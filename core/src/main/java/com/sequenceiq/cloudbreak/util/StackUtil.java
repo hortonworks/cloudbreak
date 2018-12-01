@@ -108,7 +108,7 @@ public class StackUtil {
                     try {
                         return new ImmutableEntry<>(volumeSet.getInstanceId(), volumeSet.getAttributes().get(VolumeSetAttributes.class));
                     } catch (IOException e) {
-                        LOGGER.error("Failed to parse volume set attributes JSON", e);
+                        LOGGER.info("Failed to parse volume set attributes JSON", e);
                         throw new CloudbreakServiceException("Failed to parse volume set attributes JSON", e);
                     }
                 })

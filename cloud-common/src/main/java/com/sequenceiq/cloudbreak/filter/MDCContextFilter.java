@@ -63,7 +63,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
             super(request);
             if (StringUtils.isEmpty(request.getHeader(TRACKING_ID_HEADER))) {
                 String trackingId = UUID.randomUUID().toString();
-                LOGGER.info("No trackingId in request. Adding trackingId: '{}'", trackingId);
+                LOGGER.debug("No trackingId in request. Adding trackingId: '{}'", trackingId);
                 addHeader(TRACKING_ID_HEADER, trackingId);
             }
         }

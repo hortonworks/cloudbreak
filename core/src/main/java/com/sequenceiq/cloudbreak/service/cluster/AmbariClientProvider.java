@@ -53,18 +53,18 @@ public class AmbariClientProvider {
             if (applicationProxyConfig.isProxyAuthRequired()) {
                 String proxyUser = applicationProxyConfig.getHttpsProxyUser();
                 String proxyPassword = applicationProxyConfig.getHttpsProxyPassword();
-                LOGGER.info("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
+                LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
                     clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort, proxyUser);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), ambariUserName, ambariPassword,
                     clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
             } else {
-                LOGGER.info("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{}",
+                LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{}",
                     clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), ambariUserName, ambariPassword,
                     clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
             }
         } else {
-            LOGGER.info("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{}", clientConfig.getApiAddress(), httpsPort);
+            LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{}", clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 ambariUserName, ambariPassword, clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
         }
@@ -84,18 +84,18 @@ public class AmbariClientProvider {
             if (applicationProxyConfig.isProxyAuthRequired()) {
                 String proxyUser = applicationProxyConfig.getHttpsProxyUser();
                 String proxyPassword = applicationProxyConfig.getHttpsProxyPassword();
-                LOGGER.info("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
+                LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
                     clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort, proxyUser);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), "admin", "admin",
                     clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
             } else {
-                LOGGER.info("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{}",
+                LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{}",
                     clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), "admin", "admin",
                     clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
             }
         } else {
-            LOGGER.info("Creating Ambari client with default credentials with 2-way-ssl to connect to host:port: {}:{}",
+            LOGGER.debug("Creating Ambari client with default credentials with 2-way-ssl to connect to host:port: {}:{}",
                     clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 "admin", "admin", clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());

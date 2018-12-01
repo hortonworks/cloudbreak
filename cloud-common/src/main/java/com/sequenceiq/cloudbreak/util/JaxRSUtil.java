@@ -20,7 +20,7 @@ public class JaxRSUtil {
             if (!response.getMediaType().isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
                 String errormsg = "Status: " + response.getStatusInfo().getStatusCode() + ' ' + response.getStatusInfo().getReasonPhrase();
                 String textResponse = response.readEntity(String.class);
-                LOGGER.info("Received error: {}", textResponse);
+                LOGGER.debug("Received error: {}", textResponse);
                 throw new WebApplicationException(errormsg);
             }
         }

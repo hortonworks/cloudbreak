@@ -31,7 +31,7 @@ public class GetPlatformNetworksHandler implements CloudPlatformEventHandler<Get
 
     @Override
     public void accept(Event<GetPlatformNetworksRequest> getPlatformNetworksRequest) {
-        LOGGER.info("Received event: {}", getPlatformNetworksRequest);
+        LOGGER.debug("Received event: {}", getPlatformNetworksRequest);
         GetPlatformNetworksRequest request = getPlatformNetworksRequest.getData();
 
         try {
@@ -43,7 +43,7 @@ public class GetPlatformNetworksHandler implements CloudPlatformEventHandler<Get
                     .networks(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformNetworksResult getPlatformNetworksResult = new GetPlatformNetworksResult(request, networks);
             request.getResult().onNext(getPlatformNetworksResult);
-            LOGGER.info("Query platform networks types finished.");
+            LOGGER.debug("Query platform networks types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformNetworksResult(e.getMessage(), e, request));
         }

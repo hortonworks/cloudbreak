@@ -21,13 +21,13 @@ public class ConsulServiceCheckerTask extends StackBasedStatusCheckerTask<Consul
     public boolean checkStatus(ConsulContext consulContext) {
         String serviceName = consulContext.getTargets().get(0);
         ConsulClient client = consulContext.getConsulClient();
-        LOGGER.info("Checking consul service registration of '{}'", serviceName);
+        LOGGER.debug("Checking consul service registration of '{}'", serviceName);
         List<CatalogService> service = ConsulUtils.getService(Collections.singletonList(client), serviceName);
         if (service.isEmpty()) {
-            LOGGER.info("Consul service '{}' is not registered yet", serviceName);
+            LOGGER.debug("Consul service '{}' is not registered yet", serviceName);
             return false;
         } else {
-            LOGGER.info("Consul service '{}' found on '{}'", serviceName, service.get(0).getNode());
+            LOGGER.debug("Consul service '{}' found on '{}'", serviceName, service.get(0).getNode());
             return true;
         }
     }

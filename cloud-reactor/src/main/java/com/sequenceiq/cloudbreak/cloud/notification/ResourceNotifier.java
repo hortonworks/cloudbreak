@@ -28,7 +28,7 @@ public class ResourceNotifier implements PersistenceNotifier {
     @Override
     public ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) {
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.CREATE);
-        LOGGER.info("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
+        LOGGER.debug("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }
@@ -36,7 +36,7 @@ public class ResourceNotifier implements PersistenceNotifier {
     @Override
     public ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) {
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.UPDATE);
-        LOGGER.info("Sending resource update notification: {}, context: {}", notification, cloudContext);
+        LOGGER.debug("Sending resource update notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }
@@ -44,7 +44,7 @@ public class ResourceNotifier implements PersistenceNotifier {
     @Override
     public ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) {
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.DELETE);
-        LOGGER.info("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
+        LOGGER.debug("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }

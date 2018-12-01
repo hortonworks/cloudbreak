@@ -84,9 +84,9 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
             LOGGER.warn("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
                     ex.getMessage());
         } catch (Exception ex) {
-            LOGGER.error(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
+            LOGGER.info(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
         } finally {
-            LOGGER.info("Finished clusterCreationEvaluator in {} ms", System.currentTimeMillis() - start);
+            LOGGER.debug("Finished clusterCreationEvaluator in {} ms", System.currentTimeMillis() - start);
         }
     }
 
@@ -103,7 +103,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
 
     private void createCluster(AutoscaleStackResponse stack, AmbariStack resolvedAmbari) {
         MDCBuilder.buildMdcContext(stack.getStackId(), stack.getName(), "CLUSTER");
-        LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
+        LOGGER.debug("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
         Cluster cluster = clusterService.create(resolvedAmbari, null,
                 new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId()));
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
@@ -113,7 +113,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
     private void updateCluster(AutoscaleStackResponse stack, Cluster cluster, AmbariStack resolvedAmbari) {
         if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
             MDCBuilder.buildMdcContext(cluster);
-            LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
+            LOGGER.debug("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             cluster = clusterService.update(cluster.getId(), resolvedAmbari, RUNNING, cluster.isAutoscalingEnabled());
             History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
             notificationSender.send(cluster, history);

@@ -113,7 +113,7 @@ public class StackSyncService {
             }
             handleSyncResult(stack, counts, stackStatusUpdateEnabled);
         } catch (CloudbreakImageNotFoundException | JsonProcessingException ex) {
-            LOGGER.error("Error during stack sync:", ex);
+            LOGGER.info("Error during stack sync:", ex);
             throw new CloudbreakServiceException("Stack sync failed", ex);
         }
     }
@@ -171,7 +171,7 @@ public class StackSyncService {
     private void syncStoppedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
         if (!instance.isTerminated()) {
-            LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
+            LOGGER.debug("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.STOPPED);
             instanceMetaDataRepository.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
@@ -182,14 +182,14 @@ public class StackSyncService {
     private void syncRunningInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
         if (stack.getStatus() == WAIT_FOR_SYNC && instance.isCreated()) {
-            LOGGER.info("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
+            LOGGER.debug("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
                     instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.FAILED);
             instanceMetaDataRepository.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Collections.singletonList(instance.getDiscoveryFQDN())));
         } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
-            LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
+            LOGGER.debug("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
         }
     }
@@ -198,13 +198,13 @@ public class StackSyncService {
         if (!instance.isTerminated()) {
             if (instance.getInstanceId() == null) {
                 instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
-                LOGGER.info("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
+                LOGGER.debug("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
                         instance.getPrivateId());
                 instance.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instance);
             } else {
                 instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
-                LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
+                LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
                         instance.getInstanceId());
                 updateMetaDataToDeletedOnProviderSide(stack, instance);
             }
@@ -291,7 +291,7 @@ public class StackSyncService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Host cannot be deleted from cluster: ", e);
+            LOGGER.info("Host cannot be deleted from cluster: ", e);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(),
                             Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
@@ -313,10 +313,10 @@ public class StackSyncService {
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
         HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
         if (hostMetadata != null) {
-            LOGGER.info("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
+            LOGGER.debug("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
             instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
         } else {
-            LOGGER.info("Instance '{}' was not found in the cluster metadata, setting it's state to UNREGISTERED.", instanceMetaData.getInstanceId());
+            LOGGER.debug("Instance '{}' was not found in the cluster metadata, setting it's state to UNREGISTERED.", instanceMetaData.getInstanceId());
             instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
         }
         instanceMetaDataRepository.save(instanceMetaData);

@@ -111,7 +111,7 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
             is.setImageCatalog(Strings.isNullOrEmpty(image.getImageCatalogName()) ? "" : image.getImageCatalogName());
             stackV2Request.setImageSettings(is);
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.error(e.toString());
+            LOGGER.info(e.toString());
         }
     }
 

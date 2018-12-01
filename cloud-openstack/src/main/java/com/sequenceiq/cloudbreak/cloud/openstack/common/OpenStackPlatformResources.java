@@ -129,7 +129,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             Map<String, String> subnets = new HashMap<>();
 
             List<? extends Subnet> neutronSubnets = network.getNeutronSubnets();
-            LOGGER.info("neutron subnets for {}: {}", network.getName(), neutronSubnets);
+            LOGGER.debug("Neutron subnets for {}: {}", network.getName(), neutronSubnets);
             if (neutronSubnets != null) {
                 for (Subnet neutronSubnet : neutronSubnets) {
                     if (neutronSubnet != null) {
@@ -144,7 +144,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudNetwork>> result = new HashMap<>(1);
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudNetworks);
-        LOGGER.info("openstack cloud networks result: {}", result);
+        LOGGER.debug("Openstack cloud networks result: {}", result);
         return new CloudNetworks(result);
     }
 
@@ -169,7 +169,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudSshKeys);
-        LOGGER.info("openstack cloud ssh keys result: {}", result);
+        LOGGER.debug("Openstack cloud ssh keys result: {}", result);
         return new CloudSshKeys(result);
     }
 
@@ -180,7 +180,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
         List<? extends SecGroupExtension> osSecurityGroups = osClient.compute().securityGroups().list();
-        LOGGER.info("security groups from openstack: {}", osSecurityGroups);
+        LOGGER.debug("Security groups from openstack: {}", osSecurityGroups);
         for (SecGroupExtension secGroup : osSecurityGroups) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("tenantId", secGroup.getTenantId());
@@ -192,7 +192,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudSecurityGroups);
-        LOGGER.info("openstack security groups result: {}", result);
+        LOGGER.debug("Openstack security groups result: {}", result);
         return new CloudSecurityGroups(result);
     }
 
@@ -214,7 +214,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             defaultRegion = ((StringType) cloudRegions.keySet().toArray()[0]).value();
         }
         CloudRegions regions = new CloudRegions(cloudRegions, displayNames, regionCoordinates, defaultRegion);
-        LOGGER.info("openstack regions result: {}", regions);
+        LOGGER.debug("Openstack regions result: {}", regions);
         return regions;
     }
 
@@ -234,7 +234,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         });
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
-        LOGGER.info("openstack virtual machine types: {}", cloudVmTypes);
+        LOGGER.debug("Openstack virtual machine types: {}", cloudVmTypes);
         return cloudVmTypes;
     }
 
@@ -277,7 +277,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             VmType vmType = VmType.vmTypeWithMeta(flavor.getName(), builder.create(), true);
             types.add(vmType);
         }
-        LOGGER.info("openstack collect vm types result: {}", types);
+        LOGGER.debug("Openstack collect vm types result: {}", types);
         return types;
     }
 
@@ -289,7 +289,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudGateWay> cloudGateWays = new HashSet<>();
             List<? extends Router> routerList = osClient.networking().router().list();
-            LOGGER.info("routers from openstack: {}", routerList);
+            LOGGER.debug("Routers from openstack: {}", routerList);
             for (Router router : routerList) {
                 CloudGateWay cloudGateWay = new CloudGateWay();
                 cloudGateWay.setId(router.getId());
@@ -304,7 +304,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             }
         }
         CloudGateWays cloudGateWays = new CloudGateWays(resultCloudGateWayMap);
-        LOGGER.info("openstack cloudgateway result: {}", cloudGateWays);
+        LOGGER.debug("Openstack cloudgateway result: {}", cloudGateWays);
         return cloudGateWays;
     }
 
@@ -327,7 +327,7 @@ public class OpenStackPlatformResources implements PlatformResources {
                 cloudIpPools.put(availabilityZone.value(), cloudGateWays);
             }
         }
-        LOGGER.info("openstack public ip pool result: {}", cloudIpPools);
+        LOGGER.debug("Openstack public ip pool result: {}", cloudIpPools);
         return new CloudIpPools(cloudIpPools);
     }
 
@@ -352,7 +352,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     private List<? extends Network> getNetworks(OSClient<?> osClient) {
         List<? extends Network> networks = osClient.networking().network().list();
-        LOGGER.info("networks from openstack: {}", networks);
+        LOGGER.debug("Networks from openstack: {}", networks);
         return networks;
     }
 

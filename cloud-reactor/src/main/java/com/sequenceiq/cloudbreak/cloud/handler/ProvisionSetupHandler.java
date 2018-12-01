@@ -39,7 +39,7 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
 
     @Override
     public void accept(Event<SetupRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         SetupRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         SetupResult result;
@@ -50,7 +50,7 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             connector.setup().prerequisites(auth, cloudStack, resourceNotifier);
             result = new SetupResult(request);
 
-            LOGGER.info("Provision setup finished for {}", cloudContext);
+            LOGGER.debug("Provision setup finished for {}", cloudContext);
         } catch (RuntimeException e) {
             result = new SetupResult(e, request);
         }

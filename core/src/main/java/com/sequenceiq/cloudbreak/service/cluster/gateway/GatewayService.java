@@ -108,7 +108,7 @@ public class GatewayService {
                 ExposedServices exposedServices = conversionService.convert(topologyUpdate, ExposedServices.class);
                 existingTopology.setExposedServices(new Json(exposedServices));
             } catch (JsonProcessingException e) {
-                LOGGER.error("Exception during Json creation from a valid Java object.", e);
+                LOGGER.info("Exception during Json creation from a valid Java object.", e);
             }
         });
     }

@@ -33,7 +33,7 @@ public class GetPlatformInstanceGroupParametersHandler implements CloudPlatformE
 
     @Override
     public void accept(Event<GetPlatformInstanceGroupParameterRequest> getPlatformInstanceGroupParameterRequestEvent) {
-        LOGGER.info("Received event: {}", getPlatformInstanceGroupParameterRequestEvent);
+        LOGGER.debug("Received event: {}", getPlatformInstanceGroupParameterRequestEvent);
         GetPlatformInstanceGroupParameterRequest request = getPlatformInstanceGroupParameterRequestEvent.getData();
 
         try {
@@ -44,7 +44,7 @@ public class GetPlatformInstanceGroupParametersHandler implements CloudPlatformE
             GetPlatformInstanceGroupParameterResult getPlatformInstanceGroupParameterResult =
                     new GetPlatformInstanceGroupParameterResult(request, instanceGroupParameterResponses);
             request.getResult().onNext(getPlatformInstanceGroupParameterResult);
-            LOGGER.info("Query platform instance group parameters finished.");
+            LOGGER.debug("Query platform instance group parameters finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformInstanceGroupParameterResult(e.getMessage(), e, request));
         }

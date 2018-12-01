@@ -35,7 +35,7 @@ public class InteractiveLoginHandler implements CloudPlatformEventHandler<Intera
 
     @Override
     public void accept(Event<InteractiveLoginRequest> interactiveLoginRequestEvent) {
-        LOGGER.info("Received event: {}", interactiveLoginRequestEvent);
+        LOGGER.debug("Received event: {}", interactiveLoginRequestEvent);
         InteractiveLoginRequest request = interactiveLoginRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -43,7 +43,7 @@ public class InteractiveLoginHandler implements CloudPlatformEventHandler<Intera
             Map<String, String> parameters = connector.credentials().interactiveLogin(cloudContext, request.getExtendedCloudCredential(), credentialNotifier);
             InteractiveLoginResult interactiveLoginResult = new InteractiveLoginResult(request, parameters);
             request.getResult().onNext(interactiveLoginResult);
-            LOGGER.info("Interactive login request successfully processed");
+            LOGGER.debug("Interactive login request successfully processed");
         } catch (RuntimeException e) {
             request.getResult().onNext(new InteractiveLoginResult(e.getMessage(), e, request));
         }

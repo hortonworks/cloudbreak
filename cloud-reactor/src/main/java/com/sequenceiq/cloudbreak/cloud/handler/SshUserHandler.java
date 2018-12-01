@@ -22,7 +22,7 @@ public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest>
 
     @Override
     public void accept(Event<SshUserRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         SshUserRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         request.getResult().onNext(new SshUserResponse(cloudContext, request.getLoginUserName()));

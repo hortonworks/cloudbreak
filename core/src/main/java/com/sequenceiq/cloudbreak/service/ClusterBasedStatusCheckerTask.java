@@ -31,7 +31,7 @@ public abstract class ClusterBasedStatusCheckerTask<T extends StackContext> exte
 
             return false;
         } catch (Exception ex) {
-            LOGGER.error("Error occurred when check status checker exit criteria: ", ex);
+            LOGGER.info("Error occurred when check status checker exit criteria: ", ex);
             return true;
         }
     }

@@ -69,7 +69,7 @@ public class AmbariPollingServiceProvider {
     }
 
     public PollingResult hostsPollingService(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster) {
-        LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         return hostsPollingService.pollWithTimeoutSingleFailure(
                 ambariHostsStatusCheckerTask,
                 new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, hostsInCluster.size()),
@@ -89,7 +89,7 @@ public class AmbariPollingServiceProvider {
     }
 
     public PollingResult ambariHealthChecker(Stack stack, AmbariClient ambariClient) {
-        LOGGER.info("Checking if Ambari Server is available.");
+        LOGGER.debug("Checking if Ambari Server is available.");
         return ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
                 new AmbariClientPollerObject(stack, ambariClient),

@@ -77,7 +77,7 @@ public class SaltStates {
 
     private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid) {
         Map<?, ?> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
-        LOGGER.info("Salt apply state jid info: {}", jidInfo);
+        LOGGER.debug("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
@@ -91,11 +91,11 @@ public class SaltStates {
     private static Multimap<String, String> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
         Multimap<String, String> missingTargetsWithErrors = ArrayListMultimap.create();
         for (Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
-            LOGGER.info("Collect missing targets from host: {}", stringMapEntry.getKey());
+            LOGGER.debug("Collect missing targets from host: {}", stringMapEntry.getKey());
             logRunnerInfos(stringMapEntry);
             for (RunnerInfo targetObject : stringMapEntry.getValue()) {
                 if (!targetObject.getResult()) {
-                    LOGGER.error("SaltStates: State id: {} job state has failed. Name: {} Reason: {}", targetObject.getStateId(), targetObject.getName(),
+                    LOGGER.info("SaltStates: State id: {} job state has failed. Name: {} Reason: {}", targetObject.getStateId(), targetObject.getName(),
                             targetObject.getComment());
                     missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getErrorResultSummary());
                 }
@@ -108,13 +108,13 @@ public class SaltStates {
         List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
         runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
         double sum = runnerInfos.stream().mapToDouble(RunnerInfo::getDuration).sum();
-        LOGGER.info("SaltStates executed on: {} within: {} sec", stringMapEntry.getKey(),
+        LOGGER.debug("SaltStates executed on: {} within: {} sec", stringMapEntry.getKey(),
                 TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid) {
         RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
-        LOGGER.info("Active salt jobs: {}", runningInfo);
+        LOGGER.debug("Active salt jobs: {}", runningInfo);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
                 if (stringMapEntry.getKey().equals(jid)) {
@@ -127,13 +127,13 @@ public class SaltStates {
 
     public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
         MinionIpAddressesResponse minionIpAddressesResponse = sc.run(Glob.ALL, "network.ipaddrs", LOCAL, MinionIpAddressesResponse.class);
-        LOGGER.info("Minion ip response: {}", minionIpAddressesResponse);
+        LOGGER.debug("Minion ip response: {}", minionIpAddressesResponse);
         return minionIpAddressesResponse;
     }
 
     public static MinionStatusSaltResponse collectNodeStatus(SaltConnector sc) {
         MinionStatusSaltResponse minionStatus = sc.run("manage.status", RUNNER, MinionStatusSaltResponse.class);
-        LOGGER.info("Minion status: {}", minionStatus);
+        LOGGER.debug("Minion status: {}", minionStatus);
         return minionStatus;
     }
 

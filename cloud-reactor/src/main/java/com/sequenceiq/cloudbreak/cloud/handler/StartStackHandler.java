@@ -50,7 +50,7 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
 
     @Override
     public void accept(Event<StartInstancesRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         StartInstancesRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {

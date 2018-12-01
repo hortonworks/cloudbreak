@@ -81,7 +81,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         publishIfNeeded(alertRepository.findAllByCluster(clusterId));
-        LOGGER.info("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
+        LOGGER.debug("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
     }
 
     private void publishIfNeeded(List<TimeAlert> alerts) {
@@ -104,7 +104,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private void publish(TimeAlert alert) {
-        LOGGER.info("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
+        LOGGER.debug("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
         eventPublisher.publishEvent(new ScalingEvent(alert));
     }
 }

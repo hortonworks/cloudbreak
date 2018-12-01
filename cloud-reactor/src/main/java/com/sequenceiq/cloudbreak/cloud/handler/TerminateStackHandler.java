@@ -52,7 +52,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
 
     @Override
     public void accept(Event<TerminateStackRequest> terminateStackRequestEvent) {
-        LOGGER.info("Received event: {}", terminateStackRequestEvent);
+        LOGGER.debug("Received event: {}", terminateStackRequestEvent);
         TerminateStackRequest request = terminateStackRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
@@ -82,10 +82,10 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
                 throw new CloudConnectorException(credentialStatus.getStatusReason());
             }
             request.getResult().onNext(result);
-            LOGGER.info("TerminateStackHandler finished");
+            LOGGER.debug("TerminateStackHandler finished");
             eventBus.notify(result.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), result));
         } catch (Exception e) {
-            LOGGER.error("Failed to handle TerminateStackRequest", e);
+            LOGGER.info("Failed to handle TerminateStackRequest", e);
             TerminateStackResult terminateStackResult = new TerminateStackResult("Stack termination failed.", e, request);
             request.getResult().onNext(terminateStackResult);
             eventBus.notify(terminateStackResult.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), terminateStackResult));

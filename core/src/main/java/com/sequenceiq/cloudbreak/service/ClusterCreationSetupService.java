@@ -177,13 +177,13 @@ public class ClusterCreationSetupService {
             FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getWorkspace(),
                     stack.getCreator());
             request.getFileSystem().setName(fs.getName());
-            LOGGER.info("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
 
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster.setStack(stack);
         cluster.setWorkspace(stack.getWorkspace());
-        LOGGER.info("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        LOGGER.debug("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
 
@@ -191,7 +191,7 @@ public class ClusterCreationSetupService {
 
         decorateStackWithCustomDomainIfAdOrIpaJoinable(stack, cluster);
 
-        LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        LOGGER.debug("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
         List<ClusterComponent> components = new ArrayList<>();
@@ -212,11 +212,11 @@ public class ClusterCreationSetupService {
         checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
         checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
 
-        LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        LOGGER.debug("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
         Cluster savedCluster = clusterService.create(stack, cluster, components, user);
-        LOGGER.info("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        LOGGER.debug("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;
     }
@@ -265,7 +265,7 @@ public class ClusterCreationSetupService {
                                 + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),
                         stackType, stackRepoDetails.getHdpVersion(), image.getImageId(), image.getOsType());
                 if (strictCheck) {
-                    LOGGER.error(message);
+                    LOGGER.info(message);
                     throw new BadRequestException(message);
                 } else {
                     LOGGER.warn(message);
@@ -370,7 +370,7 @@ public class ClusterCreationSetupService {
                     ambariStackDetails.setOs(osType);
                 }
             } catch (IOException e) {
-                LOGGER.error("Couldn't convert image component for stack: {} {}", cluster.getStack().getId(), cluster.getStack().getName(), e);
+                LOGGER.info("Couldn't convert image component for stack: {} {}", cluster.getStack().getId(), cluster.getStack().getName(), e);
             }
         }
     }
@@ -396,14 +396,14 @@ public class ClusterCreationSetupService {
                 String stackVersion = blueprintUtils.getBlueprintStackVersion(root);
                 String stackName = blueprintUtils.getBlueprintStackName(root);
                 if ("HDF".equalsIgnoreCase(stackName)) {
-                    LOGGER.info("Stack name is HDF, use the default HDF repo for version: " + stackVersion);
+                    LOGGER.debug("Stack name is HDF, use the default HDF repo for version: " + stackVersion);
                     for (Entry<String, DefaultHDFInfo> entry : defaultHDFEntries.getEntries().entrySet()) {
                         if (entry.getKey().equals(stackVersion)) {
                             return entry.getValue();
                         }
                     }
                 } else {
-                    LOGGER.info("Stack name is HDP, use the default HDP repo for version: " + stackVersion);
+                    LOGGER.debug("Stack name is HDP, use the default HDP repo for version: " + stackVersion);
                     for (Entry<String, DefaultHDPInfo> entry : defaultHDPEntries.getEntries().entrySet()) {
                         if (entry.getKey().equals(stackVersion)) {
                             return entry.getValue();

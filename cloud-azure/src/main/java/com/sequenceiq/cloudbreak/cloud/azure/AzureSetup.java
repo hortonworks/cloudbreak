@@ -69,7 +69,7 @@ public class AzureSetup implements Setup {
 
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
-        LOGGER.info("prepare image: {}", image);
+        LOGGER.debug("Prepare image: {}", image);
 
         String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack);
         String region = ac.getCloudContext().getLocation().getRegion().value();
@@ -77,10 +77,10 @@ public class AzureSetup implements Setup {
         try {
             copyVhdImageIfNecessary(ac, stack, image, imageResourceGroupName, region, client);
         } catch (Exception ex) {
-            LOGGER.error("Could not create image with the specified parameters", ex);
+            LOGGER.info("Could not create image with the specified parameters", ex);
             throw new CloudConnectorException("Image creation failed because " + image.getImageName() + " does not exist or Cloudbreak could not reach.", ex);
         }
-        LOGGER.debug("prepare image has been executed");
+        LOGGER.debug("Prepare image has been executed");
     }
 
     private void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String imageResourceGroupName,
@@ -123,7 +123,7 @@ public class AzureSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
                 int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info("CopyStatus Pending {} byte/{} byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
+                LOGGER.debug("CopyStatus Pending {} byte/{} byte: %.4s %% {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
         } catch (RuntimeException ignored) {

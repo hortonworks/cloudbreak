@@ -30,7 +30,7 @@ public class CreateSnapshotReadyStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     protected Boolean doCall() {
-        LOGGER.info("Checking if AWS EBS snapshot '{}' is ready.", snapshotId);
+        LOGGER.debug("Checking if AWS EBS snapshot '{}' is ready.", snapshotId);
         DescribeSnapshotsResult result = ec2Client.describeSnapshots(new DescribeSnapshotsRequest().withSnapshotIds(snapshotId));
         return result.getSnapshots() != null && !result.getSnapshots().isEmpty() && "completed".equals(result.getSnapshots().get(0).getState());
     }

@@ -162,7 +162,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         });
                         flow.sendEvent(key, payload);
                     } else {
-                        LOGGER.info("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
+                        LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
                     }
                 }
                 break;
@@ -258,6 +258,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private void logFlowId(String flowId) {
         String trackingId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.TRACKING_ID.toString());
-        LOGGER.info("Flow has been created with id: '{}' and the related tracking id: '{}'.", flowId, trackingId);
+        LOGGER.debug("Flow has been created with id: '{}' and the related tracking id: '{}'.", flowId, trackingId);
     }
 }

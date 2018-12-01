@@ -443,7 +443,7 @@ public class StackService {
                     && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
                 long start = System.currentTimeMillis();
                 rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
-                LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
+                LOGGER.debug("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
             }
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
@@ -452,50 +452,50 @@ public class StackService {
 
             long start = System.currentTimeMillis();
             String template = connector.getTemplate(stack);
-            LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             Stack savedStack = stackRepository.save(stack);
-            LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             addTemplateForStack(savedStack, template);
-            LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             addCloudbreakDetailsForStack(savedStack);
-            LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             MDCBuilder.buildMdcContext(savedStack);
 
             start = System.currentTimeMillis();
             instanceGroupRepository.saveAll(savedStack.getInstanceGroups());
-            LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList());
-            LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
-            LOGGER.info("Generating security keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Generating security keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             securityConfig.setStack(savedStack);
             start = System.currentTimeMillis();
             saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
             securityConfigRepository.save(securityConfig);
-            LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             savedStack.setSecurityConfig(securityConfig);
 
             start = System.currentTimeMillis();
             imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
-            LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             return savedStack;
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.error("Cloudbreak Image not found", e);
+            LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
-            LOGGER.error("Cloudbreak Image Catalog error", e);
+            LOGGER.info("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         }
     }
@@ -652,7 +652,7 @@ public class StackService {
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (stack.isStopped()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
-            LOGGER.info(statusDesc);
+            LOGGER.debug(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
             result = false;
         } else if (reason != StopRestrictionReason.NONE) {
@@ -675,7 +675,7 @@ public class StackService {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
-            LOGGER.info(statusDesc);
+            LOGGER.debug(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
         } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
@@ -884,11 +884,11 @@ public class StackService {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Stack delete requested.");
+        LOGGER.debug("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
-            LOGGER.info("Stack is already deleted.");
+            LOGGER.debug("Stack is already deleted.");
         }
     }
 
@@ -903,11 +903,11 @@ public class StackService {
 
     public void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Stack delete requested.");
+        LOGGER.debug("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
-            LOGGER.info("Stack is already deleted.");
+            LOGGER.debug("Stack is already deleted.");
         }
     }
 
@@ -917,7 +917,7 @@ public class StackService {
             Component stackTemplateComponent = new Component(ComponentType.STACK_TEMPLATE, ComponentType.STACK_TEMPLATE.name(), new Json(stackTemplate), stack);
             componentConfigProvider.store(stackTemplateComponent);
         } catch (JsonProcessingException e) {
-            LOGGER.error("Could not create Cloudbreak details component.", e);
+            LOGGER.info("Could not create Cloudbreak details component.", e);
         }
     }
 
@@ -927,7 +927,7 @@ public class StackService {
             Component cbDetailsComponent = new Component(ComponentType.CLOUDBREAK_DETAILS, ComponentType.CLOUDBREAK_DETAILS.name(), new Json(cbDetails), stack);
             componentConfigProvider.store(cbDetailsComponent);
         } catch (JsonProcessingException e) {
-            LOGGER.error("Could not create Cloudbreak details component.", e);
+            LOGGER.info("Could not create Cloudbreak details component.", e);
         }
     }
 

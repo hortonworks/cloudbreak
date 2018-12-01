@@ -40,14 +40,14 @@ public class RdsConnectionValidator {
             } catch (ClassNotFoundException e) {
                 String msg = String.format("Invalid connector JAR. Could not find the specified class (%s) or the JAR does not exist.",
                         rdsConfig.getDatabaseEngine().connectionDriver());
-                LOGGER.error("{}, {}", msg, e.getMessage(), e);
+                LOGGER.info("{}, {}", msg, e.getMessage(), e);
                 throw new BadRequestException(msg, e);
             } catch (InstantiationException | IllegalAccessException e) {
                 String msg = String.format("Could not instantiate the specified class (%s).", rdsConfig.getDatabaseEngine().connectionDriver());
-                LOGGER.error("{}, {}", msg, e.getMessage(), e);
+                LOGGER.info("{}, {}", msg, e.getMessage(), e);
                 throw new BadRequestException(msg, e);
             } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
+                LOGGER.info(e.getMessage(), e);
                 throw new BadRequestException(e.getMessage(), e);
             }
         } catch (MalformedURLException e) {

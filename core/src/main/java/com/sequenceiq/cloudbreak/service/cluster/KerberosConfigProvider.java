@@ -26,11 +26,11 @@ public class KerberosConfigProvider {
                 if (datalakeCluster.getKerberosConfig() != null) {
                     cluster.setSecure(Boolean.TRUE);
                     cluster.setKerberosConfig(datalakeCluster.getKerberosConfig());
-                    LOGGER.info("Inherit Kerberos config from Data Lake cluster took {} ms for stack {}, datalake stack {}",
+                    LOGGER.debug("Inherit Kerberos config from Data Lake cluster took {} ms for stack {}, datalake stack {}",
                             System.currentTimeMillis() - start, stackName, datalake.getName());
                 } else {
                     cluster.setSecure(Boolean.FALSE);
-                    LOGGER.info("Datalake cluster doesn't have Kerberos config, cannot inherit, "
+                    LOGGER.debug("Datalake cluster doesn't have Kerberos config, cannot inherit, "
                                     + "examine this took {} ms for stack {}, datalake stack {}",
                             System.currentTimeMillis() - start, stackName, datalake.getName());
                 }

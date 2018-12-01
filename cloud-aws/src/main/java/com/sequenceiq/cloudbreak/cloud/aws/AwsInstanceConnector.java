@@ -169,11 +169,11 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
-        LOGGER.info("Check instances on aws side: {}", vms);
+        LOGGER.debug("Check instances on aws side: {}", vms);
         List<CloudInstance> cloudIntancesWithInstanceId = vms.stream()
                 .filter(cloudInstance -> cloudInstance.getInstanceId() != null)
                 .collect(Collectors.toList());
-        LOGGER.info("Instances with intanceId: {}", cloudIntancesWithInstanceId);
+        LOGGER.debug("Instances with intanceId: {}", cloudIntancesWithInstanceId);
 
         List<String> instanceIds = cloudIntancesWithInstanceId.stream().map(CloudInstance::getInstanceId)
                 .collect(Collectors.toList());
@@ -183,7 +183,7 @@ public class AwsInstanceConnector implements InstanceConnector {
             DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                     ac.getCloudContext().getLocation().getRegion().value())
                     .describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
-            LOGGER.info("Result from AWS: {}", result);
+            LOGGER.debug("Result from AWS: {}", result);
             return fillCloudVmInstanceStatuses(ac, cloudIntancesWithInstanceId, region, result);
         } catch (AmazonEC2Exception e) {
             handleEC2Exception(vms, e);
@@ -205,19 +205,19 @@ public class AwsInstanceConnector implements InstanceConnector {
                 if (cloudInstanceForInstanceId.isPresent()) {
                     CloudInstance cloudInstance = cloudInstanceForInstanceId.get();
                     if ("Stopped".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
                                 instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
                         cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED));
                     } else if ("Running".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
                                 instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
                         cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED));
                     } else if ("Terminated".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
                                 instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
                         cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
                     } else {
-                        LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
                                 instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
                         cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
                     }

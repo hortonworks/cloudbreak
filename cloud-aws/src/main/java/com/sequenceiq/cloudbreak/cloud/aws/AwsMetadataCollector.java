@@ -45,7 +45,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> allInstances) {
-        LOGGER.info("Collect AWS metadata, resources: {}, vms: {}, allInstances: {}", resources, vms, allInstances);
+        LOGGER.debug("Collect AWS metadata, resources: {}, vms: {}, allInstances: {}", resources, vms, allInstances);
         try {
             List<String> knownInstanceIdList = allInstances.stream()
                     .filter(cloudInstance -> cloudInstance.getInstanceId() != null)
@@ -60,7 +60,7 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private List<CloudVmMetaDataStatus> collectCloudVmMetaDataStatuses(AuthenticatedContext ac, List<CloudInstance> vms,
             List<String> knownInstanceIdList) {
-        LOGGER.info("Collect Cloud VM metadata statuses, vms: {}, knownInstanceIdList: {}", vms, knownInstanceIdList);
+        LOGGER.debug("Collect Cloud VM metadata statuses, vms: {}, knownInstanceIdList: {}", vms, knownInstanceIdList);
 
         List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses = new ArrayList<>();
 
@@ -89,7 +89,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     }
 
     private Multimap<String, Instance> getUnkownInstancesForGroup(List<String> knownInstanceIdList, Multimap<String, Instance> instancesOnAWSForGroup) {
-        LOGGER.info("Collect unknown cloud metadata statuses, knownInstanceIdList: {}, instancesOnAWSForGroup: {}",
+        LOGGER.debug("Collect unknown cloud metadata statuses, knownInstanceIdList: {}, instancesOnAWSForGroup: {}",
                 knownInstanceIdList, instancesOnAWSForGroup);
         Multimap<String, Instance> unkownInstancesForGroup = ArrayListMultimap.create();
         for (String group : instancesOnAWSForGroup.keySet()) {
@@ -104,7 +104,7 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private void addFromUnknownMap(CloudInstance cloudInstance, Multimap<String, Instance> unknownMap,
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
-        LOGGER.info("Collect from unknown map, cloudInstance: {}, unknownMap: {}, collectedCloudVmMetaDataStatuses: {}",
+        LOGGER.debug("Collect from unknown map, cloudInstance: {}, unknownMap: {}, collectedCloudVmMetaDataStatuses: {}",
                 cloudInstance, unknownMap, collectedCloudVmMetaDataStatuses);
         String groupName = cloudInstance.getTemplate().getGroupName();
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
@@ -124,7 +124,7 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private void addKnownInstance(CloudInstance cloudInstance, Multimap<String, Instance> instancesOnAWSForGroup,
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
-        LOGGER.info("Add known intance, cloudInstance: {}, instancesOnAWSForGroup: {}, collectedCloudVmMetaDataStatuses: {}",
+        LOGGER.debug("Add known intance, cloudInstance: {}, instancesOnAWSForGroup: {}, collectedCloudVmMetaDataStatuses: {}",
                 cloudInstance, instancesOnAWSForGroup, collectedCloudVmMetaDataStatuses);
         List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Map.Entry::getValue).collect(Collectors.toList());
         instanceList.stream()
@@ -151,7 +151,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     private List<Instance> collectInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingRetryClient amazonASClient,
             AmazonEC2Client amazonEC2Client, AmazonCloudFormationRetryClient amazonCFClient, String group) {
 
-        LOGGER.info("Collect aws instances for group: {}", group);
+        LOGGER.debug("Collect aws instances for group: {}", group);
 
         String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, group);
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);

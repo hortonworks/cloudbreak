@@ -26,7 +26,7 @@ public class RSDecommissionStatusCheckerTask extends ClusterBasedStatusCheckerTa
         Map<String, String> rs = ambariClient.getHBaseRegionServersState(t.getHostNames());
         for (Entry<String, String> entry : rs.entrySet()) {
             if (!FINAL_STATE.equals(entry.getValue())) {
-                LOGGER.info("RegionServer: {} decommission is in progress, current state: {}", entry.getKey(), entry.getValue());
+                LOGGER.debug("RegionServer: {} decommission is in progress, current state: {}", entry.getKey(), entry.getValue());
                 return false;
             }
         }

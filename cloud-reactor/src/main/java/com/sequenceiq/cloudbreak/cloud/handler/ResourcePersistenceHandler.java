@@ -24,7 +24,7 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
 
     @Override
     public void accept(Event<ResourceNotification> event) {
-        LOGGER.info("Resource notification event received: {}", event);
+        LOGGER.debug("Resource notification event received: {}", event);
         ResourceNotification notification = event.getData();
 
         RetryUtil.withDefaultRetries()

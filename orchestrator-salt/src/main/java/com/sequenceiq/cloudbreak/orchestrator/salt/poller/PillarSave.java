@@ -97,13 +97,13 @@ public class PillarSave implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        LOGGER.info("Distribute pillar configs to: {}", targets);
+        LOGGER.debug("Distribute pillar configs to: {}", targets);
         if (!targets.isEmpty()) {
 
             GenericResponses responses = sc.pillar(targets, pillar);
 
             Set<String> failedTargets = new HashSet<>();
-            LOGGER.info("Salt pillar save responses: {}", responses);
+            LOGGER.debug("Salt pillar save responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
                     LOGGER.info("Failed pillar save attempt to: {}, error: {}", genericResponse.getAddress(), genericResponse.getErrorText());
@@ -119,7 +119,7 @@ public class PillarSave implements OrchestratorBootstrap {
             }
         }
 
-        LOGGER.info("Pillar save has been completed on nodes: {}", originalTargets);
+        LOGGER.debug("Pillar save has been completed on nodes: {}", originalTargets);
         return true;
     }
 }

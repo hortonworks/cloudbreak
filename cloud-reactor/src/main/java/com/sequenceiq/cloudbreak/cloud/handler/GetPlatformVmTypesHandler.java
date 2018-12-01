@@ -31,7 +31,7 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
 
     @Override
     public void accept(Event<GetPlatformVmTypesRequest> getPlatformVmTypesRequest) {
-        LOGGER.info("Received event: {}", getPlatformVmTypesRequest);
+        LOGGER.debug("Received event: {}", getPlatformVmTypesRequest);
         GetPlatformVmTypesRequest request = getPlatformVmTypesRequest.getData();
 
         try {
@@ -43,7 +43,7 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
                     .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformVmTypesResult getPlatformSecurityGroupsResult = new GetPlatformVmTypesResult(request, platformVirtualMachinesJson);
             request.getResult().onNext(getPlatformSecurityGroupsResult);
-            LOGGER.info("Query platform vmtypes types finished.");
+            LOGGER.debug("Query platform vmtypes types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformVmTypesResult(e.getMessage(), e, request));
         }

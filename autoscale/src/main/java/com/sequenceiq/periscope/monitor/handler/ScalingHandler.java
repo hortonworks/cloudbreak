@@ -68,10 +68,10 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);
             } else {
-                LOGGER.info("No scaling activity required");
+                LOGGER.debug("No scaling activity required");
             }
         } else {
-            LOGGER.info("Cluster cannot be scaled for {} min(s)",
+            LOGGER.debug("Cluster cannot be scaled for {} min(s)",
                     ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
         }
     }

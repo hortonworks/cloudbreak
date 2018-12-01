@@ -26,7 +26,7 @@ public class AzureAuthenticator implements Authenticator {
     @Override
     public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         try {
-            LOGGER.info("Authenticating to Azure ...");
+            LOGGER.debug("Authenticating to Azure ...");
             return azureClient.createAuthenticatedContext(cloudContext, cloudCredential);
         } catch (Exception e) {
             throw new CloudConnectorException("Could not authenticate to Azure!", e);

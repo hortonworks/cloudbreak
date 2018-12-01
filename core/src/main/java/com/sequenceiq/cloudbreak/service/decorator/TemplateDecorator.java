@@ -46,7 +46,7 @@ public class TemplateDecorator {
         try {
             config = resolveVolumeParameterConfig(template, platformDisks, vmTypesV2, locationString);
         } catch (NoSuchElementException ignored) {
-            LOGGER.info("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
+            LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
             config = VolumeParameterConfig.EMPTY;
         }
 
@@ -76,7 +76,7 @@ public class TemplateDecorator {
 
     private void setRootVolumeSize(Template template) {
         if (template.getRootVolumeSize() == null) {
-            LOGGER.info("No root volume size was set in the request. Getting default value for platform '{}'", template.cloudPlatform());
+            LOGGER.debug("No root volume size was set in the request. Getting default value for platform '{}'", template.cloudPlatform());
             template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform()));
         }
     }

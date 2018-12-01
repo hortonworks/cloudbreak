@@ -29,7 +29,7 @@ public class DefaultSubscriptionService implements ApplicationListener<ContextRe
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (!Strings.isNullOrEmpty(defaultSubscriptionAddress)) {
-            LOGGER.info("Configuring default subscription {}", defaultSubscriptionAddress);
+            LOGGER.debug("Configuring default subscription {}", defaultSubscriptionAddress);
             Subscription subscription = new Subscription();
             subscription.setClientId(DEFAULT_CLIENT_ID);
             subscription.setEndpoint(defaultSubscriptionAddress);

@@ -49,7 +49,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        LOGGER.info("Prepare instance resource to attach to");
+        LOGGER.debug("Prepare instance resource to attach to");
         String volumeType = getVolumeType(group);
         return AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType) ? List.of() : context.getComputeResources(privateId);
     }
@@ -64,7 +64,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        LOGGER.info("Attach volumes to instance");
+        LOGGER.debug("Attach volumes to instance");
 
         CloudResource instance = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AWS_INSTANCE))

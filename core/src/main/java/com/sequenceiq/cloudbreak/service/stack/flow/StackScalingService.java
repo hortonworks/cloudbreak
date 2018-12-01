@@ -81,14 +81,14 @@ public class StackScalingService {
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
             } catch (Exception e) {
-                LOGGER.error("Host cannot be deleted from cluster: ", e);
+                LOGGER.info("Host cannot be deleted from cluster: ", e);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_FAILED.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
 
             }
         } else {
-            LOGGER.info("Host cannot be deleted because it does not exist: {}", instanceMetaData.getInstanceId());
+            LOGGER.debug("Host cannot be deleted because it does not exist: {}", instanceMetaData.getInstanceId());
             eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
                             Collections.singletonList(instanceMetaData.getInstanceId())));
@@ -109,7 +109,7 @@ public class StackScalingService {
                 }
             }
             int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
-            LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
+            LOGGER.debug("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
             return nodeCount;

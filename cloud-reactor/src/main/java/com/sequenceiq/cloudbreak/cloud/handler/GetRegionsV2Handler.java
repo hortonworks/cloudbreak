@@ -31,7 +31,7 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
 
     @Override
     public void accept(Event<GetPlatformRegionsRequestV2> getRegionsRequestEvent) {
-        LOGGER.info("Received event: {}", getRegionsRequestEvent);
+        LOGGER.debug("Received event: {}", getRegionsRequestEvent);
         GetPlatformRegionsRequestV2 request = getRegionsRequestEvent.getData();
         try {
             CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
@@ -41,7 +41,7 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
                     .platformResources().regions(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformRegionsResultV2 getPlatformRegionsResultV2 = new GetPlatformRegionsResultV2(request, cloudRegions);
             request.getResult().onNext(getPlatformRegionsResultV2);
-            LOGGER.info("Query platform regions types finished.");
+            LOGGER.debug("Query platform regions types finished.");
         } catch (Exception e) {
             LOGGER.warn("Could not get regions from the cloud provider due to:", e);
             request.getResult().onNext(new GetPlatformRegionsResultV2(e.getMessage(), e, request));

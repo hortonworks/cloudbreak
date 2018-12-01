@@ -48,9 +48,9 @@ public class AuthenticatedUserService {
                 tenant = claims.get("tenant_name").toString();
             }
         } catch (IOException e) {
-            LOGGER.warn("can not get claims from token", e);
+            LOGGER.warn("Can not get claims from token", e);
         }
-        LOGGER.debug("tenant_name claim from jwt token: {}", tenant);
+        LOGGER.debug("Tenant_name claim from jwt token: {}", tenant);
         return tenant;
     }
 

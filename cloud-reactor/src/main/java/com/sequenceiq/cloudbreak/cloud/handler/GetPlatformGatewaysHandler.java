@@ -31,7 +31,7 @@ public class GetPlatformGatewaysHandler implements CloudPlatformEventHandler<Get
 
     @Override
     public void accept(Event<GetPlatformCloudGatewaysRequest> getPlatformCloudGatewaysRequest) {
-        LOGGER.info("Received event: {}", getPlatformCloudGatewaysRequest);
+        LOGGER.debug("Received event: {}", getPlatformCloudGatewaysRequest);
         GetPlatformCloudGatewaysRequest request = getPlatformCloudGatewaysRequest.getData();
 
         try {
@@ -42,7 +42,7 @@ public class GetPlatformGatewaysHandler implements CloudPlatformEventHandler<Get
                     .platformResources().gateways(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformCloudGatewaysResult getPlatformCloudGatewaysResult = new GetPlatformCloudGatewaysResult(request, cloudGateWays);
             request.getResult().onNext(getPlatformCloudGatewaysResult);
-            LOGGER.info("Query platform gateway types finished.");
+            LOGGER.debug("Query platform gateway types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformCloudGatewaysResult(e.getMessage(), e, request));
         }

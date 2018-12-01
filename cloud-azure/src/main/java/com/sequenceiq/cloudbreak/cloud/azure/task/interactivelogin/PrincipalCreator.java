@@ -45,14 +45,14 @@ public class PrincipalCreator {
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 ServicePrincipalInner sp = objectMapper.readValue(principal, ServicePrincipalInner.class);
                 String objectId = sp.objectId();
-                LOGGER.info("Service principal created with objectId: " + objectId);
+                LOGGER.debug("Service principal created with objectId: " + objectId);
                 return sp;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         } else {
             String errorResponse = response.readEntity(String.class);
-            LOGGER.error("create service principal failed: " + errorResponse);
+            LOGGER.info("Create service principal failed: " + errorResponse);
             try {
                 String errorMessage = new ObjectMapper().readTree(errorResponse).get("odata.error").get("message").get("value").asText();
                 throw new InteractiveLoginException("Service principal creation error: " + errorMessage);

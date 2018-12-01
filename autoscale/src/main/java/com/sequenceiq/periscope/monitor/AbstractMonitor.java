@@ -30,14 +30,14 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
         MDCBuilder.buildMdcContext();
         evalContext(context);
         List<M> monitoredData = getMonitored();
-        LOGGER.info("Job started: {}, monitored: {}", context.getJobDetail().getKey(), monitoredData.size());
+        LOGGER.debug("Job started: {}, monitored: {}", context.getJobDetail().getKey(), monitoredData.size());
         for (M monitored : monitoredData) {
             try {
                 EvaluatorExecutor evaluatorExecutor = getEvaluatorExecutorBean(monitored);
                 EvaluatorContext evaluatorContext = getContext(monitored);
                 evaluatorExecutor.setContext(evaluatorContext);
                 executorServiceWithRegistry.submitIfAbsent(evaluatorExecutor, evaluatorContext.getItemId());
-                LOGGER.info("Succesfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
+                LOGGER.debug("Succesfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
                 rejectedThreadService.remove(evaluatorContext.getData());
                 monitored.setLastEvaluated(System.currentTimeMillis());
                 save(monitored);

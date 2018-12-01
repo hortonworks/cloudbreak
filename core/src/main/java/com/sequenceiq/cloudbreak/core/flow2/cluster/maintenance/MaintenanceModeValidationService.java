@@ -75,13 +75,13 @@ public class MaintenanceModeValidationService {
     public String fetchStackRepository(Long stackId) {
         String stackRepo = clusterService.getStackRepositoryJson(stackId);
         if (stackRepo == null) {
-            LOGGER.info("Stack repository info cannot be fetched due missing OS type.");
+            LOGGER.debug("Stack repository info cannot be fetched due missing OS type.");
             return null;
         } else if (stackRepo.isEmpty()) {
             throw new CloudbreakServiceException("Stack repository info cannot be validated!");
         }
 
-        LOGGER.info(String.format("Stack repo fetched: %s", stackRepo));
+        LOGGER.debug(String.format("Stack repo fetched: %s", stackRepo));
         return stackRepo;
     }
 
@@ -171,7 +171,7 @@ public class MaintenanceModeValidationService {
     }
 
     public void handleValidationSuccess(Long stackId, List<Warning> warnings) {
-        LOGGER.info("Maintenance mode validation flow has been finished successfully");
+        LOGGER.debug("Maintenance mode validation flow has been finished successfully");
         clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Validation has been finished");
 

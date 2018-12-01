@@ -40,11 +40,11 @@ public class ClusterTerminationFlowService {
 
     public void terminateCluster(ClusterViewContext context) {
         clusterService.updateClusterStatusByStackId(context.getStackId(), Status.DELETE_IN_PROGRESS);
-        LOGGER.info("Cluster delete started.");
+        LOGGER.debug("Cluster delete started.");
     }
 
     public void finishClusterTerminationAllowed(ClusterViewContext context, ClusterTerminationResult payload) throws TransactionExecutionException {
-        LOGGER.info("Terminate cluster result: {}", payload);
+        LOGGER.debug("Terminate cluster result: {}", payload);
         StackView stackView = context.getStack();
         ClusterView clusterView = context.getClusterView();
         if (clusterView != null) {
@@ -63,9 +63,9 @@ public class ClusterTerminationFlowService {
     }
 
     public void handleClusterTerminationError(StackFailureEvent payload) {
-        LOGGER.info("Handling cluster delete failure event.");
+        LOGGER.debug("Handling cluster delete failure event.");
         Exception errorDetails = payload.getException();
-        LOGGER.error("Error during cluster termination flow: ", errorDetails);
+        LOGGER.info("Error during cluster termination flow: ", errorDetails);
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(payload.getStackId());
         if (cluster != null) {
             cluster.setStatus(DELETE_FAILED);

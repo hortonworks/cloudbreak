@@ -45,27 +45,27 @@ public class BlueprintSegmentProcessor {
         AtomicReference<String> resultBlueprint = new AtomicReference<>(blueprintText);
 
         Map<ServiceName, TemplateFiles> configurationValueMap = blueprintSegmentReader.collectAllConfigFile();
-        LOGGER.info("The collected entries are for configurationValueMap : {}", configurationValueMap);
+        LOGGER.debug("The collected entries are for configurationValueMap : {}", configurationValueMap);
         collectContents(configurationValueMap, resultBlueprint.get(), file -> {
-            LOGGER.info("The actual file is: {}", file);
+            LOGGER.debug("The actual file is: {}", file);
             String configContent = prepareContent(file, source, customProperties);
             LOGGER.debug("The generated content is: {}", configContent);
             customProperties.put(getCustomPropertyName(file), configContent);
         });
 
         Map<ServiceName, TemplateFiles> configMap = blueprintSegmentReader.collectAllServiceFile();
-        LOGGER.info("The collected entries are for configMap: {}", configMap);
+        LOGGER.debug("The collected entries are for configMap: {}", configMap);
         collectContents(configMap, resultBlueprint.get(), file -> {
-            LOGGER.info("The actual file is: {}", file);
+            LOGGER.debug("The actual file is: {}", file);
             String serviceContent = prepareContent(file, source, customProperties);
             LOGGER.debug("The generated content is: {}", serviceContent);
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addConfigEntryStringToBlueprint(serviceContent, false).asText());
         });
 
         Map<ServiceName, TemplateFiles> settingsMap = blueprintSegmentReader.collectAllSettingsFile();
-        LOGGER.info("The collected entries are for settingsMap: {}", settingsMap);
+        LOGGER.debug("The collected entries are for settingsMap: {}", settingsMap);
         collectContents(settingsMap, resultBlueprint.get(), file -> {
-            LOGGER.info("The actual file is: {}", file);
+            LOGGER.debug("The actual file is: {}", file);
             String serviceContent = prepareContent(file, source, customProperties);
             LOGGER.debug("The generated content is: {}", serviceContent);
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
@@ -73,9 +73,9 @@ public class BlueprintSegmentProcessor {
         });
 
         Map<ServiceName, TemplateFiles> kerberosDescriptorMap = blueprintSegmentReader.collectAllKerberosDescriptorFile();
-        LOGGER.info("The collected entries are for kerberosDescriptorMap: {}", kerberosDescriptorMap);
+        LOGGER.debug("The collected entries are for kerberosDescriptorMap: {}", kerberosDescriptorMap);
         collectContents(kerberosDescriptorMap, resultBlueprint.get(), file -> {
-            LOGGER.info("The actual file is: {}", file);
+            LOGGER.debug("The actual file is: {}", file);
             String kerberosDescriptorServiceContent = prepareContent(file, source, customProperties);
             LOGGER.debug("The generated content is: {}", kerberosDescriptorServiceContent);
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get())
@@ -118,20 +118,20 @@ public class BlueprintSegmentProcessor {
         boolean shouldGenerate;
         Optional<String> requiredServices = templateFiles.getFiles().stream().filter(item -> item.endsWith(SERVICES_JSON)).findFirst();
         if (!requiredServices.isPresent()) {
-            LOGGER.info("Service file is not presented in {} list.", templateFiles.getFiles());
+            LOGGER.debug("Service file is not presented in {} list.", templateFiles.getFiles());
             shouldGenerate = true;
         } else {
             try {
-                LOGGER.info("Service file is presented in {} list.", templateFiles.getFiles());
+                LOGGER.debug("Service file is presented in {} list.", templateFiles.getFiles());
                 RelatedServices relatedServices = JsonUtil.readValue(readFileFromClasspathQuietly(requiredServices.get()), RelatedServices.class);
-                LOGGER.info("Related services are {}.", relatedServices.getServices());
+                LOGGER.debug("Related services are {}.", relatedServices.getServices());
                 if (relatedServices.getServices().isEmpty()) {
-                    LOGGER.info("Related services are empty in list {}.", templateFiles.getFiles());
+                    LOGGER.debug("Related services are empty in list {}.", templateFiles.getFiles());
                     shouldGenerate = true;
                 } else {
-                    LOGGER.info("Related services list is not empty checking the blueprint that components {} are exist.", relatedServices.getServices());
+                    LOGGER.debug("Related services list is not empty checking the blueprint that components {} are exist.", relatedServices.getServices());
                     shouldGenerate = blueprintProcessorFactory.get(blueprintText).componentsExistsInBlueprint(relatedServices.getServices());
-                    LOGGER.info("The mechanism should generate configurations [{}] for {} services.", shouldGenerate, relatedServices.getServices());
+                    LOGGER.debug("The mechanism should generate configurations [{}] for {} services.", shouldGenerate, relatedServices.getServices());
                 }
             } catch (IOException e) {
                 LOGGER.error("Could not open {} file to check related service list and the template files were {}.",

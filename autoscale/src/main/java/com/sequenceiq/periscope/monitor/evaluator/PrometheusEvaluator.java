@@ -86,7 +86,7 @@ public class PrometheusEvaluator extends EvaluatorExecutor {
 
             for (PrometheusAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
-                LOGGER.info("Checking Prometheus based alert: '{}'", alertName);
+                LOGGER.debug("Checking Prometheus based alert: '{}'", alertName);
                 String query = URLEncoder.encode(String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getName(), alert.getPeriod()), "UTF-8");
                 Response response = target
                         .path("/api/v1/query")
@@ -128,10 +128,10 @@ public class PrometheusEvaluator extends EvaluatorExecutor {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to retrieve alerts from Prometheus", e);
+            LOGGER.info("Failed to retrieve alerts from Prometheus", e);
             eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
-            LOGGER.info("Finished prometheusEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
+            LOGGER.debug("Finished prometheusEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }
 

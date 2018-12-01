@@ -67,7 +67,7 @@ public class AmbariClusterUpscaleService {
 
     public void upscaleAmbari(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.info("Start adding cluster containers");
+        LOGGER.debug("Start adding cluster containers");
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
@@ -101,7 +101,7 @@ public class AmbariClusterUpscaleService {
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.info("Start executing pre recipes");
+        LOGGER.debug("Start executing pre recipes");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
         recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
@@ -109,7 +109,7 @@ public class AmbariClusterUpscaleService {
 
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.info("Start installing Ambari services");
+        LOGGER.debug("Start installing Ambari services");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         ambariClusterConnector.upscaleCluster(stack, hostGroup, hostMetadata);
@@ -117,7 +117,7 @@ public class AmbariClusterUpscaleService {
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.info("Start executing post recipes");
+        LOGGER.debug("Start executing post recipes");
         recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
     }
 }

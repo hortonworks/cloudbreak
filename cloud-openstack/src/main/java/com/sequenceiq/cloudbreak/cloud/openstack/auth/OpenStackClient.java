@@ -272,13 +272,13 @@ public class OpenStackClient {
                 }
             }
         }
-        LOGGER.info("regions from openstack: {}", regions);
+        LOGGER.debug("Regions from openstack: {}", regions);
         return regions;
     }
 
     public List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone> getZones(OSClient<?> osClient, String regionFromOpenStack) {
         List<? extends AvailabilityZone> zonesFromOS = osClient.compute().zones().list();
-        LOGGER.info("zones from openstack for {}: {}", regionFromOpenStack, zonesFromOS);
+        LOGGER.debug("Zones from openstack for {}: {}", regionFromOpenStack, zonesFromOS);
         return zonesFromOS.stream().map(z -> availabilityZone(z.getZoneName())).collect(Collectors.toList());
     }
 

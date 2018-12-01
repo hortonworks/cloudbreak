@@ -49,7 +49,7 @@ public class StackTerminationService {
     private CloudbreakMetricService metricService;
 
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
-        LOGGER.info("Terminate stack result: {}", payload);
+        LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), true);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, BillingStatus.BILLING_TERMINATED.name());

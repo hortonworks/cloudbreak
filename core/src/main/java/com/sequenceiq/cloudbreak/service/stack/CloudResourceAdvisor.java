@@ -59,7 +59,7 @@ public class CloudResourceAdvisor {
         String availabilityZone = resourceRequest.getAvailabilityZone();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
-        LOGGER.info("Advising resources for blueprintId: {}, blueprintName: {}, provider: {} and region: {}.",
+        LOGGER.debug("Advising resources for blueprintId: {}, blueprintName: {}, provider: {} and region: {}.",
                 blueprintId, blueprintName, cloudPlatform, region);
 
         Blueprint blueprint = getBlueprint(blueprintName, blueprintId, user, workspace);

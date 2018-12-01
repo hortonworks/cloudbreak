@@ -34,7 +34,7 @@ public class UpscaleValidationHandler implements CloudPlatformEventHandler<Upsca
 
     @Override
     public void accept(Event<UpscaleStackValidationRequest> upscaleStackValidationRequestEvent) {
-        LOGGER.info("Received event: {}", upscaleStackValidationRequestEvent);
+        LOGGER.debug("Received event: {}", upscaleStackValidationRequestEvent);
         UpscaleStackValidationRequest request = upscaleStackValidationRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -44,7 +44,7 @@ public class UpscaleValidationHandler implements CloudPlatformEventHandler<Upsca
             UpscaleStackValidationResult result = new UpscaleStackValidationResult(request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(upscaleStackValidationRequestEvent.getHeaders(), result));
-            LOGGER.info("Upscale validation successfully finished for {}", cloudContext);
+            LOGGER.debug("Upscale validation successfully finished for {}", cloudContext);
         } catch (Exception e) {
             UpscaleStackValidationResult result = new UpscaleStackValidationResult(e.getMessage(), e, request);
             request.getResult().onNext(result);

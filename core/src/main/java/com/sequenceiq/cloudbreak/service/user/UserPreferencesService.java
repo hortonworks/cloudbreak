@@ -40,7 +40,7 @@ public class UserPreferencesService {
     }
 
     public UserPreferences getWithExternalId(User user) {
-        LOGGER.info("Get or create user preferences with external id for user '{}'", user.getUserId());
+        LOGGER.debug("Get or create user preferences with external id for user '{}'", user.getUserId());
         UserPreferences result;
         Optional<UserPreferences> userOptional = getByUser(user);
         if (userOptional.isPresent()) {
@@ -60,7 +60,7 @@ public class UserPreferencesService {
 
     private UserPreferences update(UserPreferences userPreferences) {
         User user = userPreferences.getUser();
-        LOGGER.info("Update user preferences for user '{}'", user.getUserId());
+        LOGGER.debug("Update user preferences for user '{}'", user.getUserId());
         try {
             return transactionService.required(() -> userPreferencesRepository.save(userPreferences));
         } catch (TransactionService.TransactionExecutionException e) {

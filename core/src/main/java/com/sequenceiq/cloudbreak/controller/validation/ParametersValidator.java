@@ -39,7 +39,7 @@ public class ParametersValidator {
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             ParametersValidationResult result = request.await();
-            LOGGER.info("Parameter validation result: {}", result);
+            LOGGER.debug("Parameter validation result: {}", result);
             Exception exception = result.getErrorDetails();
             if (exception != null) {
                 throw new BadRequestException(result.getStatusReason(), exception);

@@ -48,7 +48,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
-        LOGGER.info("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
+        LOGGER.debug("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 
@@ -56,7 +56,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(stackId, eventType, eventMessage,
                 instanceGroupName);
-        LOGGER.info("Firing Cloudbreak event: stackId: {}, type: {}, message: {}, instancegroup: {}", stackId, eventType, eventMessage, instanceGroupName);
+        LOGGER.debug("Firing Cloudbreak event: stackId: {}, type: {}, message: {}, instancegroup: {}", stackId, eventType, eventMessage, instanceGroupName);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 

@@ -81,13 +81,13 @@ public class ClusterCommonService {
         }
 
         if (updateJson.getStatus() != null) {
-            LOGGER.info("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
+            LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
             return Response.status(Status.NO_CONTENT).build();
         }
 
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
-            LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
+            LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
                 recreateCluster(stack, updateJson, user, workspace);
             } catch (TransactionExecutionException e) {
@@ -104,7 +104,7 @@ public class ClusterCommonService {
         if (Objects.nonNull(updateJson.getAmbariStackDetails())) {
             return updateStackDetails(updateJson, stack);
         }
-        LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
+        LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");
     }
 
@@ -133,7 +133,7 @@ public class ClusterCommonService {
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                     stack.getStatus()));
         }
-        LOGGER.info("Cluster host adjustment request received. Stack id: {} ", stackId);
+        LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
         Blueprint blueprint = stack.getCluster().getBlueprint();
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), updateJson.getHostGroupAdjustment().getHostGroup());
         if (hostGroup == null) {
@@ -171,7 +171,7 @@ public class ClusterCommonService {
                     "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
                     stack.getStatus()));
         }
-        LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}",
+        LOGGER.debug("Cluster username password update request received. Stack id:  {}, username: {}",
                 stackId, userNamePasswordJson.getUserName());
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
     }

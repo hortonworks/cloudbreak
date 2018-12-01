@@ -88,13 +88,13 @@ public class ServiceProviderConnectorAdapter {
         CloudStack cloudStack = cloudStackConverter.convertForDownscale(stack, instanceIds);
         DownscaleStackRequest downscaleRequest = new DownscaleStackRequest(cloudContext,
                 cloudCredential, cloudStack, resources, instances);
-        LOGGER.info("Triggering downscale stack event: {}", downscaleRequest);
+        LOGGER.debug("Triggering downscale stack event: {}", downscaleRequest);
         eventBus.notify(downscaleRequest.selector(), eventFactory.createEvent(downscaleRequest));
         try {
             DownscaleStackResult res = downscaleRequest.await();
-            LOGGER.info("Downscale stack result: {}", res);
+            LOGGER.debug("Downscale stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to downscale the stack", res.getErrorDetails());
+                LOGGER.info("Failed to downscale the stack", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
             return instanceIds;
@@ -113,14 +113,14 @@ public class ServiceProviderConnectorAdapter {
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
-        LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
+        LOGGER.debug("Triggering terminate stack event: {}", terminateRequest);
         eventBus.notify(terminateRequest.selector(), eventFactory.createEvent(terminateRequest));
         try {
             TerminateStackResult res = terminateRequest.await();
-            LOGGER.info("Terminate stack result: {}", res);
+            LOGGER.debug("Terminate stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 if (res.getErrorDetails() != null) {
-                    LOGGER.error("Failed to terminate the stack", res.getErrorDetails());
+                    LOGGER.info("Failed to terminate the stack", res.getErrorDetails());
                     throw new OperationException(res.getErrorDetails());
                 }
                 throw new OperationException(format("Failed to terminate the stack: %s due to %s", cloudContext, res.getStatusReason()));
@@ -132,7 +132,7 @@ public class ServiceProviderConnectorAdapter {
     }
 
     public void rollback(Stack stack, Set<Resource> resourceSet) {
-        LOGGER.info("Rollback the whole stack for {}", stack.getId());
+        LOGGER.debug("Rollback the whole stack for {}", stack.getId());
         deleteStack(stack);
     }
 
@@ -145,7 +145,7 @@ public class ServiceProviderConnectorAdapter {
         eventBus.notify(getPlatformTemplateRequest.selector(), eventFactory.createEvent(getPlatformTemplateRequest));
         try {
             GetPlatformTemplateResult res = getPlatformTemplateRequest.await();
-            LOGGER.info("Get template result: {}", res);
+            LOGGER.debug("Get template result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get template", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
@@ -167,7 +167,7 @@ public class ServiceProviderConnectorAdapter {
         eventBus.notify(parameterRequest.selector(), eventFactory.createEvent(parameterRequest));
         try {
             PlatformParameterResult res = parameterRequest.await();
-            LOGGER.info("Platform parameter result: {}", res);
+            LOGGER.debug("Platform parameter result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform parameters", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
@@ -189,7 +189,7 @@ public class ServiceProviderConnectorAdapter {
         eventBus.notify(checkPlatformVariantRequest.selector(), eventFactory.createEvent(checkPlatformVariantRequest));
         try {
             CheckPlatformVariantResult res = checkPlatformVariantRequest.await();
-            LOGGER.info("Platform variant result: {}", res);
+            LOGGER.debug("Platform variant result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform variant", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());

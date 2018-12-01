@@ -31,7 +31,7 @@ public class GetPlatformAccessConfigsHandler implements CloudPlatformEventHandle
 
     @Override
     public void accept(Event<GetPlatformCloudAccessConfigsRequest> getPlatformCloudAccessConfigsRequest) {
-        LOGGER.info("Received event: {}", getPlatformCloudAccessConfigsRequest);
+        LOGGER.debug("Received event: {}", getPlatformCloudAccessConfigsRequest);
         GetPlatformCloudAccessConfigsRequest request = getPlatformCloudAccessConfigsRequest.getData();
 
         try {
@@ -42,7 +42,7 @@ public class GetPlatformAccessConfigsHandler implements CloudPlatformEventHandle
                     .platformResources().accessConfigs(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformCloudAccessConfigsResult getPlatformCloudAccessConfigsResult = new GetPlatformCloudAccessConfigsResult(request, cloudAccessConfigs);
             request.getResult().onNext(getPlatformCloudAccessConfigsResult);
-            LOGGER.info("Query platform access configs finished.");
+            LOGGER.debug("Query platform access configs finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformCloudAccessConfigsResult(e.getMessage(), e, request));
         }

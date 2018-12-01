@@ -151,11 +151,11 @@ public class StackCreationService {
             Image image = imageService.getImage(stack.getId());
             CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
                     cloudStackConverter.convert(stack), image);
-            LOGGER.info("Triggering event: {}", checkImageRequest);
+            LOGGER.debug("Triggering event: {}", checkImageRequest);
             eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
             CheckImageResult result = checkImageRequest.await();
             sendNotification(result, stack);
-            LOGGER.info("Result: {}", result);
+            LOGGER.debug("Result: {}", result);
             return result;
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing check image", e);
@@ -182,7 +182,7 @@ public class StackCreationService {
             securityConfig.setUsePrivateIpToTls(usePrivateIpToTls);
             stackUpdater.updateStackSecurityConfig(stack, securityConfig);
             stack = stackService.getByIdWithListsInTransaction(stack.getId());
-            LOGGER.info("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
+            LOGGER.debug("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
         return stack;
     }
@@ -202,7 +202,7 @@ public class StackCreationService {
     }
 
     public void handleStackCreationFailure(StackView stack, Exception errorDetails) {
-        LOGGER.error("Error during stack creation flow:", errorDetails);
+        LOGGER.info("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
             LOGGER.warn("The flow has been cancelled.");
@@ -248,7 +248,7 @@ public class StackCreationService {
                 usageService.closeUsagesForStack(stack.getId());
             }
         } catch (Exception ex) {
-            LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
+            LOGGER.info("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, format("Rollback failed: %s", ex.getMessage()));
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
         }
@@ -269,7 +269,7 @@ public class StackCreationService {
     private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results) {
         String action = "create";
         if (exception != null) {
-            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
+            LOGGER.info(format("Failed to %s stack: %s", action, cloudContext), exception);
             throw new OperationException(exception);
         }
         if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {

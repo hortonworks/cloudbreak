@@ -70,7 +70,7 @@ public class AwsDownscaleService {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
                     auth.getCloudContext().getLocation().getRegion().value());
             terminateInstances(instanceIds, amazonEC2Client);
-            LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
+            LOGGER.debug("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
             try {
                 amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                         .withAutoScalingGroupName(asGroupName)
@@ -91,7 +91,7 @@ public class AwsDownscaleService {
                     || instanceIds.stream().anyMatch(id -> !e.getErrorMessage().contains(id))) {
                 throw e;
             }
-            LOGGER.info(e.getErrorMessage());
+            LOGGER.debug(e.getErrorMessage());
         }
     }
 
@@ -111,7 +111,7 @@ public class AwsDownscaleService {
             if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.getErrorCode())) {
                 throw e;
             }
-            LOGGER.info(e.getErrorMessage());
+            LOGGER.debug(e.getErrorMessage());
         }
     }
 }

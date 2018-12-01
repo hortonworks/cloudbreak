@@ -131,7 +131,7 @@ public class ComputeResourceService {
         result.put(FutureResult.FAILED, new ArrayList<>());
         result.put(FutureResult.SUCCESS, new ArrayList<>());
         int requests = futures.size();
-        LOGGER.info("Waiting for {} requests to finish", requests);
+        LOGGER.debug("Waiting for {} requests to finish", requests);
         try {
             for (Future<ResourceRequestResult<T>> future : futures) {
                 ResourceRequestResult<T> resourceRequestResult = future.get();
@@ -144,7 +144,7 @@ public class ComputeResourceService {
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to execute the request", e);
         }
-        LOGGER.info("{} requests have finished, continue with next group", requests);
+        LOGGER.debug("{} requests have finished, continue with next group", requests);
         futures.clear();
         return result;
     }

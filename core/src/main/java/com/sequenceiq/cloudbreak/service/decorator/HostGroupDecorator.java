@@ -110,7 +110,7 @@ public class HostGroupDecorator {
         if (instanceGroupName != null) {
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
             if (instanceGroup == null) {
-                LOGGER.error("Instance group not found: {}", instanceGroupName);
+                LOGGER.info("Instance group not found: {}", instanceGroupName);
                 throw new BadRequestException(String.format("Instance group '%s' not found on stack.", instanceGroupName));
             }
             constraint.setInstanceGroup(instanceGroup);

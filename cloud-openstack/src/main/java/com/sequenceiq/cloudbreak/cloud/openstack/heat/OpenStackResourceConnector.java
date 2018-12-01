@@ -109,7 +109,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             List<CloudResource> cloudResources = collectResources(authenticatedContext, notifier, heatStack, stack, neutronNetworkView);
             resources = check(authenticatedContext, cloudResources);
         } else {
-            LOGGER.info("Heat stack already exists: {}", existingStack.getName());
+            LOGGER.debug("Heat stack already exists: {}", existingStack.getName());
             List<CloudResource> cloudResources = collectResources(authenticatedContext, notifier, existingStack, stack, neutronNetworkView);
             resources = check(authenticatedContext, cloudResources);
         }
@@ -149,13 +149,13 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         if (client.compute().keypairs().get(keyPairName) == null) {
             try {
                 Keypair keyPair = client.compute().keypairs().create(keyPairName, stack.getInstanceAuthentication().getPublicKey());
-                LOGGER.info("Keypair has been created: {}", keyPair);
+                LOGGER.debug("Keypair has been created: {}", keyPair);
             } catch (Exception e) {
-                LOGGER.error("Failed to create keypair", e);
+                LOGGER.info("Failed to create keypair", e);
                 throw new CloudConnectorException(e.getMessage(), e);
             }
         } else {
-            LOGGER.info("Keypair already exists: {}", keyPairName);
+            LOGGER.debug("Keypair already exists: {}", keyPairName);
         }
     }
 
@@ -193,7 +193,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         switch (resource.getType()) {
             case HEAT_STACK:
                 String heatStackId = resource.getName();
-                LOGGER.info("Checking OpenStack Heat stack status of: {}", stackName);
+                LOGGER.debug("Checking OpenStack Heat stack status of: {}", stackName);
                 Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
                 result = utils.heatStatus(resource, heatStack);
                 break;
@@ -247,7 +247,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     private void terminateHeatStack(AuthenticatedContext authenticatedContext, CloudStack cloudStack, CloudResource resource) {
         String heatStackId = resource.getName();
         String stackName = utils.getStackName(authenticatedContext);
-        LOGGER.info("Terminate stack: {}", stackName);
+        LOGGER.debug("Terminate stack: {}", stackName);
         OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
         try {
             retryService.testWith2SecDelayMax5Times(() -> {
@@ -258,12 +258,12 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 return exists;
             });
             client.heat().stacks().delete(stackName, heatStackId);
-            LOGGER.info("Heat stack has been deleted");
+            LOGGER.debug("Heat stack has been deleted");
             if (cloudStack.getInstanceAuthentication().getPublicKeyId() == null) {
                 deleteKeyPair(authenticatedContext, client);
             }
         } catch (ActionWentFailException ignored) {
-            LOGGER.info("Stack not found with name: {}", resource.getName());
+            LOGGER.debug("Stack not found with name: {}", resource.getName());
         }
     }
 
@@ -271,7 +271,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext);
         String keyPairName = keystoneCredential.getKeyPairName();
         client.compute().keypairs().delete(keyPairName);
-        LOGGER.info("Keypair has been deleted: {}", keyPairName);
+        LOGGER.debug("Keypair has been deleted: {}", keyPairName);
     }
 
     @Override
@@ -374,7 +374,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         StackUpdate updateRequest = Builders.stackUpdate().template(heatTemplate)
                 .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build();
         client.heat().stacks().update(stackName, heatStackId, updateRequest);
-        LOGGER.info("Heat stack update request sent with stack name: '{}' for Heat stack: '{}'", stackName, heatStackId);
+        LOGGER.debug("Heat stack update request sent with stack name: '{}' for Heat stack: '{}'", stackName, heatStackId);
         return check(authenticatedContext, resources);
     }
 

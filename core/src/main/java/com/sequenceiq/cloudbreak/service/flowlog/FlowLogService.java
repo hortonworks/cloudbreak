@@ -69,12 +69,12 @@ public class FlowLogService {
 
     public void purgeTerminatedStacksFlowLogs() throws TransactionExecutionException {
         transactionService.required(() -> {
-            LOGGER.info("Cleaning deleted stack's flowlog");
+            LOGGER.debug("Cleaning deleted stack's flowlog");
             int purgedTerminatedStackLogs = flowLogRepository.purgeTerminatedStackLogs();
-            LOGGER.info("Deleted flowlog count: {}", purgedTerminatedStackLogs);
-            LOGGER.info("Cleaning orphan flowchainlogs");
+            LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
+            LOGGER.debug("Cleaning orphan flowchainlogs");
             int purgedOrphanFLowChainLogs = flowChainLogRepository.purgeOrphanFLowChainLogs();
-            LOGGER.info("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
+            LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
             return null;
         });
     }

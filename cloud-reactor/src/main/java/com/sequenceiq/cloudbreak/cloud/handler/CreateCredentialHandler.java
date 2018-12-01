@@ -37,7 +37,7 @@ public class CreateCredentialHandler implements CloudPlatformEventHandler<Create
 
     @Override
     public void accept(Event<CreateCredentialRequest> credentialRequestEvent) {
-        LOGGER.info("Received event: {}", credentialRequestEvent);
+        LOGGER.debug("Received event: {}", credentialRequestEvent);
         CreateCredentialRequest request = credentialRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -53,7 +53,7 @@ public class CreateCredentialHandler implements CloudPlatformEventHandler<Create
             CreateCredentialResult result = new CreateCredentialResult(request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(credentialRequestEvent.getHeaders(), result));
-            LOGGER.info("Creating credential successfully finished for {}", cloudContext);
+            LOGGER.debug("Creating credential successfully finished for {}", cloudContext);
         } catch (RuntimeException e) {
             CreateCredentialResult failure = new CreateCredentialResult(e, request);
             request.getResult().onNext(failure);

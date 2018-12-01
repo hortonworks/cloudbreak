@@ -59,7 +59,7 @@ public class AmbariClusterStatusUpdater {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
             ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClient, blueprintName);
-            LOGGER.info("Ambari cluster status: [{}] Status reason: [{}]", clusterStatus.name(), clusterStatus.getStatusReason());
+            LOGGER.debug("Ambari cluster status: [{}] Status reason: [{}]", clusterStatus.name(), clusterStatus.getStatusReason());
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
 
         }
@@ -98,12 +98,12 @@ public class AmbariClusterStatusUpdater {
         Status status = cluster.getStatus();
         if (status != newClusterStatus) {
             if (!status.equals(Status.MAINTENANCE_MODE_ENABLED) || !newClusterStatus.equals(Status.AVAILABLE)) {
-                LOGGER.info("Cluster {} status is updated from {} to {}", cluster.getId(), status, newClusterStatus);
+                LOGGER.debug("Cluster {} status is updated from {} to {}", cluster.getId(), status, newClusterStatus);
                 clusterService.updateClusterStatusByStackId(stackId, newClusterStatus);
                 result = true;
             }
         } else {
-            LOGGER.info("Cluster {} status hasn't changed: {}", cluster.getId(), status);
+            LOGGER.debug("Cluster {} status hasn't changed: {}", cluster.getId(), status);
         }
         return result;
     }

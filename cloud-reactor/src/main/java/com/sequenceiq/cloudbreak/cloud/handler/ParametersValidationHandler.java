@@ -29,7 +29,7 @@ public class ParametersValidationHandler implements CloudPlatformEventHandler<Pa
 
     @Override
     public void accept(Event<ParametersValidationRequest> requestEvent) {
-        LOGGER.info("Received event: {}", requestEvent);
+        LOGGER.debug("Received event: {}", requestEvent);
         ParametersValidationRequest request = requestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());

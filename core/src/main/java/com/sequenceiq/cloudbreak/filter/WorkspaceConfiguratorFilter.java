@@ -55,7 +55,7 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
                 Long workspaceId = Long.valueOf(workspaceIdString);
                 restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
             } catch (NumberFormatException e) {
-                LOGGER.error(String.format("WorkspaceID couldn't be parsed from the V3 request URI: %s", requestURI), e);
+                LOGGER.info(String.format("WorkspaceID couldn't be parsed from the V3 request URI: %s", requestURI), e);
             }
         } else {
             CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();

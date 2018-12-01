@@ -36,7 +36,7 @@ public class AmbariLdapService {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         LdapConfig ldapConfig = cluster.getLdapConfig();
         if (ldapConfig != null) {
-            LOGGER.info("Setup LDAP on Ambari API for stack: {}", stack.getId());
+            LOGGER.debug("Setup LDAP on Ambari API for stack: {}", stack.getId());
             String bindDn = ldapConfig.getBindDn();
             String bindPassword = ldapConfig.getBindPassword();
             LdapView ldapView = new LdapView(ldapConfig, bindDn, bindPassword);
@@ -75,7 +75,7 @@ public class AmbariLdapService {
     }
 
     public void syncLdap(Stack stack, Cluster cluster) {
-        LOGGER.info("Sync LDAP on Ambari API for stack: {}", stack.getId());
+        LOGGER.debug("Sync LDAP on Ambari API for stack: {}", stack.getId());
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         ambariClient.syncLdap();
     }

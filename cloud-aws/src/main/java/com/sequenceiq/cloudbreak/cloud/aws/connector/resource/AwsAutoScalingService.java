@@ -62,7 +62,7 @@ public class AwsAutoScalingService {
     public void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient) {
         for (Group group : stack.getGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
-            LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
+            LOGGER.debug("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
                     asGroupName);
             PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, group.getInstancesSize(), awsClient, cfStackUtil);
             try {
@@ -78,7 +78,7 @@ public class AwsAutoScalingService {
                 .withAutoScalingGroupName(groupName)
                 .withMaxSize(group.getInstancesSize())
                 .withDesiredCapacity(group.getInstancesSize()));
-        LOGGER.info("Updated Auto Scaling group's desiredCapacity: [stack: '{}', to: '{}']", cloudContextId,
+        LOGGER.debug("Updated Auto Scaling group's desiredCapacity: [stack: '{}', to: '{}']", cloudContextId,
                 group.getInstancesSize());
 
     }

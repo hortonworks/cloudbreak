@@ -51,7 +51,7 @@ public class LogContextAspects {
         CloudPlatformRequest cloudPlatformRequest = event.getData();
         CloudContext cloudContext = cloudPlatformRequest.getCloudContext();
         buildMdcContext(cloudContext, event);
-        LOGGER.info("A CloudPlatformEventHandler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+        LOGGER.debug("A CloudPlatformEventHandler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptReactorHandlersAcceptMethod() ||"
@@ -66,7 +66,7 @@ public class LogContextAspects {
             String trackingId = mdcContextMap.get(LoggerContextKey.TRACKING_ID.toString());
             MDCBuilder.addTrackingIdToMdcContext(trackingId);
         }
-        LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+        LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptResourcePersistenceHandlerAcceptMethod()")

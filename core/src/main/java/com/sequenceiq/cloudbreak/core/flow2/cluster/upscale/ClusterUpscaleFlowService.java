@@ -61,11 +61,11 @@ public class ClusterUpscaleFlowService {
         int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
         boolean success = numOfFailedHosts == 0;
         if (success) {
-            LOGGER.info("Cluster upscaled successfully");
+            LOGGER.debug("Cluster upscaled successfully");
             clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
         } else {
-            LOGGER.info("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
+            LOGGER.debug("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
                     String.format("Ambari upscale operation failed on %d node(s).", numOfFailedHosts));
@@ -73,7 +73,7 @@ public class ClusterUpscaleFlowService {
     }
 
     public void clusterUpscaleFailed(long stackId, Exception errorDetails) {
-        LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
+        LOGGER.info("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,
                 String.format("New node(s) could not be added to the cluster: %s", errorDetails));
@@ -81,7 +81,7 @@ public class ClusterUpscaleFlowService {
     }
 
     private int updateMetadata(StackView stackView, String hostGroupName) {
-        LOGGER.info("Start update metadata");
+        LOGGER.debug("Start update metadata");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         updateFailedHostMetaData(hostMetadata);

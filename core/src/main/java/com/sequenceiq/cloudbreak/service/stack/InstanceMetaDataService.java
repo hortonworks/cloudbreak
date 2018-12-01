@@ -120,7 +120,7 @@ public class InstanceMetaDataService {
         try {
             return instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
         } catch (AccessDeniedException ignore) {
-            LOGGER.info("No primary gateway for stack [{}]", stackId);
+            LOGGER.debug("No primary gateway for stack [{}]", stackId);
             return null;
         }
     }

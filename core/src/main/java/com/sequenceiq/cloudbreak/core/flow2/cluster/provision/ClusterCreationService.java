@@ -106,10 +106,10 @@ public class ClusterCreationService {
                     clusterTerminationService.deleteClusterContainers(cluster);
                 }
             } catch (CloudbreakException | TerminationFailedException ex) {
-                LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
+                LOGGER.info("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
             }
         } else {
-            LOGGER.error("Cluster was null. Flow action was not required.");
+            LOGGER.info("Cluster was null. Flow action was not required.");
         }
     }
 

@@ -203,7 +203,7 @@ public class AwsSetup implements Setup {
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to get the key pair [name: '%s'] from EC2 [roleArn:'%s'], detailed message: %s.",
                         keyPairName, credentialView.getRoleArn(), e.getMessage());
-                LOGGER.error(errorMessage, e);
+                LOGGER.info(errorMessage, e);
             }
             if (!keyPairIsPresentOnEC2) {
                 throw new CloudConnectorException(String.format("The key pair '%s' could not be found in the '%s' region of EC2.", keyPairName, region));
@@ -233,7 +233,7 @@ public class AwsSetup implements Setup {
             List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(ac, groupInstances);
             if (!instanceStatuses.stream().allMatch(inst -> inst.getStatus().equals(InstanceStatus.STARTED))) {
                 String errorMessage = "Not all the existing instances are in [Started] state, upscale is not possible!";
-                LOGGER.error(errorMessage);
+                LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
             List<Instance> asgOnlyInstances = asg.getInstances().stream()
@@ -244,13 +244,13 @@ public class AwsSetup implements Setup {
                 String errorMessage = "The instances in the autoscaling group are not in sync with the instances in cloudbreak! Cloudbreak only instances: ["
                         + cbOnlyInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")) + "], AWS only instances: ["
                         + asgOnlyInstances.stream().map(Instance::getInstanceId).collect(Collectors.joining(",")) + "]. Upscale is not possible!";
-                LOGGER.error(errorMessage);
+                LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
             if (groupInstances.size() != asg.getDesiredCapacity()) {
                 String errorMessage = String.format("The autoscale group's desired instance count is not match with the instance count in the cloudbreak."
                         + " Desired count: %d <> cb instance count: %d. Upscale is not possible!", asg.getDesiredCapacity(), groupInstances.size());
-                LOGGER.error(errorMessage);
+                LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
         }

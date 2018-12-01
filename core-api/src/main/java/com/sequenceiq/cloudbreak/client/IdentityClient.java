@@ -46,7 +46,7 @@ public class IdentityClient {
         authorizeWebTarget = identityWebTarget.path("/oauth/authorize").queryParam("response_type", "token").queryParam("client_id", clientId);
         tokenWebTarget = identityWebTarget.path("/oauth/token").queryParam("grant_type", "client_credentials");
         checkTokenWebTarget = identityWebTarget.path("/check_token");
-        LOGGER.info("IdentityClient has been created. identity: {}, clientId: {}, configKey: {}", identityServerAddress, clientId, configKey);
+        LOGGER.debug("IdentityClient has been created. identity: {}, clientId: {}, configKey: {}", identityServerAddress, clientId, configKey);
     }
 
     public AccessToken getToken(String user, String password) {

@@ -71,7 +71,7 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
                 }
             }
         } catch (RuntimeException e) {
-            LOGGER.error("Failed to convert dynamic component.", e);
+            LOGGER.info("Failed to convert dynamic component.", e);
         }
     }
 

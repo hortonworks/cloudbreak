@@ -44,7 +44,7 @@ public class RejectedThreadService {
             throw new IllegalArgumentException("The given data is not match to AutoscaleStackResponse or Long, not possible to create");
         }
 
-        LOGGER.info("Rejected task: {}, count: {}", rejectedThread.getJson(), rejectedThread.getRejectedCount());
+        LOGGER.debug("Rejected task: {}, count: {}", rejectedThread.getJson(), rejectedThread.getRejectedCount());
         rejectedThread.setType(task.getClass().getName());
         save(rejectedThread);
     }
@@ -72,7 +72,7 @@ public class RejectedThreadService {
             throw new IllegalArgumentException("The given data is not match to AutoscaleStackResponse or Long, so not removable");
         }
         if (removed != null) {
-            LOGGER.info("Rejected thread removed {} with count {}", removed.getJson(), removed.getRejectedCount());
+            LOGGER.debug("Rejected thread removed {} with count {}", removed.getJson(), removed.getRejectedCount());
         }
     }
 

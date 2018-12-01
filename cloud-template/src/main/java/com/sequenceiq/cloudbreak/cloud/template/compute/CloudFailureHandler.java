@@ -105,7 +105,7 @@ public class CloudFailureHandler {
         List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
-                LOGGER.error("Failed to create instance: " + exception.getStatusReason());
+                LOGGER.info("Failed to create instance: " + exception.getStatusReason());
                 resources.add(exception.getCloudResource());
             }
         }

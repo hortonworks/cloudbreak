@@ -49,7 +49,7 @@ abstract class AbstractAwsStackStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     protected Boolean doCall() {
-        LOGGER.info("Checking if AWS CloudFormation stack '{}' reached status '{}'", cloudFormationStackName, successStatus);
+        LOGGER.debug("Checking if AWS CloudFormation stack '{}' reached status '{}'", cloudFormationStackName, successStatus);
 
         try {
             com.amazonaws.services.cloudformation.model.Stack cfStack = cfClient.describeStacks(describeStacksRequest).getStacks().get(0);

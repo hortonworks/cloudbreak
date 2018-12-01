@@ -40,20 +40,20 @@ public class HostFilterService {
 
     public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Collection<HostMetadata> hosts, String hostGroup) {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
-        LOGGER.info("Ambari service config, hostGroup: {}, originalList: {}", hostGroup, filteredList);
+        LOGGER.debug("Ambari service config, hostGroup: {}, originalList: {}", hostGroup, filteredList);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(cluster.getStack().getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getStack().getGatewayPort(), cluster);
         Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
-        LOGGER.info("Ambari service config, hostGroup: {}, config: {}", hostGroup, config);
+        LOGGER.debug("Ambari service config, hostGroup: {}, config: {}", hostGroup, config);
         for (HostFilter hostFilter : hostFilters) {
             try {
                 filteredList = hostFilter.filter(cluster.getId(), config, filteredList);
-                LOGGER.info("Filtered with hostfilter: {}, filteredList: {}", hostFilter.getClass().getSimpleName(), filteredList);
+                LOGGER.debug("Filtered with hostfilter: {}, filteredList: {}", hostFilter.getClass().getSimpleName(), filteredList);
             } catch (HostFilterException e) {
                 LOGGER.warn("Filter didn't succeed, moving to next filter: {}", e.getMessage());
             }
         }
-        LOGGER.info("Returned filtered hosts: {}", filteredList);
+        LOGGER.debug("Returned filtered hosts: {}", filteredList);
         return filteredList;
     }
 }

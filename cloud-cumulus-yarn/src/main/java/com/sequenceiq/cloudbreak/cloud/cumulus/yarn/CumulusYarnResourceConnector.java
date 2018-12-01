@@ -73,7 +73,7 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
                 case CUMULUS_YARN_SERVICE:
-                    LOGGER.info("Checking Yarn application status of: {}", resource.getName());
+                    LOGGER.debug("Checking Yarn application status of: {}", resource.getName());
                     try {
                         ApiResponse<Service> response = api.appV1ServicesServiceNameGetWithHttpInfo(resource.getName());
                         if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
@@ -109,10 +109,10 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
                     DefaultApi api = client.createApi(authenticatedContext);
                     String yarnApplicationName = resource.getName();
                     String stackName = authenticatedContext.getCloudContext().getName();
-                    LOGGER.info("Terminate stack: {}", stackName);
+                    LOGGER.debug("Terminate stack: {}", stackName);
                     try {
                         ApiResponse<Void> response = api.appV1ServicesServiceNameDeleteWithHttpInfo(yarnApplicationName);
-                        LOGGER.info("Yarn Service has been deleted");
+                        LOGGER.debug("Yarn Service has been deleted");
                         if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
                                 || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
                                 || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
@@ -155,17 +155,17 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
                     DefaultApi api = client.createApi(authenticatedContext);
                     String yarnApplicationName = resource.getName();
                     String stackName = authenticatedContext.getCloudContext().getName();
-                    LOGGER.info("Upscale stack: {}", stackName);
+                    LOGGER.debug("Upscale stack: {}", stackName);
                     try {
                         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
                         Artifact artifact = serviceCreator.createArtifact(stack);
                         for (Group scaledGroup : scaledGroups) {
                             Component component = serviceCreator.mapGroupToYarnComponent(scaledGroup, stack, artifact);
-                            LOGGER.info("Upscale group [{}] with component name [{}] to size [{}]", scaledGroup.getName(), component.getName(),
+                            LOGGER.debug("Upscale group [{}] with component name [{}] to size [{}]", scaledGroup.getName(), component.getName(),
                                     component.getNumberOfContainers());
                             ApiResponse<Void> response =
                                     api.appV1ServicesServiceNameComponentsComponentNamePutWithHttpInfo(yarnApplicationName, component.getName(), component);
-                            LOGGER.info("Cumulus Yarn group [{}] upscale triggered", scaledGroup.getName());
+                            LOGGER.debug("Cumulus Yarn group [{}] upscale triggered", scaledGroup.getName());
                             if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
                                     || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
                                     || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {

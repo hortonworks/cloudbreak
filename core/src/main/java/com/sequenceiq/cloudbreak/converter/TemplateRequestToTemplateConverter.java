@@ -71,7 +71,7 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
             try {
                 return new Json(value);
             } catch (JsonProcessingException e) {
-                LOGGER.error("Failed to parse template parameters as JSON.", e);
+                LOGGER.info("Failed to parse template parameters as JSON.", e);
                 throw new BadRequestException("Invalid template parameter format, valid JSON expected.");
             }
         };

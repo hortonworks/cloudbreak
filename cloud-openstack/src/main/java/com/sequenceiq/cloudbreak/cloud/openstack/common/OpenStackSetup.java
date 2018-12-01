@@ -76,7 +76,7 @@ public class OpenStackSetup implements Setup {
                 new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED)
         );
 
-        LOGGER.info("OpenStack image result. name: {}, imageStatus: {}, imageStatusResult: {}", imageName, optionalImageStatus.orElse(null), imageStatusResult);
+        LOGGER.debug("OpenStack image result. name: {}, imageStatus: {}, imageStatusResult: {}", imageName, optionalImageStatus.orElse(null), imageStatusResult);
         return imageStatusResult;
     }
 

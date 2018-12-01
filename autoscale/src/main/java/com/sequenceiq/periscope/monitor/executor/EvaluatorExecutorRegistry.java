@@ -35,14 +35,14 @@ public class EvaluatorExecutorRegistry {
         if (elementAlreadyPresent == null) {
             return true;
         } else if (now - elementAlreadyPresent.getTimestampMillis() > timeout) {
-            LOGGER.info("timeout after {}: {} for cluster {} still present, resubmitting",
+            LOGGER.info("Timeout after {}: {} for cluster {} still present, resubmitting",
                     now - elementAlreadyPresent.getTimestampMillis(),
                     elementAlreadyPresent.getEvaluatorExecutor().getName(),
                     elementAlreadyPresent.getResourceId());
             return true;
         }
 
-        LOGGER.info("submitting {} for cluster {} failed, it has been present in the system for {} ms",
+        LOGGER.debug("Submitting {} for cluster {} failed, it has been present in the system for {} ms",
                 elementAlreadyPresent.getEvaluatorExecutor().getName(),
                 elementAlreadyPresent.getResourceId(),
                 now - elementAlreadyPresent.getTimestampMillis());

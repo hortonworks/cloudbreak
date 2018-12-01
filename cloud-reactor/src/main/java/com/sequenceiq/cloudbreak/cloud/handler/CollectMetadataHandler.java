@@ -36,7 +36,7 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
 
     @Override
     public void accept(Event<CollectMetadataRequest> collectMetadataRequestEvent) {
-        LOGGER.info("Received event: {}", collectMetadataRequestEvent);
+        LOGGER.debug("Received event: {}", collectMetadataRequestEvent);
         CollectMetadataRequest request = collectMetadataRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
@@ -46,7 +46,7 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
             CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request, instanceStatuses);
             request.getResult().onNext(collectMetadataResult);
             eventBus.notify(collectMetadataResult.selector(), new Event<>(collectMetadataRequestEvent.getHeaders(), collectMetadataResult));
-            LOGGER.info("Metadata collection successfully finished");
+            LOGGER.debug("Metadata collection successfully finished");
         } catch (RuntimeException e) {
             CollectMetadataResult failure = new CollectMetadataResult(e, request);
             request.getResult().onNext(failure);

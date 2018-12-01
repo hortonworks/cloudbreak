@@ -43,14 +43,14 @@ public class StackParameterService {
             eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));
             try {
                 GetStackParamValidationResult res = getStackParamValidationRequest.await();
-                LOGGER.info("Get stack params result: {}", res);
+                LOGGER.debug("Get stack params result: {}", res);
                 if (res.getStatus().equals(EventStatus.FAILED)) {
-                    LOGGER.error("Failed to get stack params", res.getErrorDetails());
+                    LOGGER.info("Failed to get stack params", res.getErrorDetails());
                     throw new OperationException(res.getErrorDetails());
                 }
                 return res.getStackParamValidations();
             } catch (InterruptedException e) {
-                LOGGER.error("Error while getting the stack params", e);
+                LOGGER.info("Error while getting the stack params", e);
                 throw new OperationException(e);
             }
         } else {

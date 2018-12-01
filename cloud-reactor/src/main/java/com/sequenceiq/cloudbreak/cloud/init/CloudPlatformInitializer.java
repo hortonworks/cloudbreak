@@ -32,10 +32,10 @@ public class CloudPlatformInitializer {
     @PostConstruct
     public void init() {
         validateSelectors();
-        LOGGER.info("Registering CloudPlatformEventHandlers");
+        LOGGER.debug("Registering CloudPlatformEventHandlers");
         for (CloudPlatformEventHandler<?> handler : handlers) {
             String selector = CloudPlatformRequest.selector(handler.type());
-            LOGGER.info("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
+            LOGGER.debug("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
             eventBus.on($(selector), handler);
         }
     }

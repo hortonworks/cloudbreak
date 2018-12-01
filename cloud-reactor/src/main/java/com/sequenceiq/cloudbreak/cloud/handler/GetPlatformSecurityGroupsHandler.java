@@ -31,7 +31,7 @@ public class GetPlatformSecurityGroupsHandler implements CloudPlatformEventHandl
 
     @Override
     public void accept(Event<GetPlatformSecurityGroupsRequest> getPlatformSecurityGroupsRequest) {
-        LOGGER.info("Received event: {}", getPlatformSecurityGroupsRequest);
+        LOGGER.debug("Received event: {}", getPlatformSecurityGroupsRequest);
         GetPlatformSecurityGroupsRequest request = getPlatformSecurityGroupsRequest.getData();
 
         try {
@@ -43,7 +43,7 @@ public class GetPlatformSecurityGroupsHandler implements CloudPlatformEventHandl
                     .securityGroups(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformSecurityGroupsResult getPlatformSecurityGroupsResult = new GetPlatformSecurityGroupsResult(request, securityGroups);
             request.getResult().onNext(getPlatformSecurityGroupsResult);
-            LOGGER.info("Query platform networks types finished.");
+            LOGGER.debug("Query platform networks types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformSecurityGroupsResult(e.getMessage(), e, request));
         }

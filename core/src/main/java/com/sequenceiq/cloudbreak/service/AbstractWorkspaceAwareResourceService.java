@@ -92,7 +92,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     @Override
     public T delete(T resource) {
         MDCBuilder.buildMdcContext(resource);
-        LOGGER.info("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
+        LOGGER.debug("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
         prepareDeletion(resource);
         repository().delete(resource);
         return resource;

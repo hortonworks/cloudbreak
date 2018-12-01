@@ -35,16 +35,16 @@ public class AmbariClusterTemplateSubmitter {
         if (ambariClient.getClusterName() == null) {
             try {
                 String clusterTemplate = ambariClusterTemplateGenerator.generateClusterTemplate(cluster, hostGroupMappings, ambariClient);
-                LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
+                LOGGER.debug("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
                 ambariClient.createClusterFromTemplate(clusterName, clusterTemplate);
             } catch (HttpResponseException exception) {
                 String reason = collectErrorReason(exception);
                 String msg = String.format("Ambari client failed to apply cluster creation template! Reason: %s", reason);
-                LOGGER.error(msg, exception);
+                LOGGER.info(msg, exception);
                 throw new AmbariServiceException(msg, exception);
             }
         } else {
-            LOGGER.info("Ambari cluster already exists: {}", clusterName);
+            LOGGER.debug("Ambari cluster already exists: {}", clusterName);
         }
     }
 

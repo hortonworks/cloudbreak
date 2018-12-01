@@ -97,7 +97,7 @@ public class AzureUtils {
 
     public CloudResourceStatus getTemplateStatus(CloudResource resource, Deployment templateDeployment, AzureClient access, String stackName) {
         String status = templateDeployment.provisioningState();
-        LOGGER.info("Azure stack status of: {}  is: {}", resource.getName(), status);
+        LOGGER.debug("Azure stack status of: {}  is: {}", resource.getName(), status);
         ResourceStatus resourceStatus = AzureStackStatus.mapResourceStatus(status);
         CloudResourceStatus armResourceStatus = null;
 

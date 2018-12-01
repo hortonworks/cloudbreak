@@ -244,7 +244,7 @@ public class AmbariDecommissioner {
     }
 
     public Map<String, Long> selectNodes(Map<String, Long> sortedAscending, Collection<HostMetadata> filteredHostList, int removeCount) {
-        LOGGER.info("sortedAscending: {}, filteredHostList: {}", sortedAscending, filteredHostList);
+        LOGGER.debug("SortedAscending: {}, filteredHostList: {}", sortedAscending, filteredHostList);
 
         Map<String, Long> select = filteredHostList
                 .stream()
@@ -398,7 +398,7 @@ public class AmbariDecommissioner {
                     try {
                         return Optional.ofNullable(resource.getAttributes().get(VolumeSetAttributes.class));
                     } catch (IOException e) {
-                        LOGGER.error("Failed to convert volume set attributes.", e);
+                        LOGGER.info("Failed to convert volume set attributes.", e);
                         return Optional.empty();
                     }
                 })
@@ -407,7 +407,7 @@ public class AmbariDecommissioner {
                 .anyMatch(Boolean.FALSE::equals);
         int adjustment = Math.abs(scalingAdjustment);
         if (!repairInProgress && (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment)) {
-            LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
+            LOGGER.debug("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new NotEnoughNodeException("There is not enough node to downscale. "
                     + "Check the replication factor and the ApplicationMaster occupation.");
         }
@@ -416,20 +416,20 @@ public class AmbariDecommissioner {
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication, int adjustment,
             List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(adjustment);
-        LOGGER.info("removeCount: {}, replication: {}, filteredHostList size: {}, filteredHostList: {}",
+        LOGGER.debug("RemoveCount: {}, replication: {}, filteredHostList size: {}, filteredHostList: {}",
                 removeCount, replication, filteredHostList.size(), filteredHostList);
         Map<String, Map<Long, Long>> dfsSpace = getDFSSpace(stack, client);
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
-        LOGGER.info("sortedAscending: {}", sortedAscending);
+        LOGGER.debug("SortedAscending: {}", sortedAscending);
         Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
-        LOGGER.info("Selected nodes for decommission: {}", selectedNodes);
-        LOGGER.info("Remaining nodes after decommission: {}", remainingNodes);
+        LOGGER.debug("Selected nodes for decommission: {}", selectedNodes);
+        LOGGER.debug("Remaining nodes after decommission: {}", remainingNodes);
         long usedSpace = getSelectedUsage(selectedNodes);
         long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
         long safetyUsedSpace = ((Double) (usedSpace * replication * SAFETY_PERCENTAGE)).longValue();
-        LOGGER.info("Checking DFS space for decommission, usedSpace: {}, remainingSpace: {}", usedSpace, remainingSpace);
-        LOGGER.info("Used space with replication: {} and safety space: {} is: {}", replication, SAFETY_PERCENTAGE, safetyUsedSpace);
+        LOGGER.debug("Checking DFS space for decommission, usedSpace: {}, remainingSpace: {}", usedSpace, remainingSpace);
+        LOGGER.debug("Used space with replication: {} and safety space: {} is: {}", replication, SAFETY_PERCENTAGE, safetyUsedSpace);
         if (remainingSpace < safetyUsedSpace) {
             throw new BadRequestException(
                     String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
@@ -490,11 +490,11 @@ public class AmbariDecommissioner {
     }
 
     public PollingResult removeHostsFromOrchestrator(Stack stack, List<String> hostNames) throws CloudbreakException {
-        LOGGER.info("Remove hosts from orchestrator: {}", hostNames);
+        LOGGER.debug("Remove hosts from orchestrator: {}", hostNames);
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         try {
-            LOGGER.info("Orchestrator type: {}", orchestratorType);
+            LOGGER.debug("Orchestrator type: {}", orchestratorType);
             if (orchestratorType.containerOrchestrator()) {
                 Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
@@ -520,7 +520,7 @@ public class AmbariDecommissioner {
                 hostOrchestrator.tearDown(allGatewayConfigs, privateIpsByFQDN);
             }
         } catch (CloudbreakOrchestratorException e) {
-            LOGGER.error("Failed to delete orchestrator components while decommissioning: ", e);
+            LOGGER.info("Failed to delete orchestrator components while decommissioning: ", e);
             throw new CloudbreakException("Failed to delete orchestrator components while decommissioning: ", e);
         }
         return SUCCESS;
@@ -538,7 +538,7 @@ public class AmbariDecommissioner {
             return SUCCESS;
         }
 
-        LOGGER.info("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
+        LOGGER.debug("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
         return ambariOperationService.waitForOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.emptyMap(),
                 DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE).getLeft();
     }
@@ -550,7 +550,7 @@ public class AmbariDecommissioner {
             return SUCCESS;
         }
 
-        LOGGER.info("Waiting for RegionServers to move the regions to other servers");
+        LOGGER.debug("Waiting for RegionServers to move the regions to other servers");
         return rsPollerService.pollWithTimeoutSingleFailure(rsDecommissionStatusCheckerTask, new AmbariHostsWithNames(stack, ambariClient, hosts),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_REGION_DECOM);
     }
@@ -566,7 +566,7 @@ public class AmbariDecommissioner {
             }
         });
         Set<String> hostsToRemove = orderedByHealth.map(HostMetadata::getHostName).limit(adjustment).collect(Collectors.toSet());
-        LOGGER.info("Hosts '{}' will be removed from Ambari cluster", hostsToRemove);
+        LOGGER.debug("Hosts '{}' will be removed from Ambari cluster", hostsToRemove);
         return hostsToRemove;
     }
 
@@ -585,7 +585,7 @@ public class AmbariDecommissioner {
                     try {
                         return resource.getAttributes().get(VolumeSetAttributes.class);
                     } catch (IOException e) {
-                        LOGGER.error("VolumeSetAttributes conversion failed.", e);
+                        LOGGER.info("VolumeSetAttributes conversion failed.", e);
                         return null;
                     }
                 })
@@ -658,7 +658,7 @@ public class AmbariDecommissioner {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to start HDFS/YARN/HBASE services", e);
+            LOGGER.info("Failed to start HDFS/YARN/HBASE services", e);
             throw new BadRequestException("Failed to start the HDFS, YARN and HBASE services, it's possible that some of the nodes are unavailable");
         }
 
@@ -674,7 +674,7 @@ public class AmbariDecommissioner {
                 if (!"STARTED".equals(componentStateEntry.getValue()) && COMPONENTS_NEED_TO_DECOMMISSION.keySet().contains(component)) {
                     Map<String, String> componentStates = ambariClient.getComponentStates(hostComponentsEntry.getKey(), component);
                     if ("DECOMMISSIONED".equals(componentStates.get("desired_admin_state"))) {
-                        LOGGER.info("No need to start ambari service {} on host {}", component, hostComponentsEntry.getKey());
+                        LOGGER.debug("No need to start ambari service {} on host {}", component, hostComponentsEntry.getKey());
                     } else {
                         services.add(COMPONENTS_NEED_TO_DECOMMISSION.get(component));
                     }

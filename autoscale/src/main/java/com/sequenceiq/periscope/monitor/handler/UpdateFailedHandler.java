@@ -47,7 +47,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
         long autoscaleClusterId = event.getClusterId();
-        LOGGER.info("Cluster {} failed", autoscaleClusterId);
+        LOGGER.debug("Cluster {} failed", autoscaleClusterId);
         Cluster cluster = clusterService.findById(autoscaleClusterId);
         if (cluster == null) {
             return;
@@ -55,19 +55,19 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         MDCBuilder.buildMdcContext(cluster);
         StackResponse stackResponse = getStackById(cluster.getStackId());
         if (stackResponse == null) {
-            LOGGER.info("Suspending cluster {}", autoscaleClusterId);
+            LOGGER.debug("Suspending cluster {}", autoscaleClusterId);
             suspendCluster(cluster);
             return;
         }
         String stackStatus = getStackStatus(stackResponse);
         if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
             clusterService.removeById(autoscaleClusterId);
-            LOGGER.info("Delete cluster {} due to failing update attempts and Cloudbreak stack status", autoscaleClusterId);
+            LOGGER.debug("Delete cluster {} due to failing update attempts and Cloudbreak stack status", autoscaleClusterId);
             return;
         }
         Integer failed = updateFailures.get(autoscaleClusterId);
         if (failed == null) {
-            LOGGER.info("New failed cluster id: [{}]", autoscaleClusterId);
+            LOGGER.debug("New failed cluster id: [{}]", autoscaleClusterId);
             updateFailures.put(autoscaleClusterId, 1);
         } else if (RETRY_THRESHOLD - 1 == failed) {
             try {
@@ -76,11 +76,11 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                     // Ambari server is unreacheable but the stack and cluster statuses are "AVAILABLE"
                     reportAmbariServerFailure(cluster, stackResponse);
                     suspendCluster(cluster);
-                    LOGGER.info("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}",
+                    LOGGER.debug("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}",
                             autoscaleClusterId, stackStatus);
                 } else {
                     suspendCluster(cluster);
-                    LOGGER.info("Suspend cluster monitoring for cluster {}", autoscaleClusterId);
+                    LOGGER.debug("Suspend cluster monitoring for cluster {}", autoscaleClusterId);
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Problem when verifying cluster status. Original message: {}",
@@ -90,7 +90,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             updateFailures.remove(autoscaleClusterId);
         } else {
             int value = failed + 1;
-            LOGGER.info("Increase failed count[{}] for cluster id: [{}]", value, autoscaleClusterId);
+            LOGGER.debug("Increase failed count[{}] for cluster id: [{}]", value, autoscaleClusterId);
             updateFailures.put(autoscaleClusterId, value);
         }
     }

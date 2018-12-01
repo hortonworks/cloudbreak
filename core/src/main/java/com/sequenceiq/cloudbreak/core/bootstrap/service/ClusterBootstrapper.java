@@ -111,7 +111,7 @@ public class ClusterBootstrapper {
         if (orchestratorType.hostOrchestrator()) {
             bootstrapOnHost(stack);
         } else if (orchestratorType.containerOrchestrator()) {
-            LOGGER.info("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
+            LOGGER.debug("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
         } else {
             LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
             throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);
@@ -196,7 +196,7 @@ public class ClusterBootstrapper {
                     Iterator<String> iterator = recoveryHostNames.iterator();
                     node.setHostname(iterator.next().split("\\.")[0]);
                     iterator.remove();
-                    LOGGER.info("Set the hostname to {} for address: {}", node.getHostname(), im.getPrivateIp());
+                    LOGGER.debug("Set the hostname to {} for address: {}", node.getHostname(), im.getPrivateIp());
                 }
                 nodes.add(node);
             }
@@ -209,7 +209,7 @@ public class ClusterBootstrapper {
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
             } else if (orchestratorType.containerOrchestrator()) {
-                LOGGER.info("Skipping bootstrap of the new machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
+                LOGGER.debug("Skipping bootstrap of the new machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
             } else {
                 LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
                 throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);

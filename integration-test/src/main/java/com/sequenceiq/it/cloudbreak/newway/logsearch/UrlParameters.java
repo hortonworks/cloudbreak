@@ -61,7 +61,7 @@ public class UrlParameters {
             return objectMapper.convertValue(urlParameters, new TypeReference<Map<String, Object>>() {
             });
         } catch (JsonProcessingException e) {
-            LOGGER.error("Error during json convert:", e);
+            LOGGER.info("Error during json convert:", e);
             return Maps.newHashMap();
         }
     }

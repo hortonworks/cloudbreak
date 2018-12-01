@@ -305,7 +305,7 @@ public class GcpPlatformResources implements PlatformResources {
         try {
             cloudKMS = GcpStackUtil.buildCloudKMS(cloudCredential);
         } catch (Exception e) {
-            LOGGER.error("Failed to build CloudKMS client.", e);
+            LOGGER.info("Failed to build CloudKMS client.", e);
             return new CloudEncryptionKeys(new HashSet<>());
         }
 
@@ -328,7 +328,7 @@ public class GcpPlatformResources implements PlatformResources {
                     .execute();
             return Optional.ofNullable(response.getKeyRings()).orElse(List.of());
         } catch (IOException e) {
-            LOGGER.error("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
+            LOGGER.info("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
             return List.of();
         }
     }
@@ -359,7 +359,7 @@ public class GcpPlatformResources implements PlatformResources {
                     .execute();
             return Optional.ofNullable(listCryptoKeysResponse.getCryptoKeys()).orElse(List.of());
         } catch (IOException e) {
-            LOGGER.error("Failed to get list of crypto keys on keyring path: [{}].", cryptoKeysPath, e);
+            LOGGER.info("Failed to get list of crypto keys on keyring path: [{}].", cryptoKeysPath, e);
             return List.of();
         }
     }

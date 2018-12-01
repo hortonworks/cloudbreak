@@ -22,7 +22,7 @@ public class EvenFlowDistributor implements FlowDistributor {
         int nodeCount = nodes.size();
         int flowCount = flows.size();
         double flowPerNode = (double) flowCount / nodeCount;
-        LOGGER.info("Number of flows to distribute: {}, across: {} nodes, f/n: {}", flowCount, nodeCount, flowPerNode);
+        LOGGER.debug("Number of flows to distribute: {}, across: {} nodes, f/n: {}", flowCount, nodeCount, flowPerNode);
         int i = 0;
         for (String flow : flows) {
             if (nodeCount == i) {
@@ -31,7 +31,7 @@ public class EvenFlowDistributor implements FlowDistributor {
             result.computeIfAbsent(nodes.get(i), k -> new ArrayList<>()).add(flow);
             i++;
         }
-        LOGGER.info("Result of flow distribution: {}", result);
+        LOGGER.debug("Result of flow distribution: {}", result);
         return result;
     }
 }

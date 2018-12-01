@@ -30,7 +30,7 @@ public class TimerPollingScheduler implements Consumer<Long> {
     @Override
     public void accept(Long aLong) {
         latch.countDown();
-        LOGGER.info("Schedule received: {}, count: {}", this, latch.getCount());
+        LOGGER.debug("Schedule received: {}, count: {}", this, latch.getCount());
         if (latch.getCount() == 0) {
             cancel();
         }

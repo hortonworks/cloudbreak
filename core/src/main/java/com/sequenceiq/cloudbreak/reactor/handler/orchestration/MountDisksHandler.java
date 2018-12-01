@@ -42,7 +42,7 @@ public class MountDisksHandler implements ReactorEventHandler<MountDisksRequest>
             mountDisks.mountAllDisks(request.getStackId());
             response = new MountDisksSuccess(request.getStackId());
         } catch (Exception e) {
-            LOGGER.error("Mount disks failed. ", e);
+            LOGGER.info("Mount disks failed. ", e);
             response = new MountDisksFailed(request.getStackId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

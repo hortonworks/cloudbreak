@@ -28,7 +28,7 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
 
     @Override
     public void accept(Event<GetPlatformTemplateRequest> platformTemplateRequestEvent) {
-        LOGGER.info("Received event: {}", platformTemplateRequestEvent);
+        LOGGER.debug("Received event: {}", platformTemplateRequestEvent);
         GetPlatformTemplateRequest request = platformTemplateRequestEvent.getData();
         String template = null;
         try {
@@ -40,6 +40,6 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
         }
         GetPlatformTemplateResult getPlatformTemplateResult = new GetPlatformTemplateResult(request, template);
         request.getResult().onNext(getPlatformTemplateResult);
-        LOGGER.info("Get template finished.");
+        LOGGER.debug("Get template finished.");
     }
 }

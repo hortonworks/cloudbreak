@@ -45,7 +45,7 @@ public class ApplicationCreator {
             try {
                 JsonNode applicationJson = new ObjectMapper().readTree(application);
                 String appId = applicationJson.get("appId").asText();
-                LOGGER.info("Application created with appId: " + appId);
+                LOGGER.debug("Application created with appId: " + appId);
                 return appId;
             } catch (IOException e) {
                 throw new IllegalStateException(e);

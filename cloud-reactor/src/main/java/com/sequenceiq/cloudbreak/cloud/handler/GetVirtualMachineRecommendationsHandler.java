@@ -29,7 +29,7 @@ public class GetVirtualMachineRecommendationsHandler implements CloudPlatformEve
 
     @Override
     public void accept(Event<GetVirtualMachineRecommendtaionRequest> gVMRRE) {
-        LOGGER.info("Received GetVirtualMachineRecommendtaionRequest event: {}", gVMRRE);
+        LOGGER.debug("Received GetVirtualMachineRecommendtaionRequest event: {}", gVMRRE);
         GetVirtualMachineRecommendtaionRequest request = gVMRRE.getData();
         String cloudPlatform = request.getCloudPlatform();
         try {
@@ -37,7 +37,7 @@ public class GetVirtualMachineRecommendationsHandler implements CloudPlatformEve
             VmRecommendations recommendations = connector.parameters().recommendedVms();
             GetVirtualMachineRecommendationResponse gVMRResponse = new GetVirtualMachineRecommendationResponse(request, recommendations);
             request.getResult().onNext(gVMRResponse);
-            LOGGER.info("Query platform machine recommendations finished.");
+            LOGGER.debug("Query platform machine recommendations finished.");
         } catch (RuntimeException e) {
             LOGGER.warn("Could not get virtual machine recommendations for platform: " + cloudPlatform, e);
             request.getResult().onNext(new GetVirtualMachineRecommendationResponse(e.getMessage(), e, request));

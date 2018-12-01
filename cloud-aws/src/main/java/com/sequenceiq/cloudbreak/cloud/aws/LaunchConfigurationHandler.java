@@ -45,7 +45,7 @@ public class LaunchConfigurationHandler {
             LaunchConfiguration oldLaunchConfiguration, CloudContext cloudContext, String encryptedImageName) {
         String selectedImageName = StringUtils.isBlank(encryptedImageName) ? imageName : encryptedImageName;
         CreateLaunchConfigurationRequest createLaunchConfigurationRequest = getCreateLaunchConfigurationRequest(selectedImageName, oldLaunchConfiguration);
-        LOGGER.info("Create LaunchConfiguration {} with image {}",
+        LOGGER.debug("Create LaunchConfiguration {} with image {}",
                 createLaunchConfigurationRequest.getLaunchConfigurationName(), selectedImageName);
         autoScalingClient.createLaunchConfiguration(createLaunchConfigurationRequest);
         CloudResource cloudResource = CloudResource.builder()

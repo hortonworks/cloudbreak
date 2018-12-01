@@ -84,7 +84,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
                 String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
                 long executionTime = execElapsed > flowElapsed ? execElapsed : flowElapsed;
-                LOGGER.info("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
+                LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
                 metricService.submit(MetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
             }
@@ -123,7 +123,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void sendEvent(String flowId, String selector, Object payload) {
-        LOGGER.info("Triggering event: {}, payload: {}", selector, payload);
+        LOGGER.debug("Triggering event: {}, payload: {}", selector, payload);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_ID, flowId);
         String flowChainId = runningFlows.getFlowChainId(flowId);

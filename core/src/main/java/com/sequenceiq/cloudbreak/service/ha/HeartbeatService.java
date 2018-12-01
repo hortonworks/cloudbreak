@@ -127,12 +127,12 @@ public class HeartbeatService {
             try {
                 failedNodes.addAll(distributeFlows());
             } catch (TransactionExecutionException e) {
-                LOGGER.info("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
+                LOGGER.error("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
             try {
                 cleanupNodes(failedNodes);
             } catch (TransactionExecutionException e) {
-                LOGGER.info("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
+                LOGGER.error("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
 
             String nodeId = cloudbreakNodeConfig.getId();

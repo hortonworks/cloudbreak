@@ -84,7 +84,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        LOGGER.info("Create volume resources");
+        LOGGER.debug("Create volume resources");
         String volumeType = getVolumeType(group);
         if (AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType)) {
             return List.of();
@@ -151,7 +151,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        LOGGER.info("Create volumes on provider");
+        LOGGER.debug("Create volumes on provider");
         AmazonEC2Client client = getAmazonEC2Client(auth);
 
         Map<String, List<VolumeSetAttributes.Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
@@ -230,7 +230,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws InterruptedException {
-        LOGGER.info("Set delete on termination to true, on instances");
+        LOGGER.debug("Set delete on termination to true, on instances");
         VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AWS_VOLUMESET, context, auth, List.of(resource));
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(ResourceStatus.DELETED::equals);

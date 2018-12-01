@@ -84,7 +84,7 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
         try {
             Cluster cluster = clusterService.findById(clusterId);
             MDCBuilder.buildMdcContext(cluster);
-            LOGGER.info("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
+            LOGGER.debug("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() -> ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME), "alert");
             if (!alertHistory.isEmpty()) {
@@ -94,11 +94,11 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
                     if (isAlertStateMet(currentState)) {
                         String hostName = (String) history.get(HOST_NAME);
                         hostNamesToRecover.add(hostName);
-                        LOGGER.info("Alert: {} is in '{}' state for host '{}'.", AMBARI_AGENT_HEARTBEAT, currentState, hostName);
+                        LOGGER.debug("Alert: {} is in '{}' state for host '{}'.", AMBARI_AGENT_HEARTBEAT, currentState, hostName);
                     }
                 }
                 if (!hostNamesToRecover.isEmpty()) {
-                    hostNamesToRecover.forEach(hn -> LOGGER.info("Host to recover: {}", hn));
+                    hostNamesToRecover.forEach(hn -> LOGGER.debug("Host to recover: {}", hn));
                     CloudbreakIdentityClient cbClient = cloudbreakClientConfiguration.cloudbreakClient();
                     FailureReport failureReport = new FailureReport();
                     failureReport.setFailedNodes(hostNamesToRecover);
@@ -109,7 +109,7 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
             LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
             eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
-            LOGGER.info("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
+            LOGGER.debug("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
         }
     }
 

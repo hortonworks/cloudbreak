@@ -113,11 +113,11 @@ public class StackDecorator {
         String stackName = request.getName();
         long start = System.currentTimeMillis();
         prepareCredential(subject, request, user, workspace);
-        LOGGER.info("Credential was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        LOGGER.debug("Credential was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
         prepareDomainIfDefined(subject, request, user, workspace);
-        LOGGER.info("Domain was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        LOGGER.debug("Domain was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         Long credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();
@@ -133,33 +133,33 @@ public class StackDecorator {
                 throw new BadRequestException("Network must be specified!");
             }
             prepareNetwork(subject, request.getNetworkId());
-            LOGGER.info("Network was prepared and validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Network was prepared and validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             prepareOrchestratorIfNotExist(subject, subject.getCredential());
-            LOGGER.info("Orchestrator was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Orchestrator was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
             }
-            LOGGER.info("Failure policy was validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Failure policy was validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
-            LOGGER.info("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             prepareFlexSubscription(subject, request.getFlexId());
-            LOGGER.info("Flex subscriptions were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Flex subscriptions were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             validateInstanceGroups(subject);
-            LOGGER.info("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             checkSharedServiceStackRequirements(request, user, workspace);
-            LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
         return subject;
     }
@@ -315,7 +315,7 @@ public class StackDecorator {
                 Json jsonProperties = new Json(instanceGroupParameterResponse.getParameters());
                 instanceGroup.setAttributes(jsonProperties);
             } catch (JsonProcessingException e) {
-                LOGGER.error("Could not update '{}' instancegroup parameters with defaults.", instanceGroupParameterResponse.getGroupName());
+                LOGGER.info("Could not update '{}' instancegroup parameters with defaults.", instanceGroupParameterResponse.getGroupName());
             }
         }
     }

@@ -105,7 +105,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
                 }
 
             }
-            LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
+            LOGGER.debug("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
             final String finalAHostGroupName = aHostGroupName;
             blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, finalAHostGroupName::equals);
         }
@@ -131,7 +131,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
             Json productInfoJson = new Json(productInfo);
             configs.add(new BlueprintConfigurationEntry(SMART_SENSE_PRODUCT_INFO_FILE, "product-info-content", productInfoJson.getValue()));
         } catch (JsonProcessingException ignored) {
-            LOGGER.error("The 'product-info-content' SmartSense config could not be added to the Blueprint.");
+            LOGGER.info("The 'product-info-content' SmartSense config could not be added to the Blueprint.");
         }
         return configs;
     }

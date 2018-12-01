@@ -257,7 +257,7 @@ public class WorkspaceService {
                 Long deleted = userWorkspacePermissionsService.deleteByWorkspace(workspaceForDelete);
                 setupDeletionDateAndFlag(workspaceForDelete);
                 workspaceRepository.save(workspaceForDelete);
-                LOGGER.info("Deleted workspace: {}, related permissions: {}", workspaceName, deleted);
+                LOGGER.debug("Deleted workspace: {}, related permissions: {}", workspaceName, deleted);
                 return workspaceForDelete;
             });
         } catch (TransactionExecutionException e) {

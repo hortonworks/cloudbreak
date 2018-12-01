@@ -209,7 +209,7 @@ public class AlertService {
                 createAlert(client, getAlertDefinition(client, CONTAINER_ALERT), CONTAINER_ALERT);
                 createAlert(client, getAlertDefinition(client, APP_ALERT), APP_ALERT);
             } catch (Exception e) {
-                LOGGER.error("Cannot create alert definitions", e);
+                LOGGER.info("Cannot create alert definitions", e);
             }
         }
     }
@@ -221,7 +221,7 @@ public class AlertService {
         cluster.addPrometheusAlert(savedAlert);
         clusterService.save(cluster);
         consulKeyValueService.addAlert(cluster, savedAlert);
-        LOGGER.info("Prometheus alert '{}' has been created for cluster 'ID:{}'", alert.getName(), cluster.getId());
+        LOGGER.debug("Prometheus alert '{}' has been created for cluster 'ID:{}'", alert.getName(), cluster.getId());
         return savedAlert;
     }
 
@@ -235,7 +235,7 @@ public class AlertService {
         PrometheusAlert savedAlert = prometheusAlertRepository.save(alert);
         Cluster cluster = clusterService.findById(clusterId);
         consulKeyValueService.addAlert(cluster, savedAlert);
-        LOGGER.info("Prometheus alert '{}' has been updated for cluster 'ID:{}'", alert.getName(), cluster.getId());
+        LOGGER.debug("Prometheus alert '{}' has been updated for cluster 'ID:{}'", alert.getName(), cluster.getId());
         return savedAlert;
     }
 
@@ -251,7 +251,7 @@ public class AlertService {
         cluster.setPrometheusAlerts(alerts);
         prometheusAlertRepository.delete(alert);
         clusterService.save(cluster);
-        LOGGER.info("Prometheus alert '{}' has been deleted for cluster 'ID:{}'", alert.getName(), cluster.getId());
+        LOGGER.debug("Prometheus alert '{}' has been deleted for cluster 'ID:{}'", alert.getName(), cluster.getId());
     }
 
     public void addPrometheusAlertsToConsul(Cluster cluster) {
@@ -275,7 +275,7 @@ public class AlertService {
     private void createAlert(com.sequenceiq.ambari.client.services.AlertService client, String json, String alertName) {
         try {
             client.createAlert(json);
-            LOGGER.info("Alert: {} added to the cluster", alertName);
+            LOGGER.debug("Alert: {} added to the cluster", alertName);
         } catch (Exception ignored) {
             LOGGER.info("Cannot add '{}' to the cluster", alertName);
         }

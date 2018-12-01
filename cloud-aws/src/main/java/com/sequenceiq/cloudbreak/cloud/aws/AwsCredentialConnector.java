@@ -47,7 +47,7 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
-        LOGGER.info("Create credential: {}", credential);
+        LOGGER.debug("Create credential: {}", credential);
         AwsCredentialView awsCredential = new AwsCredentialView(credential);
         String roleArn = awsCredential.getRoleArn();
         String accessKey = awsCredential.getAccessKey();
@@ -96,13 +96,13 @@ public class AwsCredentialConnector implements CredentialConnector {
                 String errorMessage = String.format("Unable to load AWS credentials: please make sure that you configured your assumer %s and %s to deployer.",
                         awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_ACCESS_KEY_ID" : "AWS_ACCESS_KEY_ID",
                         awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_SECRET_ACCESS_KEY" : "AWS_SECRET_ACCESS_KEY");
-                LOGGER.error(errorMessage, ae);
+                LOGGER.info(errorMessage, ae);
                 return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }
         } catch (RuntimeException e) {
             String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID",
                     awsCredential.getRoleArn());
-            LOGGER.error(errorMessage, e);
+            LOGGER.info(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);
@@ -118,7 +118,7 @@ public class AwsCredentialConnector implements CredentialConnector {
             String errorMessage = "Unable to verify AWS credentials: "
                     + "please make sure the access key and secret key is correct. "
                     + ae.getMessage();
-            LOGGER.info(errorMessage, ae);
+            LOGGER.debug(errorMessage, ae);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID. %s",

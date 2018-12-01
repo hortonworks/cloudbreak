@@ -167,7 +167,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
                 case YARN_APPLICATION:
-                    LOGGER.info("Checking Yarn application status of: {}", resource.getName());
+                    LOGGER.debug("Checking Yarn application status of: {}", resource.getName());
                     try {
                         ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
                         applicationDetailRequest.setName(resource.getName());
@@ -203,12 +203,12 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
                     YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
                     String yarnApplicationName = resource.getName();
                     String stackName = authenticatedContext.getCloudContext().getName();
-                    LOGGER.info("Terminate stack: {}", stackName);
+                    LOGGER.debug("Terminate stack: {}", stackName);
                     try {
                         DeleteApplicationRequest deleteApplicationRequest = new DeleteApplicationRequest();
                         deleteApplicationRequest.setName(yarnApplicationName);
                         yarnClient.deleteApplication(deleteApplicationRequest);
-                        LOGGER.info("Yarn Applicatin has been deleted");
+                        LOGGER.debug("Yarn Applicatin has been deleted");
                     } catch (MalformedURLException | YarnClientException e) {
                         throw new CloudConnectorException("Stack cannot be deleted", e);
                     }

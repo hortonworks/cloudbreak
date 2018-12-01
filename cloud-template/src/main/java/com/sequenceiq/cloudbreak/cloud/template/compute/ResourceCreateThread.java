@@ -76,7 +76,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         Collection<CloudResource> buildableResources = new ArrayList<>();
         try {
             for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
-                LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
+                LOGGER.debug("Building {} resources of {} instance group", builder.resourceType(), group.getName());
                 List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
                 if (!cloudResources.isEmpty()) {
                     buildableResources.addAll(cloudResources);
@@ -101,7 +101,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         } catch (CancellationException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.info("", e);
             results.clear();
             for (CloudResource buildableResource : buildableResources) {
                 results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));

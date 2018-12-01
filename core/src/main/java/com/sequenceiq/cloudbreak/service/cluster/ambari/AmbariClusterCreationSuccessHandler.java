@@ -36,7 +36,7 @@ public class AmbariClusterCreationSuccessHandler {
     private HostMetadataRepository hostMetadataRepository;
 
     public void handleClusterCreationSuccess(Stack stack, Cluster cluster) {
-        LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
+        LOGGER.debug("Cluster created successfully. Cluster name: {}", cluster.getName());
         Long now = new Date().getTime();
         cluster.setCreationFinished(now);
         cluster.setUpSince(now);

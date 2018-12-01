@@ -80,7 +80,7 @@ public class FlexUsageGenerator {
     private String clustersComponentId;
 
     public CloudbreakFlexUsageJson getUsages(List<CloudbreakUsage> usages, Long fromDate) {
-        LOGGER.info("Generating Cloudbreak Flex related usages.");
+        LOGGER.debug("Generating Cloudbreak Flex related usages.");
         CloudbreakFlexUsageJson result = new CloudbreakFlexUsageJson();
         Optional<CloudbreakUsage> aUsage = usages.stream().findFirst();
         result.setController(getFlexUsageControllerJson(usages, aUsage));

@@ -32,8 +32,8 @@ public class PortApiExtractor implements CloudInstanceMetaDataExtractor {
         String portId = ports.get(0).getId();
         List<? extends NetFloatingIP> floatingIps = client.networking().floatingip().list(getFloatingIpListOptions(portId));
         NetFloatingIP ips = floatingIps.get(0);
-        LOGGER.info("PrivateIp of instance: {} is {}", server.getName(), ips.getFixedIpAddress());
-        LOGGER.info("FloatingIp of instance: {} is {}", server.getName(), ips.getFloatingIpAddress());
+        LOGGER.debug("PrivateIp of instance: {} is {}", server.getName(), ips.getFixedIpAddress());
+        LOGGER.debug("FloatingIp of instance: {} is {}", server.getName(), ips.getFloatingIpAddress());
         return new CloudInstanceMetaData(ips.getFixedIpAddress(), ips.getFloatingIpAddress(), hypervisor);
     }
 

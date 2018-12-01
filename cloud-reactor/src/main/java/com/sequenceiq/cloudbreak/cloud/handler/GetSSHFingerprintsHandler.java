@@ -50,7 +50,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
 
     @Override
     public void accept(Event<GetSSHFingerprintsRequest> getSSHFingerprintsRequestEvent) {
-        LOGGER.info("Received event: {}", getSSHFingerprintsRequestEvent);
+        LOGGER.debug("Received event: {}", getSSHFingerprintsRequestEvent);
         GetSSHFingerprintsRequest fingerprintsRequest = getSSHFingerprintsRequestEvent.getData();
         try {
             CloudContext cloudContext = fingerprintsRequest.getCloudContext();
@@ -76,7 +76,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);
             eventBus.notify(fingerprintsResult.selector(), new Event<>(getSSHFingerprintsRequestEvent.getHeaders(), fingerprintsResult));
-            LOGGER.info("GetSSHFingerprintsHandler finished");
+            LOGGER.debug("GetSSHFingerprintsHandler finished");
         } catch (Exception e) {
             GetSSHFingerprintsResult failure = new GetSSHFingerprintsResult("Failed to get ssh fingerprints!", e, fingerprintsRequest);
             fingerprintsRequest.getResult().onNext(failure);

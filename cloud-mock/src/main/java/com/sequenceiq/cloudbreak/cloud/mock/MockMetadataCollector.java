@@ -30,7 +30,7 @@ public class MockMetadataCollector implements MetadataCollector {
             List<CloudInstance> knownInstances) {
         try {
             MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
-            LOGGER.info("collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());
+            LOGGER.info("Collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());
             CloudVmMetaDataStatus[] response = Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/cloud_metadata_statuses")
                     .body(vms)
                     .asObject(CloudVmMetaDataStatus[].class).getBody();

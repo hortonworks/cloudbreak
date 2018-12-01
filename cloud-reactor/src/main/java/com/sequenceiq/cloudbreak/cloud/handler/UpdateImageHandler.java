@@ -39,7 +39,7 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
 
     @Override
     public void accept(Event<UpdateImageRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         UpdateImageRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -55,7 +55,7 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
             UpdateImageResult result = new UpdateImageResult(request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
-            LOGGER.info("Update image finished for {}", cloudContext);
+            LOGGER.debug("Update image finished for {}", cloudContext);
         } catch (Exception e) {
             UpdateImageResult failure = new UpdateImageResult(e.getMessage(), e, request);
             request.getResult().onNext(failure);

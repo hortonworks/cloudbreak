@@ -229,7 +229,7 @@ public class ClusterService {
     private ResourceRepository resourceRepository;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
-        LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
@@ -242,7 +242,7 @@ public class ClusterService {
             if (clusterRepository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()) != null) {
                 throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
             }
-            LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             if (Status.CREATE_FAILED.equals(stack.getStatus())) {
                 throw new BadRequestException("Stack creation failed, cannot create cluster.");
@@ -250,13 +250,13 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             saveAllHostGroupContraint(cluster);
-            LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
                 cluster.setFileSystem(fileSystemConfigService.create(cluster.getFileSystem(), cluster.getWorkspace(), user));
             }
-            LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             if (cluster.getKerberosConfig() != null) {
                 kerberosConfigRepository.save(cluster.getKerberosConfig());
@@ -266,7 +266,7 @@ public class ClusterService {
 
             start = System.currentTimeMillis();
             gateWayUtil.generateSignKeys(cluster.getGateway());
-            LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             Cluster savedCluster;
             savedCluster = saveClusterAndComponent(cluster, components, stackName);
@@ -299,7 +299,7 @@ public class ClusterService {
             if (savedCluster.getGateway() != null) {
                 gatewayRepository.save(savedCluster.getGateway());
             }
-            LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.debug("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             clusterComponentConfigProvider.store(components, savedCluster);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
@@ -337,7 +337,7 @@ public class ClusterService {
         if (stack.getCluster() == null || stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
-        LOGGER.info("Cluster delete requested.");
+        LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
         flowManager.triggerClusterTermination(stackId, withStackDelete, deleteDependencies);
     }
@@ -356,7 +356,7 @@ public class ClusterService {
                         VolumeSetAttributes volumeSetAttributes = resource.getAttributes().get(VolumeSetAttributes.class);
                         volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
                     } catch (IOException e) {
-                        LOGGER.error("Failed to parse volume set attributes");
+                        LOGGER.info("Failed to parse volume set attributes");
                     }
                 };
                 resources.forEach(volumeTerminationSetter);
@@ -380,7 +380,7 @@ public class ClusterService {
         Cluster cluster = getCluster(clusterId);
         cluster.setAmbariIp(ambariClientConfig.getApiAddress());
         cluster = clusterRepository.save(cluster);
-        LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
+        LOGGER.debug("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
     }
 
@@ -442,7 +442,7 @@ public class ClusterService {
             String stackRepoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
             String osType = ambariRepositoryVersionService.getOsTypeForStackRepoDetails(repoDetails);
             if ("".equals(osType)) {
-                LOGGER.info(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
+                LOGGER.debug(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
                 return null;
             }
 
@@ -699,7 +699,7 @@ public class ClusterService {
             flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
                     Collections.singletonList(recoveryMessageArgument));
-            LOGGER.info(recoveryMessage);
+            LOGGER.debug(recoveryMessage);
             eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
         }
     }
@@ -728,7 +728,7 @@ public class ClusterService {
                 }
             }
             if (!changedHosts.isEmpty()) {
-                LOGGER.info(recoveryMessage);
+                LOGGER.debug(recoveryMessage);
                 eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
                 hostMetadataRepository.saveAll(changedHosts);
             }
@@ -748,7 +748,7 @@ public class ClusterService {
         } else {
             if (cluster.isAvailable()) {
                 String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_START_IGNORED.code());
-                LOGGER.info(statusDesc);
+                LOGGER.debug(statusDesc);
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
@@ -767,7 +767,7 @@ public class ClusterService {
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (cluster.isStopped()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_STOP_IGNORED.code());
-            LOGGER.info(statusDesc);
+            LOGGER.debug(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
@@ -925,7 +925,7 @@ public class ClusterService {
         cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
         createHDPRepoComponent(stackRepoDetails, stack);
-        LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
         cluster = clusterRepository.save(cluster);

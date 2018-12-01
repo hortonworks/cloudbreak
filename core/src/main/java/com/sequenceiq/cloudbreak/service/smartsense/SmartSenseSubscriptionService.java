@@ -58,7 +58,7 @@ public class SmartSenseSubscriptionService {
         }
         try {
             subscription = smartSenseSubscriptionRepository.save(subscription);
-            LOGGER.info("SmartSense subscription has been created: {}", subscription);
+            LOGGER.debug("SmartSense subscription has been created: {}", subscription);
             return subscription;
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.SMARTSENSE_SUBSCRIPTION, getProperSqlErrorMessage(ex));
@@ -93,7 +93,7 @@ public class SmartSenseSubscriptionService {
 
     private void upgradeDefaultSmartSenseSubscription(SmartSenseSubscription subscription) {
         if (!StringUtils.isEmpty(defaultSmartsenseId) && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
-            LOGGER.info("Upgrading default SmartSense subscription");
+            LOGGER.debug("Upgrading default SmartSense subscription");
             subscription.setSubscriptionId(defaultSmartsenseId);
             smartSenseSubscriptionRepository.save(subscription);
         }
@@ -113,7 +113,7 @@ public class SmartSenseSubscriptionService {
     private SmartSenseSubscription createSubscriptionFromIdentityUser(CloudbreakUser cbUser) {
         SmartSenseSubscription newSubscription = null;
         if (!StringUtils.isEmpty(defaultSmartsenseId)) {
-            LOGGER.info("Generating default SmartSense subscription");
+            LOGGER.debug("Generating default SmartSense subscription");
             newSubscription = new SmartSenseSubscription();
             newSubscription.setSubscriptionId(defaultSmartsenseId);
         }

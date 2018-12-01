@@ -80,7 +80,7 @@ public class StackDownscaleService {
     }
 
     public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
-        LOGGER.error("Exception during the downscaling of stack", errorDetails);
+        LOGGER.info("Exception during the downscaling of stack", errorDetails);
         flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_DOWNSCALE_FAILED, UPDATE_FAILED.name());
         stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.DOWNSCALE_FAILED);
     }

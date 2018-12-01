@@ -33,7 +33,7 @@ public class EbsVolumeStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     protected Boolean doCall() {
-        LOGGER.info("Checking if AWS EBS volume '{}' is created.", volumeId);
+        LOGGER.debug("Checking if AWS EBS volume '{}' is created.", volumeId);
         DescribeVolumesResult describeVolumesResult = amazonEC2Client.describeVolumes(new DescribeVolumesRequest().withVolumeIds(volumeId));
         Optional<Volume> volume = describeVolumesResult.getVolumes().stream().findFirst();
         return volume.isPresent() && "available".equals(volume.get().getState());

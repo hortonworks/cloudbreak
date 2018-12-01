@@ -91,7 +91,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         } catch (Exception e) {
             //because groovy does not declare the throws
             if (e instanceof HttpResponseException && ((HttpResponseException) e).getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
-                LOGGER.info("Cannot stop service [{}], becasue it does not exists.", s);
+                LOGGER.debug("Cannot stop service [{}], becasue it does not exists.", s);
                 return -1;
             } else {
                 throw e;
@@ -140,7 +140,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     @Override
     public void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
+        LOGGER.debug("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
         AmbariClient client = clientFactory.getDefaultAmbariClient(stack);
         String cloudbreakUserName = ambariSecurityConfigProvider.getCloudbreakAmbariUserName(cluster);
         String cloudbreakPassword = ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster);

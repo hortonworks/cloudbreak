@@ -41,7 +41,7 @@ public class LdapConfigValidator {
 
     private void validateLdapConnection(String protocol, String serverHost, Integer serverPort, String bindDn, String bindPassword) {
         try {
-            LOGGER.info("Validate connection to LDAP host: '{}', port: '{}', protocol: '{}'.", serverHost, serverPort, protocol);
+            LOGGER.debug("Validate connection to LDAP host: '{}', port: '{}', protocol: '{}'.", serverHost, serverPort, protocol);
             //BEGIN GENERATED CODE
             Hashtable<String, String> env = new Hashtable<>();
             //END GENERATED CODE

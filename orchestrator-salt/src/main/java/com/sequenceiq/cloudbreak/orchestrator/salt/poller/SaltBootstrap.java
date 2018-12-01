@@ -52,7 +52,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        LOGGER.info("Bootstrapping of nodes [{}/{}]", originalTargets.size() - targets.size(), originalTargets.size());
+        LOGGER.debug("Bootstrapping of nodes [{}/{}]", originalTargets.size() - targets.size(), originalTargets.size());
         if (!targets.isEmpty()) {
             LOGGER.info("Missing targets for SaltBootstrap: {}", targets);
 
@@ -61,7 +61,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
             Set<Node> failedTargets = new HashSet<>();
 
-            LOGGER.info("SaltBootstrap responses: {}", responses);
+            LOGGER.debug("SaltBootstrap responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
                     LOGGER.info("Failed to distributed salt run to: {}, error: {}", genericResponse.getAddress(), genericResponse.getErrorText());

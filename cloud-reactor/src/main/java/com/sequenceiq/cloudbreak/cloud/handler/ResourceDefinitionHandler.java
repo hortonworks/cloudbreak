@@ -27,7 +27,7 @@ public class ResourceDefinitionHandler implements CloudPlatformEventHandler<Reso
 
     @Override
     public void accept(Event<ResourceDefinitionRequest> getRegionsRequestEvent) {
-        LOGGER.info("Received event: {}", getRegionsRequestEvent);
+        LOGGER.debug("Received event: {}", getRegionsRequestEvent);
         ResourceDefinitionRequest request = getRegionsRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getPlatform());

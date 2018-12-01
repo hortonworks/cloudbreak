@@ -108,7 +108,7 @@ public class PermissionCheckingUtils {
             throw new AccessDeniedException(format("You have no access to %s.", resource.getReadableName()));
         }
         Set<String> permissionSet = userWorkspacePermissions.getPermissionSet();
-        LOGGER.info("Checking {} permission for: {}", action, resource);
+        LOGGER.debug("Checking {} permission for: {}", action, resource);
         checkPermissionByPermissionSet(action, resource, permissionSet);
         return proceed(proceedingJoinPoint, methodSignature);
     }
@@ -131,7 +131,7 @@ public class PermissionCheckingUtils {
         try {
             Object proceed = proceedingJoinPoint.proceed();
             if (proceed == null) {
-                LOGGER.info("Return value is null, method signature: {}", methodSignature.toLongString());
+                LOGGER.debug("Return value is null, method signature: {}", methodSignature.toLongString());
             }
             return proceed;
         } catch (Throwable t) {

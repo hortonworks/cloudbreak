@@ -38,7 +38,7 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
 
     @Override
     public void accept(Event<GetDiskTypesRequest> getDiskTypesRequestEvent) {
-        LOGGER.info("Received event: {}", getDiskTypesRequestEvent);
+        LOGGER.debug("Received event: {}", getDiskTypesRequestEvent);
         GetDiskTypesRequest request = getDiskTypesRequestEvent.getData();
         try {
             Map<Platform, Collection<DiskType>> platformDiskTypes = Maps.newHashMap();
@@ -56,7 +56,7 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
             GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request,
                     new PlatformDisks(platformDiskTypes, defaultDiskTypes, diskMappings, diskDisplayNames));
             request.getResult().onNext(getDiskTypesResult);
-            LOGGER.info("Query platform disk types finished.");
+            LOGGER.debug("Query platform disk types finished.");
         } catch (RuntimeException e) {
             request.getResult().onNext(new GetDiskTypesResult(e.getMessage(), e, request));
         }

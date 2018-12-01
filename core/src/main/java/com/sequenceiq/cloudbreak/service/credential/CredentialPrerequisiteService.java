@@ -53,14 +53,14 @@ public class CredentialPrerequisiteService {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, user.getUserId(), workspace.getId());
         UserPreferences userPreferences = userPreferencesService.getWithExternalId(user);
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, userPreferences.getExternalId());
-        LOGGER.info("Triggering event: {}", request);
+        LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);
         try {
             CredentialPrerequisitesResult res = request.await();
-            LOGGER.info("Result: {}", res);
+            LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error(message, res.getErrorDetails());
+                LOGGER.info(message, res.getErrorDetails());
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             return res.getCredentialPrerequisites();
@@ -88,7 +88,7 @@ public class CredentialPrerequisiteService {
         try {
             credential.setAttributes(new Json(newAttributes).getValue());
         } catch (IOException ex) {
-            LOGGER.error("New prerequisite attributes could not be added to the credential.", ex);
+            LOGGER.info("New prerequisite attributes could not be added to the credential.", ex);
             throw new OperationException(ex);
         }
     }

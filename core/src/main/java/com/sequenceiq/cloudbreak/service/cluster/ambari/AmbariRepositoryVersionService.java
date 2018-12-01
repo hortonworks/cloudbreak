@@ -73,7 +73,7 @@ public class AmbariRepositoryVersionService {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
         if (stackRepoDetails != null) {
             try {
-                LOGGER.info("Use specific Ambari repository: {}", stackRepoDetails);
+                LOGGER.debug("Use specific Ambari repository: {}", stackRepoDetails);
                 AmbariRepo ambariRepoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
                 if (isVersionNewerOrEqualThanLimited(ambariRepoDetails::getVersion, AMBARI_VERSION_2_6_0_0)) {
                     addVersionDefinitionFileToAmbari(stackName, ambariClient, stackRepoDetails);
@@ -86,7 +86,7 @@ public class AmbariRepositoryVersionService {
                 throw new AmbariServiceException(msg, e);
             }
         } else {
-            LOGGER.info("Using latest HDP repository");
+            LOGGER.debug("Using latest HDP repository");
         }
     }
 
@@ -117,7 +117,7 @@ public class AmbariRepositoryVersionService {
     }
 
     private void setRepositoryVersionOnApi(StackService ambariClient, StackRepoDetails stackRepoDetails) throws HttpResponseException {
-        LOGGER.info("Set repository versions in Ambari via old API calls.");
+        LOGGER.debug("Set repository versions in Ambari via old API calls.");
         Map<String, String> stackRepo = stackRepoDetails.getStack();
         Map<String, String> utilRepo = stackRepoDetails.getUtil();
         String stackRepoId = stackRepo.remove(StackRepoDetails.REPO_ID_TAG);
@@ -154,7 +154,7 @@ public class AmbariRepositoryVersionService {
         Optional<String> vdfUrl = Optional.ofNullable(stackRepoDetails.getStack().get(CUSTOM_VDF_REPO_KEY));
         if (!vdfUrl.isPresent()) {
             String message = String.format("Couldn't determine any VDF file for the stack: %s", stackName);
-            LOGGER.error(message);
+            LOGGER.info(message);
             throw new AmbariOperationFailedException(message);
         }
 
@@ -169,9 +169,9 @@ public class AmbariRepositoryVersionService {
         ArrayNode versionDefItems = (ArrayNode) versionDefNode.path("items");
         if (versionDefItems.size() == 0) {
             String vdf = ambariClient.createVersionDefinition(vdfUrl.get());
-            LOGGER.info("VDF request has been sent to Ambari: '{}'.", JsonUtil.minify(vdf));
+            LOGGER.debug("VDF request has been sent to Ambari: '{}'.", JsonUtil.minify(vdf));
         } else {
-            LOGGER.info("VDF url is already set for: {} {}.", repoId, repoVersion);
+            LOGGER.debug("VDF url is already set for: {} {}.", repoId, repoVersion);
         }
     }
 }

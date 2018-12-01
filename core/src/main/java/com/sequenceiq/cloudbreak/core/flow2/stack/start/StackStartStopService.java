@@ -107,7 +107,7 @@ public class StackStartStopService {
         if (stack != null && stack.isStopRequested()) {
             return true;
         } else {
-            LOGGER.info("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
+            LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
             return false;
         }
     }
@@ -116,7 +116,7 @@ public class StackStartStopService {
         if (stack != null && stack.isStopRequested()) {
             return true;
         } else {
-            LOGGER.info("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
+            LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
             return false;
         }
     }
@@ -124,7 +124,7 @@ public class StackStartStopService {
     private void validateResourceResults(CloudContext cloudContext, Exception exception, InstancesStatusResult results, boolean start) {
         String action = start ? "start" : "stop";
         if (exception != null) {
-            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
+            LOGGER.info(format("Failed to %s stack: %s", action, cloudContext), exception);
             throw new OperationException(exception);
         }
         List<CloudVmInstanceStatus> failedInstances =

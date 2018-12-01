@@ -211,7 +211,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
-        LOGGER.info("Image catalog has been archived: {}", imageCatalog);
+        LOGGER.debug("Image catalog has been archived: {}", imageCatalog);
         return imageCatalog;
     }
 
@@ -289,7 +289,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public StatedImages getImages(ImageCatalog imageCatalog, Set<String> platforms, String cbVersion) throws CloudbreakImageCatalogException {
-        LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.",
+        LOGGER.debug("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.",
                 imageCatalog.getImageCatalogUrl(), platforms, cbVersion);
         StatedImages images;
         validateRequestPlatforms(platforms);
@@ -310,7 +310,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 }
                 suppertedVersions = Collections.singleton(cbv);
             } else {
-                LOGGER.info("No image found with exact match for version {} Trying prefix matching", cbv);
+                LOGGER.debug("No image found with exact match for version {} Trying prefix matching", cbv);
                 PrefixMatchImages prefixMatchImages = prefixMatchForCBVersion(cbVersion, cloudbreakVersions);
                 vMImageUUIDs.addAll(prefixMatchImages.vMImageUUIDs);
                 defaultVMImageUUIDs.addAll(prefixMatchImages.defaultVMImageUUIDs);
@@ -352,7 +352,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             try {
                 return getImages(workspaceId, name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
-                LOGGER.error("No images was found: ", e);
+                LOGGER.info("No images was found: ", e);
             }
         }
         return null;

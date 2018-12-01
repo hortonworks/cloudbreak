@@ -191,7 +191,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         String minified = JsonUtil.minify(resourceDefinition);
         if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
             String message = String.format("Cannot initialize Cloudbreak's policies JSON for AWS: %s", minified);
-            LOGGER.error(message);
+            LOGGER.info(message);
             throw new CloudConnectorException(message);
         }
         return Base64.encodeBase64String(minified.getBytes());

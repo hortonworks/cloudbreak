@@ -15,7 +15,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
 
     @Override
     public Response toResponse(E exception) {
-        LOGGER.error(exception.getMessage(), exception);
+        LOGGER.info(exception.getMessage(), exception);
         return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
     }
 

@@ -63,7 +63,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
                     messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
             sendEvent(context);
             LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
-            LOGGER.info("Triggering terminate stack event: {}", payload);
+            LOGGER.debug("Triggering terminate stack event: {}", payload);
         }
     }
 

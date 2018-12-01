@@ -30,12 +30,12 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
                     }
                 }
                 if (!contains) {
-                    LOGGER.info("The host {} currently not part of the cluster, waiting for join", hostMetadata.getHostName());
+                    LOGGER.debug("The host {} currently not part of the cluster, waiting for join", hostMetadata.getHostName());
                     return false;
                 }
             }
         } catch (Exception ignored) {
-            LOGGER.info("Did not join all hosts yet, polling");
+            LOGGER.debug("Did not join all hosts yet, polling");
             return false;
         }
         return true;
@@ -43,7 +43,7 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
 
     @Override
     public void handleTimeout(AmbariHostsCheckerContext t) {
-        LOGGER.error("Operation timed out. Failed to find all '{}' Ambari hosts. Stack: '{}'", t.getHostCount(), t.getStack().getId());
+        LOGGER.info("Operation timed out. Failed to find all '{}' Ambari hosts. Stack: '{}'", t.getHostCount(), t.getStack().getId());
     }
 
     @Override

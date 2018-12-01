@@ -88,7 +88,7 @@ public class TerminationService {
                 return null;
             });
         } catch (TransactionExecutionException ex) {
-            LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
+            LOGGER.info("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
         }
     }

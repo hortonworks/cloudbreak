@@ -124,7 +124,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
-        LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
+        LOGGER.debug("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
@@ -136,10 +136,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = parallelOrchestratorComponentRunner.submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
         } catch (Exception e) {
-            LOGGER.error("Error occurred during the salt bootstrap", e);
+            LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
-        LOGGER.info("SaltBootstrap finished");
+        LOGGER.debug("SaltBootstrap finished");
     }
 
     @Override
@@ -162,7 +162,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     })
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
         } catch (Exception e) {
-            LOGGER.error("Error occurred during the salt bootstrap", e);
+            LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -236,7 +236,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = parallelOrchestratorComponentRunner.submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
         } catch (Exception e) {
-            LOGGER.error("Error occurred during salt upscale", e);
+            LOGGER.info("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -303,7 +303,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during ambari bootstrap", e);
+            LOGGER.info("Error occurred during ambari bootstrap", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
@@ -329,19 +329,19 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
-        LOGGER.info("Run Services on nodes: {}", allNodes);
+        LOGGER.debug("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runNewService(sc, new HighStateRunner(all, allNodes), exitModel);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during ambari bootstrap", e);
+            LOGGER.info("Error occurred during ambari bootstrap", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e);
         }
-        LOGGER.info("Run services on nodes finished: {}", allNodes);
+        LOGGER.debug("Run services on nodes finished: {}", allNodes);
     }
 
     private void setPostgreRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> server)
@@ -367,7 +367,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        LOGGER.info("Change primary gateway: {}", formerGateway);
+        LOGGER.debug("Change primary gateway: {}", formerGateway);
         String ambariServerAddress = newPrimaryGateway.getPrivateAddress();
         try (SaltConnector sc = new SaltConnector(newPrimaryGateway, restDebug)) {
             SaltStates.stopMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
@@ -387,10 +387,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             for (GatewayConfig gatewayConfig : allGatewayConfigs) {
                 if (!gatewayConfig.getHostname().equals(formerGateway.getHostname())) {
                     try (SaltConnector sc1 = new SaltConnector(gatewayConfig, restDebug)) {
-                        LOGGER.info("Removing minion key '{}' from gateway '{}'", formerGateway.getHostname(), gatewayConfig.getHostname());
+                        LOGGER.debug("Removing minion key '{}' from gateway '{}'", formerGateway.getHostname(), gatewayConfig.getHostname());
                         sc1.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
                     } catch (Exception ex) {
-                        LOGGER.error("Unsuccessful key removal from gateway: " + gatewayConfig.getHostname(), ex);
+                        LOGGER.info("Unsuccessful key removal from gateway: " + gatewayConfig.getHostname(), ex);
                     }
                 }
             }
@@ -398,7 +398,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             // salt '*' state.highstate
             runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during primary gateway change", e);
+            LOGGER.info("Error occurred during primary gateway change", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
@@ -421,7 +421,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltJobRunBootstrapFuture = parallelOrchestratorComponentRunner.submit(saltJobRunBootstrapRunner);
             saltJobRunBootstrapFuture.get();
         } catch (Exception e) {
-            LOGGER.error("Error occurred during reset", e);
+            LOGGER.info("Error occurred during reset", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -450,20 +450,20 @@ public class SaltOrchestrator implements HostOrchestrator {
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", "ambari_upgrade", CompoundType.IP), exitCriteriaModel);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during ambari upgrade", e);
+            LOGGER.info("Error occurred during ambari upgrade", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
 
     @Override
     public void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException {
-        LOGGER.info("Tear down hosts: {},", privateIPsByFQDN);
-        LOGGER.info("Gateway config for tear down: {}", allGatewayConfigs);
+        LOGGER.debug("Tear down hosts: {},", privateIPsByFQDN);
+        LOGGER.debug("Gateway config for tear down: {}", allGatewayConfigs);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         try (SaltConnector saltConnector = new SaltConnector(primaryGateway, restDebug)) {
             SaltStates.stopMinions(saltConnector, privateIPsByFQDN);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during salt minion tear down", e);
+            LOGGER.info("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
         List<GatewayConfig> liveGateways = allGatewayConfigs.stream()
@@ -473,7 +473,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
                 removeDeadSaltMinions(gatewayConfig);
             } catch (Exception e) {
-                LOGGER.error("Error occurred during salt minion tear down", e);
+                LOGGER.info("Error occurred during salt minion tear down", e);
                 throw new CloudbreakOrchestratorFailedException(e);
             }
         }
@@ -484,7 +484,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
             return SaltStates.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException e) {
-            LOGGER.error("Error occurred during determine package versions: " + Arrays.deepToString(packages), e);
+            LOGGER.info("Error occurred during determine package versions: " + Arrays.deepToString(packages), e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -493,7 +493,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
             return SaltStates.runCommand(saltConnector, command);
         } catch (RuntimeException e) {
-            LOGGER.error("Error occurred during command execution: " + command, e);
+            LOGGER.info("Error occurred during command execution: " + command, e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -503,7 +503,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
             return SaltStates.getGrains(saltConnector, grain);
         } catch (RuntimeException e) {
-            LOGGER.error("Error occurred during get grain execution: " + grain, e);
+            LOGGER.info("Error occurred during get grain execution: " + grain, e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -516,7 +516,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltConnector.wheel("key.delete", downNodes, Object.class);
             }
         } catch (Exception e) {
-            LOGGER.error("Error occurred during dead salt minions removal", e);
+            LOGGER.info("Error occurred during dead salt minions removal", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -541,7 +541,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error occurred during recipe upload", e);
+            LOGGER.info("Error occurred during recipe upload", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -590,28 +590,28 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void preAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Executing pre-ambari-start recipes.");
+        LOGGER.debug("Executing pre-ambari-start recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_AMBARI_START);
     }
 
     @Override
     public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Executing post-ambari-start recipes.");
+        LOGGER.debug("Executing post-ambari-start recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_AMBARI_START);
     }
 
     @Override
     public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Executing post-cluster-install recipes.");
+        LOGGER.debug("Executing post-cluster-install recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL);
     }
 
     @Override
     public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Executing pre-termination recipes.");
+        LOGGER.debug("Executing pre-termination recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION);
     }
 
@@ -625,7 +625,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetry, true);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during executing highstate (for recipes).", e);
+            LOGGER.info("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -668,7 +668,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         Optional<GatewayConfig> gatewayConfigOptional = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst();
         if (gatewayConfigOptional.isPresent()) {
             GatewayConfig gatewayConfig = gatewayConfigOptional.get();
-            LOGGER.info("Primary gateway: {},", gatewayConfig);
+            LOGGER.debug("Primary gateway: {},", gatewayConfig);
             return gatewayConfig;
         }
         throw new CloudbreakOrchestratorFailedException("No primary gateway specified");
@@ -730,7 +730,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
             }
         } catch (Exception e) {
-            LOGGER.error("Error occurred during executing highstate (for recipes).", e);
+            LOGGER.info("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -754,7 +754,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws CloudbreakOrchestratorFailedException, IOException {
         byte[] byteArray;
         byteArray = stateConfigZip == null || stateConfigZip.length == 0 ? getStateConfigZip() : stateConfigZip;
-        LOGGER.info("Upload salt.zip to gateways");
+        LOGGER.debug("Upload salt.zip to gateways");
         uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/srv", "salt.zip", byteArray);
     }
 
@@ -763,7 +763,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try {
             String saltSignPrivateKey = gateway.getSaltSignPrivateKey();
             if (!gatewayTargets.isEmpty() && saltSignPrivateKey != null) {
-                LOGGER.info("Upload master_sign.pem to gateways");
+                LOGGER.debug("Upload master_sign.pem to gateways");
                 byte[] privateKeyContent = saltSignPrivateKey.getBytes();
                 uploadFileToTargets(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master_sign.pem", privateKeyContent);
             }
@@ -771,7 +771,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             String saltSignPublicKey = gateway.getSaltSignPublicKey();
             if (!targets.isEmpty() && saltSignPublicKey != null) {
                 byte[] publicKeyContent = saltSignPublicKey.getBytes();
-                LOGGER.info("Upload master_sign.pub to nodes: " + targets);
+                LOGGER.debug("Upload master_sign.pub to nodes: " + targets);
                 uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "master_sign.pub", publicKeyContent);
             }
         } catch (SecurityException se) {
@@ -782,7 +782,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void uploadRecipe(SaltConnector sc, Set<String> targets, ExitCriteriaModel exitModel,
             String name, String recipe, RecipeExecutionPhase phase) throws CloudbreakOrchestratorFailedException {
         byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
-        LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
+        LOGGER.debug("Upload '{}' recipe: {}", phase.value(), name);
         String folder = phase.isPreRecipe() ? "pre-recipes" : "post-recipes";
         uploadFileToTargets(sc, targets, exitModel, "/srv/salt/" + folder + "/scripts", name, recipeBytes);
     }
@@ -795,7 +795,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltUploadRunnerFuture = parallelOrchestratorComponentRunner.submit(saltUploadRunner);
             saltUploadRunnerFuture.get();
         } catch (Exception e) {
-            LOGGER.error("Error occurred during file distribute to gateway nodes", e);
+            LOGGER.info("Error occurred during file distribute to gateway nodes", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

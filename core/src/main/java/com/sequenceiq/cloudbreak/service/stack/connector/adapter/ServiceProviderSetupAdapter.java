@@ -54,18 +54,18 @@ public class ServiceProviderSetupAdapter {
         Image image = imageService.getImage(stack.getId());
         CheckImageRequest<CheckImageResult> checkImageRequest =
                 new CheckImageRequest<>(cloudContext, cloudCredential, cloudStackConverter.convert(stack), image);
-        LOGGER.info("Triggering event: {}", checkImageRequest);
+        LOGGER.debug("Triggering event: {}", checkImageRequest);
         eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
         try {
             CheckImageResult res = checkImageRequest.await();
-            LOGGER.info("Result: {}", res);
+            LOGGER.debug("Result: {}", res);
             if (res.getErrorDetails() != null) {
-                LOGGER.error("Failed to check image state", res.getErrorDetails());
+                LOGGER.info("Failed to check image state", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
             return new ImageStatusResult(res.getImageStatus(), res.getStatusProgressValue());
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing check image", e);
+            LOGGER.info("Error while executing check image", e);
             throw new OperationException(e);
         }
     }
