@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.config;
 
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,6 +11,8 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -22,12 +26,14 @@ import com.sequenceiq.it.verification.Call;
 import spark.Response;
 import spark.Service;
 
-import static java.lang.String.format;
-
 @Prototype
 public class SparkServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkServer.class);
+
+    private final Map<Call, Response> requestResponseMap = new HashMap<>();
+
+    private final java.util.Stack<Call> callStack = new java.util.Stack<>();
 
     private boolean initialized;
 
@@ -45,9 +51,20 @@ public class SparkServer {
 
     private Service sparkService;
 
-    private final Map<Call, Response> requestResponseMap = new HashMap<>();
-
-    private final java.util.Stack<Call> callStack = new java.util.Stack<>();
+    protected static File createTempFileFromClasspath(String file) {
+        try {
+            InputStream sshPemInputStream = new ClassPathResource(file).getInputStream();
+            File tempKeystoreFile = File.createTempFile(file, ".tmp");
+            try (OutputStream outputStream = new FileOutputStream(tempKeystoreFile)) {
+                IOUtils.copy(sshPemInputStream, outputStream);
+            } catch (IOException e) {
+                LOGGER.error("can't write " + file, e);
+            }
+            return tempKeystoreFile;
+        } catch (IOException e) {
+            throw new RuntimeException(file + " not found", e);
+        }
+    }
 
     public Map<Call, Response> getRequestResponseMap() {
         return requestResponseMap;
@@ -93,21 +110,6 @@ public class SparkServer {
         return "https://" + mockServerAddress + ":" + port;
     }
 
-    protected static File createTempFileFromClasspath(String file) {
-        try {
-            InputStream sshPemInputStream = new ClassPathResource(file).getInputStream();
-            File tempKeystoreFile = File.createTempFile(file, ".tmp");
-            try (OutputStream outputStream = new FileOutputStream(tempKeystoreFile)) {
-                IOUtils.copy(sshPemInputStream, outputStream);
-            } catch (IOException e) {
-                LOGGER.error("can't write " + file, e);
-            }
-            return tempKeystoreFile;
-        } catch (IOException e) {
-            throw new RuntimeException(file + " not found", e);
-        }
-    }
-
     public Service getSparkService() {
         return sparkService;
     }
@@ -123,6 +125,12 @@ public class SparkServer {
     public void restart() {
         stop();
         sparkService.init();
+    }
+
+    @PreDestroy
+    public void autoShutdown() {
+        LOGGER.info("Invoking PreDestroy for Spark bean");
+        stop();
     }
 
     public void stop() {
