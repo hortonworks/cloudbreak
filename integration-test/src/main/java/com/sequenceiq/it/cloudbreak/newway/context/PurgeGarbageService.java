@@ -25,9 +25,15 @@ public class PurgeGarbageService implements ApplicationContextAware {
     public <T> void purge() {
         LOGGER.info("purge starts");
         TestContext testContext = applicationContext.getBean(TestContext.class);
-        testContext.as();
-        purge(testContext);
-        testContext.shutdown();
+        try {
+            testContext.as();
+            purge(testContext);
+        } catch (Exception e) {
+            LOGGER.error("Error happended during purging the test data. Some entities might have been left over", e);
+        } finally {
+            testContext.shutdown();
+        }
+
     }
 
     private <T> void purge(TestContext testContext) {
