@@ -97,10 +97,10 @@ public class StackRepairService {
                 } catch (FlowsAlreadyRunningException ignored) {
                     trials++;
                     if (trials == RETRIES) {
-                        LOGGER.error("Could not submit because other flows are running for stack " + stackId);
+                        LOGGER.info("Could not submit because other flows are running for stack " + stackId);
                         return;
                     }
-                    LOGGER.info("Waiting for other flows of stack " + stackId + " to complete.");
+                    LOGGER.debug("Waiting for other flows of stack " + stackId + " to complete.");
                     try {
                         Thread.sleep(SLEEP_TIME_MS);
                     } catch (InterruptedException e) {

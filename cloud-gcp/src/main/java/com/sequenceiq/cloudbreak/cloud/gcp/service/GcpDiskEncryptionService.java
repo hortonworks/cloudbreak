@@ -144,13 +144,13 @@ public class GcpDiskEncryptionService {
             LOGGER.error("Failed to encrypt provided key, with Google public key. [{}] padding not supported.", RSA_CIPHER_TRANSFORMATION);
             throw new CloudbreakServiceException("OAEPWithSHA-1AndMGF1Padding padding not supported.", e);
         } catch (InvalidKeyException e) {
-            LOGGER.error("Failed to encrypt provided key, with Google public key. Public key invalid: [{}].", publicKey);
+            LOGGER.info("Failed to encrypt provided key, with Google public key. Public key invalid: [{}].", publicKey);
             throw new CloudbreakServiceException("Invalid public key.", e);
         } catch (IllegalBlockSizeException e) {
-            LOGGER.error("Failed to encrypt provided key, with Google public key. Illegal block size: [{}].", e.getMessage());
+            LOGGER.info("Failed to encrypt provided key, with Google public key. Illegal block size: [{}].", e.getMessage());
             throw new CloudbreakServiceException("Failed to encrypt key: illegal block size.", e);
         } catch (BadPaddingException e) {
-            LOGGER.error("Failed to encrypt provided key, with Google public key. Bad padding: [{}].", e.getMessage());
+            LOGGER.info("Failed to encrypt provided key, with Google public key. Bad padding: [{}].", e.getMessage());
             throw new CloudbreakServiceException("Failed to encrypt key: bad padding", e);
         }
     }

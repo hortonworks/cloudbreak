@@ -65,10 +65,10 @@ public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveIn
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            LOGGER.info("Instance remove successfully finished for {}", cloudContext);
+            LOGGER.debug("Instance remove successfully finished for {}", cloudContext);
             result = new RemoveInstanceResult(new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults())), request);
         } catch (Exception e) {
-            LOGGER.error("Failed to handle RemoveInstanceRequest.", e);
+            LOGGER.info("Failed to handle RemoveInstanceRequest.", e);
             result = new RemoveInstanceResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(removeInstanceRequestEvent.getHeaders(), result));

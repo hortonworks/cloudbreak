@@ -36,7 +36,7 @@ public class MonitorScheduler {
     @PostConstruct
     public void scheduleMonitors() throws SchedulerException {
         for (Monitor<?> monitor : monitorList) {
-            LOGGER.info("Monitor sceduled: {}, id: {}, cron: {}", monitor.getClass(), monitor.getIdentifier(), monitor.getTriggerExpression());
+            LOGGER.debug("Monitor sceduled: {}, id: {}, cron: {}", monitor.getClass(), monitor.getIdentifier(), monitor.getTriggerExpression());
             JobDataMap jobDataMap = new JobDataMap();
             jobDataMap.put(MonitorContext.APPLICATION_CONTEXT.name(), applicationContext);
             JobDetail jobDetail = newJob(monitor.getClass()).withIdentity(monitor.getIdentifier()).setJobData(jobDataMap).build();

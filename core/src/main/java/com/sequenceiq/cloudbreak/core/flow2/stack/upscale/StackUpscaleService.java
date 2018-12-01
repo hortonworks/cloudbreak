@@ -98,7 +98,7 @@ public class StackUpscaleService {
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
-        LOGGER.info("Upscale stack result: {}", payload);
+        LOGGER.debug("Upscale stack result: {}", payload);
         List<CloudResourceStatus> results = payload.getResults();
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
@@ -156,13 +156,13 @@ public class StackUpscaleService {
     }
 
     public void handleStackUpscaleFailure(long stackId, StackFailureEvent payload) {
-        LOGGER.error("Exception during the upscale of stack", payload.getException());
+        LOGGER.info("Exception during the upscale of stack", payload.getException());
         try {
             String errorReason = payload.getException().getMessage();
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
             flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, UPDATE_FAILED.name(), errorReason);
         } catch (RuntimeException e) {
-            LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
+            LOGGER.info("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
     }
 
@@ -181,7 +181,7 @@ public class StackUpscaleService {
 
     private void validateResourceResults(StackScalingFlowContext context, Exception exception, List<CloudResourceStatus> results) {
         if (exception != null) {
-            LOGGER.error(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
+            LOGGER.info(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
             throw new OperationException(exception);
         }
         List<CloudResourceStatus> templates = results.stream().filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType()
@@ -207,13 +207,13 @@ public class StackUpscaleService {
     }
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
-        LOGGER.info("Get first valid PrivateId of instanceGroups");
+        LOGGER.debug("Get first valid PrivateId of instanceGroups");
         long highest = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
-            LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
+            LOGGER.debug("Checking of instanceGroup: {}", instanceGroup.getGroupName());
             for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
                 Long privateId = metaData.getPrivateId();
-                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
+                LOGGER.debug("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
                         privateId, metaData.getInstanceGroupName(), metaData.getInstanceId(), metaData.getInstanceStatus());
                 if (privateId == null) {
                     continue;
@@ -223,7 +223,7 @@ public class StackUpscaleService {
                 }
             }
         }
-        LOGGER.info("highest privateId: {}", highest);
+        LOGGER.debug("Highest privateId: {}", highest);
         return highest == 0 ? 0 : highest + 1;
     }
 

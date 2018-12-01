@@ -62,7 +62,7 @@ public class AzureRoleManager {
             case CREATE_CUSTOM:
                 existingRole = getRoleDefinitonByName(subscriptionId, accessToken, roleName);
                 if (existingRole != null) {
-                    LOGGER.error("Role already exists in Azure with the name: " + roleName);
+                    LOGGER.info("Role already exists in Azure with the name: " + roleName);
                     throw new InteractiveLoginUnrecoverableException("Role already exists in Azure with the name: " + roleName);
                 }
                 roleId = createRole(accessToken, subscriptionId, roleName);
@@ -71,11 +71,11 @@ public class AzureRoleManager {
             case REUSE_EXISTING:
                 existingRole = getRoleDefinitonByName(subscriptionId, accessToken, roleName);
                 if (existingRole == null) {
-                    LOGGER.error("Role does not exist in Azure with the name: " + roleName);
+                    LOGGER.info("Role does not exist in Azure with the name: " + roleName);
                     throw new InteractiveLoginUnrecoverableException("Role does not exist in Azure with the name: " + roleName);
                 }
                 if (!validateRoleActions(existingRole)) {
-                    LOGGER.error(existingRole.getProperties().getRoleName()
+                    LOGGER.info(existingRole.getProperties().getRoleName()
                             + " role does not have enough privileges to be used by Cloudbreak! Please contact the documentation for more information!");
                     throw new InteractiveLoginUnrecoverableException(existingRole.getProperties().getRoleName()
                             + " role does not have enough privileges to be used by Cloudbreak! Please contact the documentation for more information!");
@@ -109,7 +109,7 @@ public class AzureRoleManager {
 
         if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             String errorResponse = response.readEntity(String.class);
-            LOGGER.error("Assign role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
+            LOGGER.info("Assign role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
             if (response.getStatusInfo().getStatusCode() == Status.FORBIDDEN.getStatusCode()) {
                 throw new InteractiveLoginException("You don't have enough permissions to assign roles, please contact with your administrator");
             } else {
@@ -121,7 +121,7 @@ public class AzureRoleManager {
                 }
             }
         } else {
-            LOGGER.info("Role assigned successfully. subscriptionId '{}', roleDefinitionId {}, principalObjectId {}",
+            LOGGER.debug("Role assigned successfully. subscriptionId '{}', roleDefinitionId {}, principalObjectId {}",
                     subscriptionId, roleDefinitionId, principalObjectId);
         }
     }
@@ -156,11 +156,11 @@ public class AzureRoleManager {
         Response response = request.get();
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             AzureRoleDefinitionListResponse azureRoleDefinitionListResponse = response.readEntity(AzureRoleDefinitionListResponse.class);
-            LOGGER.info("Role definitions retrieved:" + azureRoleDefinitionListResponse.getValue());
+            LOGGER.debug("Role definitions retrieved:" + azureRoleDefinitionListResponse.getValue());
             return azureRoleDefinitionListResponse.getValue();
         } else {
             String errorResponse = response.readEntity(String.class);
-            LOGGER.error("Get role definition request with filter: {}, failed: {}", filter, errorResponse);
+            LOGGER.info("Get role definition request with filter: {}, failed: {}", filter, errorResponse);
             if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
                 throw new InteractiveLoginException("You have no permission to access Active Directory roles, please contact with your administrator");
             } else {
@@ -189,7 +189,7 @@ public class AzureRoleManager {
         try {
             customRole = new ObjectMapper().writeValueAsString(assembleCustomRole(subscriptionId, roleName));
         } catch (JsonProcessingException e) {
-            LOGGER.error("Create role request processing error", e);
+            LOGGER.info("Create role request processing error", e);
             throw new InteractiveLoginException("Create role request error - " + e.getMessage());
         }
 
@@ -197,7 +197,7 @@ public class AzureRoleManager {
 
         if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             String errorResponse = response.readEntity(String.class);
-            LOGGER.error("Create role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
+            LOGGER.info("Create role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
             if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
                 throw new InteractiveLoginException("You don't have enough permissions to create role, please contact with your administrator");
             } else {
@@ -211,7 +211,7 @@ public class AzureRoleManager {
                 }
             }
         }
-        LOGGER.info("Role " + roleName +  " created successfully");
+        LOGGER.debug("Role " + roleName +  " created successfully");
         return roleDefinitionId;
     }
 

@@ -81,7 +81,7 @@ public class MetricEvaluator extends EvaluatorExecutor {
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
-                LOGGER.info("Checking metric based alert: '{}'", alertName);
+                LOGGER.debug("Checking metric based alert: '{}'", alertName);
                 List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() ->
                         ambariClient.getAlertHistory(alert.getDefinitionName(), 1), "alertHistory");
                 int historySize = alertHistory.size();
@@ -94,7 +94,7 @@ public class MetricEvaluator extends EvaluatorExecutor {
                     String currentState = (String) history.get(ALERT_STATE);
                     if (isAlertStateMet(currentState, alert)) {
                         long elapsedTime = getPeriod(history);
-                        LOGGER.info("Alert: {} is in '{}' state since {} min(s)", alertName, currentState,
+                        LOGGER.debug("Alert: {} is in '{}' state since {} min(s)", alertName, currentState,
                                 ClusterUtils.TIME_FORMAT.format((double) elapsedTime / TimeUtil.MIN_IN_MS));
                         if (isPeriodReached(alert, elapsedTime) && isPolicyAttached(alert)) {
                             eventPublisher.publishEvent(new ScalingEvent(alert));
@@ -104,10 +104,10 @@ public class MetricEvaluator extends EvaluatorExecutor {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to retrieve alert history", e);
+            LOGGER.info("Failed to retrieve alert history", e);
             eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
-            LOGGER.info("Finished metricEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
+            LOGGER.debug("Finished metricEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
         }
     }
 

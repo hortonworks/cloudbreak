@@ -36,13 +36,13 @@ public class OpenStackCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus create(AuthenticatedContext auth) {
-        LOGGER.info("Create credential: {}", auth.getCloudCredential());
+        LOGGER.debug("Create credential: {}", auth.getCloudCredential());
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }
 
     @Override
     public CloudCredentialStatus delete(AuthenticatedContext auth) {
-        LOGGER.info("Delete credential: {}", auth.getCloudCredential());
+        LOGGER.debug("Delete credential: {}", auth.getCloudCredential());
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.DELETED);
     }
 

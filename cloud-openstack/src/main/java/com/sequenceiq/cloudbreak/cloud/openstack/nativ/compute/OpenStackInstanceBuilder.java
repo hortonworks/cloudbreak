@@ -58,7 +58,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
             String imageId = osClient.imagesV2().list(Collections.singletonMap("name", cloudStack.getImage().getImageName())).get(0).getId();
-            LOGGER.info("Selected image id: {}", imageId);
+            LOGGER.debug("Selected image id: {}", imageId);
             Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), cloudStack.getTags());
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
@@ -92,7 +92,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             return Collections.singletonList(createPersistedResource(resource, group.getName(), server.getId(),
                     Collections.singletonMap(OpenStackConstants.SERVER, server)));
         } catch (OS4JException ex) {
-            LOGGER.error("Failed to create OpenStack instance with privateId: {}", privateId, ex);
+            LOGGER.info("Failed to create OpenStack instance with privateId: {}", privateId, ex);
             throw new OpenStackResourceException("Instance creation failed", resourceType(), resource.getName(), ex);
         }
     }

@@ -107,7 +107,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             triggerSyncs(stacksToSync, clustersToSync);
             flowLogService.purgeTerminatedStacksFlowLogs();
         } catch (TransactionExecutionException e) {
-            LOGGER.error("Unable to start node properly", e);
+            LOGGER.info("Unable to start node properly", e);
         }
         blueprintMigrationService.migrateBlueprints();
     }
@@ -127,7 +127,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private void cleanInstanceMetaData(Iterable<InstanceMetaData> metadataSet) {
         for (InstanceMetaData metadata : metadataSet) {
             if (InstanceStatus.REQUESTED.equals(metadata.getInstanceStatus()) && metadata.getInstanceId() == null) {
-                LOGGER.info("InstanceMetaData [privateId: '{}'] is deleted at CB start.", metadata.getPrivateId());
+                LOGGER.debug("InstanceMetaData [privateId: '{}'] is deleted at CB start.", metadata.getPrivateId());
                 instanceMetaDataRepository.delete(metadata);
             }
         }
@@ -217,7 +217,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             List<String> flowIds = myFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
             for (String flowId : flowIds) {
                 Long stackId = myFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getStackId).findAny().get();
-                LOGGER.info("Restarting flow {}", flowId);
+                LOGGER.debug("Restarting flow {}", flowId);
                 try {
                     flow2Handler.restartFlow(flowId);
                     stackIds.add(stackId);
@@ -241,20 +241,20 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private void loggingStatusChange(String type, Long id, Status status, Status deleteFailed) {
-        LOGGER.info("{} {} status is updated from {} to {} at CB start.", type, id, status, deleteFailed);
+        LOGGER.debug("{} {} status is updated from {} to {} at CB start.", type, id, status, deleteFailed);
     }
 
     private void triggerSyncs(Iterable<Stack> stacksToSync, Iterable<Cluster> clustersToSync) {
         try {
             for (Stack stack : stacksToSync) {
-                LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
+                LOGGER.debug("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
                 fireEvent(stack);
                 flowManager.triggerFullSyncWithoutCheck(stack.getId());
             }
 
             for (Cluster cluster : clustersToSync) {
                 Stack stack = cluster.getStack();
-                LOGGER.info("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
+                LOGGER.debug("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
                 fireEvent(stack);
                 flowManager.triggerClusterSyncWithoutCheck(stack.getId());
             }

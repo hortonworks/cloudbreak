@@ -36,10 +36,10 @@ public class ResourceDefinitionService {
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             ResourceDefinitionResult result = request.await();
-            LOGGER.info("Resource property definition: {}", result);
+            LOGGER.debug("Resource property definition: {}", result);
             return result.getDefinition();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while sending resource definition request", e);
+            LOGGER.info("Error while sending resource definition request", e);
             throw new OperationException(e);
         }
     }

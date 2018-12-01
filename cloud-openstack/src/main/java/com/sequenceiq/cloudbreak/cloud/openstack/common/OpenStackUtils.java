@@ -64,7 +64,7 @@ public class OpenStackUtils {
 
     public CloudResourceStatus heatStatus(CloudResource resource, Stack heatStack) {
         String status = heatStack.getStatus();
-        LOGGER.info("Heat stack status of: {}  is: {}", heatStack, status);
+        LOGGER.debug("Heat stack status of: {}  is: {}", heatStack, status);
         CloudResourceStatus heatResourceStatus = new CloudResourceStatus(resource, HeatStackStatus.mapResourceStatus(status), heatStack.getStackStatusReason());
         LOGGER.debug("Cloud resource status: {}", heatResourceStatus);
         return heatResourceStatus;

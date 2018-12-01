@@ -32,23 +32,23 @@ public class OpenStackImageImporter {
     public void importImage(OSClient osClient, String name) {
 
         String importLocation = openStackImageImportTaskParameters.getImportLocation(name);
-        LOGGER.info("Import OpenStack image from: {}", importLocation);
+        LOGGER.debug("Import OpenStack image from: {}", importLocation);
         if (!urlAccessValidationService.isAccessible(importLocation)) {
             throw new CloudConnectorException(String.format("OpenStack image '%s' is not accessible, therefore it cannot be imported automatically",
                     importLocation));
         }
 
         Map<String, Object> input = openStackImageImportTaskParameters.buildInput(name);
-        LOGGER.info("Executing of the following import Task: {}", input);
+        LOGGER.debug("Executing of the following import Task: {}", input);
         Task task = osClient.imagesV2().tasks().create(Builders.taskBuilder().type("import").input(input).build());
         evaluateTaskStatus(task, name);
-        LOGGER.info("Task of importing {} image, returned with {}", name, task.getStatus());
+        LOGGER.debug("Task of importing {} image, returned with {}", name, task.getStatus());
     }
 
     private void evaluateTaskStatus(Task task, String name) {
         if (task != null) {
             TaskStatus status = task.getStatus();
-            LOGGER.info("Task status: {}", status);
+            LOGGER.debug("Task status: {}", status);
 
             if (status == null) {
                 throw new CloudConnectorException(String.format("Import of %s did not return any status, message: %s", name, task.getMessage()));

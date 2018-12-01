@@ -59,16 +59,16 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
             if (ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
-                LOGGER.info("Setup LDAP and SSO on API");
+                LOGGER.debug("Setup LDAP and SSO on API");
                 ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo);
                 ambariLdapService.syncLdap(stack, stack.getCluster());
                 ambariSSOService.setupSSO(stack, stack.getCluster());
             } else {
-                LOGGER.info("Can not setup LDAP and SSO on API, Ambari too old");
+                LOGGER.debug("Can not setup LDAP and SSO on API, Ambari too old");
             }
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (RuntimeException e) {
-            LOGGER.error("Error during LDAP configuration, stackId: " + stackId, e);
+            LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);
             response = new LdapSSOConfigurationFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event<>(ldapConfigurationRequestEvent.getHeaders(), response));

@@ -4,10 +4,15 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class Json {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Json.class);
 
     private final String value;
 
@@ -33,7 +38,8 @@ public class Json {
                 return Collections.emptyMap();
             }
             return get(Map.class);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            LOGGER.info("Failed to convert to map", e);
             return Collections.emptyMap();
         }
     }

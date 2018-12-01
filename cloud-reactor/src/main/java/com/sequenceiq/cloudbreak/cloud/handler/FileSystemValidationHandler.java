@@ -28,7 +28,7 @@ public class FileSystemValidationHandler implements CloudPlatformEventHandler<Fi
 
     @Override
     public void accept(Event<FileSystemValidationRequest> requestEvent) {
-        LOGGER.info("Received event: {}", requestEvent);
+        LOGGER.debug("Received event: {}", requestEvent);
         FileSystemValidationRequest request = requestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());

@@ -51,7 +51,7 @@ public class HasPermissionService {
 
         if (annotation.condition() == ConditionType.PRE) {
             Object target = findTargetByAnnotation(proceedingJoinPoint, annotation);
-            LOGGER.info("PRE-{} permission for: {}", annotation.permission(), target);
+            LOGGER.debug("PRE-{} permission for: {}", annotation.permission(), target);
             authorizationService.hasPermission(target, annotation.permission().name());
         }
 
@@ -62,7 +62,7 @@ public class HasPermissionService {
         }
 
         if (annotation.condition() == ConditionType.POST) {
-            LOGGER.info("POST-{} permission for: {}", annotation.permission(), proceed);
+            LOGGER.debug("POST-{} permission for: {}", annotation.permission(), proceed);
             authorizationService.hasPermission(proceed, annotation.permission().name());
         }
 
@@ -70,7 +70,7 @@ public class HasPermissionService {
     }
 
     private void logBecauseOfReturnNull(Signature signature) {
-        LOGGER.info("Return value is null, method signature: {}", signature.toLongString());
+        LOGGER.debug("Return value is null, method signature: {}", signature.toLongString());
     }
 
     private Object findTargetByIndex(JoinPoint proceedingJoinPoint, int index) {

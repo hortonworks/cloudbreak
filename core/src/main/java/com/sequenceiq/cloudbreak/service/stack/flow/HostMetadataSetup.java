@@ -45,7 +45,7 @@ public class HostMetadataSetup {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     public void setupHostMetadata(Long stackId) throws CloudbreakException {
-        LOGGER.info("Setting up host metadata for the cluster.");
+        LOGGER.debug("Setting up host metadata for the cluster.");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
@@ -55,7 +55,7 @@ public class HostMetadataSetup {
     }
 
     public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) throws CloudbreakException {
-        LOGGER.info("Extending host metadata.");
+        LOGGER.debug("Extending host metadata.");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
@@ -72,12 +72,12 @@ public class HostMetadataSetup {
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
-            LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
+            LOGGER.debug("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
             for (InstanceMetaData instanceMetaData : metadataToUpdate) {
                 instanceMetaData.setConsulServer(false);
                 String address = members.get(instanceMetaData.getPrivateIp());
                 instanceMetaData.setDiscoveryFQDN(address);
-                LOGGER.info("Domain used for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
+                LOGGER.debug("Domain used for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
                         instanceMetaData.getDiscoveryFQDN());
             }
         } catch (Exception e) {

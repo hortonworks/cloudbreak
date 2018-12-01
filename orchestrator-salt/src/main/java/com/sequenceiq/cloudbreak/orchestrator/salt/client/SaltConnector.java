@@ -86,7 +86,7 @@ public class SaltConnector implements Closeable {
     public GenericResponse health() {
         Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
         GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
-        LOGGER.info("SaltBoot. Health response: {}", responseEntity);
+        LOGGER.debug("SaltBoot. Health response: {}", responseEntity);
         return responseEntity;
     }
 
@@ -116,7 +116,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
                 .post(Entity.json(saltAction));
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
-        LOGGER.info("SaltBoot. SaltAction response: {}", responseEntity);
+        LOGGER.debug("SaltBoot. SaltAction response: {}", responseEntity);
         return responseEntity;
     }
 
@@ -148,7 +148,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt run has been executed. fun: {}", fun);
+        LOGGER.debug("Salt run has been executed. fun: {}", fun);
         return responseEntity;
     }
 
@@ -164,7 +164,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt wheel has been executed. fun: {}", fun);
+        LOGGER.debug("Salt wheel has been executed. fun: {}", fun);
         return responseEntity;
     }
 
@@ -220,7 +220,7 @@ public class SaltConnector implements Closeable {
             failedResponsesErrorMessage.append(" Status: ").append(failedResponse.getStatus());
             failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getErrorText());
         }
-        LOGGER.error(failedResponsesErrorMessage.toString());
+        LOGGER.info(failedResponsesErrorMessage.toString());
     }
 
     private Form addAuth(Form form) {

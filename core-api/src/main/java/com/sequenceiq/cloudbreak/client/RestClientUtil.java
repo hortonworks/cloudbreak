@@ -32,7 +32,7 @@ public class RestClientUtil {
 
     public static synchronized Client get(ConfigKey configKey) {
         Client client = CLIENTS.computeIfAbsent(configKey, RestClientUtil::createClient);
-        LOGGER.info("RestClient cache size: {}, key: {}, fetched client: {}", CLIENTS.size(), configKey, client);
+        LOGGER.debug("RestClient cache size: {}, key: {}, fetched client: {}", CLIENTS.size(), configKey, client);
         return client;
     }
 

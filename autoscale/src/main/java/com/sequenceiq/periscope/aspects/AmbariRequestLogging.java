@@ -14,7 +14,7 @@ public class AmbariRequestLogging {
     public <T> T logging(Supplier<T> callback, String requestName) {
         long start = System.currentTimeMillis();
         T o = callback.get();
-        LOGGER.info("Ambari '{}' finished in {} ms", requestName, System.currentTimeMillis() - start);
+        LOGGER.debug("Ambari '{}' finished in {} ms", requestName, System.currentTimeMillis() - start);
         return o;
     }
 }

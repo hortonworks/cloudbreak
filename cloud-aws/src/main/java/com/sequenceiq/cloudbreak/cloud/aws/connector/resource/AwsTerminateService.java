@@ -82,7 +82,7 @@ public class AwsTerminateService {
     private AwsElasticIpService awsElasticIpService;
 
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
-        LOGGER.info("Deleting stack: {}", ac.getCloudContext().getId());
+        LOGGER.debug("Deleting stack: {}", ac.getCloudContext().getId());
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         if (resources != null && !resources.isEmpty()) {
@@ -96,7 +96,7 @@ public class AwsTerminateService {
                 return Collections.emptyList();
             }
             String cFStackName = stackResource.getName();
-            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
+            LOGGER.debug("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
             try {
                 retryService.testWith2SecDelayMax15Times(() -> {
@@ -111,7 +111,7 @@ public class AwsTerminateService {
                     return Boolean.TRUE;
                 });
             } catch (Retry.ActionWentFailException ignored) {
-                LOGGER.info("Stack not found with name: {}", cFStackName);
+                LOGGER.debug("Stack not found with name: {}", cFStackName);
                 awsElasticIpService.releaseReservedIp(amazonEC2Client, resources);
                 cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
                 return Collections.emptyList();
@@ -135,9 +135,9 @@ public class AwsTerminateService {
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             awsElasticIpService.releaseReservedIp(amazonEC2Client, resources);
-            LOGGER.info("No CloudFormation stack saved for stack.");
+            LOGGER.debug("No CloudFormation stack saved for stack.");
         } else {
-            LOGGER.info("No resources to release.");
+            LOGGER.debug("No resources to release.");
         }
         return awsResourceConnector.check(ac, resources);
     }
@@ -182,11 +182,11 @@ public class AwsTerminateService {
                         }
                     }
                 } else {
-                    LOGGER.info("Autoscaling Group's physical id is null (the resource doesn't exist), it is not needed to resume scaling policies.");
+                    LOGGER.debug("Autoscaling Group's physical id is null (the resource doesn't exist), it is not needed to resume scaling policies.");
                 }
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().matches("Resource.*does not exist for stack.*") || e.getErrorMessage().matches("Stack '.*' does not exist.*")) {
-                    LOGGER.info(e.getMessage());
+                    LOGGER.debug(e.getMessage());
                 } else {
                     throw e;
                 }

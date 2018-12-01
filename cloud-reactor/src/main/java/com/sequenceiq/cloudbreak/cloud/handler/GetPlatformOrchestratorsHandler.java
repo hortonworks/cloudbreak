@@ -36,7 +36,7 @@ public class GetPlatformOrchestratorsHandler implements CloudPlatformEventHandle
 
     @Override
     public void accept(Event<GetPlatformOrchestratorsRequest> getPlatformOrchestratorsRequest) {
-        LOGGER.info("Received event: {}", getPlatformOrchestratorsRequest);
+        LOGGER.debug("Received event: {}", getPlatformOrchestratorsRequest);
         GetPlatformOrchestratorsRequest request = getPlatformOrchestratorsRequest.getData();
         try {
             Map<Platform, Collection<Orchestrator>> platformCollectionHashMap = Maps.newHashMap();
@@ -51,7 +51,7 @@ public class GetPlatformOrchestratorsHandler implements CloudPlatformEventHandle
             GetPlatformOrchestratorsResult getPlatformOrchestratorsResult = new GetPlatformOrchestratorsResult(request,
                     new PlatformOrchestrators(platformCollectionHashMap, defaults));
             request.getResult().onNext(getPlatformOrchestratorsResult);
-            LOGGER.info("Query platform orchestrators types finished.");
+            LOGGER.debug("Query platform orchestrators types finished.");
         } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformOrchestratorsResult(e.getMessage(), e, request));
         }

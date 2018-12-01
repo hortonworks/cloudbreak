@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.structuredevent.db.converter;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -16,6 +18,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 @Component
 public class StructuredEventToStructuredEventEntityConverter extends AbstractConversionServiceAwareConverter<StructuredEvent, StructuredEventEntity> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventToStructuredEventEntityConverter.class);
 
     @Inject
     private WorkspaceService workspaceService;
@@ -42,7 +46,7 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
 
             return structuredEventEntity;
         } catch (JsonProcessingException e) {
-            // TODO What should we do in case of json processing error
+            LOGGER.error("Failed to parse structured event JSON", e);
             return null;
         }
     }

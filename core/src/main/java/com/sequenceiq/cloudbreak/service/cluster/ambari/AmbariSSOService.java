@@ -37,7 +37,7 @@ public class AmbariSSOService {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         Gateway gateway = cluster.getGateway();
         if (cluster.hasGateway() && SSOType.SSO_PROVIDER == cluster.getGateway().getSsoType()) {
-            LOGGER.info("Setup gateway on Ambari API for stack: {}", stack.getId());
+            LOGGER.debug("Setup gateway on Ambari API for stack: {}", stack.getId());
             GatewayView gatewayView = new GatewayView(gateway, gateway.getSignKey());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Map<String, Object> ssoConfigs = new HashMap<>();

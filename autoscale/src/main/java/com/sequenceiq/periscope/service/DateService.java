@@ -46,7 +46,7 @@ public final class DateService {
             Date nextTime = cronExpression.next(startDate);
             ZonedDateTime zonedNextTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(nextTime.getTime()), currentTime.getZone()).atZone(ZoneId.of(timeZone));
             long interval = (zonedCurrentTime.toEpochSecond() - zonedNextTime.toEpochSecond()) * TimeUtil.SECOND_TO_MILLISEC;
-            LOGGER.info("Time alert '{}' next firing at '{}' compared to current time '{}' in timezone '{}'",
+            LOGGER.debug("Time alert '{}' next firing at '{}' compared to current time '{}' in timezone '{}'",
                     alert.getName(), zonedNextTime, zonedCurrentTime, timeZone);
             return interval >= 0L && interval < monitorUpdateRate;
         } catch (ParseException e) {

@@ -44,7 +44,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         for (Entry<String, Integer> request : installRequests.entrySet()) {
             AmbariClient ambariClient = t.getAmbariClient();
             BigDecimal installProgress = Optional.ofNullable(ambariClient.getRequestProgress(request.getValue())).orElse(PENDING);
-            LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
+            LOGGER.debug("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
             notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
             if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;

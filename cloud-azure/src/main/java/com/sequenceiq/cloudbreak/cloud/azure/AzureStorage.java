@@ -76,7 +76,7 @@ public class AzureStorage {
 
     private String getCustomImageId(String vhd, String imageResourceGroupName, String region, AzureClient client) {
         String customImageId = client.getCustomImageId(imageResourceGroupName, vhd, region);
-        LOGGER.info("custom image id: {}", customImageId);
+        LOGGER.debug("Custom image id: {}", customImageId);
         return customImageId;
     }
 
@@ -126,7 +126,7 @@ public class AzureStorage {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             String storageAccountId = acv.getId() + "#" + cloudContext.getId() + '#' + cloudContext.getWorkspaceId();
-            LOGGER.info("Storage account internal id: {}", storageAccountId);
+            LOGGER.debug("Storage account internal id: {}", storageAccountId);
             byte[] digest = messageDigest.digest(storageAccountId.getBytes());
             String paddedId = "";
             if (armAttachedStorageOption == ArmAttachedStorageOption.PER_VM && vmId != null) {
@@ -139,7 +139,7 @@ public class AzureStorage {
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
         }
-        LOGGER.info("Storage account name: {}", result);
+        LOGGER.debug("Storage account name: {}", result);
         return result;
     }
 
@@ -150,7 +150,7 @@ public class AzureStorage {
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
         }
-        LOGGER.info("Storage account name: {}", result);
+        LOGGER.debug("Storage account name: {}", result);
         return result;
     }
 

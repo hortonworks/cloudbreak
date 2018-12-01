@@ -32,7 +32,7 @@ public class KerberosValidator implements ConstraintValidator<ValidKerberos, Ker
             declaredPairs.putAll(collectFieldMethodPairs(clazz.getSuperclass().getDeclaredFields(), clazz.getSuperclass().getDeclaredMethods()));
             return !declaredPairs.entrySet().stream()
                     .filter(entry -> isEntryInvalid(request, entry))
-                    .peek(entry -> LOGGER.error("Field {} is required for Kerberos in case of type {}.",
+                    .peek(entry -> LOGGER.info("Field {} is required for Kerberos in case of type {}.",
                             entry.getKey().getName(), request.getType().name()))
                     .findFirst()
                     .isPresent();

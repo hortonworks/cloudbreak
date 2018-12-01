@@ -36,7 +36,7 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
 
     @Override
     public void accept(Event<PrepareImageRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         PrepareImageRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -48,7 +48,7 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             PrepareImageResult result = new PrepareImageResult(request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
-            LOGGER.info("Prepare image finished for {}", cloudContext);
+            LOGGER.debug("Prepare image finished for {}", cloudContext);
         } catch (RuntimeException e) {
             PrepareImageResult failure = new PrepareImageResult(e, request);
             request.getResult().onNext(failure);

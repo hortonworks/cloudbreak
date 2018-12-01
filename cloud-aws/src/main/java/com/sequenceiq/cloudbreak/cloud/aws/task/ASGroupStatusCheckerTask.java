@@ -82,7 +82,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     protected Boolean doCall() {
-        LOGGER.info("Checking status of Auto Scaling group '{}'", autoScalingGroupName);
+        LOGGER.debug("Checking status of Auto Scaling group '{}'", autoScalingGroupName);
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
                 getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(autoScalingClient, autoScalingGroupName);

@@ -31,7 +31,7 @@ public class GetPlatformSshKeysHandler implements CloudPlatformEventHandler<GetP
 
     @Override
     public void accept(Event<GetPlatformSshKeysRequest> getPlatformSshKeysRequest) {
-        LOGGER.info("Received event: {}", getPlatformSshKeysRequest);
+        LOGGER.debug("Received event: {}", getPlatformSshKeysRequest);
         GetPlatformSshKeysRequest request = getPlatformSshKeysRequest.getData();
 
         try {
@@ -42,7 +42,7 @@ public class GetPlatformSshKeysHandler implements CloudPlatformEventHandler<GetP
                     .platformResources().sshKeys(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformSshKeysResult getPlatformSshKeysResult = new GetPlatformSshKeysResult(request, cloudSshKeys);
             request.getResult().onNext(getPlatformSshKeysResult);
-            LOGGER.info("Query platform networks types finished.");
+            LOGGER.debug("Query platform networks types finished.");
         } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformSshKeysResult(e.getMessage(), e, request));
         }

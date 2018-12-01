@@ -41,13 +41,13 @@ public class AmbariOperationService {
 
     public Pair<PollingResult, Exception> waitForOperations(Stack stack, AmbariClient ambariClient,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
-        LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
+        LOGGER.debug("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
         return waitForOperations(stack, ambariClient, ambariOperationsStatusCheckerTask, operationRequests, ambariOperationType);
     }
 
     public Pair<PollingResult, Exception> waitForOperationsToStart(Stack stack, AmbariClient ambariClient,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
-        LOGGER.info("Waiting for Ambari operations to start. [Operation requests: {}]", operationRequests);
+        LOGGER.debug("Waiting for Ambari operations to start. [Operation requests: {}]", operationRequests);
         return operationsPollingService.pollWithTimeout(ambariOperationsStartCheckerTask, new AmbariOperations(stack, ambariClient, operationRequests,
                         ambariOperationType), AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, 1);
     }

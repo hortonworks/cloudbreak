@@ -51,7 +51,7 @@ public abstract class AbstractRdsConfigProvider {
                 postgres.put("database", db);
                 postgres.put("user", getDbUser());
                 postgres.put("password", rdsConfig.getConnectionPassword());
-                LOGGER.info("Rds config added: {}, databaseEngine: {}", db, rdsConfig.getDatabaseEngine());
+                LOGGER.debug("Rds config added: {}, databaseEngine: {}", db, rdsConfig.getDatabaseEngine());
                 return Collections.singletonMap(getPillarKey(), postgres);
             }
         }
@@ -63,7 +63,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
-            LOGGER.info("Creating postgres RDSConfig for {}", getRdsType().name());
+            LOGGER.debug("Creating postgres RDSConfig for {}", getRdsType().name());
             rdsConfigs = createPostgresRdsConf(stack, cluster, rdsConfigs, getDbUser(), getDbPort(), getDb());
         }
         return rdsConfigs;

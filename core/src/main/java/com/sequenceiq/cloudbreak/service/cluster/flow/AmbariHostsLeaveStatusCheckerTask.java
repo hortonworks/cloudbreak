@@ -27,12 +27,12 @@ public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusChecker
             for (String hostName : hostNames) {
                 String status = hostStatuses.get(hostName);
                 if (!LEFT_STATE.equals(status)) {
-                    LOGGER.info("{} didn't leave the cluster yet", hostName);
+                    LOGGER.debug("{} didn't leave the cluster yet", hostName);
                     return false;
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to check the left hosts", e);
+            LOGGER.info("Failed to check the left hosts", e);
             return false;
         }
         return true;
@@ -40,7 +40,7 @@ public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusChecker
 
     @Override
     public void handleTimeout(AmbariHostsWithNames t) {
-        LOGGER.error("Operation timed out. Hosts didn't leave in time, hosts: '{}' stack: '{}'", t.getHostNames(), t.getStack().getId());
+        LOGGER.info("Operation timed out. Hosts didn't leave in time, hosts: '{}' stack: '{}'", t.getHostNames(), t.getStack().getId());
     }
 
     @Override

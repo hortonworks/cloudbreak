@@ -32,7 +32,7 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext) {
-        LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
+        LOGGER.debug("Verify credential: {}", authenticatedContext.getCloudCredential());
         GcpStackUtil.prepareCredential(authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {

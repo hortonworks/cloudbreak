@@ -31,7 +31,7 @@ public class GetPlatformIpPoolsHandler implements CloudPlatformEventHandler<GetP
 
     @Override
     public void accept(Event<GetPlatformCloudIpPoolsRequest> getPlatformIpPoolsRequest) {
-        LOGGER.info("Received event: {}", getPlatformIpPoolsRequest);
+        LOGGER.debug("Received event: {}", getPlatformIpPoolsRequest);
         GetPlatformCloudIpPoolsRequest request = getPlatformIpPoolsRequest.getData();
 
         try {
@@ -42,7 +42,7 @@ public class GetPlatformIpPoolsHandler implements CloudPlatformEventHandler<GetP
                     .platformResources().publicIpPool(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformCloudIpPoolsResult getPlatformIpPoolsResult = new GetPlatformCloudIpPoolsResult(request, cloudIpPools);
             request.getResult().onNext(getPlatformIpPoolsResult);
-            LOGGER.info("Query platform ip pool types finished.");
+            LOGGER.debug("Query platform ip pool types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformCloudIpPoolsResult(e.getMessage(), e, request));
         }

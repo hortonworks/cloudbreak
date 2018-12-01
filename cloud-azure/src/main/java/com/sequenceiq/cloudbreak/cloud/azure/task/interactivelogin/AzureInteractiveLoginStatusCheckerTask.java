@@ -86,7 +86,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
             String tokenResponseString = response.readEntity(String.class);
             try {
                 String refreshToken = new ObjectMapper().readTree(tokenResponseString).get("refresh_token").asText();
-                LOGGER.info("Access token received");
+                LOGGER.debug("Access token received");
 
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
                 AzureCredentialView armCredentialView = new AzureCredentialView(extendedCloudCredential);
@@ -122,7 +122,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
                 } catch (InteractiveLoginException | InteractiveLoginUnrecoverableException e) {
-                    LOGGER.error("Interactive login failed", e);
+                    LOGGER.info("Interactive login failed", e);
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
                 }
             } catch (IOException e) {
@@ -130,7 +130,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
             }
             return true;
         } else {
-            LOGGER.info("Polling request failed this time, status code {}, response: {}", response.getStatus(), response.readEntity(String.class));
+            LOGGER.debug("Polling request failed this time, status code {}, response: {}", response.getStatus(), response.readEntity(String.class));
             return false;
         }
     }

@@ -66,9 +66,9 @@ public class AzureInteractiveLogin {
         Response deviceCodeResponse = getDeviceCode();
 
         if (deviceCodeResponse.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
-            LOGGER.info("Successful device code response: " + deviceCodeResponse.getStatus());
+            LOGGER.debug("Successful device code response: " + deviceCodeResponse.getStatus());
             String jsonString = deviceCodeResponse.readEntity(String.class);
-            LOGGER.info("Device code json response: " + jsonString);
+            LOGGER.debug("Device code json response: " + jsonString);
             try {
                 JsonNode deviceCodeJsonNode = new ObjectMapper().readTree(jsonString);
 
@@ -84,7 +84,7 @@ public class AzureInteractiveLogin {
                 throw new IllegalStateException(e);
             }
         } else {
-            LOGGER.error("interactive login error, status: " + deviceCodeResponse.getStatus());
+            LOGGER.info("Interactive login error, status: " + deviceCodeResponse.getStatus());
             throw new IllegalStateException("interactive login error");
         }
     }
@@ -96,7 +96,7 @@ public class AzureInteractiveLogin {
             try {
                 syncPollingScheduler.schedule(interactiveLoginStatusCheckerTask, pollInterval, expiresIn / pollInterval, 1);
             } catch (Exception e) {
-                LOGGER.error("Interactive login schedule failed", e);
+                LOGGER.info("Interactive login schedule failed", e);
             }
         });
     }

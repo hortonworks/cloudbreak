@@ -165,17 +165,17 @@ public class StackImageUpdateActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Error during Stack image update flow:", payload.getException());
+                LOGGER.info("Error during Stack image update flow:", payload.getException());
                 if (variables.containsKey(AbstractStackImageUpdateAction.ORIGINAL_IMAGE)) {
                     Image originalImage = (Image) variables.get(AbstractStackImageUpdateAction.ORIGINAL_IMAGE);
-                    LOGGER.info("Reset image to the original");
+                    LOGGER.debug("Reset image to the original");
                     try {
                         Stack stack = stackService.getByIdWithTransaction(context.getStackView().getId());
                         Component component = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
                         componentConfigProvider.replaceImageComponentWithNew(component);
-                        LOGGER.info("Image restored");
+                        LOGGER.debug("Image restored");
                     } catch (JsonProcessingException e) {
-                        LOGGER.error("Could not parse JSON. Image restore failed");
+                        LOGGER.info("Could not parse JSON. Image restore failed");
                     }
                 }
                 flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_IMAGE_UPDATE_FAILED, Status.UPDATE_FAILED.name(),

@@ -28,7 +28,7 @@ public class PlatformParameterHandler implements CloudPlatformEventHandler<Platf
 
     @Override
     public void accept(Event<PlatformParameterRequest> platformParameterRequestEvent) {
-        LOGGER.info("Received event: {}", platformParameterRequestEvent);
+        LOGGER.debug("Received event: {}", platformParameterRequestEvent);
         PlatformParameterRequest request = platformParameterRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
@@ -36,7 +36,7 @@ public class PlatformParameterHandler implements CloudPlatformEventHandler<Platf
 
             PlatformParameterResult platformParameterResult = new PlatformParameterResult(request, platformParameters);
             request.getResult().onNext(platformParameterResult);
-            LOGGER.info("Query platform parameters finished.");
+            LOGGER.debug("Query platform parameters finished.");
         } catch (RuntimeException e) {
             request.getResult().onNext(new PlatformParameterResult(e.getMessage(), e, request));
         }

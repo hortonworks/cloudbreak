@@ -98,7 +98,7 @@ public class StackToCloudStackConverter {
         try {
             image = imageService.getImage(stack.getId());
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.debug(e.getMessage());
         }
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());

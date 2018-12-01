@@ -11,14 +11,14 @@ public class HypervisorExtractor {
     private static final Logger LOGGER = LoggerFactory.getLogger(HypervisorExtractor.class);
 
     public String getHypervisor(Server server) {
-        LOGGER.info("Hypervisor info for instance: {}. HypervisorHostname: {}, Host: {}", server.getInstanceName(), server.getHypervisorHostname(), server
+        LOGGER.debug("Hypervisor info for instance: {}. HypervisorHostname: {}, Host: {}", server.getInstanceName(), server.getHypervisorHostname(), server
                 .getHost());
         String hypervisor = server.getHypervisorHostname();
-        LOGGER.info("Hypervisor for instance: {} is: {} on {}", server.getInstanceName(), server.getHypervisorHostname(), server.getHost());
+        LOGGER.debug("Hypervisor for instance: {} is: {} on {}", server.getInstanceName(), server.getHypervisorHostname(), server.getHost());
         if (hypervisor == null) {
             hypervisor = server.getHost();
         }
-        LOGGER.info("Used hypervisor for instance: {}. hypervisor: {}", server.getInstanceName(), hypervisor);
+        LOGGER.debug("Used hypervisor for instance: {}. hypervisor: {}", server.getInstanceName(), hypervisor);
         return hypervisor;
     }
 }

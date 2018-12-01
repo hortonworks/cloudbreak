@@ -73,7 +73,7 @@ public class FlowChains {
     }
 
     protected void sendEvent(String flowChainId, Selectable selectable) {
-        LOGGER.info("Triggering event: {}", selectable);
+        LOGGER.debug("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_CHAIN_ID, flowChainId);
         eventBus.notify(selectable.selector(), eventFactory.createEvent(headers, selectable));

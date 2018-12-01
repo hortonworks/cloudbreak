@@ -28,7 +28,7 @@ public class AutoScalingGroupHandler {
         UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest = new UpdateAutoScalingGroupRequest();
         updateAutoScalingGroupRequest.setAutoScalingGroupName(autoScalingGroupName);
         updateAutoScalingGroupRequest.setLaunchConfigurationName(launchConfigurationName);
-        LOGGER.info("Update AutoScalingGroup {} with LaunchConfiguration {}",
+        LOGGER.debug("Update AutoScalingGroup {} with LaunchConfiguration {}",
                 updateAutoScalingGroupRequest.getAutoScalingGroupName(), updateAutoScalingGroupRequest.getLaunchConfigurationName());
         autoScalingClient.updateAutoScalingGroup(updateAutoScalingGroupRequest);
     }

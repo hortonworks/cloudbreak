@@ -43,9 +43,9 @@ public class ContainerConfigService {
             Component component = componentConfigProvider.getComponent(stack.getId(), ComponentType.CONTAINER, dc.name());
             if (component == null) {
                 component = create(stack, dc);
-                LOGGER.info("Container component definition created: {}", component);
+                LOGGER.debug("Container component definition created: {}", component);
             } else {
-                LOGGER.info("Container component definition found in database: {}", component);
+                LOGGER.debug("Container component definition found in database: {}", component);
             }
             return component.getAttributes().get(ContainerConfig.class);
         } catch (CloudbreakException | IOException ignored) {
@@ -89,7 +89,7 @@ public class ContainerConfigService {
             try {
                 return customContainerDefinition.get(Map.class);
             } catch (IOException e) {
-                LOGGER.error("Failed to add customContainerDefinition to response", e);
+                LOGGER.info("Failed to add customContainerDefinition to response", e);
                 return new HashMap<>();
             }
         }

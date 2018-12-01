@@ -33,7 +33,7 @@ public class DownscaleStackCollectResourcesHandler implements CloudPlatformEvent
 
     @Override
     public void accept(Event<DownscaleStackCollectResourcesRequest> collectResourcesRequestEvent) {
-        LOGGER.info("Received event: {}", collectResourcesRequestEvent);
+        LOGGER.debug("Received event: {}", collectResourcesRequestEvent);
         DownscaleStackCollectResourcesRequest request = collectResourcesRequestEvent.getData();
         DownscaleStackCollectResourcesResult result;
         try {
@@ -42,14 +42,14 @@ public class DownscaleStackCollectResourcesHandler implements CloudPlatformEvent
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             Object resourcesToScale = connector.resources().collectResourcesToRemove(ac, request.getCloudStack(),
                     request.getCloudResources(), request.getInstances());
-            LOGGER.info("Collect resources successfully finished for {}", cloudContext);
+            LOGGER.debug("Collect resources successfully finished for {}", cloudContext);
             result = new DownscaleStackCollectResourcesResult(request, resourcesToScale);
         } catch (RuntimeException e) {
-            LOGGER.error("Failed to handle DownscaleStackCollectResourcesRequest.", e);
+            LOGGER.info("Failed to handle DownscaleStackCollectResourcesRequest.", e);
             result = new DownscaleStackCollectResourcesResult(e.getMessage(), e, request);
         }
         request.getResult().onNext(result);
-        LOGGER.info("DownscaleStackCollectResourcesRequest finished");
+        LOGGER.debug("DownscaleStackCollectResourcesRequest finished");
         eventBus.notify(result.selector(), new Event<>(collectResourcesRequestEvent.getHeaders(), result));
     }
 }

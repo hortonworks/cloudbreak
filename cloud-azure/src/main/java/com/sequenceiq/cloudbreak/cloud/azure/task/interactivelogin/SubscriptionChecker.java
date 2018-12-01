@@ -49,7 +49,7 @@ public class SubscriptionChecker {
             String errorResponse = response.readEntity(String.class);
             try {
                 String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                LOGGER.error("Subscription retrieve error:" + errorMessage);
+                LOGGER.info("Subscription retrieve error:" + errorMessage);
                 throw new InteractiveLoginException("Error with the subscription specified in Profile id: " + subscriptionId + " message: " + errorMessage);
             } catch (IOException e) {
                 throw new IllegalStateException(e);

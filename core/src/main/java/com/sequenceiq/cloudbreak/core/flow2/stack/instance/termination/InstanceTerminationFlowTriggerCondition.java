@@ -22,7 +22,7 @@ public class InstanceTerminationFlowTriggerCondition implements FlowTriggerCondi
         StackView stack = stackService.getViewByIdWithoutAuth(stackId);
         boolean result = !stack.isDeleteInProgress();
         if (result) {
-            LOGGER.info("Couldn't start instance termination flow because the stack has been terminating.");
+            LOGGER.debug("Couldn't start instance termination flow because the stack has been terminating.");
         }
         return result;
     }

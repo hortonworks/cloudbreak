@@ -30,7 +30,7 @@ public class UrlAccessValidationService {
     }
 
     public boolean isAccessible(String url) {
-        LOGGER.info("Validation of url access: {}", url);
+        LOGGER.debug("Validation of url access: {}", url);
         boolean result = false;
         try {
             WebTarget target = client.target(url);

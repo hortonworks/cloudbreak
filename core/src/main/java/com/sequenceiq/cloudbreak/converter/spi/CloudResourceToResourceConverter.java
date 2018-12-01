@@ -31,7 +31,7 @@ public class CloudResourceToResourceConverter extends AbstractConversionServiceA
                 Json attributesJson = new Json(attributes);
                 domainResource.setAttributes(attributesJson);
             } catch (JsonProcessingException ignored) {
-                LOGGER.error("Failed to parse resource attributes. Attributes: [{}]", source.getStringParameter(CloudResource.ATTRIBUTES), ignored);
+                LOGGER.info("Failed to parse resource attributes. Attributes: [{}]", source.getStringParameter(CloudResource.ATTRIBUTES), ignored);
                 throw new IllegalStateException("Cannot parse stored resource attributes");
             }
         });

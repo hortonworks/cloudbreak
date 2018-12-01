@@ -236,7 +236,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     private Credential delete(Credential credential, Workspace workspace) {
         checkCredentialIsDeletable(credential);
-        LOGGER.info(String.format("Starting to delete credential [name: %s, workspace: %s]", credential.getName(), workspace.getName()));
+        LOGGER.debug(String.format("Starting to delete credential [name: %s, workspace: %s]", credential.getName(), workspace.getName()));
         userProfileHandler.destroyProfileCredentialPreparation(credential);
         Credential archived = archiveCredential(credential);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
@@ -244,7 +244,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void checkCredentialIsDeletable(Credential credential) {
-        LOGGER.info("Checking whether the desired credential is able to delete or not.");
+        LOGGER.debug("Checking whether the desired credential is able to delete or not.");
         if (credential == null) {
             throw new NotFoundException("Credential not found.");
         }

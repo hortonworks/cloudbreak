@@ -92,7 +92,7 @@ public class EncryptedSnapshotService {
     }
 
     public void deleteResources(AuthenticatedContext ac, AmazonEC2Client client, List<CloudResource> resources) {
-        LOGGER.info("Deleting attached EBS volume encryption related resources: {}", ac.getCloudContext().getId());
+        LOGGER.debug("Deleting attached EBS volume encryption related resources: {}", ac.getCloudContext().getId());
         if (resources != null && !resources.isEmpty()) {
             deleteSnapshotResources(client, resources);
             deleteVolumeResources(client, resources);
@@ -106,11 +106,11 @@ public class EncryptedSnapshotService {
         String volumeId = volumeResult.getVolume().getVolumeId();
         checkEbsVolumeStatus(ac, client, volumeId);
         saveEncryptedResource(ac, resourceNotifier, ResourceType.AWS_ENCRYPTED_VOLUME, volumeId, instanceView.getGroupName());
-        LOGGER.info("Encrypted EBS volume has been created with id: '{}', for group: '{}'", volumeId, instanceView.getGroupName());
+        LOGGER.debug("Encrypted EBS volume has been created with id: '{}', for group: '{}'", volumeId, instanceView.getGroupName());
 
         CreateSnapshotResult snapshotResult = client.createSnapshot(prepareCreateSnapshotRequest(volumeResult));
         checkSnapshotReadiness(ac, client, snapshotResult);
-        LOGGER.info("Encrypted snapshot of EBS volume has been created with id: '{}', for group: '{}'", snapshotResult.getSnapshot().getSnapshotId(),
+        LOGGER.debug("Encrypted snapshot of EBS volume has been created with id: '{}', for group: '{}'", snapshotResult.getSnapshot().getSnapshotId(),
                 instanceView.getGroupName());
         client.createTags(prepareCreateTagsRequest(ac, cloudStack, instanceView, snapshotResult));
         return Optional.of(snapshotResult.getSnapshot().getSnapshotId());

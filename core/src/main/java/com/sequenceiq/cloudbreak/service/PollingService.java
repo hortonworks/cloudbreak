@@ -29,7 +29,7 @@ public class PollingService<T> {
         Exception actual = null;
         boolean exit = statusCheckerTask.exitPolling(t);
         while (!timeout && !exit) {
-            LOGGER.info("Polling attempt {}.", attempts);
+            LOGGER.debug("Polling attempt {}.", attempts);
             try {
                 success = statusCheckerTask.checkStatus(t);
             } catch (Exception ex) {
@@ -38,11 +38,11 @@ public class PollingService<T> {
                 actual = ex;
             }
             if (failures >= maxFailure) {
-                LOGGER.info("Polling failure reached the limit which was {}, poller will drop the last exception.", maxFailure);
+                LOGGER.debug("Polling failure reached the limit which was {}, poller will drop the last exception.", maxFailure);
                 statusCheckerTask.handleException(actual);
                 return new ImmutablePair<>(PollingResult.FAILURE, actual);
             } else if (success) {
-                LOGGER.info(statusCheckerTask.successMessage(t));
+                LOGGER.debug(statusCheckerTask.successMessage(t));
                 return new ImmutablePair<>(PollingResult.SUCCESS, actual);
             }
             sleep(interval);
@@ -53,11 +53,11 @@ public class PollingService<T> {
             exit = statusCheckerTask.exitPolling(t);
         }
         if (timeout) {
-            LOGGER.info("Poller timeout.");
+            LOGGER.debug("Poller timeout.");
             statusCheckerTask.handleTimeout(t);
             return new ImmutablePair<>(PollingResult.TIMEOUT, actual);
         }
-        LOGGER.info("Poller exiting.");
+        LOGGER.debug("Poller exiting.");
         return new ImmutablePair<>(PollingResult.EXIT, actual);
     }
 
@@ -69,7 +69,7 @@ public class PollingService<T> {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
-            LOGGER.info("Interrupted exception occurred during polling.", e);
+            LOGGER.error("Interrupted exception occurred during polling.", e);
             Thread.currentThread().interrupt();
         }
     }

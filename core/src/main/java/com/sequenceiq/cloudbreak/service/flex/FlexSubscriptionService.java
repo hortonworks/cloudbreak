@@ -51,7 +51,7 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
                 Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByWorkspace(workspace);
                 setSubscriptionAsDefaultIfNeeded(updated, allInAccount);
                 updateSubscriptionsDefaultFlagsIfNeeded(updated, allInAccount);
-                LOGGER.info("Flex subscription has been created: {}", updated);
+                LOGGER.debug("Flex subscription has been created: {}", updated);
                 return updated;
             });
         } catch (TransactionExecutionException e) {
@@ -105,22 +105,22 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
     }
 
     private FlexSubscription getFlexSubscription(String name, Workspace workspace) {
-        LOGGER.info("Looking for Flex subscription name: {}", name);
+        LOGGER.debug("Looking for Flex subscription name: {}", name);
         return flexSubscriptionRepository.findByNameAndWorkspace(name, workspace);
     }
 
     public Set<FlexSubscription> findAllForUserAndWorkspace(User user, Long workspaceId) {
-        LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUserId());
+        LOGGER.debug("Looking for public Flex subscriptions for user: {}", user.getUserId());
         return flexSubscriptionRepository.findAllByWorkspaceId(workspaceId);
     }
 
     public void setDefaultFlexSubscription(String name, User user, Workspace workspace) {
-        LOGGER.info("Set Flex subscription '{}' as default in workspace '{}'", name, workspace.getName());
+        LOGGER.debug("Set Flex subscription '{}' as default in workspace '{}'", name, workspace.getName());
         setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setDefault);
     }
 
     public void setUsedForControllerFlexSubscription(String name, User user, Workspace workspace) {
-        LOGGER.info("Set Flex subscription '{}' as used for controller in workspace '{}'", name, workspace.getName());
+        LOGGER.debug("Set Flex subscription '{}' as used for controller in workspace '{}'", name, workspace.getName());
         setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setUsedForController);
     }
 

@@ -89,10 +89,10 @@ public class ImageService {
             String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert);
 
-            LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
+            LOGGER.debug("Determined image from catalog: {}", imgFromCatalog);
 
             String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
-            LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
+            LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                     platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
             List<Component> components = getComponents(stack, userData, imgFromCatalog.getImage(), imageName,
@@ -126,10 +126,10 @@ public class ImageService {
                 }
             }
             if (useBaseImage) {
-                LOGGER.info("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
+                LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
                 statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, cloudbreakUser, user);
             } else {
-                LOGGER.info("Image id isn't specified for the stack, falling back to a prewarmed "
+                LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
                     + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
                 statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, cloudbreakUser, user);
             }

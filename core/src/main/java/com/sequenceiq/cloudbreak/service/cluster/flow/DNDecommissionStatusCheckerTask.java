@@ -20,7 +20,7 @@ public class DNDecommissionStatusCheckerTask extends ClusterBasedStatusCheckerTa
         Map<String, Long> dataNodes = ambariClient.getDecommissioningDataNodes();
         boolean finished = dataNodes.isEmpty();
         if (!finished) {
-            LOGGER.info("DataNode decommission is in progress: {}", dataNodes);
+            LOGGER.debug("DataNode decommission is in progress: {}", dataNodes);
         }
         return finished;
     }

@@ -113,7 +113,7 @@ public class AwsLaunchService {
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         try {
             cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
-            LOGGER.info("Stack already exists: {}", cFStackName);
+            LOGGER.debug("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
             boolean existingVPC = awsNetworkView.isExistingVPC();
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
@@ -140,7 +140,7 @@ public class AwsLaunchService {
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfRetryClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
         }
-        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
+        LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(credentialView, regionName);
@@ -197,20 +197,20 @@ public class AwsLaunchService {
             AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
             try {
                 String region = ac.getCloudContext().getLocation().getRegion().value();
-                LOGGER.info("Importing public key to {} region on AWS", region);
+                LOGGER.debug("Importing public key to {} region on AWS", region);
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
                 String keyPairName = awsClient.getKeyPairName(ac);
                 ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getInstanceAuthentication().getPublicKey());
                 try {
                     client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
-                    LOGGER.info("Key-pair already exists: {}", keyPairName);
+                    LOGGER.debug("Key-pair already exists: {}", keyPairName);
                 } catch (AmazonServiceException e) {
                     client.importKeyPair(importKeyPairRequest);
                 }
             } catch (Exception e) {
                 String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
                         e.getMessage());
-                LOGGER.error(errorMessage, e);
+                LOGGER.info(errorMessage, e);
                 throw new CloudConnectorException(e.getMessage(), e);
             }
         }

@@ -76,7 +76,7 @@ public class EncryptedImageCopyService {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getImageId()));
         if (!imageIdByGroupName.isEmpty()) {
             Collection<String> imageIds = new HashSet<>(imageIdByGroupName.values());
-            LOGGER.info("Start polling the availability of the created AMIs: '{}'", imageIds.stream().collect(Collectors.joining(",")));
+            LOGGER.debug("Start polling the availability of the created AMIs: '{}'", imageIds.stream().collect(Collectors.joining(",")));
             checkBooleanPollTask(awsPollTaskFactory.newAMICopyStatusCheckerTask(ac, imageIds, client));
         }
         return imageIdByGroupName;
@@ -128,7 +128,7 @@ public class EncryptedImageCopyService {
                 .build();
 
         resourceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
-        LOGGER.info("The source AMI '{}' has been copied and encrypted with id: '{}' in region: '{}'", selectedAMIName, imageId, regionName);
+        LOGGER.debug("The source AMI '{}' has been copied and encrypted with id: '{}' in region: '{}'", selectedAMIName, imageId, regionName);
         return new EncryptedImageConfig(imageId, Optional.ofNullable(awsInstanceView.getKmsKey()));
     }
 
@@ -184,7 +184,7 @@ public class EncryptedImageCopyService {
     }
 
     private void deleteImage(AmazonEC2Client client, CloudResource encryptedImage, Image imageOptional, String regionName) {
-        LOGGER.info("Deregister encrypted AMI: '{}', in region: '{}'", encryptedImage.getName(), regionName);
+        LOGGER.debug("Deregister encrypted AMI: '{}', in region: '{}'", encryptedImage.getName(), regionName);
         DeregisterImageRequest deregisterImageRequest = new DeregisterImageRequest().withImageId(encryptedImage.getName());
         client.deregisterImage(deregisterImageRequest);
 
@@ -198,7 +198,7 @@ public class EncryptedImageCopyService {
         String snapshotId = blockDeviceMapping.getEbs().getSnapshotId();
         String imageName = encryptedImage.getName();
         try {
-            LOGGER.info("Delete encrypted AMI's ['{}'] snapshot ['{}'], in region: '{}'", imageName, snapshotId, regionName);
+            LOGGER.debug("Delete encrypted AMI's ['{}'] snapshot ['{}'], in region: '{}'", imageName, snapshotId, regionName);
             DeleteSnapshotRequest deleteSnapshotRequest = new DeleteSnapshotRequest().withSnapshotId(snapshotId);
             client.deleteSnapshot(deleteSnapshotRequest);
         } catch (Exception e) {

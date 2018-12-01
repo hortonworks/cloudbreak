@@ -88,12 +88,12 @@ public class AwsNetworkService {
         DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVPC());
         Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
         String vpcCidr = vpc.getCidrBlock();
-        LOGGER.info("Subnet cidr is empty, find a non-overlapping subnet for VPC cidr: {}", vpcCidr);
+        LOGGER.debug("Subnet cidr is empty, find a non-overlapping subnet for VPC cidr: {}", vpcCidr);
 
         DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVPC())));
         List<Subnet> awsSubnets = ec2Client.describeSubnets(request).getSubnets();
         List<String> subnetCidrs = awsSubnets.stream().map(Subnet::getCidrBlock).collect(Collectors.toList());
-        LOGGER.info("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), subnetCidrs.stream().collect(Collectors.joining(",")));
+        LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), subnetCidrs.stream().collect(Collectors.joining(",")));
 
         return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
     }
@@ -154,7 +154,7 @@ public class AwsNetworkService {
         }
         if (foundProbe && isInRange(highProbe, vpcInfo)) {
             String subnet = toSubnetCidr(lowProbe);
-            LOGGER.info("The following subnet cidr found: {} for VPC: {}", subnet, vpc.getVpcId());
+            LOGGER.debug("The following subnet cidr found: {} for VPC: {}", subnet, vpc.getVpcId());
             return subnet;
         } else {
             return null;

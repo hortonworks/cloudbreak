@@ -31,10 +31,10 @@ public class ReactorEventHandlerInitializer {
     @PostConstruct
     public void init() {
         validateSelectors();
-        LOGGER.info("Registering ReactorEventHandlers");
+        LOGGER.debug("Registering ReactorEventHandlers");
         for (ReactorEventHandler handler : handlers) {
             String selector = handler.selector();
-            LOGGER.info("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
+            LOGGER.debug("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
             eventBus.on($(selector), handler);
         }
     }

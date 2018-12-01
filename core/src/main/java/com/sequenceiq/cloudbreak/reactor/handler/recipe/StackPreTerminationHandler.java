@@ -56,7 +56,7 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
                 preTerminationStateExecutor.runPreteraminationTasks(stack);
             }
         } catch (Exception ex) {
-            LOGGER.error("Pre-termination failed: {}", ex.getMessage(), ex);
+            LOGGER.info("Pre-termination failed: {}", ex.getMessage(), ex);
         }
 
         Selectable result = new StackPreTerminationSuccess(stack.getId());

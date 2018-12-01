@@ -69,7 +69,7 @@ public class StackStartActions {
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
                 Stack stack = context.getStack();
-                LOGGER.info("Assembling start request for stack: {}", stack);
+                LOGGER.debug("Assembling start request for stack: {}", stack);
                 List<CloudInstance> cloudInstances = converterUtil.convertAll(stack.getNotDeletedInstanceMetaDataList(), CloudInstance.class);
                 List<CloudResource> resources = converterUtil.convertAll(stack.getResources(), CloudResource.class);
                 cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));

@@ -40,7 +40,7 @@ public class SecurityGroupService extends AbstractWorkspaceAwareResourceService<
     private InstanceGroupRepository instanceGroupRepository;
 
     public SecurityGroup create(User user, SecurityGroup securityGroup, Workspace workspace) {
-        LOGGER.info("Creating SecurityGroup: [User: '{}']", user.getUserId());
+        LOGGER.debug("Creating SecurityGroup: [User: '{}']", user.getUserId());
         securityGroup.setWorkspace(workspace);
         try {
             return groupRepository.save(securityGroup);
@@ -65,7 +65,7 @@ public class SecurityGroupService extends AbstractWorkspaceAwareResourceService<
     }
 
     public void deleteImpl(SecurityGroup securityGroup) {
-        LOGGER.info("Deleting SecurityGroup with name: {}", securityGroup.getName());
+        LOGGER.debug("Deleting SecurityGroup with name: {}", securityGroup.getName());
         List<InstanceGroup> instanceGroupsWithThisSecurityGroup = new ArrayList<>(instanceGroupRepository.findBySecurityGroup(securityGroup));
         if (!instanceGroupsWithThisSecurityGroup.isEmpty()) {
             if (instanceGroupsWithThisSecurityGroup.size() > 1) {

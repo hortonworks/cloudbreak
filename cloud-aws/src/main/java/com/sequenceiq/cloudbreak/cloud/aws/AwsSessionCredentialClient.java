@@ -62,13 +62,13 @@ public class AwsSessionCredentialClient {
     private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
         if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
                 || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential)) {
-            LOGGER.info("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
+            LOGGER.debug("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
             return AWSSecurityTokenServiceClientBuilder.standard()
                     .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                     .withCredentials(new InstanceProfileCredentialsProvider())
                     .build();
         } else {
-            LOGGER.info("AWSSecurityTokenServiceClient will use environment variables");
+            LOGGER.debug("AWSSecurityTokenServiceClient will use environment variables");
             return AWSSecurityTokenServiceClientBuilder.standard()
                     .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                     .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())

@@ -34,7 +34,7 @@ public class PlatformParametersHandler implements CloudPlatformEventHandler<Plat
 
     @Override
     public void accept(Event<PlatformParametersRequest> platformParameterRequestEvent) {
-        LOGGER.info("Received event: {}", platformParameterRequestEvent);
+        LOGGER.debug("Received event: {}", platformParameterRequestEvent);
         PlatformParametersRequest request = platformParameterRequestEvent.getData();
         Map<Platform, PlatformParameters> platformParameters = new HashMap<>();
         try {
@@ -43,7 +43,7 @@ public class PlatformParametersHandler implements CloudPlatformEventHandler<Plat
             }
             PlatformParametersResult platformParameterResult = new PlatformParametersResult(request, platformParameters);
             request.getResult().onNext(platformParameterResult);
-            LOGGER.info("Query platform parameters finished.");
+            LOGGER.debug("Query platform parameters finished.");
         } catch (RuntimeException e) {
             request.getResult().onNext(new PlatformParametersResult(e.getMessage(), e, request));
         }

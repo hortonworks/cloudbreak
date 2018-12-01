@@ -29,7 +29,7 @@ public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerT
         for (Entry<String, Integer> request : installRequests.entrySet()) {
             AmbariClient ambariClient = t.getAmbariClient();
             BigDecimal installProgress = Optional.ofNullable(ambariClient.getRequestProgress(request.getValue())).orElse(PENDING);
-            LOGGER.info("Ambari operation start: '{}', Progress: {}", request.getKey(), installProgress);
+            LOGGER.debug("Ambari operation start: '{}', Progress: {}", request.getKey(), installProgress);
             if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
                 for (int i = 0; i < MAX_RETRY; i++) {
@@ -66,6 +66,6 @@ public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerT
 
     @Override
     public void handleException(Exception e) {
-        LOGGER.error("Ambari operation start failed.", e);
+        LOGGER.info("Ambari operation start failed.", e);
     }
 }

@@ -28,7 +28,7 @@ public class DefaultSubscriptionService {
     @PostConstruct
     public void init() {
         if (!Strings.isNullOrEmpty(defaultSubscriptionAddress)) {
-            LOGGER.info("Configuring default subscription {}", defaultSubscriptionAddress);
+            LOGGER.debug("Configuring default subscription {}", defaultSubscriptionAddress);
             Subscription subscription = new Subscription(DEFAULT_CLIENT_ID, defaultSubscriptionAddress);
             subscriptionService.subscribe(subscription);
         }

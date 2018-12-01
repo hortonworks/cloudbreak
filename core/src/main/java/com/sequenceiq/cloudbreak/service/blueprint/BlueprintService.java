@@ -92,7 +92,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         LOGGER.debug("Creating blueprint: Workspace: {} ({})", workspace.getId(), workspace.getName());
         Blueprint savedBlueprint;
         if (properties != null && !properties.isEmpty()) {
-            LOGGER.info("Extend blueprint with the following properties: {}", properties);
+            LOGGER.debug("Extend blueprint with the following properties: {}", properties);
             Map<String, Map<String, String>> configs = new HashMap<>(properties.size());
             for (Map<String, Map<String, String>> property : properties) {
                 for (Entry<String, Map<String, String>> entry : property.entrySet()) {
@@ -107,7 +107,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             String blueprintText = blueprint.getBlueprintText();
             String extendedBlueprint = blueprintProcessorFactory.get(blueprintText)
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
+            LOGGER.debug("Extended blueprint result: {}", extendedBlueprint);
             blueprint.setBlueprintText(extendedBlueprint);
         }
         try {
@@ -135,9 +135,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public Set<BlueprintView> getAllAvailableViewInWorkspace(Workspace workspace) {
         Set<Blueprint> blueprints = blueprintRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
         if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.info("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
+            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
             blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
-            LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+            LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return blueprintViewRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
@@ -145,9 +145,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
         Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
         if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.info("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
+            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
             blueprints = blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
-            LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+            LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return blueprints;
     }
@@ -167,7 +167,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Override
     public Blueprint delete(Blueprint blueprint) {
-        LOGGER.info("Deleting blueprint with name: {}", blueprint.getName());
+        LOGGER.debug("Deleting blueprint with name: {}", blueprint.getName());
         prepareDeletion(blueprint);
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);

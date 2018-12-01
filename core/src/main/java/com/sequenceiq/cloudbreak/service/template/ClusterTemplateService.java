@@ -71,9 +71,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public Set<ClusterTemplate> getAllAvailableInWorkspace(Workspace workspace) {
         Set<ClusterTemplate> clusterTemplates = repository.findAllByNotDeletedInWorkspace(workspace.getId());
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
-            LOGGER.info("Modifying clusterTemplates based on the defaults for the '{}' workspace.", workspace.getId());
+            LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{}' workspace.", workspace.getId());
             clusterTemplates = clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::saveDefaultsWithReadRight);
-            LOGGER.info("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+            LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return clusterTemplates;
     }

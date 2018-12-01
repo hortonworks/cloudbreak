@@ -34,7 +34,7 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
 
     @Override
     public void accept(Event<CheckImageRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         CheckImageRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -45,7 +45,7 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
             ImageStatusResult progress = connector.setup().checkImageStatus(auth, stack, image);
             CheckImageResult imageResult = new CheckImageResult(request, progress.getImageStatus(), progress.getStatusProgressValue());
             request.getResult().onNext(imageResult);
-            LOGGER.info("Provision setup finished for {}", cloudContext);
+            LOGGER.debug("Provision setup finished for {}", cloudContext);
         } catch (RuntimeException e) {
             CheckImageResult failure = new CheckImageResult(e, request, ImageStatus.CREATE_FAILED);
             request.getResult().onNext(failure);

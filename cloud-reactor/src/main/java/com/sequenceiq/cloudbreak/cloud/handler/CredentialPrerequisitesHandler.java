@@ -30,7 +30,7 @@ public class CredentialPrerequisitesHandler implements CloudPlatformEventHandler
 
     @Override
     public void accept(Event<CredentialPrerequisitesRequest> credentialPrerequisitesRequestEvent) {
-        LOGGER.info("Received event: {}", credentialPrerequisitesRequestEvent);
+        LOGGER.debug("Received event: {}", credentialPrerequisitesRequestEvent);
         CredentialPrerequisitesRequest request = credentialPrerequisitesRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -38,7 +38,7 @@ public class CredentialPrerequisitesHandler implements CloudPlatformEventHandler
             CredentialPrerequisites result = connector.credentials().getPrerequisites(cloudContext, request.getExternalId());
             CredentialPrerequisitesResult credentialPrerequisitesResult = new CredentialPrerequisitesResult(request, result);
             request.getResult().onNext(credentialPrerequisitesResult);
-            LOGGER.info("Credential prerequisites have been collected successfully for platform: '{}'!", cloudContext.getPlatform().value());
+            LOGGER.debug("Credential prerequisites have been collected successfully for platform: '{}'!", cloudContext.getPlatform().value());
         } catch (RuntimeException e) {
             request.getResult().onNext(new CredentialPrerequisitesResult(e.getMessage(), e, request));
         }

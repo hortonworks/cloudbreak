@@ -258,7 +258,7 @@ public class AzureClient {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
             boolean existed = container.deleteIfExists();
-            LOGGER.info("is container existed: " + existed);
+            LOGGER.debug("Is container existed: " + existed);
         } catch (StorageException e) {
             throw new CloudConnectorException("can't delete container in storage, storage service error occurred", e);
         }
@@ -270,7 +270,7 @@ public class AzureClient {
         try {
             CloudBlockBlob blob = container.getBlockBlobReference(blobName);
             boolean wasDeleted = blob.deleteIfExists();
-            LOGGER.info("blob was deleted: " + wasDeleted);
+            LOGGER.debug("Blob was deleted: " + wasDeleted);
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't delete blob in storage container, URI is not valid", e);
         } catch (StorageException e) {
@@ -288,7 +288,7 @@ public class AzureClient {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
             boolean created = container.createIfNotExists();
-            LOGGER.info("container created: " + created);
+            LOGGER.debug("Container created: " + created);
         } catch (StorageException e) {
             throw new CloudConnectorException("can't create container in storage, storage service error occurred", e);
         }
@@ -314,7 +314,7 @@ public class AzureClient {
         try {
             CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
             String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
-            LOGGER.info("image copy started, copy id: {}", copyId);
+            LOGGER.debug("Image copy started, copy id: {}", copyId);
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't copy image blob, URI is not valid", e);
         } catch (StorageException e) {
@@ -453,10 +453,10 @@ public class AzureClient {
         Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
                 .filter(customImage -> customImage.name().equals(imageName) && customImage.region().label().equals(region)).findFirst();
         if (virtualMachineCustomImage.isPresent()) {
-            LOGGER.info("custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
+            LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
             return virtualMachineCustomImage.get().id();
         } else {
-            LOGGER.info("custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
+            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
             VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
             return customImage.id();
         }
@@ -468,7 +468,7 @@ public class AzureClient {
 
     private VirtualMachineCustomImage createCustomImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
         return handleAuthException(() -> {
-            LOGGER.info("create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
+            LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
                     fromVhdUri, imageName, resourceGroup, region);
             if (!azure.resourceGroups().checkExistence(resourceGroup)) {
                 azure.resourceGroups().define(resourceGroup).withRegion(region).create();

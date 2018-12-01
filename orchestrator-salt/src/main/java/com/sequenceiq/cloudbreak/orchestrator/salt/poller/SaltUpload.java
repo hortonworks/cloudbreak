@@ -41,15 +41,15 @@ public class SaltUpload implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        LOGGER.info("Uploading files to: {}", targets);
+        LOGGER.debug("Uploading files to: {}", targets);
         if (!targets.isEmpty()) {
-            LOGGER.info("Current targets for upload: {}", targets);
+            LOGGER.debug("Current targets for upload: {}", targets);
 
             GenericResponses responses = sc.upload(targets, path, fileName, content);
 
             Set<String> failedTargets = new HashSet<>();
 
-            LOGGER.info("Salt file upload responses: {}", responses);
+            LOGGER.debug("Salt file upload responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.CREATED.value()) {
                     LOGGER.info("Failed upload attempt to: {}, error: {}", genericResponse.getAddress(), genericResponse.getErrorText());
@@ -65,7 +65,7 @@ public class SaltUpload implements OrchestratorBootstrap {
             }
         }
 
-        LOGGER.info("File upload has been completed on nodes: {}", originalTargets);
+        LOGGER.debug("File upload has been completed on nodes: {}", originalTargets);
         return true;
     }
 

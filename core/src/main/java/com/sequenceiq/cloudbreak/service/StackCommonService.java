@@ -303,7 +303,7 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
-        LOGGER.info("Get all stack, autoscale authorized only.");
+        LOGGER.debug("Get all stack, autoscale authorized only.");
         return stackService.getAllForAutoscale();
     }
 

@@ -120,13 +120,13 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 }
             }
             if (!stopped) {
-                LOGGER.info("Stop all Hadoop services");
+                LOGGER.debug("Stop all Hadoop services");
                 eventService
                         .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                                 cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STOPPING.code()));
                 int requestId = ambariClient.stopAllServices();
                 if (requestId != -1) {
-                    LOGGER.info("Waiting for Hadoop services to stop on stack");
+                    LOGGER.debug("Waiting for Hadoop services to stop on stack");
                     PollingResult servicesStopResult = ambariOperationService.waitForOperations(stack, ambariClient, singletonMap("stop services", requestId),
                             STOP_AMBARI_PROGRESS_STATE).getLeft();
                     if (isExited(servicesStopResult)) {
@@ -156,19 +156,19 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         } else if (isTimeout(ambariHealthCheckResult)) {
             throw new CloudbreakException("Ambari server was not restarted properly.");
         }
-        LOGGER.info("Starting Ambari agents on the hosts.");
+        LOGGER.debug("Starting Ambari agents on the hosts.");
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         PollingResult hostsJoinedResult = ambariPollingServiceProvider.ambariHostJoin(stack, ambariClient, hostsInCluster);
         if (isExited(hostsJoinedResult)) {
             throw new CancellationException("Cluster was terminated while starting Ambari agents.");
         }
 
-        LOGGER.info("Start all Hadoop services");
+        LOGGER.debug("Start all Hadoop services");
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTING.code()));
         int requestId = ambariClient.startAllServices();
         if (requestId == -1) {
-            LOGGER.error("Failed to start Hadoop services.");
+            LOGGER.info("Failed to start Hadoop services.");
             throw new CloudbreakException("Failed to start Hadoop services.");
         }
         return requestId;

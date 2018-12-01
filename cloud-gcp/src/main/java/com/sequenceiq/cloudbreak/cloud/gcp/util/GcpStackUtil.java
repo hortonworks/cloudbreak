@@ -174,7 +174,7 @@ public final class GcpStackUtil {
 
     private static String checkForErrors(Operation operation) {
         if (operation == null) {
-            LOGGER.error("Operation is null!");
+            LOGGER.info("Operation is null!");
             return null;
         }
         String msg = null;
@@ -217,7 +217,7 @@ public final class GcpStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.error("Error occurred while building Google Storage access.", e);
+            LOGGER.info("Error occurred while building Google Storage access.", e);
         }
         return null;
     }

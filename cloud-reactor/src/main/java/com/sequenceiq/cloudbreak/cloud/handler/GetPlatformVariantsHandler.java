@@ -27,13 +27,13 @@ public class GetPlatformVariantsHandler implements CloudPlatformEventHandler<Get
 
     @Override
     public void accept(Event<GetPlatformVariantsRequest> getPlatformVariantsRequestEvent) {
-        LOGGER.info("Received event: {}", getPlatformVariantsRequestEvent);
+        LOGGER.debug("Received event: {}", getPlatformVariantsRequestEvent);
         GetPlatformVariantsRequest request = getPlatformVariantsRequestEvent.getData();
         try {
             PlatformVariants pv = cloudPlatformConnectors.getPlatformVariants();
             GetPlatformVariantsResult platformVariantResult = new GetPlatformVariantsResult(request, pv);
             request.getResult().onNext(platformVariantResult);
-            LOGGER.info("Query platform variant finished.");
+            LOGGER.debug("Query platform variant finished.");
         } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformVariantsResult(e.getMessage(), e, request));
         }

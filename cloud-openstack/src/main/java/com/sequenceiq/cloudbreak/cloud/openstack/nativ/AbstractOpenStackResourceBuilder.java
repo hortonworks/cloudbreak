@@ -70,16 +70,16 @@ public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformA
             Iterable<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
-            LOGGER.info("Check {} resource: {}", type, resource);
+            LOGGER.debug("Check {} resource: {}", type, resource);
             try {
                 boolean finished = checkStatus(context, auth, resource);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
                 if (finished) {
                     if (successStatus == ResourceStatus.CREATED) {
-                        LOGGER.info("Creation of {} was successful", resource);
+                        LOGGER.debug("Creation of {} was successful", resource);
                     } else {
-                        LOGGER.info("Deletion of {} was successful", resource);
+                        LOGGER.debug("Deletion of {} was successful", resource);
                     }
                 }
             } catch (OS4JException ex) {

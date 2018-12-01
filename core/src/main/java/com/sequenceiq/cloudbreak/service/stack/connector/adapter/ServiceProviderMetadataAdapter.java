@@ -62,18 +62,18 @@ public class ServiceProviderMetadataAdapter {
         if (instance != null) {
             GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
                     new GetInstancesStateRequest<>(cloudContext, cloudCredential, Collections.singletonList(instance));
-            LOGGER.info("Triggering event: {}", stateRequest);
+            LOGGER.debug("Triggering event: {}", stateRequest);
             eventBus.notify(stateRequest.selector(), eventFactory.createEvent(stateRequest));
             try {
                 GetInstancesStateResult res = stateRequest.await();
-                LOGGER.info("Result: {}", res);
+                LOGGER.debug("Result: {}", res);
                 if (res.isFailed()) {
-                    LOGGER.error("Failed to retrieve instance state", res.getErrorDetails());
+                    LOGGER.info("Failed to retrieve instance state", res.getErrorDetails());
                     throw new OperationException(res.getErrorDetails());
                 }
                 return InstanceSyncState.getInstanceSyncState(res.getStatuses().get(0).getStatus());
             } catch (InterruptedException e) {
-                LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
+                LOGGER.info(format("Error while retrieving instance state of: %s", cloudContext), e);
                 throw new OperationException(e);
             }
         } else {

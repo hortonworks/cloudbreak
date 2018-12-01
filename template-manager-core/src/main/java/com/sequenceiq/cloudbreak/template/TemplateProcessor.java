@@ -24,7 +24,7 @@ public class TemplateProcessor {
         long started = System.currentTimeMillis();
         String generateBlueprint = generateTemplateWithParameters(sourceTemplate, source, customProperties);
         long generationTime = System.currentTimeMillis() - started;
-        LOGGER.info("The template text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
+        LOGGER.debug("The template text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
                 generationTime, JsonUtil.minify(generateBlueprint));
         return generateBlueprint;
     }
@@ -33,7 +33,7 @@ public class TemplateProcessor {
         long started = System.currentTimeMillis();
         List<String> blueprintParameters = queryTemplateParameters(sourceTemplate);
         long generationTime = System.currentTimeMillis() - started;
-        LOGGER.info("The template text processed successfully by the EL based template processor under {} ms, the parameters are: {}",
+        LOGGER.debug("The template text processed successfully by the EL based template processor under {} ms, the parameters are: {}",
                 generationTime, blueprintParameters);
         return blueprintParameters;
     }

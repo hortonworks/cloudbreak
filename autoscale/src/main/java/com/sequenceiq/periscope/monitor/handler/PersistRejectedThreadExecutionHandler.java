@@ -59,8 +59,8 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         Object realTask = findRealTask(r);
         if (realTask instanceof EvaluatorExecutor) {
-            LOGGER.info("Total count of rejected tasks: {}", rejectedThreadService.getAllRejectedCluster().size());
-            LOGGER.info("Thread is rejected: {} from {}", realTask, executor);
+            LOGGER.debug("Total count of rejected tasks: {}", rejectedThreadService.getAllRejectedCluster().size());
+            LOGGER.debug("Thread is rejected: {} from {}", realTask, executor);
             rejectedThreadService.create((EvaluatorExecutor) realTask);
             super.rejectedExecution(r, executor);
         }

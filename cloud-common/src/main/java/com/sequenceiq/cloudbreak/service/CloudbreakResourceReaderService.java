@@ -28,14 +28,14 @@ public class CloudbreakResourceReaderService {
         File customResourceFile = new File(etcConfigDir, fileName);
         try {
             if (customResourceFile.exists() && customResourceFile.isFile()) {
-                LOGGER.info("Read of customised resource file: {}", customResourceFile.toPath());
+                LOGGER.debug("Read of customised resource file: {}", customResourceFile.toPath());
                 return FileReaderUtils.readFileFromPath(customResourceFile.toPath());
             }
-            LOGGER.info("Customised resource file does not exist: {}", customResourceFile.toPath());
+            LOGGER.debug("Customised resource file does not exist: {}", customResourceFile.toPath());
         } catch (IOException e) {
             LOGGER.error("Failed to read file: {}", customResourceFile.toPath(), e);
         }
-        LOGGER.info("Read resource file from classpath: {}", "definitions/" + fileName);
+        LOGGER.debug("Read resource file from classpath: {}", "definitions/" + fileName);
         return FileReaderUtils.readFileFromClasspathQuietly("definitions/" + fileName);
 
     }

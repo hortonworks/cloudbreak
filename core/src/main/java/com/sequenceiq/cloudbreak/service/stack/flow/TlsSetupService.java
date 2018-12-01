@@ -57,7 +57,7 @@ public class TlsSetupService {
             Client client = RestClientUtil.createClient(sslContext, false, null);
             Integer gatewayPort = stack.getGatewayPort();
             String ip = gatewayConfigService.getGatewayIp(stack, gwInstance);
-            LOGGER.info("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
+            LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
             nginxPollerService.pollWithTimeoutSingleFailure(
                 nginxCertListenerTask, new NginxPollerObject(stack, client, ip, gatewayPort, x509TrustManager),
                 POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);

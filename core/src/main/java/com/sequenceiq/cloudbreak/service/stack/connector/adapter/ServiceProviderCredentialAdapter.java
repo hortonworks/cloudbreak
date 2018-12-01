@@ -60,14 +60,14 @@ public class ServiceProviderCredentialAdapter {
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
         CredentialVerificationRequest request = new CredentialVerificationRequest(cloudContext, cloudCredential);
-        LOGGER.info("Triggering event: {}", request);
+        LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             CredentialVerificationResult res = request.await();
             String message = "Failed to verify the credential: ";
-            LOGGER.info("Result: {}", res);
+            LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error(message, res.getErrorDetails());
+                LOGGER.info(message, res.getErrorDetails());
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
@@ -89,14 +89,14 @@ public class ServiceProviderCredentialAdapter {
                 credential.cloudPlatform(), userId, workspaceId);
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential);
-        LOGGER.info("Triggering event: {}", request);
+        LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             InteractiveLoginResult res = request.await();
             String message = "Interactive login Failed: ";
-            LOGGER.info("Result: {}", res);
+            LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error(message, res.getErrorDetails());
+                LOGGER.info(message, res.getErrorDetails());
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             return res.getParameters();
@@ -119,7 +119,7 @@ public class ServiceProviderCredentialAdapter {
                 newAttributes.put(SMART_SENSE_ID, smartSenseId);
                 credential.setAttributes(new Json(newAttributes).getValue());
             } catch (IOException e) {
-                LOGGER.error("SmartSense id could not be added to the credential as attribute.", e);
+                LOGGER.info("SmartSense id could not be added to the credential as attribute.", e);
             }
         }
     }

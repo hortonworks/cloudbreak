@@ -32,7 +32,7 @@ public class ConsulKeyValueService {
                 ConsulClient consulClient = ConsulUtils.createClient(ambari.getHost(), cluster.getPort(), tlsConfig);
                 String alertKey = getKeyNameForAlert(alert);
                 consulClient.setKVValue(alertKey, alert.getAlertRule());
-                LOGGER.info("Alert has been added to Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
+                LOGGER.debug("Alert has been added to Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
             }
         } catch (Exception e) {
             LOGGER.warn("Alert could not be added to Consul KV store: {}", e.getMessage());
@@ -47,7 +47,7 @@ public class ConsulKeyValueService {
             ConsulClient consulClient = ConsulUtils.createClient(ambari.getHost(), cluster.getPort(), tlsConfig);
             String alertKey = getKeyNameForAlert(alert);
             consulClient.deleteKVValue(alertKey);
-            LOGGER.info("Alert has been removed from Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
+            LOGGER.debug("Alert has been removed from Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
         } catch (Exception e) {
             LOGGER.warn("Alert could not be deleted from Consul KV store: {}", e.getMessage());
         }

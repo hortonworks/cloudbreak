@@ -82,7 +82,7 @@ public class GcpProvisionSetup implements Setup {
         } catch (Exception e) {
             Long stackId = cloudContext.getId();
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
-            LOGGER.error(msg, e);
+            LOGGER.info(msg, e);
             throw new CloudConnectorException(msg, e);
         }
     }
@@ -98,7 +98,7 @@ public class GcpProvisionSetup implements Setup {
             Compute compute = buildCompute(credential);
             Get getImages = compute.images().get(projectId, gcpApiImage.getName());
             String status = getImages.execute().getStatus();
-            LOGGER.info("Status of image {} copy: {}", gcpApiImage.getName(), status);
+            LOGGER.debug("Status of image {} copy: {}", gcpApiImage.getName(), status);
             if (READY.equals(status)) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             }

@@ -54,7 +54,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
 
     @Override
     public void accept(Event<LaunchStackRequest> launchStackRequestEvent) {
-        LOGGER.info("Received event: {}", launchStackRequestEvent);
+        LOGGER.debug("Received event: {}", launchStackRequestEvent);
         LaunchStackRequest request = launchStackRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -71,10 +71,10 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             LaunchStackResult result = ResourcesStatePollerResults.transformToLaunchStackResult(request, statePollerResult);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(launchStackRequestEvent.getHeaders(), result));
-            LOGGER.info("Launching the stack successfully finished for {}", cloudContext);
+            LOGGER.debug("Launching the stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
             LaunchStackResult failure = new LaunchStackResult(e, request);
-            LOGGER.error("Error during launching the stack:", e);
+            LOGGER.info("Error during launching the stack:", e);
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(launchStackRequestEvent.getHeaders(), failure));
         }

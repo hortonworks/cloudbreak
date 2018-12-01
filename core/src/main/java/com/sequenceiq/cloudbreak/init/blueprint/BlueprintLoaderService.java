@@ -52,16 +52,16 @@ public class BlueprintLoaderService {
                 return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing, workspace, saveMethod));
             }
         } catch (Exception e) {
-            LOGGER.error("Blueprints {} is not available for {} workspace.", collectNames(blueprintsWhichAreMissing), workspace.getId());
+            LOGGER.info("Blueprints {} is not available for {} workspace.", collectNames(blueprintsWhichAreMissing), workspace.getId());
         }
         return blueprints;
     }
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing,
             Workspace workspace, BiFunction<Iterable<Blueprint>, Workspace, Iterable<Blueprint>> saveMethod) {
-        LOGGER.info("Updating blueprints which should be modified.");
+        LOGGER.debug("Updating blueprints which should be modified.");
         Iterable<Blueprint> savedBlueprints = saveMethod.apply(blueprintsWhichAreMissing, workspace);
-        LOGGER.info("Finished to update blueprints which should be modified.");
+        LOGGER.debug("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints) {
             resultBlueprints.put(blueprint.getName(), blueprint);
@@ -78,31 +78,31 @@ public class BlueprintLoaderService {
 
     private Set<Blueprint> addMissingBlueprints(Iterable<Blueprint> blueprints, Workspace workspace) {
         Set<Blueprint> resultList = new HashSet<>();
-        LOGGER.info("Adding default blueprints which are missing for the user.");
+        LOGGER.debug("Adding default blueprints which are missing for the user.");
         for (Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
-            LOGGER.info("Default Blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
+            LOGGER.debug("Default Blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
                     diffBlueprint.getKey(), workspace.getId());
             resultList.add(setupBlueprint(diffBlueprint.getValue(), workspace));
         }
-        LOGGER.info("Finished to add default blueprints which are missing for the user.");
+        LOGGER.debug("Finished to add default blueprints which are missing for the user.");
         return resultList;
     }
 
     private Set<Blueprint> updateDefaultBlueprints(Iterable<Blueprint> blueprints, Workspace workspace) {
         Set<Blueprint> resultList = new HashSet<>();
-        LOGGER.info("Updating default blueprints which are contains text modifications.");
+        LOGGER.debug("Updating default blueprints which are contains text modifications.");
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
             Blueprint defaultBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
             if (defaultBlueprintExistInTheCache(defaultBlueprint)
                     && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint))) {
-                LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
+                LOGGER.debug("Default Blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintFromDatabase.getName(), workspace.getId());
                 resultList.add(prepareBlueprint(blueprintFromDatabase, defaultBlueprint, workspace));
             }
         }
-        LOGGER.info("Finished to Update default blueprints which are contains text modifications.");
+        LOGGER.debug("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
     }
 
@@ -124,7 +124,7 @@ public class BlueprintLoaderService {
     }
 
     private Map<String, Blueprint> collectDeviationOfExistingBlueprintsAndDefaultBlueprints(Iterable<Blueprint> blueprints) {
-        LOGGER.info("Collecting Blueprints which are missing from the defaults.");
+        LOGGER.debug("Collecting Blueprints which are missing from the defaults.");
         Map<String, Blueprint> diff = new HashMap<>();
         for (Entry<String, Blueprint> stringBlueprintEntry : defaultBlueprintCache.defaultBlueprints().entrySet()) {
             boolean contains = false;
@@ -138,7 +138,7 @@ public class BlueprintLoaderService {
                 diff.put(stringBlueprintEntry.getKey(), stringBlueprintEntry.getValue());
             }
         }
-        LOGGER.info("Finished to collect the default blueprints which are missing: {}.", diff);
+        LOGGER.debug("Finished to collect the default blueprints which are missing: {}.", diff);
         return diff;
     }
 

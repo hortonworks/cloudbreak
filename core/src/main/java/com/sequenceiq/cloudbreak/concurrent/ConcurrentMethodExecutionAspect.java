@@ -134,17 +134,17 @@ public class ConcurrentMethodExecutionAspect {
 
     private void logWaitingOperation(String lockPrefix, Long stackId) {
         if (stackId != null) {
-            LOGGER.info("Waiting for other {} operation on stack {} to be finished.", lockPrefix, stackId);
+            LOGGER.debug("Waiting for other {} operation on stack {} to be finished.", lockPrefix, stackId);
         } else {
-            LOGGER.info("Waiting for other {} operation to be finished.", lockPrefix);
+            LOGGER.debug("Waiting for other {} operation to be finished.", lockPrefix);
         }
     }
 
     private void logContinueOperation(String lockPrefix, Long stackId) {
         if (stackId != null) {
-            LOGGER.info("Continue {} operation on stack {}.", lockPrefix, stackId);
+            LOGGER.debug("Continue {} operation on stack {}.", lockPrefix, stackId);
         } else {
-            LOGGER.info("Continue {} operation.", lockPrefix);
+            LOGGER.debug("Continue {} operation.", lockPrefix);
         }
     }
 }

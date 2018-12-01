@@ -74,14 +74,14 @@ public class ScalingRequest implements Runnable {
                 scaleDown(scalingAdjustment, totalNodes);
             }
         } catch (RuntimeException e) {
-            LOGGER.error("Error while executing ScaleRequest", e);
+            LOGGER.info("Error while executing ScaleRequest", e);
         }
     }
 
     private void scaleUp(int scalingAdjustment, int totalNodes) {
         metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
         if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
-            LOGGER.info("Upscale requested for {} nodes. Upscaling with the maximum allowed of {} node(s)",
+            LOGGER.debug("Upscale requested for {} nodes. Upscaling with the maximum allowed of {} node(s)",
                     scalingAdjustment, scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
             scalingAdjustment = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
         }
@@ -92,7 +92,7 @@ public class ScalingRequest implements Runnable {
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
-            LOGGER.info("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
+            LOGGER.debug("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setWithClusterEvent(true);
@@ -107,7 +107,7 @@ public class ScalingRequest implements Runnable {
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
-            LOGGER.error(statusReason, e);
+            LOGGER.info(statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
             createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
@@ -123,7 +123,7 @@ public class ScalingRequest implements Runnable {
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
-            LOGGER.info("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
+            LOGGER.debug("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -139,7 +139,7 @@ public class ScalingRequest implements Runnable {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
-            LOGGER.error(statusReason, e);
+            LOGGER.info(statusReason, e);
         } finally {
             createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
         }

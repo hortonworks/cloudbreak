@@ -50,7 +50,7 @@ public class DefaultBlueprintCache {
             try {
                 String[] split = blueprintText.trim().split("=");
                 if (blueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
-                    LOGGER.info("Load default validation '{}'.", blueprintText);
+                    LOGGER.debug("Load default validation '{}'.", blueprintText);
                     BlueprintRequest blueprintJson = new BlueprintRequest();
                     blueprintJson.setName(split[0].trim());
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
@@ -64,7 +64,7 @@ public class DefaultBlueprintCache {
                     defaultBlueprints.put(bp.getName(), bp);
                 }
             } catch (IOException e) {
-                LOGGER.info("Can not read default validation from file: ", e);
+                LOGGER.error("Can not read default validation from file: ", e);
             }
         }
     }

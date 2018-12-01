@@ -117,7 +117,7 @@ public class LeaderElectionService {
                         return null;
                     });
                 } catch (TransactionExecutionException e) {
-                    LOGGER.info("Failed to select node as leader, something went wrong. Message: {}", e.getMessage());
+                    LOGGER.error("Failed to select node as leader, something went wrong. Message: {}", e.getMessage());
                     return;
                 }
                 metricService.submit(MetricType.LEADER, 1);

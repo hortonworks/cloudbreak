@@ -30,13 +30,13 @@ public class HostGroupAssociationBuilder {
 
     public Map<String, List<Map<String, String>>> buildHostGroupAssociations(Iterable<HostGroup> hostGroups) {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
-        LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
+        LOGGER.debug("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
             List<Map<String, String>> hostInfoForHostGroup = buildHostGroupAssociation(hostGroup);
 
             hostGroupMappings.put(hostGroup.getName(), hostInfoForHostGroup);
         }
-        LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
+        LOGGER.debug("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;
     }
 
@@ -87,7 +87,7 @@ public class HostGroupAssociationBuilder {
 
     private Map<String, String> getTopologyMapping(HostGroup hg) {
         Map<String, String> result = new HashMap<>();
-        LOGGER.info("Computing hypervisor - rack mapping based on topology");
+        LOGGER.debug("Computing hypervisor - rack mapping based on topology");
         Topology topology = hg.getCluster().getStack().getCredential().getTopology();
         if (topology == null) {
             return result;

@@ -162,7 +162,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 response.setAmbariStackDetails(ambariRepoDetailsJson);
             }
         } catch (RuntimeException e) {
-            LOGGER.error("Failed to convert dynamic component.", e);
+            LOGGER.info("Failed to convert dynamic component.", e);
         }
 
     }
@@ -244,7 +244,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 clusterResponse.setCustomContainers(new CustomContainerResponse(result));
 
             } catch (IOException e) {
-                LOGGER.error("Failed to add customContainerDefinition to response", e);
+                LOGGER.info("Failed to add customContainerDefinition to response", e);
                 throw new CloudbreakApiException("Failed to add customContainerDefinition to response", e);
             }
         }
@@ -263,7 +263,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 }
             }
         } catch (IOException ignored) {
-            LOGGER.error("Could not convert blueprintinputs json to Set.");
+            LOGGER.info("Could not convert blueprintinputs json to Set.");
         }
         return blueprintInputJsons;
 

@@ -36,7 +36,7 @@ public class ApplicationProxyConfig {
     @PostConstruct
     public void init() {
         if (isProxyAuthRequired()) {
-            LOGGER.info("Configure the JVM default authenticator for proxy: {}:{} with user: {}", httpsProxyHost, httpsProxyPort, httpsProxyUser);
+            LOGGER.debug("Configure the JVM default authenticator for proxy: {}:{} with user: {}", httpsProxyHost, httpsProxyPort, httpsProxyUser);
             Authenticator.setDefault(new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {

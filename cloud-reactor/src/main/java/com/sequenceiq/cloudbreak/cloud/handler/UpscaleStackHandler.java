@@ -51,7 +51,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
 
     @Override
     public void accept(Event<UpscaleStackRequest> upscaleStackRequestEvent) {
-        LOGGER.info("Received event: {}", upscaleStackRequestEvent);
+        LOGGER.debug("Received event: {}", upscaleStackRequestEvent);
         UpscaleStackRequest request = upscaleStackRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -67,7 +67,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             UpscaleStackResult result = ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult, request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
-            LOGGER.info("Upscale successfully finished for {}", cloudContext);
+            LOGGER.debug("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request);
             request.getResult().onNext(result);

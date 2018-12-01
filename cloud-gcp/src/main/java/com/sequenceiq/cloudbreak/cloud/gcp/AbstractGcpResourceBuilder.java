@@ -58,7 +58,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
     protected List<CloudResourceStatus> checkResources(ResourceType type, GcpContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
-            LOGGER.info("Check {} resource: {}", type, resource);
+            LOGGER.debug("Check {} resource: {}", type, resource);
             try {
                 Operation operation = check(context, resource);
                 boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
@@ -66,9 +66,9 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
                 if (finished) {
                     if (successStatus == ResourceStatus.CREATED) {
-                        LOGGER.info("Creation of {} was successful", resource);
+                        LOGGER.debug("Creation of {} was successful", resource);
                     } else {
-                        LOGGER.info("Deletion of {} was successful", resource);
+                        LOGGER.debug("Deletion of {} was successful", resource);
                     }
                 }
             } catch (Exception e) {
@@ -149,7 +149,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, ResourceType resourceType) {
         if (ex.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
-            LOGGER.info("Resource {} not found: {}", resourceType, name);
+            LOGGER.debug("Resource {} not found: {}", resourceType, name);
         } else {
             throw new GcpResourceException(ex.getDetails().getMessage(), ex);
         }

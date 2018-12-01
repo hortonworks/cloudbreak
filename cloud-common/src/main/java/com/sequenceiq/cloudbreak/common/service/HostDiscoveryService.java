@@ -24,7 +24,7 @@ public class HostDiscoveryService {
         if (StringUtils.isNoneBlank(domainName)) {
             String sub = getSubDomain(subDomain, useSubDomain);
             result = domainName.startsWith(".") ? sub + domainName : sub + '.' + domainName;
-            LOGGER.info("Custom domain defined: {}", result);
+            LOGGER.debug("Custom domain defined: {}", result);
 
         }
         return result;

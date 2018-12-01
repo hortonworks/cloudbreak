@@ -17,7 +17,7 @@ public class OpenSshPublicKeyValidator {
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
                     publicKey, e.getMessage());
-            LOGGER.error(errorMessage, e);
+            LOGGER.info(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }
     }

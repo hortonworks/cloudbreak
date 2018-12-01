@@ -82,7 +82,7 @@ public class ClusterBootstrapperErrorHandler {
         if (!missingNodes.isEmpty()) {
             String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(),
                     Collections.singletonList(missingNodes.size()));
-            LOGGER.info(message);
+            LOGGER.debug(message);
             eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
 
             for (Node missingNode : missingNodes) {
@@ -96,7 +96,7 @@ public class ClusterBootstrapperErrorHandler {
                 instanceGroupRepository.save(ig);
                 message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_DELETING_NODE.code(),
                         Arrays.asList(instanceMetaData.getInstanceId(), ig.getGroupName()));
-                LOGGER.info(message);
+                LOGGER.debug(message);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
                 deleteInstanceResourceFromDatabase(stack, instanceMetaData);
@@ -104,7 +104,7 @@ public class ClusterBootstrapperErrorHandler {
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instanceMetaData);
-                LOGGER.info("InstanceMetadata [name: {}, id: {}] status set to {}.", instanceMetaData.getId(), instanceMetaData.getInstanceId(),
+                LOGGER.debug("InstanceMetadata [name: {}, id: {}] status set to {}.", instanceMetaData.getId(), instanceMetaData.getInstanceId(),
                         instanceMetaData.getInstanceStatus());
             }
         }
@@ -128,11 +128,11 @@ public class ClusterBootstrapperErrorHandler {
     }
 
     private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
-        LOGGER.info("Rolling back instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
+        LOGGER.debug("Rolling back instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
         connector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
-        LOGGER.info("Deleted instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
+        LOGGER.debug("Deleted instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
     }
 
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {

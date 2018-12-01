@@ -31,7 +31,7 @@ public class GetPlatformEncryptionKeysHandler implements CloudPlatformEventHandl
 
     @Override
     public void accept(Event<GetPlatformEncryptionKeysRequest> getPlatformEncryptionKeysRequest) {
-        LOGGER.info("Received event: {}", getPlatformEncryptionKeysRequest);
+        LOGGER.debug("Received event: {}", getPlatformEncryptionKeysRequest);
         GetPlatformEncryptionKeysRequest request = getPlatformEncryptionKeysRequest.getData();
 
         try {
@@ -43,7 +43,7 @@ public class GetPlatformEncryptionKeysHandler implements CloudPlatformEventHandl
                     .encryptionKeys(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformEncryptionKeysResult getPlatformEncryptionKeysResult = new GetPlatformEncryptionKeysResult(request, encryptionKeys);
             request.getResult().onNext(getPlatformEncryptionKeysResult);
-            LOGGER.info("Query platform encryption keys types finished.");
+            LOGGER.debug("Query platform encryption keys types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformEncryptionKeysResult(e.getMessage(), e, request));
         }

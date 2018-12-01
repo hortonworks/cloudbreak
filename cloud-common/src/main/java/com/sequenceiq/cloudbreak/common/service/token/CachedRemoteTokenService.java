@@ -55,7 +55,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         this.clientSecret = clientSecret;
         objectMapper = new ObjectMapper();
         jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        LOGGER.info("Init RemoteTokenServices with clientId: {}, identityServerUrl: {}", clientId, identityServerUrl);
+        LOGGER.debug("Init RemoteTokenServices with clientId: {}, identityServerUrl: {}", clientId, identityServerUrl);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         Map<String, Object> map = identityClient.loadAuthentication(accessToken, clientSecret);
         OAuth2Authentication oAuth2Authentication = tokenConverter.extractAuthentication(map);
         if (oAuth2Authentication != null) {
-            LOGGER.info("OAuth2 token verified for: {}", oAuth2Authentication.getPrincipal());
+            LOGGER.debug("OAuth2 token verified for: {}", oAuth2Authentication.getPrincipal());
         }
         return oAuth2Authentication;
     }
@@ -96,7 +96,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             String tenant;
             if (claims.get("tenant_name") != null) {
                 tenant = claims.get("tenant_name");
-                LOGGER.info("tenant for the token is: {}", tenant);
+                LOGGER.debug("Tenant for the token is: {}", tenant);
             } else {
                 throw new InvalidTokenException("No 'tenant_name' claim in token");
             }
@@ -121,7 +121,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             }
             OAuth2Authentication oAuth2Authentication = jwtAccessTokenConverter.extractAuthentication(tokenMap);
             if (oAuth2Authentication != null) {
-                LOGGER.info("JWT token verified for: {}", oAuth2Authentication.getPrincipal());
+                LOGGER.debug("JWT token verified for: {}", oAuth2Authentication.getPrincipal());
             }
             return oAuth2Authentication;
         } catch (ProcessingException e) {

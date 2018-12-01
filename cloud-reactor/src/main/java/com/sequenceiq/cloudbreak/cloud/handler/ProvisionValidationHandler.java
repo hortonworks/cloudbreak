@@ -36,7 +36,7 @@ public class ProvisionValidationHandler implements CloudPlatformEventHandler<Val
 
     @Override
     public void accept(Event<ValidationRequest> event) {
-        LOGGER.info("Received event: {}", event);
+        LOGGER.debug("Received event: {}", event);
         ValidationRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         ValidationResult result;

@@ -61,7 +61,7 @@ public class OpenStackImageVerifier {
         }
         if (allImages != null) {
             for (BasicResource image : allImages) {
-                LOGGER.info("Available images: {}, entry: {}", image.getName(), image);
+                LOGGER.debug("Available images: {}, entry: {}", image.getName(), image);
             }
         }
         LOGGER.warn("OpenStack image: {} not found", name);
@@ -70,7 +70,7 @@ public class OpenStackImageVerifier {
 
     private void handleMultipleImagesFound(List<? extends BasicResource> images, String name) {
         for (BasicResource image : images) {
-            LOGGER.info("Multiple images found: {}, entry: {}", image.getName(), image);
+            LOGGER.debug("Multiple images found: {}, entry: {}", image.getName(), image);
         }
         List<String> imageIds = images.stream().map(BasicResource::getId).collect(Collectors.toList());
         throw new CloudConnectorException(String.format("Multiple OpenStack images found with ids: %s, image name: %s",
@@ -79,7 +79,7 @@ public class OpenStackImageVerifier {
 
     private Optional<ImageStatus> getStatusForSingleResult(List<? extends BasicResource> images, String name, boolean v2Resource) {
         ImageStatus imageStatus;
-        LOGGER.info("OpenStack Image found: {}, entry: {}", name, images);
+        LOGGER.debug("OpenStack Image found: {}, entry: {}", name, images);
         BasicResource foundImage = images.get(0);
         if (v2Resource) {
             imageStatus = Image.class.cast(foundImage).getStatus();

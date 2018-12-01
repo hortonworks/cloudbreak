@@ -36,14 +36,14 @@ public class ComputeApiExtractor implements CloudInstanceMetaDataExtractor {
                 switch (adr.getType()) {
                     case "fixed":
                         privateIp = adr.getAddr();
-                        LOGGER.info("PrivateIp of instance: {} is {}", server.getName(), privateIp);
+                        LOGGER.debug("PrivateIp of instance: {} is {}", server.getName(), privateIp);
                         break;
                     case "floating":
                         floatingIp = adr.getAddr();
-                        LOGGER.info("FloatingIp of instance: {} is {}", server.getName(), floatingIp);
+                        LOGGER.debug("FloatingIp of instance: {} is {}", server.getName(), floatingIp);
                         break;
                     default:
-                        LOGGER.error("No such network resource type: {}, instance: {}", adr.getType(), server.getName());
+                        LOGGER.info("No such network resource type: {}, instance: {}", adr.getType(), server.getName());
                 }
             }
         }

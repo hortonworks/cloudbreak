@@ -44,7 +44,7 @@ public class ConstraintTemplateService extends AbstractWorkspaceAwareResourceSer
 
     @Override
     public ConstraintTemplate delete(ConstraintTemplate constraintTemplate) {
-        LOGGER.info("Deleting constraint-template. {} - {}", new Object[]{constraintTemplate.getId(), constraintTemplate.getName()});
+        LOGGER.debug("Deleting constraint-template. {} - {}", new Object[]{constraintTemplate.getId(), constraintTemplate.getName()});
         List<Cluster> clusters = clusterService.findAllClustersForConstraintTemplate(constraintTemplate.getId());
         if (clusters.isEmpty()) {
             if (ResourceStatus.USER_MANAGED.equals(constraintTemplate.getStatus())) {

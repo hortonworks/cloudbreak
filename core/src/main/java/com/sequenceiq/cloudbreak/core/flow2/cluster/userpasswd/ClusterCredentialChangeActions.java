@@ -89,7 +89,7 @@ public class ClusterCredentialChangeActions {
         return new AbstractStackFailureAction<ClusterCredentialChangeState, ClusterCredentialChangeEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Exception during cluster authentication change!: {}", payload.getException().getMessage());
+                LOGGER.info("Exception during cluster authentication change!: {}", payload.getException().getMessage());
                 flowMessageService.fireEventAndLog(payload.getStackId(), Msg.AMBARI_CLUSTER_CHANGE_CREDENTIAL_FAILED, UPDATE_FAILED.name());
                 sendEvent(context);
             }

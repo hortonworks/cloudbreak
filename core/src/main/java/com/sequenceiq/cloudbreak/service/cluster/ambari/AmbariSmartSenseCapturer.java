@@ -28,7 +28,7 @@ public class AmbariSmartSenseCapturer {
         Optional<SmartSenseSubscription> smartSenseSubscription = smartSenseSubscriptionService.getDefault();
         if (smartsenseConfigurationLocator.smartsenseConfigurable(smartSenseSubscription)) {
             try {
-                LOGGER.info("Triggering SmartSense data capture.");
+                LOGGER.debug("Triggering SmartSense data capture.");
                 ambariClient.smartSenseCapture(caseId);
             } catch (Exception e) {
                 LOGGER.error("Triggering SmartSense capture is failed.", e);

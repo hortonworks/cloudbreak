@@ -32,7 +32,7 @@ public class CredentialSender implements CredentialNotifier {
     public void createCredential(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential) {
         InteractiveCredentialCreationRequest credentialCreationRequest =
                 new InteractiveCredentialCreationRequest(cloudContext, extendedCloudCredential);
-        LOGGER.info("Triggering event: {}", credentialCreationRequest);
+        LOGGER.debug("Triggering event: {}", credentialCreationRequest);
         eventBus.notify(credentialCreationRequest.selector(), eventFactory.createEvent(credentialCreationRequest));
     }
 

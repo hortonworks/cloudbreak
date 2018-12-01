@@ -25,7 +25,7 @@ public class ConsulKVCheckerTask extends StackBasedStatusCheckerTask<ConsulKVChe
         String expectedValue = context.getExpectedValue();
         String failValue = context.getFailValue();
         ConsulClient client = context.getConsulClient();
-        LOGGER.info("Checking if keys in Consul's key-value store have the expected value '{}'", expectedValue);
+        LOGGER.debug("Checking if keys in Consul's key-value store have the expected value '{}'", expectedValue);
         Set<String> failedKeys = new HashSet<>();
         int matchingKeys = 0;
         int notFoundKeys = 0;
@@ -41,7 +41,7 @@ public class ConsulKVCheckerTask extends StackBasedStatusCheckerTask<ConsulKVChe
                 notFoundKeys++;
             }
         }
-        LOGGER.info("Keys: [Total: {}, {}: {}, Not {}: {}, Not found: {}, {}: {}]",
+        LOGGER.debug("Keys: [Total: {}, {}: {}, Not {}: {}, Not found: {}, {}: {}]",
                 keys.size(),
                 expectedValue, matchingKeys,
                 expectedValue, keys.size() - matchingKeys - notFoundKeys - failedKeys.size(),

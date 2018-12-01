@@ -55,7 +55,7 @@ public class InstanceTerminationService {
             if (stack.getCluster() != null) {
                 HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
                 if (hostMetadata == null) {
-                    LOGGER.info("Nothing to remove since hostmetadata is null");
+                    LOGGER.debug("Nothing to remove since hostmetadata is null");
                 } else if (HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
                     throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
                 }
@@ -78,19 +78,19 @@ public class InstanceTerminationService {
             if (stack.getCluster() != null) {
                 HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
                 if (hostMetadata != null) {
-                    LOGGER.info("Remove obsolete host: {}", hostMetadata.getHostName());
+                    LOGGER.debug("Remove obsolete host: {}", hostMetadata.getHostName());
                     stackScalingService.removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata);
                 }
             }
         }
-        LOGGER.info("Terminate instance result: {}", payload);
+        LOGGER.debug("Terminate instance result: {}", payload);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Instance removed");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
     }
 
     public void handleInstanceTerminationError(long stackId, StackFailureEvent payload) {
         Exception ex = payload.getException();
-        LOGGER.error("Error during instance terminating flow:", ex);
+        LOGGER.info("Error during instance terminating flow:", ex);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instance termination failed. " + ex.getMessage());
         flowMessageService.fireEventAndLog(stackId, Msg.STACK_REMOVING_INSTANCE_FAILED, DELETE_FAILED.name(), ex.getMessage());
     }

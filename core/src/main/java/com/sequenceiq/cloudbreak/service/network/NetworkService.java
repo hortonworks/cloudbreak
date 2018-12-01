@@ -65,7 +65,7 @@ public class NetworkService extends AbstractWorkspaceAwareResourceService<Networ
     }
 
     private void deleteImpl(Network network) {
-        LOGGER.info("Deleting network with name: {}", network.getName());
+        LOGGER.debug("Deleting network with name: {}", network.getName());
         List<Stack> stacksWithThisNetwork = new ArrayList<>(stackService.getByNetwork(network));
         if (!stacksWithThisNetwork.isEmpty()) {
             if (stacksWithThisNetwork.size() > 1) {

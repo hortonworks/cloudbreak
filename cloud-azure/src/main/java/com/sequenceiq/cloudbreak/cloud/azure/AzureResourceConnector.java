@@ -122,13 +122,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             }
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
-                LOGGER.info("created template deployment for launch: {}", templateDeployment.exportTemplate().template());
+                LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
                 if (!azureUtils.isExistingNetwork(stack.getNetwork())) {
                     client.collectAndSaveNetworkAndSubnet(resourceGroupName, stackName, notifier, ac.getCloudContext());
                 }
             }
         } catch (CloudException e) {
-            LOGGER.error("Provisioning error, cloud exception happened: ", e);
+            LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
                 String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
                 throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
@@ -137,7 +137,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
             }
         } catch (Exception e) {
-            LOGGER.error("Provisioning error:", e);
+            LOGGER.info("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
         }
 
@@ -156,7 +156,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
                 case ARM_TEMPLATE:
-                    LOGGER.info("Checking Azure group stack status of: {}", stackName);
+                    LOGGER.debug("Checking Azure group stack status of: {}", stackName);
                     try {
                         String resourceGroupName = resource.getName();
                         CloudResourceStatus templateResourceStatus;
@@ -202,7 +202,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                     });
                     client.deleteResourceGroup(resourceGroupName);
                 } catch (ActionWentFailException ignored) {
-                    LOGGER.info("Resource group not found with name: {}", resourceGroupName);
+                    LOGGER.debug("Resource group not found with name: {}", resourceGroupName);
                 }
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
                     CloudContext cloudCtx = ac.getCloudContext();
@@ -253,12 +253,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                         azureStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
             }
             Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
-            LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
+            LOGGER.debug("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
             CloudResource armTemplate = resources.stream().filter(r -> r.getType() == ResourceType.ARM_TEMPLATE).findFirst()
                     .orElseThrow(() -> new CloudConnectorException(String.format("Arm Template not found for: %s  ", stackName)));
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (CloudException e) {
-            LOGGER.error("Upscale error, cloud exception happened: ", e);
+            LOGGER.info("Upscale error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
                 String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
                 throw new CloudConnectorException(String.format("Stack upscale failed, status code %s, error message: %s, details: %s",
@@ -447,7 +447,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (e.response().code() != AzureConstants.NOT_FOUND) {
                 throw new CloudConnectorException(String.format("Could not delete container: %s", container), e);
             } else {
-                LOGGER.info("container not found: resourcegroup={}, storagename={}, container={}",
+                LOGGER.debug("Container not found: resourcegroup={}, storagename={}, container={}",
                         resourceGroup, storageName, container);
             }
         }
@@ -467,7 +467,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 if (e.response().code() != AzureConstants.NOT_FOUND) {
                     throw new CloudConnectorException(String.format("Could not delete blob: %s", storageProfileDiskName), e);
                 } else {
-                    LOGGER.info("disk not found: resourceGroup={}, storageName={}, container={}, storageProfileDiskName: {}",
+                    LOGGER.debug("Disk not found: resourceGroup={}, storageName={}, container={}, storageProfileDiskName: {}",
                             resourceGroup, storageName, container, storageProfileDiskName);
                 }
             }
@@ -483,7 +483,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 if (e.response().code() != AzureConstants.NOT_FOUND) {
                     throw new CloudConnectorException(String.format("Could not delete network interface: %s", networkInterfacesName), e);
                 } else {
-                    LOGGER.info("network interface not found: {}, {}", resourceGroupName, networkInterfacesName);
+                    LOGGER.debug("Network interface not found: {}, {}", resourceGroupName, networkInterfacesName);
                 }
             }
         }
@@ -496,7 +496,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 if (publicIpAddress != null) {
                     client.deletePublicIpAddressById(publicIpAddress.id());
                 } else {
-                    LOGGER.info("public ip not found: stackName={}, publicIpName={}", resourceGroupName, publicIpName);
+                    LOGGER.debug("Public ip not found: stackName={}, publicIpName={}", resourceGroupName, publicIpName);
                 }
             } catch (CloudException e) {
                 throw new CloudConnectorException(String.format("Could not delete public IP address: %s", publicIpName), e);
@@ -509,7 +509,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         if (client.isVirtualMachineExists(resourceGroupName, privateInstanceId)) {
             client.deleteVirtualMachine(resourceGroupName, privateInstanceId);
         } else {
-            LOGGER.info("virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
+            LOGGER.debug("Virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
         }
     }
 
@@ -521,7 +521,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (e.response().code() != AzureConstants.NOT_FOUND) {
                 throw new CloudConnectorException(String.format("Could not deallocate machine: %s", privateInstanceId), e);
             } else {
-                LOGGER.info("virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
+                LOGGER.debug("Virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
             }
         }
     }

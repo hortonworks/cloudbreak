@@ -22,7 +22,7 @@ public class NetworkConfigurationValidator {
                 nodeCount += instanceGroup.getNodeCount();
             }
             if (addressCount < nodeCount) {
-                LOGGER.error("Cannot assign more than {} addresses in the selected subnet.", addressCount);
+                LOGGER.info("Cannot assign more than {} addresses in the selected subnet.", addressCount);
                 throw new BadRequestException(
                         String.format("Cannot assign more than %s addresses in the selected subnet.", addressCount));
             }

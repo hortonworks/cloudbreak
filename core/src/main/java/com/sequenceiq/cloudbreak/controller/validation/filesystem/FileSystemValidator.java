@@ -45,7 +45,7 @@ public class FileSystemValidator {
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             FileSystemValidationResult result = request.await();
-            LOGGER.info("File system validation result: {}", result);
+            LOGGER.debug("File system validation result: {}", result);
             Exception exception = result.getErrorDetails();
             if (exception != null) {
                 throw new BadRequestException(result.getStatusReason(), exception);

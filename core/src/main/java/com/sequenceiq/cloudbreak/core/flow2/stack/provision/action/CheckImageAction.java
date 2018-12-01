@@ -53,7 +53,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
                 sendEvent(context);
                 break;
             case CREATE_FAILED:
-                LOGGER.error("Error during image status check: {}", payload);
+                LOGGER.info("Error during image status check: {}", payload);
                 int faultNum = getFaultNum(variables) + 1;
                 if (faultNum == FAULT_TOLERANCE) {
                     removeFaultNum(variables);

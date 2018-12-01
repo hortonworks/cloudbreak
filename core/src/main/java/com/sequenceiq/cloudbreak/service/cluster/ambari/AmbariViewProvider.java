@@ -26,7 +26,7 @@ public class AmbariViewProvider {
 
     public Cluster provideViewInformation(AmbariClient ambariClient, Cluster cluster) {
         try {
-            LOGGER.info("Provide view definitions.");
+            LOGGER.debug("Provide view definitions.");
             List<String> viewDefinitions = (List<String>) ambariClient.getViewDefinitions();
 
             Map<String, Object> obj = new Json(cluster.getAttributes()).getMap();

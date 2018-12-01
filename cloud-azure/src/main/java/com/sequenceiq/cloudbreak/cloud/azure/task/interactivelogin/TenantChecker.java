@@ -66,7 +66,7 @@ public class TenantChecker {
             String errorResponse = response.readEntity(String.class);
             try {
                 String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                LOGGER.error("Tenant retrieve error:" + errorMessage);
+                LOGGER.info("Tenant retrieve error:" + errorMessage);
                 throw new InteractiveLoginException("Error with the tenant specified in Profile file id: " + tenantId + ", message: " + errorMessage);
             } catch (IOException e) {
                 throw new IllegalStateException(e);

@@ -122,11 +122,11 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         AmbariClient client = clientFactory.getAmbariClient(stack, stack.getCluster());
         PollingResult pollingResult = ambariPollingServiceProvider.ambariStartupPollerObjectPollingService(stack, defaultClient, client);
         if (isSuccess(pollingResult)) {
-            LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
+            LOGGER.debug("Ambari has successfully started! Polling result: {}", pollingResult);
         } else if (isExited(pollingResult)) {
             throw new CancellationException("Polling of Ambari server start has been cancelled.");
         } else {
-            LOGGER.info("Could not start Ambari. polling result: {}", pollingResult);
+            LOGGER.debug("Could not start Ambari. polling result: {}", pollingResult);
             throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s'", pollingResult));
         }
     }
@@ -182,7 +182,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private String constructClusterFailedMessage(Long clusterId, AmbariClient ambariClient) {
         String ambariClusterInstallFailedMsg = cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_INSTALL_FAILED.code());
         ClusterStatusResult clusterStatusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
-        LOGGER.info("There are not started services. Cluster: [{}], services: [{}]", clusterId, clusterStatusResult.getComponentsInStatus());
+        LOGGER.debug("There are not started services. Cluster: [{}], services: [{}]", clusterId, clusterStatusResult.getComponentsInStatus());
         return String.format("%s Not started services: [%s]", ambariClusterInstallFailedMsg, clusterStatusResult.getComponentsInStatus());
     }
 
@@ -198,7 +198,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     @Override
     public void waitForServices(Stack stack, int requestId) throws CloudbreakException {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
-        LOGGER.info("Waiting for Hadoop services to start on stack");
+        LOGGER.debug("Waiting for Hadoop services to start on stack");
         PollingResult servicesStartResult = ambariOperationService
                 .waitForOperations(stack, ambariClient, singletonMap("start services", requestId), START_AMBARI_PROGRESS_STATE).getLeft();
         if (isExited(servicesStartResult)) {
@@ -218,11 +218,11 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     private void addBlueprint(Long stackId, AmbariClient ambariClient, String blueprintText, Boolean topologyValidation) {
         try {
-            LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
+            LOGGER.debug("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText, topologyValidation);
         } catch (HttpResponseException hre) {
             if (hre.getStatusCode() == HttpStatus.SC_CONFLICT) {
-                LOGGER.info("Ambari blueprint already exists for stack: {}", stackId);
+                LOGGER.debug("Ambari blueprint already exists for stack: {}", stackId);
             } else {
                 throw new CloudbreakServiceException("Ambari blueprint could not be added: " + AmbariClientExceptionUtil.getErrorMessage(hre), hre);
             }

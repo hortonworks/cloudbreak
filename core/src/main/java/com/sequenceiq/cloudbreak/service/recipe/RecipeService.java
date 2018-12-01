@@ -81,7 +81,7 @@ public class RecipeService extends AbstractWorkspaceAwareResourceService<Recipe>
         if (recipe == null) {
             throw new NotFoundException("Recipe not found.");
         }
-        LOGGER.info("Check if recipe can be deleted. {} - {}", recipe.getId(), recipe.getName());
+        LOGGER.debug("Check if recipe can be deleted. {} - {}", recipe.getId(), recipe.getName());
         List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()));
         if (!hostGroupsWithRecipe.isEmpty()) {
             if (hostGroupsWithRecipe.size() > 1) {

@@ -16,17 +16,17 @@ public class AmbariStartupListenerTask extends ClusterBasedStatusCheckerTask<Amb
     @Override
     public boolean checkStatus(AmbariStartupPollerObject aSPO) {
         boolean ambariRunning = false;
-        LOGGER.info("Polling Ambari server's status [Ambari server address: '{}'].", aSPO.getAmbariAddress());
+        LOGGER.debug("Polling Ambari server's status [Ambari server address: '{}'].", aSPO.getAmbariAddress());
         for (AmbariClient ambariClient : aSPO.getAmbariClients()) {
             try {
                 String ambariHealth = ambariClient.healthCheck();
-                LOGGER.info("Ambari health check returned: {} [Ambari server address: '{}']", ambariHealth, aSPO.getAmbariAddress());
+                LOGGER.debug("Ambari health check returned: {} [Ambari server address: '{}']", ambariHealth, aSPO.getAmbariAddress());
                 if ("RUNNING".equals(ambariHealth)) {
                     ambariRunning = true;
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.info("Ambari health check failed: {}", e.getMessage());
+                LOGGER.debug("Ambari health check failed: {}", e.getMessage());
             }
         }
         return ambariRunning;

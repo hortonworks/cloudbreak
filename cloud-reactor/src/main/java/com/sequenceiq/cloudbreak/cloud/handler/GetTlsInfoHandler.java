@@ -36,7 +36,7 @@ public class GetTlsInfoHandler implements CloudPlatformEventHandler<GetTlsInfoRe
 
     @Override
     public void accept(Event<GetTlsInfoRequest> getTlsInfoRequestEvent) {
-        LOGGER.info("Received event: {}", getTlsInfoRequestEvent);
+        LOGGER.debug("Received event: {}", getTlsInfoRequestEvent);
         GetTlsInfoRequest<?> tlsInfoRequest = getTlsInfoRequestEvent.getData();
         try {
             CloudContext cloudContext = tlsInfoRequest.getCloudContext();
@@ -48,7 +48,7 @@ public class GetTlsInfoHandler implements CloudPlatformEventHandler<GetTlsInfoRe
             GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(tlsInfoRequest, tlsInfo);
             tlsInfoRequest.getResult().onNext(getTlsInfoResult);
             eventBus.notify(getTlsInfoResult.selector(), new Event<>(getTlsInfoRequestEvent.getHeaders(), getTlsInfoResult));
-            LOGGER.info("GetTlsInfoHandler finished.");
+            LOGGER.debug("GetTlsInfoHandler finished.");
         } catch (RuntimeException e) {
             String errorMsg = "Failed to get Tls info from cloud connector!";
             LOGGER.error(errorMsg, e);

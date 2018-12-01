@@ -70,7 +70,7 @@ public class StackImageUpdateService {
             Image newImage = getImageModelFromStatedImage(stack, image);
             imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stack);
         } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to create json", e);
+            LOGGER.info("Failed to create json", e);
             throw new CloudbreakServiceException("Failed to create json", e);
         }
 
@@ -86,7 +86,7 @@ public class StackImageUpdateService {
             return new Image(newImageName, currentImage.getUserdata(), image.getImage().getOs(), image.getImage().getOsType(),
                     image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImage().getUuid(), image.getImage().getPackageVersions());
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.error("Could not find image", e);
+            LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);
         }
     }
@@ -120,10 +120,10 @@ public class StackImageUpdateService {
             return newImage;
 
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.error("Cloudbreak Image not found", e);
+            LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
-            LOGGER.error("Cloudbreak Image Catalog error", e);
+            LOGGER.info("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         }
     }

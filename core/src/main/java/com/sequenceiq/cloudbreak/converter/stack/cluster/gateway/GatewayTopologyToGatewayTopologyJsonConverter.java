@@ -28,7 +28,7 @@ public class GatewayTopologyToGatewayTopologyJsonConverter extends AbstractConve
             try {
                 gatewayTopologyJson.setExposedServices(exposedJson.get(ExposedServices.class).getServices());
             } catch (IOException e) {
-                LOGGER.error("Failed to add exposedServices to response", e);
+                LOGGER.info("Failed to add exposedServices to response", e);
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
             }
         }

@@ -82,16 +82,16 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         long initialStartTime = System.currentTimeMillis();
         while (success == null && belowAttemptThreshold(retryCount, errorCount)) {
             if (isExitNeeded()) {
-                LOGGER.info(exitCriteria.exitMessage());
+                LOGGER.debug(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
             }
             long startTime = System.currentTimeMillis();
             try {
-                LOGGER.info("Calling orchestrator bootstrap: {}, additional info: {}", type, orchestratorBootstrap);
+                LOGGER.debug("Calling orchestrator bootstrap: {}, additional info: {}", type, orchestratorBootstrap);
                 orchestratorBootstrap.call();
                 success = Boolean.TRUE;
                 String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
-                LOGGER.info("Orchestrator component {} successfully started! {}, "
+                LOGGER.debug("Orchestrator component {} successfully started! {}, "
                         + "additional info: {}", type, elapsedTimeLog, orchestratorBootstrap);
             } catch (CloudbreakOrchestratorTerminateException te) {
                 actualException = te;
@@ -149,7 +149,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                 : "Failed: Orchestrator component went failed in %d min(s), message: %s";
         long elapsedTimeRounded = Math.max(Math.round((double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
         String errorMessage = String.format(messageTemplate, elapsedTimeRounded, cause);
-        LOGGER.error(errorMessage);
+        LOGGER.info(errorMessage);
         Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
         if (actualException instanceof CloudbreakOrchestratorException) {
             nodesWithErrors = ((CloudbreakOrchestratorException) actualException).getNodesWithErrors();

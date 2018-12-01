@@ -55,10 +55,10 @@ public class MockInstanceConnector implements InstanceConnector {
 
         try {
             MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
-            LOGGER.info("collect instance statuses from mock spi, server address: " + mockCredentialView.getMockEndpoint());
+            LOGGER.debug("Collect instance statuses from mock spi, server address: " + mockCredentialView.getMockEndpoint());
             CloudVmInstanceStatus[] cloudVmInstanceStatusArray = Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/cloud_instance_statuses")
                     .asObject(CloudVmInstanceStatus[].class).getBody();
-            LOGGER.info("collected instance statuses: " + Arrays.toString(cloudVmInstanceStatusArray));
+            LOGGER.debug("Collected instance statuses: " + Arrays.toString(cloudVmInstanceStatusArray));
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
             for (CloudInstance instance : vms) {
                 Optional<CloudVmInstanceStatus> vmInstanceStatusFromApi = Arrays.stream(cloudVmInstanceStatusArray)

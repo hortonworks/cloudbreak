@@ -60,7 +60,7 @@ public class TemplateService {
     }
 
     public void delete(Template template) {
-        LOGGER.info("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
+        LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
         List<Stack> allStackForTemplate = stackService.getAllForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
             template.setTopology(null);
