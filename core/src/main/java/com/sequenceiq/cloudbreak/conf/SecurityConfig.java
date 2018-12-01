@@ -135,9 +135,9 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, IMAGE_CATALOG_PATTERN)
                     .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
-                    .permitAll()
+                    .access("#oauth2.isOAuth()")
                     .antMatchers(V3_API)
-                    .permitAll()
+                    .access("#oauth2.isOAuth()")
                     .antMatchers(AUTOSCALE_API)
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
 

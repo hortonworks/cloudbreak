@@ -67,7 +67,12 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     @Override
     @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
-        Jwt jwtToken = JwtHelper.decode(accessToken);
+        Jwt jwtToken;
+        try {
+            jwtToken = JwtHelper.decode(accessToken);
+        } catch (RuntimeException e) {
+            throw new InvalidTokenException("Invalid JWT token", e);
+        }
         try {
             Map<String, String> claims = objectMapper.readValue(jwtToken.getClaims(), new MapTypeReference());
             return "uaa".equals(claims.get("zid")) ? getOAuth2Authentication(accessToken) : getSSOAuthentication(accessToken, claims);
