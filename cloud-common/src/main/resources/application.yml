@@ -450,3 +450,26 @@ blueprintServicePorts:
   - service: RANGER
     configName: ranger-admin-site
     portKey: ranger.service.http.port
+
+# service discovery configuration for ServiceDescriptorDefinitionProvider.java
+serviceDescriptorDefinitionMap:
+  RANGER:
+    serviceName: RANGER
+    blueprintParamKeys:
+      - ranger.service.http.port
+      - ranger.audit.solr.zookeepers
+      - ranger_admin_username
+      - policymgr_external_url
+    blueprintSecretParamKeys:
+      - ranger.admin.password
+    componentHosts:
+      - RANGER_ADMIN
+  ATLAS:
+    serviceName: ATLAS
+    blueprintParamKeys:
+      - atlas.rest.address
+      - atlas.kafka.bootstrap.servers
+  YARN:
+    serviceName: YARN
+    blueprintParamKeys:
+      - yarn.resourcemanager.webapp.address

@@ -14,8 +14,11 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackType;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -44,6 +47,9 @@ public class StackTerminationService {
     @Inject
     private CloudbreakMetricService metricService;
 
+    @Inject
+    private DatalakeResourcesRepository datalakeResourcesRepository;
+
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
@@ -53,6 +59,12 @@ public class StackTerminationService {
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         if (deleteDependencies) {
             dependecyDeletionService.deleteDependencies(stack);
+        }
+        if (stack.getType() == StackType.DATALAKE) {
+            DatalakeResources datalakeResources = datalakeResourcesRepository.findByDatalakeStackId(stack.getId());
+            if (datalakeResources != null) {
+                datalakeResourcesRepository.delete(datalakeResources);
+            }
         }
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }

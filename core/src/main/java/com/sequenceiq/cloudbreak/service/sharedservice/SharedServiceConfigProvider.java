@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -58,6 +59,9 @@ public class SharedServiceConfigProvider {
     @Inject
     private KerberosConfigProvider kerberosConfigProvider;
 
+    @Inject
+    private DatalakeConfigProvider datalakeConfigProvider;
+
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, ConnectedClusterRequest connectedClusterRequest, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
         if (connectedClusterRequest != null) {
@@ -80,12 +84,20 @@ public class SharedServiceConfigProvider {
     public Optional<StackInputs> prepareDatalakeConfigs(Blueprint blueprint, Stack publicStack) {
         try {
             if (publicStack.getDatalakeId() != null) {
-                ConfigsResponse configsResponse = retrieveOutputs(stackService.getById(publicStack.getDatalakeId()), blueprint, publicStack.getName());
-                StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
-                stackInputs.setDatalakeInputs(configsResponse.getDatalakeInputs());
-                stackInputs.setFixInputs(configsResponse.getFixInputs());
-
-                return Optional.ofNullable(stackInputs);
+                Stack datalakeStack = stackService.getById(publicStack.getDatalakeId());
+                AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalakeStack, datalakeStack.getCluster());
+                DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, ambariClient);
+                if (datalakeResources != null) {
+                    Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
+                    Map<String, String> blueprintConfigParams =
+                            datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, ambariClient);
+                    StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
+                    stackInputs.setDatalakeInputs((Map) blueprintConfigParams);
+                    stackInputs.setFixInputs((Map) additionalParams);
+                    return Optional.ofNullable(stackInputs);
+                } else {
+                    throw new BadRequestException("Could not propagate cluster input parameters!");
+                }
             }
         } catch (IOException e) {
             LOGGER.warn("Could not propagate cluster input parameters");

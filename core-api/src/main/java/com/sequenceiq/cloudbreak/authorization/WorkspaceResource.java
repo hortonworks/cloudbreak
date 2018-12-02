@@ -26,7 +26,9 @@ public enum WorkspaceResource {
     KERBEROS_CONFIG("Kerberos Config", "krbconf"),
     GENERATED_RECIPE("Generated recipe", "generatedrecipe"),
     SECURITY_CONFIG("Security Config", "securityconfig"),
-    SALT_SECURITY_CONFIG("Salt Security Config", "saltsecurityconfig");
+    SALT_SECURITY_CONFIG("Salt Security Config", "saltsecurityconfig"),
+    DATALAKE_RESOURCES("Datalake resources", "datalakeresources"),
+    SERVICE_DESCRIPTOR("Service Descriptor", "servicedescriptor");
 
     private final String readableName;
 
