@@ -1,0 +1,205 @@
+package com.sequenceiq.cloudbreak.service.sharedservice;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterCreationService;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ServiceDescriptorRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
+import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+
+@Component
+public class DatalakeConfigProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterCreationService.class);
+
+    private static final String DEFAULT_RANGER_PORT = "6080";
+
+    @Inject
+    private AmbariClientFactory ambariClientFactory;
+
+    @Inject
+    private ServiceDescriptorDefinitionProvider serviceDescriptorDefinitionProvider;
+
+    @Inject
+    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
+
+    @Inject
+    private DatalakeResourcesRepository datalakeResourcesRepository;
+
+    @Inject
+    private ServiceDescriptorRepository serviceDescriptorRepository;
+
+    @Inject
+    private TransactionService transactionService;
+
+    public DatalakeResources collectAndStoreDatalakeResources(Stack datalakeStack) {
+        try {
+            AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalakeStack, datalakeStack.getCluster());
+            return collectAndStoreDatalakeResources(datalakeStack, ambariClient);
+        } catch (RuntimeException ex) {
+            LOGGER.warn("Datalake service discovery failed: ", ex);
+            return null;
+        }
+    }
+
+    public DatalakeResources collectAndStoreDatalakeResources(Stack datalakeStack, AmbariClient ambariClient) {
+        try {
+            return transactionService.required(() -> {
+                try {
+                    DatalakeResources datalakeResources = datalakeResourcesRepository.findByDatalakeStackId(datalakeStack.getId());
+                    if (datalakeResources == null) {
+                        Map<String, Map<String, String>> serviceSecretParamMap = Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE,
+                                Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, datalakeStack.getCluster().getPassword()))));
+                        datalakeResources = collectDatalakeResources(datalakeStack, ambariClient, serviceSecretParamMap);
+                        datalakeResources.setDatalakeStackId(datalakeStack.getId());
+                        Workspace workspace = datalakeStack.getWorkspace();
+                        datalakeResources.setWorkspace(workspace);
+                        datalakeResources.getServiceDescriptorMap().forEach((k, sd) -> sd.setWorkspace(workspace));
+                        DatalakeResources savedDatalakeResources = datalakeResourcesRepository.save(datalakeResources);
+                        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> sd.setDatalakeResources(savedDatalakeResources));
+                        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> serviceDescriptorRepository.save(sd));
+                    }
+                    return datalakeResources;
+                } catch (JsonProcessingException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        } catch (TransactionService.TransactionExecutionException ex) {
+            LOGGER.warn("Datalake service discovery failed: ", ex);
+            return null;
+        }
+    }
+
+    public DatalakeResources collectDatalakeResources(Stack datalakeStack, AmbariClient ambariClient, Map<String, Map<String, String>> serviceSecretParamMap)
+            throws JsonProcessingException {
+        String ambariIp = datalakeStack.getAmbariIp();
+        String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
+                ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
+        return collectDatalakeResources(datalakeStack.getName(), ambariIp, ambariFqdn, ambariClient, serviceSecretParamMap);
+    }
+
+    public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari,
+            Map<String, Map<String, String>> serviceSecretParamMap) throws JsonProcessingException {
+        DatalakeResources datalakeResources = new DatalakeResources();
+        datalakeResources.setName(datalakeName);
+        Set<String> datalakeParamKeys = new HashSet<>();
+        for (Map.Entry<String, ServiceDescriptorDefinition> sddEntry : serviceDescriptorDefinitionProvider.getServiceDescriptorDefinitionMap().entrySet()) {
+            datalakeParamKeys.addAll(sddEntry.getValue().getBlueprintParamKeys());
+        }
+        Map<String, ServiceDescriptor> serviceDescriptors = new HashMap<>();
+        Map<String, String> datalakeParameters = datalakeAmbari.getConfigValuesByConfigIds(Lists.newArrayList(datalakeParamKeys));
+        for (Map.Entry<String, ServiceDescriptorDefinition> sddEntry : serviceDescriptorDefinitionProvider.getServiceDescriptorDefinitionMap().entrySet()) {
+            ServiceDescriptor serviceDescriptor = new ServiceDescriptor();
+            serviceDescriptor.setServiceName(sddEntry.getValue().getServiceName());
+            Map<String, String> serviceParams = datalakeParameters.entrySet().stream()
+                    .filter(dp -> sddEntry.getValue().getBlueprintParamKeys().contains(dp.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            serviceDescriptor.setBlueprintParam(new Json(serviceParams));
+            Map<String, String> serviceSecretParams = serviceSecretParamMap.getOrDefault(sddEntry.getKey(), new HashMap<>());
+            serviceDescriptor.setBlueprintSecretParams(new Json(serviceSecretParams));
+            Map<String, String> componentHosts = new HashMap<>();
+            for (String component : sddEntry.getValue().getComponentHosts()) {
+                componentHosts.put(component, datalakeAmbari.getHostNamesByComponent(component).stream().collect(Collectors.joining(",")));
+            }
+            serviceDescriptor.setComponentsHosts(new Json(componentHosts));
+            serviceDescriptor.setDatalakeResources(datalakeResources);
+            serviceDescriptors.put(serviceDescriptor.getServiceName(), serviceDescriptor);
+        }
+        datalakeResources.setServiceDescriptorMap(serviceDescriptors);
+        setupDatalakeGlobalParams(datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari, datalakeResources);
+        return datalakeResources;
+    }
+
+    public SharedServiceConfigsView createSharedServiceConfigView(DatalakeResources datalakeResources) {
+        SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
+        sharedServiceConfigsView.setRangerAdminPassword((String) datalakeResources.getServiceDescriptorMap()
+                .get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE).getBlueprintSecretParams().getMap()
+                .get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY));
+        sharedServiceConfigsView.setAttachedCluster(true);
+        sharedServiceConfigsView.setDatalakeCluster(false);
+        sharedServiceConfigsView.setDatalakeAmbariIp(datalakeResources.getDatalakeAmbariIp());
+        sharedServiceConfigsView.setDatalakeAmbariFqdn(datalakeResources.getDatalakeAmbariFqdn());
+        sharedServiceConfigsView.setDatalakeComponents(datalakeResources.getDatalakeComponentSet());
+        sharedServiceConfigsView.setRangerAdminPort((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
+                .getBlueprintParams().getMap().getOrDefault(ServiceDescriptorDefinitionProvider.RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));
+        sharedServiceConfigsView.setRangerAdminHost((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
+                .getComponentsHosts().getMap().get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_COMPONENT));
+        return sharedServiceConfigsView;
+    }
+
+    public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, Stack workloadCluster, AmbariClient datalakeAmbari) {
+        return getBlueprintConfigParameters(datalakeResources, workloadCluster.getCluster().getBlueprint(), datalakeAmbari);
+    }
+
+    public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, Blueprint workloadBlueprint, AmbariClient datalakeAmbari) {
+        Map<String, String> blueprintConfigParameters = new HashMap<>();
+        blueprintConfigParameters.putAll(getWorkloadClusterParametersFromDatalake(workloadBlueprint, datalakeAmbari));
+        for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {
+            blueprintConfigParameters.putAll((Map) serviceDescriptor.getBlueprintParams().getMap());
+            blueprintConfigParameters.putAll((Map) serviceDescriptor.getBlueprintSecretParams().getMap());
+        }
+        return blueprintConfigParameters;
+    }
+
+    public Map<String, String> getAdditionalParameters(StackV2Request workloadStackRequest, DatalakeResources datalakeResources) {
+        return getAdditionalParameters(workloadStackRequest.getGeneral().getName(), datalakeResources);
+    }
+
+    public Map<String, String> getAdditionalParameters(Stack workloadStack, DatalakeResources datalakeResources) {
+        return getAdditionalParameters(workloadStack.getName(), datalakeResources);
+    }
+
+    private Map<String, String> getAdditionalParameters(String workloadClusterName, DatalakeResources datalakeResources) {
+        Map<String, String> result = new HashMap<>();
+        String datalakeName = datalakeResources.getName();
+        String workloadName = workloadClusterName;
+        result.put("REMOTE_CLUSTER_NAME", datalakeName);
+        result.put("remoteClusterName", datalakeName);
+        result.put("remote.cluster.name", datalakeName);
+        result.put("cluster_name", workloadName);
+        result.put("cluster.name", workloadName);
+        return result;
+    }
+
+    private Map<String, String> getWorkloadClusterParametersFromDatalake(Blueprint workloadBlueprint, AmbariClient datalakeAmbari) {
+        Set<String> workloadBlueprintParamKeys = centralBlueprintParameterQueryService.queryDatalakeParameters(workloadBlueprint.getBlueprintText());
+        return !CollectionUtils.isEmpty(workloadBlueprintParamKeys) ? datalakeAmbari.getConfigValuesByConfigIds(Lists.newArrayList(workloadBlueprintParamKeys))
+                : Map.of();
+    }
+
+    private void setupDatalakeGlobalParams(String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari,
+            DatalakeResources datalakeResources) {
+        datalakeResources.setDatalakeAmbariIp(datalakeAmbariIp);
+        datalakeResources.setDatalakeAmbariFqdn(StringUtils.isEmpty(datalakeAmbariFqdn) ? datalakeAmbariIp : datalakeAmbariFqdn);
+        Set<String> components = new HashSet<>();
+        for (Map<String, String> componentMap : datalakeAmbari.getServiceComponentsMap().values()) {
+            components.addAll(componentMap.keySet());
+        }
+        datalakeResources.setDatalakeComponentSet(components);
+    }
+}

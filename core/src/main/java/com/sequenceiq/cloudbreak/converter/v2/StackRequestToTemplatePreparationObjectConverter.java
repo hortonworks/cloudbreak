@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,13 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -38,13 +39,14 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -90,12 +92,6 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     private StackInfoService stackInfoService;
 
     @Inject
-    private SharedServiceConfigsViewProvider sharedServiceConfigsViewProvider;
-
-    @Inject
-    private SharedServiceConfigProvider sharedServiceConfigProvider;
-
-    @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
     @Inject
@@ -112,6 +108,12 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
     @Inject
     private KerberosService kerberosService;
+
+    @Inject
+    private DatalakeConfigProvider datalakeConfigProvider;
+
+    @Inject
+    private AmbariClientFactory ambariClientFactory;
 
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
@@ -158,14 +160,20 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
             if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                Stack dataLakeStack = stackService.getByNameInWorkspace(sharedService.getSharedCluster(), workspace.getId());
-                SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
-                        .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
-                ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
-                builder.withSharedServiceConfigs(sharedServiceConfigsView)
-                        .withFixInputs(configsResponse.getFixInputs())
-                        .withCustomInputs(configsResponse.getDatalakeInputs());
-
+                Stack dataLakeStack = stackService.getByNameInWorkspaceWithLists(sharedService.getSharedCluster(), workspace.getId());
+                AmbariClient datalakeAmbariClient = ambariClientFactory.getAmbariClient(dataLakeStack, dataLakeStack.getCluster());
+                DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(dataLakeStack, datalakeAmbariClient);
+                if (datalakeResources != null) {
+                    SharedServiceConfigsView sharedServiceConfigsView = datalakeConfigProvider.createSharedServiceConfigView(datalakeResources);
+                    Map<String, String> blueprintConfigParams =
+                            datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, blueprint, datalakeAmbariClient);
+                    Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(source, datalakeResources);
+                    builder.withSharedServiceConfigs(sharedServiceConfigsView)
+                            .withFixInputs((Map) additionalParams)
+                            .withCustomInputs((Map) blueprintConfigParams);
+                } else {
+                    throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
+                }
             }
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
