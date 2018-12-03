@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,13 +17,10 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -33,7 +30,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -96,7 +92,7 @@ public class MountDisks {
                 String uuids = value.getOrDefault("uuids", "");
                 String fstab = value.getOrDefault("fstab", "");
                 if (!StringUtils.isEmpty(uuids) || !StringUtils.isEmpty(fstab)) {
-                    persistUuidAndFstab(stackId, instanceId, uuids, fstab);
+                    persistUuidAndFstab(stack, instanceId, uuids, fstab);
                 }
             });
         } catch (Exception e) {
@@ -105,18 +101,15 @@ public class MountDisks {
         }
     }
 
-    private void persistUuidAndFstab(Long stackId, String instanceId, String uuids, String fstab) {
-        Resource volumeSet = resourceRepository.findByStackIdAndInstanceIdAndType(stackId, instanceId, ResourceType.AWS_VOLUMESET);
-        try {
-            VolumeSetAttributes volumeSetAttributes = volumeSet.getAttributes().get(VolumeSetAttributes.class);
-            volumeSetAttributes.setUuids(uuids);
-            volumeSetAttributes.setFstab(fstab);
-            volumeSet.setAttributes(new Json(volumeSetAttributes));
-        } catch (IOException e) {
-            LOGGER.error("Failed to parse volume set attributes.", e);
-            throw new CloudbreakServiceException("Failed to parse volume set attributes.", e);
-        }
-        resourceRepository.save(volumeSet);
+    private void persistUuidAndFstab(Stack stack, String instanceId, String uuids, String fstab) {
+        resourceRepository.saveAll(stack.getDiskResources().stream()
+                .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
+                .peek(volumeSet -> stackUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
+                    volumeSetAttributes.setUuids(uuids);
+                    volumeSetAttributes.setFstab(fstab);
+                    stackUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
+                }))
+                .collect(Collectors.toList()));
     }
 
     public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {

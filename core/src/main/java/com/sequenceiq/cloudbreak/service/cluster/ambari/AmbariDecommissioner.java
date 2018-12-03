@@ -15,7 +15,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationServ
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,7 +46,6 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -90,6 +88,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.RSDecommissionStatusChecke
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -167,6 +166,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private AmbariDecommissionTimeCalculator ambariDecommissionTimeCalculator;
+
+    @Inject
+    private StackUtil stackUtil;
 
     @PostConstruct
     public void init() {
@@ -393,17 +395,10 @@ public class AmbariDecommissioner {
     }
 
     private void verifyNodeCount(int replication, int scalingAdjustment, int hostSize, int reservedInstances, Stack stack) {
-        boolean repairInProgress = stack.getResourcesByType(ResourceType.AWS_VOLUMESET).stream()
-                .map(resource -> {
-                    try {
-                        return Optional.ofNullable(resource.getAttributes().get(VolumeSetAttributes.class));
-                    } catch (IOException e) {
-                        LOGGER.info("Failed to convert volume set attributes.", e);
-                        return Optional.empty();
-                    }
-                })
+        boolean repairInProgress = stack.getDiskResources().stream()
+                .map(resource -> stackUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
                 .flatMap(Optional::stream)
-                .map(attributes -> ((VolumeSetAttributes) attributes).getDeleteOnTermination())
+                .map(VolumeSetAttributes::getDeleteOnTermination)
                 .anyMatch(Boolean.FALSE::equals);
         int adjustment = Math.abs(scalingAdjustment);
         if (!repairInProgress && (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment)) {
@@ -577,20 +572,14 @@ public class AmbariDecommissioner {
                 .filter(instanceMetaData -> hosts.contains(instanceMetaData.getDiscoveryFQDN()))
                 .map(InstanceMetaData::getInstanceId)
                 .collect(Collectors.toList());
-        Optional<Resource> volumeSet = stack.getResourcesByType(ResourceType.AWS_VOLUMESET).stream()
+        Optional<Resource> volumeSet = stack.getDiskResources().stream()
                 .filter(resource -> instances.contains(resource.getInstanceId()))
                 .findFirst();
         Boolean decomissionVolumes = volumeSet
-                .map(resource -> {
-                    try {
-                        return resource.getAttributes().get(VolumeSetAttributes.class);
-                    } catch (IOException e) {
-                        LOGGER.info("VolumeSetAttributes conversion failed.", e);
-                        return null;
-                    }
-                })
+                .flatMap(resource -> stackUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
                 .map(VolumeSetAttributes::getDeleteOnTermination)
                 .orElse(Boolean.TRUE);
+
         COMPONENTS_NEED_TO_DECOMMISSION.keySet().forEach(component -> {
             if (!decomissionVolumes) {
                 return;
