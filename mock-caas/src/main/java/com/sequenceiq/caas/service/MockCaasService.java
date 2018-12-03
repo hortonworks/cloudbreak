@@ -125,8 +125,8 @@ public class MockCaasService {
             @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
         String host = httpServletRequest.getHeader("Host");
         if (!tenant.isPresent() || !userName.isPresent()) {
-            LOGGER.info("redirect to index.html");
-            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "login.html?redirect_uri=" + redirectUri);
+            LOGGER.info("redirect to sign in page");
+            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "../caas/sign-in.html?redirect_uri=" + redirectUri);
         } else {
             Cookie cookie = new Cookie(JWT_COOKIE_KEY, getToken(tenant.get(), userName.get(), active).getAccessToken());
             cookie.setDomain(host.split(":")[0]);
