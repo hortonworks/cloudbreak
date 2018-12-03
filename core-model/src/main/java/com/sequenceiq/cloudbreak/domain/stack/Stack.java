@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -366,6 +367,15 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setEnvironment(EnvironmentView environment) {
         this.environment = environment;
+    }
+
+    public List<Resource> getDiskResources() {
+        switch (platformVariant) {
+            case CloudConstants.AWS:
+                return getResourcesByType(ResourceType.AWS_VOLUMESET);
+            default:
+                return List.of();
+        }
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

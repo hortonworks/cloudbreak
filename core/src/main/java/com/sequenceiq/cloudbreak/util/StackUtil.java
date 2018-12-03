@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,14 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -62,7 +64,7 @@ public class StackUtil {
 
     public Set<Node> collectNodesWithDiskData(Stack stack) {
         Set<Node> agents = new HashSet<>();
-        List<Resource> volumeSets = stack.getResourcesByType(ResourceType.AWS_VOLUMESET);
+        List<Resource> volumeSets = stack.getDiskResources();
         Map<String, Map<String, String>> instanceToVolumeInfoMap = createInstanceToVolumeInfoMap(volumeSets);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
@@ -83,7 +85,7 @@ public class StackUtil {
 
     public Set<Node> collectNewNodesWithDiskData(Stack stack, Set<String> newNodeAddresses) {
         Set<Node> agents = new HashSet<>();
-        List<Resource> volumeSets = stack.getResourcesByType(ResourceType.AWS_VOLUMESET);
+        List<Resource> volumeSets = stack.getDiskResources();
         Map<String, Map<String, String>> instanceToVolumeInfoMap = createInstanceToVolumeInfoMap(volumeSets);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
@@ -104,23 +106,16 @@ public class StackUtil {
 
     private Map<String, Map<String, String>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
         return volumeSets.stream()
-                .map(volumeSet -> {
-                    try {
-                        return new ImmutableEntry<>(volumeSet.getInstanceId(), volumeSet.getAttributes().get(VolumeSetAttributes.class));
-                    } catch (IOException e) {
-                        LOGGER.info("Failed to parse volume set attributes JSON", e);
-                        throw new CloudbreakServiceException("Failed to parse volume set attributes JSON", e);
-                    }
-                })
+                .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(), getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
                 .map(entry -> {
-                    List<Volume> volumes = entry.getValue().getVolumes();
+                    List<Volume> volumes = entry.getValue().map(VolumeSetAttributes::getVolumes).orElse(List.of());
                     List<String> dataVolumes = volumes.stream().map(Volume::getDevice).collect(Collectors.toList());
                     List<String> serialIds = volumes.stream().map(Volume::getId).collect(Collectors.toList());
                     return new ImmutableEntry<>(entry.getKey(), Map.of(
                             "dataVolumes", String.join(" ", dataVolumes),
                             "serialIds", String.join(" ", serialIds),
-                            "fstab", Optional.ofNullable(entry.getValue().getFstab()).orElse(""),
-                            "uuids", Optional.ofNullable(entry.getValue().getUuids()).orElse("")));
+                            "fstab", entry.getValue().map(VolumeSetAttributes::getFstab).orElse(""),
+                            "uuids", entry.getValue().map(VolumeSetAttributes::getUuids).orElse("")));
                 })
                 .collect(Collectors.toMap(AbstractImmutableEntry::getKey, AbstractImmutableEntry::getValue));
     }
@@ -162,5 +157,22 @@ public class StackUtil {
             uptime = uptime.plusMillis(now - cluster.getUpSince());
         }
         return uptime.toMillis();
+    }
+
+    public <T> Optional<T> getTypedAttributes(Resource resource, Class<T> attributeType) {
+        Json attributes = resource.getAttributes();
+        try {
+            return Objects.nonNull(attributes.getValue()) ? Optional.ofNullable(attributes.get(attributeType)) : Optional.empty();
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to parse attributes to type: " + attributeType.getSimpleName(), e);
+        }
+    }
+
+    public <T> void setTypedAttributes(Resource resource, T attributes) {
+        try {
+            resource.setAttributes(new Json(attributes));
+        } catch (JsonProcessingException e) {
+            throw new CloudbreakServiceException("Failed to parse attributes from type: " + attributes.getClass().getSimpleName(), e);
+        }
     }
 }

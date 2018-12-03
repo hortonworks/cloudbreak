@@ -381,6 +381,7 @@ public class AmbariDecommissionerTest {
         stack.setCluster(cluster);
         stack.setGatewayPort(gatewayPort);
         stack.setId(100L);
+        stack.setPlatformVariant("GCP");
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(10);
@@ -446,6 +447,7 @@ public class AmbariDecommissionerTest {
         stack.setCluster(cluster);
         stack.setGatewayPort(gatewayPort);
         stack.setId(100L);
+        stack.setPlatformVariant("GCP");
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(10);

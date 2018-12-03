@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
@@ -45,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterServiceTest {
@@ -76,6 +78,9 @@ public class ClusterServiceTest {
     private Cluster cluster;
 
     private Stack stack;
+
+    @Spy
+    private StackUtil stackUtil;
 
     @Before
     public void setUp() throws TransactionExecutionException {
@@ -156,18 +161,20 @@ public class ClusterServiceTest {
 
         Resource volumeSet = new Resource();
         VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", 100, "standard",
-                false, "", List.of());
+                Boolean.TRUE, "", List.of());
         attributes.setDeleteOnTermination(null);
         volumeSet.setAttributes(new Json(attributes));
-        when(resourceRepository.findByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET))).thenReturn(volumeSet);
+        volumeSet.setInstanceId("instanceId1");
+        volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
+        stack.setResources(Set.of(volumeSet));
 
         clusterService.repairCluster(1L, List.of("instanceId1"), false, false);
         verify(stack).getInstanceMetaDataAsList();
-        verify(resourceRepository).findByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET));
+        verify(stack).getDiskResources();
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<Resource> saveCaptor = ArgumentCaptor.forClass(Resource.class);
-        verify(resourceRepository).save(saveCaptor.capture());
-        assertFalse(saveCaptor.getValue().getAttributes().get(VolumeSetAttributes.class).getDeleteOnTermination());
+        ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceRepository).saveAll(saveCaptor.capture());
+        assertFalse(stackUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
     }
 }

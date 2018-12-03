@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,22 +15,19 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ResourceToCloudResourceConverter extends AbstractConversionServiceAwareConverter<Resource, CloudResource> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceToCloudResourceConverter.class);
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Override
     public CloudResource convert(Resource resource) {
-        Optional<VolumeSetAttributes> attributes = Optional.ofNullable(resource.getAttributes().getValue()).map(json -> {
-            try {
-                return resource.getAttributes().get(VolumeSetAttributes.class);
-            } catch (IOException e) {
-                LOGGER.warn("Failed to convert resource attributes", e);
-                throw new IllegalStateException(e);
-            }
-        });
+        Optional<VolumeSetAttributes> attributes = stackUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
 
         Map<String, Object> paramsMap = new HashMap<>();
         attributes.ifPresent(attr -> paramsMap.put(CloudResource.ATTRIBUTES, attr));

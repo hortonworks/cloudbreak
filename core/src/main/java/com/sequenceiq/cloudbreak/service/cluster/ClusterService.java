@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -125,6 +124,7 @@ import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvid
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -227,6 +227,9 @@ public class ClusterService {
 
     @Inject
     private ResourceRepository resourceRepository;
+
+    @Inject
+    private StackUtil stackUtil;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -346,20 +349,11 @@ public class ClusterService {
         if (!"AWS".equals(stack.getPlatformVariant())) {
             return;
         }
-
         LOGGER.debug("Mark volumes for delete on termination in case of active repair flow.");
         try {
             transactionService.required(() -> {
                 List<Resource> resources = stack.getResourcesByType(ResourceType.AWS_ENCRYPTED_VOLUME);
-                Consumer<Resource> volumeTerminationSetter = resource -> {
-                    try {
-                        VolumeSetAttributes volumeSetAttributes = resource.getAttributes().get(VolumeSetAttributes.class);
-                        volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
-                    } catch (IOException e) {
-                        LOGGER.info("Failed to parse volume set attributes");
-                    }
-                };
-                resources.forEach(volumeTerminationSetter);
+                resources.forEach(resource -> updateDeleteVolumesFlag(Boolean.TRUE, resource));
                 return resourceRepository.saveAll(resources);
             });
         } catch (TransactionExecutionException e) {
@@ -613,7 +607,7 @@ public class ClusterService {
                     }
                 }
                 if (!hostGroupMode) {
-                    updateNodeVolumeSetsDeleteVolumesFlag(stackId, nodeIds, deleteVolumes);
+                    updateNodeVolumeSetsDeleteVolumesFlag(inTransactionStack, nodeIds, deleteVolumes);
                 }
                 return inTransactionStack;
             });
@@ -674,24 +668,20 @@ public class ClusterService {
         }
     }
 
-    private void updateNodeVolumeSetsDeleteVolumesFlag(Long stackId, List<String> nodeIds, boolean deleteVolumes) {
-        nodeIds.forEach(id -> {
-            Resource volumeSet = resourceRepository.findByStackIdAndInstanceIdAndType(stackId, id, ResourceType.AWS_VOLUMESET);
-            updateDeleteVolumesFlag(deleteVolumes, volumeSet);
-            resourceRepository.save(volumeSet);
-        });
+    private void updateNodeVolumeSetsDeleteVolumesFlag(Stack stack, List<String> nodeIds, boolean deleteVolumes) {
+        resourceRepository.saveAll(stack.getDiskResources().stream()
+                .filter(resource -> nodeIds.contains(resource.getInstanceId()))
+                .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
+                .collect(Collectors.toList()));
     }
 
-    private void updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {
-        Json attributesJson = null;
-        try {
-            attributesJson = volumeSet.getAttributes();
-            VolumeSetAttributes attributes = attributesJson.get(VolumeSetAttributes.class);
-            attributes.setDeleteOnTermination(deleteVolumes);
-            volumeSet.setAttributes(new Json(attributes));
-        } catch (IOException e) {
-            LOGGER.warn("Could not read/update volume set attributes: " + attributesJson.getValue(), e);
-        }
+    private Resource updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {
+        Optional<VolumeSetAttributes> attributes = stackUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
+        attributes.ifPresent(volumeSetAttributes -> {
+            volumeSetAttributes.setDeleteOnTermination(deleteVolumes);
+            stackUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
+        });
+        return volumeSet;
     }
 
     private void triggerRepair(Long stackId, Map<String, List<String>> failedNodeMap, boolean removeOnly, List<String> recoveryMessageArgument) {

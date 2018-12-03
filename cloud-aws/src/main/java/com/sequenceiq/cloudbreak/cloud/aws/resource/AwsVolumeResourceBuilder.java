@@ -26,6 +26,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
+import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
@@ -81,6 +82,16 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private AwsClient awsClient;
+
+    private Function<VolumeSetAttributes.Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
+        EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
+                .withVolumeId(volume.getId())
+                .withDeleteOnTermination(Boolean.TRUE);
+
+        return new InstanceBlockDeviceMappingSpecification()
+                .withEbs(device)
+                .withDeviceName(volume.getDevice());
+    };
 
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -233,6 +244,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Set delete on termination to true, on instances");
         VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AWS_VOLUMESET, context, auth, List.of(resource));
+
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(ResourceStatus.DELETED::equals);
         if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
             resource.setInstanceId(null);
@@ -242,31 +254,41 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             throw new InterruptedException("Resource will be preserved for later reattachment.");
         }
 
+        AmazonEC2Client client = getAmazonEC2Client(auth);
+        deleteOrphanedVolumes(cloudResourceStatuses, client);
+        turnOnDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
+
+        return null;
+    }
+
+    private void turnOnDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses, AmazonEC2Client client) {
         List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications = cloudResourceStatuses.stream()
                 .filter(cloudResourceStatus -> ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
                 .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
-                .map(volume -> {
-                    EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
-                            .withVolumeId(volume.getId())
-                            .withDeleteOnTermination(Boolean.TRUE);
-
-                    return new InstanceBlockDeviceMappingSpecification()
-                            .withEbs(device)
-                            .withDeviceName(volume.getDevice());
-                })
+                .map(toInstanceBlockDeviceMappingSpecification)
                 .collect(Collectors.toList());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
                 .withInstanceId(resource.getInstanceId())
                 .withBlockDeviceMappings(deviceMappingSpecifications);
 
-        AmazonEC2Client client = getAmazonEC2Client(auth);
         LOGGER.debug("Volume delete request {}", modifyInstanceAttributeRequest);
         ModifyInstanceAttributeResult modifyIdentityIdFormatResult = client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
         LOGGER.debug("Volume delete result {}", modifyIdentityIdFormatResult);
-        return null;
+    }
+
+    private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEC2Client client) {
+        cloudResourceStatuses.stream()
+                .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()))
+                .map(CloudResourceStatus::getCloudResource)
+                .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(List::stream)
+                .map(VolumeSetAttributes.Volume::getId)
+                .map(volumeId -> new DeleteVolumeRequest().withVolumeId(volumeId))
+                .forEach(client::deleteVolume);
     }
 
     @Override
