@@ -1,17 +1,11 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -19,7 +13,6 @@ import javax.persistence.Table;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -40,23 +33,11 @@ public class StackApiView extends CompactView {
     @OneToOne
     private Credential credential;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000, nullable = false)
-    @JoinTable(name = "stack_parameters", joinColumns = @JoinColumn(name = "stack_id"))
-    private Map<String, String> parameters;
-
-    @OneToOne
-    private OrchestratorView orchestrator;
-
     @OneToOne
     private StackStatusView stackStatus;
 
     @OneToMany(mappedBy = "stack", fetch = FetchType.EAGER)
     private Set<InstanceGroupView> instanceGroups = new HashSet<>();
-
-    @ManyToOne
-    private FlexSubscription flexSubscription;
 
     private Long created;
 
@@ -99,22 +80,6 @@ public class StackApiView extends CompactView {
         this.credential = credential;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
-    }
-
-    public OrchestratorView getOrchestrator() {
-        return orchestrator;
-    }
-
-    public void setOrchestrator(OrchestratorView orchestrator) {
-        this.orchestrator = orchestrator;
-    }
-
     public StackStatusView getStackStatus() {
         return stackStatus;
     }
@@ -129,14 +94,6 @@ public class StackApiView extends CompactView {
 
     public void setInstanceGroups(Set<InstanceGroupView> instanceGroups) {
         this.instanceGroups = instanceGroups;
-    }
-
-    public FlexSubscription getFlexSubscription() {
-        return flexSubscription;
-    }
-
-    public void setFlexSubscription(FlexSubscription flexSubscription) {
-        this.flexSubscription = flexSubscription;
     }
 
     public Long getCreated() {
