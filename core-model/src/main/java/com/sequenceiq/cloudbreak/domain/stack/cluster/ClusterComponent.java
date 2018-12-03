@@ -18,12 +18,13 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentApi;
 
 @NamedEntityGraph(name = "ClusterComponent.cluster.rdsConfig",
         attributeNodes = @NamedAttributeNode(value = "cluster", subgraph = "rdsConfig"),
         subgraphs = @NamedSubgraph(name = "rdsConfig", attributeNodes = @NamedAttributeNode("rdsConfigs")))
 @Entity
-public class ClusterComponent implements ProvisionEntity {
+public class ClusterComponent implements ProvisionEntity, ClusterComponentApi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "component_generator")

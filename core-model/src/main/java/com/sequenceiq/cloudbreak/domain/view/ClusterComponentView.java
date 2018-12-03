@@ -5,7 +5,9 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -15,17 +17,18 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "ClusterComponent")
-public class ClusterComponentView implements ProvisionEntity {
+public class ClusterComponentView implements ProvisionEntity, ClusterComponentApi {
+
     @Id
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ClusterApiView cluster;
 
     @Enumerated(EnumType.STRING)
     private ComponentType componentType;
 
     private String name;
-
-    @Column(name = "cluster_id")
-    private Long clusterId;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -63,11 +66,4 @@ public class ClusterComponentView implements ProvisionEntity {
         this.attributes = attributes;
     }
 
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
 }
