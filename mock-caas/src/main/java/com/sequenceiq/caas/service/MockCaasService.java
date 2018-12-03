@@ -3,6 +3,7 @@ package com.sequenceiq.caas.service;
 import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static javax.servlet.http.HttpServletResponse.SC_FOUND;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 import static org.springframework.security.jwt.JwtHelper.encode;
 
@@ -61,7 +62,14 @@ public class MockCaasService {
     }
 
     public List<CaasUser> getUsers(HttpServletRequest request) {
-        IntrospectResponse introspectResponse = getIntrospectResponse(request);
+        String authenticationHeader = request.getHeader(AUTHORIZATION);
+        String token;
+        if (authenticationHeader.startsWith("Bearer ")) {
+            token = authenticationHeader.substring(7);
+        } else {
+            throw new AccessDeniedException("No token in Authorization header");
+        }
+        IntrospectResponse introspectResponse = introSpect(token);
         List<CaasUser> caasUsers = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             CaasUser caasUser = new CaasUser();
@@ -87,8 +95,12 @@ public class MockCaasService {
     }
 
     public IntrospectResponse introSpect(@Nonnull IntrospectRequest encodedToken) {
+        return introSpect(encodedToken.getToken());
+    }
+
+    private IntrospectResponse introSpect(String encodedToken) throws AccessDeniedException {
         try {
-            Jwt token = decodeAndVerify(encodedToken.getToken(), SIGNATURE_VERIFIER);
+            Jwt token = decodeAndVerify(encodedToken, SIGNATURE_VERIFIER);
             IntrospectResponse introspectResponse = jsonUtil.toObject(token.getClaims(), IntrospectResponse.class);
             LOGGER.info(String.format("IntrospectResponse: %s", jsonUtil.toJsonString(introspectResponse)));
             return introspectResponse;
