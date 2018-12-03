@@ -17,6 +17,10 @@ import (
 // swagger:model EnvironmentAttachRequest
 type EnvironmentAttachRequest struct {
 
+	// Name of Kerberos configs to be attached to the environment.
+	// Unique: true
+	KerberosConfigs []string `json:"kerberosConfigs"`
+
 	// Name of the Kubernetes configurations to be attached to the environment.
 	// Unique: true
 	KubernetesConfigs []string `json:"kubernetesConfigs"`
@@ -38,6 +42,10 @@ type EnvironmentAttachRequest struct {
 func (m *EnvironmentAttachRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateKerberosConfigs(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateKubernetesConfigs(formats); err != nil {
 		res = append(res, err)
 	}
@@ -57,6 +65,19 @@ func (m *EnvironmentAttachRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *EnvironmentAttachRequest) validateKerberosConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kerberosConfigs", "body", m.KerberosConfigs); err != nil {
+		return err
+	}
+
 	return nil
 }
 

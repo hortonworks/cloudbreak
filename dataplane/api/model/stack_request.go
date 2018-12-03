@@ -60,7 +60,7 @@ type StackRequest struct {
 	// custom hostname for nodes in the stack
 	CustomHostname string `json:"customHostname,omitempty"`
 
-	// Custom parameters as a json
+	// AmbariKerberosDescriptor parameters as a json
 	CustomInputs map[string]interface{} `json:"customInputs,omitempty"`
 
 	// stack related default tags

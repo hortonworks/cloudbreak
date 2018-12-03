@@ -6,8 +6,6 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -19,85 +17,61 @@ import (
 // swagger:model KerberosRequest
 type KerberosRequest struct {
 
-	// kerberos admin user
-	// Max Length: 15
-	// Min Length: 5
-	Admin string `json:"admin,omitempty"`
+	// active directory
+	ActiveDirectory *ActiveDirectoryKerberosDescriptor `json:"activeDirectory,omitempty"`
 
-	// kerberos admin server URL
-	AdminURL string `json:"adminUrl,omitempty"`
+	// ambari kerberos descriptor
+	AmbariKerberosDescriptor *AmbariKerberosDescriptor `json:"ambariKerberosDescriptor,omitempty"`
 
-	// container dn
-	ContainerDn string `json:"containerDn,omitempty"`
+	// description of the resource
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
 
-	// Ambari kerberos descriptor
-	Descriptor string `json:"descriptor,omitempty"`
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
 
-	// cluster instances will set this as the domain part of their hostname
-	Domain string `json:"domain,omitempty"`
+	// free ipa
+	FreeIpa *FreeIPAKerberosDescriptor `json:"freeIpa,omitempty"`
 
-	// Ambari kerberos krb5.conf template
-	Krb5Conf string `json:"krb5Conf,omitempty"`
+	// mit
+	Mit *MITKerberosDescriptor `json:"mit,omitempty"`
 
-	// ldap Url
-	LdapURL string `json:"ldapUrl,omitempty"`
-
-	// kerberos master key
-	// Max Length: 50
-	// Min Length: 3
-	MasterKey string `json:"masterKey,omitempty"`
-
-	// comma separated list of nameservers' IP address which will be used by cluster instances
-	// Pattern: (^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)
-	NameServers string `json:"nameServers,omitempty"`
-
-	// kerberos admin password
-	// Max Length: 50
-	// Min Length: 5
-	Password string `json:"password,omitempty"`
-
-	// kerberos principal
-	Principal string `json:"principal,omitempty"`
-
-	// realm
-	Realm string `json:"realm,omitempty"`
-
-	// tcp allowed
-	TCPAllowed *bool `json:"tcpAllowed,omitempty"`
-
-	// type
+	// the name of the kerberos configuration
 	// Required: true
-	// Enum: [CB_MANAGED EXISTING_AD EXISTING_MIT EXISTING_FREEIPA CUSTOM]
-	Type *string `json:"type"`
-
-	// kerberos KDC server URL
-	URL string `json:"url,omitempty"`
-
-	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
-	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
+	Name *string `json:"name"`
 }
 
 // Validate validates this kerberos request
 func (m *KerberosRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAdmin(formats); err != nil {
+	if err := m.validateActiveDirectory(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateMasterKey(formats); err != nil {
+	if err := m.validateAmbariKerberosDescriptor(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateNameServers(formats); err != nil {
+	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validatePassword(formats); err != nil {
+	if err := m.validateEnvironments(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateType(formats); err != nil {
+	if err := m.validateFreeIpa(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMit(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -107,116 +81,111 @@ func (m *KerberosRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *KerberosRequest) validateAdmin(formats strfmt.Registry) error {
+func (m *KerberosRequest) validateActiveDirectory(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Admin) { // not required
+	if swag.IsZero(m.ActiveDirectory) { // not required
 		return nil
 	}
 
-	if err := validate.MinLength("admin", "body", string(m.Admin), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("admin", "body", string(m.Admin), 15); err != nil {
-		return err
+	if m.ActiveDirectory != nil {
+		if err := m.ActiveDirectory.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("activeDirectory")
+			}
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (m *KerberosRequest) validateMasterKey(formats strfmt.Registry) error {
+func (m *KerberosRequest) validateAmbariKerberosDescriptor(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.MasterKey) { // not required
+	if swag.IsZero(m.AmbariKerberosDescriptor) { // not required
 		return nil
 	}
 
-	if err := validate.MinLength("masterKey", "body", string(m.MasterKey), 3); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("masterKey", "body", string(m.MasterKey), 50); err != nil {
-		return err
+	if m.AmbariKerberosDescriptor != nil {
+		if err := m.AmbariKerberosDescriptor.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ambariKerberosDescriptor")
+			}
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (m *KerberosRequest) validateNameServers(formats strfmt.Registry) error {
+func (m *KerberosRequest) validateDescription(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.NameServers) { // not required
+	if swag.IsZero(m.Description) { // not required
 		return nil
 	}
 
-	if err := validate.Pattern("nameServers", "body", string(m.NameServers), `(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)`); err != nil {
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *KerberosRequest) validatePassword(formats strfmt.Registry) error {
+func (m *KerberosRequest) validateEnvironments(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Password) { // not required
+	if swag.IsZero(m.Environments) { // not required
 		return nil
 	}
 
-	if err := validate.MinLength("password", "body", string(m.Password), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("password", "body", string(m.Password), 50); err != nil {
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-var kerberosRequestTypeTypePropEnum []interface{}
+func (m *KerberosRequest) validateFreeIpa(formats strfmt.Registry) error {
 
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","EXISTING_FREEIPA","CUSTOM"]`), &res); err != nil {
-		panic(err)
+	if swag.IsZero(m.FreeIpa) { // not required
+		return nil
 	}
-	for _, v := range res {
-		kerberosRequestTypeTypePropEnum = append(kerberosRequestTypeTypePropEnum, v)
+
+	if m.FreeIpa != nil {
+		if err := m.FreeIpa.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("freeIpa")
+			}
+			return err
+		}
 	}
-}
 
-const (
-
-	// KerberosRequestTypeCBMANAGED captures enum value "CB_MANAGED"
-	KerberosRequestTypeCBMANAGED string = "CB_MANAGED"
-
-	// KerberosRequestTypeEXISTINGAD captures enum value "EXISTING_AD"
-	KerberosRequestTypeEXISTINGAD string = "EXISTING_AD"
-
-	// KerberosRequestTypeEXISTINGMIT captures enum value "EXISTING_MIT"
-	KerberosRequestTypeEXISTINGMIT string = "EXISTING_MIT"
-
-	// KerberosRequestTypeEXISTINGFREEIPA captures enum value "EXISTING_FREEIPA"
-	KerberosRequestTypeEXISTINGFREEIPA string = "EXISTING_FREEIPA"
-
-	// KerberosRequestTypeCUSTOM captures enum value "CUSTOM"
-	KerberosRequestTypeCUSTOM string = "CUSTOM"
-)
-
-// prop value enum
-func (m *KerberosRequest) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, kerberosRequestTypeTypePropEnum); err != nil {
-		return err
-	}
 	return nil
 }
 
-func (m *KerberosRequest) validateType(formats strfmt.Registry) error {
+func (m *KerberosRequest) validateMit(formats strfmt.Registry) error {
 
-	if err := validate.Required("type", "body", m.Type); err != nil {
-		return err
+	if swag.IsZero(m.Mit) { // not required
+		return nil
 	}
 
-	// value enum
-	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
+	if m.Mit != nil {
+		if err := m.Mit.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("mit")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *KerberosRequest) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
 	}
 

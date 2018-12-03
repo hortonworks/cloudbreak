@@ -28,6 +28,10 @@ type EnvironmentRequest struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// Name of Kerberos configs to be attached to the environment.
+	// Unique: true
+	KerberosConfigs []string `json:"kerberosConfigs"`
+
 	// Name of the Kubernetes configurations to be attached to the environment.
 	// Unique: true
 	KubernetesConfigs []string `json:"kubernetesConfigs"`
@@ -69,6 +73,10 @@ func (m *EnvironmentRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateKerberosConfigs(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -135,6 +143,19 @@ func (m *EnvironmentRequest) validateDescription(formats strfmt.Registry) error 
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentRequest) validateKerberosConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kerberosConfigs", "body", m.KerberosConfigs); err != nil {
 		return err
 	}
 

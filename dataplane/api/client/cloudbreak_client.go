@@ -45,6 +45,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_filesystems"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_flexsubscriptions"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_imagecatalogs"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kerberos"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_knoxservices"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kubernetesconfigs"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_ldapconfigs"
@@ -169,6 +170,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V3WorkspaceIDFlexsubscriptions = v3_workspace_id_flexsubscriptions.New(transport, formats)
 
 	cli.V3WorkspaceIDImagecatalogs = v3_workspace_id_imagecatalogs.New(transport, formats)
+
+	cli.V3WorkspaceIDKerberos = v3_workspace_id_kerberos.New(transport, formats)
 
 	cli.V3WorkspaceIDKnoxservices = v3_workspace_id_knoxservices.New(transport, formats)
 
@@ -306,6 +309,8 @@ type Cloudbreak struct {
 
 	V3WorkspaceIDImagecatalogs *v3_workspace_id_imagecatalogs.Client
 
+	V3WorkspaceIDKerberos *v3_workspace_id_kerberos.Client
+
 	V3WorkspaceIDKnoxservices *v3_workspace_id_knoxservices.Client
 
 	V3WorkspaceIDKubernetesconfigs *v3_workspace_id_kubernetesconfigs.Client
@@ -404,6 +409,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V3WorkspaceIDFlexsubscriptions.SetTransport(transport)
 
 	c.V3WorkspaceIDImagecatalogs.SetTransport(transport)
+
+	c.V3WorkspaceIDKerberos.SetTransport(transport)
 
 	c.V3WorkspaceIDKnoxservices.SetTransport(transport)
 

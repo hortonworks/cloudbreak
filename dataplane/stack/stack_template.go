@@ -300,45 +300,6 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV2Request, boolFin
 			ImageID:      "____",
 		}
 	}
-	if withKerberosManaged := boolFinder(fl.FlWithKerberosManagedOptional.Name); withKerberosManaged {
-		template.Cluster.Ambari.Kerberos = &model.KerberosRequest{
-			TCPAllowed: &(&types.B{B: false}).B,
-			MasterKey:  "____",
-			Admin:      "____",
-			Password:   "____",
-		}
-	}
-	if withKerberosMIT := boolFinder(fl.FlWithKerberosExistingMITOptional.Name); withKerberosMIT {
-		template.Cluster.Ambari.Kerberos = &model.KerberosRequest{
-			TCPAllowed: &(&types.B{B: false}).B,
-			Principal:  "____",
-			Password:   "____",
-			URL:        "____",
-			AdminURL:   "____",
-			Realm:      "____",
-		}
-	}
-	if withKerberosAD := boolFinder(fl.FlWithKerberosExistingADOptional.Name); withKerberosAD {
-		template.Cluster.Ambari.Kerberos = &model.KerberosRequest{
-			TCPAllowed:  &(&types.B{B: false}).B,
-			Principal:   "____",
-			Password:    "____",
-			URL:         "____",
-			AdminURL:    "____",
-			Realm:       "____",
-			LdapURL:     "____",
-			ContainerDn: "____",
-		}
-	}
-	if withKerberosCustom := boolFinder(fl.FlWithKerberosCustomOptional.Name); withKerberosCustom {
-		template.Cluster.Ambari.Kerberos = &model.KerberosRequest{
-			TCPAllowed: &(&types.B{B: false}).B,
-			Principal:  "____",
-			Password:   "____",
-			Descriptor: "____",
-			Krb5Conf:   "____",
-		}
-	}
 	if withBlueprintValidation := boolFinder(fl.FlWithBlueprintValidation.Name); withBlueprintValidation {
 		template.Cluster.Ambari.ValidateBlueprint = &(&types.B{B: true}).B
 	}

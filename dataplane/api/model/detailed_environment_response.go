@@ -35,6 +35,10 @@ type DetailedEnvironmentResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
+	// Kerberos configs in the environment.
+	// Unique: true
+	KerberosConfigs []*KerberosResponse `json:"kerberosConfigs"`
+
 	// Kubernetes configurations in the environment.
 	// Unique: true
 	KubernetesConfigs []*KubernetesConfigResponse `json:"kubernetesConfigs"`
@@ -73,6 +77,10 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatalakeClusters(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateKerberosConfigs(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -133,6 +141,35 @@ func (m *DetailedEnvironmentResponse) validateDatalakeClusters(formats strfmt.Re
 			if err := m.DatalakeClusters[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("datalakeClusters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateKerberosConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("kerberosConfigs", "body", m.KerberosConfigs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.KerberosConfigs); i++ {
+		if swag.IsZero(m.KerberosConfigs[i]) { // not required
+			continue
+		}
+
+		if m.KerberosConfigs[i] != nil {
+			if err := m.KerberosConfigs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("kerberosConfigs" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

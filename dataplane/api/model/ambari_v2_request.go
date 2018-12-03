@@ -52,8 +52,8 @@ type AmbariV2Request struct {
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
-	// kerberos
-	Kerberos *KerberosRequest `json:"kerberos,omitempty"`
+	// kerberos config name
+	KerberosConfigName string `json:"kerberosConfigName,omitempty"`
 
 	// ambari password
 	// Required: true
@@ -104,10 +104,6 @@ func (m *AmbariV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGateway(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberos(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -273,24 +269,6 @@ func (m *AmbariV2Request) validateGateway(formats strfmt.Registry) error {
 		if err := m.Gateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gateway")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *AmbariV2Request) validateKerberos(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kerberos) { // not required
-		return nil
-	}
-
-	if m.Kerberos != nil {
-		if err := m.Kerberos.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("kerberos")
 			}
 			return err
 		}

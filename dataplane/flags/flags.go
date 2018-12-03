@@ -781,34 +781,6 @@ var (
 			Usage: "adds image-catalog configuration to the template",
 		},
 	}
-	FlWithKerberosManagedOptional = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "with-kerberos-managed",
-			Usage: "adds DataPlane managed Kerberos configuration to the template",
-		},
-	}
-	FlWithKerberosExistingMITOptional = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "with-kerberos-mit",
-			Usage: "adds existing MIT Kerberos configuration to the template",
-		},
-	}
-	FlWithKerberosExistingADOptional = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "with-kerberos-ad",
-			Usage: "adds existing Active Directory Kerberos configuration to the template",
-		},
-	}
-	FlWithKerberosCustomOptional = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "with-kerberos-custom",
-			Usage: "adds custom Kerberos configuration to the template",
-		},
-	}
 	FlWithSourceCluster = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -964,6 +936,13 @@ var (
 			Usage: "names of environments in which the created resource should be attached during the creation",
 		},
 	}
+	FlEnvironmentName = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "environment-name",
+			Usage: "environment name for queries",
+		},
+	}
 	FlEnvironmentLocationName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -985,11 +964,116 @@ var (
 			Usage: "latitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
 		},
 	}
+	FlAttachGlobalFlag = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "attach-global",
+			Usage: "attach-global flag for global query across environments",
+		},
+	}
 	FlRefreshTokenOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "refreshtoken",
 			Usage: "caas refresh token",
+		},
+	}
+	FlKerberosPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "password",
+			Usage: "kerberos password",
+		},
+	}
+	FlKerberosPrincipal = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "principal",
+			Usage: "kerberos principal",
+		},
+	}
+	FlKerberosVerifyKdcTrust = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "verify-kdc-trust",
+			Usage: "verify-kdc-trust flag",
+		},
+	}
+	FlKerberosDomain = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "domain",
+			Usage: "kerberos domain",
+		},
+	}
+	FlKerberosNameServers = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "name-servers",
+			Usage: "kerberos name servers",
+		},
+	}
+	FlKerberosTcpAllowed = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "tcp-allowed",
+			Usage: "kerberos tcp-allowed flag",
+		},
+	}
+	FlKerberosDescriptor = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "descriptor",
+			Usage: "kerberos descriptor",
+		},
+	}
+	FlKerberosKrb5Conf = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "krb5Conf",
+			Usage: "kerberos krb5Conf",
+		},
+	}
+	FlKerberosUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "url",
+			Usage: "kerberos url",
+		},
+	}
+	FlKerberosAdminUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "admin-url",
+			Usage: "kerberos admin url",
+		},
+	}
+	FlKerberosRealm = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "realm",
+			Usage: "kerberos realm",
+		},
+	}
+	FlKerberosLdapUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-url",
+			Usage: "kerberos LDAP url",
+		},
+	}
+	FlKerberosContainerDn = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "container-dn",
+			Usage: "kerberos container dn",
+		},
+	}
+	FlKerberosAdmin = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "admin",
+			Usage: "kerberos admin",
 		},
 	}
 )
@@ -1142,7 +1226,15 @@ func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithKerberosManagedOptional, FlWithKerberosExistingMITOptional, FlWithKerberosExistingADOptional, FlWithKerberosCustomOptional, FlWithBlueprintValidation} {
+	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithBlueprintValidation} {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
+func (fb *FlagBuilder) AddCommonKerberosCreateFlags() *FlagBuilder {
+	for _, f := range []cli.Flag{FlEnvironmentsOptional, FlKerberosVerifyKdcTrust, FlKerberosDomain, FlKerberosNameServers,
+		FlKerberosPassword, FlKerberosTcpAllowed, FlKerberosPrincipal, FlKerberosAdmin} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

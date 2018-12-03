@@ -28,11 +28,23 @@ type KerberosResponse struct {
 	// container dn
 	ContainerDn string `json:"containerDn,omitempty"`
 
+	// description of the resource
+	// Max Length: 1000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
+
 	// Ambari kerberos descriptor
 	Descriptor *SecretResponse `json:"descriptor,omitempty"`
 
 	// cluster instances will set this as the domain part of their hostname
 	Domain string `json:"domain,omitempty"`
+
+	// Environments of the resource
+	// Unique: true
+	Environments []string `json:"environments"`
+
+	// id
+	ID int64 `json:"id,omitempty"`
 
 	// Ambari kerberos krb5.conf template
 	Krb5Conf *SecretResponse `json:"krb5Conf,omitempty"`
@@ -40,8 +52,8 @@ type KerberosResponse struct {
 	// ldap Url
 	LdapURL string `json:"ldapUrl,omitempty"`
 
-	// kerberos master key
-	MasterKey *SecretResponse `json:"masterKey,omitempty"`
+	// name
+	Name string `json:"name,omitempty"`
 
 	// comma separated list of nameservers' IP address which will be used by cluster instances
 	// Pattern: (^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)
@@ -61,7 +73,7 @@ type KerberosResponse struct {
 
 	// type
 	// Required: true
-	// Enum: [CB_MANAGED EXISTING_AD EXISTING_MIT EXISTING_FREEIPA CUSTOM]
+	// Enum: [ACTIVE_DIRECTORY MIT FREEIPA CUSTOM]
 	Type *string `json:"type"`
 
 	// kerberos KDC server URL
@@ -79,15 +91,19 @@ func (m *KerberosResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDescriptor(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateKrb5Conf(formats); err != nil {
+	if err := m.validateEnvironments(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateMasterKey(formats); err != nil {
+	if err := m.validateKrb5Conf(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -131,6 +147,23 @@ func (m *KerberosResponse) validateAdmin(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *KerberosResponse) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *KerberosResponse) validateDescriptor(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Descriptor) { // not required
@@ -149,6 +182,19 @@ func (m *KerberosResponse) validateDescriptor(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *KerberosResponse) validateEnvironments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *KerberosResponse) validateKrb5Conf(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Krb5Conf) { // not required
@@ -159,24 +205,6 @@ func (m *KerberosResponse) validateKrb5Conf(formats strfmt.Registry) error {
 		if err := m.Krb5Conf.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("krb5Conf")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *KerberosResponse) validateMasterKey(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.MasterKey) { // not required
-		return nil
-	}
-
-	if m.MasterKey != nil {
-		if err := m.MasterKey.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("masterKey")
 			}
 			return err
 		}
@@ -238,7 +266,7 @@ var kerberosResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","EXISTING_FREEIPA","CUSTOM"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["ACTIVE_DIRECTORY","MIT","FREEIPA","CUSTOM"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -248,17 +276,14 @@ func init() {
 
 const (
 
-	// KerberosResponseTypeCBMANAGED captures enum value "CB_MANAGED"
-	KerberosResponseTypeCBMANAGED string = "CB_MANAGED"
+	// KerberosResponseTypeACTIVEDIRECTORY captures enum value "ACTIVE_DIRECTORY"
+	KerberosResponseTypeACTIVEDIRECTORY string = "ACTIVE_DIRECTORY"
 
-	// KerberosResponseTypeEXISTINGAD captures enum value "EXISTING_AD"
-	KerberosResponseTypeEXISTINGAD string = "EXISTING_AD"
+	// KerberosResponseTypeMIT captures enum value "MIT"
+	KerberosResponseTypeMIT string = "MIT"
 
-	// KerberosResponseTypeEXISTINGMIT captures enum value "EXISTING_MIT"
-	KerberosResponseTypeEXISTINGMIT string = "EXISTING_MIT"
-
-	// KerberosResponseTypeEXISTINGFREEIPA captures enum value "EXISTING_FREEIPA"
-	KerberosResponseTypeEXISTINGFREEIPA string = "EXISTING_FREEIPA"
+	// KerberosResponseTypeFREEIPA captures enum value "FREEIPA"
+	KerberosResponseTypeFREEIPA string = "FREEIPA"
 
 	// KerberosResponseTypeCUSTOM captures enum value "CUSTOM"
 	KerberosResponseTypeCUSTOM string = "CUSTOM"

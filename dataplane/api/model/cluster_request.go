@@ -85,8 +85,8 @@ type ClusterRequest struct {
 	// Unique: true
 	HostGroups []*HostGroupRequest `json:"hostGroups"`
 
-	// kerberos
-	Kerberos *KerberosRequest `json:"kerberos,omitempty"`
+	// kerberos config name
+	KerberosConfigName string `json:"kerberosConfigName,omitempty"`
 
 	// LDAP config for the cluster
 	LdapConfig *LdapConfigRequest `json:"ldapConfig,omitempty"`
@@ -197,10 +197,6 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberos(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -561,24 +557,6 @@ func (m *ClusterRequest) validateHostGroups(formats strfmt.Registry) error {
 			}
 		}
 
-	}
-
-	return nil
-}
-
-func (m *ClusterRequest) validateKerberos(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kerberos) { // not required
-		return nil
-	}
-
-	if m.Kerberos != nil {
-		if err := m.Kerberos.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("kerberos")
-			}
-			return err
-		}
 	}
 
 	return nil

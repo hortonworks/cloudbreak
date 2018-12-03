@@ -16,7 +16,7 @@ import (
 // swagger:model ParametersQueryResponse
 type ParametersQueryResponse struct {
 
-	// Custom parameters as a json
+	// AmbariKerberosDescriptor parameters as a json
 	// Required: true
 	Custom map[string]string `json:"custom"`
 }
