@@ -7,30 +7,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.model.CredentialViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Component
 public class StackApiViewToStackViewResponseConverter extends AbstractConversionServiceAwareConverter<StackApiView, StackViewResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackApiViewToStackViewResponseConverter.class);
-
-    @Inject
-    private ComponentConfigProvider componentConfigProvider;
-
-    @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     @Qualifier("conversionService")
@@ -41,38 +29,16 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         StackViewResponse stackViewResponse = new StackViewResponse();
         stackViewResponse.setId(source.getId());
         stackViewResponse.setName(source.getName());
-        stackViewResponse.setOwner(source.getOwner());
-        stackViewResponse.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
-        stackViewResponse.setParameters(Maps.newHashMap(source.getParameters()));
+        stackViewResponse.setCredential(getConversionService().convert(source.getCredential(), CredentialViewResponse.class));
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(conversionService.convert(source.getCluster(), ClusterViewResponse.class));
         }
-        convertComponentConfig(source, stackViewResponse);
         addNodeCount(source, stackViewResponse);
         stackViewResponse.setCloudPlatform(source.getCloudPlatform());
         stackViewResponse.setPlatformVariant(source.getPlatformVariant());
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());
-        addFlexSubscription(source, stackViewResponse);
         return stackViewResponse;
-    }
-
-    private void convertComponentConfig(StackApiView source, StackViewResponse stackJson) {
-        try {
-            if (source.getCluster() != null) {
-                StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
-                if (stackRepoDetails != null && stackRepoDetails.getStack() != null) {
-                    String repositoryVersion = stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION);
-                    if (!StringUtils.isEmpty(repositoryVersion)) {
-                        stackJson.setHdpVersion(repositoryVersion);
-                    } else {
-                        stackJson.setHdpVersion(stackRepoDetails.getHdpVersion());
-                    }
-                }
-            }
-        } catch (RuntimeException e) {
-            LOGGER.error("Failed to convert dynamic component.", e);
-        }
     }
 
     private void addNodeCount(StackApiView source, StackViewResponse stackViewResponse) {
@@ -83,14 +49,4 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         stackViewResponse.setNodeCount(nodeCount);
     }
 
-    private void addFlexSubscription(StackApiView source, StackViewResponse stackJson) {
-        if (source.getFlexSubscription() != null) {
-            try {
-                FlexSubscriptionResponse flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionResponse.class);
-                stackJson.setFlexSubscription(flexSubscription);
-            } catch (Exception ex) {
-                LOGGER.warn("Flex subscription could not be added to stack response.", ex);
-            }
-        }
-    }
 }

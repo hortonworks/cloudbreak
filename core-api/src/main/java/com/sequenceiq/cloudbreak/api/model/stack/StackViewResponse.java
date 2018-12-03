@@ -2,11 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.stack;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.STACK_ID;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.model.CredentialViewResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -21,9 +17,6 @@ public class StackViewResponse {
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.OWNER)
-    private String owner;
-
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloudPlatform;
 
@@ -31,16 +24,13 @@ public class StackViewResponse {
     private String platformVariant;
 
     @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialResponse credential;
+    private CredentialViewResponse credential;
 
     @ApiModelProperty(StackModelDescription.HDP_VERSION)
     private String hdpVersion;
 
     @ApiModelProperty(StackModelDescription.CLUSTER)
     private ClusterViewResponse cluster;
-
-    @ApiModelProperty(StackModelDescription.PARAMETERS)
-    private Map<String, String> parameters = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
@@ -51,23 +41,12 @@ public class StackViewResponse {
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
-    @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
-    private FlexSubscriptionResponse flexSubscription;
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public ClusterViewResponse getCluster() {
@@ -94,11 +73,11 @@ public class StackViewResponse {
         this.platformVariant = platformVariant;
     }
 
-    public CredentialResponse getCredential() {
+    public CredentialViewResponse getCredential() {
         return credential;
     }
 
-    public void setCredential(CredentialResponse credential) {
+    public void setCredential(CredentialViewResponse credential) {
         this.credential = credential;
     }
 
@@ -142,19 +121,4 @@ public class StackViewResponse {
         this.name = name;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
-    }
-
-    public FlexSubscriptionResponse getFlexSubscription() {
-        return flexSubscription;
-    }
-
-    public void setFlexSubscription(FlexSubscriptionResponse flexSubscription) {
-        this.flexSubscription = flexSubscription;
-    }
 }
