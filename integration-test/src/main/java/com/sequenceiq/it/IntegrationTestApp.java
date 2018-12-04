@@ -87,7 +87,9 @@ public class IntegrationTestApp implements CommandLineRunner {
             LOG.error("Something went wrong during closing Spring Context.");
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             threadSet.stream().forEach(t -> LOG.info("Runnning threads: {}", t.getName()));
+            System.exit(1);
         }
+        System.exit(0);
     }
 
     @Override
