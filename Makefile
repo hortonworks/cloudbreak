@@ -15,22 +15,22 @@ ifeq ($(CB_PORT),)
 endif
 
 deps: deps-errcheck
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u golang.org/x/tools/cmd/goimports
+	GO111MODULE=off go get -u github.com/golang/dep/cmd/dep
+	GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports
 	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/0.12.0/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
 	chmod +x $(GOPATH)/bin/swagger
 
 deps-errcheck:
-	go get -u github.com/kisielk/errcheck
+	GO111MODULE=off go get -u github.com/kisielk/errcheck
 
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 vet:
-	go vet ./...
+	GO111MODULE=off go vet ./...
 
 test:
-	go test -timeout 30s -race ./...
+	GO111MODULE=off go test -timeout 30s -race ./...
 
 errcheck:
 	errcheck -ignoretests -exclude errcheck_excludes.txt ./...
@@ -52,22 +52,22 @@ build-docker:
 	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} golang:1.9 make deps-errcheck build
 
 build-darwin:
-	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Darwin/${BINARY} main.go
+	GOOS=darwin CGO_ENABLED=0 GO111MODULE=off go build -a ${LDFLAGS_NOVER} -o build/Darwin/${BINARY} main.go
 
 build-linux:
-	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Linux/${BINARY} main.go
+	GOOS=linux CGO_ENABLED=0 GO111MODULE=off go build -a ${LDFLAGS_NOVER} -o build/Linux/${BINARY} main.go
 
 build-windows:
-	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Windows/${BINARY}.exe main.go
+	GOOS=windows CGO_ENABLED=0 GO111MODULE=off go build -a ${LDFLAGS_NOVER} -o build/Windows/${BINARY}.exe main.go
 
 build-darwin-version:
-	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
+	GOOS=darwin CGO_ENABLED=0 GO111MODULE=off go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
 
 build-linux-version:
-	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
+	GOOS=linux CGO_ENABLED=0 GO111MODULE=off go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
 
 build-windows-version:
-	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
+	GOOS=windows CGO_ENABLED=0 GO111MODULE=off go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger: build-swagger-fix
 	rm -rf client_cloudbreak models_cloudbreak
@@ -81,7 +81,7 @@ generate-swagger-docker: build-swagger-fix
 	make fix-swagger
 
 build-swagger-fix:
-	go build -o build/swagger_fix swagger_fix/main.go
+	GO111MODULE=off go build -o build/swagger_fix swagger_fix/main.go
 
 fix-swagger:
 	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)

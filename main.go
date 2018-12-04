@@ -1016,18 +1016,6 @@ func main() {
 					Usage: "adds a new recipe from a file or from a URL",
 					Subcommands: []cli.Command{
 						{
-							Name:   "from-url",
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build(),
-							Before: ConfigRead,
-							Action: cb.CreateRecipeFromUrl,
-							Usage:  "creates a recipe by downloading it from a URL location",
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
 							Name:   "from-file",
 							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,

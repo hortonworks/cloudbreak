@@ -5,7 +5,6 @@
 
 # Recipes
 : ${RECIPE_NAME:=test-recipe}
-: ${RECIPE_URL:="https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh"}
 : ${RECIPE_FILE:=scripts/recipe.sh}
 
 # Image catalog DEV
