@@ -1,6 +1,9 @@
 -- // RMP-12890
 -- Migration SQL that makes the change goes here.
 
+ALTER TABLE ONLY cluster DROP CONSTRAINT fk_cluster_kerberosconfig_id;
+DELETE FROM kerberosconfig;
+
 CREATE TABLE IF NOT EXISTS env_kdc (
     envid bigint NOT NULL,
     kdcid bigint NOT NULL
@@ -26,4 +29,6 @@ ALTER TABLE ONLY env_kdc DROP CONSTRAINT IF EXISTS uk_env_kdc_envid_kdcid;
 ALTER TABLE ONLY env_kdc DROP CONSTRAINT IF EXISTS fk_env_kdc_kdcid;
 ALTER TABLE ONLY env_kdc DROP CONSTRAINT IF EXISTS fk_env_kdc_envid;
 DROP TABLE IF EXISTS env_kdc;
+
+ALTER TABLE ONLY cluster ADD CONSTRAINT fk_cluster_kerberosconfig_id FOREIGN KEY (kerberosconfig_id) REFERENCES kerberosconfig(id);
 
