@@ -53,6 +53,14 @@ jobs:
       - run:
           name: checkstyle-main
           command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store checkstyle results
+          command: |
+            mkdir -p ~/checkstyle
+            grep -rl */build/reports/checkstyle/*.xml -e "<error line=" | xargs -I '{}' cp '{}' ~/checkstyle
+          when: always
+      - store_artifacts:
+          path: ~/checkstyle
 
   code-quality-check-spotbugs-main:
     docker:
