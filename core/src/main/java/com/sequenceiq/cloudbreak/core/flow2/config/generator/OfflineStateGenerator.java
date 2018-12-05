@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -62,9 +63,11 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -262,6 +265,7 @@ public class OfflineStateGenerator {
             StackService stackService = new StackService();
             inject(factory, "stackService", stackService);
             inject(stackService, "stackRepository", new CustomStackRepository());
+            inject(stackService, "transactionService", new CustomTransactionService());
 
             return (T) bean;
         }
@@ -421,7 +425,10 @@ public class OfflineStateGenerator {
 
         @Override
         public Optional<Stack> findById(Long aLong) {
-            return Optional.empty();
+            Stack stack = new Stack();
+            stack.setWorkspace(new Workspace());
+            stack.setCreator(new User());
+            return Optional.of(stack);
         }
 
         @Override
@@ -530,6 +537,12 @@ public class OfflineStateGenerator {
         @Override
         protected Object getFailurePayload(Payload payload, Optional<CommonContext> flowContext, Exception ex) {
             return null;
+        }
+    }
+
+    static class CustomTransactionService extends TransactionService {
+        public <T> T required(Supplier<T> callback) {
+            return callback.get();
         }
     }
 }
