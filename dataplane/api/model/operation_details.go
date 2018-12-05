@@ -38,6 +38,9 @@ type OperationDetails struct {
 	// resource type
 	ResourceType string `json:"resourceType,omitempty"`
 
+	// tenant
+	Tenant string `json:"tenant,omitempty"`
+
 	// timestamp
 	Timestamp int64 `json:"timestamp,omitempty"`
 
@@ -47,12 +50,11 @@ type OperationDetails struct {
 	// user name
 	UserName string `json:"userName,omitempty"`
 
+	// uuid
+	UUID string `json:"uuid,omitempty"`
+
 	// workspace Id
 	WorkspaceID int64 `json:"workspaceId,omitempty"`
-
-	// zoned date time
-	// Format: date-time
-	ZonedDateTime strfmt.DateTime `json:"zonedDateTime,omitempty"`
 }
 
 // Validate validates this operation details
@@ -60,10 +62,6 @@ func (m *OperationDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEventType(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateZonedDateTime(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -113,19 +111,6 @@ func (m *OperationDetails) validateEventType(formats strfmt.Registry) error {
 
 	// value enum
 	if err := m.validateEventTypeEnum("eventType", "body", m.EventType); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *OperationDetails) validateZonedDateTime(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ZonedDateTime) { // not required
-		return nil
-	}
-
-	if err := validate.FormatOf("zonedDateTime", "body", "date-time", m.ZonedDateTime.String(), formats); err != nil {
 		return err
 	}
 

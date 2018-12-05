@@ -22,7 +22,12 @@ type auditListOut struct {
 }
 
 func (a *auditListOut) DataAsStringArray() []string {
-	return []string{strconv.FormatInt(a.Audit.AuditID, 10), a.Audit.Operation.EventType, a.Audit.Operation.ZonedDateTime.String(), strconv.FormatInt(a.Audit.Operation.ResourceID, 10), a.Audit.Operation.ResourceName, a.Audit.Operation.ResourceType, a.Audit.Operation.UserName, a.Audit.Status, strconv.FormatInt(a.Audit.Duration, 10)}
+	return []string{strconv.FormatInt(a.Audit.AuditID, 10), a.Audit.Operation.EventType, convertToDateTimeString(a.Audit.Operation.Timestamp), strconv.FormatInt(a.Audit.Operation.ResourceID, 10), a.Audit.Operation.ResourceName, a.Audit.Operation.ResourceType, a.Audit.Operation.UserName, a.Audit.Status, strconv.FormatInt(a.Audit.Duration, 10)}
+}
+
+func convertToDateTimeString(t int64) string {
+	loc := time.FixedZone("UTC", 0)
+	return time.Unix(int64(t/1000), 0).In(loc).Format("2006-01-02T15:04:05Z-07:00")
 }
 
 var auditHeader = []string{"Audit"}
