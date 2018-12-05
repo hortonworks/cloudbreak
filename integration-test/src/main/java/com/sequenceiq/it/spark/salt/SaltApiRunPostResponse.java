@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +80,20 @@ public class SaltApiRunPostResponse extends ITResponse {
         }
         if (body.contains("key.delete")) {
             return "";
+        }
+        if (body.contains("cmd.run")) {
+            Pattern pattern = Pattern.compile("&tgt=([\\w\\.-]+)&");
+            Matcher matcher = pattern.matcher(body);
+            String host = matcher.find() ? matcher.group(1) : "";
+
+            if (body.contains("arg=%28cd+%2Fsrv%2Fsalt%2Fdisk%3BCLOUD_PLATFORM%3D%27MOCK%27+ATTACHED_VOLUME_NAME_LIST%3D%27%27+"
+                    + "ATTACHED_VOLUME_SERIAL_LIST%3D%27%27+.%2Ffind-device-and-format.sh%29")) {
+                return String.format(responseFromJsonFile("saltapi/cmd_run_format_response.json"), host);
+            } else if (body.contains("arg=cat+%2Fetc%2Ffstab")) {
+                return String.format(responseFromJsonFile("saltapi/cmd_run_mount_response.json"), host);
+            } else {
+                return responseFromJsonFile("saltapi/cmd_run_empty_response.json");
+            }
         }
         LOGGER.error("no response for this SALT RUN request: " + body);
         throw new IllegalStateException("no response for this SALT RUN request: " + body);

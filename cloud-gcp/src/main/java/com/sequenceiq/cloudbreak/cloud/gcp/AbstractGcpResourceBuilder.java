@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
@@ -60,7 +59,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
         for (CloudResource resource : resources) {
             LOGGER.debug("Check {} resource: {}", type, resource);
             try {
-                Operation operation = check(context, resource);
+                Operation operation = check(context, resource.getStringParameter(OPERATION_ID));
                 boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
@@ -80,8 +79,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
         return result;
     }
 
-    protected Operation check(GcpContext context, DynamicModel resource) throws IOException {
-        String operation = resource.getStringParameter(OPERATION_ID);
+    protected Operation check(GcpContext context, String operation) throws IOException {
         if (operation == null) {
             return null;
         }

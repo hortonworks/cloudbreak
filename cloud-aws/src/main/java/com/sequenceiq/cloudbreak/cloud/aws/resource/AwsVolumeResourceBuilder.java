@@ -61,11 +61,14 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 
 @Component
 public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsVolumeResourceBuilder.class);
+
+    private static final String DEVICE_NAME_TEMPLATE = "/dev/xvd%s";
 
     @Inject
     @Qualifier("intermediateBuilderExecutor")
@@ -180,7 +183,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
 
             VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-            DeviceNameGenerator generator = new DeviceNameGenerator();
+            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE);
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(createVolumeRequest(snapshotId, tagSpecification, volumeSet))
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
