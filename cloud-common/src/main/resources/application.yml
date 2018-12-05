@@ -131,7 +131,8 @@ cb:
      internal: >
                 HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;
                 HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics;
-                HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp30-shared-services
+                HDP 3.0 - Data Lake: Apache Ranger=hdp30-shared-services;
+                HDP 3.0 - Data Lake: Apache Ranger, Apache Atlas, Infrastructure Services=hdp30-shared-services-v2
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
