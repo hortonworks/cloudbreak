@@ -5,7 +5,9 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,17 +33,21 @@ public class OperationDetails implements Serializable {
 
     private Long workspaceId;
 
+    private String tenant;
+
+    private String uuid;
+
     public OperationDetails() {
     }
 
     public OperationDetails(StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String cloudbreakId,
-            String cloudbreakVersion, Long workspaceId, String userId, String userName) {
+            String cloudbreakVersion, Long workspaceId, String userId, String userName, String tenant) {
         this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, resourceName, cloudbreakId, cloudbreakVersion, workspaceId, userId,
-                userName);
+                userName, tenant);
     }
 
     public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String cloudbreakId,
-            String cloudbreakVersion, Long workspaceId, String userId, String userName) {
+            String cloudbreakVersion, Long workspaceId, String userId, String userName, String tenant) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
@@ -52,6 +58,8 @@ public class OperationDetails implements Serializable {
         this.workspaceId = workspaceId;
         this.userId = userId;
         this.userName = userName;
+        this.tenant = tenant;
+        this.uuid = UUID.randomUUID().toString();
     }
 
     public StructuredEventType getEventType() {
@@ -94,6 +102,7 @@ public class OperationDetails implements Serializable {
         this.timestamp = timestamp;
     }
 
+    @JsonIgnore
     public ZonedDateTime getZonedDateTime() {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
     }
@@ -136,5 +145,21 @@ public class OperationDetails implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }
