@@ -111,7 +111,10 @@ RSpec.describe 'Ldap test cases', :type => :aruba do
     JSON.parse(result.stdout).each do |s|    
         expect(s).to include_json(
         Name: /.*/,
-        Server: /.*/,  
+        Description: /.*/,
+        Server: /.*/,
+        Domain: /.*/,
+        DirectoryType: /.*/,
         UserSearchBase: /.*/,
         UserDnPattern: /.*/,
         UserNameAttribute: /.*/,
@@ -119,9 +122,11 @@ RSpec.describe 'Ldap test cases', :type => :aruba do
         GroupMemberAttribute: /.*/,
         GroupNameAttribute: /.*/,
         GroupObjectClass: /.*/,
-        GroupSearchBase: /.*/    
+        GroupSearchBase: /.*/,
+        AdminGroup: /.*/,
+        Environments: /.*/
       )
-    end        
+    end
   end
 
   it "Database - Delete" do
