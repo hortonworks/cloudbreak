@@ -31,7 +31,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v1smartsensesubscriptions"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v1stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v1subscriptions"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1usages"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v1users"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v1util"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v2connectors"
@@ -142,8 +141,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V1stacks = v1stacks.New(transport, formats)
 
 	cli.V1subscriptions = v1subscriptions.New(transport, formats)
-
-	cli.V1usages = v1usages.New(transport, formats)
 
 	cli.V1users = v1users.New(transport, formats)
 
@@ -281,8 +278,6 @@ type Cloudbreak struct {
 
 	V1subscriptions *v1subscriptions.Client
 
-	V1usages *v1usages.Client
-
 	V1users *v1users.Client
 
 	V1util *v1util.Client
@@ -381,8 +376,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V1stacks.SetTransport(transport)
 
 	c.V1subscriptions.SetTransport(transport)
-
-	c.V1usages.SetTransport(transport)
 
 	c.V1users.SetTransport(transport)
 

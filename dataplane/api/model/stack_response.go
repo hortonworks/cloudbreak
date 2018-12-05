@@ -39,9 +39,6 @@ type StackResponse struct {
 	// related events for a cloudbreak stack
 	CloudbreakEvents []*CloudbreakEvent `json:"cloudbreakEvents"`
 
-	// usage information for a specific stack
-	CloudbreakUsages []*CloudbreakUsage `json:"cloudbreakUsages"`
-
 	// cluster object on stack
 	Cluster *ClusterResponse `json:"cluster,omitempty"`
 
@@ -164,10 +161,6 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateCloudbreakUsages(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateCluster(formats); err != nil {
 		res = append(res, err)
 	}
@@ -263,31 +256,6 @@ func (m *StackResponse) validateCloudbreakEvents(formats strfmt.Registry) error 
 			if err := m.CloudbreakEvents[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("cloudbreakEvents" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *StackResponse) validateCloudbreakUsages(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.CloudbreakUsages) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.CloudbreakUsages); i++ {
-		if swag.IsZero(m.CloudbreakUsages[i]) { // not required
-			continue
-		}
-
-		if m.CloudbreakUsages[i] != nil {
-			if err := m.CloudbreakUsages[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("cloudbreakUsages" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

@@ -39,7 +39,7 @@ require (
 	golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3 // indirect
 	golang.org/x/net v0.0.0-20181005035420-146acd28ed58
 	golang.org/x/text v0.3.0
-	golang.org/x/tools v0.0.0-20181128225727-c5b00d9557fd
+	golang.org/x/tools v0.0.0-20181205014116-22934f0fdb62
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20170511165959-379148ca0225 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
