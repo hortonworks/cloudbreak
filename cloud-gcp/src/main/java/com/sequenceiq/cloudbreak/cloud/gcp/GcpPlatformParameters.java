@@ -147,7 +147,11 @@ public class GcpPlatformParameters implements PlatformParameters {
         }
 
         public static String getUrl(String projectId, AvailabilityZone zone, String volumeId) {
-            return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.value(), volumeId);
+            return getUrl(projectId, zone.value(), volumeId);
+        }
+
+        public static String getUrl(String projectId, String zone, String volumeId) {
+            return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone, volumeId);
         }
 
         public String value() {

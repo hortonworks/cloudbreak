@@ -63,7 +63,14 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
     public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
         LOGGER.debug("Deleting compute resource {}", resource);
         if (resource.getStatus() == CommonStatus.CREATED) {
-            CloudResource deletedResource = builder.delete(context, auth, resource);
+            CloudResource deletedResource = null;
+            try {
+                deletedResource = builder.delete(context, auth, resource);
+            } catch (InterruptedException ignored) {
+                LOGGER.debug("Preserve resource for later use.");
+                CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.CREATED);
+                return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
+            }
             if (deletedResource != null) {
                 PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory
                         .newPollResourceTask(builder, auth, Collections.singletonList(deletedResource), context, cancellable);

@@ -60,7 +60,10 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -85,6 +88,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
 
+    @Inject
+    private PersistenceNotifier persistenceNotifier;
+
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -104,7 +110,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
 
         listOfDisks.addAll(getBootDiskList(computeResources, projectId, location.getAvailabilityZone()));
-        listOfDisks.addAll(getAttachedDisks(computeResources, projectId, location.getAvailabilityZone()));
+        listOfDisks.addAll(getAttachedDisks(computeResources, projectId));
 
         listOfDisks.forEach(disk -> gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
@@ -172,9 +178,18 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             if (operation.getHttpErrorStatusCode() != null) {
                 throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
             }
+
+            updateDiskSetWithInstanceName(auth, computeResources, instance);
             return singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
+        }
+    }
+
+    private void updateDiskSetWithInstanceName(AuthenticatedContext auth, List<CloudResource> computeResources, Instance instance) {
+        for (CloudResource resource : filterResourcesByType(computeResources, ResourceType.GCP_ATTACHED_DISKSET)) {
+            resource.setInstanceId(instance.getName());
+            persistenceNotifier.notifyUpdate(resource, auth.getCloudContext());
         }
     }
 
@@ -207,7 +222,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         CloudInstance cloudInstance = instances.get(0);
         try {
             LOGGER.debug("Checking instance: {}", cloudInstance);
-            Operation operation = check(context, cloudInstance);
+            Operation operation = check(context, cloudInstance.getStringParameter(OPERATION_ID));
             boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
             InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
             LOGGER.debug("Instance: {} status: {}", instances, status);
@@ -241,28 +256,31 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private Collection<AttachedDisk> getBootDiskList(Iterable<CloudResource> resources, String projectId, AvailabilityZone zone) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {
-            listOfDisks.add(createDisk(resource, projectId, zone, true));
+            listOfDisks.add(createDisk(projectId, true, resource.getName(), zone.value(), true));
         }
         return listOfDisks;
     }
 
-    private Collection<AttachedDisk> getAttachedDisks(Iterable<CloudResource> resources, String projectId, AvailabilityZone zone) {
+    private Collection<AttachedDisk> getAttachedDisks(Iterable<CloudResource> resources, String projectId) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
-        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISK)) {
-            listOfDisks.add(createDisk(resource, projectId, zone, false));
+        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            for (Volume volume : volumeSetAttributes.getVolumes()) {
+                listOfDisks.add(createDisk(projectId, false, volume.getId(), volumeSetAttributes.getAvailabilityZone(), Boolean.FALSE));
+            }
         }
         return listOfDisks;
     }
 
-    private AttachedDisk createDisk(CloudResource resource, String projectId, AvailabilityZone zone, boolean boot) {
+    private AttachedDisk createDisk(String projectId, boolean boot, String resourceName, String zone, boolean autoDelete) {
         AttachedDisk attachedDisk = new AttachedDisk();
         attachedDisk.setBoot(boot);
-        attachedDisk.setAutoDelete(true);
+        attachedDisk.setAutoDelete(autoDelete);
         attachedDisk.setType(GCP_DISK_TYPE);
         attachedDisk.setMode(GCP_DISK_MODE);
-        attachedDisk.setDeviceName(resource.getName());
+        attachedDisk.setDeviceName(resourceName);
         attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                projectId, zone.value(), resource.getName()));
+                projectId, zone, resourceName));
         return attachedDisk;
     }
 

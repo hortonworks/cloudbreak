@@ -173,7 +173,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         return resources;
     }
 
-    private Group getScalingGroup(Group scalingGroup) {
+    protected Group getScalingGroup(Group scalingGroup) {
         List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
         instances.removeIf(cloudInstance -> InstanceStatus.CREATE_REQUESTED != cloudInstance.getTemplate().getStatus());
         return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity(), null,
@@ -183,7 +183,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
                 scalingGroup.getRootVolumeSize());
     }
 
-    private Group getGroup(Iterable<Group> groups, String groupName) {
+    protected Group getGroup(Iterable<Group> groups, String groupName) {
         Group resultGroup = null;
         for (Group group : groups) {
             if (groupName.equalsIgnoreCase(group.getName())) {
@@ -194,7 +194,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         return resultGroup;
     }
 
-    private String getGroupName(CloudStack stack) {
+    protected String getGroupName(CloudStack stack) {
         for (Group group : stack.getGroups()) {
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = instance.getTemplate();
@@ -206,7 +206,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         return null;
     }
 
-    private Collection<CloudResource> getDeleteResources(Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {
+    protected Collection<CloudResource> getDeleteResources(Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {
         Collection<CloudResource> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
             String instanceId = instance.getInstanceId();

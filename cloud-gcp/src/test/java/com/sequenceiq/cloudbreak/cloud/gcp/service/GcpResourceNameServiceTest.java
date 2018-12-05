@@ -85,7 +85,7 @@ public class GcpResourceNameServiceTest {
         Object[] parts = {"stack", "group", 3, 2};
 
         // WHEN
-        String resourceName = subject.resourceName(ResourceType.GCP_ATTACHED_DISK, parts);
+        String resourceName = subject.resourceName(ResourceType.GCP_ATTACHED_DISKSET, parts);
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);

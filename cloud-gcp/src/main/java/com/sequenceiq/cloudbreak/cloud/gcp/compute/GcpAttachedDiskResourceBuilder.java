@@ -1,15 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -26,20 +31,31 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 
 @Component
 public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpAttachedDiskResourceBuilder.class);
+
+    private static final String DEVICE_NAME_TEMPLATE = "/dev/sd%s";
 
     @Inject
     @Qualifier("intermediateBuilderExecutor")
@@ -51,76 +67,151 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
 
+    @Inject
+    private PersistenceNotifier resourceNotifier;
+
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        List<CloudResource> cloudResources = new ArrayList<>();
+        List<CloudResource> computeResources = context.getComputeResources(privateId);
+        Optional<CloudResource> reattachableDiskSet = computeResources.stream()
+                .filter(resource -> resourceType().equals(resource.getType()))
+                .findFirst();
+
+        return List.of(reattachableDiskSet
+                .orElseGet(() -> createAttachedDiskSet(context, privateId, auth, group)));
+    }
+
+    private CloudResource createAttachedDiskSet(GcpContext context, long privateId, AuthenticatedContext auth, Group group) {
         CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
         CloudContext cloudContext = auth.getCloudContext();
         String stackName = cloudContext.getName();
+        Location location = context.getLocation();
+
+        List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE);
         for (int i = 0; i < template.getVolumes().size(); i++) {
-            String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
-            cloudResources.add(createNamedResource(resourceType(), resourceName));
+            String volumeName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
+            volumes.add(new VolumeSetAttributes.Volume(volumeName, generator.next()));
         }
-        return cloudResources;
+        Volume volume = template.getVolumes().iterator().next();
+        String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, 0);
+        Map<String, Object> attributes = new HashMap<>(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                .withVolumeSize(volume.getSize())
+                .withVolumeType(volume.getType())
+                .withAvailabilityZone(location.getAvailabilityZone().value())
+                .withDeleteOnTermination(Boolean.TRUE)
+                .withVolumes(volumes).build()));
+        return new Builder()
+                .type(resourceType())
+                .status(CommonStatus.REQUESTED)
+                .name(resourceName)
+                .group(groupName)
+                .params(attributes)
+                .build();
     }
 
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
-            List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
+            List<CloudResource> resources, CloudStack cloudStack) throws Exception {
         CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
-        Volume volume = template.getVolumes().get(0);
 
-        List<CloudResource> resources = new ArrayList<>();
-        List<CloudResource> syncedResources = Collections.synchronizedList(resources);
+        List<String> operations = new ArrayList<>();
+        List<String> syncedOperations = Collections.synchronizedList(operations);
         String projectId = context.getProjectId();
-        Location location = context.getLocation();
         Compute compute = context.getCompute();
         Collection<Future<Void>> futures = new ArrayList<>();
-        for (CloudResource cloudResource : buildableResource) {
-            Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName(), cloudStack.getTags());
 
-            gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
+        List<CloudResource> buildableResource = resources.stream()
+                .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
+                .collect(Collectors.toList());
+
+        List<CloudResource> result = new ArrayList<>();
+        for (CloudResource volumeSetResource : buildableResource) {
+            VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+
+            for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+                Disk disk = createDisk(projectId, volume.getId(), cloudStack.getTags(), volumeSetAttributes);
+
+                gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
+                Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
+                    Insert insDisk = compute.disks().insert(projectId, volumeSetAttributes.getAvailabilityZone(), disk);
+                    try {
+                        Operation operation = insDisk.execute();
+                        syncedOperations.add(operation.getName());
+                        if (operation.getHttpErrorStatusCode() != null) {
+                            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
+                        }
+                    } catch (GoogleJsonResponseException e) {
+                        throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
+                    }
+                    return null;
+                });
+                futures.add(submit);
+            }
+            volumeSetResource.putParameter(OPERATION_ID, operations);
+            result.add(new Builder().cloudResource(volumeSetResource)
+                    .status(CommonStatus.CREATED)
+                    .params(volumeSetResource.getParameters())
+                    .build());
+        }
+
+        for (Future<Void> future : futures) {
+            future.get();
+        }
+
+        result.addAll(resources.stream().filter(cloudResource -> CommonStatus.CREATED.equals(cloudResource.getStatus())).collect(Collectors.toList()));
+        return result;
+    }
+
+    @Override
+    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+        VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+
+        if (!volumeSetAttributes.getDeleteOnTermination()) {
+            resource.setInstanceId(null);
+            volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
+            resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
+            resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
+            throw new InterruptedException("Resource will be preserved for later reattachment.");
+        }
+
+        List<String> operations = new ArrayList<>();
+        List<String> syncedOperations = Collections.synchronizedList(operations);
+        Collection<Future<Void>> futures = new ArrayList<>();
+        for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
             Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
-                Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
                 try {
-                    Operation operation = insDisk.execute();
-                    syncedResources.add(createOperationAwareCloudResource(cloudResource, operation));
+                    Operation operation = context.getCompute().disks()
+                            .delete(context.getProjectId(), volumeSetAttributes.getAvailabilityZone(), volume.getId()).execute();
+                    syncedOperations.add(operation.getName());
                     if (operation.getHttpErrorStatusCode() != null) {
-                        throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), cloudResource.getName());
+                        throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), volume.getId());
                     }
                 } catch (GoogleJsonResponseException e) {
-                    throw new GcpResourceException(checkException(e), resourceType(), cloudResource.getName());
+                    exceptionHandler(e, resource.getName(), resourceType());
+                } catch (IOException e) {
+                    throw new GcpResourceException(e.getMessage(), e);
                 }
                 return null;
             });
             futures.add(submit);
         }
+
         for (Future<Void> future : futures) {
             future.get();
         }
-        return resources;
-    }
 
-    @Override
-    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        String resourceName = resource.getName();
-        try {
-            Operation operation = context.getCompute().disks()
-                    .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
-            return createOperationAwareCloudResource(resource, operation);
-        } catch (GoogleJsonResponseException e) {
-            exceptionHandler(e, resourceName, resourceType());
-        }
-        return null;
+        resource.putParameter(OPERATION_ID, operations);
+        return resource;
     }
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCP_ATTACHED_DISK;
+        return ResourceType.GCP_ATTACHED_DISKSET;
     }
 
     @Override
@@ -128,11 +219,11 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         return 1;
     }
 
-    private Disk createDisk(Volume volume, String projectId, AvailabilityZone availabilityZone, String resourceName, Map<String, String> tags) {
+    private Disk createDisk(String projectId, String resourceName, Map<String, String> tags, VolumeSetAttributes attributes) {
         Disk disk = new Disk();
-        disk.setSizeGb((long) volume.getSize());
+        disk.setSizeGb(Long.valueOf(attributes.getVolumeSize()));
         disk.setName(resourceName);
-        disk.setType(GcpDiskType.getUrl(projectId, availabilityZone, volume.getType()));
+        disk.setType(GcpDiskType.getUrl(projectId, attributes.getAvailabilityZone(), attributes.getVolumeType()));
 
         Map<String, String> customTags = new HashMap<>();
         customTags.putAll(tags);
@@ -140,5 +231,36 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setLabels(customTags);
 
         return disk;
+    }
+
+    @Override
+    public List<CloudResourceStatus> checkResources(GcpContext context, AuthenticatedContext auth, List<CloudResource> resources) {
+        List<CloudResourceStatus> result = new ArrayList<>();
+        for (CloudResource resource : resources) {
+            LOGGER.debug("Check {} resource: {}", resourceType(), resource);
+            List<String> operationIds = Optional.ofNullable(resource.getParameter(OPERATION_ID, List.class)).orElse(List.of());
+
+            boolean finished = operationIds.isEmpty() || operationIds.stream()
+                    .allMatch(operationId -> {
+                        try {
+                            Operation operation = check(context, operationId);
+                            return operation == null || GcpStackUtil.isOperationFinished(operation);
+                        } catch (Exception e) {
+                            CloudContext cloudContext = auth.getCloudContext();
+                            throw new GcpResourceException("Error during status check", resourceType(),
+                                    cloudContext.getName(), cloudContext.getId(), resource.getName(), e);
+                        }
+                    });
+            ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
+            result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
+            if (finished) {
+                if (successStatus == ResourceStatus.CREATED) {
+                    LOGGER.debug("Creation of {} was successful", resource);
+                } else {
+                    LOGGER.debug("Deletion of {} was successful", resource);
+                }
+            }
+        }
+        return result;
     }
 }

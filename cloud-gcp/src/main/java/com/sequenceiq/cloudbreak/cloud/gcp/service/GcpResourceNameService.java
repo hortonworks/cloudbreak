@@ -52,7 +52,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
             case GCP_DISK:
                 resourceName = instanceName(parts);
                 break;
-            case GCP_ATTACHED_DISK:
+            case GCP_ATTACHED_DISKSET:
                 resourceName = attachedDiskResourceName(parts);
                 break;
             default:

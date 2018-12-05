@@ -59,7 +59,7 @@ public class MountDisks {
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if (!"AWS".equals(stack.getPlatformVariant())) {
+        if ("OPENSTACK".equals(stack.getPlatformVariant())) {
             return;
         }
 
@@ -114,7 +114,7 @@ public class MountDisks {
 
     public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if (!"AWS".equals(stack.getPlatformVariant())) {
+        if ("OPENSTACK".equals(stack.getPlatformVariant())) {
             return;
         }
 

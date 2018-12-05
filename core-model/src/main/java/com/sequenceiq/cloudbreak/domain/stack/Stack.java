@@ -373,6 +373,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         switch (platformVariant) {
             case CloudConstants.AWS:
                 return getResourcesByType(ResourceType.AWS_VOLUMESET);
+            case CloudConstants.GCP:
+                return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
             default:
                 return List.of();
         }

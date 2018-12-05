@@ -55,8 +55,8 @@ was_script_executed() {
 
 is_cloud_platform_supported() {
     local log_file=$1
-    if [[ $CLOUD_PLATFORM != "AWS" ]]; then
-        log $log_file "Only cloud platform AWS is supported. Cloud platform currently: $CLOUD_PLATFORM. Exiting"
+    if [[ $CLOUD_PLATFORM != "AWS" && $CLOUD_PLATFORM != "GCP" ]]; then
+        log $log_file "Only AWS and GCP cloud platforms are supported. Cloud platform currently: $CLOUD_PLATFORM. Exiting"
         exit
     fi
 }

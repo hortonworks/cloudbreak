@@ -29,6 +29,7 @@ public enum ResourceType {
     // GCP
     GCP_DISK,
     GCP_ATTACHED_DISK,
+    GCP_ATTACHED_DISKSET,
     GCP_RESERVED_IP,
     GCP_NETWORK,
     GCP_SUBNET,

@@ -346,9 +346,6 @@ public class ClusterService {
     }
 
     private void markVolumesForDeletion(Stack stack) {
-        if (!"AWS".equals(stack.getPlatformVariant())) {
-            return;
-        }
         LOGGER.debug("Mark volumes for delete on termination in case of active repair flow.");
         try {
             transactionService.required(() -> {
@@ -619,8 +616,8 @@ public class ClusterService {
     }
 
     private void checkReattachSupportedOnProvider(Stack inTransactionStack, boolean repairWithReattach) {
-        if (repairWithReattach && !"AWS".equalsIgnoreCase(inTransactionStack.getPlatformVariant())) {
-            throw new BadRequestException("Volume reattach currently only supported on AWS.");
+        if (repairWithReattach && "OPENSTACK".equalsIgnoreCase(inTransactionStack.getPlatformVariant())) {
+            throw new BadRequestException("Volume reattach currently not supported on OpenStack.");
         }
     }
 
@@ -660,7 +657,7 @@ public class ClusterService {
     }
 
     private void validateRepair(Stack stack, HostMetadata hostMetadata, boolean repairWithReattach) {
-        if (!repairWithReattach || (isGateway(hostMetadata) && !isMultipleGateway(stack))) {
+        if (!repairWithReattach && (isGateway(hostMetadata) && !isMultipleGateway(stack))) {
             throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
         }
         if (isGateway(hostMetadata) && withEmbeddedAmbariDB(stack.getCluster())) {
