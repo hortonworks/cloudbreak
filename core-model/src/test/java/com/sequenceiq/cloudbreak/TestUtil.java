@@ -422,7 +422,6 @@ public class TestUtil {
         }
 
         if (kerberosConfig != null) {
-            cluster.setSecure(true);
             cluster.setKerberosConfig(kerberosConfig);
         }
         Workspace workspace = new Workspace();

@@ -54,10 +54,10 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
     }
 
     @Test
-    @Parameters({"clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+    @Parameters({"clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "kerberosMasterKey", "kerberosAdmin",
             "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "mockPort"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
-            @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey,
+            @Optional("admin123!@#") String ambariPassword, @Optional String kerberosMasterKey,
             @Optional String kerberosAdmin, @Optional String kerberosPassword, @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari,
             @Optional("9443") int mockPort) throws Exception {
         // GIVEN
@@ -74,15 +74,10 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
-        clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);
         clusterRequest.setUserName(ambariUser);
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
-
-        if (enableSecurity) {
-            clusterRequest.setKerberosConfigName("somename");
-        }
 
         GatewayJson gatewayJson = new GatewayJson();
         gatewayJson.setExposedServices(ImmutableList.of("ALL"));

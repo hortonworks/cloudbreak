@@ -46,7 +46,6 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setBlueprintName(ambariRequest.getBlueprintName());
             cluster.setConfigStrategy(ambariRequest.getConfigStrategy());
             cluster.setConnectedCluster(ambariRequest.getConnectedCluster());
-            cluster.setEnableSecurity(ambariRequest.getEnableSecurity());
             cluster.setGateway(ambariRequest.getGateway());
             cluster.setKerberosConfigName(ambariRequest.getKerberosConfigName());
             cluster.setPassword(ambariRequest.getPassword());

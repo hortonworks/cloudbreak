@@ -22,7 +22,6 @@
   ],
   "password": "admin",
   "userName": "admin",
-  "enableSecurity": false,
   "gateway": {
     "enableGateway": false,
     "exposedServices": [

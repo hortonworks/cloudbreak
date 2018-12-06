@@ -86,9 +86,6 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(StackModelDescription.DP_AMBARI_PASSWORD)
     private SecretResponse dpAmbariPassword;
 
-    @ApiModelProperty(ClusterModelDescription.SECURE)
-    private boolean secure;
-
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
@@ -243,14 +240,6 @@ public class ClusterResponse implements JsonEntity {
 
     public void setHostGroups(Set<HostGroupResponse> hostGroups) {
         this.hostGroups = hostGroups;
-    }
-
-    public boolean isSecure() {
-        return secure;
-    }
-
-    public void setSecure(boolean secure) {
-        this.secure = secure;
     }
 
     public String getAmbariServerIp() {

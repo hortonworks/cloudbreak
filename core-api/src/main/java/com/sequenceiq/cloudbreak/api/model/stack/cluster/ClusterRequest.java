@@ -63,9 +63,6 @@ public class ClusterRequest implements JsonEntity {
 
     private GatewayJson gateway;
 
-    @ApiModelProperty(StackModelDescription.ENABLE_SECURITY)
-    private Boolean enableSecurity = Boolean.FALSE;
-
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -188,14 +185,6 @@ public class ClusterRequest implements JsonEntity {
 
     public void setHostGroups(Set<HostGroupRequest> hostGroups) {
         this.hostGroups = hostGroups;
-    }
-
-    public Boolean getEnableSecurity() {
-        return enableSecurity;
-    }
-
-    public void setEnableSecurity(Boolean enableSecurity) {
-        this.enableSecurity = enableSecurity;
     }
 
     public GatewayJson getGateway() {

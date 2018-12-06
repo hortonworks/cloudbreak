@@ -140,12 +140,8 @@ public class ClusterCreationSetupService {
     }
 
     public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
-        if (stack.getDatalakeId() == null) {
-            if (request.getEnableSecurity() && request.getKerberosConfigName() == null) {
-                throw new BadRequestException("If the security is enabled then kerberos parameters cannot be empty");
-            }
-        } else if (request.getKerberosConfigName() != null) {
-                throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
+        if (stack.getDatalakeId() != null && StringUtils.isNotBlank(request.getKerberosConfigName())) {
+            throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
         MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());
         CloudCredential credential = cloudCredential;
@@ -222,7 +218,7 @@ public class ClusterCreationSetupService {
     }
 
     private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack, Cluster cluster) {
-        if (cluster.isSecure() && cluster.getKerberosConfig() != null && StringUtils.isNotBlank(cluster.getKerberosConfig().getDomain())) {
+        if (cluster.getKerberosConfig() != null && StringUtils.isNotBlank(cluster.getKerberosConfig().getDomain())) {
             stack.setCustomDomain(cluster.getKerberosConfig().getDomain());
         }
     }

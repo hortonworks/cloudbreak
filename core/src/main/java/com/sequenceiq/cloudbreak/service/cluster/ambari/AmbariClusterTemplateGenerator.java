@@ -34,7 +34,7 @@ public class AmbariClusterTemplateGenerator {
         String clusterTemplate;
 
         String repositoryVersion = ambariRepositoryVersionService.getRepositoryVersion(cluster.getId(), cluster.getStack().getOrchestrator());
-        if (cluster.isSecure()) {
+        if (cluster.getKerberosConfig() != null) {
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
             clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,

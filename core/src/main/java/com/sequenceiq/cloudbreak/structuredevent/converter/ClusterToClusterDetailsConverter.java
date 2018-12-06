@@ -58,10 +58,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void convertKerberosConfig(ClusterDetails clusterDetails, Cluster source) {
-        Boolean secure = source.isSecure();
-        clusterDetails.setSecure(secure);
-        if (secure) {
-            clusterDetails.setSecure(Boolean.TRUE);
+        if (source.getKerberosConfig() != null) {
             KerberosConfig kerberosConfig = source.getKerberosConfig();
             String kerberosType = "New MIT Kerberos";
             if (kerberosConfig != null) {

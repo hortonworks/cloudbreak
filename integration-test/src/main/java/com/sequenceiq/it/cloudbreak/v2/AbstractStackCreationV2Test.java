@@ -86,8 +86,8 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
-    @Parameters({"blueprintName", "enableSecurity", "enableGateway"})
-    public void ambariParameters(@Optional("") String blueprintName, @Optional("false") boolean enableSecurity, @Optional("true") boolean enableGateway) {
+    @Parameters({"blueprintName", "enableGateway"})
+    public void ambariParameters(@Optional("") String blueprintName, @Optional("true") boolean enableGateway) {
         IntegrationTestContext itContext = getItContext();
         blueprintName = StringUtils.hasText(blueprintName) ? blueprintName : itContext.getContextParam(CloudbreakV2Constants.BLUEPRINT_NAME);
 
@@ -106,9 +106,6 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         if (enableGateway) {
             addGatewayRequest(stackV2Request, ambariV2Request);
-        }
-        if (enableSecurity) {
-            ambariV2Request.setEnableSecurity(enableSecurity);
         }
     }
 

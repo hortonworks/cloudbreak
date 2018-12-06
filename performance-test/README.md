@@ -158,8 +158,7 @@ Please run cb with following V2 cluster request to create a cluster.
       "userName": "admin",
       "password": "password",
       "validateBlueprint": false,
-      "ambariSecurityMasterKey": "",
-      "enableSecurity": false
+      "ambariSecurityMasterKey": ""
     }
   },
   "instanceGroups": [

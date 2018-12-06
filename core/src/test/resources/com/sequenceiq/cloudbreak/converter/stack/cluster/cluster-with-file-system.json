@@ -6,7 +6,6 @@
   "description" : "my cluster description",
   "userName" : "user",
   "password" : "pass",
-  "enableSecurity": true,
   "kerberosConfigName" : "somename",
   "gateway" : {
     "enableKnoxGateway": "false"

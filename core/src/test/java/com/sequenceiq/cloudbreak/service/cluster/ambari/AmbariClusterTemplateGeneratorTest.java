@@ -68,7 +68,6 @@ public class AmbariClusterTemplateGeneratorTest {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");
-        cluster.setSecure(Boolean.TRUE);
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setPassword("KerberosPassword");
         cluster.setKerberosConfig(kerberosConfig);

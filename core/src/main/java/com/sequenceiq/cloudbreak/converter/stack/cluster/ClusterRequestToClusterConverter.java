@@ -59,8 +59,6 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         cluster.setUserName(source.getUserName());
         cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
-        Boolean enableSecurity = source.getEnableSecurity();
-        cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
         convertGateway(source, cluster);
 
         if (source.getKerberosConfigName() != null) {

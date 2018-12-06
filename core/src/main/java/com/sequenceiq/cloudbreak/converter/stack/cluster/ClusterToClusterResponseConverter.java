@@ -279,8 +279,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     private void convertKerberosConfig(Cluster source, ClusterResponse clusterResponse) {
         KerberosConfig kerberosConfig = source.getKerberosConfig();
-        if (source.isSecure() && kerberosConfig != null) {
-            clusterResponse.setSecure(source.isSecure());
+        if (kerberosConfig != null) {
             clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
         }
     }

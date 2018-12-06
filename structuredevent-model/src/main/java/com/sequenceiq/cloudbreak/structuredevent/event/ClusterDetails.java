@@ -23,8 +23,6 @@ public class ClusterDetails implements Serializable {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String statusReason;
 
-    private Boolean secure;
-
     private String kerberosType;
 
     private Boolean gatewayEnabled;
@@ -87,14 +85,6 @@ public class ClusterDetails implements Serializable {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
-    }
-
-    public Boolean getSecure() {
-        return secure;
-    }
-
-    public void setSecure(Boolean secure) {
-        this.secure = secure;
     }
 
     public String getKerberosType() {

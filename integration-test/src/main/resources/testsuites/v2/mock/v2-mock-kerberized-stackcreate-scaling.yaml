@@ -63,7 +63,6 @@ tests:
       subnetCidr: 10.0.0.0/16
       mockPort: 9443
       publicKeyId: seq-master
-      enableSecurity: false
       enableGateway: false
     classes:
       - com.sequenceiq.it.cloudbreak.v2.mock.MockStackCreationV2Test

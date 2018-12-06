@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFact
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
@@ -132,7 +133,7 @@ public class ReactorFlowManagerTest {
     public void testClusterTerminationOnlySecuredCluster() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setSecure(true);
+        stack.getCluster().setKerberosConfig(new KerberosConfig());
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
 
         underTest.triggerClusterTermination(1L, false, false);
@@ -151,7 +152,7 @@ public class ReactorFlowManagerTest {
     public void testClusterTerminationSecuredClusterAndStack() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setSecure(true);
+        stack.getCluster().setKerberosConfig(new KerberosConfig());
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
 
         underTest.triggerClusterTermination(1L, true, false);

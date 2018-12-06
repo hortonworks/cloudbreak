@@ -104,7 +104,6 @@
         "gatewayType": "CENTRAL",
         "ssoType": "SSO_PROVIDER"
       },
-      "enableSecurity": false,
       "userName": "string",
       "password": "string",
       "kerberos": {
