@@ -108,7 +108,6 @@ public class ClusterCreationSetupServiceTest {
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
 
         cluster = new Cluster();
-        cluster.setSecure(true);
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
@@ -146,15 +145,6 @@ public class ClusterCreationSetupServiceTest {
     }
 
     @Test
-    public void testNotSecureSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        cluster.setSecure(false);
-
-        underTest.prepare(clusterRequest, stack, blueprint, user, workspace);
-
-        assertNull(stack.getCustomDomain());
-    }
-
-    @Test
     public void testMissingKerberosConfig() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.setKerberosConfig(null);
 
@@ -173,18 +163,9 @@ public class ClusterCreationSetupServiceTest {
     }
 
     @Test
-    public void testIncorrectKerberosSettingForDatalakeCluster() {
-        clusterRequest.setKerberosConfigName(null);
-        clusterRequest.setEnableSecurity(true);
-
-        assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
-    }
-
-    @Test
     public void testIncorrectKerberosSettingForWorkloadCluster() {
-        stack.setDatalakeId(null);
-        clusterRequest.setKerberosConfigName(null);
-        clusterRequest.setEnableSecurity(true);
+        stack.setDatalakeId(1L);
+        clusterRequest.setKerberosConfigName("attached_kerberos_which_not_allowed");
 
         assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
     }

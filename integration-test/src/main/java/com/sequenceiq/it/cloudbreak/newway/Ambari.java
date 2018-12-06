@@ -65,11 +65,6 @@ public class Ambari extends Entity  {
         return this;
     }
 
-    public Ambari withEnableSecurity(boolean enableSecurity) {
-        request.setEnableSecurity(enableSecurity);
-        return this;
-    }
-
     public Ambari withGateway(GatewayJson gatewayJson) {
         request.setGateway(gatewayJson);
         return this;

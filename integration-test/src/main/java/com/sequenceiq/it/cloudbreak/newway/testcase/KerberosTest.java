@@ -79,8 +79,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withAmbariRequest(new AmbariEntity(testContext)
                                 .valid()
                                 .withKerberos(request.getName())
-                                .withBlueprintName(blueprintName)
-                                .withEnableSecurity(true)))
+                                .withBlueprintName(blueprintName)))
                 .when(Stack.postV2())
                 .await(STACK_AVAILABLE)
                 .then(testData.getAssertions())
@@ -91,13 +90,9 @@ public class KerberosTest extends AbstractIntegrationTest {
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
-        KerberosRequest request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-        request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
                 .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV2())
-                .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
-                .when(Kerberos.postV2())
                 .given("master", InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .given(StackEntity.class)
                 .withInstanceGroups("master")
@@ -106,10 +101,9 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withAmbariRequest(new AmbariEntity(testContext)
                                 .valid()
                                 .withKerberos(null)
-                                .withBlueprintName(blueprintName)
-                                .withEnableSecurity(true)))
-                .when(Stack.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                                .withBlueprintName(blueprintName)))
+                .when(Stack.postV2())
+                .await(STACK_AVAILABLE)
                 .validate();
     }
 
@@ -132,8 +126,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withAmbariRequest(new AmbariEntity(testContext)
                                 .valid()
                                 .withKerberos("")
-                                .withBlueprintName(blueprintName)
-                                .withEnableSecurity(true)))
+                                .withBlueprintName(blueprintName)))
                 .when(Stack.postV2(), key("badRequest"))
                 .except(BadRequestException.class, key("badRequest"))
                 .validate();

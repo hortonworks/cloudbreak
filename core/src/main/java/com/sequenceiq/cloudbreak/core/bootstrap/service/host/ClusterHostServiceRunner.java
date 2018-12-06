@@ -186,8 +186,8 @@ public class ClusterHostServiceRunner {
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        saveCustomNameservers(stack, cluster.isSecure(), cluster.getKerberosConfig(), servicePillar);
-        if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
+        saveCustomNameservers(stack, cluster.getKerberosConfig(), servicePillar);
+        if (cluster.getKerberosConfig() != null && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin(), "user");
@@ -323,13 +323,12 @@ public class ClusterHostServiceRunner {
         return grainProperties;
     }
 
-    private void saveCustomNameservers(Stack stack, boolean secure, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
-        if (secure && kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
+    private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
+        if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
             List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
-        } else if (!secure || kerberosConfig == null
-                || (kerberosConfig.getType() != KerberosType.FREEIPA && kerberosConfig.getType() != KerberosType.ACTIVE_DIRECTORY)) {
+        } else if (kerberosConfig == null || (kerberosConfig.getType() != KerberosType.FREEIPA && kerberosConfig.getType() != KerberosType.ACTIVE_DIRECTORY)) {
             saveDatalakeNameservers(stack, servicePillar);
         }
     }
@@ -376,7 +375,7 @@ public class ClusterHostServiceRunner {
             }
         }
 
-        gateway.put("kerberos", cluster.isSecure());
+        gateway.put("kerberos", cluster.getKerberosConfig() != null);
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
 
         List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());

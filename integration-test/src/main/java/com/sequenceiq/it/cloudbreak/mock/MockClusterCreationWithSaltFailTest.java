@@ -59,11 +59,11 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
     }
 
     @Test
-    @Parameters({"clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+    @Parameters({"clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "kerberosMasterKey", "kerberosAdmin",
             "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "mockPort"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
             @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
-            @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,
+            @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,
             @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari, @Optional("9443") int mockPort) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
@@ -78,7 +78,6 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
-        clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);
         clusterRequest.setUserName(ambariUser);
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));

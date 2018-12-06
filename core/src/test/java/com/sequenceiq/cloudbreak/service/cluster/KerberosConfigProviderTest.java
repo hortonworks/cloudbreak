@@ -58,7 +58,6 @@ public class KerberosConfigProviderTest {
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getKerberosConfig()).thenReturn(null);
         underTest.setKerberosConfigForWorkloadCluster(workLoadCluster, datalakeStack);
-        assertEquals(workLoadCluster.isSecure(), false);
     }
 
     @Test

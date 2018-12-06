@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.domain.view;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -15,6 +14,7 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -25,8 +25,8 @@ public class ClusterApiView extends CompactView {
     @OneToOne(fetch = FetchType.LAZY)
     private StackApiView stack;
 
-    @Column(nullable = false)
-    private Boolean secure;
+    @ManyToOne
+    private KerberosConfig kerberosConfig;
 
     @OneToMany(mappedBy = "cluster")
     private Set<HostGroupView> hostGroups = new HashSet<>();
@@ -63,12 +63,12 @@ public class ClusterApiView extends CompactView {
         this.stack = stack;
     }
 
-    public Boolean getSecure() {
-        return secure;
+    public KerberosConfig getKerberosConfig() {
+        return kerberosConfig;
     }
 
-    public void setSecure(Boolean secure) {
-        this.secure = secure;
+    public void setKerberosConfig(KerberosConfig kerberosConfig) {
+        this.kerberosConfig = kerberosConfig;
     }
 
     public Set<HostGroupView> getHostGroups() {

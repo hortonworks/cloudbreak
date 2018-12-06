@@ -225,7 +225,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Boolean secure = stackService.getByIdWithTransaction(stackId).getCluster().isSecure();
+        Boolean secure = stackService.getByIdWithTransaction(stackId).getCluster().getKerberosConfig() != null;
         String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
         notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
         cancelRunningFlows(stackId);

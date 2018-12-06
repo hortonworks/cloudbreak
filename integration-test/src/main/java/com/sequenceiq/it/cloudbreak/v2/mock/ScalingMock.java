@@ -245,7 +245,7 @@ public class ScalingMock extends MockServer {
     }
 
     private int calculateGrainsAppendCount(ClusterV2Request cluster) {
-        boolean securityEnabled = cluster.getAmbari().getEnableSecurity();
+        boolean securityEnabled = cluster.getAmbari().getKerberosConfigName() != null;
         boolean gatewayEnabled = false;
         if (cluster.getAmbari().getGateway() != null) {
             gatewayEnabled = !cluster.getAmbari().getGateway().getTopologies().isEmpty();

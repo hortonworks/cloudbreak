@@ -120,7 +120,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
                     .withLdapConfig(ldapConfig, bindDn, bindPassword)
                     .withHdfConfigs(hdfConfigs)
-                    .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
+                    .withKerberosConfig(cluster.getKerberosConfig())
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))
                     .build();
         } catch (BlueprintProcessingException | IOException e) {

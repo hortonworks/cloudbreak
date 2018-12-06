@@ -34,10 +34,10 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({"clusterName", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+    @Parameters({"clusterName", "emailNeeded", "kerberosMasterKey", "kerberosAdmin",
             "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "withRDSConfig", "autoRecoveryMode", "withFs"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("false") boolean emailNeeded,
-            @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey,
+            @Optional String kerberosMasterKey,
             @Optional String kerberosAdmin, @Optional String kerberosPassword,
             @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari,
             @Optional ("false") boolean withRDSConfig, @Optional ("false") boolean autoRecoveryMode,
@@ -57,7 +57,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
-        clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);
         clusterRequest.setUserName(ambariUser);
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
@@ -69,11 +68,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
         if (withFs) {
             clusterRequest = setFileSystem(itContext, clusterRequest);
-        }
-
-        if (enableSecurity) {
-            // FIXME
-            clusterRequest.setKerberosConfigName("");
         }
 
         ClusterV1Endpoint clusterV1Endpoint = getCloudbreakClient().clusterEndpoint();

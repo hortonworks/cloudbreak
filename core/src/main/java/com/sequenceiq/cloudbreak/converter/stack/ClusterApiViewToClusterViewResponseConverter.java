@@ -32,7 +32,7 @@ public class ClusterApiViewToClusterViewResponseConverter extends CompactViewToC
         ClusterViewResponse clusterViewResponse = super.convert(source);
         clusterViewResponse.setAmbariServerIp(source.getAmbariIp());
         clusterViewResponse.setStatus(source.getStatus());
-        clusterViewResponse.setSecure(source.getSecure());
+        clusterViewResponse.setSecure(source.getKerberosConfig() != null);
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterViewResponse.setBlueprint(conversionService.convert(source.getBlueprint(), BlueprintViewResponse.class));
         addSharedServiceResponse(source, clusterViewResponse);

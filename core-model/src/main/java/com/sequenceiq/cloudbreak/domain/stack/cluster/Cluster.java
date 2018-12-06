@@ -127,9 +127,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret dpAmbariPassword = Secret.EMPTY;
 
-    @Column(nullable = false)
-    private Boolean secure;
-
     @ManyToOne
     private KerberosConfig kerberosConfig;
 
@@ -301,10 +298,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return status.equals(Status.CREATE_FAILED);
     }
 
-    public boolean isSecure() {
-        return secure == null ? false : secure;
-    }
-
     public Set<RDSConfig> getRdsConfigs() {
         return rdsConfigs;
     }
@@ -387,14 +380,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isDeleteCompleted() {
         return DELETE_COMPLETED.equals(status);
-    }
-
-    public Boolean getSecure() {
-        return secure;
-    }
-
-    public void setSecure(Boolean secure) {
-        this.secure = secure;
     }
 
     public boolean isClusterReadyForStart() {
@@ -577,11 +562,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isAdJoinable() {
-        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY;
+        return kerberosConfig != null && kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY;
     }
 
     public boolean isIpaJoinable() {
-        return isSecure() && kerberosConfig != null && kerberosConfig.getType() == KerberosType.FREEIPA;
+        return kerberosConfig != null && kerberosConfig.getType() == KerberosType.FREEIPA;
     }
 
     @Override

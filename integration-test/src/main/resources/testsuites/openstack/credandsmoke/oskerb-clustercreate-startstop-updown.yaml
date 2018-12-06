@@ -65,7 +65,6 @@ tests:
       stackName: it-oskerb-cred-ssud
       region: local
       clusterName: it-oskerb-cred-ssud
-      enableSecurity: true
       kerberosMasterKey: masterkey
       kerberosAdmin: admin
       kerberosPassword: admin

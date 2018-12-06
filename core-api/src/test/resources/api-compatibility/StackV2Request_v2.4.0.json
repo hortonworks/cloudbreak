@@ -111,7 +111,6 @@
     "ambari": {
       "blueprintId": 0,
       "blueprintName": "string",
-      "enableSecurity": false,
       "userName": "string",
       "password": "string",
       "kerberosConfigName": "testFreeIpaKdc",

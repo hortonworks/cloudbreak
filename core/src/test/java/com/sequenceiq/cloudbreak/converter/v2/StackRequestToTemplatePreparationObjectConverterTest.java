@@ -247,7 +247,6 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenKerberosRequestIsNotNullInAmbariV2RequestButSecurityFalseThenEmptyKerberosShouldBeStored() {
         when(ambari.getKerberosConfigName()).thenReturn("something");
-        when(ambari.getEnableSecurity()).thenReturn(false);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -259,7 +258,6 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     public void testConvertWhenKerberosRequestIsNotNullInAmbariV2RequestAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
         KerberosConfig expected = new KerberosConfig();
         when(ambari.getKerberosConfigName()).thenReturn("somename");
-        when(ambari.getEnableSecurity()).thenReturn(true);
         when(kerberosService.getByNameForWorkspaceId(eq("somename"), anyLong())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);

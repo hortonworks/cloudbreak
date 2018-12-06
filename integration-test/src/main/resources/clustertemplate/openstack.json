@@ -113,7 +113,6 @@
         "executorType": "DEFAULT",
         "ambari": {
             "blueprintName": "Data Science: Apache Spark 2, Apache Zeppelin",
-            "enableSecurity": false,
             "userName": "admin",
             "password": "",
             "validateBlueprint": false,

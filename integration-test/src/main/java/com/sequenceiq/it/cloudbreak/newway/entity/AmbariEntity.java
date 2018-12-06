@@ -48,11 +48,6 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
         return this;
     }
 
-    public AmbariEntity withEnableSecurity(Boolean enableSecurity) {
-        getRequest().setEnableSecurity(enableSecurity);
-        return this;
-    }
-
     public AmbariEntity withUserName(String userName) {
         getRequest().setUserName(userName);
         return this;

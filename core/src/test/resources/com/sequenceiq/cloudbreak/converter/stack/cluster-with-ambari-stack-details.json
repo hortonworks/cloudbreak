@@ -5,7 +5,6 @@
   "description" : "my cluster description",
   "userName" : "user",
   "password" : "pass",
-  "enableSecurity": false,
   "kerberosMasterKey": "masterkey",
   "kerberosAdmin" : "admin",
   "kerberosPassword" : "passw",

@@ -857,7 +857,7 @@ public class ClusterService {
             checkBlueprintIdAndHostGroups(blueprintId, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
             Cluster cluster = getCluster(stackWithLists);
-            if (cluster != null && stackWithLists.getCluster().isSecure()) {
+            if (cluster != null && stackWithLists.getCluster().getKerberosConfig() != null) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
             }
             Blueprint blueprint = blueprintService.get(blueprintId);

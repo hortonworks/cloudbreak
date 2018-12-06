@@ -28,12 +28,11 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
         prepareStackRepoDetails(source, ambariV2Request);
         ambariV2Request.setConfigStrategy(null);
         ambariV2Request.setConnectedCluster(null);
-        ambariV2Request.setEnableSecurity(source.isSecure());
         ambariV2Request.setGateway(null);
         ambariV2Request.setPassword("");
         ambariV2Request.setUserName("");
         ambariV2Request.setValidateBlueprint(null);
-        if (source.isSecure() && source.getKerberosConfig() != null) {
+        if (source.getKerberosConfig() != null) {
             ambariV2Request.setKerberosConfigName(source.getKerberosConfig().getName());
         }
         if (source.getGateway() != null) {

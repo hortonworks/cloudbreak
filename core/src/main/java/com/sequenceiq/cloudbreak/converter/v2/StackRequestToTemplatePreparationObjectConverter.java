@@ -246,7 +246,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
     private KerberosConfig getKerberosConfig(StackV2Request source) {
         KerberosConfig kerberosConfig = null;
-        if (source.getCluster().getAmbari().getKerberosConfigName() != null && source.getCluster().getAmbari().getEnableSecurity()) {
+        if (StringUtils.isNotBlank(source.getCluster().getAmbari().getKerberosConfigName())) {
             kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getCluster().getAmbari().getKerberosConfigName(),
                     restRequestThreadLocalService.getRequestedWorkspaceId());
         }

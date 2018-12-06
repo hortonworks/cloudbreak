@@ -178,7 +178,6 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         request.setBlueprintName("blueprintName");
         request.setConfigStrategy(ConfigStrategy.ALWAYS_APPLY);
         request.setConnectedCluster(new ConnectedClusterRequest());
-        request.setEnableSecurity(true);
         request.setGateway(new GatewayJson());
         request.setKerberosConfigName(null);
         request.setPassword("somePwd");

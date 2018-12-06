@@ -57,7 +57,6 @@ tests:
       region: europe-west1,
       availabilityZone: europe-west1-b,
       clusterName: it-gcp-kerberos-cluster,
-      enableSecurity: true,
       kerberosMasterKey: masterkey,
       kerberosAdmin: admin,
       kerberosPassword: admin
