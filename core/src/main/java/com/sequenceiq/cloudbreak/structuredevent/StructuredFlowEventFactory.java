@@ -22,8 +22,12 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -108,4 +112,59 @@ public class StructuredFlowEventFactory {
                 cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
+
+    public StructuredNotificationEvent createStructuredNotificationEvent(LdapDetails ldapDetails, String notificationType, String message,
+            boolean notifyWorkspace) {
+        LdapNotificationDetails notificationDetails = new LdapNotificationDetails();
+        notificationDetails.setLdapDetails(ldapDetails);
+        notificationDetails.setNotification(message);
+        notificationDetails.setNotificationType(notificationType);
+
+        OperationDetails operationDetails = new OperationDetails(
+                NOTIFICATION,
+                "ldaps",
+                ldapDetails.getId(),
+                ldapDetails.getName(),
+                cloudbreakNodeConfig.getInstanceUUID(),
+                cbVersion,
+                null,
+                ldapDetails.getUserId(),
+                null,
+                null
+        );
+        if (notifyWorkspace) {
+            operationDetails.setWorkspaceId(ldapDetails.getWorkspaceId());
+            operationDetails.setUserName(ldapDetails.getUserName());
+            operationDetails.setTenant(ldapDetails.getTenantName());
+        }
+        return new StructuredNotificationEvent(operationDetails, notificationDetails);
+    }
+
+    public StructuredNotificationEvent createStructuredNotificationEvent(RdsDetails rdsDetails, String notificationType, String message,
+            boolean notifyWorkspace) {
+        RdsNotificationDetails notificationDetails = new RdsNotificationDetails();
+        notificationDetails.setRdsDetails(rdsDetails);
+        notificationDetails.setNotification(message);
+        notificationDetails.setNotificationType(notificationType);
+
+        OperationDetails operationDetails = new OperationDetails(
+                NOTIFICATION,
+                "rds",
+                rdsDetails.getId(),
+                rdsDetails.getName(),
+                cloudbreakNodeConfig.getInstanceUUID(),
+                cbVersion,
+                null,
+                rdsDetails.getUserId(),
+                null,
+                null
+        );
+        if (notifyWorkspace) {
+            operationDetails.setWorkspaceId(rdsDetails.getWorkspaceId());
+            operationDetails.setUserName(rdsDetails.getUserName());
+            operationDetails.setTenant(rdsDetails.getTenantName());
+        }
+        return new StructuredNotificationEvent(operationDetails, notificationDetails);
+    }
+
 }

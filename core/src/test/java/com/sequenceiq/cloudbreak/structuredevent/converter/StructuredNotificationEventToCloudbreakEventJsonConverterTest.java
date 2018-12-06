@@ -1,31 +1,56 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.runners.Parameterized.Parameters;
 
+import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
-import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
+@RunWith(Parameterized.class)
 public class StructuredNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
 
-    private static final long ORG_ID = 1L;
+    private static final String MESSAGE = "someMessage";
 
-    private static final String USER_ID = "horton@hortonworks.com";
+    private static final String TYPE = "eventType";
 
-    private static final String USER_NAME = "Alma Ur";
+    private StructuredNotificationEvent source;
+
+    private List<String> skippedFields;
 
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
+
+    public StructuredNotificationEventToCloudbreakEventJsonConverterTest(StructuredNotificationEvent source, List<String> additionalElementsToSkip) {
+        skippedFields = Lists.newArrayList("availabilityZone", "owner", "account");
+        skippedFields.addAll(additionalElementsToSkip);
+        this.source = source;
+    }
+
+    @Parameters(name = "Current StructuredNotificationEvent {0}, and the following fields should be skipped on null check: {1}")
+    public static Object[][] data() {
+        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
+                "usagestack", "cbId", "cbVersion", 1L, "horton@hortonworks.com", "Alma Ur", "tenant");
+        return new Object[][]{
+                {new StructuredNotificationEvent(operation, TestUtil.notificationDetails(MESSAGE, TYPE)), List.of("ldapDetails", "rdsDetails")},
+                {new StructuredNotificationEvent(operation, TestUtil.ldapNotificationDetails(MESSAGE, TYPE)), getFieldNamesExcept(List.of("ldapDetails"))},
+                {new StructuredNotificationEvent(operation, TestUtil.rdsNotificationDetails(MESSAGE, TYPE)), getFieldNamesExcept(List.of("rdsDetails"))}
+        };
+    }
 
     @Before
     public void setUp() {
@@ -34,33 +59,26 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Test
     public void testConvert() {
-        // GIVEN
-        // WHEN
-        CloudbreakEventsJson result = underTest.convert(getSource());
-        // THEN
-        assertEquals("message", result.getEventMessage());
-        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "owner", "account"));
+        CloudbreakEventsJson result = underTest.convert(source);
+
+        assertNotNull(result);
+        assertEquals(MESSAGE, result.getEventMessage());
+        assertEquals(TYPE, result.getEventType());
+        assertAllFieldsNotNull(result, skippedFields);
     }
 
     @Override
     public StructuredNotificationEvent createSource() {
-        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
-                "usagestack", "cbId", "cbVersion", ORG_ID, USER_ID, USER_NAME, "tenant");
-        NotificationDetails notification = new NotificationDetails();
-        notification.setInstanceGroup("master");
-        notification.setRegion("us");
-        notification.setStackName("usagestack");
-        notification.setStackId(1L);
-        notification.setNotification("message");
-        notification.setNotificationType("eventType");
-        notification.setCloud(GCP);
-        notification.setBlueprintName("blueprintName");
-        notification.setBlueprintId(1L);
-        notification.setStackStatus(AVAILABLE.name());
-        notification.setNodeCount(1);
-        notification.setClusterStatus(AVAILABLE.name());
-        notification.setClusterId(1L);
-        notification.setClusterName("test");
-        return new StructuredNotificationEvent(operation, notification);
+        return null;
+    }
+
+    private static List<String> getFieldNamesExcept(List<String> exclusions) {
+        List<String> fieldsToReturn = new LinkedList<>();
+        for (Field field : CloudbreakEventsJson.class.getDeclaredFields()) {
+            if (!exclusions.contains(field.getName())) {
+                fieldsToReturn.add(field.getName());
+            }
+        }
+        return fieldsToReturn;
     }
 }

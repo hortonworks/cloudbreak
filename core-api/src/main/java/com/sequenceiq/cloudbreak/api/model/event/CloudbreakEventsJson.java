@@ -1,5 +1,7 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.event;
 
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -7,6 +9,8 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EventModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
+import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -66,6 +70,10 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_ID)
     private Long workspaceId;
+
+    private LdapDetails ldapDetails;
+
+    private RdsDetails rdsDetails;
 
     public Integer getNodeCount() {
         return nodeCount;
@@ -209,5 +217,21 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
+    }
+
+    public LdapDetails getLdapDetails() {
+        return ldapDetails;
+    }
+
+    public void setLdapDetails(LdapDetails ldapDetails) {
+        this.ldapDetails = ldapDetails;
+    }
+
+    public RdsDetails getRdsDetails() {
+        return rdsDetails;
+    }
+
+    public void setRdsDetails(RdsDetails rdsDetails) {
+        this.rdsDetails = rdsDetails;
     }
 }

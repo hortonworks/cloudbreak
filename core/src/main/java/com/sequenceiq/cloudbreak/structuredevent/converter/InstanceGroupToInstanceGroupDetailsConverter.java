@@ -1,20 +1,15 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import javax.inject.Inject;
-
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.SecurityGroupDetails;
 
 @Component
 public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupDetails>  {
-    @Inject
-    private ConversionService conversionService;
 
     @Override
     public InstanceGroupDetails convert(InstanceGroup source) {
@@ -29,7 +24,7 @@ public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConver
             instanceGroupDetails.setVolumeSize(source.getTemplate().getVolumeSize());
             instanceGroupDetails.setVolumeCount(source.getTemplate().getVolumeCount());
         }
-        instanceGroupDetails.setSecurityGroup(conversionService.convert(source.getSecurityGroup(), SecurityGroupDetails.class));
+        instanceGroupDetails.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroupDetails.class));
         return instanceGroupDetails;
     }
 }

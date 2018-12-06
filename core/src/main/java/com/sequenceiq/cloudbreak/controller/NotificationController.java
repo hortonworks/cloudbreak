@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;

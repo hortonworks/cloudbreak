@@ -80,6 +80,11 @@ import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class TestUtil {
@@ -704,6 +709,12 @@ public class TestUtil {
         rdsConfig.setType(rdsType.name());
         rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
         rdsConfig.setDatabaseEngine(databaseVendor);
+        rdsConfig.setDescription("someDescription");
+        rdsConfig.setCreationDate(1234567L);
+        rdsConfig.setStatus(ResourceStatus.DEFAULT);
+        rdsConfig.setStackVersion("3.2");
+        rdsConfig.setConnectorJarUrl("http://somejarurl.com");
+        rdsConfig.setClusters(Collections.emptySet());
         return rdsConfig;
     }
 
@@ -813,4 +824,107 @@ public class TestUtil {
         } catch (IllegalAccessException ignore) {
         }
     }
+
+    public static Object[][] combinationOf(Object[] first, Object[] second) {
+
+        Object[][] testData = new Object[first.length * second.length][2];
+
+        int index = 0;
+        if (first.length > second.length) {
+            for (Object elementOfSecond : second) {
+                for (Object elementOfFirst : first) {
+                    testData[index][0] = elementOfFirst;
+                    testData[index][1] = elementOfSecond;
+                    index++;
+                }
+            }
+        } else {
+            for (Object elementOfFirst : first) {
+                for (Object elementOfSecond : second) {
+                    testData[index][0] = elementOfFirst;
+                    testData[index][1] = elementOfSecond;
+                    index++;
+                }
+            }
+        }
+
+        return testData;
+    }
+
+    public static LdapNotificationDetails ldapNotificationDetails(String message, String type) {
+        LdapNotificationDetails ldapNotificationDetails = new LdapNotificationDetails();
+        ldapNotificationDetails.setLdapDetails(ldapDetails());
+        ldapNotificationDetails.setNotification(message);
+        ldapNotificationDetails.setNotificationType(type);
+        return ldapNotificationDetails;
+    }
+
+    public static RdsNotificationDetails rdsNotificationDetails(String message, String type) {
+        RdsNotificationDetails rdsNotificationDetails = new RdsNotificationDetails();
+        rdsNotificationDetails.setRdsDetails(rdsDetails());
+        rdsNotificationDetails.setNotification(message);
+        rdsNotificationDetails.setNotificationType(type);
+        return rdsNotificationDetails;
+    }
+
+    public static NotificationDetails notificationDetails(String message, String type) {
+        NotificationDetails notification = new NotificationDetails();
+        notification.setInstanceGroup("master");
+        notification.setRegion("us");
+        notification.setStackName("usagestack");
+        notification.setStackId(1L);
+        notification.setNotification(message);
+        notification.setNotificationType(type);
+        notification.setCloud(GCP);
+        notification.setBlueprintName("blueprintName");
+        notification.setBlueprintId(1L);
+        notification.setStackStatus(AVAILABLE.name());
+        notification.setNodeCount(1);
+        notification.setClusterStatus(AVAILABLE.name());
+        notification.setClusterId(1L);
+        notification.setClusterName("test");
+        return notification;
+    }
+
+    public static LdapDetails ldapDetails() {
+        LdapDetails details = new LdapDetails();
+        details.setTenantName("someTenant");
+        details.setUserId("someUserId");
+        details.setUserName("someUsername");
+        details.setWorkspaceId(123L);
+        details.setAdminGroup("adminGroupValue");
+        details.setCertificate("cert");
+        details.setDescription(DUMMY_DESCRIPTION);
+        details.setDirectoryType(DirectoryType.LDAP.name());
+        details.setGroupMemberAttribute("somevalue");
+        details.setGroupNameAttribute("nameattribute");
+        details.setGroupObjectClass("objectclass");
+        details.setGroupSearchBase("searchbase");
+        details.setAdminGroup("admingroup");
+        details.setUserDnPattern("userdnpattern");
+        details.setUserNameAttribute("usernameattribute");
+        details.setUserObjectClass("userobjectclass");
+        details.setUserSearchBase("usersearchbase");
+        details.setServerPort(1234);
+        details.setServerHost("somehost");
+        details.setProtocol("https");
+        details.setDomain("somedomain");
+        details.setId(111L);
+        details.setName("ldapname");
+        return details;
+    }
+
+    public static RdsDetails rdsDetails() {
+        RdsDetails details = new RdsDetails();
+        details.setTenantName("someTenant");
+        details.setUserId("someUserId");
+        details.setUserName("someUsername");
+        details.setWorkspaceId(123L);
+        details.setDescription(DUMMY_DESCRIPTION);
+        details.setId(111L);
+        details.setName("ldapname");
+
+        return details;
+    }
+
 }

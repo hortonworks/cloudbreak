@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;

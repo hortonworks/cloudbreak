@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFact
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 import reactor.bus.EventBus;
@@ -49,6 +51,24 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
         LOGGER.debug("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
+        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+    }
+
+    @Override
+    public void fireLdapEvent(LdapDetails ldapDetails, String eventType, String eventMessage, boolean notifyWorkspace) {
+        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(ldapDetails, eventType, eventMessage,
+                notifyWorkspace);
+        LOGGER.debug("Firing Ldap event: entityId: {}, entityName: {}, type: {}, message: {}", ldapDetails.getId(), ldapDetails.getName(), eventType,
+                eventMessage);
+        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+    }
+
+    @Override
+    public void fireRdsEvent(RdsDetails rdsDetails, String eventType, String eventMessage, boolean notifyWorkspace) {
+        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(rdsDetails, eventType, eventMessage,
+                notifyWorkspace);
+        LOGGER.debug("Firing RDS event: entityId: {}, entityName: {}, type: {}, message: {}", rdsDetails.getId(), rdsDetails.getName(), eventType,
+                eventMessage);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 

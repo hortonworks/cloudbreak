@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
+import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
+import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteResponse;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
@@ -19,11 +21,12 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakePrerequisiteService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Controller
-public class UtilV3Controller implements UtilV3Endpoint {
+public class UtilV3Controller extends NotificationController implements UtilV3Endpoint {
 
     @Inject
     private RdsConnectionBuilder rdsConnectionBuilder;
@@ -33,6 +36,9 @@ public class UtilV3Controller implements UtilV3Endpoint {
 
     @Inject
     private FileSystemSupportMatrixService fileSystemSupportMatrixService;
+
+    @Inject
+    private DatalakePrerequisiteService datalakePrerequisiteService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -74,5 +80,11 @@ public class UtilV3Controller implements UtilV3Endpoint {
     @Override
     public Collection<CloudStorageSupportedResponse> getCloudStorageMatrix(String stackVersion) {
         return fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersion);
+    }
+
+    @Override
+    public DatalakePrerequisiteResponse buildDatalakePrerequisite(Long workspaceId, String environment,
+            DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
+        return datalakePrerequisiteService.prepare(workspaceId, environment, datalakePrerequisiteRequest);
     }
 }
