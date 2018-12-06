@@ -97,18 +97,18 @@ release: build
 	mkdir release
 	git tag v${VERSION}
 	git push https://${GITHUB_ACCESS_TOKEN}@github.com/hortonworks/cb-cli.git v${VERSION}
-	tar -zcvf release/cb-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin "${BINARY}"
-	tar -zcvf release/cb-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux "${BINARY}"
-	tar -zcvf release/cb-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows "${BINARY}.exe"
+	tar -zcvf release/dp-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin "${BINARY}"
+	tar -zcvf release/dp-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux "${BINARY}"
+	tar -zcvf release/dp-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows "${BINARY}.exe"
 
 release-version: build-version
 	rm -rf release
 	mkdir release
 	git tag v${VERSION}
 	git push https://${GITHUB_ACCESS_TOKEN}@github.com/hortonworks/cb-cli.git v${VERSION}
-	tar -zcvf release/cb-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin "${BINARY}"
-	tar -zcvf release/cb-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux "${BINARY}"
-	tar -zcvf release/cb-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows "${BINARY}.exe"
+	tar -zcvf release/dp-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin "${BINARY}"
+	tar -zcvf release/dp-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux "${BINARY}"
+	tar -zcvf release/dp-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows "${BINARY}.exe"
 
 release-docker:
 	@USER_NS='-u $(shell id -u $(whoami)):$(shell id -g $(whoami))'
@@ -119,12 +119,12 @@ release-docker-version:
 	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} -e GO111MODULE=on golang:1.11 bash -c "make deps && make release-version"
 
 upload_s3:
-	ls -1 release | xargs -I@ aws s3 cp release/@ s3://cb-cli/@ --acl public-read
+	ls -1 release | xargs -I@ aws s3 cp release/@ s3://dp-cli/@ --acl public-read
 
 linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name "${BINARY}" alpine sh
 
-# Build CB-CLI locally
+# Build DP-CLI locally
 # Start a new DataPlane Mock with new Swagger JSON and renewed Mock IP
 #   For custom version apply like: 'GIT_FIRST_PARENT=2.8.0-dev.374 make integration-test'
 # Execute just one scenario you can start this with: 'CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
