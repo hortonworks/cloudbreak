@@ -190,8 +190,6 @@ public class ClusterHostServiceRunner {
         if (cluster.getKerberosConfig() != null && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin(), "user");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
             if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
                 putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
@@ -203,8 +201,6 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
             putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
-            putIfNotNull(kerberosPillarConf, cluster.getCloudbreakAmbariUser(), "clusterUser");
-            putIfNotNull(kerberosPillarConf, cluster.getCloudbreakAmbariPassword(), "clusterPassword");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
         servicePillar.put("disk", new SaltPillarProperties("/disk/disk.sls", singletonMap("disk", diskMountParameters(stack))));
