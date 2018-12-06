@@ -47,7 +47,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     expect(result.exit_status).to eql 0 
   end 
 
-  it "Proxy - List - Checking previosly created proxy" do
+  it "Proxy - List - Checking previously created proxy" do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
     end
@@ -59,8 +59,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
           Name: @proxy_name,
           Host: @proxy_server,  
           Port: @proxy_port,
-          Protocol: "http",
-          User: /.*/
+          Protocol: "http"
         )
       end
     end        
@@ -72,7 +71,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     expect(result.exit_status).to eql 0 
   end
 
-  it "Proxy - List - Checking previosly created proxy and cheking User name" do
+  it "Proxy - List - Checking previously created proxy and checking User name" do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
     end
@@ -84,8 +83,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
           Name: /.*/,
           Host: /.*/,  
           Port: /.*/,
-          Protocol: /.*/,
-          User: @proxy_user
+          Protocol: /.*/
         )
      end
     end        
@@ -97,7 +95,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     expect(result.exit_status).to eql 0 
   end
 
-  it "Proxy - List - Checking previosly created proxy and cheking protocol" do
+  it "Proxy - List - Checking previously created proxy and checking protocol" do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
     end
@@ -109,8 +107,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
           Name: /.*/,
           Host: /.*/,  
           Port: /.*/,
-          Protocol: "https",
-          User: /.*/
+          Protocol: "https"
         )
      end
     end        
