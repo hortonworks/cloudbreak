@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var KerberosHeader = []string{"Name", "Environments"}
+var KerberosHeader = []string{"Name", "Description", "Type", "Environments", "ID"}
 
 type kerberos struct {
 	Name         string `json:"Name" yaml:"Name"`
@@ -173,15 +173,13 @@ func SendCreateKerberosRequestImpl(kerberosClient kerberosClient, workspaceID in
 func ListKerberos(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "list kerberos configs")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	environment := c.String(fl.FlEnvironmentName.Name)
-	attachGlobal := c.Bool(fl.FlAttachGlobalFlag.Name)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	return ListKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, environment, attachGlobal, output.WriteList)
+	return ListKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, output.WriteList)
 }
 
-func ListKerberosImpl(kerberosClient kerberosClient, workspaceID int64, environment string, attachGlobal bool, writer func([]string, []utils.Row)) error {
-	listRequest := v3_workspace_id_kerberos.NewListKerberosConfigByWorkspaceParams().WithWorkspaceID(workspaceID).WithEnvironment(&environment).WithAttachGlobal(&attachGlobal)
+func ListKerberosImpl(kerberosClient kerberosClient, workspaceID int64, writer func([]string, []utils.Row)) error {
+	listRequest := v3_workspace_id_kerberos.NewListKerberosConfigByWorkspaceParams().WithWorkspaceID(workspaceID)
 	resp, err := kerberosClient.ListKerberosConfigByWorkspace(listRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -291,7 +289,7 @@ func DeleteKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerber
 }
 
 func writeResponse(writer func([]string, utils.Row), kerberosResponse *model.KerberosResponse) {
-	writer(append(KerberosHeader, "ID"), &kerberosOutDescribe{
+	writer(append(KerberosHeader), &kerberosOutDescribe{
 		&kerberos{
 			Name:         kerberosResponse.Name,
 			Description:  utils.SafeStringConvert(kerberosResponse.Description),

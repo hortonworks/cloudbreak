@@ -39,7 +39,7 @@ type KerberosViewResponse struct {
 	Name *string `json:"name"`
 
 	// type
-	// Enum: [ACTIVE_DIRECTORY MIT FREEIPA CUSTOM]
+	// Enum: [ACTIVE_DIRECTORY MIT FREEIPA AMBARI_DESCRIPTOR]
 	Type string `json:"type,omitempty"`
 }
 
@@ -124,7 +124,7 @@ var kerberosViewResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["ACTIVE_DIRECTORY","MIT","FREEIPA","CUSTOM"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["ACTIVE_DIRECTORY","MIT","FREEIPA","AMBARI_DESCRIPTOR"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -143,8 +143,8 @@ const (
 	// KerberosViewResponseTypeFREEIPA captures enum value "FREEIPA"
 	KerberosViewResponseTypeFREEIPA string = "FREEIPA"
 
-	// KerberosViewResponseTypeCUSTOM captures enum value "CUSTOM"
-	KerberosViewResponseTypeCUSTOM string = "CUSTOM"
+	// KerberosViewResponseTypeAMBARIDESCRIPTOR captures enum value "AMBARI_DESCRIPTOR"
+	KerberosViewResponseTypeAMBARIDESCRIPTOR string = "AMBARI_DESCRIPTOR"
 )
 
 // prop value enum

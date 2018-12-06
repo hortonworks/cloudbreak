@@ -936,13 +936,6 @@ var (
 			Usage: "names of environments in which the created resource should be attached during the creation",
 		},
 	}
-	FlEnvironmentName = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:  "environment-name",
-			Usage: "environment name for queries",
-		},
-	}
 	FlEnvironmentLocationName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -962,13 +955,6 @@ var (
 		Float64Flag: cli.Float64Flag{
 			Name:  "latitude",
 			Usage: "latitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
-		},
-	}
-	FlAttachGlobalFlag = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "attach-global",
-			Usage: "attach-global flag for global query across environments",
 		},
 	}
 	FlRefreshTokenOptional = StringFlag{
@@ -1009,8 +995,8 @@ var (
 	FlKerberosNameServers = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "name-servers",
-			Usage: "kerberos name servers",
+			Name:  "nameservers",
+			Usage: "kerberos nameservers",
 		},
 	}
 	FlKerberosTcpAllowed = BoolFlag{

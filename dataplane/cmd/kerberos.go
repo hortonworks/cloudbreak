@@ -19,11 +19,11 @@ func init() {
 					{
 						Name:   "ad",
 						Usage:  "creates a new AD Kerberos",
-						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm, fl.FlKerberosLdapUrl, fl.FlKerberosContainerDn).AddAuthenticationFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm, fl.FlKerberosLdapUrl, fl.FlKerberosContainerDn).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: kerberos.CreateAdKerberos,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm, fl.FlKerberosLdapUrl, fl.FlKerberosContainerDn).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm, fl.FlKerberosLdapUrl, fl.FlKerberosContainerDn).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -31,11 +31,11 @@ func init() {
 					{
 						Name:   "freeipa",
 						Usage:  "creates a new FreeIpa Kerberos",
-						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm).AddAuthenticationFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: kerberos.CreateFreeIpaKerberos,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -43,11 +43,11 @@ func init() {
 					{
 						Name:   "custom",
 						Usage:  "creates a new custom Kerberos",
-						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosDescriptor, fl.FlKerberosKrb5Conf).AddAuthenticationFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosDescriptor, fl.FlKerberosKrb5Conf).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: kerberos.CreateCustomKerberos,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosDescriptor, fl.FlKerberosKrb5Conf).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosDescriptor, fl.FlKerberosKrb5Conf).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -105,11 +105,11 @@ func init() {
 			{
 				Name:   "list",
 				Usage:  "list the available kerberos configs",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlAttachGlobalFlag, fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: kerberos.ListKerberos,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlAttachGlobalFlag, fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

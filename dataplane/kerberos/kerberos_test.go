@@ -79,7 +79,7 @@ func (*mockKerberosClient) DeleteKerberosConfigInWorkspace(params *v3_workspace_
 
 func TestListKerberosImpl(t *testing.T) {
 	var rows []utils.Row
-	ListKerberosImpl(new(mockKerberosClient), 1, "", true, func(h []string, r []utils.Row) { rows = r })
+	ListKerberosImpl(new(mockKerberosClient), 1, func(h []string, r []utils.Row) { rows = r })
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}

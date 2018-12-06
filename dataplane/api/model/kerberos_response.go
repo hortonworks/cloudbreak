@@ -73,7 +73,7 @@ type KerberosResponse struct {
 
 	// type
 	// Required: true
-	// Enum: [ACTIVE_DIRECTORY MIT FREEIPA CUSTOM]
+	// Enum: [ACTIVE_DIRECTORY MIT FREEIPA AMBARI_DESCRIPTOR]
 	Type *string `json:"type"`
 
 	// kerberos KDC server URL
@@ -266,7 +266,7 @@ var kerberosResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["ACTIVE_DIRECTORY","MIT","FREEIPA","CUSTOM"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["ACTIVE_DIRECTORY","MIT","FREEIPA","AMBARI_DESCRIPTOR"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -285,8 +285,8 @@ const (
 	// KerberosResponseTypeFREEIPA captures enum value "FREEIPA"
 	KerberosResponseTypeFREEIPA string = "FREEIPA"
 
-	// KerberosResponseTypeCUSTOM captures enum value "CUSTOM"
-	KerberosResponseTypeCUSTOM string = "CUSTOM"
+	// KerberosResponseTypeAMBARIDESCRIPTOR captures enum value "AMBARI_DESCRIPTOR"
+	KerberosResponseTypeAMBARIDESCRIPTOR string = "AMBARI_DESCRIPTOR"
 )
 
 // prop value enum
