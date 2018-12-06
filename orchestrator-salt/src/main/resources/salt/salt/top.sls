@@ -100,10 +100,6 @@ base:
     - match: grain
     - recipes.post-cluster-install
 
-  'G@recipes:post and G@roles:kerberos_server_slave':
-    - match: compound
-    - kerberos.kprop
-
   'G@roles:ad_leave and G@os_family:RedHat':
     - match: compound
     - sssd.ad-leave
