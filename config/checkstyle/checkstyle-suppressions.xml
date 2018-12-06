@@ -17,6 +17,7 @@
     <suppress checks="IllegalThrow" files="HasPermissionService.java"/>
     <suppress checks="RedundantModifier" files="CoreApi.java"/>
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
+    <suppress checks="RegexpMultilineCheck" files="IntegrationTestApp.java"/>
     <suppress checks="IllegalTypeCheck" files="AbstractFlowConfiguration.java|AbstractFlowConfigurationTest.java"/>
     <suppress checks="ParameterNumber" files="UserDataBuilder.java"/>
     <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>

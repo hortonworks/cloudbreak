@@ -38,6 +38,14 @@ jobs:
       - run:
           name: checkstyle-test
           command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store checkstyle-test results
+          command: |
+            mkdir -p ~/checkstyle-test
+            grep -rls */build/reports/checkstyle/*.xml -e "<error line=" | xargs -I '{}' cp '{}' ~/checkstyle-test
+          when: always
+      - store_artifacts:
+          path: ~/checkstyle-test
 
   code-quality-check-checkstyle-main:
     docker:
@@ -57,7 +65,7 @@ jobs:
           name: Store checkstyle results
           command: |
             mkdir -p ~/checkstyle
-            grep -rl */build/reports/checkstyle/*.xml -e "<error line=" | xargs -I '{}' cp '{}' ~/checkstyle
+            grep -rls */build/reports/checkstyle/*.xml -e "<error line=" | xargs -I '{}' cp '{}' ~/checkstyle
           when: always
       - store_artifacts:
           path: ~/checkstyle
@@ -76,6 +84,14 @@ jobs:
       - run:
           name: spotbugs-main
           command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsTest -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store spotbugs main results
+          command: |
+            mkdir -p ~/spotbugs-main
+            grep -rls */build/reports/spotbugs/*.html -e "<b>[^0]</b>" | xargs -I '{}' cp '{}' ~/spotbugs-main
+          when: always
+      - store_artifacts:
+          path: ~/spotbugs-main
 
   code-quality-check-spotbugs-test:
     docker:
@@ -91,6 +107,14 @@ jobs:
       - run:
           name: spotbugs-test
           command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsMain -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store spotbugs test results
+          command: |
+            mkdir -p ~/spotbugs-test
+            grep -rls */build/reports/spotbugs/*.html -e "<b>[^0]</b>" | xargs -I '{}' cp '{}' ~/spotbugs-test
+          when: always
+      - store_artifacts:
+          path: ~/spotbugs-test
 
   unit-test:
     environment:
