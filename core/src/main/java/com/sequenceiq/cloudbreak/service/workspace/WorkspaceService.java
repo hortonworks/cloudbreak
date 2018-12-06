@@ -23,7 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissionUtil;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -61,6 +61,9 @@ public class WorkspaceService {
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private WorkspacePermissionUtil workspacePermissionUtil;
 
     public Workspace create(User user, Workspace workspace) {
         try {
@@ -334,7 +337,7 @@ public class WorkspaceService {
         if (userWorkspacePermissions == null) {
             throw new AccessDeniedException("You have no access for this workspace.");
         }
-        boolean hasPermission = WorkspacePermissions.hasPermission(userWorkspacePermissions.getPermissionSet(), WorkspaceResource.WORKSPACE, action);
+        boolean hasPermission = workspacePermissionUtil.hasPermission(userWorkspacePermissions.getPermissionSet(), WorkspaceResource.WORKSPACE, action);
         if (!hasPermission) {
             throw new AccessDeniedException(message);
         }
