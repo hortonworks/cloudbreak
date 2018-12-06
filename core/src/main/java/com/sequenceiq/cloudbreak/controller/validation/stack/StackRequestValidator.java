@@ -192,13 +192,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 .getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
         boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
-            Set<RdsType> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
+            Set<String> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "
                     + "rds/database configuration to the Cluster request";
-            if (!rdsTypes.contains(RdsType.HIVE)) {
+            if (!rdsTypes.contains(RdsType.HIVE.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
             }
-            if (!rdsTypes.contains(RdsType.RANGER)) {
+            if (!rdsTypes.contains(RdsType.RANGER.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
             }
             if (isLdapNotProvided(stackRequest.getClusterRequest())) {
@@ -212,13 +212,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
         return clusterRequest.getLdapConfig() == null && clusterRequest.getLdapConfigName() == null && clusterRequest.getLdapConfigId() == null;
     }
 
-    private Set<RdsType> getGivenRdsTypes(ClusterRequest clusterRequest) {
-        Set<RdsType> types = clusterRequest.getRdsConfigIds().stream().map(id -> RdsType.valueOf(rdsConfigService.get(id).getType()))
+    private Set<String> getGivenRdsTypes(ClusterRequest clusterRequest) {
+        Set<String> types = clusterRequest.getRdsConfigIds().stream().map(id -> rdsConfigService.get(id).getType())
                 .collect(Collectors.toSet());
-        types.addAll(clusterRequest.getRdsConfigJsons().stream().map(rdsConfigRequest -> RdsType.valueOf(rdsConfigRequest.getType()))
+        types.addAll(clusterRequest.getRdsConfigJsons().stream().map(rdsConfigRequest -> rdsConfigRequest.getType())
                 .collect(Collectors.toSet()));
-        types.addAll(clusterRequest.getRdsConfigNames().stream().map(s -> RdsType.valueOf(
-                rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType())).collect(Collectors.toSet()));
+        types.addAll(clusterRequest.getRdsConfigNames().stream().map(s ->
+                rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType()).collect(Collectors.toSet()));
         return types;
     }
 

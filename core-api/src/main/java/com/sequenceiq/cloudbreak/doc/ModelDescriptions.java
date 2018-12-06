@@ -509,6 +509,8 @@ public class ModelDescriptions {
     }
 
     public static class LdapConfigModelDescription {
+        public static final String REQUEST = "LDAP config request";
+        public static final String RESPONSE = "LDAP config response";
         public static final String SERVER_HOST = "public host or IP address of LDAP server";
         public static final String SERVER_PORT = "port of LDAP server (typically: 389 or 636 for LDAPS)";
         public static final String PROTOCOL = "determines the protocol (LDAP or LDAP over SSL)";
@@ -530,7 +532,14 @@ public class ModelDescriptions {
     }
 
     public static class RDSConfigModelDescription {
+        public static final String REQUEST = "RDS config request";
+        public static final String RESPONSE = "RDS config response";
         public static final String CLUSTER_NAMES = "list of clusters which use config";
+    }
+
+    public static class KerberosConfigModelDescription {
+        public static final String REQUEST = "Kerberos config request";
+        public static final String RESPONSE = "Kerberos config response";
     }
 
     public static class TopologyModelDescription {

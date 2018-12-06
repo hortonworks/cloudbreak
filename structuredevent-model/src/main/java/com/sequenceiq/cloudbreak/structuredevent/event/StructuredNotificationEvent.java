@@ -6,12 +6,32 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class StructuredNotificationEvent extends StructuredEvent {
     private NotificationDetails notificationDetails;
 
+    private LdapNotificationDetails ldapNotificationDetails;
+
+    private RdsNotificationDetails rdsNotificationDetails;
+
     public StructuredNotificationEvent() {
     }
 
     public StructuredNotificationEvent(OperationDetails operation, NotificationDetails notificationDetails) {
         super(StructuredNotificationEvent.class.getSimpleName(), operation);
         this.notificationDetails = notificationDetails;
+        this.ldapNotificationDetails = null;
+        this.rdsNotificationDetails = null;
+    }
+
+    public StructuredNotificationEvent(OperationDetails operation, LdapNotificationDetails ldapNotificationDetails) {
+        super(StructuredNotificationEvent.class.getSimpleName(), operation);
+        this.notificationDetails = null;
+        this.ldapNotificationDetails = ldapNotificationDetails;
+        this.rdsNotificationDetails = null;
+    }
+
+    public StructuredNotificationEvent(OperationDetails operation, RdsNotificationDetails rdsNotificationDetails) {
+        super(StructuredNotificationEvent.class.getSimpleName(), operation);
+        this.notificationDetails = null;
+        this.ldapNotificationDetails = null;
+        this.rdsNotificationDetails = rdsNotificationDetails;
     }
 
     @Override
@@ -30,5 +50,21 @@ public class StructuredNotificationEvent extends StructuredEvent {
 
     public NotificationDetails getNotificationDetails() {
         return notificationDetails;
+    }
+
+    public LdapNotificationDetails getLdapNotificationDetails() {
+        return ldapNotificationDetails;
+    }
+
+    public void setLdapNotificationDetails(LdapNotificationDetails ldapNotificationDetails) {
+        this.ldapNotificationDetails = ldapNotificationDetails;
+    }
+
+    public RdsNotificationDetails getRdsNotificationDetails() {
+        return rdsNotificationDetails;
+    }
+
+    public void setRdsNotificationDetails(RdsNotificationDetails rdsNotificationDetails) {
+        this.rdsNotificationDetails = rdsNotificationDetails;
     }
 }

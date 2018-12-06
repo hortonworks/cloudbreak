@@ -14,6 +14,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
+import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
+import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteResponse;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
@@ -55,4 +57,13 @@ public interface UtilV3Endpoint {
     @ApiOperation(value = UtilityOpDescription.CLOUD_STORAGE_MATRIX, produces = ContentType.JSON, nickname = "getCloudStorageMatrixV3",
             notes = "Define stack version at least at patch level eg. 2.6.0")
     Collection<CloudStorageSupportedResponse> getCloudStorageMatrix(@QueryParam("stackVersion") String stackVersion);
+
+    @POST
+    @Path("{workspaceId}/datalake-prerequisites")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.DATALAKE_PREREQUISITES, produces = ContentType.JSON, nickname = "buildPrerequisites")
+    DatalakePrerequisiteResponse buildDatalakePrerequisite(
+            @PathParam("workspaceId") Long workspaceId,
+            @QueryParam("environment") String environment,
+            DatalakePrerequisiteRequest datalakePrerequisiteRequest);
 }

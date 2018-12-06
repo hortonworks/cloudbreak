@@ -36,7 +36,9 @@ public enum ResourceEvent {
     FILESYSTEM_DELETED("resource.filesystem.deleted"),
     TOPOLOGY_DELETED("resource.topology.deleted"),
     MAINTENANCE_MODE_ENABLED("resource.maintenancemode.enabled"),
-    MAINTENANCE_MODE_DISABLED("resource.maintenancemode.disabled");
+    MAINTENANCE_MODE_DISABLED("resource.maintenancemode.disabled"),
+    TEST_CONNECTION_SUCCESS("resource.connection.success"),
+    TEST_CONNECTION_FAILED("resource.connection.failed"),;
 
     private final String message;
 

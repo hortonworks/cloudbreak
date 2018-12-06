@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
@@ -83,30 +84,7 @@ public class PermissionCheckingUtilsBulkTest {
 
     @Parameters(name = "Current Action - WorkspaceResource pair: [{0} - {1}]")
     public static Object[][] data() {
-        Action[] actions = Action.values();
-        WorkspaceResource[] resources = WorkspaceResource.values();
-
-        Object[][] testData = new Object[actions.length * resources.length][2];
-
-        int index = 0;
-        if (actions.length < resources.length) {
-            for (Action action : actions) {
-                for (WorkspaceResource resource : resources) {
-                    testData[index][0] = action;
-                    testData[index][1] = resource;
-                    index++;
-                }
-            }
-        } else {
-            for (WorkspaceResource resource : resources) {
-                for (Action action : actions) {
-                    testData[index][0] = resource;
-                    testData[index][1] = action;
-                    index++;
-                }
-            }
-        }
-        return testData;
+        return TestUtil.combinationOf(Action.values(), WorkspaceResource.values());
     }
 
     @Before
