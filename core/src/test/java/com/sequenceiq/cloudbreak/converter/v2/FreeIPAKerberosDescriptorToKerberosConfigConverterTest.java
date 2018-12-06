@@ -29,6 +29,8 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverterTest {
 
     private static final String NAMESERVERS = "1.1.1.1";
 
+    private static final String PRINCIPAL = "principal";
+
     private FreeIPAKerberosDescriptorToKerberosConfigConverter underTest;
 
     private FreeIPAKerberosDescriptor source;
@@ -45,6 +47,7 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverterTest {
         source.setPassword(PASSWORD);
         source.setVerifyKdcTrust(VERIFY_KDC_TRUST);
         source.setTcpAllowed(TCP_ALLOWED);
+        source.setPrincipal(PRINCIPAL);
     }
 
     @Test
@@ -61,6 +64,7 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverterTest {
         assertEquals(DOMAIN, result.getDomain());
         assertEquals(NAMESERVERS, result.getNameServers());
         assertEquals(KerberosType.FREEIPA, result.getType());
+        assertEquals(PRINCIPAL, result.getPrincipal());
         assertNull(result.getName());
         assertNull(result.getDescription());
         assertNull(result.getDescriptor());

@@ -21,6 +21,7 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverter extends Abstract
         config.setPassword(source.getPassword());
         config.setVerifyKdcTrust(source.getVerifyKdcTrust());
         config.setTcpAllowed(source.getTcpAllowed());
+        config.setPrincipal(source.getPrincipal());
         return config;
     }
 
