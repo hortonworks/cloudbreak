@@ -15,7 +15,6 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -25,9 +24,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class ClusterApiView extends CompactView {
     @OneToOne(fetch = FetchType.LAZY)
     private StackApiView stack;
-
-    @ManyToOne
-    private KerberosConfig kerberosConfig;
 
     @Column(nullable = false)
     private Boolean secure;
@@ -39,8 +35,6 @@ public class ClusterApiView extends CompactView {
     private BlueprintView blueprint;
 
     private String ambariIp;
-
-    private String emailTo;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -56,14 +50,6 @@ public class ClusterApiView extends CompactView {
 
     public void setStack(StackApiView stack) {
         this.stack = stack;
-    }
-
-    public KerberosConfig getKerberosConfig() {
-        return kerberosConfig;
-    }
-
-    public void setKerberosConfig(KerberosConfig kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
     }
 
     public Boolean getSecure() {
@@ -96,14 +82,6 @@ public class ClusterApiView extends CompactView {
 
     public void setAmbariIp(String ambariIp) {
         this.ambariIp = ambariIp;
-    }
-
-    public String getEmailTo() {
-        return emailTo;
-    }
-
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
     }
 
     public Status getStatus() {

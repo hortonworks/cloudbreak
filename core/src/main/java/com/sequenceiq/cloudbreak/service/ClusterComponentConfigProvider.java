@@ -73,7 +73,7 @@ public class ClusterComponentConfigProvider {
     public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
             return Optional.ofNullable(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS))
-                        .orElse(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS));
+                    .orElse(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS));
         } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
         }
@@ -128,15 +128,6 @@ public class ClusterComponentConfigProvider {
             store(component);
         }
         return components;
-    }
-
-    public void deleteComponentsForCluster(Long clusterId) {
-        Set<ClusterComponent> componentsByClusterId = componentRepository.findComponentByClusterId(clusterId);
-        if (!componentsByClusterId.isEmpty()) {
-            LOGGER.debug("Components({}) are going to be deleted for cluster: {}", componentsByClusterId.size(), clusterId);
-            componentRepository.deleteAll(componentsByClusterId);
-            LOGGER.debug("Components({}) have been deleted for cluster : {}", componentsByClusterId.size(), clusterId);
-        }
     }
 
     public Set<ClusterComponent> findByComponentType(ComponentType componentType) {
