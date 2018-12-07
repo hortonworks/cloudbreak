@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
@@ -16,12 +17,16 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverter extends Abstract
         config.setRealm(source.getRealm());
         config.setUrl(source.getUrl());
         config.setType(source.getType());
-        config.setDomain(source.getDomain());
         config.setNameServers(source.getNameServers());
         config.setPassword(source.getPassword());
         config.setVerifyKdcTrust(source.getVerifyKdcTrust());
         config.setTcpAllowed(source.getTcpAllowed());
         config.setPrincipal(source.getPrincipal());
+        if (StringUtils.isNotBlank(source.getDomain())) {
+            config.setDomain(source.getDomain());
+        } else if (StringUtils.isNotBlank(source.getRealm())) {
+            config.setDomain(source.getRealm().toLowerCase());
+        }
         return config;
     }
 
