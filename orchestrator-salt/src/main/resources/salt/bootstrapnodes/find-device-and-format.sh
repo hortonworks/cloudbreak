@@ -74,11 +74,11 @@ not_in_list() {
 get_ephemeral_device_names() {
     attached_volumes=$1
 
-    lsblk_out=$(lsblk | cut -f1 -d' ')
+    lsblk_out=$(lsblk -I 8 -dn  | cut -f1 -d' ')
 
     root_disk=$(get_root_disk)
     used_disks="$attached_volumes $root_disk"
-    all_disk_names=$(lsblk | cut -f1 -d' ' | grep ^[a-z])
+    all_disk_names=$(lsblk_command  | cut -f1 -d' ')
     log $LOG_FILE root disk: $root_disk
     log $LOG_FILE used disks: $used_disks
     log $LOG_FILE all disks: $all_disk_names

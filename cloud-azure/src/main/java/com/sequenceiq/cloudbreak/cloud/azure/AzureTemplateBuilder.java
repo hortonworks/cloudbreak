@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceCredentialView;
@@ -98,7 +99,7 @@ public class AzureTemplateBuilder {
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
-            throw new CloudConnectorException("Failed to process the Arm TemplateBuilder", e);
+            throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
         }
     }
 
@@ -106,7 +107,7 @@ public class AzureTemplateBuilder {
         try {
             return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
         } catch (IOException | TemplateException e) {
-            throw new CloudConnectorException("Failed to process the Arm TemplateParameterBuilder", e);
+            throw new CloudConnectorException("Failed to process the ARM TemplateParameterBuilder", e);
         }
     }
 
@@ -118,15 +119,19 @@ public class AzureTemplateBuilder {
         try {
             return new Template(armTemplatePath, stack.getTemplate(), freemarkerConfiguration);
         } catch (IOException e) {
-            throw new CloudConnectorException("can't create template object", e);
+            throw new CloudConnectorException("Couldn't create template object", e);
         }
+    }
+
+    public JsonNode getTemplateAsJson(String armTemplate) {
+        return freeMarkerTemplateUtils.convertStringTemplateToJson(armTemplate);
     }
 
     private Template getTemplate() {
         try {
             return freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8");
         } catch (IOException e) {
-            throw new CloudConnectorException("can't get arm template", e);
+            throw new CloudConnectorException("Couldn't get ARM template", e);
         }
     }
 

@@ -8,11 +8,13 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -26,10 +28,14 @@ import com.microsoft.aad.adal4j.AuthenticationException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.Disk;
+import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.PowerState;
+import com.microsoft.azure.management.compute.StorageAccountTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
+import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.LoadBalancer;
@@ -46,6 +52,7 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
+import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.microsoft.azure.management.storage.ProvisioningState;
@@ -65,6 +72,7 @@ import com.microsoft.azure.storage.blob.CloudPageBlob;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -256,9 +264,59 @@ public class AzureClient {
         }
     }
 
+    public Disk createManagedDisk(String diskName, int diskSize, AzureDiskType diskType, String region, String resourceGroupName, Map<String, String> tags) {
+        LOGGER.debug("create managed disk with name={}", diskName);
+        return azure.disks().define(diskName)
+                .withRegion(Region.findByLabelOrName(region))
+                .withExistingResourceGroup(resourceGroupName)
+                .withData()
+                .withSizeInGB(diskSize)
+                .withTags(tags)
+                .withSku(convertAzureDiskTypeToDiskSkuTypes(diskType))
+                .create();
+    }
+
+    public void attachDiskToVm(Disk disk, VirtualMachine vm) {
+        LOGGER.debug("attach managed disk {} to VM {}", disk, vm);
+        vm.update().withExistingDataDisk(disk).apply();
+    }
+
+    public void detachDiskFromVm(String id, VirtualMachine vm) {
+        LOGGER.debug("detach managed disk with id={}", id);
+        VirtualMachineDataDisk dataDisk = vm.dataDisks()
+                .values()
+                .stream()
+                .filter(virtualMachineDataDisk -> virtualMachineDataDisk.id().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new CloudConnectorException(String.format("Virtual machine does not have attached data disk with id %s", id)));
+        int lun = dataDisk.lun();
+        LOGGER.debug("detaches a managed data disk with LUN {} from the virtual machine {}", lun, vm);
+        vm.update().withoutDataDisk(lun).apply();
+    }
+
+    public PagedList<Disk> listDisksByResourceGroup(String resourceGroupName) {
+        return azure.disks().listByResourceGroup(resourceGroupName);
+    }
+
+    public Disk getDiskById(String id) {
+        return azure.disks().getById(id);
+    }
+
+    public Disk getDiskByName(String resourceGroupName, String diskName) {
+        return azure.disks().getByResourceGroup(resourceGroupName, diskName);
+    }
+
     public void deleteManagedDisk(String id) {
         LOGGER.debug("delete managed disk: id={}", id);
         handleAuthException(() -> azure.disks().deleteById(id));
+    }
+
+    public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
+        if (Objects.nonNull(diskType)) {
+            return DiskSkuTypes.fromStorageAccountType(StorageAccountTypes.fromString(diskType.value()));
+        } else {
+            return DiskSkuTypes.STANDARD_LRS;
+        }
     }
 
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -367,6 +425,13 @@ public class AzureClient {
 
     public VirtualMachineInstanceView getVirtualMachineInstanceView(String resourceGroup, String vmName) {
         return getVirtualMachine(resourceGroup, vmName).instanceView();
+    }
+
+    public Set<AvailabilityZoneId> getAvailabilityZone(String resourceGroup, String vmName) {
+        return handleAuthException(() -> {
+            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, vmName);
+            return Objects.nonNull(vm) ? vm.availabilityZones() : Collections.emptySet();
+        });
     }
 
     public Integer getFaultDomainNumber(String resourceGroup, String vmName) {
@@ -533,16 +598,41 @@ public class AzureClient {
         return resultList;
     }
 
-    public void collectAndSaveNetworkAndSubnet(String resourceGroupName, String virtualNetwork, PersistenceNotifier notifier, CloudContext cloudContext) {
-        Optional<Subnet> first = getSubnets(resourceGroupName, virtualNetwork).values().stream().findFirst();
-        if (first.isPresent()) {
-            Subnet subnet = first.get();
-            String subnetName = subnet.name();
-            String networkName = subnet.parent().name();
+    public List<CloudResource> collectAndSaveNetworkAndSubnet(String resourceGroupName, String virtualNetwork, PersistenceNotifier notifier,
+            CloudContext cloudContext, List<String> subnetNameList, String networkName) {
+        List<CloudResource> resources = new ArrayList<>();
 
-            notifier.notifyAllocation(CloudResource.builder().name(networkName).type(ResourceType.AZURE_NETWORK).build(), cloudContext);
-            notifier.notifyAllocation(CloudResource.builder().name(subnetName).type(ResourceType.AZURE_SUBNET).build(), cloudContext);
+        if (subnetNameList.isEmpty()) {
+            Optional<Subnet> first = getSubnets(resourceGroupName, virtualNetwork).values().stream().findFirst();
+            if (first.isPresent()) {
+                Subnet subnet = first.get();
+                String subnetName = subnet.name();
+                subnetNameList.add(subnetName);
+                networkName = subnet.parent().name();
+            }
         }
+        CloudResource resourceGroupResource = CloudResource.builder().
+                name(resourceGroupName).
+                type(ResourceType.AZURE_RESOURCE_GROUP).
+                build();
+        resources.add(resourceGroupResource);
+        notifier.notifyAllocation(resourceGroupResource, cloudContext);
+
+        CloudResource networkResource = CloudResource.builder().
+                        name(networkName).
+                        type(ResourceType.AZURE_NETWORK).
+                        build();
+        resources.add(networkResource);
+        notifier.notifyAllocation(networkResource, cloudContext);
+        for (String subnetName : subnetNameList) {
+            CloudResource subnetResource = CloudResource.builder().
+                    name(subnetName).
+                    type(ResourceType.AZURE_SUBNET).
+                    build();
+            resources.add(subnetResource);
+            notifier.notifyAllocation(subnetResource, cloudContext);
+        }
+        return resources;
     }
 
     private Set<VirtualMachineSize> getAllElement(Collection<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {

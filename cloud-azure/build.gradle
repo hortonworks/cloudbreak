@@ -17,6 +17,7 @@ dependencies {
 
   compile project(':cloud-api')
   compile project(':cloud-reactor')
+  compile project(':cloud-template')
 
 
   compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication', version: '1.2.0') {
@@ -45,5 +46,7 @@ dependencies {
   }
   testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
   testCompile project(path: ':cloud-common', configuration: 'tests')
+
+  compile (group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2')
 
 }

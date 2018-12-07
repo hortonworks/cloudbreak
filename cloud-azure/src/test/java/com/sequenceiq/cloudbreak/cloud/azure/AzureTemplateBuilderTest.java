@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
@@ -633,8 +634,9 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestDataDisks() {
+    public void buildTestDisksFor1xVersions() {
         //GIVEN
+        assumeFalse(isTemplateVersionGreaterOrEqualThan());
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -659,6 +661,36 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '0')]"));
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '1')]"));
+    }
+
+    @Test
+    public void buildTestDisks() {
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan());
+        Network network = new Network(new Subnet("testSubnet"));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString, containsString("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
+        assertThat(templateString, not(containsString("[concat('datadisk', 'm0', '1')]")));
     }
 
     @Test
@@ -704,6 +736,6 @@ public class AzureTemplateBuilderTest {
         }
         String[] splittedName = templatePath.split("-");
         String templateVersion = splittedName[splittedName.length - 1].replaceAll("\\.ftl", "");
-        return Version.versionCompare(templateVersion, "1.16.5") > -1;
+        return Version.versionCompare(templateVersion, "1.16.5.0") > -1;
     }
 }

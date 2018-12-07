@@ -55,10 +55,11 @@ was_script_executed() {
 
 is_cloud_platform_supported() {
     local log_file=$1
-    if [[ $CLOUD_PLATFORM != "AWS" && $CLOUD_PLATFORM != "GCP" ]]; then
-        log $log_file "Only AWS and GCP cloud platforms are supported. Cloud platform currently: $CLOUD_PLATFORM. Exiting"
-        exit
-    fi
+    case $CLOUD_PLATFORM in
+        AWS|AZURE|GCP) ;; # "Cloud platform is supported"
+        *)         log $log_file "Cloud platform is NOT supported. Cloud platform currently: $CLOUD_PLATFORM. Exiting"
+                   exit;;
+    esac
 }
 
 can_start() {
@@ -72,8 +73,10 @@ can_start() {
 
 get_disk_uuid() {
     local device=$1
-    uuid=$(blkid -o value $device | head -1)
+    uuid=$(blkid -o export $device | grep -i UUID | cut -d '=' -f 2)
+    local retval=$?
     echo $uuid
+    return $((retval))
 }
 
 get_root_disk() {
@@ -90,4 +93,8 @@ not_elastic_block_store() {
     local log_file=$2
     nvme list | grep $device_name | sed 's/ \+/ /g' | tr '[:upper:]' '[:lower:]' | grep "amazon elastic block store" >> $log_file 2>&1
     [[ $? -eq 0 ]] && return 1 || return 0
+}
+
+lsblk_command() {
+    lsblk -I 8 -dn
 }

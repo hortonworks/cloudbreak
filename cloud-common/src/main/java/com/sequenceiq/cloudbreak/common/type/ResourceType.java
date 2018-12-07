@@ -38,9 +38,13 @@ public enum ResourceType {
     GCP_INSTANCE,
 
     //AZURE
+    AZURE_INSTANCE,
     AZURE_NETWORK,
     AZURE_STORAGE,
     AZURE_SUBNET,
+    AZURE_VOLUMESET,
+    AZURE_DISK,
+    AZURE_RESOURCE_GROUP,
 
     // ARM
     ARM_TEMPLATE(CommonResourceType.TEMPLATE),

@@ -374,28 +374,8 @@
                                <#else>
                                "id": "${customImageId}"
                                </#if>
-                           },
+                           }
                            </#if>
-                           "dataDisks": [
-                           <#list instance.volumes as volume>
-                               {
-                                   "name": "[concat('datadisk', '${instance.instanceId}', '${volume_index}')]",
-                                   "diskSizeGB": ${volume.size},
-                                   "lun":  ${volume_index},
-                                   <#if instance.managedDisk == false>
-                                   "vhd": {
-                                        "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
-                                   },
-                                   <#else>
-                                   "managedDisk": {
-                                        "storageAccountType": "${instance.attachedDiskStorageType}"
-                                   },
-                                   </#if>
-                                   "caching": "None",
-                                   "createOption": "Empty"
-                               } <#if (volume_index + 1) != instance.volumes?size>,</#if>
-                           </#list>
-                           ]
                        },
                        "networkProfile": {
                            "networkInterfaces": [

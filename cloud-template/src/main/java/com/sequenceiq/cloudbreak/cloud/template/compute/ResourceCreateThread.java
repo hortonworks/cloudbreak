@@ -6,6 +6,7 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
@@ -78,7 +79,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
             for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
                 LOGGER.debug("Building {} resources of {} instance group", builder.resourceType(), group.getName());
                 List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
-                if (!cloudResources.isEmpty()) {
+                if (Objects.nonNull(cloudResources) && !cloudResources.isEmpty()) {
                     buildableResources.addAll(cloudResources);
                     createResource(auth, cloudResources);
 
