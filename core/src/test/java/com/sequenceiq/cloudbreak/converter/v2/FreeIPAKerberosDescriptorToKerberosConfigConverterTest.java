@@ -54,6 +54,21 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverterTest {
     public void testConvert() {
         KerberosConfig result = underTest.convert(source);
 
+        commonAsserts(result);
+        assertEquals(DOMAIN, result.getDomain());
+    }
+
+    @Test
+    public void testConvertWithoutDomain() {
+        source.setDomain(null);
+
+        KerberosConfig result = underTest.convert(source);
+
+        commonAsserts(result);
+        assertEquals(REALM.toLowerCase(), result.getDomain());
+    }
+
+    private void commonAsserts(KerberosConfig result) {
         assertNotNull(result);
         assertEquals(URL, result.getUrl());
         assertEquals(ADMIN_URL, result.getAdminUrl());
@@ -61,7 +76,6 @@ public class FreeIPAKerberosDescriptorToKerberosConfigConverterTest {
         assertEquals(PASSWORD, result.getPassword());
         assertEquals(VERIFY_KDC_TRUST, result.getVerifyKdcTrust());
         assertEquals(TCP_ALLOWED, result.isTcpAllowed());
-        assertEquals(DOMAIN, result.getDomain());
         assertEquals(NAMESERVERS, result.getNameServers());
         assertEquals(KerberosType.FREEIPA, result.getType());
         assertEquals(PRINCIPAL, result.getPrincipal());

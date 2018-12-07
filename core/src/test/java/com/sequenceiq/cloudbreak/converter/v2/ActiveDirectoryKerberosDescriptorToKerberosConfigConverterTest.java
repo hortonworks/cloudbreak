@@ -67,6 +67,21 @@ public class ActiveDirectoryKerberosDescriptorToKerberosConfigConverterTest {
     public void testConvertWhenPassingRequestThenExpectedOutputsShouldHavePlaced() {
         KerberosConfig result = underTest.convert(request);
 
+        commonAsserts(result);
+        assertEquals(DOMAIN, result.getDomain());
+    }
+
+    @Test
+    public void testConvertWhenPassingRequestThenExpectedOutputsShouldHavePlacedWithoutDomain() {
+        when(request.getDomain()).thenReturn(null);
+
+        KerberosConfig result = underTest.convert(request);
+
+        commonAsserts(result);
+        assertEquals(REALM.toLowerCase(), result.getDomain());
+    }
+
+    private void commonAsserts(KerberosConfig result) {
         assertNotNull(result);
         assertEquals(ADMIN_URL, result.getAdminUrl());
         assertEquals(CONTAINER_DN, result.getContainerDn());
@@ -75,7 +90,6 @@ public class ActiveDirectoryKerberosDescriptorToKerberosConfigConverterTest {
         assertEquals(URL, result.getUrl());
         assertEquals(PRINCIPAL, result.getPrincipal());
         assertEquals(TYPE, result.getType());
-        assertEquals(DOMAIN, result.getDomain());
         assertEquals(NAME_SERVERS, result.getNameServers());
         assertEquals(PASSWORD, result.getPassword());
         assertEquals(VERIFY_KDC_TRUST, result.getVerifyKdcTrust());
