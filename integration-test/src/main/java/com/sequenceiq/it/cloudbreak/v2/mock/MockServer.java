@@ -8,9 +8,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -18,8 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 
 import com.google.gson.Gson;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -37,6 +41,14 @@ import spark.Service;
 public class MockServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockServer.class);
 
+    private static final String READYNESS_PROBE = "/readyness";
+
+    private static final String READY_STRING = "[\"OK\"]";
+
+    private static final int START_WAIT_SLEEP = 500;
+
+    private static final int START_WAIT_RETRIES = 10;
+
     private static final Gson GSON = new Gson();
 
     @Inject
@@ -45,19 +57,22 @@ public class MockServer {
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
 
-    private int mockPort;
+    private final String readynessLocation;
 
-    private int sshPort;
+    private final int mockPort;
 
-    private Service sparkService;
+    private final int sshPort;
 
-    private Map<Call, Response> requestResponseMap = new HashMap<>();
+    private final Service sparkService;
+
+    private final Map<Call, Response> requestResponseMap = new HashMap<>();
 
     private Map<String, CloudVmMetaDataStatus> instanceMap;
 
     private int numberOfServers;
 
     private MockServer(int mockPort, int sshPort) {
+        readynessLocation = "https://127.0.0.1:" + mockPort + READYNESS_PROBE;
         this.mockPort = mockPort;
         this.sshPort = sshPort;
         sparkService = Service.ignite();
@@ -66,6 +81,9 @@ public class MockServer {
         sparkService.secure(keystoreFile.getPath(), "secret", null, null);
         sparkService.before((req, res) -> res.type("application/json"));
         sparkService.after((request, response) -> requestResponseMap.put(Call.fromRequest(request), response));
+        sparkService.get(READYNESS_PROBE, (request, response) -> READY_STRING);
+
+        isStarted();
     }
 
     public MockServer(int mockPort, int sshPort, Map<String, CloudVmMetaDataStatus> instanceMap) {
@@ -126,6 +144,7 @@ public class MockServer {
 
     public void stop() {
         sparkService.stop();
+        isStopped();
     }
 
     protected Verification verify(String path, String httpMethod) {
@@ -163,6 +182,40 @@ public class MockServer {
             LOGGER.error("can't read file from path", e);
             return "";
         }
+    }
+
+    private boolean isStarted() {
+        return Stream.iterate(null, s -> {
+            if (Boolean.TRUE.equals(s)) {
+                return s;
+            } else if (s != null) {
+                try {
+                    Thread.sleep(START_WAIT_SLEEP);
+                } catch (InterruptedException ignore) {
+                }
+            }
+            try {
+                Client client = RestClientUtil.get();
+                javax.ws.rs.core.Response response = client.target(readynessLocation).request().get();
+                return response.getStatus() == HttpStatus.OK.value() && READY_STRING.equals(response.readEntity(String.class));
+            } catch (Exception ignore) {
+                return Boolean.FALSE;
+            }
+        }).limit(START_WAIT_RETRIES).anyMatch(Boolean.TRUE::equals);
+    }
+
+    private boolean isStopped() {
+        return Stream.iterate(null, s -> {
+            if (Boolean.TRUE.equals(s)) {
+                return s;
+            }
+            try {
+                Client client = RestClientUtil.get();
+                return client.target(readynessLocation).request().get().getStatus() != HttpStatus.OK.value();
+            } catch (Exception ignore) {
+                return Boolean.FALSE;
+            }
+        }).limit(START_WAIT_RETRIES).anyMatch(Boolean.TRUE::equals);
     }
 
     private File createTempFileFromClasspath(String file) {

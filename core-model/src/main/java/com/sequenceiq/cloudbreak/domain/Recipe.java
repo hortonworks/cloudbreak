@@ -32,9 +32,6 @@ public class Recipe implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private RecipeType recipeType;
 
-    @Column(nullable = false)
-    private String uri;
-
     @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String content;
@@ -78,14 +75,6 @@ public class Recipe implements ProvisionEntity {
 
     public void setRecipeType(RecipeType recipeType) {
         this.recipeType = recipeType;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
     }
 
     public String getContent() {

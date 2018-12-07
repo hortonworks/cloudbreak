@@ -292,7 +292,6 @@ public class ModelDescriptions {
     public static class RecipeModelDescription {
         public static final String CONTENT = "content of recipe";
         public static final String TYPE = "type of recipe";
-        public static final String RECIPE_URI = "recipe uri";
     }
 
     public static class InstanceGroupModelDescription {

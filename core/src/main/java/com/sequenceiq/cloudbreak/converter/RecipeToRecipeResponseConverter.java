@@ -16,7 +16,6 @@ public class RecipeToRecipeResponseConverter extends AbstractConversionServiceAw
         json.setContent(recipe.getContent());
         json.setId(recipe.getId());
         json.setPublicInAccount(recipe.isPublicInAccount());
-        json.setUri(recipe.getUri());
         return json;
     }
 }
