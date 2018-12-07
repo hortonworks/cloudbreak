@@ -87,7 +87,7 @@ public class AzureSetup implements Setup {
             String region, AzureClient client) {
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         if (!client.resourceGroupExists(resourceGroupName)) {
             client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
         }

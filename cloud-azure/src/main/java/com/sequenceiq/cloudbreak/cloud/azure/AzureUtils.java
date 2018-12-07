@@ -3,10 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector.RESOURCE_GROUP_NAME;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,10 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
+import com.microsoft.azure.management.resources.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -36,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -51,6 +57,8 @@ public class AzureUtils {
     private static final String NO_FIREWALL_RULES = "noFirewallRules";
 
     private static final int HOST_GROUP_LENGTH = 3;
+
+    private static final String MICROSOFT_COMPUTE_VIRTUAL_MACHINES = "Microsoft.Compute/virtualMachines";
 
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
@@ -123,16 +131,16 @@ public class AzureUtils {
         return armResourceStatus;
     }
 
-    public String getResourceGroupName(CloudContext cloudContext) {
+    private String getDefaultResourceGroupName(CloudContext cloudContext) {
         return getStackName(cloudContext);
     }
 
     public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {
-        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getResourceGroupName(cloudContext));
+        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext));
     }
 
     public String getResourceGroupName(CloudContext cloudContext, DynamicModel dynamicModel) {
-        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getResourceGroupName(cloudContext)).toString();
+        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext)).toString();
     }
 
     public boolean isExistingNetwork(Network network) {
@@ -176,9 +184,9 @@ public class AzureUtils {
     public List<String> getCustomSubnetIds(Network network) {
         String subnetIds = network.getStringParameter(CloudInstance.SUBNET_ID);
         if (StringUtils.isBlank(subnetIds)) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
-        return Arrays.asList(network.getStringParameter(CloudInstance.SUBNET_ID).split(","));
+        return Arrays.asList(subnetIds.split(","));
     }
 
     public void validateSubnet(AzureClient client, Network network) {
@@ -191,7 +199,7 @@ public class AzureUtils {
                     Subnet subnet = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
                     if (subnet == null) {
                         throw new CloudConnectorException(
-                                String.format("Subnet [%s] does not found with resourceGroupName [%s] and network [%s]", subnetId, resourceGroupName, networkId)
+                                String.format("Subnet [%s] is not found in resource group [%s] and network [%s]", subnetId, resourceGroupName, networkId)
                         );
                     }
                 } catch (RuntimeException e) {
@@ -217,5 +225,39 @@ public class AzureUtils {
                 throw new CloudConnectorException("Only the DS instance types supports the premium storage.");
             }
         }
+    }
+
+    public List<CloudResource> getInstanceCloudResources(CloudContext cc,
+            Deployment templateDeployment, List<Group> groups) {
+        PagedList<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
+        List<CloudResource> cloudResourceList = new ArrayList<>();
+        for (DeploymentOperation operation : operations) {
+            TargetResource resource = operation.targetResource();
+            if (Objects.nonNull(resource) && resource.resourceType().equals(MICROSOFT_COMPUTE_VIRTUAL_MACHINES)) {
+                String vmName = operation.targetResource().resourceName();
+                String resourceGroupNm = templateDeployment.resourceGroupName();
+                for (Group group : groups) {
+                    for (CloudInstance instance : group.getInstances()) {
+                        String id = getPrivateInstanceId(
+                                getStackName(cc), group.getName(), Long.toString(instance.getTemplate().getPrivateId()));
+                        if (vmName.equals(id)) {
+                            Map<String, Object> paramsMap = new HashMap<>();
+                            paramsMap.put(RESOURCE_GROUP_NAME, resourceGroupNm);
+                            CloudResource vm = CloudResource.builder()
+                                    .type(ResourceType.AZURE_INSTANCE)
+                                    .instanceId(id)
+                                    .name(id)
+                                    .group(group.getName())
+                                    .status(CommonStatus.CREATED)
+                                    .persistent(false)
+                                    .params(paramsMap)
+                                    .build();
+                            cloudResourceList.add(vm);
+                        }
+                    }
+                }
+            }
+        }
+        return cloudResourceList;
     }
 }

@@ -402,7 +402,7 @@ public class AmbariDecommissioner {
                 .anyMatch(Boolean.FALSE::equals);
         int adjustment = Math.abs(scalingAdjustment);
         if (!repairInProgress && (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment)) {
-            LOGGER.debug("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
+            LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new NotEnoughNodeException("There is not enough node to downscale. "
                     + "Check the replication factor and the ApplicationMaster occupation.");
         }

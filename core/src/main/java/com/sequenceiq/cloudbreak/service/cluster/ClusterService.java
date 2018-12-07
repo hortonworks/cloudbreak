@@ -346,6 +346,9 @@ public class ClusterService {
     }
 
     private void markVolumesForDeletion(Stack stack) {
+        if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
+            return;
+        }
         LOGGER.debug("Mark volumes for delete on termination in case of active repair flow.");
         try {
             transactionService.required(() -> {
@@ -616,8 +619,8 @@ public class ClusterService {
     }
 
     private void checkReattachSupportedOnProvider(Stack inTransactionStack, boolean repairWithReattach) {
-        if (repairWithReattach && "OPENSTACK".equalsIgnoreCase(inTransactionStack.getPlatformVariant())) {
-            throw new BadRequestException("Volume reattach currently not supported on OpenStack.");
+        if (repairWithReattach && !StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(inTransactionStack.getPlatformVariant())) {
+            throw new BadRequestException("Volume reattach currently not supported!");
         }
     }
 
@@ -688,6 +691,8 @@ public class ClusterService {
                     Collections.singletonList(recoveryMessageArgument));
             LOGGER.debug(recoveryMessage);
             eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
+        } else {
+            throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
         }
     }
 
