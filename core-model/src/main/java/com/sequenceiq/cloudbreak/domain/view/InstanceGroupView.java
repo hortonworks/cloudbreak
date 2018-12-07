@@ -21,7 +21,7 @@ public class InstanceGroupView implements ProvisionEntity {
     private Long id;
 
     @ManyToOne
-    private StackView stack;
+    private StackApiView stack;
 
     @OneToMany(mappedBy = "instanceGroup", fetch = FetchType.EAGER)
     private Set<InstanceMetaDataView> instanceMetaData = new HashSet<>();

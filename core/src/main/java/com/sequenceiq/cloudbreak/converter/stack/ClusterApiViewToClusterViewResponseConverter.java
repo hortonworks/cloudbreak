@@ -13,10 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.HostGroupViewResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.AttachedClusterInfoResponse;
 import com.sequenceiq.cloudbreak.converter.CompactViewToCompactViewResponseConverter;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -35,7 +32,7 @@ public class ClusterApiViewToClusterViewResponseConverter extends CompactViewToC
         ClusterViewResponse clusterViewResponse = super.convert(source);
         clusterViewResponse.setAmbariServerIp(source.getAmbariIp());
         clusterViewResponse.setStatus(source.getStatus());
-        convertKerberosConfig(source, clusterViewResponse);
+        clusterViewResponse.setSecure(source.getSecure());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterViewResponse.setBlueprint(conversionService.convert(source.getBlueprint(), BlueprintViewResponse.class));
         addSharedServiceResponse(source, clusterViewResponse);
@@ -45,13 +42,6 @@ public class ClusterApiViewToClusterViewResponseConverter extends CompactViewToC
     @Override
     protected ClusterViewResponse createTarget() {
         return new ClusterViewResponse();
-    }
-
-    private void convertKerberosConfig(ClusterApiView source, ClusterViewResponse clusterViewResponse) {
-        KerberosConfig kerberosConfig = source.getKerberosConfig();
-        if (source.getSecure() && kerberosConfig != null) {
-            clusterViewResponse.setSecure(source.getSecure());
-        }
     }
 
     private Set<HostGroupViewResponse> convertHostGroupsToJson(Iterable<HostGroupView> hostGroups) {
@@ -67,13 +57,6 @@ public class ClusterApiViewToClusterViewResponseConverter extends CompactViewToC
         if (cluster.getStack().getDatalakeId() != null) {
             sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
             sharedServiceResponse.setSharedClusterName(stackService.getByIdWithTransaction(cluster.getStack().getDatalakeId()).getName());
-        } else {
-            for (Stack stack : stackService.findClustersConnectedToDatalake(cluster.getStack().getId())) {
-                AttachedClusterInfoResponse attachedClusterInfoResponse = new AttachedClusterInfoResponse();
-                attachedClusterInfoResponse.setId(stack.getId());
-                attachedClusterInfoResponse.setName(stack.getName());
-                sharedServiceResponse.getAttachedClusters().add(attachedClusterInfoResponse);
-            }
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
