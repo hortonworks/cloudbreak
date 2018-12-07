@@ -1,18 +1,19 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+
+import javax.ws.rs.BadRequestException;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class StackCreationTest extends AbstractIntegrationTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationTest.class);
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -29,6 +30,15 @@ public class StackCreationTest extends AbstractIntegrationTest {
         testContext.given(StackEntity.class)
                 .when(Stack.postV2())
                 .await(STACK_AVAILABLE)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testAttemptToCreateTwoRegularClusterWithTheSameName(TestContext testContext) {
+        testContext.given(StackEntity.class)
+                .when(Stack.postV2())
+                .when(Stack.postV2(), RunningParameter.key("badRequest"))
+                .except(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 

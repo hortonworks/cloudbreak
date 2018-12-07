@@ -11,13 +11,11 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.FLEXSUBS
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.IMAGECATALOG;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.LDAP;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.MPACK;
-import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.WORKSPACE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.PROXY;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.RDS;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.RECIPE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.STACK;
-
-import java.util.Set;
+import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.WORKSPACE;
 
 public enum WorkspacePermissions {
 
@@ -74,21 +72,6 @@ public enum WorkspacePermissions {
 
     public static String getName(WorkspaceResource resource, Action action) {
         return resource.name() + ':' + action.name();
-    }
-
-    public static boolean hasPermission(Set<String> permissions, WorkspaceResource resource, Action action) {
-        if (resource == WORKSPACE) {
-            if (action == INVITE && (permissions.contains(WORKSPACE_INVITE.name) || permissions.contains(WORKSPACE_MANAGE.name))) {
-                return true;
-            }
-            return action == MANAGE && permissions.contains(WORKSPACE_MANAGE.name);
-        } else if (permissions.contains(ALL_WRITE.name)) {
-            return true;
-        } else if (permissions.contains(ALL_READ.name) && action == READ) {
-            return true;
-        }
-        String permissionName = getName(resource, action);
-        return permissions.contains(permissionName);
     }
 
     public String value() {
