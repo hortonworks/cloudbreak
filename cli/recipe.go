@@ -4,8 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"net/http"
-
 	"encoding/base64"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
@@ -24,21 +22,6 @@ type recipeOut struct {
 
 func (r *recipeOut) DataAsStringArray() []string {
 	return []string{r.Name, r.Description, r.ExecutionType}
-}
-
-func CreateRecipeFromUrl(c *cli.Context) {
-	checkRequiredFlagsAndArguments(c)
-
-	log.Infof("[CreateRecipeFromUrl] creating recipe from a URL")
-	cbClient := NewCloudbreakHTTPClientFromContext(c)
-	urlLocation := c.String(FlURL.Name)
-	createRecipeImpl(
-		cbClient.Cloudbreak.V1recipes,
-		c.String(FlName.Name),
-		c.String(FlDescriptionOptional.Name),
-		c.Bool(FlPublicOptional.Name),
-		getExecutionType(c.String(FlExecutionType.Name)),
-		base64.StdEncoding.EncodeToString(utils.ReadContentFromURL(urlLocation, new(http.Client))))
 }
 
 func CreateRecipeFromFile(c *cli.Context) {
