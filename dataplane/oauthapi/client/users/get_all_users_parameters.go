@@ -16,8 +16,6 @@ import (
 	cr "github.com/go-openapi/runtime/client"
 
 	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/hortonworks/cb-cli/dataplane/oauthapi/model"
 )
 
 // NewGetAllUsersParams creates a new GetAllUsersParams object
@@ -64,13 +62,26 @@ for the get all users operation typically these are written to a http.Request
 */
 type GetAllUsersParams struct {
 
-	/*Body*/
-	Body *model.UserContext
 	/*ID
 	  ID of user that needs to be fetched
 
 	*/
 	ID *string
+	/*Offset
+	  offset for pagination
+
+	*/
+	Offset *string
+	/*PageSize
+	  page size
+
+	*/
+	PageSize *string
+	/*SearchTerm
+	  searchTerm
+
+	*/
+	SearchTerm *string
 	/*UserName
 	  name of user that needs to be fetched
 
@@ -115,17 +126,6 @@ func (o *GetAllUsersParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the get all users params
-func (o *GetAllUsersParams) WithBody(body *model.UserContext) *GetAllUsersParams {
-	o.SetBody(body)
-	return o
-}
-
-// SetBody adds the body to the get all users params
-func (o *GetAllUsersParams) SetBody(body *model.UserContext) {
-	o.Body = body
-}
-
 // WithID adds the id to the get all users params
 func (o *GetAllUsersParams) WithID(id *string) *GetAllUsersParams {
 	o.SetID(id)
@@ -135,6 +135,39 @@ func (o *GetAllUsersParams) WithID(id *string) *GetAllUsersParams {
 // SetID adds the id to the get all users params
 func (o *GetAllUsersParams) SetID(id *string) {
 	o.ID = id
+}
+
+// WithOffset adds the offset to the get all users params
+func (o *GetAllUsersParams) WithOffset(offset *string) *GetAllUsersParams {
+	o.SetOffset(offset)
+	return o
+}
+
+// SetOffset adds the offset to the get all users params
+func (o *GetAllUsersParams) SetOffset(offset *string) {
+	o.Offset = offset
+}
+
+// WithPageSize adds the pageSize to the get all users params
+func (o *GetAllUsersParams) WithPageSize(pageSize *string) *GetAllUsersParams {
+	o.SetPageSize(pageSize)
+	return o
+}
+
+// SetPageSize adds the pageSize to the get all users params
+func (o *GetAllUsersParams) SetPageSize(pageSize *string) {
+	o.PageSize = pageSize
+}
+
+// WithSearchTerm adds the searchTerm to the get all users params
+func (o *GetAllUsersParams) WithSearchTerm(searchTerm *string) *GetAllUsersParams {
+	o.SetSearchTerm(searchTerm)
+	return o
+}
+
+// SetSearchTerm adds the searchTerm to the get all users params
+func (o *GetAllUsersParams) SetSearchTerm(searchTerm *string) {
+	o.SearchTerm = searchTerm
 }
 
 // WithUserName adds the userName to the get all users params
@@ -156,14 +189,6 @@ func (o *GetAllUsersParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(model.UserContext)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
-	}
-
 	if o.ID != nil {
 
 		// query param id
@@ -174,6 +199,54 @@ func (o *GetAllUsersParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		qID := qrID
 		if qID != "" {
 			if err := r.SetQueryParam("id", qID); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.Offset != nil {
+
+		// query param offset
+		var qrOffset string
+		if o.Offset != nil {
+			qrOffset = *o.Offset
+		}
+		qOffset := qrOffset
+		if qOffset != "" {
+			if err := r.SetQueryParam("offset", qOffset); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.PageSize != nil {
+
+		// query param pageSize
+		var qrPageSize string
+		if o.PageSize != nil {
+			qrPageSize = *o.PageSize
+		}
+		qPageSize := qrPageSize
+		if qPageSize != "" {
+			if err := r.SetQueryParam("pageSize", qPageSize); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.SearchTerm != nil {
+
+		// query param searchTerm
+		var qrSearchTerm string
+		if o.SearchTerm != nil {
+			qrSearchTerm = *o.SearchTerm
+		}
+		qSearchTerm := qrSearchTerm
+		if qSearchTerm != "" {
+			if err := r.SetQueryParam("searchTerm", qSearchTerm); err != nil {
 				return err
 			}
 		}

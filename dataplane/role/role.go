@@ -1,8 +1,9 @@
 package role
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/go-openapi/swag"
@@ -27,6 +28,11 @@ func (r *roleDetailsOut) DataAsStringArray() []string {
 		swag.StringValue(r.Role.Service.Name)}
 }
 
+type roleClient interface {
+	GetRoles(params *roles.GetRolesParams) (*roles.GetRolesOK, error)
+	GetRoleByID(params *roles.GetRoleByIDParams) (*roles.GetRoleByIDOK, error)
+}
+
 // ListRoles : List roles
 func ListRoles(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "list roles")
@@ -42,4 +48,14 @@ func ListRoles(c *cli.Context) {
 		tableRows = append(tableRows, &roleDetailsOut{role})
 	}
 	output.WriteList(roleDetailsHeader, tableRows)
+}
+
+//GetRoles : return all roles present in system
+func GetRoles(client roleClient) []*model.RoleWithPermissionDetails {
+	log.Infof("[listUsersImpl] sending list roles request")
+	resp, err := client.GetRoles(roles.NewGetRolesParams())
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	return resp.Payload
 }

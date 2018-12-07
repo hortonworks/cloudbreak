@@ -1,9 +1,10 @@
 package user
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"strconv"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/go-openapi/swag"
@@ -12,6 +13,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/roles"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/users"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/model"
+	"github.com/hortonworks/cb-cli/dataplane/role"
 	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
 )
@@ -56,6 +58,18 @@ func (r *roleDetailsOut) DataAsStringArray() []string {
 		swag.StringValue(r.Role.Service.Name)}
 }
 
+type userRolesOut struct {
+	Role *model.RoleWithPermission
+}
+
+func (r *userRolesOut) DataAsStringArray() []string {
+	return []string{
+		r.Role.ID.String(),
+		swag.StringValue(r.Role.Name),
+		swag.StringValue(r.Role.DisplayName),
+		r.Role.Service}
+}
+
 type roleAssigned struct {
 	Role *model.UserRole
 }
@@ -73,42 +87,72 @@ type userClient interface {
 	DeleteRolesFromUser(params *users.DeleteRolesFromUserParams) (*users.DeleteRolesFromUserOK, error)
 }
 
+type oidcClient interface {
+	LoggedInUserInfo(params *oidc.LoggedInUserInfoParams) (*oidc.LoggedInUserInfoOK, error)
+}
+
+type roleClient interface {
+	GetRoles(params *roles.GetRolesParams) (*roles.GetRolesOK, error)
+	GetRoleByID(params *roles.GetRoleByIDParams) (*roles.GetRoleByIDOK, error)
+}
+
 // ListUsers : lists user details
 func ListUsers(c *cli.Context) {
 	log.Infof("[ListUsers] List all users in a tenant")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
-	listUsersImpl(dpClient.Dataplane.Users, output.WriteList)
+	usersResponse := listUsersImpl(dpClient.Dataplane.Users)
+	tableRows := []utils.Row{}
+	for _, user := range usersResponse {
+		tableRows = append(tableRows, &userListOut{user})
+	}
+	output.WriteList(userDetailsHeader, tableRows)
 }
 
-func listUsersImpl(client userClient, writer func([]string, []utils.Row)) {
+func listUsersImpl(client userClient) []*model.UserWithRoles {
 	defer utils.TimeTrack(time.Now(), "List Users")
 	log.Infof("[listUsersImpl] sending list users request")
 	resp, err := client.GetAllUsers(users.NewGetAllUsersParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
-	for _, user := range resp.Payload {
-		tableRows = append(tableRows, &userListOut{user})
-	}
-	writer(userDetailsHeader, tableRows)
+	return resp.Payload.Users
 }
 
 // ListRoles : List roles for users
 func ListRoles(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "list roles")
-	log.Infof("[ListUsers] List all roles of the user")
+	log.Infof("[ListUsers] List roles available for a user")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
-	resp, err := dpClient.Dataplane.Roles.GetRoles(roles.NewGetRolesParams())
+	userNameOption := c.String(fl.FlUserNameOptional.Name)
+	var userName string
+	// If name is provided : roles information for another user
+	var userinfo *model.UserInfo
+	userinfo = userinfoImpl(dpClient.Dataplane.Oidc)
+	if userNameOption == "" {
+		userName = swag.StringValue(userinfo.Name)
+	} else {
+		userName = userNameOption
+	}
+	strategyID := userinfo.StrategyID.String()
+	resp, err := dpClient.Dataplane.Users.GetAllUsers(users.NewGetAllUsersParams().WithSearchTerm(&userName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
-	for _, role := range resp.Payload {
-		tableRows = append(tableRows, &roleDetailsOut{role})
+	var filteredRoles []*model.RoleWithPermission
+
+	// Assumption : There cannot be 2 users in a strategy
+	for _, user := range resp.Payload.Users {
+		if user.StrategyID.String() == strategyID {
+			filteredRoles = user.Roles
+		}
 	}
+	tableRows := []utils.Row{}
+	for _, role := range filteredRoles {
+		tableRows = append(tableRows, &userRolesOut{role})
+	}
+
 	output.WriteList(roleDetailsHeader, tableRows)
 }
 
@@ -118,16 +162,20 @@ func Userinfo(c *cli.Context) {
 	log.Infof("[ListUsers] List information for connected user")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
-	resp, err := dpClient.Dataplane.Oidc.LoggedInUserInfo(oidc.NewLoggedInUserInfoParams())
+	output.Write(userDetailsHeader, &UsersInfoOut{userinfoImpl(dpClient.Dataplane.Oidc)})
+}
+
+func userinfoImpl(client oidcClient) *model.UserInfo {
+	resp, err := client.LoggedInUserInfo(oidc.NewLoggedInUserInfoParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	output.Write(userDetailsHeader, &UsersInfoOut{resp.Payload})
+	return resp.Payload
 }
 
 // AssignRoles : Assign roles to a user
 func AssignRoles(c *cli.Context) {
-	log.Infof("[CreateKubernetes] Adding roles to user")
+	log.Infof("[AssignRoles] Adding roles to user")
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	assignRolesImpl(
@@ -154,21 +202,58 @@ func assignRolesImpl(client userClient, userid string, roleids []string, writer 
 	writer(roleAssignedHeader, tableRows)
 }
 
+//AssignRolesToUserByName : Assign roles to a user by role names
+func AssignRolesToUserByName(c *cli.Context) {
+	log.Infof("[AssignRolesToUserByName] Adding roles to user")
+	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
+	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	var userinfo *model.UserInfo
+	userinfo = userinfoImpl(dpClient.Dataplane.Oidc)
+	userID := getUserIDFromName(
+		dpClient.Dataplane.Users,
+		userinfo.StrategyID.String(),
+		c.String(fl.FlUserName.Name),
+	)
+	roleIDs := getRoleIDsFromRoles(
+		dpClient.Dataplane.Roles,
+		userinfo.StrategyID.String(),
+		c.String(fl.FlRoleNames.Name),
+	)
+	assignRolesImpl(dpClient.Dataplane.Users, userID, roleIDs, output.WriteList)
+}
+
 // RevokeRoles : Revokes roles from a user
 func RevokeRoles(c *cli.Context) {
 	log.Infof("[CreateKubernetes] Adding roles to user")
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
-	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	revokeRolesImpl(
 		dpClient.Dataplane.Users,
 		c.String(fl.FlUserID.Name),
-		utils.DelimitedStringToArray(c.String(fl.FlRolesIDs.Name), ","),
-		output.Write)
+		utils.DelimitedStringToArray(c.String(fl.FlRolesIDs.Name), ","))
 }
 
-func revokeRolesImpl(client userClient, userid string, roleids []string, writer func([]string, utils.Row)) {
-	defer utils.TimeTrack(time.Now(), "assign roles to user")
-	log.Infof("[assignRolesImpl] sending assign roles request")
+//RevokeRolesFromUserByName : revoke roles from a user by role names
+func RevokeRolesFromUserByName(c *cli.Context) {
+	log.Infof("[RevokeRolesFromUserByName] revoke roles to user")
+	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
+	var userinfo *model.UserInfo
+	userinfo = userinfoImpl(dpClient.Dataplane.Oidc)
+	userID := getUserIDFromName(
+		dpClient.Dataplane.Users,
+		userinfo.StrategyID.String(),
+		c.String(fl.FlUserName.Name),
+	)
+	roleIDs := getRoleIDsFromRoles(
+		dpClient.Dataplane.Roles,
+		userinfo.StrategyID.String(),
+		c.String(fl.FlRoleNames.Name),
+	)
+	revokeRolesImpl(dpClient.Dataplane.Users, userID, roleIDs)
+}
+
+func revokeRolesImpl(client userClient, userid string, roleids []string) {
+	defer utils.TimeTrack(time.Now(), "revoke roles from user")
+	log.Infof("[revokeRolesImpl] sending revoke roles request")
 	userRolesRequest := &model.RolesInput{
 		RoleIds: roleids}
 
@@ -177,4 +262,37 @@ func revokeRolesImpl(client userClient, userid string, roleids []string, writer 
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[revokeRolesImpl] roles deleted : %s ", strconv.FormatBool(resp.Payload))
+}
+
+func getUserIDFromName(client userClient, strategyid string, name string) string {
+	var userID string
+	usersResponse := listUsersImpl(client)
+	for _, user := range usersResponse {
+		if name == swag.StringValue(user.Name) && strategyid == user.StrategyID.String() {
+			userID = user.ID.String()
+			break
+		}
+	}
+	return userID
+}
+
+func getRoleIDsFromRoles(client roleClient, strategyid string, names string) []string {
+	roleNames := utils.DelimitedStringToArray(names, ",")
+	var roleIDs []string
+	rolesResponse := role.GetRoles(client)
+	for _, role := range rolesResponse {
+		if contains(roleNames, swag.StringValue(role.Name)) {
+			roleIDs = append(roleIDs, role.ID.String())
+		}
+	}
+	return roleIDs
+}
+
+func contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }

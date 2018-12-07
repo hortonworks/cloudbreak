@@ -18,6 +18,9 @@ import (
 
 type UserInfo struct {
 
+	// activated at
+	ActivatedAt strfmt.DateTime `json:"activated_at,omitempty"`
+
 	// display name
 	DisplayName string `json:"display_name,omitempty"`
 
@@ -55,6 +58,8 @@ type UserInfo struct {
 	// Required: true
 	TenantID *strfmt.UUID `json:"tenant_id"`
 }
+
+/* polymorph UserInfo activated_at false */
 
 /* polymorph UserInfo display_name false */
 

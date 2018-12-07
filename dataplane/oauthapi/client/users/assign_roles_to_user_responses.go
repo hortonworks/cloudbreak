@@ -53,13 +53,6 @@ func (o *AssignRolesToUserReader) ReadResponse(response runtime.ClientResponse, 
 		}
 		return nil, result
 
-	case 409:
-		result := NewAssignRolesToUserConflict()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
-
 	case 500:
 		result := NewAssignRolesToUserInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -158,27 +151,6 @@ func (o *AssignRolesToUserForbidden) Error() string {
 }
 
 func (o *AssignRolesToUserForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	return nil
-}
-
-// NewAssignRolesToUserConflict creates a AssignRolesToUserConflict with default headers values
-func NewAssignRolesToUserConflict() *AssignRolesToUserConflict {
-	return &AssignRolesToUserConflict{}
-}
-
-/*AssignRolesToUserConflict handles this case with default header values.
-
-Role already exists
-*/
-type AssignRolesToUserConflict struct {
-}
-
-func (o *AssignRolesToUserConflict) Error() string {
-	return fmt.Sprintf("[POST /caas/api/users/{userId}/roles][%d] assignRolesToUserConflict ", 409)
-}
-
-func (o *AssignRolesToUserConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	return nil
 }

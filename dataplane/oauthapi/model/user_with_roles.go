@@ -20,6 +20,9 @@ import (
 
 type UserWithRoles struct {
 
+	// activated at
+	ActivatedAt strfmt.DateTime `json:"activated_at,omitempty"`
+
 	// display name
 	DisplayName string `json:"display_name,omitempty"`
 
@@ -57,6 +60,8 @@ type UserWithRoles struct {
 	// Required: true
 	TenantID *strfmt.UUID `json:"tenant_id"`
 }
+
+/* polymorph UserWithRoles activated_at false */
 
 /* polymorph UserWithRoles display_name false */
 

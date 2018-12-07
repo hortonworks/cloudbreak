@@ -75,7 +75,7 @@ func NewGetAllUsersOK() *GetAllUsersOK {
 successful operation
 */
 type GetAllUsersOK struct {
-	Payload []*model.UserWithRoles
+	Payload *model.UserList
 }
 
 func (o *GetAllUsersOK) Error() string {
@@ -84,8 +84,10 @@ func (o *GetAllUsersOK) Error() string {
 
 func (o *GetAllUsersOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(model.UserList)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

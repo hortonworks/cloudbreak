@@ -25,6 +25,9 @@ type RoleWithPermission struct {
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// is default
+	IsDefault interface{} `json:"is_default,omitempty"`
+
 	// name
 	// Required: true
 	Name *string `json:"name"`
@@ -35,17 +38,24 @@ type RoleWithPermission struct {
 
 	// service
 	Service string `json:"service,omitempty"`
+
+	// type
+	Type string `json:"type,omitempty"`
 }
 
 /* polymorph RoleWithPermission display_name false */
 
 /* polymorph RoleWithPermission id false */
 
+/* polymorph RoleWithPermission is_default false */
+
 /* polymorph RoleWithPermission name false */
 
 /* polymorph RoleWithPermission permissions false */
 
 /* polymorph RoleWithPermission service false */
+
+/* polymorph RoleWithPermission type false */
 
 // Validate validates this role with permission
 func (m *RoleWithPermission) Validate(formats strfmt.Registry) error {

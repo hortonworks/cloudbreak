@@ -53,7 +53,35 @@ func (a *Client) AssignRolesToUser(params *AssignRolesToUserParams) (*AssignRole
 }
 
 /*
-DeleteRolesFromUser assigns roles to user
+AssignUsersToRole assigns users to role
+*/
+func (a *Client) AssignUsersToRole(params *AssignUsersToRoleParams) (*AssignUsersToRoleOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAssignUsersToRoleParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "assignUsersToRole",
+		Method:             "POST",
+		PathPattern:        "/caas/api/users/{roleId}/role",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AssignUsersToRoleReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AssignUsersToRoleOK), nil
+
+}
+
+/*
+DeleteRolesFromUser revokes roles from user
 */
 func (a *Client) DeleteRolesFromUser(params *DeleteRolesFromUserParams) (*DeleteRolesFromUserOK, error) {
 	// TODO: Validate the params before sending

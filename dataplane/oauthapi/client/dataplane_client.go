@@ -14,6 +14,8 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/oidc"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/roles"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/status"
+	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/strategies"
+	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/strategytypes"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/users"
 )
 
@@ -63,6 +65,10 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Dataplane 
 	cli.Roles = roles.New(transport, formats)
 
 	cli.Status = status.New(transport, formats)
+
+	cli.Strategies = strategies.New(transport, formats)
+
+	cli.Strategytypes = strategytypes.New(transport, formats)
 
 	cli.Users = users.New(transport, formats)
 
@@ -116,6 +122,10 @@ type Dataplane struct {
 
 	Status *status.Client
 
+	Strategies *strategies.Client
+
+	Strategytypes *strategytypes.Client
+
 	Users *users.Client
 
 	Transport runtime.ClientTransport
@@ -130,6 +140,10 @@ func (c *Dataplane) SetTransport(transport runtime.ClientTransport) {
 	c.Roles.SetTransport(transport)
 
 	c.Status.SetTransport(transport)
+
+	c.Strategies.SetTransport(transport)
+
+	c.Strategytypes.SetTransport(transport)
 
 	c.Users.SetTransport(transport)
 

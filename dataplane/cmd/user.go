@@ -27,11 +27,11 @@ func init() {
 			{
 				Name:   "roles",
 				Usage:  "list roles assigned to a user",
-				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlUserNameOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlagsDP,
 				Action: user.ListRoles,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlUserNameOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -53,13 +53,25 @@ func init() {
 				Usage: "provide information about a user",
 				Subcommands: []cli.Command{
 					{
-						Name:   "roles",
-						Usage:  "Add roles to a user",
+						Name:   "roles-by-ids",
+						Usage:  "Add roles to a user by ids",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlUserID, fl.FlRolesIDs).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlagsDP,
 						Action: user.AssignRoles,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlUserID, fl.FlRolesIDs).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "roles",
+						Usage:  "Add roles to a user",
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlUserName, fl.FlRoleNames).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlagsDP,
+						Action: user.AssignRolesToUserByName,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlUserID, fl.FlRoleNames).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -71,13 +83,25 @@ func init() {
 				Usage: "provide information about a user",
 				Subcommands: []cli.Command{
 					{
-						Name:   "roles",
+						Name:   "roles-by-ids",
 						Usage:  "revoke roles from a user",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlUserID, fl.FlRolesIDs).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlagsDP,
 						Action: user.RevokeRoles,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlUserID, fl.FlRolesIDs).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "roles",
+						Usage:  "revoke roles from a user",
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlUserName, fl.FlRoleNames).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlagsDP,
+						Action: user.RevokeRolesFromUserByName,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlUserName, fl.FlRoleNames).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
