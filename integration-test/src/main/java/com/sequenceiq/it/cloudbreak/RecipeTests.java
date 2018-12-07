@@ -24,7 +24,7 @@ public class RecipeTests extends CloudbreakTest {
 
     private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
-    public static final String VALID_RECIPE_SCRIPT = "echo test";
+    private static final String VALID_RECIPE_SCRIPT = "echo test";
 
     private static final String VALID_RECIPE_SCRIPT_FILE = "classpath:/recipes/valid_recipe.sh";
 
