@@ -477,7 +477,6 @@ public class TestUtil {
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
             recipe.setPublicInAccount(true);
-            recipe.setUri("https://some/url");
             recipe.setContent("base64Content");
             recipe.setRecipeType(RecipeType.POST_AMBARI_START);
             recipes.add(recipe);

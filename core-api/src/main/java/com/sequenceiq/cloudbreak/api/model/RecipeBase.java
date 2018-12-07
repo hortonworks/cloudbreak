@@ -28,9 +28,6 @@ public abstract class RecipeBase implements JsonEntity {
     @ApiModelProperty(RecipeModelDescription.CONTENT)
     private String content;
 
-    @ApiModelProperty(RecipeModelDescription.RECIPE_URI)
-    private String uri;
-
     public String getName() {
         return name;
     }
@@ -61,13 +58,5 @@ public abstract class RecipeBase implements JsonEntity {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
     }
 }
