@@ -41,9 +41,6 @@ type RecipeResponse struct {
 	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
 	RecipeType *string `json:"recipeType"`
 
-	// recipe uri
-	URI string `json:"uri,omitempty"`
-
 	// workspace of the resource
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }

@@ -29,13 +29,10 @@ type StackViewResponse struct {
 	Created int64 `json:"created,omitempty"`
 
 	// stack related credential
-	Credential *CredentialResponse `json:"credential,omitempty"`
+	Credential *CredentialViewResponse `json:"credential,omitempty"`
 
 	// environment which the stack is assigned to
 	Environment string `json:"environment,omitempty"`
-
-	// the related flex subscription
-	FlexSubscription *FlexSubscriptionResponse `json:"flexSubscription,omitempty"`
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
@@ -49,9 +46,6 @@ type StackViewResponse struct {
 
 	// node count of the stack
 	NodeCount int32 `json:"nodeCount,omitempty"`
-
-	// additional cloud specific parameters for stack
-	Parameters map[string]string `json:"parameters,omitempty"`
 
 	// cloud provider api variant
 	PlatformVariant string `json:"platformVariant,omitempty"`
@@ -73,10 +67,6 @@ func (m *StackViewResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateCredential(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateFlexSubscription(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -126,24 +116,6 @@ func (m *StackViewResponse) validateCredential(formats strfmt.Registry) error {
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *StackViewResponse) validateFlexSubscription(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.FlexSubscription) { // not required
-		return nil
-	}
-
-	if m.FlexSubscription != nil {
-		if err := m.FlexSubscription.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("flexSubscription")
 			}
 			return err
 		}

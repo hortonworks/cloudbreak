@@ -12,7 +12,6 @@ import (
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 
 	"github.com/hortonworks/cb-cli/dataplane/common"
-	"github.com/hortonworks/cb-cli/dataplane/credential"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
@@ -134,7 +133,7 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 
 func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, commonutils.SafeStringConvert(s.Cluster.Description), credential.GetPlatformName(s.Credential)},
+		common.CloudResourceOut{*s.Name, commonutils.SafeStringConvert(s.Cluster.Description), *s.Credential.CloudPlatform},
 		s.Environment,
 		s.Status,
 		s.Cluster.Status,
@@ -143,7 +142,7 @@ func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 
 func convertResponseToStack(s *model.StackResponse) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, s.Cluster.Description, credential.GetPlatformName(s.Credential)},
+		common.CloudResourceOut{*s.Name, s.Cluster.Description, *s.Credential.CloudPlatform},
 		s.Environment,
 		s.Status,
 		s.Cluster.Status,

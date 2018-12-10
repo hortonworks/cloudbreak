@@ -4,16 +4,15 @@ require 'json'
 require 'date'
 require 'allure-rspec'
 require_relative "../common/command_builder"
+require "oauth"
 
-RSpec.configure do |config|
-  config.include AllureRSpec::Adaptor
+RSpec.configure do |c|
+  c.include AllureRSpec::Adaptor
 
-  config.expect_with :rspec do |expectations|
-    expectations.syntax = :expect
-  end
-  config.color = true
-  config.tty = true
-  config.formatter = :documentation
+  c.expect_with(:rspec) { |c| c.syntax = :expect }
+  c.color = true
+  c.tty = true
+  c.formatter = :documentation
 
   def html_print(&blk)
     puts "<pre>"
@@ -22,8 +21,8 @@ RSpec.configure do |config|
   end
 end
 
-AllureRSpec.configure do |config|
-  config.output_dir = "allure/allure-results" # - default: gen/allure-results
-  config.clean_dir = true # - clean the output directory first? (default: true)
-  config.logging_level = Logger::ERROR # - logging level (default: DEBUG)
+AllureRSpec.configure do |c|
+  c.output_dir = "allure/allure-results" # default: gen/allure-results
+  c.clean_dir = true # clean the output directory first? (default: true)
+  c.logging_level = Logger::ERROR # logging level (default: DEBUG)
 end

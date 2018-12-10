@@ -37,9 +37,6 @@ type RecipeRequest struct {
 	// Required: true
 	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
 	RecipeType *string `json:"recipeType"`
-
-	// recipe uri
-	URI string `json:"uri,omitempty"`
 }
 
 // Validate validates this recipe request
