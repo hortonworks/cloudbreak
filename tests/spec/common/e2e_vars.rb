@@ -8,8 +8,7 @@ RSpec.shared_context "shared vars", :a => :b do
 
 
   before (:all) { @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"] }
-  before (:all) { @recipe_name = "cli-recipe-url" }
-  before (:all) { @recipe_url = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh" }      
+  before (:all) { @recipe_name = "cli-recipe" }
   before (:all) { @recipe_file = "../../recipes/recipe.sh" }
 
   before (:all) { @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'" }

@@ -42,8 +42,7 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @blueprint_file = "../../blueprints/test.bp"
 
     @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
-    @recipe_name = "cli-recipe-url"
-    @recipe_url = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh"
+    @recipe_name = "cli-recipe"
     @recipe_file = "../../recipes/recipe.sh"
 
     @ldap_name = "cli-ldap"
