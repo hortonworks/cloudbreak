@@ -11,3 +11,4 @@ tests:
       - com.sequenceiq.it.cloudbreak.newway.testcase.RecipeTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.SharedServiceTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentClusterTest

@@ -90,6 +90,13 @@ public class RdsConfig extends RdsConfigEntity {
         return delete(RDSCONFIG);
     }
 
+    public static RdsConfigEntity delete(TestContext testContext, RdsConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().rdsConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
     public static Action<RdsConfig> testConnect(String key) {
         return new Action<>(getTestContext(key), RdsConfigV3Action::testConnect);
     }

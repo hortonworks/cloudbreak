@@ -240,6 +240,11 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
         return this;
     }
 
+    public StackEntity withAttachEnvironment(String name) {
+        getRequest().getGeneral().setEnvironmentName(name);
+        return this;
+    }
+
     public boolean hasCluster() {
         return getRequest().getCluster() != null;
     }

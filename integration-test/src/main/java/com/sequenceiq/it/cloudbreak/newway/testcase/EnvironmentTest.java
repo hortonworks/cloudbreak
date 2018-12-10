@@ -554,7 +554,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         return environment;
     }
 
-    private static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    protected static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> rdsConfigs = new HashSet<>();
         Set<RDSConfigResponse> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
         for (RDSConfigResponse rdsConfigResponse : rdsConfigResponseSet) {
@@ -566,7 +566,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         return environment;
     }
 
-    private static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    protected static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> ldapConfigs = new HashSet<>();
         Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
         for (LdapConfigResponse ldapConfigResponse : ldapConfigResponseSet) {
@@ -578,7 +578,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         return environment;
     }
 
-    private static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    protected static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> proxyConfigs = new HashSet<>();
         Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
         for (ProxyConfigResponse proxyConfigResponse : proxyConfigResponseSet) {

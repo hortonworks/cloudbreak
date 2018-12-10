@@ -82,6 +82,13 @@ public class ProxyConfig extends ProxyConfigEntity {
         return delete(PROXYCONFIG);
     }
 
+    public static ProxyConfigEntity delete(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
     public static Assertion<ProxyConfig> assertThis(BiConsumer<ProxyConfig, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
