@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -102,22 +104,31 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .when(ImageCatalogEntity::putSetDefaultByName);
     }
 
-    protected void createDefaultProxyConfig(TestContext testContext) {
+    protected Set<String> createDefaultProxyConfig(TestContext testContext) {
         testContext
                 .given(ProxyConfigEntity.class)
                 .when(new ProxyConfigCreateIfNotExistsAction());
+        Set<String> validProxy = new HashSet<>();
+        validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
+        return validProxy;
     }
 
-    protected void createDefaultLdapConfig(TestContext testContext) {
+    protected Set<String> createDefaultLdapConfig(TestContext testContext) {
         testContext
                 .given(LdapConfigEntity.class)
                 .when(new LdapConfigCreateIfNotExistsAction());
+        Set<String> validLdap = new HashSet<>();
+        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        return validLdap;
     }
 
-    protected void createDefaultRdsConfig(TestContext testContext) {
+    protected Set<String> createDefaultRdsConfig(TestContext testContext) {
         testContext
                 .given(RdsConfigEntity.class)
                 .when(new RdsConfigCreateIfNotExistsAction());
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        return validRds;
     }
 
     protected void createDefaultUser(TestContext testContext) {

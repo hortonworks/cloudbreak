@@ -1,13 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
-
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 @Prototype
 public class Credential extends CredentialEntity {
@@ -101,6 +101,13 @@ public class Credential extends CredentialEntity {
 
     public static Action<Credential> delete() {
         return delete(CREDENTIAL);
+    }
+
+    public static CredentialEntity delete(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().credentialV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
     }
 
     public static Assertion<Credential> assertThis(BiConsumer<Credential, IntegrationTestContext> check) {

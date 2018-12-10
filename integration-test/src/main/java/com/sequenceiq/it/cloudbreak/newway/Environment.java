@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -64,6 +65,13 @@ public class Environment extends EnvironmentEntity {
         return get(ENVIRONMENT);
     }
 
+    public static EnvironmentEntity get(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
+
     public static EnvironmentEntity getAll(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponseSimpleEnvSet(
                 cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().list(cloudbreakClient.getWorkspaceId())
@@ -103,6 +111,15 @@ public class Environment extends EnvironmentEntity {
         entity.setResponse(
                 cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().detachResources(cloudbreakClient.getWorkspaceId(), entity.getName(),
                         environmentDetachRequest)
+        );
+        return entity;
+    }
+
+    public static EnvironmentEntity changeCredential(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
+        EnvironmentChangeCredentialRequest envChangeCredentialRequest = new EnvironmentChangeCredentialRequest();
+        envChangeCredentialRequest.setCredential(entity.getRequest().getCredential());
+        entity.setResponse(cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().changeCredential(cloudbreakClient.getWorkspaceId(), entity.getName(),
+                envChangeCredentialRequest)
         );
         return entity;
     }

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -228,5 +229,10 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
     @Override
     public void delete(S entity, CloudbreakClient client) {
 
+    }
+
+    public <T extends CloudbreakEntity> T deleteGiven(Class<T> clss, ActionV2<T> action, RunningParameter runningParameter) {
+        testContext.when((T) testContext.given(clss), action, runningParameter);
+        return testContext.expect((T) testContext.given(clss), BadRequestException.class, runningParameter);
     }
 }
