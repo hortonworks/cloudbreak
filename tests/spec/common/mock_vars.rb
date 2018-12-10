@@ -23,7 +23,7 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @valid_cred_json = "{\"Name\":\"test\"}"
     @invalid_cred_json = "{\"Other\":\"test\"}"
 
-    @imagecatalog_invalid_json = "https://rawgit.com/hortonworks/cb-cli/master/tests/templates/imagecatalog_invalid.json"
+    @imagecatalog_invalid_json = "https://raw.githubusercontent.com/hortonworks/cb-cli/master/tests/templates/imagecatalog_invalid.json"
 
   	@db_name = "mockdbname"
   	@db_url = "jdbc:postgresql://test:99/mock"
