@@ -6,6 +6,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidBase64;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,6 +27,7 @@ public abstract class RecipeBase implements JsonEntity {
     private RecipeType recipeType;
 
     @ApiModelProperty(RecipeModelDescription.CONTENT)
+    @ValidBase64
     private String content;
 
     public String getName() {

@@ -10,12 +10,12 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = PluginValidator.class)
+@Constraint(validatedBy = Base64Validator.class)
 @Target({ ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidPlugin {
+public @interface ValidBase64 {
 
-    String message() default "Only plugins from http, https, git and consul protocols are allowed and base64 encoded plugins with base64:// prefix.";
+    String message() default "The field should contains a valid Base64 string";
 
     Class<?>[] groups() default { };
 
