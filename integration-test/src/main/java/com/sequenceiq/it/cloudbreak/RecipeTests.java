@@ -230,7 +230,7 @@ public class RecipeTests extends CloudbreakTest {
     }
 
     private String getRecipeFile(String location) throws IOException {
-        return new String(
+        return Base64.encodeBase64String(
                 StreamUtils.copyToByteArray(
                         applicationContext
                                 .getResource(location)
