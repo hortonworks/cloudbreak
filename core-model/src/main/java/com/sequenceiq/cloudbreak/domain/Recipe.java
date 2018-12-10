@@ -37,9 +37,6 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
     private RecipeType recipeType;
 
     @Column(nullable = false)
-    private String uri;
-
-    @Column(nullable = false)
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret content = Secret.EMPTY;
@@ -78,14 +75,6 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setRecipeType(RecipeType recipeType) {
         this.recipeType = recipeType;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
     }
 
     public String getContent() {
