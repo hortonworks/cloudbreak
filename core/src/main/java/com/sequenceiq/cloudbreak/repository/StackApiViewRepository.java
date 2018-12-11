@@ -38,7 +38,7 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.environment "
-            + "WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "WHERE s.workspace.id= :id AND s.terminated = null")
     Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
 
     @CheckPermissionsByWorkspaceId
@@ -46,6 +46,6 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.environment "
-            + "WHERE s.workspace.id= :id AND :environment in e AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "WHERE s.workspace.id= :id AND :environment in e AND s.terminated = null")
     Set<StackApiView> findAllByWorkspaceIdAndEnvironments(@Param("id") Long id, @Param("environment") EnvironmentView environment);
 }

@@ -40,6 +40,8 @@ public class StackView extends CompactView {
 
     private Long created;
 
+    private Long terminated;
+
     public StackView() {
     }
 
@@ -104,5 +106,9 @@ public class StackView extends CompactView {
 
     public boolean isStackInDeletionPhase() {
         return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
+    }
+
+    public Long getTerminated() {
+        return terminated;
     }
 }

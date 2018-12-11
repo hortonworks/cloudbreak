@@ -157,6 +157,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private Long created;
 
+    private Long terminated;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;
@@ -686,5 +688,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.STACK;
+    }
+
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
     }
 }
