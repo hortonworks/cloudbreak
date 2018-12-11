@@ -30,10 +30,7 @@ type StackViewResponse struct {
 	Created int64 `json:"created,omitempty"`
 
 	// stack related credential
-	Credential *CredentialResponse `json:"credential,omitempty"`
-
-	// the related flex subscription
-	FlexSubscription *FlexSubscriptionResponse `json:"flexSubscription,omitempty"`
+	Credential *CredentialViewResponse `json:"credential,omitempty"`
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
@@ -47,12 +44,6 @@ type StackViewResponse struct {
 
 	// node count of the stack
 	NodeCount int32 `json:"nodeCount,omitempty"`
-
-	// id of the resource owner that is provided by OAuth provider
-	Owner string `json:"owner,omitempty"`
-
-	// additional cloud specific parameters for stack
-	Parameters map[string]string `json:"parameters,omitempty"`
 
 	// cloud provider api variant
 	PlatformVariant string `json:"platformVariant,omitempty"`
@@ -69,8 +60,6 @@ type StackViewResponse struct {
 
 /* polymorph StackViewResponse credential false */
 
-/* polymorph StackViewResponse flexSubscription false */
-
 /* polymorph StackViewResponse hdpVersion false */
 
 /* polymorph StackViewResponse id false */
@@ -78,10 +67,6 @@ type StackViewResponse struct {
 /* polymorph StackViewResponse name false */
 
 /* polymorph StackViewResponse nodeCount false */
-
-/* polymorph StackViewResponse owner false */
-
-/* polymorph StackViewResponse parameters false */
 
 /* polymorph StackViewResponse platformVariant false */
 
@@ -97,11 +82,6 @@ func (m *StackViewResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateCredential(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateFlexSubscription(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -152,25 +132,6 @@ func (m *StackViewResponse) validateCredential(formats strfmt.Registry) error {
 		if err := m.Credential.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("credential")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *StackViewResponse) validateFlexSubscription(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.FlexSubscription) { // not required
-		return nil
-	}
-
-	if m.FlexSubscription != nil {
-
-		if err := m.FlexSubscription.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("flexSubscription")
 			}
 			return err
 		}

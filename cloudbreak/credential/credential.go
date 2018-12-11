@@ -305,15 +305,8 @@ func listCredentialsImpl(client listCredentialsByWorkspaceClient, workspaceID in
 
 	tableRows := []utils.Row{}
 	for _, cred := range credResp.Payload {
-		tableRows = append(tableRows, &common.CloudResourceOut{*cred.Name, *cred.Description, GetPlatformName(cred)})
+		tableRows = append(tableRows, &common.CloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform})
 	}
 
 	writer(common.CloudResourceHeader, tableRows)
-}
-
-func GetPlatformName(credRes *model.CredentialResponse) string {
-	if credRes != nil && credRes.Parameters["govCloud"] == "true" {
-		return *credRes.CloudPlatform + "_GOV"
-	}
-	return *credRes.CloudPlatform
 }

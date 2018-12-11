@@ -6,6 +6,7 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -23,6 +24,10 @@ type AccountPreferencesResponse struct {
 	// default tags for the resources created
 	DefaultTags map[string]string `json:"defaultTags,omitempty"`
 
+	// feature switches
+	// Unique: true
+	FeatureSwitches []string `json:"featureSwitches"`
+
 	// list of the cloudplatforms visible on the UI
 	Platforms string `json:"platforms,omitempty"`
 
@@ -36,6 +41,8 @@ type AccountPreferencesResponse struct {
 
 /* polymorph AccountPreferencesResponse defaultTags false */
 
+/* polymorph AccountPreferencesResponse featureSwitches false */
+
 /* polymorph AccountPreferencesResponse platforms false */
 
 /* polymorph AccountPreferencesResponse smartsenseEnabled false */
@@ -46,6 +53,11 @@ type AccountPreferencesResponse struct {
 func (m *AccountPreferencesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateFeatureSwitches(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateSupportedExternalDatabases(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -54,6 +66,47 @@ func (m *AccountPreferencesResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var accountPreferencesResponseFeatureSwitchesItemsEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["DISABLE_SHOW_CLI","DISABLE_SHOW_BLUEPRINT"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		accountPreferencesResponseFeatureSwitchesItemsEnum = append(accountPreferencesResponseFeatureSwitchesItemsEnum, v)
+	}
+}
+
+func (m *AccountPreferencesResponse) validateFeatureSwitchesItemsEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, accountPreferencesResponseFeatureSwitchesItemsEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AccountPreferencesResponse) validateFeatureSwitches(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FeatureSwitches) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("featureSwitches", "body", m.FeatureSwitches); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.FeatureSwitches); i++ {
+
+		// value enum
+		if err := m.validateFeatureSwitchesItemsEnum("featureSwitches"+"."+strconv.Itoa(i), "body", m.FeatureSwitches[i]); err != nil {
+			return err
+		}
+
+	}
+
 	return nil
 }
 

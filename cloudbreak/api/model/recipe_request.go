@@ -37,9 +37,6 @@ type RecipeRequest struct {
 	// type of recipe
 	// Required: true
 	RecipeType *string `json:"recipeType"`
-
-	// recipe uri
-	URI string `json:"uri,omitempty"`
 }
 
 /* polymorph RecipeRequest content false */
@@ -49,8 +46,6 @@ type RecipeRequest struct {
 /* polymorph RecipeRequest name false */
 
 /* polymorph RecipeRequest recipeType false */
-
-/* polymorph RecipeRequest uri false */
 
 // Validate validates this recipe request
 func (m *RecipeRequest) Validate(formats strfmt.Registry) error {

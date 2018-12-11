@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // AmbariStackDetails ambari stack details
@@ -59,6 +60,7 @@ type AmbariStackDetails struct {
 	Verify *bool `json:"verify,omitempty"`
 
 	// version of the stack
+	// Pattern: (^[0-9]+\.[0-9]+$)
 	Version string `json:"version,omitempty"`
 
 	// local path on the Ambari server or URL that point to the desired VDF file
@@ -104,6 +106,11 @@ func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateVersion(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -132,6 +139,19 @@ func (m *AmbariStackDetails) validateMpacks(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *AmbariStackDetails) validateVersion(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Version) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("version", "body", string(m.Version), `(^[0-9]+\.[0-9]+$)`); err != nil {
+		return err
 	}
 
 	return nil

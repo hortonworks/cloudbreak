@@ -44,7 +44,6 @@ RSpec.shared_context "mock shared vars", :a => :b do
 
     @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
     @recipe_name = "cli-recipe-url"
-    @recipe_url = ENV['RECIPE_URL']
     @recipe_file = "../../recipes/echo.sh"
 
     @ldap_name = "cli-ldap"

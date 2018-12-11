@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"net/http"
-
 	"encoding/base64"
 
 	log "github.com/Sirupsen/logrus"
@@ -47,20 +45,6 @@ func (r *recipeOutJsonDescribe) DataAsStringArray() []string {
 
 func (r *recipeOutTableDescribe) DataAsStringArray() []string {
 	return append(r.recipeOut.DataAsStringArray(), r.ID)
-}
-
-func CreateRecipeFromUrl(c *cli.Context) {
-
-	log.Infof("[CreateRecipeFromUrl] creating recipe from a URL")
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	urlLocation := c.String(fl.FlURL.Name)
-	createRecipeImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDRecipes,
-		c.Int64(fl.FlWorkspaceOptional.Name),
-		c.String(fl.FlName.Name),
-		c.String(fl.FlDescriptionOptional.Name),
-		getExecutionType(c.String(fl.FlExecutionType.Name)),
-		base64.StdEncoding.EncodeToString(utils.ReadContentFromURL(urlLocation, new(http.Client))))
 }
 
 func CreateRecipeFromFile(c *cli.Context) {

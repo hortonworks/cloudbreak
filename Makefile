@@ -88,7 +88,7 @@ generate-swagger-docker: build-swagger-fix
 	make fix-swagger
 
 build-swagger-fix:
-	go build -o build/swagger_fix swagger_fix/main.go
+	GO111MODULE=off go build -o build/swagger_fix swagger_fix/main.go
 
 fix-swagger:
 	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)

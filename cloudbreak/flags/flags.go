@@ -343,13 +343,6 @@ var (
 			Usage: "custom key encryption for GCP instances which can use your kms key",
 		},
 	}
-	FlWithBlueprintValidation = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "with-blueprint-validation",
-			Usage: "enable Ambari blueprint validation",
-		},
-	}
 	FlExecutionType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -818,6 +811,13 @@ var (
 		BoolFlag: cli.BoolFlag{
 			Name:  "with-kerberos-custom",
 			Usage: "adds custom Kerberos configuration to the template",
+		},
+	}
+	FlWithBlueprintValidation = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-blueprint-validation",
+			Usage: "enable Ambari blueprint validation",
 		},
 	}
 	FlWithSourceCluster = StringFlag{

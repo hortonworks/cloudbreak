@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
-	"github.com/hortonworks/cb-cli/cloudbreak/credential"
 	"github.com/hortonworks/cb-cli/cloudbreak/oauth"
 	"os"
 	"strconv"
@@ -124,7 +123,7 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 
 func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, utils.SafeStringConvert(s.Cluster.Description), credential.GetPlatformName(s.Credential)},
+		common.CloudResourceOut{*s.Name, utils.SafeStringConvert(s.Cluster.Description), *s.Credential.CloudPlatform},
 		s.Status,
 		s.Cluster.Status,
 	}
@@ -132,7 +131,7 @@ func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 
 func convertResponseToStack(s *model.StackResponse) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, s.Cluster.Description, credential.GetPlatformName(s.Credential)},
+		common.CloudResourceOut{*s.Name, s.Cluster.Description, *s.Credential.CloudPlatform},
 		s.Status,
 		s.Cluster.Status,
 	}

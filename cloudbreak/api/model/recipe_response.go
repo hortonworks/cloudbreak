@@ -41,9 +41,6 @@ type RecipeResponse struct {
 	// Required: true
 	RecipeType *string `json:"recipeType"`
 
-	// recipe uri
-	URI string `json:"uri,omitempty"`
-
 	// workspace of the resource
 	Workspace *WorkspaceResourceResponse `json:"workspace,omitempty"`
 }
@@ -57,8 +54,6 @@ type RecipeResponse struct {
 /* polymorph RecipeResponse name false */
 
 /* polymorph RecipeResponse recipeType false */
-
-/* polymorph RecipeResponse uri false */
 
 /* polymorph RecipeResponse workspace false */
 
