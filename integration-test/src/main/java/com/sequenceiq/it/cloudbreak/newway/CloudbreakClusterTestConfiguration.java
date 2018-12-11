@@ -1,14 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
+
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 
 public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClusterTestConfiguration.class);
@@ -16,6 +19,12 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final int MAX_RETRY = 360;
 
     private static final int SLEEP_TIME = 10;
+
+    @BeforeSuite
+    public void getAllBlueprints() throws Exception {
+        given(CloudbreakClient.created());
+        when(Blueprint.getAll());
+    }
 
     @BeforeClass
     public void cleanUpClusterBeforeTestClass() throws Exception {
