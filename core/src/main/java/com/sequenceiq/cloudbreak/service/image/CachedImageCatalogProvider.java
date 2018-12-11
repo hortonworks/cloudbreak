@@ -77,7 +77,7 @@ public class CachedImageCatalogProvider {
             long timeOfParse = System.currentTimeMillis() - started;
             LOGGER.debug("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
-            throw new CloudbreakImageCatalogException("Failed to get image catalog", e);
+            throw new CloudbreakImageCatalogException(String.format("Failed to get image catalog: %s from %s", e.getMessage(), catalogUrl), e);
         } catch (JsonMappingException e) {
             throw new CloudbreakImageCatalogException(e.getMessage(), e);
         } catch (IOException e) {

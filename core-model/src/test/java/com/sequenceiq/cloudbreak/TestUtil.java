@@ -496,7 +496,6 @@ public class TestUtil {
             recipe.setDescription("description");
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
-            recipe.setUri("https://some/url");
             recipe.setContent("base64Content");
             recipe.setRecipeType(RecipeType.POST_AMBARI_START);
             Workspace workspace = new Workspace();
