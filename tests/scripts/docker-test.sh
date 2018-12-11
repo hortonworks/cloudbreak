@@ -7,7 +7,6 @@
 : ${PASSWORD_CLI:=cloudbreak}
 : ${CLI_TEST_FILES:=spec/integration/*.rb}
 : ${BLUEPRINT_URL:? required}
-: ${RECIPE_URL:? required}
 
 readonly TEST_CONTAINER_NAME=cli-test-runner
 
@@ -98,7 +97,6 @@ test-regression() {
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
        -e "BLUEPRINT_URL=$BLUEPRINT_URL" \
-       -e "RECIPE_URL=$RECIPE_URL" \
        hortonworks/cloud-cli-e2e
     RESULT=$?
 }

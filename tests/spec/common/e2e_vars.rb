@@ -9,8 +9,7 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @ambari_password = 'Admin123!@#\"'
 
   @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
-  @recipe_name = "cli-recipe-url"
-  @recipe_url = ENV['RECIPE_URL']
+  @recipe_name = "cli-recipe"
   @recipe_file = "../../recipes/echo.sh"
 
   @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
