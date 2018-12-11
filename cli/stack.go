@@ -123,7 +123,7 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 
 func convertViewResponseToStack(s *models_cloudbreak.StackViewResponse) *stackOut {
 	return &stackOut{
-		cloudResourceOut{*s.Name, utils.SafeStringConvert(s.Cluster.Description), GetPlatformName(s.Credential)},
+		cloudResourceOut{*s.Name, utils.SafeStringConvert(s.Cluster.Description), *s.Credential.CloudPlatform},
 		s.Status,
 		s.Cluster.Status,
 	}
@@ -131,7 +131,7 @@ func convertViewResponseToStack(s *models_cloudbreak.StackViewResponse) *stackOu
 
 func convertResponseToStack(s *models_cloudbreak.StackResponse) *stackOut {
 	return &stackOut{
-		cloudResourceOut{*s.Name, s.Cluster.Description, GetPlatformName(s.Credential)},
+		cloudResourceOut{*s.Name, s.Cluster.Description, *s.Credential.CloudPlatform},
 		s.Status,
 		s.Cluster.Status,
 	}
