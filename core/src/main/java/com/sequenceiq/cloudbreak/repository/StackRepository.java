@@ -35,21 +35,21 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.cluster.ambariIp= :ambariIp AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "WHERE s.cluster.ambariIp= :ambariIp AND s.terminated = null")
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
 
     @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.workspace.id= :workspaceId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "WHERE s.workspace.id= :workspaceId AND s.terminated = null")
     Set<Stack> findForWorkspaceIdWithLists(@Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null")
     Stack findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null")
     Stack findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
@@ -58,7 +58,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s "
-            + "WHERE s.datalakeId= :id AND s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'"
+            + "WHERE s.datalakeId= :id AND s.terminated = null AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'"
             + "AND s.stackStatus.status <> 'REQUESTED'")
     Set<Stack> findEphemeralClusters(@Param("id") Long id);
 
@@ -80,21 +80,21 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Stack findByNameInWorkspaceWithLists(@Param("name") String name, @Param("workspace") Workspace workspace);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED'")
+    @Query("SELECT s FROM Stack s WHERE s.terminated = null")
     List<Stack> findAllAlive();
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND "
+    @Query("SELECT s FROM Stack s WHERE s.terminated = null AND "
             + "(s.workspace = null OR s.creator = null)")
     Set<Stack> findAllAliveWithNoWorkspaceOrUser();
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'REQUESTED' "
+    @Query("SELECT s FROM Stack s WHERE s.terminated = null AND s.stackStatus.status <> 'REQUESTED' "
             + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
     List<Stack> findAllAliveAndProvisioned();
 
     @CheckPermissionsByWorkspaceId(action = READ)
-    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.workspace.id= :workspaceId")
+    @Query("SELECT s FROM Stack s WHERE s.terminated = null AND s.workspace.id= :workspaceId")
     Set<Stack> findAllForWorkspace(@Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
@@ -104,7 +104,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
-            + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
+            + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.terminated = null "
             + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
     Set<Stack> findAliveOnes();
 
@@ -125,15 +125,15 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @DisableCheckPermissions
     @Query("SELECT COUNT(s) FROM Stack s WHERE (s.workspace = null OR s.creator = null) "
-            + "AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "AND s.terminated = null")
     Long countStacksWithNoWorkspaceOrCreator();
 
     @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.account = :account AND s.terminated = null")
     Long countActiveByAccount(@Param("account") String account);
 
     @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE s.owner = :owner AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.owner = :owner AND s.terminated = null")
     Long countActiveByOwner(@Param("owner") String owner);
 
     @DisableCheckPermissions

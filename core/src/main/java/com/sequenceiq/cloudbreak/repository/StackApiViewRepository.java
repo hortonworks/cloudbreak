@@ -35,7 +35,6 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
     @Query("SELECT s FROM StackApiView s LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.blueprint "
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "WHERE s.workspace.id= :id AND s.terminated = null")
     Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
-
 }

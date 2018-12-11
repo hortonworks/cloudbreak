@@ -41,6 +41,9 @@ public class StackViewResponse {
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
+    @ApiModelProperty(StackModelDescription.TERMINATED)
+    private Long terminated;
+
     public Long getId() {
         return id;
     }
@@ -121,4 +124,11 @@ public class StackViewResponse {
         this.name = name;
     }
 
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
+    }
 }
