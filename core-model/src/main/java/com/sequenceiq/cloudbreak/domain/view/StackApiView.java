@@ -41,6 +41,8 @@ public class StackApiView extends CompactView {
 
     private Long created;
 
+    private Long terminated;
+
     private Long datalakeId;
 
     @Override
@@ -114,5 +116,13 @@ public class StackApiView extends CompactView {
 
     public Status getStatus() {
         return stackStatus != null ? stackStatus.getStatus() : null;
+    }
+
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
     }
 }

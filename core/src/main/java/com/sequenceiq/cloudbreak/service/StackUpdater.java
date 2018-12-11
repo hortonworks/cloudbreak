@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Calendar;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -49,6 +51,9 @@ public class StackUpdater {
         Status status = detailedStatus.getStatus();
         if (!stack.isDeleteCompleted()) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
+            if (detailedStatus == DetailedStackStatus.DELETE_COMPLETED) {
+                stack.setTerminated(Calendar.getInstance().getTimeInMillis());
+            }
             if (status.isRemovableStatus()) {
                 InMemoryStateStore.deleteStack(stackId);
                 if (stack.getCluster() != null && stack.getCluster().getStatus().isRemovableStatus()) {
