@@ -36,9 +36,6 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
     @Enumerated(EnumType.STRING)
     private RecipeType recipeType;
 
-    @Column(nullable = false)
-    private String uri;
-
     @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
     private String content;
@@ -81,14 +78,6 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setRecipeType(RecipeType recipeType) {
         this.recipeType = recipeType;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
     }
 
     public String getContent() {

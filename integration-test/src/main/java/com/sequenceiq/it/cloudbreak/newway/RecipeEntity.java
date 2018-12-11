@@ -36,9 +36,4 @@ public class RecipeEntity extends AbstractCloudbreakEntity<RecipeRequest, Recipe
         getRequest().setRecipeType(recipeType);
         return this;
     }
-
-    public RecipeEntity withUri(String uri) {
-        getRequest().setUri(uri);
-        return this;
-    }
 }
