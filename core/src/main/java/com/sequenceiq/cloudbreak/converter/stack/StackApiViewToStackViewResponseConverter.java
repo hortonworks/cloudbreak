@@ -39,6 +39,7 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         stackViewResponse.setPlatformVariant(source.getPlatformVariant());
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());
+        stackViewResponse.setTerminated(source.getTerminated());
         addUser(source, stackViewResponse);
         if (source.getEnvironment() != null) {
             stackViewResponse.setEnvironment(source.getEnvironment().getName());

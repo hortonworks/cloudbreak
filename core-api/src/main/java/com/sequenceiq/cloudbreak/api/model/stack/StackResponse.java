@@ -65,6 +65,9 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
+    @ApiModelProperty(StackModelDescription.TERMINATED)
+    private Long terminated;
+
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
 
@@ -251,5 +254,13 @@ public class StackResponse extends StackBase {
 
     public void setWorkspace(WorkspaceResourceResponse workspace) {
         this.workspace = workspace;
+    }
+
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
     }
 }

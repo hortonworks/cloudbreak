@@ -208,6 +208,7 @@ public class ModelDescriptions {
         public static final String ENVIRONMENT = "environment which the stack is assigned to";
         public static final String KERBEROS_KDC_VERIFY_KDC_TRUST = "Allows to select either a trusting SSL connection or a "
                 + "validating (non-trusting) SSL connection to KDC";
+        public static final String TERMINATED = "termination completion time of stack in long";
     }
 
     public static class ClusterModelDescription {

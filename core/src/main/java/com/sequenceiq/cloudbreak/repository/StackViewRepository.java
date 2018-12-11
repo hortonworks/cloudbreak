@@ -28,7 +28,7 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     Optional<StackView> findById(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :id AND s.terminated = null")
     Set<StackView> findByWorkspaceId(@Param("id") Long id);
 
     @Override

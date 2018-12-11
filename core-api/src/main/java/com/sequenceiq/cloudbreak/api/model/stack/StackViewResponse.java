@@ -41,6 +41,9 @@ public class StackViewResponse {
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
+    @ApiModelProperty(StackModelDescription.TERMINATED)
+    private Long terminated;
+
     @ApiModelProperty(StackModelDescription.USER)
     private UserViewResponse user;
 
@@ -141,5 +144,13 @@ public class StackViewResponse {
 
     public void setUser(UserViewResponse user) {
         this.user = user;
+    }
+
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
     }
 }

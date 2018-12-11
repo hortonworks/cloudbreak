@@ -46,6 +46,8 @@ public class StackApiView extends CompactView {
 
     private Long created;
 
+    private Long terminated;
+
     private Long datalakeId;
 
     @Enumerated(EnumType.STRING)
@@ -153,5 +155,13 @@ public class StackApiView extends CompactView {
 
     public void setType(StackType type) {
         this.type = type;
+    }
+
+    public Long getTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Long terminated) {
+        this.terminated = terminated;
     }
 }
