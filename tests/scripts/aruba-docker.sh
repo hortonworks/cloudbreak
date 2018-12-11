@@ -9,7 +9,7 @@ echo "HOME path: "$HOME
 
 if [[ "${TARGET_CBD_VERSION}" != "MOCK" ]]; then
     echo "Get DP CLI for "$TARGET_CBD_VERSION
-    wget --continue --no-check-certificate https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz -O - | tar -xvz --directory /usr/local/bin
+    wget --continue --no-check-certificate https://s3.amazonaws.com/dp-cli/dp-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz -O - | tar -xvz --directory /usr/local/bin
     echo "DP CLI version is: "$(dp -v)
 fi
 

@@ -21,7 +21,7 @@ echo "CBD Username: "$USERNAME_CLI
 echo "CBD Password: "$PASSWORD_CLI
 echo "CLI Tests: "$CLI_TEST_FILES
 
-curl --verbose --show-error --location --insecure -C - https://s3-us-west-2.amazonaws.com/cb-cli/cb-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
+curl --verbose --show-error --location --insecure -C - https://s3.amazonaws.com/dp-cli/dp-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
 
 token=$(wget --continue --no-check-certificate $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=$CBD_TENANT -O -)
 echo $token | cb configure --server $BASE_URL --workspace $USERNAME_CLI
