@@ -57,9 +57,6 @@ type ClusterDetails struct {
 	// name
 	Name string `json:"name,omitempty"`
 
-	// secure
-	Secure *bool `json:"secure,omitempty"`
-
 	// sso type
 	SsoType string `json:"ssoType,omitempty"`
 

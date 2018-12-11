@@ -46,9 +46,6 @@ type AmbariV2Request struct {
 	// cluster can connect to a datalake you can define the parameters here
 	ConnectedCluster *ConnectedClusterRequest `json:"connectedCluster,omitempty"`
 
-	// enable Kerberos security
-	EnableSecurity *bool `json:"enableSecurity,omitempty"`
-
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 

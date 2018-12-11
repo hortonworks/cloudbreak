@@ -65,6 +65,8 @@ type GetPrerequisitesForCloudPlatformParams struct {
 
 	/*CloudPlatform*/
 	CloudPlatform string
+	/*DeploymentAddress*/
+	DeploymentAddress *string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -117,6 +119,17 @@ func (o *GetPrerequisitesForCloudPlatformParams) SetCloudPlatform(cloudPlatform 
 	o.CloudPlatform = cloudPlatform
 }
 
+// WithDeploymentAddress adds the deploymentAddress to the get prerequisites for cloud platform params
+func (o *GetPrerequisitesForCloudPlatformParams) WithDeploymentAddress(deploymentAddress *string) *GetPrerequisitesForCloudPlatformParams {
+	o.SetDeploymentAddress(deploymentAddress)
+	return o
+}
+
+// SetDeploymentAddress adds the deploymentAddress to the get prerequisites for cloud platform params
+func (o *GetPrerequisitesForCloudPlatformParams) SetDeploymentAddress(deploymentAddress *string) {
+	o.DeploymentAddress = deploymentAddress
+}
+
 // WithWorkspaceID adds the workspaceID to the get prerequisites for cloud platform params
 func (o *GetPrerequisitesForCloudPlatformParams) WithWorkspaceID(workspaceID int64) *GetPrerequisitesForCloudPlatformParams {
 	o.SetWorkspaceID(workspaceID)
@@ -139,6 +152,22 @@ func (o *GetPrerequisitesForCloudPlatformParams) WriteToRequest(r runtime.Client
 	// path param cloudPlatform
 	if err := r.SetPathParam("cloudPlatform", o.CloudPlatform); err != nil {
 		return err
+	}
+
+	if o.DeploymentAddress != nil {
+
+		// query param deploymentAddress
+		var qrDeploymentAddress string
+		if o.DeploymentAddress != nil {
+			qrDeploymentAddress = *o.DeploymentAddress
+		}
+		qDeploymentAddress := qrDeploymentAddress
+		if qDeploymentAddress != "" {
+			if err := r.SetQueryParam("deploymentAddress", qDeploymentAddress); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	// path param workspaceId

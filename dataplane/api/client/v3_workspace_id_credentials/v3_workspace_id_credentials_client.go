@@ -25,6 +25,36 @@ type Client struct {
 }
 
 /*
+AuthorizeCodeGrantFlowBasedCredentialInWorkspace authorizes oauth2 authorization code grant flow
+
+Authorize code grant flow based credential creation.
+*/
+func (a *Client) AuthorizeCodeGrantFlowBasedCredentialInWorkspace(params *AuthorizeCodeGrantFlowBasedCredentialInWorkspaceParams) (*AuthorizeCodeGrantFlowBasedCredentialInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAuthorizeCodeGrantFlowBasedCredentialInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "authorizeCodeGrantFlowBasedCredentialInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v3/{workspaceId}/credentials/codegrantflow/authorization/{cloudPlatform}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AuthorizeCodeGrantFlowBasedCredentialInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AuthorizeCodeGrantFlowBasedCredentialInWorkspaceOK), nil
+
+}
+
+/*
 CreateCredentialInWorkspace creates credential in workspace
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
@@ -141,6 +171,66 @@ func (a *Client) GetPrerequisitesForCloudPlatform(params *GetPrerequisitesForClo
 		return nil, err
 	}
 	return result.(*GetPrerequisitesForCloudPlatformOK), nil
+
+}
+
+/*
+InitCodeGrantFlowBasedCredentialInWorkspace starts a credential creation with oauth2 authorization code grant flow
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) InitCodeGrantFlowBasedCredentialInWorkspace(params *InitCodeGrantFlowBasedCredentialInWorkspaceParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewInitCodeGrantFlowBasedCredentialInWorkspaceParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "initCodeGrantFlowBasedCredentialInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v3/{workspaceId}/credentials/codegrantflow/init",
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &InitCodeGrantFlowBasedCredentialInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+InitCodeGrantFlowOnExistingCredentialInWorkspace reinitializes oauth2 authorization code grant flow on an existing credential
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) InitCodeGrantFlowOnExistingCredentialInWorkspace(params *InitCodeGrantFlowOnExistingCredentialInWorkspaceParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewInitCodeGrantFlowOnExistingCredentialInWorkspaceParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "initCodeGrantFlowOnExistingCredentialInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v3/{workspaceId}/credentials/codegrantflow/init/{name}",
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &InitCodeGrantFlowOnExistingCredentialInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 
 }
 

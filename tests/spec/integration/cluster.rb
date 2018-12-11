@@ -151,6 +151,14 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end   
   end
 
+      it "Cluster - Sync - Success" do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.sync.name("asdfg").build(false)
+      expect(result.exit_status).to eql 0
+      expect(result.stderr).to include("stack synced")          
+    end
+  end
+
    it "Cluster - Sync - Failure" do 
     with_environment 'DEBUG' => '1' do
       requestBody = MockResponse.requestBodyCreate('putsyncStackV3','{"message":"Stack \'azstatus\' not found"}', '404')

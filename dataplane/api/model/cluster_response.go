@@ -128,9 +128,6 @@ type ClusterResponse struct {
 	// Unique: true
 	RdsConfigs []*RDSConfigResponse `json:"rdsConfigs"`
 
-	// tells wether the cluster is secured or not
-	Secure *bool `json:"secure,omitempty"`
-
 	// shared service for a specific stack
 	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
 

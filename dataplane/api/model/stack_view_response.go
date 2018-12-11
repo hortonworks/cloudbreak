@@ -54,6 +54,9 @@ type StackViewResponse struct {
 	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	Status string `json:"status,omitempty"`
 
+	// termination completion time of stack in long
+	Terminated int64 `json:"terminated,omitempty"`
+
 	// the related user
 	User *UserViewResponse `json:"user,omitempty"`
 }

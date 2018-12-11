@@ -199,7 +199,6 @@ This way you have introduced another top level command, but you have the advanta
 * develop it independently from this repository
 * have an independent CLI tool that can be invoked without the top level CLI
 ```
-
 ## Functional Testing
 
 This repository contains also functional tests for CB-CLI (in End to End and Integration suites).

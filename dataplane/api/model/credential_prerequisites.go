@@ -25,6 +25,10 @@ type CredentialPrerequisites struct {
 	// Required: true
 	Aws *AwsCredentialPrerequisites `json:"aws"`
 
+	// Azure specific credential prerequisites.
+	// Required: true
+	Azure *AzureCredentialPrerequisites `json:"azure"`
+
 	// type of cloud provider
 	// Required: true
 	CloudPlatform *string `json:"cloudPlatform"`
@@ -39,6 +43,10 @@ func (m *CredentialPrerequisites) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateAws(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateAzure(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -71,6 +79,24 @@ func (m *CredentialPrerequisites) validateAws(formats strfmt.Registry) error {
 		if err := m.Aws.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("aws")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *CredentialPrerequisites) validateAzure(formats strfmt.Registry) error {
+
+	if err := validate.Required("azure", "body", m.Azure); err != nil {
+		return err
+	}
+
+	if m.Azure != nil {
+		if err := m.Azure.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("azure")
 			}
 			return err
 		}

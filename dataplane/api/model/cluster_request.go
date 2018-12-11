@@ -68,9 +68,6 @@ type ClusterRequest struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// enable Kerberos security
-	EnableSecurity *bool `json:"enableSecurity,omitempty"`
-
 	// executor type of cluster
 	// Enum: [CONTAINER DEFAULT]
 	ExecutorType string `json:"executorType,omitempty"`
