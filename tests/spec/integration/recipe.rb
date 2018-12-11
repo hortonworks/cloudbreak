@@ -12,17 +12,6 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "mock shared vars"
 
-  it "Recipe - Create from url - All recipe types" do
-    with_environment 'DEBUG' => '1' do
-      @recipe_types.each  do |type|
-        r_name = "cli-" + type
-        result = cb.recipe.create.from_url.name(r_name).execution_type(type).url(@recipe_url).build(false)
-        expect(result.exit_status).to eql 0
-        expect(result.stderr.to_s.downcase).not_to include("failed", "error")
-      end
-    end 
-  end
-
    it "Recipe - Create from file - All recipe types" do
     with_environment 'DEBUG' => '1' do
       @recipe_types.each  do |type|

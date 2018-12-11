@@ -48,16 +48,7 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
     end  
   end
 
-  it "Recipe - Create from url - Describe - List - Delete - All recipe types" do 
-    @recipe_types.each  do |type|
-      r_name = "cli-" + type + "-u"
-      recipe_create_describe_list_delete(cb, r_name) do
-        cb.recipe.create.from_url.name(r_name).execution_type(type).url(@recipe_url).build 
-      end
-    end 
-  end
-
-   it "Recipe - Create from file - Describe - List - Delete - All recipe types" do 
+  it "Recipe - Create from file - Describe - List - Delete - All recipe types" do
     @recipe_types.each  do |type|
       r_name = "cli-" + type + "-f"
       recipe_create_describe_list_delete(cb, r_name) do
