@@ -200,7 +200,7 @@ public class ScalingMock extends MockServer {
             verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.ipaddrs").exactTimes(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_all").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
 
