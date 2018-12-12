@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.UserWorkspacePermissionsRepository;
 
 @Service

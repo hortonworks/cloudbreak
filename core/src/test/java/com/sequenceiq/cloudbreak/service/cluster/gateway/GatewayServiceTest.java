@@ -87,7 +87,7 @@ public class GatewayServiceTest {
     private final GatewayTopologyJsonToExposedServicesConverter exposedServicesConverter = new GatewayTopologyJsonToExposedServicesConverter();
 
     @Before
-    public void setup() throws TransactionExecutionException {
+    public void setUp() throws TransactionExecutionException {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 

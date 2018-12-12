@@ -20,9 +20,9 @@ import org.junit.runners.Parameterized;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 
 @RunWith(Parameterized.class)
-public class WorkspacePermissionAuthorizerTest {
+public class WorkspacePermissionUtilTest {
 
-    private WorkspacePermissionAuthorizer underTest;
+    private WorkspacePermissionUtil underTest;
 
     private WorkspaceResource resource;
 
@@ -32,7 +32,7 @@ public class WorkspacePermissionAuthorizerTest {
 
     private Action action;
 
-    public WorkspacePermissionAuthorizerTest(Set<String> permissions, WorkspaceResource resource, Action action, boolean expectedResult) {
+    public WorkspacePermissionUtilTest(Set<String> permissions, WorkspaceResource resource, Action action, boolean expectedResult) {
         this.expectedResult = expectedResult;
         this.permissions = permissions;
         this.resource = resource;
@@ -41,7 +41,7 @@ public class WorkspacePermissionAuthorizerTest {
 
     @Before
     public void setUp() {
-        underTest = new WorkspacePermissionAuthorizer();
+        underTest = new WorkspacePermissionUtil();
     }
 
     @Parameterized.Parameters(name = "[{index}] Permission set: {0}, resource: {1}, action: {2}, expected output: {3}")

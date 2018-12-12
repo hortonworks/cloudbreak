@@ -40,13 +40,13 @@ public class PermissionCheckingUtils {
     private UserWorkspacePermissionsService userWorkspacePermissionsService;
 
     @Inject
-    private WorkspacePermissionAuthorizer workspacePermissionAuthorizer;
+    private WorkspacePermissionUtil workspacePermissionUtil;
 
     public void checkPermissionByWorkspaceIdForUser(Long workspaceId, WorkspaceResource resource, Action action, User user) {
         UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserByWorkspaceId(workspaceId, user);
         if (userWorkspacePermissions != null) {
             Set<String> permissionSet = userWorkspacePermissions.getPermissionSet();
-            boolean hasPermission = workspacePermissionAuthorizer.hasPermission(permissionSet, resource, action);
+            boolean hasPermission = workspacePermissionUtil.hasPermission(permissionSet, resource, action);
             if (!hasPermission) {
                 throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource));
             }
@@ -117,7 +117,7 @@ public class PermissionCheckingUtils {
     }
 
     void checkPermissionByPermissionSet(Action action, WorkspaceResource resource, Set<String> permissionSet) {
-        boolean hasPermission = workspacePermissionAuthorizer.hasPermission(permissionSet, resource, action);
+        boolean hasPermission = workspacePermissionUtil.hasPermission(permissionSet, resource, action);
         if (!hasPermission) {
             throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
         }
