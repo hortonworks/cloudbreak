@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttach
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
@@ -58,5 +59,10 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
     @Override
     public DetailedEnvironmentResponse changeCredential(Long workspaceId, String environmentName, EnvironmentChangeCredentialRequest request) {
         return environmentService.changeCredential(environmentName, workspaceId, request);
+    }
+
+    @Override
+    public DetailedEnvironmentResponse registerExternalDatalake(Long workspaceId, String environmentName, @Valid RegisterDatalakeRequest request) {
+        return environmentService.registerExternalDatalake(environmentName, workspaceId, request);
     }
 }

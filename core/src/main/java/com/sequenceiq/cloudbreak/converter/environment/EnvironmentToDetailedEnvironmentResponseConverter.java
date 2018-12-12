@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.environment.response.DatalakeResourcesResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.StackType;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
@@ -73,6 +76,20 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .map(stack -> getConversionService().convert(stack, StackViewResponse.class))
                         .collect(Collectors.toSet()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
+        if (source.getDatalakeResources() != null) {
+            DatalakeResources datalakeResources = source.getDatalakeResources();
+            DatalakeResourcesResponse datalakeResourcesResponse = new DatalakeResourcesResponse();
+            if (datalakeResources.getLdapConfig() != null) {
+                datalakeResourcesResponse.setLdapName(datalakeResources.getLdapConfig().getName());
+            }
+            if (datalakeResources.getKerberosConfig() != null) {
+                datalakeResourcesResponse.setKerberosName(datalakeResources.getKerberosConfig().getName());
+            }
+            if (!CollectionUtils.isEmpty(datalakeResources.getRdsConfigs())) {
+                datalakeResourcesResponse.setRdsNames(datalakeResources.getRdsConfigs().stream().map(rds -> rds.getName()).collect(Collectors.toSet()));
+            }
+            response.setDatalakeResourcesResponse(datalakeResourcesResponse);
+        }
         return response;
     }
 }

@@ -16,6 +16,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -101,6 +103,9 @@ public class Environment implements WorkspaceAwareResource {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
     private Set<ClusterApiView> clusters = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private DatalakeResources datalakeResources;
 
     @Override
     public Long getId() {
@@ -205,6 +210,14 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setClusters(Set<ClusterApiView> clusters) {
         this.clusters = clusters;
+    }
+
+    public DatalakeResources getDatalakeResources() {
+        return datalakeResources;
+    }
+
+    public void setDatalakeResources(DatalakeResources datalakeResources) {
+        this.datalakeResources = datalakeResources;
     }
 
     @Override

@@ -262,6 +262,7 @@ public class ModelDescriptions {
         public static final String LOCATIONS = "cloud storage locations";
         public static final String STATUS_MAINTENANCE_MODE = "maintenance mode status";
         public static final String SECURE = "tells wether the cluster is secured or not";
+        public static final String KERBEROSCONFIG_NAME = "Kerberos config name for the cluster";
     }
 
     public static class GatewayModelDescription {
@@ -639,6 +640,8 @@ public class ModelDescriptions {
         public static final String WORKLOAD_CLUSTER_NAMES = "Names of the workload clusters created in the environment.";
         public static final String DATALAKE_CLUSTERS = "Datalake clusters created in the environment.";
         public static final String DATALAKE_CLUSTER_NAMES = "Names of the datalake clusters created in the environment.";
+        public static final String DATALAKE_RESOURCES_NAME = "Datalake cluster resources registered to the environment.";
+        public static final String DATALAKE_RESOURCES = "Datalake cluster resources registered to the environment.";
         public static final String KERBEROS_CONFIGS = "Kerberos configs in the environment.";
     }
 

@@ -11,12 +11,16 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -49,6 +53,15 @@ public class DatalakeResources implements WorkspaceAwareResource {
     @OneToMany(mappedBy = "datalakeResources", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @MapKey(name = "serviceName")
     private Map<String, ServiceDescriptor> serviceDescriptorMap;
+
+    @ManyToMany(cascade = CascadeType.MERGE)
+    private Set<RDSConfig> rdsConfigs;
+
+    @ManyToOne
+    private LdapConfig ldapConfig;
+
+    @ManyToOne
+    private KerberosConfig kerberosConfig;
 
     @Override
     public Long getId() {
@@ -129,5 +142,29 @@ public class DatalakeResources implements WorkspaceAwareResource {
 
     public void setServiceDescriptorMap(Map<String, ServiceDescriptor> serviceDescriptorMap) {
         this.serviceDescriptorMap = serviceDescriptorMap;
+    }
+
+    public Set<RDSConfig> getRdsConfigs() {
+        return rdsConfigs;
+    }
+
+    public void setRdsConfigs(Set<RDSConfig> rdsConfigs) {
+        this.rdsConfigs = rdsConfigs;
+    }
+
+    public LdapConfig getLdapConfig() {
+        return ldapConfig;
+    }
+
+    public void setLdapConfig(LdapConfig ldapConfig) {
+        this.ldapConfig = ldapConfig;
+    }
+
+    public KerberosConfig getKerberosConfig() {
+        return kerberosConfig;
+    }
+
+    public void setKerberosConfig(KerberosConfig kerberosConfig) {
+        this.kerberosConfig = kerberosConfig;
     }
 }

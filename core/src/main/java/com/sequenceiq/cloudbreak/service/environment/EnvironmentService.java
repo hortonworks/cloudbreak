@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.environment;
 
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -13,17 +15,21 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -45,6 +51,7 @@ import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -53,17 +60,21 @@ import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -116,6 +127,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Inject
     private EnvironmentDetachValidator environmentDetachValidator;
+
+    @Inject
+    private DatalakeConfigProvider datalakeConfigProvider;
+
+    @Inject
+    private AmbariClientProvider ambariClientProvider;
 
     public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
         return environmentViewService.findAllByWorkspaceId(workspaceId).stream()
@@ -350,6 +367,34 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public DetailedEnvironmentResponse registerExternalDatalake(String environmentName, Long workspaceId, RegisterDatalakeRequest registerDatalakeRequest) {
+        try {
+            Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+            Credential credential = environment.getCredential();
+            String attributesStr = credential.getAttributes();
+            Map<String, Object> attributes = isEmpty(attributesStr) ? new HashMap<>() : new Json(attributesStr).getMap();
+            String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
+            String datalakeAmbariUser = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_USER);
+            String datalakeAmbariPassowrd = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_PASSWORD);
+            LdapConfig ldapConfig = StringUtils.isEmpty(registerDatalakeRequest.getLdapName()) ? null
+                    : ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId);
+            KerberosConfig kerberosConfig = StringUtils.isEmpty(registerDatalakeRequest.getKerberosName()) ? null
+                    : kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
+            Set<RDSConfig> rdssConfigs = CollectionUtils.isEmpty(registerDatalakeRequest.getRdsNames()) ? null
+                    : rdsConfigService.findByNamesInWorkspace(registerDatalakeRequest.getRdsNames(), workspaceId);
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, datalakeAmbariUser, datalakeAmbariPassowrd);
+            // get ambari host / ip
+            DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, datalakeAmbariUrl,
+                    datalakeAmbariUrl, ambariClient, new HashMap<>(), ldapConfig, kerberosConfig, rdssConfigs, environment.getWorkspace());
+            environment.setDatalakeResources(datalakeResources);
+            environmentRepository.save(environment);
+            return null;
+        } catch (Exception ex) {
+            LOGGER.error("", ex);
+            return null;
         }
     }
 

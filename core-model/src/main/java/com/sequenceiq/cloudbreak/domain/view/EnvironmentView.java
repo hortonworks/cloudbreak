@@ -42,6 +42,9 @@ public class EnvironmentView extends CompactView {
     @Column(nullable = false)
     private Double latitude;
 
+    @Column(name = "datalakeresources_id")
+    private Long datalakeResourcesId;
+
     public Json getRegions() {
         return regions;
     }
@@ -97,6 +100,14 @@ public class EnvironmentView extends CompactView {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.ENVIRONMENT;
+    }
+
+    public Long getDatalakeResourcesId() {
+        return datalakeResourcesId;
+    }
+
+    public void setDatalakeResourcesId(Long datalakeResourcesId) {
+        this.datalakeResourcesId = datalakeResourcesId;
     }
 
     @Override

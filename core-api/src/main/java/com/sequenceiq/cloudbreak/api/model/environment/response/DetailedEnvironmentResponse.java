@@ -31,6 +31,9 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.KERBEROS_CONFIGS)
     private Set<KerberosResponse> kerberosConfigs = new HashSet<>();
 
+    @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES)
+    private DatalakeResourcesResponse datalakeResourcesResponse;
+
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTERS)
     private Set<StackViewResponse> workloadClusters = new HashSet<>();
 
@@ -67,6 +70,14 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public void setKubernetesConfigs(Set<KubernetesConfigResponse> kubernetesConfigs) {
         this.kubernetesConfigs = kubernetesConfigs;
+    }
+
+    public DatalakeResourcesResponse getDatalakeResourcesResponse() {
+        return datalakeResourcesResponse;
+    }
+
+    public void setDatalakeResourcesResponse(DatalakeResourcesResponse datalakeResourcesResponse) {
+        this.datalakeResourcesResponse = datalakeResourcesResponse;
     }
 
     public Set<StackViewResponse> getWorkloadClusters() {
