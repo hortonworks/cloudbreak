@@ -15,6 +15,8 @@ public class StackDetails implements Serializable {
 
     private String name;
 
+    private String type;
+
     private String description;
 
     private String region;
@@ -51,6 +53,8 @@ public class StackDetails implements Serializable {
 
     private List<InstanceGroupDetails> instanceGroups;
 
+    private Long datalakeId;
+
     public Long getId() {
         return id;
     }
@@ -65,6 +69,14 @@ public class StackDetails implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getRegion() {
@@ -201,5 +213,13 @@ public class StackDetails implements Serializable {
 
     public void setInstanceGroups(List<InstanceGroupDetails> instanceGroups) {
         this.instanceGroups = instanceGroups;
+    }
+
+    public Long getDatalakeId() {
+        return datalakeId;
+    }
+
+    public void setDatalakeId(Long datalakeId) {
+        this.datalakeId = datalakeId;
     }
 }
