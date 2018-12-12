@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AmbariDatabaseToRdsConfigMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
+import com.sequenceiq.cloudbreak.startup.GovCloudFlagMigrator;
 import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
 
 @Component
@@ -104,6 +105,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private WorkspaceMigrationRunner workspaceMigrationRunner;
 
     @Inject
+    private GovCloudFlagMigrator govCloudFlagMigrator;
+
+    @Inject
     private BlueprintMigrationService blueprintMigrationService;
 
     @Override
@@ -125,6 +129,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
         credentialMigrationService.migrateGcpCredentials();
         blueprintMigrationService.migrateBlueprints();
+        govCloudFlagMigrator.run();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {

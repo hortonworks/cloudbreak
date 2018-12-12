@@ -22,6 +22,9 @@ public class CredentialViewResponse implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
+    @ApiModelProperty(value = ModelDescriptions.GOV_CLOUD_FLAG)
+    private Boolean govCloud;
+
     public String getName() {
         return name;
     }
@@ -36,6 +39,14 @@ public class CredentialViewResponse implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public Boolean getGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(Boolean govCloud) {
+        this.govCloud = govCloud;
     }
 
     @Override

@@ -20,6 +20,7 @@ public class ModelDescriptions {
     public static final String USER_ID_V3 = "User ID in the new authorization model";
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";
+    public static final String GOV_CLOUD_FLAG = "Flag indicating if the credential type is AWS Gov Cloud";
 
     private ModelDescriptions() {
     }
