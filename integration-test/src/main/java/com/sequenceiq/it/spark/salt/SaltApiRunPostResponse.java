@@ -53,7 +53,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         if (request.body().contains("grains.remove")) {
             return grainsResponse();
         }
-        if (request.body().contains("saltutil.sync_grains")) {
+        if (request.body().contains("saltutil.sync_all")) {
             return saltUtilSyncGrainsResponse();
         }
         if (request.body().contains("mine.update")) {

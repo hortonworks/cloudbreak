@@ -80,9 +80,9 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void syncGrainsTest() {
-        SaltStates.syncGrains(saltConnector);
-        verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_grains"), eq(LOCAL), eq(ApplyResponse.class));
+    public void syncAllTest() {
+        SaltStates.syncAll(saltConnector);
+        verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_all"), eq(LOCAL), eq(ApplyResponse.class));
     }
 
     @Test

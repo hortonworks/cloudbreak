@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SaltStates.class)
-public class SyncGrainsRunnerTest {
+public class SyncAllRunnerTest {
 
     @Test
     public void submit() {
@@ -47,13 +47,13 @@ public class SyncGrainsRunnerTest {
         nodes.put("10-0-0-2.example.com", "something");
         result.add(nodes);
         applyResponse.setResult(result);
-        PowerMockito.when(SaltStates.syncGrains(any())).thenReturn(applyResponse);
+        PowerMockito.when(SaltStates.syncAll(any())).thenReturn(applyResponse);
 
-        SyncGrainsRunner syncGrainsRunner = new SyncGrainsRunner(targets, allNode);
+        SyncAllRunner syncAllRunner = new SyncAllRunner(targets, allNode);
 
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
-        String missingIps = syncGrainsRunner.submit(saltConnector);
-        assertThat(syncGrainsRunner.getTarget(), hasItems("10.0.0.3"));
+        String missingIps = syncAllRunner.submit(saltConnector);
+        assertThat(syncAllRunner.getTarget(), hasItems("10.0.0.3"));
         assertEquals("[10.0.0.3]", missingIps);
     }
 
