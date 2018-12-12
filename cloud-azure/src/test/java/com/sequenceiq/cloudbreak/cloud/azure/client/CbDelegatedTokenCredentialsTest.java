@@ -125,8 +125,8 @@ public class CbDelegatedTokenCredentialsTest {
                 cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
 
         verify(applicationTokenCredentials, times(0)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(0)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
     }
@@ -139,8 +139,8 @@ public class CbDelegatedTokenCredentialsTest {
         assertEquals(ACCESS_TOKEN, result);
 
         verify(applicationTokenCredentials, times(0)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(0)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
     }
@@ -154,8 +154,8 @@ public class CbDelegatedTokenCredentialsTest {
                 cbRefreshTokenClientProvider).getToken(RESOURCE);
 
         verify(applicationTokenCredentials, times(0)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(0)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
     }
@@ -177,8 +177,8 @@ public class CbDelegatedTokenCredentialsTest {
         underTest.getToken(RESOURCE);
 
         verify(applicationTokenCredentials, times(0)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -196,8 +196,8 @@ public class CbDelegatedTokenCredentialsTest {
         underTest.getToken(RESOURCE);
 
         verify(applicationTokenCredentials, times(0)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -225,8 +225,8 @@ public class CbDelegatedTokenCredentialsTest {
 
         verify(futureAuthenticationResult, times(1)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -255,8 +255,8 @@ public class CbDelegatedTokenCredentialsTest {
 
         verify(futureAuthenticationResult, times(1)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -285,8 +285,8 @@ public class CbDelegatedTokenCredentialsTest {
 
         verify(futureAuthenticationResult, times(1)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -307,8 +307,8 @@ public class CbDelegatedTokenCredentialsTest {
             assertEquals(tokens.get(key), authenticationResult1);
         });
 
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
     }
 
     @Test
@@ -323,8 +323,8 @@ public class CbDelegatedTokenCredentialsTest {
 
         assertEquals(expected, result);
 
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
     }
 
     @Test
@@ -342,8 +342,8 @@ public class CbDelegatedTokenCredentialsTest {
 
         verify(futureAuthenticationResult, times(0)).get();
         verify(applicationTokenCredentials, times(0)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(0)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContext, times(0)).acquireTokenByAuthorizationCode(anyString(), any(URI.class), any(ClientCredential.class), anyString(), any());
@@ -362,7 +362,7 @@ public class CbDelegatedTokenCredentialsTest {
         AuthenticationResult refreshTokenFromAccessTokenResult = new AuthenticationResult("type", expected, REFRESH_TOKEN,
                 PAST_DATE, "2", userInfo, true);
 
-        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(String.format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any())).thenReturn(cbRefreshTokenClient);
+        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(String.format("%s/", DEFAULT_TEST_AD_ENDPOINT)))).thenReturn(cbRefreshTokenClient);
         when(cbRefreshTokenClient.refreshToken(TEST_DOMAIN, CLIENT_ID, CLIENT_SECRET, customResource, REFRESH_TOKEN, MULTIPLE_RESOURCE_REFRESH_TOKEN))
                 .thenReturn(refreshTokenFromAccessTokenResult);
         when(applicationTokenCredentials.clientId()).thenReturn(CLIENT_ID);
@@ -375,8 +375,8 @@ public class CbDelegatedTokenCredentialsTest {
 
         verify(futureAuthenticationResult, times(0)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(0)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(1)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContext, times(0)).acquireTokenByAuthorizationCode(anyString(), any(URI.class), any(ClientCredential.class), anyString(), any());
@@ -393,7 +393,7 @@ public class CbDelegatedTokenCredentialsTest {
                 "1", mock(UserInfo.class),
                 true));
 
-        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(String.format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any())).thenReturn(cbRefreshTokenClient);
+        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(String.format("%s/", DEFAULT_TEST_AD_ENDPOINT)))).thenReturn(cbRefreshTokenClient);
         doThrow(new RuntimeException()).when(cbRefreshTokenClient).refreshToken(TEST_DOMAIN, CLIENT_ID, CLIENT_SECRET, customResource, REFRESH_TOKEN,
                 MULTIPLE_RESOURCE_REFRESH_TOKEN);
         when(applicationTokenCredentials.clientId()).thenReturn(CLIENT_ID);
@@ -407,10 +407,10 @@ public class CbDelegatedTokenCredentialsTest {
 
         verify(futureAuthenticationResult, times(0)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(1)).refreshToken(TEST_DOMAIN, CLIENT_ID, CLIENT_SECRET, customResource, REFRESH_TOKEN,
                 MULTIPLE_RESOURCE_REFRESH_TOKEN);
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(0)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(1)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContext, times(0)).acquireTokenByAuthorizationCode(anyString(), any(URI.class), any(ClientCredential.class), anyString(), any());

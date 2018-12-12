@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import java.net.Proxy;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CBRefreshTokenClientProvider {
 
-    public CBRefreshTokenClient getCBRefreshTokenClient(String baseUrl, Proxy proxy) {
-        return new CBRefreshTokenClient(baseUrl, proxy);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CBRefreshTokenClientProvider.class);
+
+    public CBRefreshTokenClient getCBRefreshTokenClient(String baseUrl) {
+        return new CBRefreshTokenClient(baseUrl);
     }
 
 }

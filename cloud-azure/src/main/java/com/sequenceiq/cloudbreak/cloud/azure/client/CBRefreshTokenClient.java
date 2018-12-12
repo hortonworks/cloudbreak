@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import java.net.Proxy;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +7,9 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.rest.LogLevel;
 import com.microsoft.rest.interceptors.LoggingInterceptor;
 import com.microsoft.rest.serializer.JacksonAdapter;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
+import okhttp3.JavaNetAuthenticator;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -22,11 +23,9 @@ public class CBRefreshTokenClient {
 
     private final RefreshTokenService service;
 
-    public CBRefreshTokenClient(String baseUrl, Proxy proxy) {
+    public CBRefreshTokenClient(String baseUrl) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(new LoggingInterceptor(LogLevel.BODY_AND_HEADERS));
-        if (proxy != null) {
-            builder = builder.proxy(proxy);
-        }
+        builder.proxyAuthenticator(new JavaNetAuthenticator());
         service = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(new JacksonAdapter().converterFactory())
@@ -52,7 +51,8 @@ public class CBRefreshTokenClient {
                     null,
                     multipleResourceRefreshToken);
         } catch (Exception e) {
-            return null;
+            String msg = String.format("Could refresh token for application '%s' in tenant '%s' for resource '%s'", clientId, tenant, resource);
+            throw new CloudbreakServiceException(msg, e);
         }
     }
 
