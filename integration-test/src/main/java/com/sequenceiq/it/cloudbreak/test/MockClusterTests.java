@@ -29,7 +29,7 @@ public class MockClusterTests extends CloudbreakMockClusterTest {
         when(Stack.post(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
-        then(Mock.assertCalls(verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2)));
+        then(Mock.assertCalls(verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_all").atLeast(2)));
     }
 
     private Verification verify(String s, String post) {
