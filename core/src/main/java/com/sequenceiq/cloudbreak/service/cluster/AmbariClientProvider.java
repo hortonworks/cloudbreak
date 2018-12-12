@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,12 +13,20 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.proxy.ApplicationProxyConfig;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 
 @Service
 public class AmbariClientProvider {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClientProvider.class);
+
+    private static final Pattern AMBRI_URL_PATTERN = Pattern.compile("(http|https)://([a-zA-Z\\.0-9-]+):([0-9]+)");
+
+    private static final int PROTOCOL_GROUP = 1;
+
+    private static final int HOST_GROUP = 2;
+
+    private static final int PORT_GROUP = 3;
 
     @Inject
     private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
@@ -99,6 +110,19 @@ public class AmbariClientProvider {
                     clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 "admin", "admin", clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
+        }
+    }
+
+    public AmbariClient getAmbariClient(String ambariUrl, String ambariUser, String ambariPassword) {
+        Matcher matcher = AMBRI_URL_PATTERN.matcher(ambariUrl);
+        if (matcher.matches()) {
+            boolean secure = matcher.group(PROTOCOL_GROUP).equals("https");
+            String host = matcher.group(HOST_GROUP);
+            String port = matcher.group(PORT_GROUP);
+            String basePath = "";
+            return new AmbariClient(host, port, ambariUser, ambariPassword, basePath, secure);
+        } else {
+            throw new CloudbreakServiceException("Wrong ambari url: " + ambariUrl);
         }
     }
 }

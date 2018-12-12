@@ -18,6 +18,8 @@ public class ServiceDescriptorDefinitionProvider {
 
     public static final String RANGER_HTTPPORT_KEY = "ranger.service.http.port";
 
+    public static final String YARN_RESOURCEMANAGER_WEBAPP_ADDRESS = "yarn.resourcemanager.webapp.address";
+
     private Map<String, ServiceDescriptorDefinition> serviceDescriptorDefinitionMap;
 
     public Map<String, ServiceDescriptorDefinition> getServiceDescriptorDefinitionMap() {
