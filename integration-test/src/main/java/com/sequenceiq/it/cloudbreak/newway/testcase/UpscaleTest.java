@@ -75,7 +75,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .then(MockVerification.verify(HttpMethod.POST, SALT_BOOT_ROOT + "/salt/action/distribute").atLeast(1))
                 .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("fun=network.ipaddrs").atLeast(1))
                 .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("arg=roles&arg=ambari_server").atLeast(2))
-                .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_grains").atLeast(1))
+                .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1))
                 .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1))
                 .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(2))
                 .then(MockVerification.verify(HttpMethod.POST, SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(4))
