@@ -37,10 +37,9 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.cloudbreak.validation.bean.ImageCatalogProvider;
 
 @Component
-public class CachedImageCatalogProvider implements ImageCatalogProvider {
+public class CachedImageCatalogProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedImageCatalogProvider.class);
 
     @Value("${cb.etc.config.dir}")
