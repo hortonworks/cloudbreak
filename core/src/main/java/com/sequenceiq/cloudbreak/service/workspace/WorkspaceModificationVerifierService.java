@@ -15,7 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissionAuthorizer;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -35,6 +35,9 @@ public class WorkspaceModificationVerifierService {
     private StackService stackService;
 
     @Inject
+    private WorkspacePermissionAuthorizer workspacePermissionAuthorizer;
+
+    @Inject
     private UserWorkspacePermissionsService userWorkspacePermissionsService;
 
     public void authorizeWorkspaceManipulation(User currentUser, Workspace workspaceToManipulate, Action action, String unautorizedMessage) {
@@ -42,7 +45,7 @@ public class WorkspaceModificationVerifierService {
         if (userWorkspacePermissions == null) {
             throw new AccessDeniedException("You have no access for this workspace.");
         }
-        boolean hasPermission = WorkspacePermissions.hasPermission(userWorkspacePermissions.getPermissionSet(), WorkspaceResource.WORKSPACE, action);
+        boolean hasPermission = workspacePermissionAuthorizer.hasPermission(userWorkspacePermissions.getPermissionSet(), WorkspaceResource.WORKSPACE, action);
         if (!hasPermission) {
             throw new AccessDeniedException(unautorizedMessage);
         }

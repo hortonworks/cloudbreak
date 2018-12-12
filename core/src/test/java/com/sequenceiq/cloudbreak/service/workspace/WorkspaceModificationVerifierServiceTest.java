@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_R
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.WORKSPACE_MANAGE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -17,11 +18,13 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissionAuthorizer;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -48,6 +51,9 @@ public class WorkspaceModificationVerifierServiceTest {
     @Mock
     private UserWorkspacePermissionsService userWorkspacePermissionsService;
 
+    @Spy
+    private WorkspacePermissionAuthorizer workspacePermissionAuthorizer = new WorkspacePermissionAuthorizer();
+
     @InjectMocks
     private WorkspaceModificationVerifierService underTest;
 
@@ -67,6 +73,7 @@ public class WorkspaceModificationVerifierServiceTest {
         testWorkspace.setTenant(testTenant);
         initiatorWsPermissions.setUser(initiator);
         initiatorWsPermissions.setWorkspace(testWorkspace);
+        assertNotNull(workspacePermissionAuthorizer);
     }
 
     @Test
