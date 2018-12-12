@@ -54,8 +54,8 @@ public class SaltStates {
         return sc.run(target, "grains.remove", LOCAL, ApplyResponse.class, key, value);
     }
 
-    public static ApplyResponse syncGrains(SaltConnector sc) {
-        return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, ApplyResponse.class);
+    public static ApplyResponse syncAll(SaltConnector sc) {
+        return sc.run(Glob.ALL, "saltutil.sync_all", LOCAL, ApplyResponse.class);
     }
 
     public static ApplyResponse updateMine(SaltConnector sc) {
