@@ -141,3 +141,35 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
+  - name: "aws prewarm image hdp3"
+    preserveOrder: true
+    parameters:
+      clusterName: aws-prewarm-hdp3
+      provider: aws
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      image: hdp
+      instancegroupName: worker
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewRegularCluster
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
+  - name: "aws base image hdp3"
+    preserveOrder: true
+    parameters:
+      clusterName: aws-base-hdp3
+      provider: aws
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      image: base
+      instancegroupName: worker
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewRegularCluster
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
