@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
 import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
@@ -198,11 +200,26 @@ public class TestUtil {
         return workspace;
     }
 
-    public static User user(Long id, String name) {
+    public static User user(Long id, String userId) {
         User user = new User();
-        user.setUserId(name);
+        user.setUserId(userId);
         user.setId(id);
         return user;
+    }
+
+    public static UserWorkspacePermissions userWorkspacePermissions(User user, Workspace workspace, String... permissions) {
+        UserWorkspacePermissions userWorkspacePermissions = new UserWorkspacePermissions();
+        userWorkspacePermissions.setUser(user);
+        userWorkspacePermissions.setWorkspace(workspace);
+        userWorkspacePermissions.setPermissionSet(Set.of(permissions));
+        return userWorkspacePermissions;
+    }
+
+    public static ChangeWorkspaceUsersJson changeWorkspaceUsersJson(String userId, String... permissions) {
+        ChangeWorkspaceUsersJson json1 = new ChangeWorkspaceUsersJson();
+        json1.setUserId(userId);
+        json1.setPermissions(Set.of(permissions));
+        return json1;
     }
 
     public static SecurityGroup securityGroup(long id) {

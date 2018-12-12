@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -88,7 +87,7 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
     @Override
     public SortedSet<UserResponseJson> changeUsers(String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Set<User> users = workspaceService.changeUsers(workspaceName, jsonToMap(changeWorkspaceUsersJson), user);
+        Set<User> users = workspaceService.changeUsers(workspaceName, changeWorkspaceUsersJson, user);
         return usersToSortedResponse(users);
     }
 
@@ -104,11 +103,6 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.updateUsers(workspaceName, updateWorkspaceUsersJson, user);
         return usersToSortedResponse(users);
-    }
-
-    private Map<String, Set<String>> jsonToMap(Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons) {
-        return changeWorkspaceUsersJsons.stream()
-                .collect(Collectors.toMap(ChangeWorkspaceUsersJson::getUserId, ChangeWorkspaceUsersJson::getPermissions));
     }
 
     private SortedSet<WorkspaceResponse> workspacesToSortedResponse(Set<Workspace> workspaces) {

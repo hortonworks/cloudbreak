@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.workspace;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -74,5 +75,22 @@ public class Tenant implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !getClass().equals(o.getClass())) {
+            return false;
+        }
+        Tenant tenant = (Tenant) o;
+        return Objects.equals(id, tenant.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
