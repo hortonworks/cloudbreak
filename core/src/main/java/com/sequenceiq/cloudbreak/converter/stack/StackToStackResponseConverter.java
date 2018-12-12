@@ -91,6 +91,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
             stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
         }
         stackJson.setStatus(source.getStatus());
+        stackJson.setTerminated(source.getTerminated());
         stackJson.setStatusReason(source.getStatusReason());
         stackJson.setRegion(source.getRegion());
         stackJson.setAvailabilityZone(source.getAvailabilityZone());
