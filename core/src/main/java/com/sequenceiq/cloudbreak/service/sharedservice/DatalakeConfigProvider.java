@@ -21,6 +21,9 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterCreationService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -78,11 +81,7 @@ public class DatalakeConfigProvider {
                         datalakeResources = collectDatalakeResources(datalakeStack, ambariClient, serviceSecretParamMap);
                         datalakeResources.setDatalakeStackId(datalakeStack.getId());
                         Workspace workspace = datalakeStack.getWorkspace();
-                        datalakeResources.setWorkspace(workspace);
-                        datalakeResources.getServiceDescriptorMap().forEach((k, sd) -> sd.setWorkspace(workspace));
-                        DatalakeResources savedDatalakeResources = datalakeResourcesRepository.save(datalakeResources);
-                        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> sd.setDatalakeResources(savedDatalakeResources));
-                        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> serviceDescriptorRepository.save(sd));
+                        storeDatalakeResources(datalakeResources, workspace);
                     }
                     return datalakeResources;
                 } catch (JsonProcessingException ex) {
@@ -100,11 +99,14 @@ public class DatalakeConfigProvider {
         String ambariIp = datalakeStack.getAmbariIp();
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
                 ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
-        return collectDatalakeResources(datalakeStack.getName(), ambariIp, ambariFqdn, ambariClient, serviceSecretParamMap);
+        return collectDatalakeResources(datalakeStack.getName(), ambariIp, ambariFqdn, ambariClient, serviceSecretParamMap,
+                datalakeStack.getCluster().getLdapConfig(), datalakeStack.getCluster().getKerberosConfig(), datalakeStack.getCluster().getRdsConfigs());
     }
 
+    //CHECKSTYLE:OFF
     public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari,
-            Map<String, Map<String, String>> serviceSecretParamMap) throws JsonProcessingException {
+            Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig, Set<RDSConfig> rdsConfigs)
+            throws JsonProcessingException {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName(datalakeName);
         Set<String> datalakeParamKeys = new HashSet<>();
@@ -132,8 +134,23 @@ public class DatalakeConfigProvider {
         }
         datalakeResources.setServiceDescriptorMap(serviceDescriptors);
         setupDatalakeGlobalParams(datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari, datalakeResources);
+        datalakeResources.setLdapConfig(ldapConfig);
+        datalakeResources.setKerberosConfig(kerberosConfig);
+        datalakeResources.setRdsConfigs(rdsConfigs);
         return datalakeResources;
     }
+
+    public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, String datalakeAmbariIp, String datalakeAmbariFqdn,
+            AmbariClient datalakeAmbari, Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig,
+            Set<RDSConfig> rdsConfigs, Workspace workspace) throws Exception {
+        DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari,
+                serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
+        return transactionService.required(() -> {
+            storeDatalakeResources(datalakeResources, workspace);
+            return datalakeResources;
+        });
+    }
+    //CHECKSTYLE:ON
 
     public SharedServiceConfigsView createSharedServiceConfigView(DatalakeResources datalakeResources) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
@@ -172,6 +189,14 @@ public class DatalakeConfigProvider {
 
     public Map<String, String> getAdditionalParameters(Stack workloadStack, DatalakeResources datalakeResources) {
         return getAdditionalParameters(workloadStack.getName(), datalakeResources);
+    }
+
+    private DatalakeResources storeDatalakeResources(DatalakeResources datalakeResources, Workspace workspace) {
+        datalakeResources.setWorkspace(workspace);
+        datalakeResources.getServiceDescriptorMap().forEach((k, sd) -> sd.setWorkspace(workspace));
+        DatalakeResources savedDatalakeResources = datalakeResourcesRepository.save(datalakeResources);
+        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> serviceDescriptorRepository.save(sd));
+        return savedDatalakeResources;
     }
 
     private Map<String, String> getAdditionalParameters(String workloadClusterName, DatalakeResources datalakeResources) {

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttach
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -81,4 +82,12 @@ public interface EnvironmentV3Endpoint {
             nickname = "changeCredentialInEnvironment")
     DetailedEnvironmentResponse changeCredential(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             EnvironmentChangeCredentialRequest request);
+
+    @PUT
+    @Path("/{name}/registerDatalake")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.REGISTER_EXTERNAL_DATALAKE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
+            nickname = "registerExternalDatalake")
+    DetailedEnvironmentResponse registerExternalDatalake(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+            @Valid RegisterDatalakeRequest request);
 }
