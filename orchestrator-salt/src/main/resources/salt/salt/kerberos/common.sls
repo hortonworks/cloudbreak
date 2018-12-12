@@ -1,5 +1,3 @@
-{%- from 'kerberos/settings.sls' import kerberos with context %}
-
 haveged:
   pkg.installed: []
   service.running:
@@ -39,9 +37,7 @@ install_kerberos:
       - force: True
 {% endif %}
 
-{% if salt['cmd.retcode']('test -f /var/krb5-conf-initialized') == 1 %}
 /etc/krb5.conf:
   file.managed:
     - source: salt://kerberos/config/krb5.conf-existing
     - template: jinja
-{% endif %}
