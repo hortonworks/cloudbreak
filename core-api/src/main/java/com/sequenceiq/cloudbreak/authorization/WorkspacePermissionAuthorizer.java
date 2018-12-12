@@ -13,7 +13,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
-    public class WorkspacePermissionUtil {
+    public class WorkspacePermissionAuthorizer {
 
     public boolean hasPermission(Set<String> permissions, WorkspaceResource resource, WorkspacePermissions.Action action) {
         if (resource == WORKSPACE) {

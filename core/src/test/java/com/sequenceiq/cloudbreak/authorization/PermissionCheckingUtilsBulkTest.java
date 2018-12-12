@@ -49,7 +49,7 @@ public class PermissionCheckingUtilsBulkTest {
     private UserWorkspacePermissionsService userWorkspacePermissionsService;
 
     @Mock
-    private WorkspacePermissionUtil workspacePermissionUtil;
+    private WorkspacePermissionAuthorizer workspacePermissionAuthorizer;
 
     @InjectMocks
     private PermissionCheckingUtils underTest;
@@ -126,7 +126,7 @@ public class PermissionCheckingUtilsBulkTest {
 
         verify(userWorkspacePermissionsService, times(1)).findForUserByWorkspaceId(anyLong(), any(User.class));
         verify(userWorkspacePermissionsService, times(1)).findForUserByWorkspaceId(WORKSPACE_ID, user);
-        verify(workspacePermissionUtil, times(0)).hasPermission(anySet(), any(WorkspaceResource.class), any(Action.class));
+        verify(workspacePermissionAuthorizer, times(0)).hasPermission(anySet(), any(WorkspaceResource.class), any(Action.class));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class PermissionCheckingUtilsBulkTest {
         Set<String> permissionSet = Collections.emptySet();
         when(userWorkspacePermissionsService.findForUserByWorkspaceId(WORKSPACE_ID, user)).thenReturn(userWorkspacePermissions);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(permissionSet);
-        when(workspacePermissionUtil.hasPermission(permissionSet, resource, action)).thenReturn(false);
+        when(workspacePermissionAuthorizer.hasPermission(permissionSet, resource, action)).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(format("You have no [%s] permission to %s.", action.name(), resource));
@@ -143,8 +143,8 @@ public class PermissionCheckingUtilsBulkTest {
 
         verify(userWorkspacePermissionsService, times(1)).findForUserByWorkspaceId(anyLong(), any(User.class));
         verify(userWorkspacePermissionsService, times(1)).findForUserByWorkspaceId(WORKSPACE_ID, user);
-        verify(workspacePermissionUtil, times(1)).hasPermission(anySet(), any(WorkspaceResource.class), any(Action.class));
-        verify(workspacePermissionUtil, times(1)).hasPermission(anySet(), eq(resource), eq(action));
+        verify(workspacePermissionAuthorizer, times(1)).hasPermission(anySet(), any(WorkspaceResource.class), any(Action.class));
+        verify(workspacePermissionAuthorizer, times(1)).hasPermission(anySet(), eq(resource), eq(action));
     }
 
     @Test
@@ -152,14 +152,14 @@ public class PermissionCheckingUtilsBulkTest {
         Set<String> permissionSet = Collections.emptySet();
         when(userWorkspacePermissionsService.findForUserByWorkspaceId(WORKSPACE_ID, user)).thenReturn(userWorkspacePermissions);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(permissionSet);
-        when(workspacePermissionUtil.hasPermission(permissionSet, resource, action)).thenReturn(true);
+        when(workspacePermissionAuthorizer.hasPermission(permissionSet, resource, action)).thenReturn(true);
 
         underTest.checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, resource, action, user);
 
         verify(userWorkspacePermissionsService, times(1)).findForUserByWorkspaceId(anyLong(), any(User.class));
         verify(userWorkspacePermissionsService, times(1)).findForUserByWorkspaceId(WORKSPACE_ID, user);
-        verify(workspacePermissionUtil, times(1)).hasPermission(anySet(), any(WorkspaceResource.class), any(Action.class));
-        verify(workspacePermissionUtil, times(1)).hasPermission(anySet(), eq(resource), eq(action));
+        verify(workspacePermissionAuthorizer, times(1)).hasPermission(anySet(), any(WorkspaceResource.class), any(Action.class));
+        verify(workspacePermissionAuthorizer, times(1)).hasPermission(anySet(), eq(resource), eq(action));
     }
 
     @Test
@@ -190,7 +190,7 @@ public class PermissionCheckingUtilsBulkTest {
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(Collections.emptySet());
         when(userWorkspacePermissionsService.findForUserByWorkspaceIds(eq(user), anySet())).thenReturn(Set.of(userWorkspacePermissions));
         // returning true, to avoid AccessDeniedException from the validation of this value later on
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
 
         underTest.checkPermissionsByTarget(workspaceAwareResource, user, resource, action);
     }
@@ -200,7 +200,7 @@ public class PermissionCheckingUtilsBulkTest {
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(Collections.emptySet());
         when(userWorkspacePermissionsService.findForUserByWorkspaceIds(eq(user), anySet())).thenReturn(Set.of(userWorkspacePermissions));
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(false);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
@@ -233,7 +233,7 @@ public class PermissionCheckingUtilsBulkTest {
         //CHECKSTYLE:ON
         when(userWorkspacePermissionsService.findForUserByWorkspaceId(user, WORKSPACE_ID)).thenReturn(userWorkspacePermissions);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(Set.of("somePermission"));
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
         String someMessage = "hereComesTheSanta";
         doThrow(new RuntimeException(someMessage)).when(proceedingJoinPoint).proceed();
 
@@ -247,7 +247,7 @@ public class PermissionCheckingUtilsBulkTest {
     public void testCheckPermissionsByPermissionSetAndProceedWhenWorkspacePermissionUtilTellsItHasNoPermissionThenAccessDeniedExceptionComes() {
         when(userWorkspacePermissionsService.findForUserByWorkspaceId(user, WORKSPACE_ID)).thenReturn(userWorkspacePermissions);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(Set.of("somePermission"));
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(false);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
@@ -261,7 +261,7 @@ public class PermissionCheckingUtilsBulkTest {
         //CHECKSTYLE:ON
         when(userWorkspacePermissionsService.findForUserByWorkspaceId(user, WORKSPACE_ID)).thenReturn(userWorkspacePermissions);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(Set.of("somePermission"));
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
         when(proceedingJoinPoint.proceed()).thenReturn(null);
 
         Object result = underTest.checkPermissionsByPermissionSetAndProceed(resource, user, WORKSPACE_ID, action, proceedingJoinPoint, methodSignature);
@@ -275,7 +275,7 @@ public class PermissionCheckingUtilsBulkTest {
         //CHECKSTYLE:ON
         when(userWorkspacePermissionsService.findForUserByWorkspaceId(user, WORKSPACE_ID)).thenReturn(userWorkspacePermissions);
         when(userWorkspacePermissions.getPermissionSet()).thenReturn(Set.of("somePermission"));
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
         Object expected = new Object();
         when(proceedingJoinPoint.proceed()).thenReturn(expected);
 
@@ -287,23 +287,23 @@ public class PermissionCheckingUtilsBulkTest {
 
     @Test
     public void testCheckPermissionByPermissionSetWhenWorkspacePermissionUtilTellsHasNoPermissionThenAccessDeniedExceptionComesRegardlessOfTheGivenTypes() {
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(false);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
 
         underTest.checkPermissionByPermissionSet(action, resource, Collections.emptySet());
 
-        verify(workspacePermissionUtil, times(1)).hasPermission(anySet(), eq(resource), eq(action));
+        verify(workspacePermissionAuthorizer, times(1)).hasPermission(anySet(), eq(resource), eq(action));
     }
 
     @Test
     public void testCheckPermissionByPermissionSetWhenWorkspacePermissionUtilTellsHasPermissionThenNoExceptionComes() {
-        when(workspacePermissionUtil.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
+        when(workspacePermissionAuthorizer.hasPermission(anySet(), eq(resource), eq(action))).thenReturn(true);
 
         underTest.checkPermissionByPermissionSet(action, resource, Collections.emptySet());
 
-        verify(workspacePermissionUtil, times(1)).hasPermission(anySet(), eq(resource), eq(action));
+        verify(workspacePermissionAuthorizer, times(1)).hasPermission(anySet(), eq(resource), eq(action));
     }
 
 }
