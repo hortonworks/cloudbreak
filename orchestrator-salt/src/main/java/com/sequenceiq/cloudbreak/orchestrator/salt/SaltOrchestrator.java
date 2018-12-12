@@ -619,7 +619,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", roleToAdd, CompoundType.IP), exitCriteriaModel);
             runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", roleToRemove, CompoundType.IP), exitCriteriaModel);
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetry, true);
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
