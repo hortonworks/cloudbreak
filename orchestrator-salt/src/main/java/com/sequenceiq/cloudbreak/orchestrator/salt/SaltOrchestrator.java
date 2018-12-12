@@ -288,10 +288,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitModel);
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server_master"), exitModel);
-                if (!standbyServers.isEmpty()) {
-                    runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "kerberos_server_slave"), exitModel);
-                }
+                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "kerberized"), exitModel);
             }
             // smartsense
             if (configureSmartSense) {

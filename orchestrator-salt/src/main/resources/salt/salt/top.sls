@@ -15,13 +15,9 @@ base:
     - match: compound
     - sssd.ipa
 
-  'roles:kerberos_server_master':
+  'roles:kerberized':
     - match: grain
-    - kerberos.master
-
-  'roles:kerberos_server_slave':
-    - match: grain
-    - kerberos.slave
+    - kerberos.common
 
   'G@roles:ambari_upgrade and G@roles:ambari_agent':
     - match: compound
