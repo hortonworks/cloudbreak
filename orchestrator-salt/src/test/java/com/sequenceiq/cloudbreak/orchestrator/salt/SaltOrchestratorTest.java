@@ -62,7 +62,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -165,11 +165,11 @@ public class SaltOrchestratorTest {
         SaltCommandTracker roleCheckerSaltCommandTracker = mock(SaltCommandTracker.class);
         whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(addRemoveGrainRunner)).thenReturn(roleCheckerSaltCommandTracker);
 
-        SyncGrainsRunner syncGrainsRunner = mock(SyncGrainsRunner.class);
-        whenNew(SyncGrainsRunner.class).withAnyArguments().thenReturn(syncGrainsRunner);
+        SyncAllRunner syncAllRunner = mock(SyncAllRunner.class);
+        whenNew(SyncAllRunner.class).withAnyArguments().thenReturn(syncAllRunner);
 
         SaltCommandTracker syncGrainsCheckerSaltCommandTracker = mock(SaltCommandTracker.class);
-        whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(syncGrainsRunner)).thenReturn(syncGrainsCheckerSaltCommandTracker);
+        whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(syncAllRunner)).thenReturn(syncGrainsCheckerSaltCommandTracker);
 
         HighStateRunner highStateRunner = mock(HighStateRunner.class);
         whenNew(HighStateRunner.class).withAnyArguments().thenReturn(highStateRunner);
@@ -209,8 +209,8 @@ public class SaltOrchestratorTest {
                 .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify syncgrains command
-        verifyNew(SyncGrainsRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
-        verifyNew(SaltCommandTracker.class, times(1)).withArguments(eq(saltConnector), eq(syncGrainsRunner));
+        verifyNew(SyncAllRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
+        verifyNew(SaltCommandTracker.class, times(1)).withArguments(eq(saltConnector), eq(syncAllRunner));
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(eq(syncGrainsCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 

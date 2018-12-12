@@ -67,7 +67,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -297,7 +297,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
             uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
 
-            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitModel);
+            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
         } catch (Exception e) {
             LOGGER.info("Error occurred during ambari bootstrap", e);
@@ -440,7 +440,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", "ambari_upgrade", CompoundType.IP), exitCriteriaModel);
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetry, true);
 
             // remove 'ambari_upgrade' role from all nodes
@@ -713,7 +713,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);
 
             // remove 'recipe' grain from all nodes
