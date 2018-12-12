@@ -1,29 +1,24 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import java.util.Map;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
-import com.sequenceiq.cloudbreak.validation.bean.ImageCatalogProvider;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-@Component
 public class ImageCatalogValidator implements ConstraintValidator<ValidImageCatalog, String> {
 
-    private static ImageCatalogProvider imageCatalogProvider;
+    private static final Client CLIENT = RestClientUtil.get();
 
-    @Inject
-    private ImageCatalogProvider imageCatalogProviderComponent;
-
-    @PostConstruct
-    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    public void init() {
-        imageCatalogProvider = imageCatalogProviderComponent;
-    }
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public void initialize(ValidImageCatalog constraintAnnotation) {
@@ -35,12 +30,39 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
             return false;
         }
         try {
-            imageCatalogProvider.getImageCatalogV2(value);
-            return true;
-        } catch (Exception e) {
-            return false;
-        } finally {
-            imageCatalogProvider.evictImageCatalogCache(value);
+            WebTarget target = CLIENT.target(value);
+            try (Response response = target.request().get()) {
+                if (response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
+                    String responseContent = response.readEntity(String.class);
+                    OBJECT_MAPPER.readValue(responseContent, CloudbreakImageCatalog.class);
+                    return true;
+                }
+            }
+        } catch (Throwable ignore) {
+        }
+        return false;
+    }
+
+    public static class CloudbreakImageCatalog {
+
+        private final Map<String, Object> images;
+
+        private final Map<String, Object> versions;
+
+        @JsonCreator
+        public CloudbreakImageCatalog(
+                @JsonProperty(value = "images", required = true) Map<String, Object> images,
+                @JsonProperty(value = "versions", required = true) Map<String, Object> versions) {
+            this.images = images;
+            this.versions = versions;
+        }
+
+        public Map<String, Object> getImages() {
+            return images;
+        }
+
+        public Map<String, Object> getVersions() {
+            return versions;
         }
     }
 }
