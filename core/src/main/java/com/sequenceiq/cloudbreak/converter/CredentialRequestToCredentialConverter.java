@@ -1,21 +1,23 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.util.GovCloudFlagUtil.GOV_CLOUD_KEY;
 
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
+import com.sequenceiq.cloudbreak.util.GovCloudFlagUtil;
 
 @Component
 public class CredentialRequestToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, Credential> {
@@ -41,6 +43,8 @@ public class CredentialRequestToCredentialConverter extends AbstractConversionSe
         if (parameters != null && !parameters.isEmpty()) {
             try {
                 credential.setAttributes(new Json(parameters));
+                Object govCloudFlag = parameters.get(GOV_CLOUD_KEY);
+                credential.setGovCloud(GovCloudFlagUtil.extractGovCloudFlag(govCloudFlag));
             } catch (JsonProcessingException ignored) {
                 throw new BadRequestException("Invalid parameters");
             }
