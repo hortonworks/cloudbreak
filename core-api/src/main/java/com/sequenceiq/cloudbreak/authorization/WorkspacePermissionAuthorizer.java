@@ -12,10 +12,12 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-@Component
-    public class WorkspacePermissionUtil {
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 
-    public boolean hasPermission(Set<String> permissions, WorkspaceResource resource, WorkspacePermissions.Action action) {
+@Component
+public class WorkspacePermissionAuthorizer {
+
+    public boolean hasPermission(Set<String> permissions, WorkspaceResource resource, Action action) {
         if (resource == WORKSPACE) {
             if (action == INVITE && (permissions.contains(getName(WORKSPACE, INVITE)) || permissions.contains(getName(WORKSPACE, MANAGE)))) {
                 return true;
