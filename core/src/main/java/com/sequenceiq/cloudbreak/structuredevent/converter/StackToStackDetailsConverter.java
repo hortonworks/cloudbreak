@@ -42,6 +42,8 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         StackDetails stackDetails = new StackDetails();
         stackDetails.setId(source.getId());
         stackDetails.setName(source.getName());
+        stackDetails.setType(source.getType().name());
+        stackDetails.setDatalakeId(source.getDatalakeId());
         stackDetails.setRegion(source.getRegion());
         stackDetails.setAvailabilityZone(source.getAvailabilityZone());
         stackDetails.setDescription(source.getDescription());
