@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -74,7 +73,7 @@ public class AzureClientCredentialsTest {
         when(credentialView.getSecretKey()).thenReturn(SECRET_KEY);
         when(credentialView.getName()).thenReturn(CREDENTIAL_NAME);
         when(credentialView.getSubscriptionId()).thenReturn(SUBSCRIPTION_ID);
-        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()), any())).thenReturn(cbRefreshTokenClient);
+        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
         authenticationResult = new AuthenticationResult("type", ACCESS_TOKEN, REFRESH_TOKEN, 123456789L, "1", mock(UserInfo.class), true);
     }
 
@@ -92,7 +91,7 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(2)).getCodeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
-        verify(cbRefreshTokenClientProvider, times(0)).getCBRefreshTokenClient(anyString(), any());
+        verify(cbRefreshTokenClientProvider, times(0)).getCBRefreshTokenClient(anyString());
     }
 
     @Test
@@ -111,9 +110,9 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(2)).getCodeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
-        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString(), any());
+        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(1)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
-        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()), any());
+        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()));
     }
 
     @Test
@@ -135,9 +134,9 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(2)).getCodeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(credentialView, times(1)).getAuthorizationCode();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()));
     }
 
     @Test
@@ -158,9 +157,9 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(2)).getCodeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(credentialView, times(1)).getAuthorizationCode();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString(), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()), any());
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()));
     }
 
     @Test
@@ -181,9 +180,9 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getCodeGrantFlow();
         verify(credentialView, times(2)).getSubscriptionId();
         verify(credentialView, times(0)).getAuthorizationCode();
-        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString(), any());
+        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(1)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
-        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()), any());
+        verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()));
     }
 
 }

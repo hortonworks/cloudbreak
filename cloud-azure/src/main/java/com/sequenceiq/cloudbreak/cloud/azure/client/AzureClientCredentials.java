@@ -65,7 +65,7 @@ public class AzureClientCredentials {
             if (StringUtils.isNoneEmpty(refreshToken)) {
                 LOGGER.info("Creating Azure credentials for a new delegated token with refresh token, credential: {}", credentialView.getName());
                 String resource = azureEnvironment.managementEndpoint();
-                CBRefreshTokenClient refreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(azureEnvironment.activeDirectoryEndpoint(), null);
+                CBRefreshTokenClient refreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(azureEnvironment.activeDirectoryEndpoint());
                 AuthenticationResult authenticationResult = refreshTokenClient.refreshToken(tenantId, clientId, secretKey, resource, refreshToken, false);
 
                 if (authenticationResult == null) {
