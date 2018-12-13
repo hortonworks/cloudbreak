@@ -20,7 +20,7 @@ type Strategy struct {
 
 	// config
 	// Required: true
-	Config *JSON `json:"config"`
+	Config interface{} `json:"config"`
 
 	// enabled
 	// Required: true
@@ -90,20 +90,6 @@ func (m *Strategy) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Strategy) validateConfig(formats strfmt.Registry) error {
-
-	if err := validate.Required("config", "body", m.Config); err != nil {
-		return err
-	}
-
-	if m.Config != nil {
-
-		if err := m.Config.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("config")
-			}
-			return err
-		}
-	}
 
 	return nil
 }

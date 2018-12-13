@@ -129,7 +129,7 @@ func ListRoles(c *cli.Context) {
 	var userName string
 	// If name is provided : roles information for another user
 	var userinfo *model.UserInfo
-	userinfo = userinfoImpl(dpClient.Dataplane.Oidc)
+	userinfo = UserInfoImpl(dpClient.Dataplane.Oidc)
 	if userNameOption == "" {
 		userName = swag.StringValue(userinfo.Name)
 	} else {
@@ -162,10 +162,13 @@ func Userinfo(c *cli.Context) {
 	log.Infof("[ListUsers] List information for connected user")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
-	output.Write(userDetailsHeader, &UsersInfoOut{userinfoImpl(dpClient.Dataplane.Oidc)})
+	output.Write(userDetailsHeader, &UsersInfoOut{UserInfoImpl(dpClient.Dataplane.Oidc)})
 }
 
-func userinfoImpl(client oidcClient) *model.UserInfo {
+// UserInfoImpl : gets User information for connected user
+func UserInfoImpl(client oidcClient) *model.UserInfo {
+	defer utils.TimeTrack(time.Now(), "user info")
+	log.Infof("[UserInfoImpl] sending user info request")
 	resp, err := client.LoggedInUserInfo(oidc.NewLoggedInUserInfoParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -208,7 +211,7 @@ func AssignRolesToUserByName(c *cli.Context) {
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	var userinfo *model.UserInfo
-	userinfo = userinfoImpl(dpClient.Dataplane.Oidc)
+	userinfo = UserInfoImpl(dpClient.Dataplane.Oidc)
 	userID := getUserIDFromName(
 		dpClient.Dataplane.Users,
 		userinfo.StrategyID.String(),
@@ -237,7 +240,7 @@ func RevokeRolesFromUserByName(c *cli.Context) {
 	log.Infof("[RevokeRolesFromUserByName] revoke roles to user")
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
 	var userinfo *model.UserInfo
-	userinfo = userinfoImpl(dpClient.Dataplane.Oidc)
+	userinfo = UserInfoImpl(dpClient.Dataplane.Oidc)
 	userID := getUserIDFromName(
 		dpClient.Dataplane.Users,
 		userinfo.StrategyID.String(),

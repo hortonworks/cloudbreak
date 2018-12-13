@@ -13,14 +13,10 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// StrategyType strategy type
-// swagger:model StrategyType
+// Tenant tenant
+// swagger:model Tenant
 
-type StrategyType struct {
-
-	// config schema
-	// Required: true
-	ConfigSchema interface{} `json:"config_schema"`
+type Tenant struct {
 
 	// display name
 	// Required: true
@@ -33,29 +29,22 @@ type StrategyType struct {
 	// Required: true
 	Name *string `json:"name"`
 
-	// template
+	// state
 	// Required: true
-	Template interface{} `json:"template"`
+	State *string `json:"state"`
 }
 
-/* polymorph StrategyType config_schema false */
+/* polymorph Tenant display_name false */
 
-/* polymorph StrategyType display_name false */
+/* polymorph Tenant id false */
 
-/* polymorph StrategyType id false */
+/* polymorph Tenant name false */
 
-/* polymorph StrategyType name false */
+/* polymorph Tenant state false */
 
-/* polymorph StrategyType template false */
-
-// Validate validates this strategy type
-func (m *StrategyType) Validate(formats strfmt.Registry) error {
+// Validate validates this tenant
+func (m *Tenant) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateConfigSchema(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateDisplayName(formats); err != nil {
 		// prop
@@ -67,7 +56,7 @@ func (m *StrategyType) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateTemplate(formats); err != nil {
+	if err := m.validateState(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -78,12 +67,7 @@ func (m *StrategyType) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StrategyType) validateConfigSchema(formats strfmt.Registry) error {
-
-	return nil
-}
-
-func (m *StrategyType) validateDisplayName(formats strfmt.Registry) error {
+func (m *Tenant) validateDisplayName(formats strfmt.Registry) error {
 
 	if err := validate.Required("display_name", "body", m.DisplayName); err != nil {
 		return err
@@ -92,7 +76,7 @@ func (m *StrategyType) validateDisplayName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StrategyType) validateName(formats strfmt.Registry) error {
+func (m *Tenant) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
@@ -101,13 +85,17 @@ func (m *StrategyType) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StrategyType) validateTemplate(formats strfmt.Registry) error {
+func (m *Tenant) validateState(formats strfmt.Registry) error {
+
+	if err := validate.Required("state", "body", m.State); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *StrategyType) MarshalBinary() ([]byte, error) {
+func (m *Tenant) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -115,8 +103,8 @@ func (m *StrategyType) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *StrategyType) UnmarshalBinary(b []byte) error {
-	var res StrategyType
+func (m *Tenant) UnmarshalBinary(b []byte) error {
+	var res Tenant
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

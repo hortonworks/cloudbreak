@@ -866,6 +866,34 @@ var (
 			Usage: "identity provider meta path url",
 		},
 	}
+	FlCaasStrategyName = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "name",
+			Usage: "name of strategy",
+		},
+	}
+	FlCaasTenantName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "name",
+			Usage: "name of tenant",
+		},
+	}
+	FlCaasTenantLabel = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "label",
+			Usage: "Display name for tenant",
+		},
+	}
+	FlCaasTenantEmail = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "email",
+			Usage: "email of the tenant",
+		},
+	}
 	FlRolesIDs = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
