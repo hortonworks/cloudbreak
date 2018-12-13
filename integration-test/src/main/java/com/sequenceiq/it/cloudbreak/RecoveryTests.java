@@ -30,11 +30,11 @@ public class RecoveryTests extends ClusterTests {
             List<HostGroupResponse> hostgroupList = stack.getResponse().getCluster().getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(HostGroupType.WORKER.getName()))
                     .collect(Collectors.toList());
-            Assert.assertTrue(hostgroupList.size() == 1);
+            Assert.assertEquals(1, hostgroupList.size(), "Hostgroup list size does not match.");
             List<HostMetadataResponse> nodeList = hostgroupList.get(0).getMetadata().stream()
                     .filter(node -> node.getState().equals("UNHEALTHY"))
                     .collect(Collectors.toList());
-            Assert.assertTrue(nodeList.size() == 1);
+            Assert.assertEquals(1, nodeList.size(), "Host metadata list size does not match.");
         }));
         when(Stack.repair(HostGroupType.WORKER.getName()));
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
