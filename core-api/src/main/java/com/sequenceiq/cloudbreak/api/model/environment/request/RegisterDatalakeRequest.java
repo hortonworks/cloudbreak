@@ -18,6 +18,8 @@ public class RegisterDatalakeRequest {
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.KERBEROSCONFIG_NAME)
     private String kerberosName;
 
+    private String rangerAdminPassword;
+
     public String getLdapName() {
         return ldapName;
     }
@@ -40,5 +42,13 @@ public class RegisterDatalakeRequest {
 
     public void setKerberosName(String kerberosName) {
         this.kerberosName = kerberosName;
+    }
+
+    public String getRangerAdminPassword() {
+        return rangerAdminPassword;
+    }
+
+    public void setRangerAdminPassword(String rangerAdminPassword) {
+        this.rangerAdminPassword = rangerAdminPassword;
     }
 }

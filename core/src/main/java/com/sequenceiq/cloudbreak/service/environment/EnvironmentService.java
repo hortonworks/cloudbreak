@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
+import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -372,29 +373,32 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     public DetailedEnvironmentResponse registerExternalDatalake(String environmentName, Long workspaceId, RegisterDatalakeRequest registerDatalakeRequest) {
         try {
-            Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-            Credential credential = environment.getCredential();
-            String attributesStr = credential.getAttributes();
-            Map<String, Object> attributes = isEmpty(attributesStr) ? new HashMap<>() : new Json(attributesStr).getMap();
-            String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
-            String datalakeAmbariUser = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_USER);
-            String datalakeAmbariPassowrd = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_PASSWORD);
-            LdapConfig ldapConfig = StringUtils.isEmpty(registerDatalakeRequest.getLdapName()) ? null
-                    : ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId);
-            KerberosConfig kerberosConfig = StringUtils.isEmpty(registerDatalakeRequest.getKerberosName()) ? null
-                    : kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
-            Set<RDSConfig> rdssConfigs = CollectionUtils.isEmpty(registerDatalakeRequest.getRdsNames()) ? null
-                    : rdsConfigService.findByNamesInWorkspace(registerDatalakeRequest.getRdsNames(), workspaceId);
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, datalakeAmbariUser, datalakeAmbariPassowrd);
-            // get ambari host / ip
-            DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, datalakeAmbariUrl,
-                    datalakeAmbariUrl, ambariClient, new HashMap<>(), ldapConfig, kerberosConfig, rdssConfigs, environment.getWorkspace());
-            environment.setDatalakeResources(datalakeResources);
-            environmentRepository.save(environment);
-            return null;
-        } catch (Exception ex) {
-            LOGGER.error("", ex);
-            return null;
+            return transactionService.required(() -> {
+                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                Credential credential = environment.getCredential();
+                String attributesStr = credential.getAttributes();
+                Map<String, Object> attributes = isEmpty(attributesStr) ? new HashMap<>() : new Json(attributesStr).getMap();
+                String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
+                String datalakeAmbariUser = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_USER);
+                String datalakeAmbariPassowrd = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_PASSWORD);
+                LdapConfig ldapConfig = StringUtils.isEmpty(registerDatalakeRequest.getLdapName()) ? null
+                        : ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId);
+                KerberosConfig kerberosConfig = StringUtils.isEmpty(registerDatalakeRequest.getKerberosName()) ? null
+                        : kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
+                Set<RDSConfig> rdssConfigs = CollectionUtils.isEmpty(registerDatalakeRequest.getRdsNames()) ? null
+                        : rdsConfigService.findByNamesInWorkspace(registerDatalakeRequest.getRdsNames(), workspaceId);
+                AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, datalakeAmbariUser, datalakeAmbariPassowrd);
+                // get ambari host / ip
+                Map<String, Map<String, String>> serviceSecretParamMap = StringUtils.isEmpty(registerDatalakeRequest.getRangerAdminPassword()) ? new HashMap<>()
+                        : Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE, Map.ofEntries(
+                        Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, registerDatalakeRequest.getRangerAdminPassword()))));
+                DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, datalakeAmbariUrl,
+                        datalakeAmbariUrl, ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig, rdssConfigs, environment.getWorkspace());
+                environment.setDatalakeResources(datalakeResources);
+                return conversionService.convert(environmentRepository.save(environment), DetailedEnvironmentResponse.class);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 

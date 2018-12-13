@@ -142,13 +142,17 @@ public class DatalakeConfigProvider {
 
     public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, String datalakeAmbariIp, String datalakeAmbariFqdn,
             AmbariClient datalakeAmbari, Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig,
-            Set<RDSConfig> rdsConfigs, Workspace workspace) throws Exception {
-        DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari,
-                serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
-        return transactionService.required(() -> {
-            storeDatalakeResources(datalakeResources, workspace);
-            return datalakeResources;
-        });
+            Set<RDSConfig> rdsConfigs, Workspace workspace) {
+        try {
+            DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari,
+                    serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
+            return transactionService.required(() -> {
+                storeDatalakeResources(datalakeResources, workspace);
+                return datalakeResources;
+            });
+        } catch (TransactionService.TransactionExecutionException | JsonProcessingException ex) {
+            throw new RuntimeException("Error during datalake resource collection from ambari.", ex);
+        }
     }
     //CHECKSTYLE:ON
 
