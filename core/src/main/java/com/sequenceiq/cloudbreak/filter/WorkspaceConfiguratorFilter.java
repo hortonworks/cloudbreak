@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -60,12 +61,16 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
         } else {
             CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
             if (cloudbreakUser != null) {
-                User user = userService.getOrCreate(cloudbreakUser);
-                Workspace workspace = workspaceService.getDefaultWorkspaceForUser(user);
-                if (workspace == null) {
-                    throw new NotFoundException("Workspace not found");
+                try {
+                    User user = userService.getOrCreate(cloudbreakUser);
+                    Workspace workspace = workspaceService.getDefaultWorkspaceForUser(user);
+                    if (workspace == null) {
+                        throw new NotFoundException("Workspace not found");
+                    }
+                    restRequestThreadLocalService.setRequestedWorkspaceId(workspace.getId());
+                } catch (TransactionService.TransactionRuntimeExecutionException e) {
+                    throw e.getOriginalCause();
                 }
-                restRequestThreadLocalService.setRequestedWorkspaceId(workspace.getId());
             }
         }
         filterChain.doFilter(request, response);
