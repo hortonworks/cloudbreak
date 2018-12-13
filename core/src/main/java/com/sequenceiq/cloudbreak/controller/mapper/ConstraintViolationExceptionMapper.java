@@ -29,7 +29,7 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
     protected Object getEntity(ConstraintViolationException exception) {
         List<String> result = new ArrayList<>();
         for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
-            result.add(violation.getMessage());
+            result.add(violation.getPropertyPath() + ": " + violation.getInvalidValue() + ", error: " + violation.getMessage());
         }
         return String.join("\n", result);
     }

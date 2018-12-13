@@ -3,10 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.FACING;
-import static com.sequenceiq.cloudbreak.type.OpenStackCredentialV3ScopeConstants.CB_KEYSTONE_V3_DEFAULT_SCOPE;
-import static com.sequenceiq.cloudbreak.type.OpenStackCredentialV3ScopeConstants.CB_KEYSTONE_V3_DOMAIN_SCOPE;
-import static com.sequenceiq.cloudbreak.type.OpenStackCredentialV3ScopeConstants.CB_KEYSTONE_V3_PROJECT_SCOPE;
-import static com.sequenceiq.cloudbreak.type.OpenStackCredentialVersionConstants.CB_KEYSTONE_V2;
+import static com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView.CB_KEYSTONE_V2;
+import static com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE;
+import static com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE;
 
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +39,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -104,12 +102,13 @@ public class OpenStackClient {
 
     public OSClient<?> createOSClient(CloudCredential cloudCredential) {
         String facing = cloudCredential.getStringParameter(FACING);
+        KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
 
         if (isV2Keystone(cloudCredential)) {
-            Access access = createAccess(cloudCredential);
+            Access access = createAccess(osCredential);
             return OSFactory.clientFromAccess(access, Facing.value(facing));
         } else {
-            Token token = createToken(cloudCredential);
+            Token token = createToken(osCredential);
             return OSFactory.clientFromToken(token, Facing.value(facing));
         }
     }
@@ -123,11 +122,15 @@ public class OpenStackClient {
 
     public boolean isV2Keystone(AuthenticatedContext authenticatedContext) {
         KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
-        return CB_KEYSTONE_V2.equals(osCredential.getVersion());
+        return isV2Keystone(osCredential);
     }
 
     public boolean isV2Keystone(CloudCredential cloudCredential) {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
+        return isV2Keystone(osCredential);
+    }
+
+    public boolean isV2Keystone(KeystoneCredentialView osCredential) {
         return CB_KEYSTONE_V2.equals(osCredential.getVersion());
     }
 
@@ -144,13 +147,10 @@ public class OpenStackClient {
                 .stream()
                 .map(r -> {
                     Optional<ResourceType> type = getType(r);
-                    if (type.isPresent()) {
-                        return new Builder()
-                                .name(r.getPhysicalResourceId())
-                                .type(type.get())
-                                .build();
-                    }
-                    return null;
+                    return type.map(resourceType -> new Builder()
+                            .name(r.getPhysicalResourceId())
+                            .type(resourceType)
+                            .build()).orElse(null);
                 })
                 .filter(r -> Objects.nonNull(r) && StringUtils.isNotBlank(r.getName()))
                 .collect(Collectors.toMap(CloudResource::getName, cloudResource -> cloudResource))
@@ -192,35 +192,27 @@ public class OpenStackClient {
         return Optional.ofNullable(result);
     }
 
-    private Access createAccess(CloudCredential cloudCredential) {
-        KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
-
-        if (CB_KEYSTONE_V2.equals(osCredential.getVersion())) {
-            try {
-                return OSFactory.builderV2().withConfig(config).endpoint(osCredential.getEndpoint())
-                        .credentials(osCredential.getUserName(), osCredential.getPassword())
-                        .tenantName(osCredential.getTenantName())
-                        .authenticate()
-                        .getAccess();
-            } catch (AuthenticationException | ClientResponseException e) {
-                LOGGER.info("Openstack authentication failed", e);
-                throw new CredentialVerificationException("Authentication failed to openstack, message: " + e.getMessage(), e);
-            }
+    private Access createAccess(KeystoneCredentialView osCredential) {
+        try {
+            return OSFactory.builderV2().withConfig(config).endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword())
+                    .tenantName(osCredential.getTenantName())
+                    .authenticate()
+                    .getAccess();
+        } catch (AuthenticationException | ClientResponseException e) {
+            LOGGER.info("Openstack authentication failed", e);
+            throw new CredentialVerificationException("Authentication failed to openstack, message: " + e.getMessage(), e);
         }
-        return null;
     }
 
-    private Token createToken(CloudCredential cloudCredential) {
-        KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
-        if (osCredential == null || osCredential.getScope() == null) {
-            return null;
+    private Token createToken(KeystoneCredentialView osCredential) {
+        if (osCredential == null) {
+            throw new CredentialVerificationException("Empty credential");
+        }
+        if (osCredential.getScope() == null) {
+            throw new CredentialVerificationException("Null scope not supported");
         }
         switch (osCredential.getScope()) {
-            case CB_KEYSTONE_V3_DEFAULT_SCOPE:
-                return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
-                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                        .authenticate()
-                        .getToken();
             case CB_KEYSTONE_V3_DOMAIN_SCOPE:
                 return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                         .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
@@ -234,40 +226,43 @@ public class OpenStackClient {
                         .authenticate()
                         .getToken();
             default:
-                return null;
+                throw new CredentialVerificationException("Scope not supported: " + osCredential.getScope());
         }
     }
 
     private void createAccessOrToken(AuthenticatedContext authenticatedContext) {
-        Access access = createAccess(authenticatedContext.getCloudCredential());
-        Token token = createToken(authenticatedContext.getCloudCredential());
-
-        if (token == null && access == null) {
-            throw new CloudConnectorException("Unsupported keystone version");
-        } else if (token != null) {
-            authenticatedContext.putParameter(Token.class, token);
+        KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext.getCloudCredential());
+        if (isV2Keystone(osCredential)) {
+            Access access = createAccess(osCredential);
+            if (access != null) {
+                authenticatedContext.putParameter(Access.class, access);
+            } else {
+                throw new CredentialVerificationException("Openstack authentication failed, can not create access");
+            }
         } else {
-            authenticatedContext.putParameter(Access.class, access);
+            Token token = createToken(osCredential);
+            if (token != null) {
+                authenticatedContext.putParameter(Token.class, token);
+            } else {
+                throw new CredentialVerificationException("Openstack authentication failed, can not create token");
+            }
         }
     }
 
     public Set<String> getRegion(CloudCredential cloudCredential) {
-        Access access = createAccess(cloudCredential);
-        Token token = createToken(cloudCredential);
-
+        KeystoneCredentialView keystoneCredential = createKeystoneCredential(cloudCredential);
         Set<String> regions = new HashSet<>();
-
-        if (token == null && access == null) {
-            throw new CloudConnectorException("Unsupported keystone version");
-        } else if (token != null) {
-            for (Service service : token.getCatalog()) {
-                for (Endpoint endpoint : service.getEndpoints()) {
+        if (isV2Keystone(keystoneCredential)) {
+            Access access = createAccess(keystoneCredential);
+            for (Access.Service service : access.getServiceCatalog()) {
+                for (org.openstack4j.model.identity.v2.Endpoint endpoint : service.getEndpoints()) {
                     regions.add(endpoint.getRegion());
                 }
             }
         } else {
-            for (Access.Service service : access.getServiceCatalog()) {
-                for (org.openstack4j.model.identity.v2.Endpoint endpoint : service.getEndpoints()) {
+            Token token = createToken(keystoneCredential);
+            for (Service service : token.getCatalog()) {
+                for (Endpoint endpoint : service.getEndpoints()) {
                     regions.add(endpoint.getRegion());
                 }
             }

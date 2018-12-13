@@ -25,6 +25,10 @@ public class CredentialDefinitionService {
     @Inject
     private ResourceDefinitionService definitionService;
 
+    public void checkProperties(Platform cloudPlatform, Map<String, Object> properties) {
+        processValues(getDefinition(cloudPlatform), properties);
+    }
+
     public Map<String, Object> removeSensitives(Platform cloudPlatform, Map<String, Object> properties) {
         return processValues(getDefinition(cloudPlatform), properties);
     }

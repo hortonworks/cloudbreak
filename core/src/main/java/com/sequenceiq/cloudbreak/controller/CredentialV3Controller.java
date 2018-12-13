@@ -17,7 +17,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -48,6 +50,9 @@ public class CredentialV3Controller extends NotificationController implements Cr
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private CredentialValidator credentialValidator;
+
     @Override
     public Set<CredentialResponse> listByWorkspace(Long workspaceId) {
         return credentialService.listAvailablesByWorkspaceId(workspaceId).stream()
@@ -63,6 +68,8 @@ public class CredentialV3Controller extends NotificationController implements Cr
     @Override
     public CredentialResponse createInWorkspace(Long workspaceId, CredentialRequest request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        credentialValidator.validateCredentialCloudPlatform(request.getCloudPlatform());
+        credentialValidator.validateParameters(Platform.platform(request.getCloudPlatform()), request.getParameters());
         Credential credential = credentialService.create(conversionService.convert(request, Credential.class), workspaceId, user);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return conversionService.convert(credential, CredentialResponse.class);
