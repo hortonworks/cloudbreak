@@ -14,19 +14,19 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryService;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,16 +52,28 @@ public class FileSystemConfigQueryServiceTest {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     @Mock
+    private CloudbreakResourceReaderService cloudbreakResourceReaderServicePlaceholders;
+
+    @Mock
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
-    @InjectMocks
-    private FileSystemConfigQueryService underTest;
+    private final FileSystemConfigQueryService underTest = new FileSystemConfigQueryService();
+
+    private final FileSystemConfigQueryService underTestPlaceholders = new FileSystemConfigQueryService();
 
     @Before
     public void before() throws IOException {
         String specifications = FileReaderUtils.readFileFromClasspath("definitions/cloud-storage-location-specification.json");
         when(cloudbreakResourceReaderService.resourceDefinition("cloud-storage-location-specification")).thenReturn(specifications);
+        ReflectionTestUtils.setField(underTest, null, cloudbreakResourceReaderService, CloudbreakResourceReaderService.class);
+        ReflectionTestUtils.setField(underTest, null, blueprintProcessorFactory, BlueprintProcessorFactory.class);
         underTest.init();
+
+        specifications = FileReaderUtils.readFileFromClasspath("filesystem-definitions/cloud-storage-location-specification-placeholders.json");
+        when(cloudbreakResourceReaderServicePlaceholders.resourceDefinition("cloud-storage-location-specification")).thenReturn(specifications);
+        ReflectionTestUtils.setField(underTestPlaceholders, null, cloudbreakResourceReaderServicePlaceholders, CloudbreakResourceReaderService.class);
+        ReflectionTestUtils.setField(underTestPlaceholders, null, blueprintProcessorFactory, BlueprintProcessorFactory.class);
+        underTestPlaceholders.init();
     }
 
     @Test
@@ -215,6 +227,62 @@ public class FileSystemConfigQueryServiceTest {
 
         Assert.assertFalse(hiveMetastore.isPresent());
         Assert.assertFalse(rangerAdmin.isPresent());
+    }
+
+    @Test
+    public void testPathPlaceholders() {
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, HIVE_SERVER, RANGER_ADMIN);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withAttachedCluster(false)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTestPlaceholders.queryParameters(fileSystemConfigQueryObject);
+
+        Assert.assertEquals(3L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE, HIVE_METASTORE_WAREHOUSE_DIR);
+        Optional<ConfigQueryEntry> hiveServerRangerAdmin = serviceEntry(bigCluster, HIVE_SERVER);
+        Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+
+        Assert.assertTrue(hiveMetastore.isPresent());
+        Assert.assertTrue(hiveServerRangerAdmin.isPresent());
+        Assert.assertTrue(rangerAdmin.isPresent());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/bigCluster/apps/ranger/audit",
+                hiveServerRangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse",
+                hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/bigCluster/apps/ranger/audit", rangerAdmin.get().getDefaultPath());
+    }
+
+    @Test
+    public void testPathPlaceholdersWhenAttachedCluster() {
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, HIVE_SERVER, RANGER_ADMIN);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withAttachedCluster(true)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTestPlaceholders.queryParameters(fileSystemConfigQueryObject);
+
+        Assert.assertEquals(3L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE, HIVE_METASTORE_WAREHOUSE_DIR);
+        Optional<ConfigQueryEntry> hiveServerRangerAdmin = serviceEntry(bigCluster, HIVE_SERVER);
+        Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+
+        Assert.assertTrue(hiveMetastore.isPresent());
+        Assert.assertTrue(hiveServerRangerAdmin.isPresent());
+        Assert.assertTrue(rangerAdmin.isPresent());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit",
+                hiveServerRangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse",
+                hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/bigCluster/apps/ranger/audit", rangerAdmin.get().getDefaultPath());
     }
 
     private Optional<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
