@@ -97,7 +97,7 @@
     <service>
         <role>WEBHDFS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>http://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
+        <url>http://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs/v1</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -179,6 +179,15 @@
         <role>YARNUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
         <url>http://{{ hostloc }}:{{ ports['YARNUI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {% if 'YARNUIV2' in exposed -%}
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/yarnuiv2/ -->
+    <service>
+        <role>YARNUIV2</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
