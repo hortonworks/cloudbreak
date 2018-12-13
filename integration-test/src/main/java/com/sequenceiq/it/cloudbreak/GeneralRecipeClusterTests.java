@@ -1,5 +1,19 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -12,19 +26,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class GeneralRecipeClusterTests extends CloudbreakTest {
 
@@ -132,8 +133,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
 
     private int getRequiredRecipeAmountForRunningCluster() {
         // * 2 since we post both bash and python script
-        // + 1 since the hdfs-home (default) recipe/script is only available on the master node
-        return FILES_PATH.length * 2 * HOSTGROUPS.length + 1;
+        return FILES_PATH.length * 2 * HOSTGROUPS.length;
     }
 
     private void setUpRecipes() throws Exception {
