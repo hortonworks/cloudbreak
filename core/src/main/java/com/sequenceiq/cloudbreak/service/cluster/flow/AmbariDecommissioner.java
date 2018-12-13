@@ -430,7 +430,7 @@ public class AmbariDecommissioner {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 Map<String, String> privateIpsByFQDN = new HashMap<>();
                 stack.getInstanceMetaDataAsList().stream()
-                        .filter(instanceMetaData -> hostNames.stream().anyMatch(hn -> hn.contains(instanceMetaData.getDiscoveryFQDN().split("\\.")[0])))
+                        .filter(instanceMetaData -> hostNames.stream().anyMatch(hn -> hn.equals(instanceMetaData.getDiscoveryFQDN().split("\\.")[0])))
                         .forEach(instanceMetaData -> privateIpsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 hostOrchestrator.tearDown(allGatewayConfigs, privateIpsByFQDN);
