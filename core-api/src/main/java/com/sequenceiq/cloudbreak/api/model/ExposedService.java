@@ -27,7 +27,8 @@ public enum ExposedService {
     RANGER("Ranger", "RANGER_ADMIN", "RANGERUI", "/ranger/", true, 6080),
     DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "PROFILER-AGENT", "", true, 21900),
     BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "", true, 25968),
-    LIVY_SERVER("Livy Server", "LIVY2_SERVER", "LIVYSERVER", "/livy/v1/sessions/", true, 8999);
+    LIVY_SERVER("Livy Server", "LIVY2_SERVER", "LIVYSERVER", "/livy/v1/sessions/", true, 8999),
+    LOGSEARCH("Log Search", "LOGSEARCH_SERVER", "LOGSEARCH", "/logsearch", true, 61888);
 
     private final String serviceName;
     private final String portName;

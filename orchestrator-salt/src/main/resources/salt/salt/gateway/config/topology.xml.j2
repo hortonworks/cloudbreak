@@ -301,14 +301,25 @@
     {%- endif %}
 
    {% if 'LIVY2_SERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'LIVYSERVER' in exposed -%}
-    <service>
+   {% if 'LIVYSERVER' in exposed -%}
+   <service>
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY2_SERVER'] -%}
         <url>http://{{ hostloc }}:{{ ports['LIVYSERVER'] }}</url>
         {%- endfor %}
-    </service>
-    {%- endif %}
-    {%- endif %}
+   </service>
+   {%- endif %}
+   {%- endif %}
+
+   {% if 'LOGSEARCH_SERVER' in salt['pillar.get']('gateway:location') -%}
+   {% if 'LOGSEARCH' in exposed -%}
+   <service>
+        <role>LOGSEARCH</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LOGSEARCH_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['LOGSEARCH'] }}</url>
+        {%- endfor %}
+   </service>
+   {%- endif %}
+   {%- endif %}
 
 </topology>
