@@ -36,6 +36,9 @@ type StackDetails struct {
 	// cluster version
 	ClusterVersion string `json:"clusterVersion,omitempty"`
 
+	// datalake Id
+	DatalakeID int64 `json:"datalakeId,omitempty"`
+
 	// description
 	Description string `json:"description,omitempty"`
 
@@ -74,6 +77,9 @@ type StackDetails struct {
 
 	// status reason
 	StatusReason string `json:"statusReason,omitempty"`
+
+	// type
+	Type string `json:"type,omitempty"`
 }
 
 // Validate validates this stack details
