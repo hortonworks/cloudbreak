@@ -71,14 +71,15 @@ public class FileSystemConfigQueryService {
                 filtered.addAll(collectedEntries);
             }
         }
+        boolean attachedCluster = request.isAttachedCluster();
         List<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                 .stream()
-                .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() && request.isAttachedCluster())
+                .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() && attachedCluster)
                 .collect(Collectors.toList());
         filtered.addAll(collectedEntries);
         String fileSystemTypeRequest = request.getFileSystemType();
         FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
-        Map<String, String> templateObject = getTemplateObject(request, fileSystemType.getProtocol());
+        Map<String, Object> templateObject = getTemplateObject(request, fileSystemType.getProtocol());
         for (ConfigQueryEntry configQueryEntry : filtered) {
             try {
                 configQueryEntry.setProtocol(fileSystemType.getProtocol());
@@ -91,17 +92,18 @@ public class FileSystemConfigQueryService {
         return filtered;
     }
 
-    private String generateConfigWithParameters(String sourceTemplate, FileSystemType fileSystemType, Map<String, String> templateObject) throws IOException {
+    private String generateConfigWithParameters(String sourceTemplate, FileSystemType fileSystemType, Map<String, Object> templateObject) throws IOException {
         String defaultPath = fileSystemType.getDefaultPath();
-        Template defaultPathtemplate = handlebars.compileInline(defaultPath, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
-        templateObject.put("defaultPath", defaultPathtemplate.apply(templateObject));
+        Template defaultPathTemplate = handlebars.compileInline(defaultPath, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
+        templateObject.put("defaultPath", defaultPathTemplate.apply(templateObject));
         Template template = handlebars.compileInline(sourceTemplate, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
         return template.apply(templateObject);
     }
 
-    private Map<String, String> getTemplateObject(FileSystemConfigQueryObject fileSystemConfigQueryObject, String protocol) {
-        Map<String, String> templateObject = new HashMap<>();
+    private Map<String, Object> getTemplateObject(FileSystemConfigQueryObject fileSystemConfigQueryObject, String protocol) {
+        Map<String, Object> templateObject = new HashMap<>();
         templateObject.put("clusterName", fileSystemConfigQueryObject.getClusterName());
+        templateObject.put("attachedCluster", fileSystemConfigQueryObject.isAttachedCluster());
         templateObject.put("storageName", fileSystemConfigQueryObject.getStorageName());
         templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
         templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));

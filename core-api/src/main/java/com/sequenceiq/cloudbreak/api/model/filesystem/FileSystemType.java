@@ -8,7 +8,7 @@ public enum FileSystemType {
     @Deprecated
     WASB_INTEGRATED(WasbIntegratedFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
-    GCS(GcsFileSystem.class, "gs", "{{{ storageName }}}/{{{ clusterName }}}"),
+    GCS(GcsFileSystem.class, "gs", "{{{ storageName }}}"),
 
     WASB(WasbFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
@@ -16,7 +16,7 @@ public enum FileSystemType {
 
     ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
-    S3(S3FileSystem.class, "s3a", "{{{ storageName }}}/{{{ clusterName }}}");
+    S3(S3FileSystem.class, "s3a", "{{{ storageName }}}");
 
     private final Class<? extends BaseFileSystem> clazz;
 
