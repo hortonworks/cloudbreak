@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -230,26 +231,33 @@ public class ServiceEndpointCollectorTest {
         when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER")));
+        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER",
+                "SPARK2_JOBHISTORYSERVER", "LOGSEARCH_SERVER")));
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
+
         assertEquals(3L, exposedServiceResponses.size());
-        assertFalse(exposedServiceResponses
-                .stream()
-                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
-                    || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER"))
+        assertFalse(createExposedServiceFilteredStream(exposedServiceResponses)
                 .findFirst()
                 .isPresent());
 
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
+
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
-        assertEquals(5L, exposedServiceResponses.size());
-        assertTrue(exposedServiceResponses
+
+        assertEquals(6L, exposedServiceResponses.size());
+        assertTrue(createExposedServiceFilteredStream(exposedServiceResponses)
+                .count() == 2);
+    }
+
+    private Stream<ExposedServiceResponse> createExposedServiceFilteredStream(Collection<ExposedServiceResponse> exposedServiceResponses) {
+        return exposedServiceResponses
                 .stream()
                 .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
-                        || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER"))
-                .count() == 2);
+                        || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")
+                        || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LOGSEARCH_SERVER"));
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
