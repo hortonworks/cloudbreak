@@ -13,9 +13,10 @@ public enum ExposedService {
     ALL("Every Service", "ALL", "", "", true, null),
 
     AMBARI("Ambari", "AMBARI_SERVER", "AMBARI", "/ambari/", true, 8080),
-    WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/", false, 50070),
+    WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070),
     NAMENODE("Name Node", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
+    RESOURCEMANAGER_WEB_V2("Resource Manager V2", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088),
     JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "JOBHISTORYUI", "/jobhistory/", true, 19888),
     HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVE", "/hive/", false, 10001),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "HIVE_INTERACTIVE", "/hive/", false, 10501),
