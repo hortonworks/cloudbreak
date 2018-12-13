@@ -8,11 +8,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.retry.RetryException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -55,20 +53,22 @@ public class UserService {
     @Inject
     private UserPreferencesRepository userPreferencesRepository;
 
-    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
+    @Retryable(value = RetryException.class, maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(CloudbreakUser cloudbreakUser) {
         if (cloudbreakUser != null) {
             try {
-                return getCached(cloudbreakUser, this::createUser);
+                return getCached(cloudbreakUser);
+            } catch (TransactionRuntimeExecutionException e) {
+                throw e;
             } catch (Exception e) {
-                throw new RetryException(e.getMessage());
+                throw new RetryException(e.getMessage(), e);
             }
         } else {
             throw new AccessDeniedException("cloudbreakUser is empty");
         }
     }
 
-    private User getCached(CloudbreakUser cloudbreakUser, Function<CloudbreakUser, User> createUser) throws InterruptedException {
+    private User getCached(CloudbreakUser cloudbreakUser) throws InterruptedException {
         Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(cloudbreakUser, iu -> new Semaphore(1));
         semaphore.acquire();
         try {
@@ -128,13 +128,6 @@ public class UserService {
                 return user;
             });
         } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof ConstraintViolationException) {
-                try {
-                    return transactionService.requiresNew(() -> userRepository.findByUserId(cloudbreakUser.getUserId()));
-                } catch (TransactionExecutionException e2) {
-                    throw new TransactionRuntimeExecutionException(e2);
-                }
-            }
             throw new TransactionRuntimeExecutionException(e);
         }
     }
