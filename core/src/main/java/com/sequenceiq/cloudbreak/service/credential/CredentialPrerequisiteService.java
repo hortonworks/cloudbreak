@@ -89,7 +89,7 @@ public class CredentialPrerequisiteService {
         String attributes = credential.getAttributes();
         Map<String, Object> newAttributes = isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
         boolean attributesChanged = false;
-        if (StringUtils.isNoneEmpty(String.valueOf(newAttributes.get(ROLE_ARN_PARAMTER_KEY)))) {
+        if (StringUtils.isNoneEmpty((String) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);
             if (userPreferencesOptional.isPresent() && StringUtils.isNoneEmpty(userPreferencesOptional.get().getExternalId())) {
                 String externalId = userPreferencesOptional.get().getExternalId();
@@ -103,7 +103,7 @@ public class CredentialPrerequisiteService {
                     (String) newAttributes.get(CUMULUS_AMBARI_PASSWORD));
             Map<String, String> params =
                     ambariClient.getConfigValuesByConfigIds(List.of(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
-            newAttributes.put(CUMULUS_YARN_ENDPOINT, params.get(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
+            newAttributes.put(CUMULUS_YARN_ENDPOINT, "http://" + params.get(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
             attributesChanged = true;
         }
         if (attributesChanged) {
