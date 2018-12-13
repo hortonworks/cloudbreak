@@ -50,16 +50,21 @@ import org.junit.runners.Parameterized.Parameters;
 import org.skyscreamer.jsonassert.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.blueprint.smartsense.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @RunWith(Parameterized.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
-public class BlueprintModulTest extends CentralBlueprintContext {
+public class BlueprintModulTest extends CentralBlueprintContext implements ApplicationContextAware {
 
     static final String BLUEPRINT_UPDATER_TEST_INPUTS = "module-test/inputs";
 
@@ -75,6 +80,8 @@ public class BlueprintModulTest extends CentralBlueprintContext {
 
     @Parameter(2)
     public TemplatePreparationObject testData;
+
+    private ApplicationContext applicationContext;
 
     @Parameters(name = "{index}: module-test/inputs/{0}.bp should equals module-test/outputs/{1}.bp")
     public static Collection<Object[]> data() throws IOException {
@@ -160,6 +167,8 @@ public class BlueprintModulTest extends CentralBlueprintContext {
     public void setUp() throws Exception {
         TestContextManager testContextManager = new TestContextManager(getClass());
         testContextManager.prepareTestInstance(this);
+        SmartSenseConfigProvider smartSenseConfigProvider = applicationContext.getBean(SmartSenseConfigProvider.class);
+        ReflectionTestUtils.setField(smartSenseConfigProvider, "cbVersion", "custom.cb.version");
     }
 
     @Test
@@ -183,6 +192,11 @@ public class BlueprintModulTest extends CentralBlueprintContext {
         assertJsonEquals(expected.toString(), resultBlueprintText.toString(), when(IGNORING_ARRAY_ORDER));
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
     private TemplatePreparationObject prepareBlueprintPreparationObjectWithBlueprintText(TestFile inputFile) {
         TemplatePreparationObject templatePreparationObject = testData;
         templatePreparationObject.getBlueprintView().setBlueprintText(inputFile.getFileContent());
@@ -192,5 +206,4 @@ public class BlueprintModulTest extends CentralBlueprintContext {
     private JSONObject toJSON(String jsonText) throws JSONException {
         return (JSONObject) JSONParser.parseJSON(jsonText);
     }
-
 }
