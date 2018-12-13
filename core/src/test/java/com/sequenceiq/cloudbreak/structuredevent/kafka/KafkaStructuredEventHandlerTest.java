@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.kafka;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -8,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ExecutionException;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,11 +20,15 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 
 import reactor.bus.Event;
@@ -38,8 +45,13 @@ public class KafkaStructuredEventHandlerTest {
     @InjectMocks
     private KafkaStructuredEventHandler classIntest;
 
+    @Before
+    public void setup() {
+        classIntest.init();
+    }
+
     @Test
-    public void sendingValidRestCallToDifferentTopic() throws ExecutionException, InterruptedException {
+    public void checkEventTypeBasedTopicDistribution() throws ExecutionException, InterruptedException {
         StructuredRestCallEvent structuredEvent = generateValidRestEvent();
         Event<StructuredEvent> event = new Event<>(structuredEvent);
         ListenableFuture<SendResult<String, String>> futures = generateMockFutureWrappers();
@@ -48,6 +60,31 @@ public class KafkaStructuredEventHandlerTest {
         classIntest.accept(event);
 
         verify(kafkaTemplate).send(eq("cbStructuredRestCallEvent"), anyString());
+    }
+
+    @Test
+    public void checkIfPropertiesGetFilteredWithCustomMapper() throws JsonProcessingException {
+        StructuredRestCallEvent restEvent = createDummyStructuredRestEvent();
+
+        ObjectMapper mapper = classIntest.createObjectMapper();
+        String result = mapper.writeValueAsString(restEvent);
+        assertFalse("Filtered because of JsonFilter", result.contains("BodyContent"));
+        assertFalse("Filtered because of JsonFilter", result.contains("body"));
+        assertTrue("Unaffected property by the filter", result.contains("content-length"));
+    }
+
+    private StructuredRestCallEvent createDummyStructuredRestEvent() {
+        RestRequestDetails requestDetails = new RestRequestDetails();
+        RestResponseDetails restResponseDetails = new RestResponseDetails();
+        restResponseDetails.setStatusCode(200);
+        restResponseDetails.setBody("BodyContent");
+        restResponseDetails.setHeaders(ImmutableMap.of("content-length", "89"));
+        RestCallDetails restCallDetails = new RestCallDetails();
+        restCallDetails.setRestRequest(requestDetails);
+        restCallDetails.setRestResponse(restResponseDetails);
+        StructuredRestCallEvent restEvent = new StructuredRestCallEvent();
+        restEvent.setRestCall(restCallDetails);
+        return restEvent;
     }
 
     private ListenableFuture<SendResult<String, String>> generateMockFutureWrappers() throws InterruptedException, ExecutionException {

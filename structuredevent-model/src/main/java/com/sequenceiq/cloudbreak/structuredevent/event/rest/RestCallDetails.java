@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.structuredevent.event.rest;
 import java.io.Serializable;
 
 public class RestCallDetails implements Serializable {
+
+    public static final String KAFKA_PROPERTY_FILTER_NAME = "kafkaPropertyFilter";
+
     private RestRequestDetails restRequest;
 
     private RestResponseDetails restResponse;
