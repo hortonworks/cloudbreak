@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.kafka;
 
+import static com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails.KAFKA_PROPERTY_FILTER_NAME;
+
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.kafka.common.errors.InvalidTopicException;
@@ -14,6 +17,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
@@ -24,7 +29,7 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaStructuredEventHandler.class);
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
     @Inject
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -49,6 +54,19 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error happened in message sending to kafka", e);
         }
+    }
+
+    @PostConstruct
+    protected void init() {
+        objectMapper = createObjectMapper();
+    }
+
+    protected ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+        filterProvider.addFilter(KAFKA_PROPERTY_FILTER_NAME, SimpleBeanPropertyFilter.serializeAllExcept("body", "cookies"));
+        mapper.setFilterProvider(filterProvider);
+        return mapper;
     }
 
     private String getTopicNameForEvent(Event<T> event) {
