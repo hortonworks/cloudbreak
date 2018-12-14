@@ -72,7 +72,7 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
 
         ambariStackDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
         ambariStackDetailsJson.setVerify(source.isVerify());
-        ambariStackDetailsJson.setVersion(source.getHdpVersion());
+        ambariStackDetailsJson.setVersion(source.getMajorHdpVersion());
         if (!source.getMpacks().isEmpty()) {
             List<ManagementPackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
                     mp, ManagementPackDetails.class)).collect(Collectors.toList());
