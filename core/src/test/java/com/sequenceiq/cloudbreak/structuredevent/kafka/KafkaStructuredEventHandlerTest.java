@@ -68,13 +68,14 @@ public class KafkaStructuredEventHandlerTest {
 
         ObjectMapper mapper = classIntest.createObjectMapper();
         String result = mapper.writeValueAsString(restEvent);
+        assertTrue("Unaffected property by the filter", result.contains("content-length"));
         assertFalse("Filtered because of JsonFilter", result.contains("BodyContent"));
         assertFalse("Filtered because of JsonFilter", result.contains("body"));
-        assertTrue("Unaffected property by the filter", result.contains("content-length"));
     }
 
     private StructuredRestCallEvent createDummyStructuredRestEvent() {
         RestRequestDetails requestDetails = new RestRequestDetails();
+        requestDetails.setBody("RequestBodyContent");
         RestResponseDetails restResponseDetails = new RestResponseDetails();
         restResponseDetails.setStatusCode(200);
         restResponseDetails.setBody("BodyContent");
