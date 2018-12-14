@@ -3,7 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v1util"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1util"
 )
 
 var r *rand.Rand
@@ -60,42 +60,42 @@ func SafeStringConvert(value *string) string {
 	return *value
 }
 
-func SafeCredentialCloudPlatformConvert(s *model.StackResponse) string {
+func SafeCredentialCloudPlatformConvert(s *models_cloudbreak.StackResponse) string {
 	if s.Credential != nil {
 		return SafeStringConvert(s.Credential.CloudPlatform)
 	}
 	return ""
 }
 
-func SafeCredentialViewCloudPlatformConvert(s *model.StackViewResponse) string {
+func SafeCredentialViewCloudPlatformConvert(s *models_cloudbreak.StackViewResponse) string {
 	if s.Credential != nil {
 		return SafeStringConvert(s.Credential.CloudPlatform)
 	}
 	return ""
 }
 
-func SafeClusterViewDescriptionConvert(s *model.StackViewResponse) string {
+func SafeClusterViewDescriptionConvert(s *models_cloudbreak.StackViewResponse) string {
 	if s.Cluster != nil {
 		return SafeStringConvert(s.Cluster.Description)
 	}
 	return ""
 }
 
-func SafeClusterDescriptionConvert(s *model.StackResponse) string {
+func SafeClusterDescriptionConvert(s *models_cloudbreak.StackResponse) string {
 	if s.Cluster != nil {
 		return s.Cluster.Description
 	}
 	return ""
 }
 
-func SafeClusterViewStatusConvert(s *model.StackViewResponse) string {
+func SafeClusterViewStatusConvert(s *models_cloudbreak.StackViewResponse) string {
 	if s.Cluster != nil {
 		return s.Cluster.Status
 	}
 	return ""
 }
 
-func SafeClusterStatusConvert(s *model.StackResponse) string {
+func SafeClusterStatusConvert(s *models_cloudbreak.StackResponse) string {
 	if s.Cluster != nil {
 		return s.Cluster.Status
 	}
