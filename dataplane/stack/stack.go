@@ -133,19 +133,19 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 
 func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, commonutils.SafeStringConvert(s.Cluster.Description), *s.Credential.CloudPlatform},
+		common.CloudResourceOut{*s.Name, utils.SafeClusterViewDescriptionConvert(s), utils.SafeCredentialViewCloudPlatformConvert(s)},
 		s.Environment,
 		s.Status,
-		s.Cluster.Status,
+		utils.SafeClusterViewStatusConvert(s),
 	}
 }
 
 func convertResponseToStack(s *model.StackResponse) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, s.Cluster.Description, *s.Credential.CloudPlatform},
+		common.CloudResourceOut{*s.Name, utils.SafeClusterDescriptionConvert(s), utils.SafeCredentialCloudPlatformConvert(s)},
 		s.Environment,
 		s.Status,
-		s.Cluster.Status,
+		utils.SafeClusterStatusConvert(s),
 	}
 }
 
