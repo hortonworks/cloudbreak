@@ -212,7 +212,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         AutoscaleStackResponse stack = new AutoscaleStackResponse();
         stack.setStackId(stackId);
         stack.setClusterStatus(Status.AVAILABLE);
-        stack.setAmbariServerIp("199.199.199");
+        stack.setAmbariServerIp(String.format("199.199.%03d", stackId));
         return stack;
     }
 

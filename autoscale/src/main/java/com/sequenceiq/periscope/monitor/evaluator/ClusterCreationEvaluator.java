@@ -78,7 +78,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
                 createCluster(stack, resolvedAmbari);
             }
         } catch (AmbariHealtCheckException ahf) {
-            LOGGER.warn("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
+            LOGGER.warn("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getName(), stack.getStackId(),
                     ahf.getMessage());
         } catch (TlsConfigurationException ex) {
             LOGGER.warn("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
@@ -133,10 +133,12 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
             AmbariClient client = ambariClientProvider.createAmbariClient(new Cluster(ambariStack));
             String healthCheckResult = ambariRequestLogging.logging(client::healthCheck, "healthCheck");
             if (!"RUNNING".equals(healthCheckResult)) {
-                throw new AmbariHealtCheckException(String.format("Ambari on host '%s' is not in 'RUNNING' state.", host));
+                throw new AmbariHealtCheckException(String.format("Ambari on host '%s' is not in 'RUNNING' state, got state: %s", host, healthCheckResult));
             }
+        } catch (AmbariHealtCheckException ex) {
+            throw ex;
         } catch (Exception ex) {
-            throw new AmbariHealtCheckException(String.format("Health check failed on host '%s':", host), ex);
+            throw new AmbariHealtCheckException(String.format("Health check failed on host '%s', original message: %s", host, ex.getMessage()), ex);
         }
     }
 
