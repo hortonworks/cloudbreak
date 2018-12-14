@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -57,6 +58,48 @@ func SafeStringConvert(value *string) string {
 		return ""
 	}
 	return *value
+}
+
+func SafeCredentialCloudPlatformConvert(s *models_cloudbreak.StackResponse) string {
+	if s.Credential != nil {
+		return SafeStringConvert(s.Credential.CloudPlatform)
+	}
+	return ""
+}
+
+func SafeCredentialViewCloudPlatformConvert(s *models_cloudbreak.StackViewResponse) string {
+	if s.Credential != nil {
+		return SafeStringConvert(s.Credential.CloudPlatform)
+	}
+	return ""
+}
+
+func SafeClusterViewDescriptionConvert(s *models_cloudbreak.StackViewResponse) string {
+	if s.Cluster != nil {
+		return SafeStringConvert(s.Cluster.Description)
+	}
+	return ""
+}
+
+func SafeClusterDescriptionConvert(s *models_cloudbreak.StackResponse) string {
+	if s.Cluster != nil {
+		return s.Cluster.Description
+	}
+	return ""
+}
+
+func SafeClusterViewStatusConvert(s *models_cloudbreak.StackViewResponse) string {
+	if s.Cluster != nil {
+		return s.Cluster.Status
+	}
+	return ""
+}
+
+func SafeClusterStatusConvert(s *models_cloudbreak.StackResponse) string {
+	if s.Cluster != nil {
+		return s.Cluster.Status
+	}
+	return ""
 }
 
 func EscapeStringToJson(input string) string {
