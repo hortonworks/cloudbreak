@@ -136,15 +136,16 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     private AmbariClientProvider ambariClientProvider;
 
     public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
-        return environmentViewService.findAllByWorkspaceId(workspaceId).stream()
+        Set<SimpleEnvironmentResponse> environmentResponses = environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
-                .peek(env -> {
-                    Set<String> datalakeNames = stackService.findDatalakeStackNamesByWorkspaceAndEnvironment(workspaceId, env.getId());
-                    env.setDatalakeClusterNames(datalakeNames);
-                    Set<String> workloadNames = stackService.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, env.getId());
-                    env.setWorkloadClusterNames(workloadNames);
-                })
                 .collect(Collectors.toSet());
+        for (SimpleEnvironmentResponse environmentResponse : environmentResponses) {
+            Set<String> datalakeNames = stackService.findDatalakeStackNamesByWorkspaceAndEnvironment(workspaceId, environmentResponse.getId());
+            environmentResponse.setDatalakeClusterNames(datalakeNames);
+            Set<String> workloadNames = stackService.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, environmentResponse.getId());
+            environmentResponse.setWorkloadClusterNames(workloadNames);
+        }
+        return environmentResponses;
     }
 
     public DetailedEnvironmentResponse get(String environmentName, Long workspaceId) {
