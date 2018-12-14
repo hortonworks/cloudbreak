@@ -123,16 +123,12 @@ public class AzureUtils {
         return armResourceStatus;
     }
 
-    public String getResourceGroupName(CloudContext cloudContext) {
-        return getStackName(cloudContext);
-    }
-
     public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {
-        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getResourceGroupName(cloudContext));
+        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getStackName(cloudContext));
     }
 
     public String getResourceGroupName(CloudContext cloudContext, DynamicModel dynamicModel) {
-        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getResourceGroupName(cloudContext)).toString();
+        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getStackName(cloudContext)).toString();
     }
 
     public boolean isExistingNetwork(Network network) {

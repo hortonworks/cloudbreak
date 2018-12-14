@@ -19,7 +19,7 @@ public class AzureResourceGroupValidator implements Validator {
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), cloudStack);
         boolean exists = client.resourceGroupExists(resourceGroupName);
         if (exists) {
             throw new CloudConnectorException(String.format("Resource group is already exists with the given name: %s", resourceGroupName));
