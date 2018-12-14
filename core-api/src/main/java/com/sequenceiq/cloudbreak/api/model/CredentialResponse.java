@@ -19,6 +19,9 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty
     private WorkspaceResourceResponse workspace;
 
+    @ApiModelProperty(value = ModelDescriptions.GOV_CLOUD_FLAG)
+    private Boolean govCloud;
+
     @JsonProperty("public")
     public boolean isPublicInAccount() {
         return publicInAccount;
@@ -43,5 +46,13 @@ public class CredentialResponse extends CredentialBase {
 
     public void setWorkspace(WorkspaceResourceResponse workspace) {
         this.workspace = workspace;
+    }
+
+    public Boolean getGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(Boolean govCloud) {
+        this.govCloud = govCloud;
     }
 }

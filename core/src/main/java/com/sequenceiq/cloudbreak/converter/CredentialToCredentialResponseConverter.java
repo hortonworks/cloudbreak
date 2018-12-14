@@ -53,6 +53,7 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         }
         credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         coverSensitiveData(credentialJson);
+        credentialJson.setGovCloud(source.getGovCloud());
         return credentialJson;
     }
 
