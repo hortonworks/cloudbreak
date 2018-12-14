@@ -13,6 +13,7 @@ public class CredentialToCredentialViewResponseConverter extends AbstractConvers
         CredentialViewResponse credentialJson = new CredentialViewResponse();
         credentialJson.setName(source.getName());
         credentialJson.setCloudPlatform(source.cloudPlatform());
+        credentialJson.setGovCloud(source.getGovCloud());
         return credentialJson;
     }
 

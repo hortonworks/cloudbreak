@@ -27,6 +27,9 @@ public class CredentialView implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    @Column
+    private Boolean govCloud;
+
     public Long getId() {
         return id;
     }
@@ -64,4 +67,11 @@ public class CredentialView implements ProvisionEntity, WorkspaceAwareResource {
         return WorkspaceResource.CREDENTIAL;
     }
 
+    public Boolean getGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(Boolean govCloud) {
+        this.govCloud = govCloud;
+    }
 }

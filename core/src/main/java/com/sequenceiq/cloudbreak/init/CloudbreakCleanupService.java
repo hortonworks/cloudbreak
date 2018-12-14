@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.startup.GovCloudFlagMigrator;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
@@ -88,6 +89,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private TransactionService transactionService;
 
     @Inject
+    private GovCloudFlagMigrator govCloudFlagMigrator;
+
+    @Inject
     private BlueprintMigrationService blueprintMigrationService;
 
     @Override
@@ -105,6 +109,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             LOGGER.info("Unable to start node properly", e);
         }
         blueprintMigrationService.migrateBlueprints();
+        govCloudFlagMigrator.run();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
