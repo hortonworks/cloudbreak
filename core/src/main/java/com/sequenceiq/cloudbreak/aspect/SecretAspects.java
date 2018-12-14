@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
 import com.sequenceiq.cloudbreak.service.Clock;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 
@@ -55,26 +54,26 @@ public class SecretAspects {
     }
 
     @Around("onRepositorySave()")
-    public Object proceedOnRepositorySave(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositorySave(ProceedingJoinPoint proceedingJoinPoint) {
         return proceedSave(proceedingJoinPoint);
     }
 
     @Around("onRepositoryDelete()")
-    public Object proceedOnRepositoryDelete(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositoryDelete(ProceedingJoinPoint proceedingJoinPoint) {
         return proceedDelete(proceedingJoinPoint);
     }
 
     @Around("onRepositorySaveAll()")
-    public Object proceedOnRepositorySaveAll(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositorySaveAll(ProceedingJoinPoint proceedingJoinPoint) {
         return proceedSave(proceedingJoinPoint);
     }
 
     @Around("onRepositoryDeleteAll()")
-    public Object proceedOnRepositoryDeleteAll(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    public Object proceedOnRepositoryDeleteAll(ProceedingJoinPoint proceedingJoinPoint) {
         return proceedDelete(proceedingJoinPoint);
     }
 
-    private Object proceedSave(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    private Object proceedSave(ProceedingJoinPoint proceedingJoinPoint) {
         Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
         for (Object entity : entities) {
             String tenant = null;
@@ -97,22 +96,25 @@ public class SecretAspects {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Looks like something went wrong with Secret Store. Data is not encrypted!", e);
-                throw new CloudbreakException(e);
+                throw new CloudbreakServiceException(e);
             }
         }
 
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (RuntimeException re) {
+            LOGGER.warn("Failed to invoke repository save", re);
+            throw re;
         } catch (Throwable throwable) {
             LOGGER.error("Failed to invoke repository save", throwable);
-            throw new CloudbreakException(throwable);
+            throw new CloudbreakServiceException(throwable);
         }
 
         return proceed;
     }
 
-    private Object proceedDelete(ProceedingJoinPoint proceedingJoinPoint) throws CloudbreakException {
+    private Object proceedDelete(ProceedingJoinPoint proceedingJoinPoint) {
         Collection<Object> entities = convertFirstArgToCollection(proceedingJoinPoint);
         for (Object entity : entities) {
             try {
@@ -129,16 +131,19 @@ public class SecretAspects {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
-                throw new CloudbreakException(e);
+                throw new CloudbreakServiceException(e);
             }
         }
 
         Object proceed;
         try {
             proceed = proceedingJoinPoint.proceed();
+        } catch (RuntimeException re) {
+            LOGGER.warn("Failed to invoke repository delete", re);
+            throw re;
         } catch (Throwable throwable) {
             LOGGER.error("Failed to invoke repository delete", throwable);
-            throw new CloudbreakException(throwable);
+            throw new CloudbreakServiceException(throwable);
         }
         return proceed;
     }
