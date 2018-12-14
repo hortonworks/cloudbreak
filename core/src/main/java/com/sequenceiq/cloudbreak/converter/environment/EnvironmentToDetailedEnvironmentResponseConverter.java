@@ -80,6 +80,16 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .map(stack -> getConversionService().convert(stack, StackViewResponse.class))
                         .collect(Collectors.toSet()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
+        response.setWorkloadClusterNames(
+                response.getWorkloadClusters()
+                        .stream()
+                        .map(StackViewResponse::getName)
+                        .collect(Collectors.toSet()));
+        response.setDatalakeClusterNames(
+                response.getDatalakeClusters()
+                        .stream()
+                        .map(StackViewResponse::getName)
+                        .collect(Collectors.toSet()));
         if (source.getDatalakeResources() != null) {
             DatalakeResources datalakeResources = source.getDatalakeResources();
             DatalakeResourcesResponse datalakeResourcesResponse = new DatalakeResourcesResponse();

@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironm
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConve
 import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
+import com.sequenceiq.cloudbreak.converter.stack.StackApiViewToStackViewResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -176,6 +178,9 @@ public class EnvironmentServiceTest {
 
     @InjectMocks
     private KerberosConfigToKerberosResponseConverter kerberosConfigResponseConverter;
+
+    @InjectMocks
+    private StackApiViewToStackViewResponseConverter stackApiViewToStackViewResponseConverter;
 
     @Before
     public void setup() throws TransactionExecutionException {
@@ -379,7 +384,9 @@ public class EnvironmentServiceTest {
         environment.setCredential(credential1);
         Set<StackApiView> workloadClusters = new HashSet<>();
         StackApiView stackApiView1 = new StackApiView();
+        stackApiView1.setName("name1");
         StackApiView stackApiView2 = new StackApiView();
+        stackApiView2.setName("name2");
         workloadClusters.add(stackApiView1);
         workloadClusters.add(stackApiView2);
         environment.setStacks(workloadClusters);
@@ -392,7 +399,8 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
                 .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-
+        when(conversionService.convert(any(StackApiView.class), eq(StackViewResponse.class)))
+                .thenAnswer(invocation -> stackApiViewToStackViewResponseConverter.convert((StackApiView) invocation.getArgument(0)));
 
         EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
         request.setCredentialName(credentialName2);

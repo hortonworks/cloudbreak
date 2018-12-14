@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model.environment.response;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.model.CompactRegionResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -32,6 +34,39 @@ public abstract class EnvironmentBaseResponse {
     private LocationResponse location;
 
     private WorkspaceResourceResponse workspace;
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES_NAME)
+    private String datalakeResourcesName;
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_CLUSTER_NAMES)
+    private Set<String> datalakeClusterNames;
+
+    @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTER_NAMES)
+    private Set<String> workloadClusterNames;
+
+    public String getDatalakeResourcesName() {
+        return datalakeResourcesName;
+    }
+
+    public void setDatalakeResourcesName(String datalakeResourcesName) {
+        this.datalakeResourcesName = datalakeResourcesName;
+    }
+
+    public Set<String> getDatalakeClusterNames() {
+        return datalakeClusterNames;
+    }
+
+    public void setDatalakeClusterNames(Set<String> datalakeClusterNames) {
+        this.datalakeClusterNames = datalakeClusterNames;
+    }
+
+    public Set<String> getWorkloadClusterNames() {
+        return workloadClusterNames;
+    }
+
+    public void setWorkloadClusterNames(Set<String> workloadClusterNames) {
+        this.workloadClusterNames = workloadClusterNames;
+    }
 
     public Long getId() {
         return id;
