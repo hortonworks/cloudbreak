@@ -264,6 +264,7 @@ public class ModelDescriptions {
         public static final String STATUS_MAINTENANCE_MODE = "maintenance mode status";
         public static final String SECURE = "tells wether the cluster is secured or not";
         public static final String KERBEROSCONFIG_NAME = "Kerberos config name for the cluster";
+        public static final String AMBARI_URL = "Ambari url";
     }
 
     public static class GatewayModelDescription {
@@ -649,5 +650,12 @@ public class ModelDescriptions {
     public static class SecretResponseModelDescription {
         public static final String ENGINE_PATH = "Engine path of the secret.";
         public static final String SECRET_PATH = "Path of the secret.";
+    }
+
+    public static class DatalakeResourcesDescription {
+        public static final String SERVICE_DESCRIPTORS = "Descriptors of the datalake services";
+        public static final String SERVICE_NAME = "Name of the datalake service";
+        public static final String BLUEPRINT_PARAMS = "Bluepirnt parameters from the datalake services";
+        public static final String COMPONENT_HOSTS = "Component hosts of the datalake services";
     }
 }
