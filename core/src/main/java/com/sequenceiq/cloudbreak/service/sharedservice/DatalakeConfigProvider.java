@@ -136,7 +136,9 @@ public class DatalakeConfigProvider {
         setupDatalakeGlobalParams(datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari, datalakeResources);
         datalakeResources.setLdapConfig(ldapConfig);
         datalakeResources.setKerberosConfig(kerberosConfig);
-        datalakeResources.setRdsConfigs(rdsConfigs);
+        if (rdsConfigs != null) {
+            datalakeResources.setRdsConfigs(new HashSet<>(rdsConfigs));
+        }
         return datalakeResources;
     }
 
