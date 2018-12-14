@@ -99,14 +99,14 @@ public class DatalakeConfigProvider {
         String ambariIp = datalakeStack.getAmbariIp();
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
                 ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
-        return collectDatalakeResources(datalakeStack.getName(), ambariIp, ambariFqdn, ambariClient, serviceSecretParamMap,
+        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, ambariClient, serviceSecretParamMap,
                 datalakeStack.getCluster().getLdapConfig(), datalakeStack.getCluster().getKerberosConfig(), datalakeStack.getCluster().getRdsConfigs());
     }
 
     //CHECKSTYLE:OFF
-    public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari,
-            Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig, Set<RDSConfig> rdsConfigs)
-            throws JsonProcessingException {
+    public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
+            AmbariClient datalakeAmbari, Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig,
+            Set<RDSConfig> rdsConfigs) throws JsonProcessingException {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName(datalakeName);
         Set<String> datalakeParamKeys = new HashSet<>();
@@ -133,19 +133,19 @@ public class DatalakeConfigProvider {
             serviceDescriptors.put(serviceDescriptor.getServiceName(), serviceDescriptor);
         }
         datalakeResources.setServiceDescriptorMap(serviceDescriptors);
-        setupDatalakeGlobalParams(datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari, datalakeResources);
+        setupDatalakeGlobalParams(datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari, datalakeResources);
         datalakeResources.setLdapConfig(ldapConfig);
         datalakeResources.setKerberosConfig(kerberosConfig);
         datalakeResources.setRdsConfigs(rdsConfigs);
         return datalakeResources;
     }
 
-    public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, String datalakeAmbariIp, String datalakeAmbariFqdn,
+    public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
             AmbariClient datalakeAmbari, Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig,
             Set<RDSConfig> rdsConfigs, Workspace workspace) {
         try {
-            DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariIp, datalakeAmbariFqdn, datalakeAmbari,
-                    serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
+            DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn,
+                    datalakeAmbari, serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
             return transactionService.required(() -> {
                 storeDatalakeResources(datalakeResources, workspace);
                 return datalakeResources;
@@ -221,8 +221,9 @@ public class DatalakeConfigProvider {
                 : Map.of();
     }
 
-    private void setupDatalakeGlobalParams(String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari,
+    private void setupDatalakeGlobalParams(String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari,
             DatalakeResources datalakeResources) {
+        datalakeResources.setDatalakeAmbariUrl(datalakeAmbariUrl);
         datalakeResources.setDatalakeAmbariIp(datalakeAmbariIp);
         datalakeResources.setDatalakeAmbariFqdn(StringUtils.isEmpty(datalakeAmbariFqdn) ? datalakeAmbariIp : datalakeAmbariFqdn);
         Set<String> components = new HashSet<>();

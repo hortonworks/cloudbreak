@@ -42,6 +42,8 @@ public class DatalakeResources implements WorkspaceAwareResource {
 
     private String name;
 
+    private String datalakeAmbariUrl;
+
     private String datalakeAmbariIp;
 
     private String datalakeAmbariFqdn;
@@ -102,6 +104,14 @@ public class DatalakeResources implements WorkspaceAwareResource {
 
     public void setDatalakeStackId(Long datalakeStackId) {
         this.datalakeStackId = datalakeStackId;
+    }
+
+    public String getDatalakeAmbariUrl() {
+        return datalakeAmbariUrl;
+    }
+
+    public void setDatalakeAmbariUrl(String datalakeAmbariUrl) {
+        this.datalakeAmbariUrl = datalakeAmbariUrl;
     }
 
     public String getDatalakeAmbariIp() {

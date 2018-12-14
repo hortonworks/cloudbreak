@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.environment;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -12,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DatalakeResourcesResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
+import com.sequenceiq.cloudbreak.api.model.environment.response.ServiceDescriptorResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
@@ -21,6 +24,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
@@ -79,6 +83,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         if (source.getDatalakeResources() != null) {
             DatalakeResources datalakeResources = source.getDatalakeResources();
             DatalakeResourcesResponse datalakeResourcesResponse = new DatalakeResourcesResponse();
+            datalakeResourcesResponse.setAmbariUrl(datalakeResources.getDatalakeAmbariUrl());
             if (datalakeResources.getLdapConfig() != null) {
                 datalakeResourcesResponse.setLdapName(datalakeResources.getLdapConfig().getName());
             }
@@ -88,6 +93,15 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
             if (!CollectionUtils.isEmpty(datalakeResources.getRdsConfigs())) {
                 datalakeResourcesResponse.setRdsNames(datalakeResources.getRdsConfigs().stream().map(rds -> rds.getName()).collect(Collectors.toSet()));
             }
+            Map<String, ServiceDescriptorResponse> serviceDescriptorResponses = new HashMap<>();
+            for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {
+                ServiceDescriptorResponse serviceDescriptorResponse = new ServiceDescriptorResponse();
+                serviceDescriptorResponse.setServiceName(serviceDescriptor.getServiceName());
+                serviceDescriptorResponse.setBlueprintParams((Map) serviceDescriptor.getBlueprintParams().getMap());
+                serviceDescriptorResponse.setComponentHosts((Map) serviceDescriptor.getComponentsHosts().getMap());
+                serviceDescriptorResponses.put(serviceDescriptor.getServiceName(), serviceDescriptorResponse);
+            }
+            datalakeResourcesResponse.setServiceDescriptorMap(serviceDescriptorResponses);
             response.setDatalakeResourcesResponse(datalakeResourcesResponse);
         }
         return response;

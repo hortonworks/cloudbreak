@@ -393,7 +393,8 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                         : Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE, Map.ofEntries(
                         Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, registerDatalakeRequest.getRangerAdminPassword()))));
                 DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, datalakeAmbariUrl,
-                        datalakeAmbariUrl, ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig, rdssConfigs, environment.getWorkspace());
+                        datalakeAmbariUrl, datalakeAmbariUrl, ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig, rdssConfigs,
+                        environment.getWorkspace());
                 environment.setDatalakeResources(datalakeResources);
                 return conversionService.convert(environmentRepository.save(environment), DetailedEnvironmentResponse.class);
             });
