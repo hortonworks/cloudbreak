@@ -29,6 +29,9 @@ type DetailedEnvironmentResponse struct {
 	// Unique: true
 	DatalakeClusters []*StackViewResponse `json:"datalakeClusters"`
 
+	// Datalake cluster resources registered to the environment.
+	DatalakeResourcesResponse *DatalakeResourcesResponse `json:"datalakeResourcesResponse,omitempty"`
+
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
@@ -77,6 +80,10 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDatalakeClusters(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDatalakeResourcesResponse(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -146,6 +153,24 @@ func (m *DetailedEnvironmentResponse) validateDatalakeClusters(formats strfmt.Re
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateDatalakeResourcesResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeResourcesResponse) { // not required
+		return nil
+	}
+
+	if m.DatalakeResourcesResponse != nil {
+		if err := m.DatalakeResourcesResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("datalakeResourcesResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

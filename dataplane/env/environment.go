@@ -64,9 +64,9 @@ func CreateEnvironment(c *cli.Context) {
 	description := c.String(fl.FlDescriptionOptional.Name)
 	credentialName := c.String(fl.FlEnvironmentCredential.Name)
 	regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ",")
-	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentLdapsOptional.Name), ",")
+	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentProxiesOptional.Name), ",")
-	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRdsesOptional.Name), ",")
+	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	locationName := c.String(fl.FlEnvironmentLocationName.Name)
 	longitude := c.Float64(fl.FlEnvironmentLongitudeOptional.Name)
@@ -102,6 +102,43 @@ func createEnvironmentImpl(c *cli.Context, workspaceId int64, environmentRequest
 	environment := resp.Payload
 
 	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %d", *environmentRequest.Name, environment.ID)
+}
+
+func RegisterCumulusDatalake(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "register cumulus datalake")
+
+	ldapConfig := c.String(fl.FlLdapNameOptional.Name)
+	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
+	kerberosConfig := c.String(fl.FlKerberosNameOptional.Name)
+	envName := c.String(fl.FlEnvironmentName.Name)
+	rangerPassword := c.String(fl.FlRangerAdminPasswordOptional.Name)
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+
+	registerRequest := model.RegisterDatalakeRequest{
+		KerberosName:        kerberosConfig,
+		LdapName:            ldapConfig,
+		RdsNames:            rdsConfigs,
+		RangerAdminPassword: rangerPassword,
+	}
+
+	registerCumulusDatalake(c, workspaceID, envName, &registerRequest)
+}
+
+func registerCumulusDatalake(c *cli.Context, workspaceId int64, envName string, registerRequest *model.RegisterDatalakeRequest) {
+	log.Infof("[registerCumulusDatalake] register cumulus datalake for env: %s", envName)
+
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := cbClient.Cloudbreak.V3WorkspaceIDEnvironments
+
+	resp, err := envClient.RegisterExternalDatalake(v3_workspace_id_environments.NewRegisterExternalDatalakeParams().
+		WithWorkspaceID(workspaceId).
+		WithName(envName).
+		WithBody(registerRequest))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	log.Infof("[registerCumulusDatalake] datalake registered with id: %d", resp.Payload.ID)
 }
 
 func ListEnvironments(c *cli.Context) error {
@@ -181,9 +218,9 @@ func AttachResources(c *cli.Context) {
 func createAttachRequest(c *cli.Context) *v3_workspace_id_environments.AttachResourcesToEnvironmentParams {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
-	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentLdapsOptional.Name), ",")
+	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentProxiesOptional.Name), ",")
-	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRdsesOptional.Name), ",")
+	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, rdsConfigs)
 	attachBody := &model.EnvironmentAttachRequest{
@@ -215,9 +252,9 @@ func DetachResources(c *cli.Context) {
 func createDetachRequest(c *cli.Context) *v3_workspace_id_environments.DetachResourcesFromEnvironmentParams {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
-	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentLdapsOptional.Name), ",")
+	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentProxiesOptional.Name), ",")
-	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRdsesOptional.Name), ",")
+	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, rdsConfigs)
 	detachBody := &model.EnvironmentDetachRequest{

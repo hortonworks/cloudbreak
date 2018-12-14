@@ -234,6 +234,36 @@ func (a *Client) ListEnvironment(params *ListEnvironmentParams) (*ListEnvironmen
 
 }
 
+/*
+RegisterExternalDatalake registers external datalake
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) RegisterExternalDatalake(params *RegisterExternalDatalakeParams) (*RegisterExternalDatalakeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRegisterExternalDatalakeParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "registerExternalDatalake",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/environments/{name}/registerDatalake",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RegisterExternalDatalakeReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*RegisterExternalDatalakeOK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

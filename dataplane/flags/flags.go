@@ -964,11 +964,11 @@ var (
 			Usage: "region names for the environment",
 		},
 	}
-	FlEnvironmentLdapsOptional = StringFlag{
+	FlLdapNamesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "ldaps",
-			Usage: "ldap config names for the environment",
+			Usage: "ldap config names delimited by comma",
 		},
 	}
 	FlEnvironmentProxiesOptional = StringFlag{
@@ -978,11 +978,25 @@ var (
 			Usage: "proxy config names for the environment",
 		},
 	}
-	FlEnvironmentRdsesOptional = StringFlag{
+	FlRdsNamesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "rds",
-			Usage: "rds config names for the environment",
+			Name:  "rds-names",
+			Usage: "rds config names delimited by comma",
+		},
+	}
+	FlLdapNameOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-name",
+			Usage: "ldap config name",
+		},
+	}
+	FlEnvironmentName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "env-name",
+			Usage: "name of an environment",
 		},
 	}
 	FlEnvironments = StringFlag{
@@ -1025,6 +1039,20 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "refreshtoken",
 			Usage: "caas refresh token",
+		},
+	}
+	FlRangerAdminPasswordOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "ranger-admin-password",
+			Usage: "ranger admin password",
+		},
+	}
+	FlKerberosNameOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "kerberos-name",
+			Usage: "kerberos config name",
 		},
 	}
 	FlKerberosPassword = StringFlag{

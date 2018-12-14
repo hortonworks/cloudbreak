@@ -27,6 +27,9 @@ type SimpleEnvironmentResponse struct {
 	// Unique: true
 	DatalakeClusterNames []string `json:"datalakeClusterNames"`
 
+	// Datalake cluster resources registered to the environment.
+	DatalakeResourcesName string `json:"datalakeResourcesName,omitempty"`
+
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
