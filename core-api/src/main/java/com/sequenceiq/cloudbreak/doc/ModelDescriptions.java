@@ -97,6 +97,14 @@ public class ModelDescriptions {
 
     }
 
+    public static class StructuredEventResponseDescription {
+        public static final String TYPE = "Type of the Audit event. REST|FLOW|NOTIFICATION";
+        public static final String OPERATION = "Basic details about the Audit event";
+        public static final String EVENT_JSON = "Raw StructuredEvent content";
+        public static final String STATUS = "Summary status of the Audit event";
+        public static final String DURATION = "Timespan of the event in miliseconds";
+    }
+
     public static class CloudbreakDetailsModelDescription {
         public static final String VERSION = "version of the Cloudbreak that provisioned the stack";
     }
