@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -77,8 +75,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class ClusterCreationSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationSetupService.class);
-
-    private static final Pattern MAJOR_VERSION_REGEX_PATTERN = Pattern.compile("(^[0-9]+\\.[0-9]+).*");
 
     @Inject
     private FileSystemValidator fileSystemValidator;
@@ -229,11 +225,7 @@ public class ClusterCreationSetupService {
         StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
         Image image = imageComponent.getAttributes().get(Image.class);
         StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
-        String stackMajorVersion = stackRepoDetails.getHdpVersion();
-        Matcher majorVersionRegex = MAJOR_VERSION_REGEX_PATTERN.matcher(stackMajorVersion);
-        if (majorVersionRegex.matches()) {
-            stackMajorVersion = majorVersionRegex.group(1);
-        }
+        String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
         Map<String, StackDescriptor> stackDescriptorMap;
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {

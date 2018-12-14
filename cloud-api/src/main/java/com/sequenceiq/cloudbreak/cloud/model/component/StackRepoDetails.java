@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +22,8 @@ public class StackRepoDetails implements Serializable {
     public static final String VDF_REPO_KEY_PREFIX = "vdf-";
 
     public static final String CUSTOM_VDF_REPO_KEY = "vdf-url";
+
+    private static final Pattern MAJOR_VERSION_REGEX_PATTERN = Pattern.compile("(^[0-9]+\\.[0-9]+).*");
 
     private Map<String, String> stack;
 
@@ -58,6 +63,19 @@ public class StackRepoDetails implements Serializable {
 
     public String getHdpVersion() {
         return hdpVersion;
+    }
+
+    @JsonIgnore
+    public String getMajorHdpVersion() {
+        String result = hdpVersion;
+        if (result == null) {
+            result = "";
+        }
+        Matcher majorVersionRegex = MAJOR_VERSION_REGEX_PATTERN.matcher(result);
+        if (majorVersionRegex.matches()) {
+            result = majorVersionRegex.group(1);
+        }
+        return result;
     }
 
     public void setHdpVersion(String hdpVersion) {
