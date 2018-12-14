@@ -65,7 +65,7 @@ func CreateEnvironment(c *cli.Context) {
 	credentialName := c.String(fl.FlEnvironmentCredential.Name)
 	regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ",")
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
-	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentProxiesOptional.Name), ",")
+	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	locationName := c.String(fl.FlEnvironmentLocationName.Name)
@@ -219,7 +219,7 @@ func createAttachRequest(c *cli.Context) *v3_workspace_id_environments.AttachRes
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
-	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentProxiesOptional.Name), ",")
+	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, rdsConfigs)
@@ -253,7 +253,7 @@ func createDetachRequest(c *cli.Context) *v3_workspace_id_environments.DetachRes
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
-	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentProxiesOptional.Name), ",")
+	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, rdsConfigs)

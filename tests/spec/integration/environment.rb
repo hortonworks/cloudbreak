@@ -67,7 +67,7 @@ RSpec.describe 'Environment test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('attachResourcesToEnvironment', load_json(@env_single_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.env.attach.name("test-env").ldaps("test").build(false)
+      result = cb.env.attach.name("test-env").ldap_names("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("resources attached to environment") 
     end  
@@ -78,7 +78,7 @@ RSpec.describe 'Environment test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('attachResourcesToEnvironment', load_json(@env_single_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.env.attach.name("test-env").proxies("test").build(false)
+      result = cb.env.attach.name("test-env").proxy_names("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("resources attached to environment") 
     end  
@@ -100,7 +100,7 @@ RSpec.describe 'Environment test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('attachResourcesToEnvironment', load_json(@env_single_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.env.attach.name("test-env").ldaps("test").proxies("test").rds_names("test").build(false)
+      result = cb.env.attach.name("test-env").ldap_names("test").proxy_names("test").rds_names("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("resources attached to environment") 
     end  
@@ -111,7 +111,7 @@ RSpec.describe 'Environment test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('detachResourcesToEnvironment', load_json(@env_single_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.env.detach.name("test-env").ldaps("test").build(false)
+      result = cb.env.detach.name("test-env").ldap_names("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("resources detached to environment") 
     end  
@@ -122,7 +122,7 @@ RSpec.describe 'Environment test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('detachResourcesToEnvironment', load_json(@env_single_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.env.detach.name("test-env").proxies("test").build(false)
+      result = cb.env.detach.name("test-env").proxy_names("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("resources detached to environment") 
     end  
@@ -144,7 +144,7 @@ RSpec.describe 'Environment test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('detachResourcesToEnvironment', load_json(@env_single_json), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.env.detach.name("test-env").ldaps("test").proxies("test").rds_names("test").build(false)
+      result = cb.env.detach.name("test-env").ldap_names("test").proxy_names("test").rds_names("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("resources detached to environment") 
     end  

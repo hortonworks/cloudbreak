@@ -967,15 +967,15 @@ var (
 	FlLdapNamesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "ldaps",
+			Name:  "ldap-names",
 			Usage: "ldap config names delimited by comma",
 		},
 	}
-	FlEnvironmentProxiesOptional = StringFlag{
+	FlProxyNamesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "proxies",
-			Usage: "proxy config names for the environment",
+			Name:  "proxy-names",
+			Usage: "proxy config names delimited by comma",
 		},
 	}
 	FlRdsNamesOptional = StringFlag{
