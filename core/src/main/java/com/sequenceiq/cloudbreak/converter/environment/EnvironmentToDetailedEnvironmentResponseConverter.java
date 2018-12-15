@@ -92,6 +92,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .collect(Collectors.toSet()));
         if (source.getDatalakeResources() != null) {
             DatalakeResources datalakeResources = source.getDatalakeResources();
+            response.setDatalakeResourcesName(datalakeResources.getName());
             DatalakeResourcesResponse datalakeResourcesResponse = new DatalakeResourcesResponse();
             datalakeResourcesResponse.setAmbariUrl(datalakeResources.getDatalakeAmbariUrl());
             if (datalakeResources.getLdapConfig() != null) {
