@@ -113,6 +113,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     extendedCloudCredential.putParameter("accessKey", application.getAppId());
                     extendedCloudCredential.putParameter("secretKey", application.getAzureApplicationCreationView().getAppSecret());
                     extendedCloudCredential.putParameter("spDisplayName", sp.displayName());
+                    extendedCloudCredential.putParameter("appObjectId", application.getObjectId());
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
