@@ -23,6 +23,7 @@
                     "kdc_hosts": "url.conf",
                     "admin_server_host": "adminUrl.conf",
                     "encryption_types": "aes des3-cbc-sha1 rc4 des-cbc-md5",
+                    "include_all_components_in_auth_to_local_rules": "true",
                     "ldap_url": "ldapUrl.conf",
                     "container_dn": "containerDn.conf"
                 }

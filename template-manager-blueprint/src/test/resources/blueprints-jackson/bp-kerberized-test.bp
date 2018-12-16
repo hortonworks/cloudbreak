@@ -22,6 +22,7 @@
                     "case_insensitive_username_rules": "true",
                     "container_dn": "",
                     "encryption_types": "enc_types.bp",
+                    "include_all_components_in_auth_to_local_rules": "true",
                     "install_packages": false,
                     "kdc_hosts": "kdc_host.bp",
                     "kdc_type": "mit-kdc",
