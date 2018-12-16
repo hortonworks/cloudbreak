@@ -72,6 +72,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 .put("kdc_hosts", kdcHosts)
                 .put("admin_server_host", kdcAdminHost)
                 .put("encryption_types", "aes des3-cbc-sha1 rc4 des-cbc-md5")
+                .put("include_all_components_in_auth_to_local_rules", "true")
                 .put("ldap_url", ldapUrl == null ? "" : ldapUrl)
                 .put("container_dn", containerDn == null ? "" : containerDn);
         if (kerberosConfig.getType() == KerberosType.FREEIPA) {
