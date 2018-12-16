@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "propertyName": "logfeeder.cloud.storage.base.path",
+      "propertyFile": "logfeeder-properties",
+      "description": "This is the directory where cluster daemon logs should be stored by Log Feeder",
+      "defaultPath": "{{{ defaultPath }}}/clusterlogs",
+      "propertyDisplayName": "Cluster Daemon Logs",
+      "relatedService": "LOGSEARCH_LOGFEEDER",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
       "propertyName": "zeppelin.notebook.dir",
       "propertyFile": "zeppelin-site",
       "description": "The root directory where Zeppelin notebook directories are saved",
