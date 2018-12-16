@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
@@ -68,6 +70,42 @@ public class TemplateProcessorTest {
         assertTrue(result.contains("jdbc:postgresql://10.1.1.1:5432/ranger"));
         assertTrue(result.contains("cn=users,dc=example,dc=org"));
         assertTrue(result.contains("ldap://localhost:389"));
+        assertFalse(result.contains("cloud-storage-present"));
+    }
+
+    @Test
+    public void testMustacheGeneratorWithSimpleUseCaseAndCloudStorage() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
+
+        Cluster cluster = cluster();
+        BlueprintStackInfo blueprintStackInfo = new BlueprintStackInfo("hdp", "2.4");
+        GeneralClusterConfigs generalClusterConfigs = generalClusterConfigs();
+        generalClusterConfigs.setClusterName("dummyCluster");
+        generalClusterConfigs.setStackName("dummyCluster");
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("S3_BUCKET", "testbucket");
+
+        TemplatePreparationObject templatePreparationObject = Builder.builder()
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withGateway(cluster.getGateway(), "/cb/secret/signkey")
+                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
+                .withFixInputs(properties)
+                .withFileSystemConfigurationView(s3FileSystemConfig())
+                .build();
+
+        String result = underTest.process(testBlueprint, templatePreparationObject, Maps.newHashMap());
+        assertTrue(result.contains("testbucket"));
+        assertTrue(result.contains("{{ zookeeper_quorum }}"));
+        assertTrue(result.contains("{{default('/configurations/hadoop-env/hdfs_log_dir_prefix', '/var/log/hadoop')}}"));
+        assertTrue(result.contains(cluster.getName()));
+        assertTrue(result.contains("jdbc:postgresql://10.1.1.1:5432/ranger"));
+        assertTrue(result.contains("cn=users,dc=example,dc=org"));
+        assertTrue(result.contains("ldap://localhost:389"));
+        assertTrue(result.contains("cloud-storage-present"));
+        assertTrue(result.contains("0_test/test/end"));
     }
 
     @Test
@@ -275,5 +313,9 @@ public class TemplateProcessorTest {
         ambariDatabase.setUserName("ambari-database-user");
         ambariDatabase.setVendor("mysql");
         return ambariDatabase;
+    }
+
+    private BaseFileSystemConfigurationsView s3FileSystemConfig() {
+        return TemplateCoreTestUtil.s3FileSystemConfiguration(TemplateCoreTestUtil.storageLocationViews());
     }
 }

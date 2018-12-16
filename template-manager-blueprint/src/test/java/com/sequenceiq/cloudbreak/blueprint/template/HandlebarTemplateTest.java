@@ -62,7 +62,7 @@ public class HandlebarTemplateTest {
         this.model = model;
     }
 
-    @Parameters(name = "{index}: templateTest {0} with handlebar where the expected file is  {1}")
+    @Parameters(name = "{index}: templateTest {0} with handlebar where the expected file is {1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
 
@@ -99,6 +99,8 @@ public class HandlebarTemplateTest {
                 // S3
                 {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3.json",
                         s3FileSystemConfigsWithStorageLocations()},
+                {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3-duplicated-key.json",
+                        s3FileSystemConfigsWithStorageLocationsAndDuplicatedKey()},
 
                 // NIFI
                 {"blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-with-hdf-nifitargets.json",
@@ -235,6 +237,38 @@ public class HandlebarTemplateTest {
                 {"blueprints/configurations/yarn_client/shared_service.handlebars", "configurations/yarn_client/yarn-client.json",
                         sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig()},
 
+                // LOGSEARCH_LOGFEEDER
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty.json",
+                        logfeederConfigDlNoCloudStorage()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-cloud.json",
+                        logfeederConfigDlWithCloudStorageNoSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-hybrid.json",
+                        logfeederConfigDlWithCloudStorageWithSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty.json",
+                        logfeederConfigAttachedWlNoCloudStorage()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-cloud.json",
+                        logfeederConfigAttachedWlWithCloudStorageNoSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-hybrid.json",
+                        logfeederConfigAttachedWlWithCloudStorageWithSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty.json",
+                        logfeederConfigStandaloneWlNoCloudStorage()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-cloud.json",
+                        logfeederConfigStandaloneWlWithCloudStorageNoSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-hybrid.json",
+                        logfeederConfigStandaloneWlWithCloudStorageWithSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/external_solr.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty.json",
+                        logfeederConfigDlWithCloudStorageWithSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/external_solr.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty2.json",
+                        logfeederConfigAttachedWlWithCloudStorageNoSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/external_solr.handlebars",
+                        "configurations/logsearch_logfeeder/logsearch-logfeeder-external_solr.json",
+                        logfeederConfigAttachedWlWithCloudStorageWithSolr()},
+                {"blueprints/configurations/logsearch_logfeeder/external_solr.handlebars",
+                        "configurations/logsearch_logfeeder/logsearch-logfeeder-external_solr-krb.json",
+                        logfeederConfigAttachedWlWithCloudStorageWithSolrKrb()},
+                {"blueprints/configurations/logsearch_logfeeder/external_solr.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty.json",
+                        logfeederConfigStandaloneWlWithCloudStorageWithSolr()},
+
                 // RANGER_ADMIN
                 {"blueprints/configurations/ranger/gateway.handlebars", "configurations/ranger/enable-gateway.json",
                         enabledGateway()},
@@ -283,10 +317,7 @@ public class HandlebarTemplateTest {
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-with-ad.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithAdConfig()},
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
-                        withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
-
-                {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3-duplicated-key.json",
-                        s3FileSystemConfigsWithStorageLocationsAndDuplicatedKey()}
+                        withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()}
         });
     }
 
@@ -699,7 +730,6 @@ public class HandlebarTemplateTest {
     }
 
     private static Object sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig() {
-
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
         sharedServiceConfigsView.setDatalakeAmbariFqdn("ambarifqdn");
 
@@ -844,6 +874,91 @@ public class HandlebarTemplateTest {
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID, DatabaseVendor.MYSQL)))
                 .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+    }
+
+    private static Object logfeederConfigDlNoCloudStorage() {
+        SharedServiceConfigsView sharedServiceConfigsView = datalakeSharedServiceConfig().get();
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .build();
+    }
+
+    private static Object logfeederConfigDlWithCloudStorageNoSolr() {
+        SharedServiceConfigsView sharedServiceConfigsView = datalakeSharedServiceConfig().get();
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .build();
+    }
+
+    private static Object logfeederConfigDlWithCloudStorageWithSolr() {
+        SharedServiceConfigsView sharedServiceConfigsView = datalakeSharedServiceConfig().get();
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .withComponents(Set.of("INFRA_SOLR"))
+                .build();
+    }
+
+    private static Object logfeederConfigAttachedWlNoCloudStorage() {
+        SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .build();
+    }
+
+    private static Object logfeederConfigAttachedWlWithCloudStorageNoSolr() {
+        SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .build();
+    }
+
+    private static Object logfeederConfigAttachedWlWithCloudStorageWithSolr() {
+        SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
+        sharedServiceConfigsView.setDatalakeComponents(Set.of("INFRA_SOLR"));
+        sharedServiceConfigsView.setDatalakeAmbariFqdn("dl-ambari-host.example.com");
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .build();
+    }
+
+    private static Object logfeederConfigAttachedWlWithCloudStorageWithSolrKrb() {
+        SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
+        sharedServiceConfigsView.setDatalakeComponents(Set.of("INFRA_SOLR"));
+        sharedServiceConfigsView.setDatalakeAmbariFqdn("dl-ambari-host.example.com");
+
+        return new TemplateModelContextBuilder()
+                .withSharedServiceConfigs(sharedServiceConfigsView)
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .withKerberos(TestUtil.kerberosConfigFreeipa())
+                .build();
+    }
+
+    private static Object logfeederConfigStandaloneWlNoCloudStorage() {
+        return new TemplateModelContextBuilder()
+                .build();
+    }
+
+    private static Object logfeederConfigStandaloneWlWithCloudStorageNoSolr() {
+        return new TemplateModelContextBuilder()
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .build();
+    }
+
+    private static Object logfeederConfigStandaloneWlWithCloudStorageWithSolr() {
+        return new TemplateModelContextBuilder()
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .withComponents(Set.of("INFRA_SOLR"))
                 .build();
     }
 

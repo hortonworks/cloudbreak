@@ -64,6 +64,15 @@
         }
       },
       {
+        "logfeeder-properties": {
+          "properties_attributes": {},
+          "properties": {
+            "logfeeder.cloud.rollover.threshold.min": "10",
+            "logfeeder.cloud.rollover.on.shutdown": "true"
+          }
+        }
+      },
+      {
         "anonymization-conf": {
           "security.anonymization.max.heap": "1024"
         }
@@ -142,6 +151,9 @@
             "name": "RESOURCEMANAGER"
           },
           {
+            "name": "LOGSEARCH_LOGFEEDER"
+          },
+          {
             "name": "HST_SERVER"
           },
           {
@@ -170,6 +182,9 @@
             "name": "NODEMANAGER"
           },
           {
+            "name": "LOGSEARCH_LOGFEEDER"
+          },
+          {
             "name": "HST_AGENT"
           }
         ],
@@ -190,6 +205,9 @@
           },
           {
             "name": "NODEMANAGER"
+          },
+          {
+            "name": "LOGSEARCH_LOGFEEDER"
           },
           {
             "name": "HST_AGENT"
