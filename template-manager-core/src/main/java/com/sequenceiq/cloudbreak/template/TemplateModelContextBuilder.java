@@ -152,7 +152,7 @@ public class TemplateModelContextBuilder {
         blueprintTemplateModelContext.put(HandleBarModelKey.KERBEROS.modelKey(), kerberos.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.GATEWAY.modelKey(), gateway.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
-        blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(fileSystemConfig));
+        blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(createAdjustedFileSystemConfig()));
         blueprintTemplateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         blueprintTemplateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
@@ -161,5 +161,12 @@ public class TemplateModelContextBuilder {
         ModelConverterUtils.deepMerge(blueprintTemplateModelContext, ModelConverterUtils.convert(fixInputs));
         blueprintTemplateModelContext.put(HandleBarModelKey.STACK_VERSION.modelKey(), "{{stack_version}}");
         return blueprintTemplateModelContext;
+    }
+
+    private Map<String, Object> createAdjustedFileSystemConfig() {
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(fileSystemConfig);
+        result.put("cloudStorageEnabled", !fileSystemConfig.isEmpty());
+        return result;
     }
 }

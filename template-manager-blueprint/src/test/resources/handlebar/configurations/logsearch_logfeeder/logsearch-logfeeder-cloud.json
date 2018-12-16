@@ -1,0 +1,13 @@
+{
+
+  "logfeeder-properties": {
+    "properties": {
+
+
+      "logfeeder.cloud.storage.mode": "cloud"
+
+
+    }
+  }
+
+}

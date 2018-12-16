@@ -33,7 +33,7 @@
           "content": "{{{ hdf.nodeEntities }}}",
           "nifi.initial.admin.identity": "{{{ general.userName }}}"
         },
-      }
+      },
       {
         "total-custom-rds-conf": {
           "custom.metadata.storage.type": "{{{ rds.customrds.subprotocol }}}",
@@ -129,7 +129,18 @@
           "ranger.service.config.param.enable.hive.metastore.lookup": "true",
           "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
         }
-      }
+      }{{{#if-true fileSystemConfigs.cloudStorageEnabled}}},
+      {
+        "cloud-storage-properties" : {
+          "cloud-storage-present" : "true"{{{#if fileSystemConfigs.s3}}},
+          {{{#each fileSystemConfigs.s3.locations}}}
+          "{{{ this.configFile }}}": {
+            "{{{ this.property }}}": "{{{ this.value }}}"
+          },
+          {{{/each}}}
+          {{{/if}}}
+        }
+      }{{{/if-true}}}
     ],
     "host_groups": [
       {
