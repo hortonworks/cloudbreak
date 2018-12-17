@@ -43,11 +43,11 @@ func init() {
 					{
 						Name:   "saml",
 						Usage:  "create a new strategy of type SAML for the tenant",
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider, fl.FlCaasStrategyName).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider).AddAuthenticationFlags().AddOutputFlag().Build(),
 						Before: cf.CheckConfigAndCommandFlagsDP,
 						Action: strategy.CreateStrategySAML,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider, fl.FlCaasStrategyName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -61,11 +61,11 @@ func init() {
 					{
 						Name:   "saml",
 						Usage:  "update value for the saml for the tenant",
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider, fl.FlCaasStrategyName).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider).AddAuthenticationFlags().AddOutputFlag().Build(),
 						Before: cf.CheckConfigAndCommandFlagsDP,
 						Action: strategy.UpdateStrategySAML,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider, fl.FlCaasStrategyName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasStrateyProvider).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

@@ -81,6 +81,34 @@ func (a *Client) ListStrategies(params *ListStrategiesParams) (*ListStrategiesOK
 }
 
 /*
+SetDefaultStrategy sets default strategy
+*/
+func (a *Client) SetDefaultStrategy(params *SetDefaultStrategyParams) (*SetDefaultStrategyOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetDefaultStrategyParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "setDefaultStrategy",
+		Method:             "PATCH",
+		PathPattern:        "/caas/api/strategies/{strategyName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &SetDefaultStrategyReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SetDefaultStrategyOK), nil
+
+}
+
+/*
 UpdateStrategy updates strategy
 */
 func (a *Client) UpdateStrategy(params *UpdateStrategyParams) (*UpdateStrategyOK, error) {

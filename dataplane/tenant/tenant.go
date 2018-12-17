@@ -97,13 +97,42 @@ func ResendEMail(c *cli.Context) {
 	tenant := retrieveTenantImpl(
 		dpClient.Dataplane.Tenants,
 		tenantName)
-	log.Infof("Resending mail to %s ", swag.StringValue(tenant.Name))
-	log.Infof("[ResendEMail] sending resend-email request")
-	mailType := "activation"
-	_, err := dpClient.Dataplane.Tenants.ResendMail(tenants.NewResendMailParams().WithName(tenantName).WithType(mailType))
-	if err != nil {
-		utils.LogErrorAndExit(err)
+	// check tenant status
+	if swag.StringValue(tenant.State) == "CREATED" {
+		log.Infof("Sending activation mail to %s ", swag.StringValue(tenant.Name))
+		log.Infof("[ResendEMail] sending  ResendMail request")
+		mailType := "activation"
+		_, err := dpClient.Dataplane.Tenants.ResendMail(tenants.NewResendMailParams().WithName(tenantName).WithType(mailType))
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+	} else {
+		log.Infof("Activation mail will not be send. Tenant state is %s ", swag.StringValue(tenant.State))
 	}
+
+}
+
+func SendPasswordResetEMail(c *cli.Context) {
+	log.Infof("[SendPasswordResetEMail] Sending password reset mail to Tenant's super user")
+	//Search if the tenant exist
+	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
+	tenantName := c.String(fl.FlCaasTenantName.Name)
+	tenant := retrieveTenantImpl(
+		dpClient.Dataplane.Tenants,
+		tenantName)
+	// check tenant status
+	if swag.StringValue(tenant.State) == "ACTIVE" {
+		log.Infof("Sending password reset mail to %s ", swag.StringValue(tenant.Name))
+		log.Infof("[ResendEMail] sending password reset email")
+		mailType := "reset"
+		_, err := dpClient.Dataplane.Tenants.ResendMail(tenants.NewResendMailParams().WithName(tenantName).WithType(mailType))
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+	} else {
+		log.Infof("Password reset mail will not be send. Tenant state is %s ", swag.StringValue(tenant.State))
+	}
+
 }
 
 func DisableTenant(c *cli.Context) {

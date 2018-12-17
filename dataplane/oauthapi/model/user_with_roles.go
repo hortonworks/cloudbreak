@@ -56,6 +56,10 @@ type UserWithRoles struct {
 	// Required: true
 	StrategyID *strfmt.UUID `json:"strategy_id"`
 
+	// strategy name
+	// Required: true
+	StrategyName *string `json:"strategy_name"`
+
 	// tenant id
 	// Required: true
 	TenantID *strfmt.UUID `json:"tenant_id"`
@@ -83,6 +87,8 @@ type UserWithRoles struct {
 
 /* polymorph UserWithRoles strategy_id false */
 
+/* polymorph UserWithRoles strategy_name false */
+
 /* polymorph UserWithRoles tenant_id false */
 
 // Validate validates this user with roles
@@ -105,6 +111,11 @@ func (m *UserWithRoles) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateStrategyID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateStrategyName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -172,6 +183,15 @@ func (m *UserWithRoles) validateStrategyID(formats strfmt.Registry) error {
 	}
 
 	if err := validate.FormatOf("strategy_id", "body", "uuid", m.StrategyID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserWithRoles) validateStrategyName(formats strfmt.Registry) error {
+
+	if err := validate.Required("strategy_name", "body", m.StrategyName); err != nil {
 		return err
 	}
 

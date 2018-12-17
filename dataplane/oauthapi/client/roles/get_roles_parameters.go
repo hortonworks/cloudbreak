@@ -16,12 +16,14 @@ import (
 	cr "github.com/go-openapi/runtime/client"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/hortonworks/cb-cli/dataplane/oauthapi/model"
 )
 
 // NewGetRolesParams creates a new GetRolesParams object
 // with the default values initialized.
 func NewGetRolesParams() *GetRolesParams {
-
+	var ()
 	return &GetRolesParams{
 
 		timeout: cr.DefaultTimeout,
@@ -31,7 +33,7 @@ func NewGetRolesParams() *GetRolesParams {
 // NewGetRolesParamsWithTimeout creates a new GetRolesParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetRolesParamsWithTimeout(timeout time.Duration) *GetRolesParams {
-
+	var ()
 	return &GetRolesParams{
 
 		timeout: timeout,
@@ -41,7 +43,7 @@ func NewGetRolesParamsWithTimeout(timeout time.Duration) *GetRolesParams {
 // NewGetRolesParamsWithContext creates a new GetRolesParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetRolesParamsWithContext(ctx context.Context) *GetRolesParams {
-
+	var ()
 	return &GetRolesParams{
 
 		Context: ctx,
@@ -51,7 +53,7 @@ func NewGetRolesParamsWithContext(ctx context.Context) *GetRolesParams {
 // NewGetRolesParamsWithHTTPClient creates a new GetRolesParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetRolesParamsWithHTTPClient(client *http.Client) *GetRolesParams {
-
+	var ()
 	return &GetRolesParams{
 		HTTPClient: client,
 	}
@@ -61,6 +63,10 @@ func NewGetRolesParamsWithHTTPClient(client *http.Client) *GetRolesParams {
 for the get roles operation typically these are written to a http.Request
 */
 type GetRolesParams struct {
+
+	/*Body*/
+	Body *model.UserContext
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -99,6 +105,17 @@ func (o *GetRolesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithBody adds the body to the get roles params
+func (o *GetRolesParams) WithBody(body *model.UserContext) *GetRolesParams {
+	o.SetBody(body)
+	return o
+}
+
+// SetBody adds the body to the get roles params
+func (o *GetRolesParams) SetBody(body *model.UserContext) {
+	o.Body = body
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetRolesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -106,6 +123,14 @@ func (o *GetRolesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regi
 		return err
 	}
 	var res []error
+
+	if o.Body == nil {
+		o.Body = new(model.UserContext)
+	}
+
+	if err := r.SetBodyParam(o.Body); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

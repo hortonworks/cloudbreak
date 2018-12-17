@@ -38,11 +38,23 @@ func init() {
 				},
 			},
 			{
-				Name:   "resend-email",
-				Usage:  "resend activation email to the email",
+				Name:   "send-activation-email",
+				Usage:  "send activation email to super user",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasTenantName).AddAuthenticationFlags().AddOutputFlag().Build(),
 				Before: cf.CheckConfigAndCommandFlagsDP,
 				Action: tenant.ResendEMail,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasTenantName).AddAuthenticationFlags().AddOutputFlag().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
+				Name:   "send-password-reset-email",
+				Usage:  "send password reset email to super user",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasTenantName).AddAuthenticationFlags().AddOutputFlag().Build(),
+				Before: cf.CheckConfigAndCommandFlagsDP,
+				Action: tenant.SendPasswordResetEMail,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasTenantName).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)

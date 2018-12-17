@@ -47,6 +47,7 @@ type strategyClient interface {
 	CreateStrategy(params *strategies.CreateStrategyParams) (*strategies.CreateStrategyOK, error)
 	ListStrategies(params *strategies.ListStrategiesParams) (*strategies.ListStrategiesOK, error)
 	UpdateStrategy(params *strategies.UpdateStrategyParams) (*strategies.UpdateStrategyOK, error)
+	SetDefaultStrategy(params *strategies.SetDefaultStrategyParams) (*strategies.SetDefaultStrategyOK, error)
 }
 
 type strategyTypesClient interface {
@@ -97,7 +98,7 @@ func CreateStrategySAML(c *cli.Context) {
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	config := getStrategyConfigForSAML(c.String(fl.FlCaasStrateyProvider.Name))
-	strategyName := getStrategyName(c.String(fl.FlCaasStrategyName.Name))
+	strategyName := getStrategyName("")
 	var userinfo *model.UserInfo
 	userinfo = user.UserInfoImpl(dpClient.Dataplane.Oidc)
 	strategyTypeID := strfmt.UUID(getStrategyTypeID(dpClient.Dataplane.Strategytypes, "saml"))
@@ -109,9 +110,20 @@ func CreateStrategySAML(c *cli.Context) {
 		Name:           &strategyName,
 		Enabled:        &enabled,
 	}
+
 	resp, err := dpClient.Dataplane.Strategies.CreateStrategy(strategies.NewCreateStrategyParams().WithStrategy(&strategyRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
+	}
+	// Make the strategy default for the tenant
+	defaultStrategyValue := true
+	markDefaultRequest := model.MarkDefaultRequest{
+		Default: &defaultStrategyValue,
+	}
+	_, markDefaultErr := dpClient.Dataplane.Strategies.SetDefaultStrategy(
+		strategies.NewSetDefaultStrategyParams().WithStrategyName(strategyName).WithBody(&markDefaultRequest))
+	if markDefaultErr != nil {
+		utils.LogErrorAndExit(markDefaultErr)
 	}
 	output.Write(strategyHeader, &strategyOut{resp.Payload})
 }
@@ -119,7 +131,7 @@ func CreateStrategySAML(c *cli.Context) {
 func UpdateStrategySAML(c *cli.Context) {
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
 	config := getStrategyConfigForSAML(c.String(fl.FlCaasStrateyProvider.Name))
-	strategyName := getStrategyName(c.String(fl.FlCaasStrategyName.Name))
+	strategyName := getStrategyName("")
 	strategyTypeID := strfmt.UUID(getStrategyTypeID(dpClient.Dataplane.Strategytypes, "saml"))
 	strategyID := strfmt.UUID(getStrategyID(dpClient.Dataplane.Strategies, strategyName))
 	enabled := true
