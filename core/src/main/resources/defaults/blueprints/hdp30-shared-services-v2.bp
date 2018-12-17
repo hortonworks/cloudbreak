@@ -8,13 +8,13 @@
       "stack_name": "HDP",
       "stack_version": "3.0"
     },
-  "settings": [
-    {
-      "recovery_settings": []
-    },
-    {
-      "component_settings": []
-    }
+    "settings": [
+      {
+        "recovery_settings": []
+      },
+      {
+        "component_settings": []
+      }
     ],
     "configurations": [
       {
@@ -40,6 +40,7 @@
       {
         "yarn-hbase-site": {
           "hbase.wal.dir": "file:///hadoopfs/fs1/apps/yarn-hbase/wal-data/",
+          "hbase.rootdir": "file:///hadoopfs/fs1/apps/yarn-hbase/data/",
           "hbase.unsafe.stream.capability.enforce": "false"
         }
       },
@@ -54,6 +55,7 @@
       {
         "hbase-site": {
           "hbase.wal.dir": "file:///hadoopfs/fs1/hbase-atlas-wal-data/",
+          "hbase.rootdir": "file:///hadoopfs/fs1/hbase-atlas-data",
           "hbase.unsafe.stream.capability.enforce" : "false"
         }
       },
@@ -70,7 +72,13 @@
       },
       {
         "ams-hbase-site": {
-          "hbase.wal.dir": "file:///hadoopfs/fs1/apps/ams-hbase/wal-data/"
+          "hbase.wal.dir": "file:///hadoopfs/fs1/apps/ams-hbase/wal-data/",
+          "hbase.rootdir": "file:///hadoopfs/fs1/apps/ams-hbase/data"
+        }
+      },
+      {
+        "kafka-broker": {
+          "log.dirs": "file:///hadoopfs/fs1/kafka-logs"
         }
       },
       {
@@ -89,13 +97,13 @@
         }
       }
     ],
-      "host_groups": [
-        {
-          "name": "master",
-          "configurations": [],
-          "components": [
-            {
-              "name": "HDFS_CLIENT"
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HDFS_CLIENT"
           },
           {
             "name": "ZOOKEEPER_CLIENT"

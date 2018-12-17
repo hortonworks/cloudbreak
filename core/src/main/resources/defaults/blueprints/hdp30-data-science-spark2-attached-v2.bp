@@ -1,0 +1,203 @@
+{
+  "description": "Useful for data science with Spark and Zeppelin",
+  "blueprint": {
+    "Blueprints": {
+      "stack_name": "HDP",
+      "stack_version": "3.0",
+      "blueprint_name": "hdp30-data-science-spark2-attached-v2"
+    },
+    "settings": [
+      {
+        "recovery_settings": []
+      },
+      {
+        "service_settings": [
+          {
+            "name": "HIVE",
+            "credential_store_enabled": "true"
+          }
+        ]
+      },
+      {
+        "component_settings": []
+      }
+    ],
+    "configurations": [
+      {
+        "zeppelin-site": {
+          "properties_attributes": {},
+          "properties": {
+            "zeppelin.hadoop.localfs.override": "false"
+          }
+        }
+      },
+      {
+        "livy2-conf": {
+          "properties_attributes": {},
+          "properties": {
+            "livy.superusers": "knox,zeppelin"
+          }
+        }
+      },
+      {
+        "yarn-site": {
+          "properties_attributes": {},
+          "properties": {
+            "yarn.acl.enable": "true",
+            "hadoop.registry.dns.enabled": "false",
+            "yarn.log-aggregation.fs-support-append": "false",
+            "yarn.log-aggregation.file-formats": "TFile",
+            "yarn.timeline-service.versions" : "2.0f",
+            "yarn.resourcemanager.cluster-id" : "{{{ general.uuid }}}",
+            "yarn.log-aggregation-status.time-out.ms": "1200000"
+          }
+        }
+      },
+      {
+        "yarn-hbase-site": {
+          "properties_attributes": {},
+          "properties": {
+            "hbase.zookeeper.property.clientPort": "2181",
+            "hbase.client.retries.number": "10"
+          }
+        }
+      },
+      {
+        "yarn-hbase-env": {
+          "properties_attributes": {},
+          "properties": {
+            "use_external_hbase": "true",
+            "is_hbase_system_service_launch": "false"
+          }
+        }
+      },  
+      {
+        "cluster-env": {
+          "properties_attributes": {},
+          "properties": {
+            "metrics_collector_external_port": "6188"
+          }
+        }
+      },
+      {
+        "anonymization-conf": {
+          "security.anonymization.max.heap": "1024"
+        }
+      },
+      {
+        "hst-agent-conf": {
+          "security.anonymization.max.heap": "1024"
+        }
+      },
+      {
+        "hst-server-conf": {
+          "server.max.heap": "1024"
+        }
+      }
+    ],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "HDFS_CLIENT"
+          },
+          {
+            "name": "SPARK2_CLIENT"
+          },
+          {
+            "name": "HIVE_METASTORE"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "ZEPPELIN_MASTER"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "AMBARI_SERVER"
+          },
+          {
+            "name": "LIVY2_SERVER"
+          },
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "HST_SERVER"
+          },
+          {
+            "name": "HST_AGENT"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "worker",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "SPARK2_CLIENT"
+          },
+          {
+            "name": "DATANODE"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name": "HST_AGENT"
+          }
+        ],
+        "cardinality": "1+"
+      },
+      {
+        "name": "compute",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "SPARK2_CLIENT"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name": "HST_AGENT"
+          }
+        ],
+        "cardinality": "1+"
+      }
+    ]
+  }
+}
