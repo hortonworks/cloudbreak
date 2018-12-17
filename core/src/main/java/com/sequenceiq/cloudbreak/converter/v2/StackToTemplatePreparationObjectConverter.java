@@ -23,15 +23,16 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -64,9 +65,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private ClusterService clusterService;
 
     @Inject
@@ -77,6 +75,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private BlueprintViewProvider blueprintViewProvider;
+
+    @Inject
+    private DatalakeResourcesRepository datalakeResourcesRepository;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -91,7 +92,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
-            Stack dataLakeStack = getDataLakeStack(source);
+            Optional<DatalakeResources> dataLakeResource = getDataLakeResource(source);
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
@@ -121,19 +122,18 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withLdapConfig(ldapConfig, bindDn, bindPassword)
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.getKerberosConfig())
-                    .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))
+                    .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .build();
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
-    private Stack getDataLakeStack(Stack source) {
-        Stack dataLakeStack = null;
-        if (source.getDatalakeId() != null) {
-            dataLakeStack = stackService.getByIdWithListsInTransaction(source.getDatalakeId());
+    private Optional<DatalakeResources> getDataLakeResource(Stack source) {
+        if (source.getDatalakeResourceId() != null) {
+            return datalakeResourcesRepository.findById(source.getDatalakeResourceId());
         }
-        return dataLakeStack;
+        return Optional.empty();
     }
 
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Stack source, FileSystem fileSystem) throws IOException {

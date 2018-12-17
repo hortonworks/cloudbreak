@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,9 +45,11 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -142,6 +145,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private BlueprintViewProvider blueprintViewProvider;
+
+    @Mock
+    private DatalakeResourcesRepository datalakeResourcesRepository;
 
     @Before
     public void setUp() throws IOException {
@@ -340,12 +346,11 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenDataLakeIdNotNullThenExpectedSharedServiceConfigsShouldBeStored() {
         // just in case adding one to avoid matching with the class variable
-        Long testDataLakeId = TEST_CLUSTER_ID + 1L;
-        Stack dataLakeStack = new Stack();
+        Optional<DatalakeResources> datalakeResources = Optional.of(new DatalakeResources());
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
-        when(source.getDatalakeId()).thenReturn(testDataLakeId);
-        when(stackService.getByIdWithListsInTransaction(testDataLakeId)).thenReturn(dataLakeStack);
-        when(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack)).thenReturn(expected);
+        when(sharedServiceConfigProvider.createSharedServiceConfigs(source, datalakeResources)).thenReturn(expected);
+        when(source.getDatalakeResourceId()).thenReturn(1L);
+        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(datalakeResources);
 
         TemplatePreparationObject result = underTest.convert(source);
 

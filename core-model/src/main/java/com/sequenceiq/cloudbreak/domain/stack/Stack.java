@@ -174,6 +174,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private Long datalakeId;
 
+    private Long datalakeResourceId;
+
     @ManyToOne
     private Workspace workspace;
 
@@ -698,5 +700,17 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setTerminated(Long terminated) {
         this.terminated = terminated;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public Long getDatalakeResourceId() {
+        return datalakeResourceId;
+    }
+
+    public void setDatalakeResourceId(Long datalakeResourceId) {
+        this.datalakeResourceId = datalakeResourceId;
     }
 }

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -24,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -89,10 +86,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
         Stack stack = stackService.getByIdWithLists(stackId);
         clusterCreationSetupService.validate(request, stack, user, workspace);
         Cluster cluster = clusterCreationSetupService.prepare(request, stack, user, workspace);
-        Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(cluster.getBlueprint(), stack);
-        if (stackInputs.isPresent()) {
-            sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
-        }
+        sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
         return conversionService.convert(cluster, ClusterResponse.class);
     }
 
