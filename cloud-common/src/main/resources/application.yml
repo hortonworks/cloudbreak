@@ -518,6 +518,10 @@ serviceDescriptorDefinitionMap:
     blueprintParamKeys:
       - atlas.rest.address
       - atlas.kafka.bootstrap.servers
+      - atlas.kafka.security.protocol
+      - atlas.jaas.KafkaClient.option.serviceName
+      - atlas.kafka.sasl.kerberos.service.name
+      - atlas.kafka.zookeeper.connect
   YARN:
     serviceName: YARN
     blueprintParamKeys:

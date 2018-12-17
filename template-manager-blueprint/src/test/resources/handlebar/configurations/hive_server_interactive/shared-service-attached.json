@@ -29,6 +29,12 @@
       "ranger.plugin.hive.service.name":"datalake-1_hive"
     }
   },
+  "ranger-hive-audit": {
+    "properties": {
+      "xasecure.audit.destination.solr": "true",
+      "xasecure.audit.destination.solr.zookeepers": "10.1.1.1:2181/infra-solr"
+    }
+  },
   "hive-env": {
     "properties": {
       "hive_security_authorization": "Ranger"
