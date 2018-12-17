@@ -1,6 +1,7 @@
 {
 
 
+
   "core-site": {
     "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
     "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
@@ -13,6 +14,7 @@
     "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
     "hadoop.security.group.mapping.ldap.search.attr.member": "member"
   }
+
 
 
 }

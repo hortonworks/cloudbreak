@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,6 +71,8 @@ public class HandlebarTemplateTest {
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig()},
                 {"blueprints/configurations/hadoop/ldap.handlebars", "configurations/hadoop/hadoop-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
+                {"blueprints/configurations/hadoop/ldap.handlebars", "configurations/hadoop/hadoop-without-ldap2.json",
+                        ldapConfigWithLdapAndKerberosPresent()},
                 {"blueprints/configurations/hadoop/global.handlebars", "configurations/hadoop/global.json",
                         objectWithoutEverything()},
 
@@ -449,6 +452,18 @@ public class HandlebarTemplateTest {
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+    }
+
+    public static Map<String, Object> ldapConfigWithLdapAndKerberosPresent() {
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setName("kerberos-config");
+        kerberosConfig.setAdmin("admin");
+
+        return new TemplateModelContextBuilder()
+                .withLdap(new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin"))
+                .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
+                .withKerberos(kerberosConfig)
                 .build();
     }
 
