@@ -43,10 +43,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
-    private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
-
-    private static final String VALID_LOCATION = "London";
-
     private static final String BP_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     @BeforeMethod
@@ -145,8 +141,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testSameEnvironmentWithDifferentClusters(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
 
                 .given(StackEntity.class)
@@ -170,8 +164,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
 
         testContext.given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
@@ -199,15 +191,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
 
         testContext.given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
                 .when(Environment::putDetachResources)
                 .withName("int-env-reuse")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
@@ -240,8 +228,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testWlClusterChangeCred(TestContext testContext) {
         Map<String, Object> parameters = new HashMap<>();
         testContext.given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .given(StackEntity.class)
                 .withRegion("Europe")
@@ -249,11 +235,17 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Stack.postV2())
                 .await(STACK_AVAILABLE)
 
+                .given(CredentialEntity.class)
+                .withName("int-change-cred-cl")
+
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
-                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred", parameters))
+                .withCredentialName(null)
+                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred-cl", parameters))
                 .when(Environment::changeCredential)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .validate();
+                checkCredentialAttachedToCluster(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -264,12 +256,18 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     private void createEnvWithResources(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(createDefaultRdsConfig(testContext))
                 .withLdapConfigs(createDefaultLdapConfig(testContext))
                 .withProxyConfigs(createDefaultProxyConfig(testContext))
                 .when(Environment::post);
+    }
+
+    private void checkCredentialAttachedToCluster(TestContext testContext) {
+        testContext.given(StackEntity.class)
+                .withName(testContext.get(StackEntity.class).getName())
+                .when(Stack::getByName)
+                .then(EnvironmentClusterTest::checkCredentialInStack)
+                .validate();
     }
 
     private Set<String> getProxyAsList(TestContext testContext) {
@@ -310,6 +308,14 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         credentialRequest.setName(name);
         credentialRequest.setParameters(parameters);
         return credentialRequest;
+    }
+
+    private static StackEntity checkCredentialInStack(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
+        String credentialName = stack.getResponse().getCredential().getName();
+        if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
+            throw new TestFailException("Credential is not attached to cluster");
+        }
+        return stack;
     }
 
     private static EnvironmentEntity checkEnvHasNoRds(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {

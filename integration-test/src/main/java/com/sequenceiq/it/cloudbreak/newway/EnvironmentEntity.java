@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
@@ -15,6 +17,10 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentEntity>  {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
+
+    private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
+
+    private static final String VALID_LOCATION = "London";
 
     private Set<SimpleEnvironmentResponse> response;
 
@@ -35,7 +41,9 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
     @Override
     public EnvironmentEntity valid() {
         return withName(getNameCreator().getRandomNameForMock())
-                .withDescription("okt23")
+                .withDescription("Description for environment")
+                .withRegions(VALID_REGION)
+                .withLocation(VALID_LOCATION)
                 .withCredentialName(getTestContext().get(CredentialEntity.class).getName());
     }
 

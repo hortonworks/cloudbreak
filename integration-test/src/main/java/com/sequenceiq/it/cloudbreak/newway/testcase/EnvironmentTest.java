@@ -3,8 +3,10 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,6 +17,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
@@ -27,14 +30,11 @@ import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class EnvironmentTest extends AbstractIntegrationTest  {
     private static final String FORBIDDEN_KEY = "forbiddenPost";
-
-    private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
-
-    private static final String VALID_LOCATION = "London";
 
     private static final Set<String> INVALID_REGION = new HashSet<>(Collections.singletonList("MockRegion"));
 
@@ -68,8 +68,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testCreateEnvironment(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .when(Environment::getAll)
@@ -84,8 +82,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withProxyConfigs(validProxy)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -101,8 +97,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         validLdap.add(testContext.get(LdapConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withLdapConfigs(validLdap)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -118,8 +112,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -133,7 +125,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withRegions(INVALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -143,6 +134,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testCreateEnvironmentNoRegion(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
+                .withRegions(null)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -153,8 +145,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withCredentialName("notexistingcredendital")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -164,8 +154,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testCreateEnvironmentNotExistProxy(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withProxyConfigs(INVALID_PROXY)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
@@ -176,8 +164,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testCreateEnvironmentNotExistLdap(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withLdapConfigs(INVALID_LDAP)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
@@ -188,8 +174,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testCreateEnvironmentNotExistRds(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(INVALID_RDS)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
@@ -203,8 +187,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         mixedRds.add("invalidRds");
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(mixedRds)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
@@ -218,8 +200,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         mixedProxy.add("invalidProxy");
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withProxyConfigs(mixedProxy)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
@@ -233,8 +213,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         mixedLdap.add("invalidLdap");
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withLdapConfigs(mixedLdap)
                 .when(Environment::post, key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
@@ -245,8 +223,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testDeleteEnvironment(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .when(Environment::getAll)
@@ -262,8 +238,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withProxyConfigs(validProxy)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -280,8 +254,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         validLdap.add(testContext.get(LdapConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withLdapConfigs(validLdap)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -298,8 +270,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -313,8 +283,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     public void testDeleteEnvironmentNotExist(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::delete, key(FORBIDDEN_KEY))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -328,8 +296,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-rds-attach")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .when(Environment::getAll)
                 .given(EnvironmentEntity.class)
@@ -347,8 +313,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-ldap-attach")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .given(EnvironmentEntity.class)
                 .withLdapConfigs(validLdap)
@@ -365,8 +329,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-proxy-attach")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .given(EnvironmentEntity.class)
                 .withProxyConfigs(validProxy)
@@ -383,8 +345,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-rds-detach")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .when(Environment::getAll)
                 .given(EnvironmentEntity.class)
@@ -403,8 +363,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-ldap-detach")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .when(Environment::getAll)
                 .given(EnvironmentEntity.class)
@@ -423,8 +381,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-proxy-detach")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .when(Environment::getAll)
                 .given(EnvironmentEntity.class)
@@ -486,8 +442,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-rds-attach-1")
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
                 .when(Environment::getAll)
                 .given(EnvironmentEntity.class)
@@ -501,12 +455,69 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .validate();
     }
 
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvironmentChangeCredWithCredName(TestContext testContext) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+
+                .given(CredentialEntity.class)
+                .withName("int-env-change-cred")
+                .when(new CredentialCreateAction())
+
+                .given(EnvironmentEntity.class)
+                .withCredentialName(testContext.get(CredentialEntity.class).getName())
+                .then(Environment::changeCredential)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvironmentChangeCredWithCredRequest(TestContext testContext) {
+        Map<String, Object> parameters = new HashMap<>();
+        testContext
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+
+                .given(CredentialEntity.class)
+                .withName("int-change-cred")
+
+                .given(EnvironmentEntity.class)
+                .withCredentialName(null)
+                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred", parameters))
+                .then(Environment::changeCredential)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvironmentChangeCredForSame(TestContext testContext) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+                .withCredentialName(testContext.get(CredentialEntity.class).getName())
+                .then(Environment::changeCredential)
+                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .validate();
+    }
+
+    @Test(dataProvider = "testContext")
+    public void testCreateEnvironmentChangeCredNotExistingName(TestContext testContext) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+
+                .given(EnvironmentEntity.class)
+                .withCredentialName("not-existing-cred")
+                .then(Environment::changeCredential, key(FORBIDDEN_KEY))
+                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .validate();
+    }
+
     private static void attachRdsToEnv(TestContext testContext, String name, Set<String> validRds) {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName(name)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
 
                 .given(EnvironmentEntity.class)
@@ -520,8 +531,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName(name)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
 
                 .given(EnvironmentEntity.class)
@@ -535,8 +544,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         testContext
                 .given(EnvironmentEntity.class)
                 .withName(name)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
                 .when(Environment::post)
 
                 .given(EnvironmentEntity.class)
@@ -546,7 +553,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .validate();
     }
 
-    private static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    protected static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
             throw new TestFailException("Credential is not attached to environment");
@@ -599,5 +606,14 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
             throw new TestFailException("Environment is not listed");
         }
         return environment;
+    }
+
+    private CredentialRequest createCredentialRequest(String cloudPlatform, String description, String name, Map<String, Object> parameters) {
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setCloudPlatform(cloudPlatform);
+        credentialRequest.setDescription(description);
+        credentialRequest.setName(name);
+        credentialRequest.setParameters(parameters);
+        return credentialRequest;
     }
 }
