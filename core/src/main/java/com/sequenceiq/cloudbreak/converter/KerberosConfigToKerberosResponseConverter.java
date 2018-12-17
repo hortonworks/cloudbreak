@@ -38,6 +38,7 @@ public class KerberosConfigToKerberosResponseConverter extends AbstractConversio
         kerberosResponse.setName(source.getName());
         kerberosResponse.setDescription(source.getDescription());
         kerberosResponse.setId(source.getId());
+        kerberosResponse.setVerifyKdcTrust(source.getVerifyKdcTrust());
         kerberosResponse.setEnvironments(source.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return kerberosResponse;
     }

@@ -47,6 +47,8 @@ public class KerberosConfigToKerberosResponseConverterTest {
 
     private static final Boolean TCP_ALLOWED = true;
 
+    private static final Boolean VERIFY_KDC_TRUST = false;
+
     private static final String ADMIN_SECRET = "someAdminSecret";
 
     private static final String PASSWORD_SECRET = "somePasswordSecret";
@@ -125,6 +127,7 @@ public class KerberosConfigToKerberosResponseConverterTest {
         when(source.getDescription()).thenReturn(DESCRIPTION);
         when(source.getId()).thenReturn(ID);
         when(source.getEnvironments()).thenReturn(environmentViews);
+        when(source.getVerifyKdcTrust()).thenReturn(VERIFY_KDC_TRUST);
     }
 
     @Parameters(name = "[{index}] Kerberos type: {0}")
@@ -154,6 +157,7 @@ public class KerberosConfigToKerberosResponseConverterTest {
         assertEquals(DESCRIPTION, result.getDescription());
         assertEquals(ID, result.getId());
         assertTrue(result.getEnvironments().isEmpty());
+        assertEquals(VERIFY_KDC_TRUST, result.getVerifyKdcTrust());
         verify(conversionService, times(5)).convert(anyString(), eq(SecretResponse.class));
         verify(conversionService, times(1)).convert(ADMIN_SECRET, SecretResponse.class);
         verify(conversionService, times(1)).convert(PASSWORD_SECRET, SecretResponse.class);
