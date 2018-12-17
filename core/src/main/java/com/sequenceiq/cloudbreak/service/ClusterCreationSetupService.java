@@ -136,7 +136,7 @@ public class ClusterCreationSetupService {
     }
 
     public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
-        if (stack.getDatalakeId() != null && StringUtils.isNotBlank(request.getKerberosConfigName())) {
+        if ((stack.getDatalakeId() != null || stack.getDatalakeResourceId() != null) && StringUtils.isNotBlank(request.getKerberosConfigName())) {
             throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
         MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());

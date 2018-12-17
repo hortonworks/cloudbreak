@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -23,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.StackFromTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -56,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -120,6 +119,9 @@ public class StackCreatorService {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private CredentialPrerequisiteService credentialPrerequisiteService;
 
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
@@ -213,12 +215,13 @@ public class StackCreatorService {
                 stack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
                 LOGGER.debug("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
+                decorateWithDatalakeResourceId(stack);
                 try {
                     createClusterIfNeed(user, workspace, stackRequest, stack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-                prepareSharedServiceIfNeed(stackRequest, stack, stackName);
+                prepareSharedServiceIfNeed(stackRequest, stack);
                 return stack;
             });
         } catch (TransactionExecutionException e) {
@@ -240,6 +243,13 @@ public class StackCreatorService {
         LOGGER.debug("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, savedStack.getName());
 
         return response;
+    }
+
+    private void decorateWithDatalakeResourceId(Stack stack) {
+        if (stack.getEnvironment() != null
+                && stack.getEnvironment().getDatalakeResourcesId() != null && stack.getDatalakeResourceId() == null) {
+            stack.setDatalakeResourceId(stack.getEnvironment().getDatalakeResourcesId());
+        }
     }
 
     private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {
@@ -269,14 +279,13 @@ public class StackCreatorService {
         return clusterRequest.getAmbariRepoDetailsJson() != null || clusterRequest.getAmbariStackDetails() != null;
     }
 
-    private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack, String stackName) {
-        if (stackRequest.getClusterRequest() != null && stackRequest.getClusterRequest().getConnectedCluster() != null) {
+    private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack) {
+        if (credentialPrerequisiteService.isCumulusCredential(stack.getCredential().getAttributes())
+                || stack.getDatalakeResourceId() != null
+                || (stackRequest.getClusterRequest() != null && stackRequest.getClusterRequest().getConnectedCluster() != null)) {
             long start = System.currentTimeMillis();
-            Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(stack.getCluster().getBlueprint(), stack);
-            if (stackInputs.isPresent()) {
-                stack = sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
-            }
-            LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            stack = sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
+            LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stack.getName());
         }
         return stack;
     }

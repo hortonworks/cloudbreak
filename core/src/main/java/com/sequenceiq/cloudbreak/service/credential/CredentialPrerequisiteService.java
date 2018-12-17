@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
@@ -87,7 +88,7 @@ public class CredentialPrerequisiteService {
 
     public Credential decorateCredential(Credential credential, String userId) {
         String attributes = credential.getAttributes();
-        Map<String, Object> newAttributes = isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
+        Map<String, Object> newAttributes = convertJsonStringToMap(attributes);
         boolean attributesChanged = false;
         if (StringUtils.isNoneEmpty((String) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);
@@ -97,10 +98,8 @@ public class CredentialPrerequisiteService {
                 attributesChanged = true;
             }
         }
-        if (StringUtils.isNoneEmpty((String) newAttributes.get(CUMULUS_AMBARI_URL))) {
-            String datalakeAmbariUrl = (String) newAttributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, (String) newAttributes.get(CUMULUS_AMBARI_USER),
-                    (String) newAttributes.get(CUMULUS_AMBARI_PASSWORD));
+        if (isCumulusCredential(newAttributes)) {
+            AmbariClient ambariClient = createCumulusAmbariClient(newAttributes);
             Map<String, String> params =
                     ambariClient.getConfigValuesByConfigIds(List.of(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
             newAttributes.put(CUMULUS_YARN_ENDPOINT, "http://" + params.get(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
@@ -110,6 +109,34 @@ public class CredentialPrerequisiteService {
             saveNewAttributesToCredential(credential, newAttributes);
         }
         return credential;
+    }
+
+    private Map<String, Object> convertJsonStringToMap(String attributes) {
+        return isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
+    }
+
+    public AmbariClient createCumulusAmbariClient(Map<String, Object> attributes) {
+        if (isCumulusCredential(attributes)) {
+            String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, (String) attributes.get(CUMULUS_AMBARI_USER),
+                    (String) attributes.get(CUMULUS_AMBARI_PASSWORD));
+            return ambariClient;
+        } else {
+            throw new CloudbreakServiceException("Cannot create Ambari client from non Cumulus credential!");
+        }
+    }
+
+    public AmbariClient createCumulusAmbariClient(String attributes) {
+        return createCumulusAmbariClient(convertJsonStringToMap(attributes));
+    }
+
+    public boolean isCumulusCredential(Map<String, Object> attributes) {
+        return StringUtils.isNoneEmpty((String) attributes.get(CUMULUS_AMBARI_URL));
+    }
+
+    public boolean isCumulusCredential(String attributes) {
+        Map<String, Object> attributeMap = convertJsonStringToMap(attributes);
+        return isCumulusCredential(attributeMap);
     }
 
     private void saveNewAttributesToCredential(Credential credential, Map<String, Object> newAttributes) {

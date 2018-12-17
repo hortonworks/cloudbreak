@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -25,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
@@ -35,9 +35,10 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -52,16 +53,10 @@ public class SharedServiceConfigProviderTest {
     private StackService stackService;
 
     @Mock
-    private ClusterService clusterService;
-
-    @Mock
     private User user;
 
     @Mock
     private Workspace workspace;
-
-    @Mock
-    private ConnectedClusterRequest connectedClusterRequest;
 
     @Mock
     private LdapConfig ldapConfig;
@@ -76,9 +71,6 @@ public class SharedServiceConfigProviderTest {
     private Stack publicStack;
 
     @Mock
-    private Cluster sourceCluster;
-
-    @Mock
     private Cluster publicStackCluster;
 
     @Mock
@@ -86,6 +78,9 @@ public class SharedServiceConfigProviderTest {
 
     @Mock
     private KerberosConfigProvider kerberosConfigProvider;
+
+    @Mock
+    private DatalakeResourcesRepository datalakeResourcesRepository;
 
     @Before
     public void setUp() {
@@ -137,8 +132,9 @@ public class SharedServiceConfigProviderTest {
     @Test
     public void testConfigureClusterWhenConnectedClusterRequestIsNullThenOriginalClusterInstanceShouldReturn() {
         Cluster cluster = new Cluster();
+        cluster.setStack(publicStack);
 
-        Cluster result = underTest.configureCluster(cluster, null, user, workspace);
+        Cluster result = underTest.configureCluster(cluster, user, workspace);
 
         Assert.assertEquals(cluster, result);
     }
@@ -146,72 +142,65 @@ public class SharedServiceConfigProviderTest {
     @Test
     public void testConfigureClusterWhenSourceClusterNameDoesNotExistsThenPublicStackInstanceWouldComeFromTheStackServiceGetMethod() throws IOException {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
+        DatalakeResources datalakeResources = new DatalakeResources();
+        datalakeResources.setLdapConfig(ldapConfig);
 
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(publicStackCluster);
+
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
+        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
-        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
+        Cluster result = underTest.configureCluster(requestedCluster, user, workspace);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
-        verify(stackService, times(1)).getById(TEST_LONG_VALUE);
+        verify(datalakeResourcesRepository, times(1)).findById(anyLong());
         verify(stackService, times(0)).getByNameInWorkspace(anyString(), anyLong());
     }
 
     @Test
     public void testConfigureClusterWhenSourceClusterNameExistsThenPublicStackWouldComeFromTheStackServiceGetPublicStack() throws IOException {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
+        DatalakeResources datalakeResources = new DatalakeResources();
+        datalakeResources.setLdapConfig(ldapConfig);
 
         String clusterName = "some value representing a cluster name";
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(clusterName);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getByNameInWorkspace(eq(clusterName), anyLong())).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
+        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
-        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
+        Cluster result = underTest.configureCluster(requestedCluster, user, workspace);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
-        verify(stackService, times(0)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).getByNameInWorkspace(anyString(), anyLong());
     }
 
     @Test
     public void testConfigureClusterIfSourceClusterContainsDifferentResourceStatusThenTheDefaultOnesWouldNotBeStoredInTheReturnCluster() throws IOException {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
-        Cluster sourceCluster = createBarelyConfiguredRequestedCluster();
-        sourceCluster.setRdsConfigs(createRdsConfigs(DEFAULT, DEFAULT_DELETED, USER_MANAGED));
+        DatalakeResources datalakeResources = new DatalakeResources();
+        datalakeResources.setRdsConfigs(createRdsConfigs(DEFAULT, DEFAULT_DELETED, USER_MANAGED));
 
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
-        when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
+        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
-        Cluster result = underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
+        Cluster result = underTest.configureCluster(requestedCluster, user, workspace);
 
         Assert.assertEquals(2L, result.getRdsConfigs().size());
         result.getRdsConfigs().forEach(rdsConfig -> Assert.assertNotEquals(DEFAULT, rdsConfig.getStatus()));
@@ -221,22 +210,17 @@ public class SharedServiceConfigProviderTest {
     public void testConfigureClusterWhenBlueprintAttributesAreNullThenBlueprintParameterJsonsShouldBeEmpty() throws IOException {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
 
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
+        underTest.configureCluster(requestedCluster, user, workspace);
 
-        verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).getById(TEST_LONG_VALUE);
+        verify(datalakeResourcesRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -244,23 +228,18 @@ public class SharedServiceConfigProviderTest {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
         Json mockBlueprintAttributes = mock(Json.class);
 
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(mockBlueprintAttributes.getValue()).thenReturn(null);
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
+        underTest.configureCluster(requestedCluster, user, workspace);
 
-        verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).getById(TEST_LONG_VALUE);
+        verify(datalakeResourcesRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -268,51 +247,41 @@ public class SharedServiceConfigProviderTest {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
         Json mockBlueprintAttributes = mock(Json.class);
 
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(mockBlueprintAttributes.getValue()).thenReturn("");
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
+        underTest.configureCluster(requestedCluster, user, workspace);
 
-        verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).getById(TEST_LONG_VALUE);
+        verify(datalakeResourcesRepository, times(1)).findById(anyLong());
     }
 
     @Test
     public void testConfigureClusterWhenBlueprintAttributesisNotNullAndItsValueIsNotEmptyThenBlueprintParameterJsonsShouldNotBeEmpty() throws IOException {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
         Json mockBlueprintAttributes = mock(Json.class);
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(mockBlueprintAttributes.getValue()).thenReturn("some value which does not empty or null");
-        when(clusterService.retrieveOutputs(anyLong())).thenReturn(configsResponse);
         when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
-        underTest.configureCluster(requestedCluster, connectedClusterRequest, user, workspace);
-
-        verify(clusterService, times(0)).retrieveOutputs(TEST_LONG_VALUE);
+        underTest.configureCluster(requestedCluster, user, workspace);
     }
 
     private Cluster createBarelyConfiguredRequestedCluster() {
         Cluster requestedCluster = new Cluster();
         requestedCluster.setRdsConfigs(new LinkedHashSet<>());
         requestedCluster.setBlueprint(blueprint);
+        requestedCluster.setStack(publicStack);
         return requestedCluster;
     }
 

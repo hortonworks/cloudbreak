@@ -55,6 +55,8 @@ public class StackDetails implements Serializable {
 
     private Long datalakeId;
 
+    private Long datalakeResourceId;
+
     public Long getId() {
         return id;
     }
@@ -221,5 +223,13 @@ public class StackDetails implements Serializable {
 
     public void setDatalakeId(Long datalakeId) {
         this.datalakeId = datalakeId;
+    }
+
+    public Long getDatalakeResourceId() {
+        return datalakeResourceId;
+    }
+
+    public void setDatalakeResourceId(Long datalakeResourceId) {
+        this.datalakeResourceId = datalakeResourceId;
     }
 }

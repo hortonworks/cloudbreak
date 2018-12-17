@@ -89,7 +89,7 @@ public class ClusterDecorator {
         prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName());
         prepareLdap(cluster, request, user, workspace);
-        cluster = sharedServiceConfigProvider.configureCluster(cluster, request.getConnectedCluster(), user, workspace);
+        cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
     }
 
