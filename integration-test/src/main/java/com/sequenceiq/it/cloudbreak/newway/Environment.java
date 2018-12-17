@@ -118,6 +118,7 @@ public class Environment extends EnvironmentEntity {
     public static EnvironmentEntity changeCredential(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
         EnvironmentChangeCredentialRequest envChangeCredentialRequest = new EnvironmentChangeCredentialRequest();
         envChangeCredentialRequest.setCredential(entity.getRequest().getCredential());
+        envChangeCredentialRequest.setCredentialName(entity.getRequest().getCredentialName());
         entity.setResponse(cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().changeCredential(cloudbreakClient.getWorkspaceId(), entity.getName(),
                 envChangeCredentialRequest)
         );
