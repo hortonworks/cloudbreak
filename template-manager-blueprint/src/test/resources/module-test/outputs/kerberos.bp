@@ -61,6 +61,7 @@
           "kdc_hosts": "fqdn.loal.com",
           "realm": "LOAL.COM",
           "encryption_types": "aes des3-cbc-sha1 rc4 des-cbc-md5",
+          "include_all_components_in_auth_to_local_rules": "true",
           "admin_server_host": "fqdn.loal.com",
           "ldap_url": "",
           "container_dn": ""
