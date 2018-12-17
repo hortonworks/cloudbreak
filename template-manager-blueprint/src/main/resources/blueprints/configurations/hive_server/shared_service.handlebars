@@ -24,6 +24,12 @@
       "ranger.plugin.hive.service.name":"{{{ remoteClusterName }}}_hive"
     }
   },
+  "ranger-hive-audit": {
+    "properties": {
+      "xasecure.audit.destination.solr": "true"{{{#cp sharedService.datalakeComponents 'RANGER_ADMIN'}}},
+      "xasecure.audit.destination.solr.zookeepers": "{{{ ranger.audit.solr.zookeepers }}}"{{{/cp}}}
+    }
+  },
   "hive-env": {
     "properties": {
       "hive_security_authorization": "Ranger"{{{#cp sharedService.datalakeComponents 'ATLAS_SERVER'}}},
@@ -32,7 +38,11 @@
   }{{{#cp sharedService.datalakeComponents 'KAFKA_BROKER'}}},
   "hive-atlas-application.properties": {
     "properties": {
-      "atlas.kafka.bootstrap.servers": "{{{ atlas.kafka.bootstrap.servers }}}"
+      "atlas.kafka.bootstrap.servers": "{{{ atlas.kafka.bootstrap.servers }}}",
+      "atlas.kafka.security.protocol": "{{{ atlas.kafka.security.protocol }}}",
+      "atlas.jaas.KafkaClient.option.serviceName": "{{{ atlas.jaas.KafkaClient.option.serviceName }}}",
+      "atlas.kafka.sasl.kerberos.service.name": "{{{ atlas.kafka.sasl.kerberos.service.name }}}",
+      "atlas.kafka.zookeeper.connect": "{{{ atlas.kafka.zookeeper.connect }}}"
     }
   }{{{/cp}}}
 {{{/if-true}}}

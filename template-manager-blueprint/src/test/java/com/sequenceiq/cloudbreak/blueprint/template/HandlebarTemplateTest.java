@@ -685,8 +685,15 @@ public class HandlebarTemplateTest {
         Map<String, Object> fixInputs = new HashMap<>();
         fixInputs.put("remoteClusterName", "datalake-1");
         fixInputs.put("policymgr_external_url", "10.1.1.1:6080");
+        fixInputs.put("ranger.audit.solr.zookeepers", "10.1.1.1:2181/infra-solr");
+
+        SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
+        Set<String> objects = new HashSet<>();
+        objects.add("RANGER_ADMIN");
+        sharedServiceConfigsView.setDatalakeComponents(objects);
+
         return new TemplateModelContextBuilder()
-                .withSharedServiceConfigs(attachedClusterSharedServiceConfig().get())
+                .withSharedServiceConfigs(sharedServiceConfigsView)
                 .withFixInputs(fixInputs)
                 .build();
     }
@@ -707,12 +714,19 @@ public class HandlebarTemplateTest {
         fixInputs.put("policymgr_external_url", "10.1.1.1:6080");
         fixInputs.put("atlas.kafka.bootstrap.servers", "10.1.1.1:6667");
         fixInputs.put("atlas.rest.address", "http://10.1.1.1:21000");
+        fixInputs.put("atlas.kafka.security.protocol", "SASL_PLAINTEXT");
+        fixInputs.put("atlas.jaas.KafkaClient.option.serviceName", "kafka");
+        fixInputs.put("atlas.kafka.sasl.kerberos.service.name", "kafka");
+        fixInputs.put("atlas.kafka.zookeeper.connect", "10.1.1.1:2181");
+        fixInputs.put("ranger.audit.solr.zookeepers", "10.1.1.1:2181/infra-solr");
+
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
         sharedServiceConfigsView.setDatalakeAmbariIp("10.1.1.1");
 
         Set<String> objects = new HashSet<>();
         objects.add("KAFKA_BROKER");
         objects.add("ATLAS_SERVER");
+        objects.add("RANGER_ADMIN");
         sharedServiceConfigsView.setDatalakeComponents(objects);
 
         return new TemplateModelContextBuilder()

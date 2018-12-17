@@ -24,6 +24,12 @@
       "ranger.plugin.hive.service.name":"datalake-1_hive"
     }
   },
+  "ranger-hive-audit": {
+    "properties": {
+      "xasecure.audit.destination.solr": "true",
+      "xasecure.audit.destination.solr.zookeepers": "10.1.1.1:2181/infra-solr"
+    }
+  },
   "hive-env": {
     "properties": {
       "hive_security_authorization": "Ranger",
@@ -32,7 +38,11 @@
   },
   "hive-atlas-application.properties": {
     "properties": {
-      "atlas.kafka.bootstrap.servers": "10.1.1.1:6667"
+      "atlas.kafka.bootstrap.servers": "10.1.1.1:6667",
+      "atlas.kafka.security.protocol": "SASL_PLAINTEXT",
+      "atlas.jaas.KafkaClient.option.serviceName": "kafka",
+      "atlas.kafka.sasl.kerberos.service.name": "kafka",
+      "atlas.kafka.zookeeper.connect": "10.1.1.1:2181"
     }
   }
 
