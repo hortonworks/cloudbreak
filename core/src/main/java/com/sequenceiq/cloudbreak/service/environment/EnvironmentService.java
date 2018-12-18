@@ -392,11 +392,11 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                             : kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
                     Set<RDSConfig> rdssConfigs = CollectionUtils.isEmpty(registerDatalakeRequest.getRdsNames()) ? null
                             : rdsConfigService.findByNamesInWorkspace(registerDatalakeRequest.getRdsNames(), workspaceId);
-                    AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, datalakeAmbariUser, datalakeAmbariPassowrd);
+                    URL ambariUrl = new URL(datalakeAmbariUrl);
+                    AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariUrl, datalakeAmbariUser, datalakeAmbariPassowrd);
                     Map<String, Map<String, String>> serviceSecretParamMap = StringUtils.isEmpty(registerDatalakeRequest.getRangerAdminPassword())
                             ? new HashMap<>() : Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE, Map.ofEntries(
                             Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, registerDatalakeRequest.getRangerAdminPassword()))));
-                    URL ambariUrl = new URL(datalakeAmbariUrl);
                     DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, datalakeAmbariUrl,
                             ambariUrl.getHost(), ambariUrl.getHost(), ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig, rdssConfigs,
                             environment.getWorkspace());

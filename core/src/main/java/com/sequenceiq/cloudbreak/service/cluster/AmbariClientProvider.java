@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import java.util.regex.Matcher;
+import java.net.URL;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.proxy.ApplicationProxyConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 
 @Service
@@ -45,7 +45,7 @@ public class AmbariClientProvider {
      */
     public AmbariClient getAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
         return getAmbariClient(clientConfig, httpsPort,
-            ambariSecurityConfigProvider.getCloudbreakAmbariUserName(cluster), ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster));
+                ambariSecurityConfigProvider.getCloudbreakAmbariUserName(cluster), ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster));
     }
 
     /**
@@ -65,19 +65,19 @@ public class AmbariClientProvider {
                 String proxyUser = applicationProxyConfig.getHttpsProxyUser();
                 String proxyPassword = applicationProxyConfig.getHttpsProxyPassword();
                 LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
-                    clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort, proxyUser);
+                        clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort, proxyUser);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), ambariUserName, ambariPassword,
-                    clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
+                        clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
             } else {
                 LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{}",
-                    clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort);
+                        clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), ambariUserName, ambariPassword,
-                    clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
+                        clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
             }
         } else {
             LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{}", clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
-                ambariUserName, ambariPassword, clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
+                    ambariUserName, ambariPassword, clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
         }
     }
 
@@ -96,33 +96,46 @@ public class AmbariClientProvider {
                 String proxyUser = applicationProxyConfig.getHttpsProxyUser();
                 String proxyPassword = applicationProxyConfig.getHttpsProxyPassword();
                 LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
-                    clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort, proxyUser);
+                        clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort, proxyUser);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), "admin", "admin",
-                    clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
+                        clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
             } else {
                 LOGGER.debug("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{} through proxy: {}:{}",
-                    clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort);
+                        clientConfig.getApiAddress(), httpsPort, proxyHost, proxyPort);
                 return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort), "admin", "admin",
-                    clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
+                        clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
             }
         } else {
             LOGGER.debug("Creating Ambari client with default credentials with 2-way-ssl to connect to host:port: {}:{}",
                     clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
-                "admin", "admin", clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
+                    "admin", "admin", clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
         }
     }
 
-    public AmbariClient getAmbariClient(String ambariUrl, String ambariUser, String ambariPassword) {
-        Matcher matcher = AMBRI_URL_PATTERN.matcher(ambariUrl);
-        if (matcher.matches()) {
-            boolean secure = matcher.group(PROTOCOL_GROUP).equals("https");
-            String host = matcher.group(HOST_GROUP);
-            String port = matcher.group(PORT_GROUP);
-            String basePath = "";
-            return new AmbariClient(host, port, ambariUser, ambariPassword, basePath, secure);
+    public AmbariClient getAmbariClient(URL ambariUrl, String ambariUser, String ambariPassword) {
+        String basePath = StringUtils.removeEnd(ambariUrl.getPath(), "/");
+        if (applicationProxyConfig.isUseProxyForClusterConnection()) {
+            String proxyHost = applicationProxyConfig.getHttpsProxyHost();
+            int proxyPort = applicationProxyConfig.getHttpsProxyPort();
+            if (applicationProxyConfig.isProxyAuthRequired()) {
+                String proxyUser = applicationProxyConfig.getHttpsProxyUser();
+                String proxyPassword = applicationProxyConfig.getHttpsProxyPassword();
+                LOGGER.debug("Creating Ambari client with user-pass to connect to host:port: {}:{} through proxy: {}:{} with proxy user: {}",
+                        ambariUrl.getHost(), ambariUrl.getPort(), proxyHost, proxyPort, proxyUser);
+                return new AmbariClient(ambariUrl.getHost(), String.valueOf(ambariUrl.getPort()), ambariUser, ambariPassword, basePath,
+                        "https".equals(ambariUrl.getProtocol()), proxyHost, proxyPort, proxyUser, proxyPassword);
+            } else {
+                LOGGER.debug("Creating Ambari client with user-pass to connect to host:port: {}:{} through proxy: {}:{}",
+                        ambariUrl.getHost(), ambariUrl.getPort(), proxyHost, proxyPort);
+                return new AmbariClient(ambariUrl.getHost(), String.valueOf(ambariUrl.getPort()), ambariUser, ambariPassword, basePath,
+                        "https".equals(ambariUrl.getProtocol()), proxyHost, proxyPort);
+            }
         } else {
-            throw new CloudbreakServiceException("Wrong ambari url: " + ambariUrl);
+            LOGGER.debug("Creating Ambari client with default credentials with user-pass to connect to host:port: {}:{}",
+                    ambariUrl.getHost(), ambariUrl.getPort());
+            return new AmbariClient(ambariUrl.getHost(), String.valueOf(ambariUrl.getPort()), ambariUser, ambariPassword, basePath,
+                    "https".equals(ambariUrl.getProtocol()));
         }
     }
 }

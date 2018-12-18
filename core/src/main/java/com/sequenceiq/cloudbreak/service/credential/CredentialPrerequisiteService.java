@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.credential;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,9 +120,14 @@ public class CredentialPrerequisiteService {
     public AmbariClient createCumulusAmbariClient(Map<String, Object> attributes) {
         if (isCumulusCredential(attributes)) {
             String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(datalakeAmbariUrl, (String) attributes.get(CUMULUS_AMBARI_USER),
-                    (String) attributes.get(CUMULUS_AMBARI_PASSWORD));
-            return ambariClient;
+            try {
+                URL ambariUrl = new URL(datalakeAmbariUrl);
+                AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariUrl, (String) attributes.get(CUMULUS_AMBARI_USER),
+                        (String) attributes.get(CUMULUS_AMBARI_PASSWORD));
+                return ambariClient;
+            } catch (MalformedURLException e) {
+                throw new CloudbreakServiceException("Datalake Ambari URL is malformed: " + datalakeAmbariUrl, e);
+            }
         } else {
             throw new CloudbreakServiceException("Cannot create Ambari client from non Cumulus credential!");
         }
