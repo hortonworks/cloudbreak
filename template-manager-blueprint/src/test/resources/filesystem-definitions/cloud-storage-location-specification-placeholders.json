@@ -6,7 +6,7 @@
       "description": "Hive stores the table data for managed tables in the warehouse directory",
       "defaultPath": "{{{ defaultPath }}}/apps/hive/warehouse",
       "propertyDisplayName": "Hive Warehouse Directory",
-      "relatedService": "HIVE_METASTORE",
+      "relatedServices": ["HIVE_METASTORE"],
       "requiredForAttachedCluster": false,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
@@ -16,7 +16,7 @@
       "description": "This is the directory where audit logs should be stored",
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/apps/ranger/audit",
       "propertyDisplayName": "Ranger Audit Logs",
-      "relatedService": "RANGER_ADMIN",
+      "relatedServices": ["RANGER_ADMIN"],
       "requiredForAttachedCluster": false,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
@@ -26,7 +26,7 @@
       "description": "This is the directory where audit logs should be stored",
       "defaultPath": "{{{ defaultPath }}}{{{#if-false attachedCluster}}}/{{{ clusterName }}}{{{/if-false}}}/apps/ranger/audit",
       "propertyDisplayName": "Ranger Audit Logs For Hive",
-      "relatedService": "HIVE_SERVER",
+      "relatedServices": ["HIVE_SERVER"],
       "requiredForAttachedCluster": false,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     }

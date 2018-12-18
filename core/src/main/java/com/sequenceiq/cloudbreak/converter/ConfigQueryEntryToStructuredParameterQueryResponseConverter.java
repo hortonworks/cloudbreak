@@ -15,7 +15,7 @@ public class ConfigQueryEntryToStructuredParameterQueryResponseConverter
         structuredParameterQueryResponse.setDefaultPath(source.getDefaultPath());
         structuredParameterQueryResponse.setDescription(source.getDescription());
         structuredParameterQueryResponse.setPropertyName(source.getPropertyName());
-        structuredParameterQueryResponse.setRelatedService(source.getRelatedService());
+        structuredParameterQueryResponse.setRelatedServices(source.getRelatedServices());
         structuredParameterQueryResponse.setPropertyFile(source.getPropertyFile());
         structuredParameterQueryResponse.setProtocol(source.getProtocol());
         structuredParameterQueryResponse.setPropertyDisplayName(source.getPropertyDisplayName());

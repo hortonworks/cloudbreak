@@ -5,13 +5,17 @@ import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 
 public class ConfigQueryEntryToStructuredParameterQueryResponseConverterTest {
 
-    private static final String TEST_RELATED_SERVICE = "testForExampleAmbar";
+    private static final String TEST_RELATED_SERVICE = "testForExampleAmbari";
+
+    private static final String TEST_RELATED_SERVICE2 = "testForExampleAmbari2";
 
     private static final String TEST_DESCRIPTION = "some description value";
 
@@ -43,7 +47,7 @@ public class ConfigQueryEntryToStructuredParameterQueryResponseConverterTest {
         expected.setPropertyDisplayName(TEST_DISPLAY_NAME);
         expected.setPropertyFile(TEST_PROPERTY_FILE);
         expected.setPropertyName(TEST_PROPERTY_NAME);
-        expected.setRelatedService(TEST_RELATED_SERVICE);
+        expected.setRelatedServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
 
         StructuredParameterQueryResponse result = underTest.convert(createConfigQueryEntry());
 
@@ -58,7 +62,7 @@ public class ConfigQueryEntryToStructuredParameterQueryResponseConverterTest {
         entry.setPropertyDisplayName(TEST_DISPLAY_NAME);
         entry.setPropertyFile(TEST_PROPERTY_FILE);
         entry.setPropertyName(TEST_PROPERTY_NAME);
-        entry.setRelatedService(TEST_RELATED_SERVICE);
+        entry.setRelatedServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
         entry.setSupportedStorages(Collections.singleton(TEST_STORAGE));
         return entry;
     }
