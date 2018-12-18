@@ -120,18 +120,10 @@ cb:
 
   blueprint:
      defaults: >
-                EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;
-                EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;
-                Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;
                 Flow Management: Apache NiFi, Apache NiFi Registry=hdf32-flow-management;
                 HDF-3.3 Messaging Management: Apache Kafka=hdf33-messaging-kafka;
-                Messaging Management: Apache Kafka, Schema Registry=hdf32-messaging-kafka-registry;
-                Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;
-                Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha
+                Messaging Management: Apache Kafka, Schema Registry=hdf32-messaging-kafka-registry
      internal: >
-                HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;
-                HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics;
-                HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp30-shared-services;
                 HDP 3.0 - Data Lake: Apache Ranger, Apache Atlas, Infrastructure Services=hdp30-shared-services-v2;
                 HDP 3.0 - Data Science Attached: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2-attached-v2;
                 HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2-standalone-v2;
