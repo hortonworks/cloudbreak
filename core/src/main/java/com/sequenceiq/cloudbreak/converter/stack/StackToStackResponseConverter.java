@@ -11,8 +11,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -55,10 +53,6 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
     private static final String NETWORK_ID = "networkId";
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
-
-    @Inject
     private ImageService imageService;
 
     @Inject
@@ -78,7 +72,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         }
 
         stackJson.setName(source.getName());
-        stackJson.setStackAuthentication(conversionService.convert(source.getStackAuthentication(), StackAuthenticationResponse.class));
+        stackJson.setStackAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationResponse.class));
         stackJson.setId(source.getId());
         if (source.getCredential() == null) {
             stackJson.setCloudPlatform(null);
@@ -121,7 +115,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         stackJson.setCustomHostname(source.getCustomHostname());
         stackJson.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
         stackJson.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
-        stackJson.setWorkspace(conversionService.convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        stackJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         addNodeCount(source, stackJson);
         putSubnetIdIntoResponse(source, stackJson);
         putVpcIdIntoResponse(source, stackJson);

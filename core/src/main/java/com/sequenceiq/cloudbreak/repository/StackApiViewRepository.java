@@ -38,7 +38,8 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.environment LEFT JOIN FETCH c.kerberosConfig "
-            + "WHERE s.workspace.id= :id AND s.terminated = null")
+            + "WHERE s.workspace.id= :id AND s.terminated = null "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
 
     @CheckPermissionsByWorkspaceId
@@ -46,6 +47,7 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.environment LEFT JOIN FETCH c.kerberosConfig "
-            + "WHERE s.workspace.id= :id AND :environment in e AND s.terminated = null")
+            + "WHERE s.workspace.id= :id AND :environment in e AND s.terminated = null "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<StackApiView> findAllByWorkspaceIdAndEnvironments(@Param("id") Long id, @Param("environment") EnvironmentView environment);
 }

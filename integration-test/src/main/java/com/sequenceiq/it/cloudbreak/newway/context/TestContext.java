@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.newway.context;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.emptyRunningParameter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -154,7 +153,12 @@ public class TestContext implements ApplicationContextAware {
 
         LOGGER.info("then {} assertion on {}, name: {}", key, entity, entity.getName());
         try {
-            return assertion.doAssertion(this, entity, getCloudbreakClient(who));
+            CloudbreakEntity cloudbreakEntity = resources.get(key);
+            if (cloudbreakEntity != null) {
+                return assertion.doAssertion(this, (T) cloudbreakEntity, getCloudbreakClient(who));
+            } else {
+                assertion.doAssertion(this, entity, getCloudbreakClient(who));
+            }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("then [{}] assertion is failed: {}, name: {}", key, e.getMessage(), entity.getName(), e);
@@ -201,9 +205,7 @@ public class TestContext implements ApplicationContextAware {
 
     public <O extends CloudbreakEntity> O given(String key, Class<O> clss) {
         checkShutdown();
-        O entity = (O) resources.computeIfAbsent(key, value -> init(clss));
-        resources.put(clss.getSimpleName(), entity);
-        return entity;
+        return (O) resources.computeIfAbsent(key, value -> init(clss));
     }
 
     public void addStatuses(Map<String, String> statuses) {
@@ -342,6 +344,10 @@ public class TestContext implements ApplicationContextAware {
         return cloudbreakClient;
     }
 
+    public CloudbreakClient getCloudbreakClient() {
+        return getCloudbreakClient(getDefaultUser());
+    }
+
     public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, String> desiredStatuses) {
         return await(entityClass, desiredStatuses, emptyRunningParameter());
     }
@@ -356,18 +362,23 @@ public class TestContext implements ApplicationContextAware {
 
     public <T extends CloudbreakEntity> T await(T entity, Map<String, String> desiredStatuses, RunningParameter runningParameter) {
         checkShutdown();
-        String key = getKey(entity.getClass(), runningParameter);
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
             return entity;
         }
+        String key = getKey(entity.getClass(), runningParameter);
+        CloudbreakEntity awaitEntity = get(key);
         LOGGER.info("await {} for {}", key, desiredStatuses);
         try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
+            }
+
             CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter));
-            statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, entity.getName(), desiredStatuses));
+            statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses));
             if (!desiredStatuses.values().contains("DELETE_COMPLETED")) {
-                entity.refresh(this, cloudbreakClient);
+                awaitEntity.refresh(this, cloudbreakClient);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -386,8 +397,8 @@ public class TestContext implements ApplicationContextAware {
             return;
         }
         List<CloudbreakEntity> entities = new ArrayList<>(resources.values());
-        Collections.reverse(entities);
-        entities.stream().forEach(entryset -> {
+
+        entities.stream().sorted(new CompareByOrder()).forEach(entryset -> {
             try {
                 //TODO this needs better implementation
                 entryset.cleanUp(this, clients.get(getDefaultUser()));

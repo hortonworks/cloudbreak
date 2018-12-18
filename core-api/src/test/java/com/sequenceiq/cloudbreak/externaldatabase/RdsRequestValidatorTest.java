@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MYSQL;
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE12;
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.POSTGRES;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 

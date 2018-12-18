@@ -9,7 +9,6 @@ import com.sequenceiq.it.cloudbreak.newway.action.CredentialPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
-@Prototype
 public class Credential extends CredentialEntity {
 
     Credential() {

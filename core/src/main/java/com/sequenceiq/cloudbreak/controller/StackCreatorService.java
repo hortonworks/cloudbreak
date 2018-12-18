@@ -19,8 +19,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.StackFromTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -36,13 +34,10 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -56,14 +51,12 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 
 @Service
 public class StackCreatorService {
@@ -112,12 +105,6 @@ public class StackCreatorService {
 
     @Inject
     private ParametersValidator parametersValidator;
-
-    @Inject
-    private ClusterTemplateService clusterTemplateService;
-
-    @Inject
-    private CredentialService credentialService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -307,34 +294,6 @@ public class StackCreatorService {
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user, workspace);
             LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
-        }
-    }
-
-    public StackResponse createInWorkspaceFromTemplate(String templateName, StackFromTemplateRequest request, CloudbreakUser cloudbreakUser, User user,
-            Workspace workspace) {
-        ClusterTemplate clusterTemplate = clusterTemplateService.getByNameForWorkspace(templateName, workspace);
-        validateTemplateAndCredentialCloudPlatform(request, workspace, clusterTemplate);
-        try {
-            String template = clusterTemplate.getTemplate();
-            StackV2Request stackV2Request = new Json(template).get(StackV2Request.class);
-            stackV2Request.setGeneral(request.getGeneral());
-            stackV2Request.setStackAuthentication(request.getStackAuthentication());
-            if (stackV2Request.getCluster() != null && stackV2Request.getCluster().getAmbari() != null) {
-                stackV2Request.getCluster().getAmbari().setPassword(request.getAmbariPassword());
-                stackV2Request.getCluster().getAmbari().setUserName(request.getAmbariUserName());
-            }
-            StackRequest stackRequest = conversionService.convert(stackV2Request, StackRequest.class);
-            return createStack(cloudbreakUser, user, workspace, stackRequest);
-        } catch (IOException e) {
-            throw new BadRequestException("Could not load template", e);
-        }
-    }
-
-    private void validateTemplateAndCredentialCloudPlatform(StackFromTemplateRequest request, Workspace workspace, ClusterTemplate clusterTemplate) {
-        Credential credential = credentialService.getByNameForWorkspace(request.getGeneral().getCredentialName(), workspace);
-        if (!credential.cloudPlatform().equalsIgnoreCase(clusterTemplate.getCloudPlatform())) {
-            throw new BadRequestException(String.format("Credential cloudplatform [%s] and template cloudplatform [%s] is different",
-                    credential.cloudPlatform(), clusterTemplate.getCloudPlatform()));
         }
     }
 

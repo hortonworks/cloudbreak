@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v2.cli;
 
 import static java.util.Optional.ofNullable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -27,7 +28,8 @@ public class TemplateToTemplateV2RequestConverter extends AbstractConversionServ
     public TemplateV2Request convert(Template source) {
         TemplateV2Request templateV2Request = new TemplateV2Request();
 
-        Map<String, Object> parameters = source.getAttributes().getMap();
+        Map<String, Object> parameters = new HashMap<>();
+        ofNullable(source.getAttributes()).ifPresent(attr -> parameters.putAll(attr.getMap()));
         ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr).getMap()));
         if (parameters.containsKey(KEY_ENCRYPTION_METHOD_FIELD)
                 && !KeyEncryptionMethod.KMS.name().equalsIgnoreCase((String) parameters.get(KEY_ENCRYPTION_METHOD_FIELD))) {

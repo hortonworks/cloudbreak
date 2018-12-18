@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -24,8 +26,12 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, Cl
         super(new ClusterV2Request(), testContex);
     }
 
+    public ClusterEntity() {
+        super(ClusterEntity.class.getSimpleName());
+    }
+
     public ClusterEntity valid() {
-        return withAmbariRequest(getTestContext().init(AmbariEntity.class));
+        return withAmbari(getTestContext().init(AmbariEntity.class));
     }
 
     public ClusterEntity withName(String name) {
@@ -33,7 +39,12 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, Cl
         return this;
     }
 
-    public ClusterEntity withAmbariRequest(AmbariEntity ambariRequest) {
+    public ClusterEntity withAmbari(String key) {
+        AmbariEntity ambari = getTestContext().get(key);
+        return withAmbari(ambari);
+    }
+
+    public ClusterEntity withAmbari(AmbariEntity ambariRequest) {
         getRequest().setAmbari(ambariRequest.getRequest());
         return this;
     }
@@ -50,6 +61,11 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, Cl
 
     public ClusterEntity withProxyConfigName(String proxy) {
         getRequest().setProxyName(proxy);
+        return this;
+    }
+
+    public ClusterEntity withRdsConfigNames(String... names) {
+        getRequest().setRdsConfigNames(newHashSet(names));
         return this;
     }
 

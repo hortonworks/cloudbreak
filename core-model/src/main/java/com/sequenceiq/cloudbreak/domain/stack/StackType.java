@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
 public enum  StackType {
-    WORKLOAD, DATALAKE
+    WORKLOAD, DATALAKE, TEMPLATE
 }

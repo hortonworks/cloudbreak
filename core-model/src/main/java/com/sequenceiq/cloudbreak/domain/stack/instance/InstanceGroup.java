@@ -46,10 +46,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @OneToOne
     private SecurityGroup securityGroup;
 
-    @Column(nullable = false)
     private String groupName;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
 

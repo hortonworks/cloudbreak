@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -122,12 +123,13 @@ public class ClusterComponentConfigProvider {
         return ret;
     }
 
-    public List<ClusterComponent> store(List<ClusterComponent> components, Cluster cluster) {
+    public List<ClusterComponent> store(Collection<ClusterComponent> components, Cluster cluster) {
+        List<ClusterComponent> ret = new ArrayList<>();
         for (ClusterComponent component : components) {
             component.setCluster(cluster);
-            store(component);
+            ret.add(store(component));
         }
-        return components;
+        return ret;
     }
 
     public Set<ClusterComponent> findByComponentType(ComponentType componentType) {

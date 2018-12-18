@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 
-public interface Purgable<T> {
+public interface Purgable<T> extends Orderable {
 
     Collection<T> getAll(CloudbreakClient client);
 

@@ -288,7 +288,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(rdsSet)
-                .withAmbariRequest(new AmbariEntity(testContext).valid().withBlueprintName(BP_NAME));
+                .withAmbari(new AmbariEntity(testContext).valid().withBlueprintName(BP_NAME));
         if (rdsName != null) {
             cluster.withRdsConfigNames(rdsSet);
         }

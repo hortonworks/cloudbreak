@@ -2,12 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -17,20 +13,19 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 @Prototype
 public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Response, AmbariEntity> {
 
-    public AmbariEntity(AmbariV2Request request, TestContext testContex) {
-        super(request, testContex);
-    }
-
     public AmbariEntity(TestContext testContex) {
         super(new AmbariV2Request(), testContex);
+    }
+
+    public AmbariEntity() {
+        super(AmbariEntity.class.getSimpleName().toUpperCase());
     }
 
     public AmbariEntity valid() {
         return withUserName("admin")
                 .withPassword("admin1234")
                 .withBlueprintName(MockCloudProvider.BLUEPRINT_DEFAULT_NAME)
-                .withValidateRepositories(true)
-                .withAmbariStackDetails(new AmbariStackDetailsJson());
+                .withValidateRepositories(true);
     }
 
     public AmbariEntity withBlueprintId(Long blueprintId) {
@@ -43,8 +38,9 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
         return this;
     }
 
-    public AmbariEntity withGateway(GatewayJson gateway) {
-        getRequest().setGateway(gateway);
+    public AmbariEntity withGateway(String key) {
+        GatewayEntity gatewayEntity = getTestContext().get(key);
+        getRequest().setGateway(gatewayEntity.getRequest());
         return this;
     }
 
@@ -73,18 +69,23 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
         return this;
     }
 
-    public AmbariEntity withAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
-        getRequest().setAmbariStackDetails(ambariStackDetails);
+    public AmbariEntity withAmbariStackDetails(String key) {
+        AmbariStackDetailsEntity ambariStack = getTestContext().get(key);
+        return withAmbariStackDetails(ambariStack);
+    }
+
+    public AmbariEntity withAmbariStackDetails(AmbariStackDetailsEntity ambariStackDetails) {
+        getRequest().setAmbariStackDetails(ambariStackDetails.getRequest());
         return this;
     }
 
-    public AmbariEntity withAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
-        getRequest().setAmbariRepoDetailsJson(ambariRepoDetailsJson);
-        return this;
+    public AmbariEntity withAmbariRepoDetails(String key) {
+        AmbariRepoDetailsEntity ambariRepo = getTestContext().get(key);
+        return withAmbariRepoDetails(ambariRepo);
     }
 
-    public AmbariEntity withAmbariDatabaseDetails(AmbariDatabaseDetailsJson ambariDatabaseDetails) {
-        getRequest().setAmbariDatabaseDetails(ambariDatabaseDetails);
+    public AmbariEntity withAmbariRepoDetails(AmbariRepoDetailsEntity ambariRepoDetailsJson) {
+        getRequest().setAmbariRepoDetailsJson(ambariRepoDetailsJson.getRequest());
         return this;
     }
 

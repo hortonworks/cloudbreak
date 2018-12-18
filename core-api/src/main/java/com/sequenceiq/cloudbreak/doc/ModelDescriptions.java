@@ -302,6 +302,7 @@ public class ModelDescriptions {
         public static final String TEMPLATE = "stringified template JSON";
         public static final String TYPE = "type of the cluster template";
         public static final String CLOUD_PLATFORM = "cloudplatform which this template is compatible with";
+        public static final String DATALAKE_REQUIRED = "datalake required which this template is compatible with";
     }
 
     public static class ConnectorModelDescription {

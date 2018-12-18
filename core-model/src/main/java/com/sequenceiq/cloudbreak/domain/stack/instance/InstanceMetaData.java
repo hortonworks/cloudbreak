@@ -47,11 +47,9 @@ public class InstanceMetaData implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceMetadataType instanceMetadataType;
 

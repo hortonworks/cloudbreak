@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.blueprint;
 
 import static com.sequenceiq.cloudbreak.template.model.ServiceName.serviceName;
 import static com.sequenceiq.cloudbreak.template.model.TemplateFiles.templateFiles;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;

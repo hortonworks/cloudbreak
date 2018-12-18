@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;

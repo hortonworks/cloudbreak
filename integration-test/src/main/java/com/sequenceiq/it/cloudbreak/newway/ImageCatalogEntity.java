@@ -8,9 +8,12 @@ import java.util.Collection;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogRequest, ImageCatalogResponse, ImageCatalogEntity> {
+@Prototype
+public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogRequest, ImageCatalogResponse, ImageCatalogEntity>
+        implements Purgable<ImageCatalogResponse> {
     public static final String IMAGE_CATALOG = "IMAGE_CATALOG";
 
     public static final String IMAGE_CATALOG_URL = "IMAGE_CATALOG_URL";
@@ -90,5 +93,15 @@ public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogReq
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
         }
+    }
+
+    @Override
+    public int order() {
+        return 1000;
+    }
+
+    @Override
+    public String getName() {
+        return getRequest().getName();
     }
 }

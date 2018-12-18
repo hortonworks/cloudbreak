@@ -19,7 +19,9 @@ public class NetworkToNetworkV2RequestConverter extends AbstractConversionServic
     @Override
     public NetworkV2Request convert(Network source) {
         NetworkV2Request networkV2Request = new NetworkV2Request();
-        networkV2Request.setParameters(cleanMap(source.getAttributes().getMap()));
+        if (source.getAttributes() != null) {
+            networkV2Request.setParameters(cleanMap(source.getAttributes().getMap()));
+        }
         networkV2Request.setSubnetCIDR(source.getSubnetCIDR());
         return networkV2Request;
     }

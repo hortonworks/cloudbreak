@@ -59,6 +59,10 @@ public class TemplateService {
         return savedTemplate;
     }
 
+    public Template savePure(Template template) {
+        return templateRepository.save(template);
+    }
+
     public void delete(Template template) {
         LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
         List<Stack> allStackForTemplate = stackService.getAllForTemplate(template.getId());

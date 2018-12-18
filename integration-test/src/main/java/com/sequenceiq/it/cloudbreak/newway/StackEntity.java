@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
 import static java.util.Collections.emptyMap;
@@ -30,17 +33,22 @@ import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.it.cloudbreak.newway.action.StackRefreshAction;
+import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.GeneralSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
+import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.SecurityGroupEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthentication;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.newway.testcase.ClusterTemplateTest;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
-public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse, StackEntity> {
+public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse, StackEntity> implements Purgable<StackResponse> {
 
     public static final String STACK = "STACK";
 
@@ -65,21 +73,58 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
 
     public StackEntity(TestContext testContext) {
         super(new StackV2Request(), testContext);
-        getRequest().setGeneral(new GeneralSettings());
-        getRequest().setPlacement(new PlacementSettings());
     }
 
     public StackEntity valid() {
+        String randomNameForMock = getNameCreator().getRandomNameForMock();
         return withInputs(emptyMap())
-                .withName(getNameCreator().getRandomNameForMock())
-                .withRegion(getCloudProvider().region())
-                .withAvailabilityZone(getCloudProvider().availabilityZone())
+                .withGeneralSettings(getTestContext().init(GeneralSettingsEntity.class))
+                .withPlacementSettings(getTestContext().init(PlacementSettingsEntity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()))
                 .withCredentialName(getTestContext().get(CredentialEntity.class).getName())
                 .withStackAuthentication(getTestContext().init(StackAuthentication.class))
                 .withGatewayPort(getTestContext().getSparkServer().getPort())
-                .withCluster(getTestContext().init(ClusterEntity.class));
+                .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
+    }
+
+    public StackEntity withEveryProperties() {
+        getTestContext().given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
+                .given("placementSettings", PlacementSettingsEntity.class).withRegion(ClusterTemplateTest.EUROPE)
+                .given("network", NetworkV2Entity.class).withSubnetCIDR("10.10.0.0/16").withParameters(Map.of("customParameter", "subnet-value"))
+                .given("securityRulesWorker", SecurityRulesEntity.class).withPorts("55,66,77").withProtocol("ftp").withSubnet("10.0.0.0/32")
+                .given("securityGroupMaster", SecurityGroupEntity.class).withSecurityGroupIds("scgId1", "scgId2")
+                .given("securityGroupWorker", SecurityGroupEntity.class).withSecurityRules("securityRulesWorker")
+                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withRecipes("mock-test-recipe").withSecurityGroup("securityGroupMaster")
+                .given("worker", InstanceGroupEntity.class).withHostGroup(WORKER).withSecurityGroup("securityGroupWorker")
+                .given("compute", InstanceGroupEntity.class).withHostGroup(COMPUTE)
+                .given("cluster", ClusterEntity.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap");
+
+        return withGeneralSettings("generalSettings")
+                .withPlacementSettings("placementSettings")
+                .withNetwork("network")
+                .withInstanceGroups("master", "worker", "compute")
+                .withCluster("cluster");
+    }
+
+    public StackEntity withPlacementSettings(String key) {
+        PlacementSettingsEntity placementSettings = getTestContext().get(key);
+        return withPlacementSettings(placementSettings);
+    }
+
+    public StackEntity withPlacementSettings(PlacementSettingsEntity placementSettings) {
+        getRequest().setPlacement(placementSettings.getRequest());
+        return this;
+    }
+
+    public StackEntity withGeneralSettings(GeneralSettingsEntity generalSettings) {
+        getRequest().setGeneral(generalSettings.getRequest());
+        return this;
+    }
+
+    public StackEntity withGeneralSettings(String key) {
+        GeneralSettingsEntity generalSettings = getTestContext().get(key);
+        return withGeneralSettings(generalSettings);
     }
 
     public StackEntity withName(String name) {
@@ -91,6 +136,11 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     public StackEntity withCredentialName(String credentialName) {
         getRequest().getGeneral().setCredentialName(credentialName);
         return this;
+    }
+
+    public StackEntity withCluster(String key) {
+        ClusterEntity clusterEntity = getTestContext().get(key);
+        return withCluster(clusterEntity);
     }
 
     public StackEntity withCluster(ClusterEntity cluster) {
@@ -192,6 +242,11 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
         return this;
     }
 
+    public StackEntity withNetwork(String key) {
+        NetworkV2Entity network = getTestContext().get(key);
+        return withNetwork(network);
+    }
+
     public StackEntity withNetwork(NetworkV2Entity network) {
         getRequest().setNetwork(network.getRequest());
         return this;
@@ -281,6 +336,7 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     public List<StackResponse> getAll(CloudbreakClient client) {
         StackV3Endpoint stackV3Endpoint = client.getCloudbreakClient().stackV3Endpoint();
         return stackV3Endpoint.listByWorkspace(client.getWorkspaceId(), null, false).stream()
+                .filter(s -> s.getName() != null)
                 .map(s -> {
                     StackResponse stackResponse = new StackResponse();
                     stackResponse.setName(s.getName());
@@ -312,4 +368,10 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     public CloudbreakEntity wait(Map<String, String> desiredStatuses, RunningParameter runningParameter) {
         return await(desiredStatuses, runningParameter);
     }
+
+    @Override
+    public String getName() {
+        return getRequest().getGeneral().getName();
+    }
+
 }

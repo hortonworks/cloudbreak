@@ -1,0 +1,133 @@
+{
+  "name": "EDW-Analytics on Microsoft Azure",
+  "description": "LLAP is a set of persistent daemons that execute fragments of Hive queries. Query execution on LLAP is very similar to Hive without LLAP, except that worker tasks run inside LLAP daemons, and not in containers.",
+  "type": "HIVE",
+  "cloudPlatform": "AZURE",
+  "datalakeRequired": "NONE",
+  "stackTemplate": {
+    "cluster": {
+      "ambari": {
+        "blueprintName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
+        "validateBlueprint": false,
+        "gateway": {
+          "enableGateway": true,
+          "topologies": [
+            {
+              "topologyName": "dp-proxy",
+              "exposedServices": [
+                "ALL"
+              ]
+            }
+          ],
+          "ssoType": "NONE"
+        },
+        "ambariStackDetails": {
+          "stack": "HDP",
+          "version": "3.0",
+          "verify": false,
+          "enableGplRepo": false
+        }
+      },
+      "rdsConfigNames": []
+    },
+    "instanceGroups": [
+      {
+        "group": "master",
+        "template": {
+          "instanceType": "Standard_D12_v2",
+          "rootVolumeSize": 30,
+          "volumeCount": 1,
+          "volumeSize": 100,
+          "volumeType": "Standard_LRS",
+          "parameters": {
+            "manageDisk": true
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "parameters": {},
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": "9443",
+              "protocol": "tcp"
+            },
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": "8443",
+              "protocol": "tcp"
+            },
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": "22",
+              "protocol": "tcp"
+            }
+          ]
+        }
+      },
+      {
+        "group": "worker",
+        "template": {
+          "instanceType": "Standard_D3_v2",
+          "rootVolumeSize": 30,
+          "volumeCount": 1,
+          "volumeSize": 100,
+          "volumeType": "Standard_LRS",
+          "parameters": {
+            "manageDisk": true
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "parameters": {
+          "availabilitySet": {}
+        },
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": "22",
+              "protocol": "tcp"
+            }
+          ]
+        }
+      },
+      {
+        "group": "compute",
+        "template": {
+          "instanceType": "Standard_D3_v2",
+          "rootVolumeSize": 30,
+          "volumeCount": 1,
+          "volumeSize": 100,
+          "volumeType": "Standard_LRS",
+          "parameters": {
+            "manageDisk": true
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "parameters": {},
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": "22",
+              "protocol": "tcp"
+            }
+          ]
+        }
+      }
+    ],
+    "network": {
+      "parameters": {
+        "noFirewallRules": false,
+        "noPublicIp": false
+      },
+      "subnetCIDR": "10.0.0.0/16"
+    }
+  }
+}

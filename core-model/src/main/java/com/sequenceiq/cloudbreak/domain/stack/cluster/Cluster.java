@@ -295,7 +295,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isCreateFailed() {
-        return status.equals(Status.CREATE_FAILED);
+        return Status.CREATE_FAILED.equals(status);
     }
 
     public Set<RDSConfig> getRdsConfigs() {

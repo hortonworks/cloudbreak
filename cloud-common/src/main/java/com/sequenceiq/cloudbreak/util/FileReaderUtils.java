@@ -3,10 +3,15 @@ package com.sequenceiq.cloudbreak.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -63,10 +68,45 @@ public final class FileReaderUtils {
 
     public static String readFileFromCustomPath(String filePath) throws IOException {
         File file = new File(filePath);
-        if (file == null) {
-            throw new IOException("File path must not be null");
+        if (!file.isFile()) {
+            throw new IOException("Given path should be a file");
+        }
+        if (!file.exists()) {
+            throw new IOException("File must be exists");
         }
         return FileUtils.readFileToString(file);
     }
 
+    public static File getDirFromClasspath(String dirPath) throws IOException {
+        String path = dirPath;
+        if (!path.startsWith(File.separator)) {
+            path = File.separator + path;
+        }
+        File dir = new ClassPathResource(path).getFile();
+        if (!dir.exists()) {
+            throw new IOException("Dir does not exists");
+        }
+        if (!dir.isDirectory()) {
+            throw new IOException(dirPath + " is not a directory.");
+        }
+        return dir;
+    }
+
+    public static List<String> getFileNamesRecursivelyFromClasspathByDirPath(String dirPath, FilenameFilter filter) throws IOException {
+        File dir = getDirFromClasspath(dirPath);
+        return Arrays.stream(dir.listFiles())
+                .flatMap(f -> {
+                    if (f.isDirectory() && f.listFiles() != null) {
+                        try {
+                            return getFileNamesRecursivelyFromClasspathByDirPath(dirPath + File.separator + f.getName(), filter).stream();
+                        } catch (IOException e) {
+                            return Stream.empty();
+                        }
+                    } else if (f.isFile() && filter != null && filter.accept(f.getParentFile(), f.getName())) {
+                        return Stream.of(dirPath + File.separator + f.getName());
+                    }
+                    return Stream.empty();
+                })
+                .collect(Collectors.toList());
+    }
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
+import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsStringSilent;
+
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -17,8 +20,10 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
 @Service
 public class ClusterTemplateLoaderService {
@@ -27,8 +32,11 @@ public class ClusterTemplateLoaderService {
     @Inject
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
-        Map<String, ClusterTemplate> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplates();
+        Map<String, DefaultClusterTemplateRequest> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(clusterTemplates);
         if (defaultTemplatesInDb.size() < defaultTemplates.size()) {
             LOGGER.debug("Default templates in DB [{}] less than default templates size [{}]", defaultTemplatesInDb.size(), defaultTemplates.size());
@@ -45,27 +53,25 @@ public class ClusterTemplateLoaderService {
                 .collect(Collectors.toList());
     }
 
-    private boolean isAllDefaultTemplateInDbHasTheSameContentAsCached(Map<String, ClusterTemplate> defaultTemplates,
+    private boolean isAllDefaultTemplateInDbHasTheSameContentAsCached(Map<String, DefaultClusterTemplateRequest> defaultTemplates,
             Collection<ClusterTemplate> defaultTemplatesInDb) {
         return defaultTemplatesInDb.stream().anyMatch(clusterTemplate -> {
-            ClusterTemplate defaultTemplate = defaultTemplates.get(clusterTemplate.getName());
+            DefaultClusterTemplateRequest defaultTemplate = defaultTemplates.get(clusterTemplate.getName());
             return isTemplatesContentDifferent(clusterTemplate, defaultTemplate);
         });
     }
 
-    private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, ClusterTemplate defaultTemplate) {
-        String templateContent = clusterTemplate.getTemplate();
-        return !templateContent.equals(defaultTemplate.getTemplate())
-                || !clusterTemplate.getDescription().equals(defaultTemplate.getDescription())
-                || !clusterTemplate.getCloudPlatform().equals(defaultTemplate.getCloudPlatform());
+    private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, DefaultClusterTemplateRequest defaultTemplate) {
+        return !Base64.getEncoder().encodeToString(writeValueAsStringSilent(defaultTemplate).getBytes()).equals(clusterTemplate.getTemplateContent());
     }
 
-    private boolean isAllDefaultTemplateExistsInDbByName(Map<String, ClusterTemplate> defaultTemplates, Collection<ClusterTemplate> defaultTemplatesInDb) {
-        return defaultTemplatesInDb.stream().map(ClusterTemplate::getName).collect(Collectors.toSet()).containsAll(defaultTemplates.keySet());
+    private boolean isAllDefaultTemplateExistsInDbByName(Map<String, DefaultClusterTemplateRequest> defaultTemplates,
+            Collection<ClusterTemplate> defaultTemplatesInDb) {
+        return defaultTemplatesInDb.stream().allMatch(s -> defaultTemplates.keySet().contains(s.getName()));
     }
 
     public Set<ClusterTemplate> loadClusterTemplatesForWorkspace(Set<ClusterTemplate> templatesInDb, Workspace workspace,
-            Function<Iterable<ClusterTemplate>, Iterable<ClusterTemplate>> saveMethod) {
+            Function<Iterable<ClusterTemplate>, Collection<ClusterTemplate>> saveMethod) {
         Set<ClusterTemplate> clusterTemplatesToSave = collectClusterTemplatesToSaveInDb(templatesInDb, workspace);
         Iterable<ClusterTemplate> savedClusterTemplates = saveMethod.apply(clusterTemplatesToSave);
         return unifyTemplatesUpdatedAndUnmodified(templatesInDb, clusterTemplatesToSave, savedClusterTemplates);
@@ -75,7 +81,8 @@ public class ClusterTemplateLoaderService {
             Iterable<ClusterTemplate> savedClusterTemplates) {
         Set<String> savedTemplatesName = clusterTemplatesToSave.stream().map(ClusterTemplate::getName).collect(Collectors.toSet());
         Set<ClusterTemplate> templatesNotModified = templatesInDb.stream()
-                .filter(template -> !savedTemplatesName.contains(template.getName())).collect(Collectors.toSet());
+                .filter(template -> !savedTemplatesName.contains(template.getName()))
+                .collect(Collectors.toSet());
         Set<ClusterTemplate> unionOfTemplates = Sets.newHashSet(savedClusterTemplates);
         unionOfTemplates.addAll(templatesNotModified);
         return unionOfTemplates;
@@ -85,17 +92,14 @@ public class ClusterTemplateLoaderService {
         Map<String, ClusterTemplate> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplates();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(templatesInDb);
         Collection<ClusterTemplate> templatesMissingFromDb = collectTemplatesMissingFromDb(defaultTemplates, defaultTemplatesInDb, workspace);
-        Collection<ClusterTemplate> updatedTemplates = updateAndCollectOutdatedTemplatesInDb(defaultTemplates, defaultTemplatesInDb);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Templates missing from DB: {}",
                     templatesMissingFromDb.stream().map(ClusterTemplate::getName).collect(Collectors.joining(", ")));
-            LOGGER.debug("Templates to be updated in DB: {}",
-                    updatedTemplates.stream().map(ClusterTemplate::getName).collect(Collectors.joining(", ")));
         }
-        return Stream.concat(templatesMissingFromDb.stream(), updatedTemplates.stream()).collect(Collectors.toSet());
+        return Stream.concat(templatesMissingFromDb.stream(), defaultTemplates.values().stream()).collect(Collectors.toSet());
     }
 
-    private Collection<ClusterTemplate> collectTemplatesMissingFromDb(Map<String, ClusterTemplate> defaultTemplates,
+    public Collection<ClusterTemplate> collectTemplatesMissingFromDb(Map<String, ClusterTemplate> defaultTemplates,
             Collection<ClusterTemplate> defaultTemplatesInDb, Workspace workspace) {
         Set<String> defaultTemplateInDbNames = defaultTemplatesInDb.stream().map(ClusterTemplate::getName).collect(Collectors.toSet());
         Set<ClusterTemplate> templatesMissingFromDb = defaultTemplates.values().stream()
@@ -105,18 +109,19 @@ public class ClusterTemplateLoaderService {
         return templatesMissingFromDb;
     }
 
-    private Collection<ClusterTemplate> updateAndCollectOutdatedTemplatesInDb(Map<String, ClusterTemplate> defaultTemplates,
-            Iterable<ClusterTemplate> defaultTemplatesInDb) {
-        Collection<ClusterTemplate> updatedTemplates = new HashSet<>();
+    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Set<ClusterTemplate> clusterTemplates) {
+        return collectOutdatedTemplatesInDb(defaultClusterTemplateCache.defaultClusterTemplateRequests(), clusterTemplates);
+    }
+
+    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, DefaultClusterTemplateRequest> defaultTemplates,
+            Collection<ClusterTemplate> defaultTemplatesInDb) {
+        Collection<ClusterTemplate> outdatedTemplates = new HashSet<>();
         for (ClusterTemplate template : defaultTemplatesInDb) {
-            ClusterTemplate defaultTemplate = defaultTemplates.get(template.getName());
+            DefaultClusterTemplateRequest defaultTemplate = defaultTemplates.get(template.getName());
             if (isTemplatesContentDifferent(template, defaultTemplate)) {
-                template.setTemplate(defaultTemplate.getTemplate());
-                template.setCloudPlatform(defaultTemplate.getCloudPlatform());
-                template.setDescription(defaultTemplate.getDescription());
-                updatedTemplates.add(template);
+                outdatedTemplates.add(template);
             }
         }
-        return updatedTemplates;
+        return outdatedTemplates;
     }
 }

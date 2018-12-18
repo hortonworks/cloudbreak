@@ -25,6 +25,10 @@ public class TemplateEntity extends AbstractCloudbreakEntity<TemplateV2Request, 
         super(new TemplateV2Request(), testContext);
     }
 
+    public TemplateEntity() {
+        super(TemplateEntity.class.getSimpleName().toUpperCase());
+    }
+
     public TemplateEntity valid() {
         return withInstanceType("large")
                 .withVolumeCount(1)

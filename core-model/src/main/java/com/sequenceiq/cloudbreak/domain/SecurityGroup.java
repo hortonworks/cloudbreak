@@ -33,17 +33,15 @@ public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
     @SequenceGenerator(name = "securitygroup_generator", sequenceName = "securitygroup_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @OneToMany(mappedBy = "securityGroup", cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
+    @OneToMany(mappedBy = "securityGroup", cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<SecurityRule> securityRules = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -109,7 +107,7 @@ public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public String getFirstSecurityGroupId() {
-        return securityGroupIds.isEmpty() ? null : securityGroupIds.iterator().next();
+        return securityGroupIds == null || securityGroupIds.isEmpty() ? null : securityGroupIds.iterator().next();
     }
 
     public Set<String> getSecurityGroupIds() {
