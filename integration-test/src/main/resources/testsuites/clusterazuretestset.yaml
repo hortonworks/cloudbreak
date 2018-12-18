@@ -12,7 +12,7 @@ tests:
     parameters:
       clusterName: azure-prewarm-edwetl
       provider: azure
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:

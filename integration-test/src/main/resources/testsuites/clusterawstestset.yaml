@@ -15,7 +15,7 @@ tests:
     parameters:
       clusterName: aws-base-datasci
       provider: aws
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
       isGatekeeper: true
@@ -32,7 +32,7 @@ tests:
     parameters:
       clusterName: aws-base-edwan
       provider: aws
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
       workerInstanceCount: 3
       image: base
       instancegroupName: worker
@@ -60,28 +60,12 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "aws base image edw edwetl"
-    preserveOrder: true
-    parameters:
-      clusterName: aws-base-edwetl
-      provider: aws
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: base
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
   - name: "aws prewarm image datascience"
     preserveOrder: true
     parameters:
       clusterName: aws-prewarm-datasci
       provider: aws
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
@@ -97,7 +81,7 @@ tests:
     parameters:
       clusterName: aws-prewarm-edwan
       provider: aws
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
       workerInstanceCount: 3
       image: hdp
       instancegroupName: worker
@@ -122,54 +106,6 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
           - testCreateNewHdfCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "aws prewarm image edw edwetl"
-    preserveOrder: true
-    parameters:
-      clusterName: aws-prewarm-edwetl
-      provider: aws
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "aws prewarm image hdp3"
-    preserveOrder: true
-    parameters:
-      clusterName: aws-prewarm-hdp3
-      provider: aws
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "aws base image hdp3"
-    preserveOrder: true
-    parameters:
-      clusterName: aws-base-hdp3
-      provider: aws
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
-      image: base
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
           - testStopCluster
           - testStartCluster
           - testTerminateCluster

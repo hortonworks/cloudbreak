@@ -13,7 +13,7 @@ tests:
     parameters:
       clusterName: os-base-datasci
       provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
       isGatekeeper: true
@@ -30,7 +30,7 @@ tests:
     parameters:
       clusterName: os-base-datasci-knox-gw
       provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
       isGatekeeper: true
@@ -38,23 +38,6 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
           - testCreateNewClusterWithKnox
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack base image EDW-Analytics"
-    preserveOrder: true
-    parameters:
-      clusterName: os-base-edwan
-      provider: openstack
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
-      workerInstanceCount: 3
-      image: base
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
           - testScaleCluster
           - testStopCluster
           - testStartCluster
@@ -75,28 +58,12 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack base image edwetl"
-    preserveOrder: true
-    parameters:
-      clusterName: os-base-edwetl
-      provider: openstack
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: base
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
   - name: "openstack prewarm image datascience"
     preserveOrder: true
     parameters:
       clusterName: os-prewarm-datasci
       provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
@@ -112,7 +79,7 @@ tests:
     parameters:
       clusterName: os-prewarm-edwan
       provider: openstack
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
       workerInstanceCount: 3
       image: hdp
       instancegroupName: worker
@@ -140,28 +107,12 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack prewarm image edwetl"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-edwetl
-      provider: openstack
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
   - name: "openstack change image"
     preserveOrder: true
     parameters:
       clusterName: os-prewarm-datasci-changeimage
       provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
@@ -174,19 +125,3 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack prewarm image hdp3"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-hdp3
-      provider: openstack
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
-      image: hdp
-      instancegroupName: worker
-    classes:
-    - name: com.sequenceiq.it.cloudbreak.ClusterTests
-      includedMethods:
-      - testCreateNewRegularCluster
-      - testScaleCluster
-      - testStopCluster
-      - testStartCluster
-      - testTerminateCluster
