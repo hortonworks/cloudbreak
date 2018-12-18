@@ -45,9 +45,13 @@ func (k *kerberosOutDescribe) DataAsStringArray() []string {
 	return append(k.kerberos.DataAsStringArray(), k.ID)
 }
 
+func GetVerifyKdcTrustFlag(c *cli.Context) bool {
+	return !c.Bool(fl.FlKerberosDisableVerifyKdcTrust.Name)
+}
+
 func CreateAdKerberos(c *cli.Context) error {
 	admin := c.String(fl.FlKerberosAdmin.Name)
-	verifyKdcTrust := c.Bool(fl.FlKerberosVerifyKdcTrust.Name)
+	verifyKdcTrust := GetVerifyKdcTrustFlag(c)
 	domain := c.String(fl.FlKerberosDomain.Name)
 	nameServers := c.String(fl.FlKerberosNameServers.Name)
 	password := c.String(fl.FlKerberosPassword.Name)
@@ -81,7 +85,7 @@ func CreateAdKerberos(c *cli.Context) error {
 
 func CreateCustomKerberos(c *cli.Context) error {
 	admin := c.String(fl.FlKerberosAdmin.Name)
-	verifyKdcTrust := c.Bool(fl.FlKerberosVerifyKdcTrust.Name)
+	verifyKdcTrust := GetVerifyKdcTrustFlag(c)
 	domain := c.String(fl.FlKerberosDomain.Name)
 	nameServers := c.String(fl.FlKerberosNameServers.Name)
 	password := c.String(fl.FlKerberosPassword.Name)
@@ -109,7 +113,7 @@ func CreateCustomKerberos(c *cli.Context) error {
 
 func CreateFreeIpaKerberos(c *cli.Context) error {
 	admin := c.String(fl.FlKerberosAdmin.Name)
-	verifyKdcTrust := c.Bool(fl.FlKerberosVerifyKdcTrust.Name)
+	verifyKdcTrust := GetVerifyKdcTrustFlag(c)
 	domain := c.String(fl.FlKerberosDomain.Name)
 	nameServers := c.String(fl.FlKerberosNameServers.Name)
 	password := c.String(fl.FlKerberosPassword.Name)

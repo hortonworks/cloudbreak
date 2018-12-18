@@ -1069,11 +1069,11 @@ var (
 			Usage: "kerberos principal",
 		},
 	}
-	FlKerberosVerifyKdcTrust = BoolFlag{
+	FlKerberosDisableVerifyKdcTrust = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
-			Name:  "verify-kdc-trust",
-			Usage: "verify-kdc-trust flag",
+			Name:  "disable-verify-kdc-trust",
+			Usage: "disable kdc-trust verification",
 		},
 	}
 	FlKerberosDomain = StringFlag{
@@ -1310,7 +1310,7 @@ func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddCommonKerberosCreateFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlEnvironmentsOptional, FlKerberosVerifyKdcTrust, FlKerberosDomain, FlKerberosNameServers,
+	for _, f := range []cli.Flag{FlEnvironmentsOptional, FlKerberosDisableVerifyKdcTrust, FlKerberosDomain, FlKerberosNameServers,
 		FlKerberosPassword, FlKerberosTcpAllowed, FlKerberosPrincipal, FlKerberosAdmin} {
 		fb.flags = append(fb.flags, f)
 	}
