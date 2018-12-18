@@ -123,7 +123,7 @@
     <service>
         <role>RANGER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>http://{{ hostloc }}:{{ ports['RANGERUI'] }}</url>
+        <url>http://{{ hostloc }}:{{ ports['RANGER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -248,12 +248,12 @@
     {%- endif %}
 
     {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
-    {% if 'RANGERUI' in exposed -%}
+    {% if 'RANGER' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/ranger/ -->
     <service>
         <role>RANGERUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>http://{{ hostloc }}:{{ ports['RANGERUI'] }}</url>
+        <url>http://{{ hostloc }}:{{ ports['RANGER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
