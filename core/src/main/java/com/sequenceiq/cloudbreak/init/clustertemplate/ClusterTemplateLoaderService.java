@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
 @Service
 public class ClusterTemplateLoaderService {
@@ -31,9 +30,6 @@ public class ClusterTemplateLoaderService {
 
     @Inject
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
         Map<String, DefaultClusterTemplateRequest> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
