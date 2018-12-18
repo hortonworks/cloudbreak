@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,9 +18,6 @@ public class ConverterUtil {
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    @Inject
-    private List<Converter> converters;
 
     public <T> List<T> convertAll(Iterable<?> list, Class<T> clss) {
         return StreamSupport.stream(list.spliterator(), false)
