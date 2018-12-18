@@ -12,7 +12,7 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @recipe_name = "cli-recipe"
   @recipe_file = "../../recipes/echo.sh"
 
-  @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
+  @default_blueprint_name = "'HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin'"
   @blueprint_name_url = "cli-bp-url"
   @blueprint_name_file = "cli-bp-file"
   @blueprint_url = ENV['BLUEPRINT_URL']

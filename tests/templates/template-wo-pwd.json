@@ -2,7 +2,7 @@
   "cluster": {
     "ambari": {
       "blueprintInputs": [],
-      "blueprintName": "EDW-ETL: Apache Hive, Apache Spark 2",
+      "blueprintName": "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin",
       "userName": "admin"
     }
   },

@@ -36,7 +36,7 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @mock_endpoint_reset = "/cb/api/reset"
     @mock_password = "mockpassword"
 
-    @default_blueprint_name = "'EDW-ETL: Apache Hive, Apache Spark 2'"
+    @default_blueprint_name = "'HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin'"
     @blueprint_name_file = "cli-bp-file"
     @blueprint_url = ENV['BLUEPRINT_URL']
     @blueprint_file = "../../blueprints/test.bp"
