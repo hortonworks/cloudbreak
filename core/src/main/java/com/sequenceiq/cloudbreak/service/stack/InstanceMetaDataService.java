@@ -115,13 +115,16 @@ public class InstanceMetaDataService {
         return null;
     }
 
-    public InstanceMetaData
-    getPrimaryGatewayInstanceMetadata(long stackId) {
+    public InstanceMetaData getPrimaryGatewayInstanceMetadata(long stackId) {
         try {
             return instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
         } catch (AccessDeniedException ignore) {
             LOGGER.debug("No primary gateway for stack [{}]", stackId);
             return null;
         }
+    }
+
+    public InstanceMetaData pureSave(InstanceMetaData instanceMetaData) {
+        return instanceMetaDataRepository.save(instanceMetaData);
     }
 }

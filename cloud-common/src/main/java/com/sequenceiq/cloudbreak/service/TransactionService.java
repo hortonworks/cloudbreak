@@ -11,6 +11,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +28,9 @@ public class TransactionService {
 
     @Inject
     private Clock clock;
+
+    @Value("${cb.log.transaction.stacktrace:true}")
+    private boolean logTransactionStacktrace;
 
     public <T> T required(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
@@ -97,10 +101,17 @@ public class TransactionService {
     private void processTransactionDuration(long start) {
         long duration = clock.getCurrentTime() - start;
         if (TX_DURATION_ERROR < duration) {
-            LOGGER.error("Transaction duration was critical, took {}ms  at: {}", duration, generateStackTrace());
-
+            if (logTransactionStacktrace) {
+                LOGGER.error("Transaction duration was critical, took {}ms at: {}", duration, generateStackTrace());
+            } else {
+                LOGGER.error("Transaction duration was critical, took {}ms", duration);
+            }
         } else if (TX_DURATION_OK < duration) {
-            LOGGER.warn("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
+            if (logTransactionStacktrace) {
+                LOGGER.warn("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
+            } else {
+                LOGGER.warn("Transaction duration was high, took {}ms", duration);
+            }
         }
     }
 

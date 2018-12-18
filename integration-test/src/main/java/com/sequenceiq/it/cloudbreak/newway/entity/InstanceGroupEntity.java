@@ -33,6 +33,10 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
         super(new InstanceGroupV2Request(), testContext);
     }
 
+    public InstanceGroupEntity() {
+        super(InstanceGroupEntity.class.getSimpleName().toUpperCase());
+    }
+
     public InstanceGroupEntity valid() {
         HostGroupType hostGroupType = MASTER;
         return withHostGroup(hostGroupType);
@@ -92,6 +96,11 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
     public InstanceGroupEntity withType(InstanceGroupType instanceGroupType) {
         getRequest().setType(instanceGroupType);
         return this;
+    }
+
+    public InstanceGroupEntity withSecurityGroup(String key) {
+        SecurityGroupEntity securityGroupEntity = getTestContext().get(key);
+        return withSecurityGroup(securityGroupEntity);
     }
 
     public InstanceGroupEntity withSecurityGroup(SecurityGroupEntity securityGroup) {

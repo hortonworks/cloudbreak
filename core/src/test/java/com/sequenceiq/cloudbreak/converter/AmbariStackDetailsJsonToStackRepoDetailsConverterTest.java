@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
 
@@ -26,11 +25,6 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends Abstr
         assertAllFieldsNotNull(result, Collections.singletonList("knox"));
 
         Assert.assertFalse(result.getStack().containsKey(StackRepoDetails.CUSTOM_VDF_REPO_KEY));
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testConvertWhenVDFAndBaseURLNotProvided() {
-        underTest.convert(getRequest("stack/ambari-stack-details-empty.json"));
     }
 
     @Test

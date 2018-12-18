@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

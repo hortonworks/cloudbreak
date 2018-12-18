@@ -20,6 +20,10 @@ public class NetworkV2Entity extends AbstractCloudbreakEntity<NetworkV2Request, 
         super(new NetworkV2Request(), testContext);
     }
 
+    public NetworkV2Entity() {
+        super(NetworkV2Entity.class.getSimpleName().toUpperCase());
+    }
+
     public NetworkV2Entity valid() {
         return this;
     }

@@ -4,8 +4,6 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.empty
 import static com.sequenceiq.it.cloudbreak.newway.finder.Finders.same;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,14 +16,13 @@ import org.apache.commons.lang3.NotImplementedException;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.newway.finder.Finder;
 
-public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity> extends Entity implements CloudbreakEntity, Purgable<S> {
+public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity> extends Entity implements CloudbreakEntity {
 
     @Inject
     private TestParameter testParameter;
@@ -213,22 +210,6 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
 
     public RandomNameCreator getNameCreator() {
         return creator;
-    }
-
-    @Override
-    public Collection<S> getAll(CloudbreakClient client) {
-        LOGGER.info("{} is not a purgable entity", getClass());
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean deletable(S entity) {
-        return false;
-    }
-
-    @Override
-    public void delete(S entity, CloudbreakClient client) {
-
     }
 
     public <T extends CloudbreakEntity> T deleteGiven(Class<T> clss, ActionV2<T> action, RunningParameter runningParameter) {

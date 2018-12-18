@@ -6,10 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.context.Orderable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public interface CloudbreakEntity {
+public interface CloudbreakEntity extends Orderable {
 
     Logger LOGGER = LoggerFactory.getLogger(CloudbreakEntity.class);
 
@@ -18,7 +19,7 @@ public interface CloudbreakEntity {
     String getName();
 
     default void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.warn("Did not clean up resource: {}", getName());
+        LOGGER.warn("Did not clean up resource ({}): name={}", getClass().getSimpleName(), getName());
     }
 
     default CloudbreakEntity refresh(TestContext context, CloudbreakClient cloudbreakClient) {

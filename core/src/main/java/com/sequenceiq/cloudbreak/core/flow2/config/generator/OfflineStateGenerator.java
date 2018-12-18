@@ -399,6 +399,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Stack findTemplateWithLists(Long id) {
+            return null;
+        }
+
+        @Override
         public Long countDatalakeStacksInEnvironment(Long environmentId) {
             return null;
         }

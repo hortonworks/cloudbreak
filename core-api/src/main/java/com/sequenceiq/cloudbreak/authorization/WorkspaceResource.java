@@ -8,6 +8,7 @@ public enum WorkspaceResource {
     CREDENTIAL("Credential", "credential"),
     RECIPE("Recipe", "recipe"),
     STACK("Stack", "stack"),
+    STACK_TEMPLATE("Stack template", "stacktemplate"),
     LDAP("LDAP config", "ldap"),
     RDS("RDS config", "rds"),
     PROXY("Proxy config", "proxy"),

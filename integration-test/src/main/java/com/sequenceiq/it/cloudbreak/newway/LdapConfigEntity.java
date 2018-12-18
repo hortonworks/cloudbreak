@@ -1,13 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.ws.rs.WebApplicationException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest, LdapConfigResponse, LdapConfigEntity> {
+public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest, LdapConfigResponse, LdapConfigEntity> implements Purgable<LdapConfigResponse> {
     public static final String LDAP_CONFIG = "LDAP_CONFIG";
 
     public LdapConfigEntity(String newId) {
@@ -148,5 +153,32 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest
     public LdapConfigEntity withUserSearchBase(String userSearchBase) {
         getRequest().setUserSearchBase(userSearchBase);
         return this;
+    }
+
+    @Override
+    public List<LdapConfigResponse> getAll(CloudbreakClient client) {
+        LdapConfigV3Endpoint ldapConfigV3Endpoint = client.getCloudbreakClient().ldapConfigV3Endpoint();
+        return ldapConfigV3Endpoint.listConfigsByWorkspace(client.getWorkspaceId(), null, null).stream()
+                .filter(s -> s.getName() != null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean deletable(LdapConfigResponse entity) {
+        return entity.getName().startsWith("mock-");
+    }
+
+    @Override
+    public void delete(LdapConfigResponse entity, CloudbreakClient client) {
+        try {
+            client.getCloudbreakClient().ldapConfigV3Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName());
+        } catch (Exception e) {
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public int order() {
+        return 500;
     }
 }

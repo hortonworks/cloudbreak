@@ -8,16 +8,14 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
-import javax.inject.Inject;
-
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.GeneralSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
@@ -29,9 +27,6 @@ public class ClusterStopTest extends AbstractIntegrationTest {
     private static final String TEST_CONTEXT = "testContext";
 
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
-
-    @Inject
-    private RandomNameCreator creator;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -49,11 +44,12 @@ public class ClusterStopTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT)
     public void testClusterStop(TestContext testContext) {
-        String clusterName = creator.getRandomNameForMock();
+        String clusterName = getNameGenerator().getRandomNameForMock();
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);
         testContext
-                .given(StackEntity.class).valid().withName(clusterName)
+                .given("generalEntity", GeneralSettingsEntity.class).withName(clusterName)
+                .given(StackEntity.class).valid().withGeneralSettings("generalEntity")
                 .when(Stack.postV2())
                 .await(STACK_AVAILABLE)
                 .when(Stack.stopV2())

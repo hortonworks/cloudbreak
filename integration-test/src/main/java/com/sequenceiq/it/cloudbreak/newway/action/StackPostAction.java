@@ -31,10 +31,4 @@ public class StackPostAction implements ActionV2<StackEntity> {
 
         return entity;
     }
-
-    private void checkOldEntityExists(Object entity) {
-        if (entity != null) {
-            LOGGER.warn("{} udpated from test context.", entity.getClass().getSimpleName());
-        }
-    }
 }

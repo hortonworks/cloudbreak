@@ -17,7 +17,7 @@ import net.sf.json.JSONObject;
 
 public class Json implements Serializable {
 
-    private final String value;
+    private String value;
 
     public Json(String value) {
         this.value = value;
@@ -27,12 +27,22 @@ public class Json implements Serializable {
         this.value = JsonUtil.writeValueAsString(value);
     }
 
+    private Json() {
+
+    }
+
     public String getValue() {
         return value;
     }
 
     public <T> T get(Class<T> valueType) throws IOException {
         return JsonUtil.readValue(value, valueType);
+    }
+
+    public static Json silent(Object value) {
+        Json json = new Json();
+        json.value = JsonUtil.writeValueAsStringSilent(value);
+        return json;
     }
 
     @JsonIgnore

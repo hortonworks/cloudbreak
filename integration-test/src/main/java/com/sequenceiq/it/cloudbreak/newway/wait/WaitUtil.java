@@ -1,20 +1,22 @@
 package com.sequenceiq.it.cloudbreak.newway.wait;
 
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
-import com.sequenceiq.it.cloudbreak.WaitResult;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.ForbiddenException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.ws.rs.ForbiddenException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
+import com.sequenceiq.it.cloudbreak.WaitResult;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 
 @Component
 public class WaitUtil {
@@ -23,7 +25,7 @@ public class WaitUtil {
 
     private static final int MAX_RETRY = 360;
 
-    @Value("${integrationtest.testsuite.pollingInterval}")
+    @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
 
     public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, String> desiredStatuses) {

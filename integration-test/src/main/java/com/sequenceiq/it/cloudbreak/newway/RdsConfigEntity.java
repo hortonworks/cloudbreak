@@ -1,13 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.ws.rs.WebApplicationException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
+import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse, RdsConfigEntity> {
+public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse, RdsConfigEntity> implements Purgable<RDSConfigResponse> {
 
     public static final String RDS_CONFIG = "RDS_CONFIG";
 
@@ -81,5 +86,32 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, 
 
     public void setResponseTestResult(RdsTestResult response) {
         this.response = response;
+    }
+
+    @Override
+    public List<RDSConfigResponse> getAll(CloudbreakClient client) {
+        RdsConfigV3Endpoint rdsConfigV3Endpoint = client.getCloudbreakClient().rdsConfigV3Endpoint();
+        return rdsConfigV3Endpoint.listByWorkspace(client.getWorkspaceId(), null, false).stream()
+                .filter(s -> s.getName() != null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean deletable(RDSConfigResponse entity) {
+        return entity.getName().startsWith("mock-");
+    }
+
+    @Override
+    public void delete(RDSConfigResponse entity, CloudbreakClient client) {
+        try {
+            client.getCloudbreakClient().stackV3Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName(), true, false);
+        } catch (Exception e) {
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public int order() {
+        return 500;
     }
 }

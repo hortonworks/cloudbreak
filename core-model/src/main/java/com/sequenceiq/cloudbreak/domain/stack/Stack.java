@@ -79,10 +79,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String region;
 
     private String availabilityZone;
@@ -106,7 +104,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000, nullable = false)
+    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> parameters;
 
     @OneToOne
@@ -187,7 +185,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     private EnvironmentView environment;
 
     @Enumerated(EnumType.STRING)
-    private StackType type = StackType.WORKLOAD;
+    private StackType type;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;

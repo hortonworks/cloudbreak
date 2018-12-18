@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

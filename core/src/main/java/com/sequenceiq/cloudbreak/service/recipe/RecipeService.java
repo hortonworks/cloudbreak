@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static java.util.Collections.emptySet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,9 +19,9 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
@@ -42,6 +43,9 @@ public class RecipeService extends AbstractWorkspaceAwareResourceService<Recipe>
     private HostGroupRepository hostGroupRepository;
 
     public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Collection<String> recipeNames) {
+        if (recipeNames.isEmpty()) {
+            return emptySet();
+        }
         Set<Recipe> recipes = recipeRepository.findByNamesInWorkspace(recipeNames, workspace.getId());
         if (recipeNames.size() != recipes.size()) {
             throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));

@@ -17,6 +17,10 @@ public class StackAuthentication extends AbstractCloudbreakEntity<StackAuthentic
         super(new StackAuthenticationRequest(), testContext);
     }
 
+    public StackAuthentication() {
+        super(StackAuthentication.class.getSimpleName().toUpperCase());
+    }
+
     public StackAuthentication valid() {
         return withPublicKeyId("publicKeyId");
     }

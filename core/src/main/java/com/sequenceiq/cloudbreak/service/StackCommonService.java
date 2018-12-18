@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StackFromTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
@@ -369,10 +368,5 @@ public class StackCommonService implements StackEndpoint {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
                     scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
-    }
-
-    public StackResponse createInWorkspaceFromTemplate(String templateName, StackFromTemplateRequest request, CloudbreakUser cloudbreakUser, User user,
-            Workspace workspace) {
-        return stackCreatorService.createInWorkspaceFromTemplate(templateName, request, cloudbreakUser, user, workspace);
     }
 }

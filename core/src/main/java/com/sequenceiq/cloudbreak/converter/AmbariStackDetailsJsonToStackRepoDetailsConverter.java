@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 @Component
 public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
@@ -37,14 +36,8 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
 
         boolean baseRepoRequiredFieldsExists = isBaseRepoRequiredFieldsExists(source);
 
-        if (!isVdfRequiredFieldsExists(source) && !baseRepoRequiredFieldsExists && source.getMpacks().isEmpty()) {
-            String msg = "The 'repositoryVersion', 'versionDefinitionFileUrl' or "
-                    + "'stackBaseURL', 'stackRepoId', 'utilsBaseUrl', 'utilsRepoId' fields must be specified!";
-            throw new BadRequestException(msg);
-        }
-
-        stack.put("repoid", source.getStackRepoId());
-        util.put("repoid", source.getUtilsRepoId());
+        stack.put(StackRepoDetails.REPO_ID_TAG, source.getStackRepoId());
+        util.put(StackRepoDetails.REPO_ID_TAG, source.getUtilsRepoId());
 
         if (baseRepoRequiredFieldsExists) {
             String stackBaseURL = source.getStackBaseURL();
@@ -66,8 +59,11 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
 
         if (!StringUtils.isEmpty(source.getRepositoryVersion())) {
             stack.put(StackRepoDetails.REPOSITORY_VERSION, source.getRepositoryVersion());
-            stack.put("repoid", source.getStack());
+            stack.put(StackRepoDetails.REPO_ID_TAG, source.getStack());
         }
+
+        stack.computeIfAbsent(StackRepoDetails.REPO_ID_TAG, k -> source.getStack());
+
         if (!StringUtils.isEmpty(source.getVersionDefinitionFileUrl())) {
             stack.put(StackRepoDetails.CUSTOM_VDF_REPO_KEY, source.getVersionDefinitionFileUrl());
         }
@@ -86,7 +82,7 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
         repo.setStack(stack);
         repo.setUtil(util);
         repo.setEnableGplRepo(source.isEnableGplRepo());
-        repo.setVerify(source.getVerify());
+        repo.setVerify(Boolean.TRUE.equals(source.getVerify()));
         repo.setHdpVersion(source.getVersion());
         return repo;
     }

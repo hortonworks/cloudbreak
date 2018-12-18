@@ -29,7 +29,6 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource {
     @SequenceGenerator(name = "network_generator", sequenceName = "network_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
     private String subnetCIDR;
@@ -37,11 +36,9 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @Column(nullable = false)
     private String cloudPlatform;
 
     @Convert(converter = JsonToString.class)

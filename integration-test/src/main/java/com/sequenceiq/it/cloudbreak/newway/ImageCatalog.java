@@ -10,7 +10,6 @@ import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.ImageCatalogV3Action;
 
-@Prototype
 public class ImageCatalog extends ImageCatalogEntity {
 
     public ImageCatalog(TestContext testContext) {

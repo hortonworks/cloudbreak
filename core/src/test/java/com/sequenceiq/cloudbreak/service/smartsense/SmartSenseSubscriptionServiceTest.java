@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -12,9 +13,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -59,7 +58,7 @@ public class SmartSenseSubscriptionServiceTest {
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
-        verify(repository, times(1)).save(ArgumentMatchers.<SmartSenseSubscription>any());
+        verify(repository, times(1)).save(any(SmartSenseSubscription.class));
         Assert.assertEquals(DEPLOYMENT_SMARTSENSE_ID, result.getSubscriptionId());
     }
 
@@ -69,7 +68,7 @@ public class SmartSenseSubscriptionServiceTest {
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
-        verify(repository, times(1)).save(ArgumentMatchers.<SmartSenseSubscription>any());
+        verify(repository, times(1)).save(any(SmartSenseSubscription.class));
         Assert.assertEquals(DEPLOYMENT_SMARTSENSE_ID, result.getSubscriptionId());
     }
 
@@ -101,7 +100,7 @@ public class SmartSenseSubscriptionServiceTest {
         thrown.expectMessage(exceptionMessage);
 
         underTest.getDefaultForUser(user);
-        verify(authorizationService, times(1)).hasPermission(Matchers.<SmartSenseSubscription>any(), anyString());
+        verify(authorizationService, times(1)).hasPermission(any(SmartSenseSubscription.class), anyString());
     }
 
     @Test
@@ -112,7 +111,7 @@ public class SmartSenseSubscriptionServiceTest {
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
-        Assert.assertEquals("The given SmartSenseSubscription instance has got a unexpected update", subscription, result);
+        Assert.assertEquals("The given SmartSenseSubscription instance has got an unexpected update", subscription, result);
     }
 
     private SmartSenseSubscription createSmartSenseSubscription() {

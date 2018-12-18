@@ -267,7 +267,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName, rangerRdsName))
-                .withAmbariRequest(new AmbariEntity(testContext).valid().withBlueprintName(blueprintName));
+                .withAmbari(new AmbariEntity(testContext).valid().withBlueprintName(blueprintName));
         if (ldapName != null) {
             cluster.withLdapConfigName(ldapName);
         }

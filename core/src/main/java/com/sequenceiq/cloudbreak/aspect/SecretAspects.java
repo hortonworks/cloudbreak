@@ -126,6 +126,8 @@ public class SecretAspects {
                         if (path != null && path.getSecret() != null) {
                             secretService.delete(path.getSecret());
                             LOGGER.debug("Secret deleted at path: {}", path);
+                        } else {
+                            LOGGER.debug("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());
                         }
                     }
                 }

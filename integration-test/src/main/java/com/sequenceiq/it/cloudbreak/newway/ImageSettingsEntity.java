@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
+@Prototype
 public class ImageSettingsEntity extends AbstractCloudbreakEntity<com.sequenceiq.cloudbreak.api.model.v2.ImageSettings, Response, ImageSettingsEntity> {
 
     public static final String IMAGESETTINGS_REQUEST = "IMAGESETTINGS_REQUEST";
@@ -23,6 +24,11 @@ public class ImageSettingsEntity extends AbstractCloudbreakEntity<com.sequenceiq
 
     public ImageSettingsEntity(TestContext testContext) {
         super(new ImageSettings(), testContext);
+    }
+
+    @Override
+    public ImageSettingsEntity valid() {
+        return this;
     }
 
     public ImageSettingsEntity withImageCatalog(String imageCatalog) {

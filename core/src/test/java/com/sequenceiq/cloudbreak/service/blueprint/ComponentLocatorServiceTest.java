@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;

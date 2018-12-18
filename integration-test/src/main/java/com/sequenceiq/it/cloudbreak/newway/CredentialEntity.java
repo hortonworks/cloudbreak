@@ -8,10 +8,12 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
-public class CredentialEntity extends AbstractCloudbreakEntity<CredentialRequest, CredentialResponse, CredentialEntity> {
+@Prototype
+public class CredentialEntity extends AbstractCloudbreakEntity<CredentialRequest, CredentialResponse, CredentialEntity> implements Purgable<CredentialResponse> {
 
     public static final String CREDENTIAL = "CREDENTIAL";
 
@@ -75,5 +77,10 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialRequest
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
         }
+    }
+
+    @Override
+    public int order() {
+        return 1000;
     }
 }

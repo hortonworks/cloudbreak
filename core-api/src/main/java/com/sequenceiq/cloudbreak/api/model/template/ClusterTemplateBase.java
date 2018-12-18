@@ -15,8 +15,8 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class ClusterTemplateBase implements JsonEntity {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
+    @Pattern(regexp = "^[^;\\/%]*$",
+            message = "The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
@@ -27,9 +27,10 @@ public abstract class ClusterTemplateBase implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.TEMPLATE)
     @NotNull
-    private StackV2Request template;
+    private StackV2Request stackTemplate;
 
-    @NotNull
+    private ClusterTemplateType type;
+
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
@@ -49,12 +50,12 @@ public abstract class ClusterTemplateBase implements JsonEntity {
         this.description = description;
     }
 
-    public StackV2Request getTemplate() {
-        return template;
+    public StackV2Request getStackTemplate() {
+        return stackTemplate;
     }
 
-    public void setTemplate(StackV2Request template) {
-        this.template = template;
+    public void setStackTemplate(StackV2Request stackTemplate) {
+        this.stackTemplate = stackTemplate;
     }
 
     public String getCloudPlatform() {
@@ -63,5 +64,13 @@ public abstract class ClusterTemplateBase implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public ClusterTemplateType getType() {
+        return type;
+    }
+
+    public void setType(ClusterTemplateType type) {
+        this.type = type;
     }
 }

@@ -124,8 +124,9 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         CloudResource heatResource = new Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
         try {
             notifier.notifyAllocation(heatResource, authenticatedContext.getCloudContext());
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException e) {
             //Rollback
+            LOGGER.warn("Error occured: {}, OpenstackResourceConnector is rolling back", e.getMessage());
             terminate(authenticatedContext, stack, Collections.singletonList(heatResource));
         }
         cloudResources.add(heatResource);

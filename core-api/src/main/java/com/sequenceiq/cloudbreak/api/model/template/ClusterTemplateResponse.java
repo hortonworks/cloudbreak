@@ -18,6 +18,9 @@ public class ClusterTemplateResponse extends ClusterTemplateBase {
 
     private ResourceStatus status;
 
+    @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.DATALAKE_REQUIRED)
+    private DatalakeRequired datalakeRequired;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -32,5 +35,13 @@ public class ClusterTemplateResponse extends ClusterTemplateBase {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public DatalakeRequired getDatalakeRequired() {
+        return datalakeRequired;
+    }
+
+    public void setDatalakeRequired(DatalakeRequired datalakeRequired) {
+        this.datalakeRequired = datalakeRequired;
     }
 }
