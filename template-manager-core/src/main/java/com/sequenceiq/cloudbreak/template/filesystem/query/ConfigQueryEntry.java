@@ -17,7 +17,7 @@ public class ConfigQueryEntry {
 
     private String defaultPath;
 
-    private String relatedService;
+    private Set<String> relatedServices = new HashSet<>();
 
     private String propertyFile;
 
@@ -61,12 +61,12 @@ public class ConfigQueryEntry {
         this.defaultPath = defaultPath;
     }
 
-    public String getRelatedService() {
-        return relatedService;
+    public Set<String> getRelatedServices() {
+        return relatedServices;
     }
 
-    public void setRelatedService(String relatedService) {
-        this.relatedService = relatedService;
+    public void setRelatedServices(Set<String> relatedServices) {
+        this.relatedServices = relatedServices;
     }
 
     public String getPropertyFile() {
@@ -108,7 +108,7 @@ public class ConfigQueryEntry {
         configQueryEntry.propertyFile = propertyFile;
         configQueryEntry.description = description;
         configQueryEntry.propertyDisplayName = propertyDisplayName;
-        configQueryEntry.relatedService = relatedService;
+        configQueryEntry.relatedServices = relatedServices;
         configQueryEntry.propertyName = propertyName;
         configQueryEntry.requiredForAttachedCluster = requiredForAttachedCluster;
         return configQueryEntry;
@@ -131,7 +131,7 @@ public class ConfigQueryEntry {
                 .append(propertyName)
                 .append(description)
                 .append(defaultPath)
-                .append(relatedService)
+                .append(relatedServices)
                 .append(propertyFile)
                 .append(protocol)
                 .append(propertyDisplayName)

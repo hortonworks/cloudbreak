@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.Objects;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -16,7 +17,7 @@ public class StructuredParameterQueryResponse implements JsonEntity {
 
     private String defaultPath;
 
-    private String relatedService;
+    private Set<String> relatedServices;
 
     private String propertyFile;
 
@@ -48,12 +49,12 @@ public class StructuredParameterQueryResponse implements JsonEntity {
         this.defaultPath = defaultPath;
     }
 
-    public String getRelatedService() {
-        return relatedService;
+    public Set<String> getRelatedServices() {
+        return relatedServices;
     }
 
-    public void setRelatedService(String relatedService) {
-        this.relatedService = relatedService;
+    public void setRelatedServices(Set<String> relatedServices) {
+        this.relatedServices = relatedServices;
     }
 
     public String getPropertyFile() {
@@ -92,7 +93,7 @@ public class StructuredParameterQueryResponse implements JsonEntity {
         return Objects.equals(getPropertyName(), that.getPropertyName())
                 && Objects.equals(getDescription(), that.getDescription())
                 && Objects.equals(getDefaultPath(), that.getDefaultPath())
-                && Objects.equals(getRelatedService(), that.getRelatedService())
+                && Objects.equals(getRelatedServices(), that.getRelatedServices())
                 && Objects.equals(getPropertyFile(), that.getPropertyFile())
                 && Objects.equals(getProtocol(), that.getProtocol())
                 && Objects.equals(getPropertyDisplayName(), that.getPropertyDisplayName());
@@ -100,7 +101,7 @@ public class StructuredParameterQueryResponse implements JsonEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPropertyName(), getDescription(), getDefaultPath(), getRelatedService(), getPropertyFile(), getProtocol(),
+        return Objects.hash(getPropertyName(), getDescription(), getDefaultPath(), getRelatedServices(), getPropertyFile(), getProtocol(),
                 getPropertyDisplayName());
     }
 

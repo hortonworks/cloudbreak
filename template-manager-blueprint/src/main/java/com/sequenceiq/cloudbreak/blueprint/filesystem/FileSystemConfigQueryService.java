@@ -64,7 +64,8 @@ public class FileSystemConfigQueryService {
             for (String service : serviceHostgroupEntry.getValue()) {
                 Set<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                         .stream()
-                        .filter(configQueryEntry -> configQueryEntry.getRelatedService().equalsIgnoreCase(service))
+                        .filter(configQueryEntry -> configQueryEntry.getRelatedServices().stream().
+                                anyMatch(relatedService -> relatedService.equalsIgnoreCase(service)))
                         .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
                         .map(configQueryEntry -> configQueryEntry.copy())
                         .collect(Collectors.toSet());
@@ -104,6 +105,7 @@ public class FileSystemConfigQueryService {
         Map<String, Object> templateObject = new HashMap<>();
         templateObject.put("clusterName", fileSystemConfigQueryObject.getClusterName());
         templateObject.put("attachedCluster", fileSystemConfigQueryObject.isAttachedCluster());
+        templateObject.put("datalakeCluster", fileSystemConfigQueryObject.isDatalakeCluster());
         templateObject.put("storageName", fileSystemConfigQueryObject.getStorageName());
         templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
         templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));

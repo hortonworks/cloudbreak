@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -65,6 +66,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintViewRepository blueprintViewRepository;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     @Inject
     private ClusterService clusterService;
@@ -233,6 +237,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             String storageName, String fileSystemType, String accountName, boolean attachedCluster, Workspace workspace) {
         Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
         String blueprintText = blueprint.getBlueprintText();
+        // Not necessarily the best way to figure out whether a DL or not. At the moment, DLs cannot be launched as
+        // workloads, so works fine. Would be better to get this information from the invoking context itself.
+        boolean datalake = blueprintUtils.isSharedServiceReadyBlueprint(blueprint);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withClusterName(clusterName)
                 .withStorageName(storageName)
@@ -240,6 +247,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .withFileSystemType(fileSystemType)
                 .withAccountName(accountName)
                 .withAttachedCluster(attachedCluster)
+                .withDatalakeCluster(datalake)
                 .build();
 
         return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);

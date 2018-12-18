@@ -16,6 +16,8 @@ public class FileSystemConfigQueryObject {
 
     private final boolean attachedCluster;
 
+    private final boolean datalakeCluster;
+
     private FileSystemConfigQueryObject(FileSystemConfigQueryObject.Builder builder) {
         this.storageName = builder.storageName;
         this.clusterName = builder.clusterName;
@@ -23,6 +25,7 @@ public class FileSystemConfigQueryObject {
         this.fileSystemType = builder.fileSystemType;
         this.accountName = builder.accountName;
         this.attachedCluster = builder.attachedCluster;
+        this.datalakeCluster = builder.datalakeCluster;
     }
 
     public String getClusterName() {
@@ -49,6 +52,10 @@ public class FileSystemConfigQueryObject {
         return attachedCluster;
     }
 
+    public boolean isDatalakeCluster() {
+        return datalakeCluster;
+    }
+
     public static class Builder {
 
         private String clusterName;
@@ -62,6 +69,8 @@ public class FileSystemConfigQueryObject {
         private Optional<String> accountName = Optional.empty();
 
         private boolean attachedCluster;
+
+        private boolean datalakeCluster;
 
         public static Builder builder() {
             return new Builder();
@@ -94,6 +103,11 @@ public class FileSystemConfigQueryObject {
 
         public Builder withAttachedCluster(boolean attachedCluster) {
             this.attachedCluster = attachedCluster;
+            return this;
+        }
+
+        public Builder withDatalakeCluster(boolean datalakeCluster) {
+            this.datalakeCluster = datalakeCluster;
             return this;
         }
 

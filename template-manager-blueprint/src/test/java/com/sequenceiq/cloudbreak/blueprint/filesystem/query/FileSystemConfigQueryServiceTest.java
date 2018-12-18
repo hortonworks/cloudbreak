@@ -38,6 +38,10 @@ public class FileSystemConfigQueryServiceTest {
 
     private static final String RANGER_ADMIN = "RANGER_ADMIN";
 
+    private static final String NODEMANAGER = "NODEMANAGER";
+
+    private static final String SPARK2_JOBHISTORYSERVER = "SPARK2_JOBHISTORYSERVER";
+
     private static final String HIVE_SERVER = "HIVE_SERVER";
 
     private static final String CLUSTER_NAME = "bigCluster";
@@ -47,6 +51,12 @@ public class FileSystemConfigQueryServiceTest {
     private static final String HIVE_METASTORE_WAREHOUSE_DIR = "hive.metastore.warehouse.dir";
 
     private static final String HIVE_METASTORE_WAREHOUSE_EXTERNAL_DIR = "hive.metastore.warehouse.external.dir";
+
+    private static final String RANGER_HIVE_AUDIT_DIR = "xasecure.audit.destination.hdfs.dir";
+
+    private static final String SPARK_EVENTLOG_DIR = "spark.eventLog.dir";
+
+    private static final String SPARK_HISTORY_DIR = "spark.history.fs.logDirectory";
 
     @Mock
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -93,14 +103,16 @@ public class FileSystemConfigQueryServiceTest {
         Optional<ConfigQueryEntry> hiveMetastoreExternal = serviceEntry(bigCluster, HIVE_METASTORE, HIVE_METASTORE_WAREHOUSE_EXTERNAL_DIR);
         Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
 
+
         Assert.assertTrue(hiveMetastore.isPresent());
         Assert.assertTrue(hiveMetastoreExternal.isPresent());
         Assert.assertTrue(rangerAdmin.isPresent());
 
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse", hiveMetastore.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/ewarehouse/tablespace/external/hive",
+
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/managed/hive", hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/external/hive",
                 hiveMetastoreExternal.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit", rangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/ranger/audit", rangerAdmin.get().getDefaultPath());
     }
 
     @Test
@@ -128,10 +140,10 @@ public class FileSystemConfigQueryServiceTest {
         Assert.assertTrue(hiveMetastoreExternal.isPresent());
         Assert.assertTrue(rangerAdmin.isPresent());
 
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse", hiveMetastore.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/ewarehouse/tablespace/external/hive",
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/managed/hive", hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/external/hive",
                 hiveMetastoreExternal.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit", rangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/ranger/audit", rangerAdmin.get().getDefaultPath());
     }
 
     @Test
@@ -152,11 +164,11 @@ public class FileSystemConfigQueryServiceTest {
 
         Assert.assertFalse(hiveMetastore.isPresent());
         Assert.assertTrue(rangerAdmin.isPresent());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit", rangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/ranger/audit", rangerAdmin.get().getDefaultPath());
     }
 
     @Test
-    public void testWhenOnlyHiveMetastoreIsPresentedAndAttachedClusterThenShouldReturnWithBothHiveMetastoreAndRangerAdminConfigs() {
+    public void testWhenOnlyHiveMetastoreIsPresentedAndAttachedClusterThenShouldReturnWithHiveMetastoreConfigs() {
         prepareBlueprintProcessorFactoryMock(HIVE_METASTORE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -167,20 +179,19 @@ public class FileSystemConfigQueryServiceTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(3L, bigCluster.size());
+        Assert.assertEquals(2L, bigCluster.size());
 
         Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE, HIVE_METASTORE_WAREHOUSE_DIR);
         Optional<ConfigQueryEntry> hiveMetastoreExternal = serviceEntry(bigCluster, HIVE_METASTORE, HIVE_METASTORE_WAREHOUSE_EXTERNAL_DIR);
-        Optional<ConfigQueryEntry> hiveServerRangerAdmin = serviceEntry(bigCluster, HIVE_SERVER);
+        Optional<ConfigQueryEntry> hiveServerRangerAdmin = serviceEntry(bigCluster, HIVE_METASTORE, RANGER_HIVE_AUDIT_DIR);
 
         Assert.assertTrue(hiveMetastore.isPresent());
         Assert.assertTrue(hiveMetastoreExternal.isPresent());
-        Assert.assertTrue(hiveServerRangerAdmin.isPresent());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit",
-                hiveServerRangerAdmin.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse",
+        Assert.assertFalse(hiveServerRangerAdmin.isPresent());
+
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/managed/hive",
                 hiveMetastore.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/ewarehouse/tablespace/external/hive",
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/external/hive",
                 hiveMetastoreExternal.get().getDefaultPath());
     }
 
@@ -204,8 +215,8 @@ public class FileSystemConfigQueryServiceTest {
         Assert.assertTrue(hiveMetastore.isPresent());
         Assert.assertTrue(hiveMetastoreExternal.isPresent());
         Assert.assertFalse(rangerAdmin.isPresent());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse", hiveMetastore.get().getDefaultPath());
-        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/ewarehouse/tablespace/external/hive",
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/managed/hive", hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/warehouse/tablespace/external/hive",
                 hiveMetastoreExternal.get().getDefaultPath());
     }
 
@@ -227,6 +238,97 @@ public class FileSystemConfigQueryServiceTest {
 
         Assert.assertFalse(hiveMetastore.isPresent());
         Assert.assertFalse(rangerAdmin.isPresent());
+    }
+
+    @Test
+    public void testDatalakeClusterPaths() {
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, SPARK2_JOBHISTORYSERVER, NODEMANAGER);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withDatalakeCluster(true)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Assert.assertEquals(4L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+        Optional<ConfigQueryEntry> yarnLogs = serviceEntry(bigCluster, NODEMANAGER);
+        Optional<ConfigQueryEntry> sparkEventLog = serviceEntry(bigCluster, SPARK2_JOBHISTORYSERVER, SPARK_EVENTLOG_DIR);
+        Optional<ConfigQueryEntry> sparkHistory = serviceEntry(bigCluster, SPARK2_JOBHISTORYSERVER, SPARK_HISTORY_DIR);
+
+        Assert.assertTrue(rangerAdmin.isPresent());
+        Assert.assertTrue(yarnLogs.isPresent());
+        Assert.assertTrue(sparkEventLog.isPresent());
+        Assert.assertTrue(sparkHistory.isPresent());
+
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/ranger/audit", rangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/oplogs/yarn-app-logs", yarnLogs.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/oplogs/spark2-history", sparkEventLog.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/oplogs/spark2-history", sparkHistory.get().getDefaultPath());
+    }
+
+    @Test
+    public void testStandaloneClusterPaths() {
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, SPARK2_JOBHISTORYSERVER, NODEMANAGER);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withDatalakeCluster(false)
+                .withAttachedCluster(false)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Assert.assertEquals(4L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+        Optional<ConfigQueryEntry> yarnLogs = serviceEntry(bigCluster, NODEMANAGER);
+        Optional<ConfigQueryEntry> sparkEventLog = serviceEntry(bigCluster, SPARK2_JOBHISTORYSERVER, SPARK_EVENTLOG_DIR);
+        Optional<ConfigQueryEntry> sparkHistory = serviceEntry(bigCluster, SPARK2_JOBHISTORYSERVER, SPARK_HISTORY_DIR);
+
+        Assert.assertTrue(rangerAdmin.isPresent());
+        Assert.assertTrue(yarnLogs.isPresent());
+        Assert.assertTrue(sparkEventLog.isPresent());
+        Assert.assertTrue(sparkHistory.isPresent());
+
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/ranger/audit", rangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/" + CLUSTER_NAME + "/oplogs/yarn-app-logs", yarnLogs.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/" + CLUSTER_NAME + "/oplogs/spark2-history",
+                sparkEventLog.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/" + CLUSTER_NAME + "/oplogs/spark2-history",
+                sparkHistory.get().getDefaultPath());
+    }
+
+    @Test
+    public void testAttachedClusterPaths() {
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, SPARK2_JOBHISTORYSERVER, NODEMANAGER);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withDatalakeCluster(false)
+                .withAttachedCluster(true)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Assert.assertEquals(4L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+        Optional<ConfigQueryEntry> yarnLogs = serviceEntry(bigCluster, NODEMANAGER);
+        Optional<ConfigQueryEntry> sparkEventLog = serviceEntry(bigCluster, SPARK2_JOBHISTORYSERVER, SPARK_EVENTLOG_DIR);
+        Optional<ConfigQueryEntry> sparkHistory = serviceEntry(bigCluster, SPARK2_JOBHISTORYSERVER, SPARK_HISTORY_DIR);
+
+        Assert.assertTrue(rangerAdmin.isPresent());
+        Assert.assertTrue(yarnLogs.isPresent());
+        Assert.assertTrue(sparkEventLog.isPresent());
+        Assert.assertTrue(sparkHistory.isPresent());
+
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/ranger/audit", rangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/oplogs/yarn-app-logs", yarnLogs.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/oplogs/spark2-history", sparkEventLog.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/oplogs/spark2-history", sparkHistory.get().getDefaultPath());
     }
 
     @Test
@@ -286,11 +388,13 @@ public class FileSystemConfigQueryServiceTest {
     }
 
     private Optional<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
-        return configQueryEntries.stream().filter(b -> b.getRelatedService().equals(serviceName)).findFirst();
+        return configQueryEntries.stream().filter(b -> b.getRelatedServices().stream().anyMatch(service -> service.equals(serviceName))).findFirst();
     }
 
     private Optional<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName, String propertyName) {
-        return configQueryEntries.stream().filter(b -> b.getRelatedService().equals(serviceName)).filter(b -> b.getPropertyName().equals(propertyName))
+        return configQueryEntries.stream()
+                .filter(b -> b.getRelatedServices().stream().anyMatch(service -> service.equals(serviceName)))
+                .filter(b -> b.getPropertyName().equals(propertyName))
                 .findFirst();
     }
 
