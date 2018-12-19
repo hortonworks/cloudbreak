@@ -5,6 +5,12 @@ import java.util.Map;
 
 public class IntegrationTestContext {
 
+    public static final String IDENTITY_URL = "IDENTITY_URL";
+
+    public static final String AUTH_USER = "AUTH_USER";
+
+    public static final String AUTH_PASSWORD = "AUTH_PASSWORD";
+
     public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
 
     private Map<String, Object> contextParameters = new HashMap<>();

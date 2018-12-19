@@ -30,7 +30,18 @@ import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
 
 @EnableConfigurationProperties(LogSearchProps.class)
 public class CloudbreakTest extends GherkinTest {
+
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
+
+    public static final String IDENTITY_URL = "IDENTITY_URL";
+
+    public static final String AUTOSCALE_CLIENT_ID = "AUTOSCALE_CLIENTID";
+
+    public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
+
+    public static final String USER = "USER";
+
+    public static final String PASSWORD = "PASSWORD";
 
     public static final String CAAS_PROTOCOL = "CAAS_PROTOCOL";
 
@@ -65,6 +76,21 @@ public class CloudbreakTest extends GherkinTest {
 
     @Value("${integrationtest.caas.address:}")
     private String caasAddress;
+
+    @Value("${integrationtest.uaa.server}")
+    private String uaaServer;
+
+    @Value("${integrationtest.uaa.user}")
+    private String defaultUaaUser;
+
+    @Value("${integrationtest.uaa.password}")
+    private String defaultUaaPassword;
+
+    @Value("${integrationtest.uaa.autoscale.clientId:periscope}")
+    private String autoscaleUaaClientId;
+
+    @Value("${integrationtest.uaa.autoscale.clientSecret}")
+    private String autoscaleUaaClientSecret;
 
     @Inject
     private Environment environment;
@@ -102,6 +128,12 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(SECONDARY_REFRESH_TOKEN, secondaryRefreshToken);
         testContext.putContextParam(LOG_SEARCH_QUERY_TYPES, logSearchProps.getQueryTypes());
         testContext.putContextParam(LOG_SEARCH_URL_PREFIX, logSearchProps.getUrl());
+
+        testContext.putContextParam(IDENTITY_URL, uaaServer);
+        testContext.putContextParam(USER, defaultUaaUser);
+        testContext.putContextParam(PASSWORD, defaultUaaPassword);
+        testContext.putContextParam(AUTOSCALE_CLIENT_ID, autoscaleUaaClientId);
+        testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
 
         testParameter.put("INTEGRATIONTEST_CLOUDBREAK_SERVER", server + cbRootContextPath);
 
