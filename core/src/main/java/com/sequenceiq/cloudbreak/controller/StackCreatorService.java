@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeEx
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -122,6 +124,9 @@ public class StackCreatorService {
 
     @Inject
     private CredentialPrerequisiteService credentialPrerequisiteService;
+
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
 
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
@@ -249,6 +254,11 @@ public class StackCreatorService {
         if (stack.getEnvironment() != null
                 && stack.getEnvironment().getDatalakeResourcesId() != null && stack.getDatalakeResourceId() == null) {
             stack.setDatalakeResourceId(stack.getEnvironment().getDatalakeResourcesId());
+        } else if (stack.getDatalakeId() != null) {
+            DatalakeResources datalakeResources = datalakeResourcesService.getDatalakeResources(stack.getDatalakeId());
+            if (datalakeResources != null) {
+                stack.setDatalakeResourceId(datalakeResources.getId());
+            }
         }
     }
 
