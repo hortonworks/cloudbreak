@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.TemplateModelContextBuilder;
@@ -703,14 +703,8 @@ public class HandlebarTemplateTest {
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
         sharedServiceConfigsView.setDatalakeAmbariFqdn("ambarifqdn");
 
-        Map<String, Object> fixInputs = new HashMap<>();
-        fixInputs.put("yarn.timeline-service.reader.webapp.address", "yarn-ts-address:8198");
-        fixInputs.put("yarn.timeline-service.reader.webapp.https.address", "yarn-ts-address:8199");
-        fixInputs.put("yarn.log.server.web-service.url", "http://yarn-log-address:8188/ws/v1/applicationhistory");
-
-
         return new TemplateModelContextBuilder()
-                .withSharedServiceConfigs(sharedServiceConfigsView).withFixInputs(fixInputs)
+                .withSharedServiceConfigs(sharedServiceConfigsView)
                 .build();
     }
 
