@@ -1,7 +1,9 @@
 package user
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -148,6 +150,13 @@ func ListRoles(c *cli.Context) {
 			filteredRoles = user.Roles
 		}
 	}
+	// If the user is not found in same strategy try to find in SAML
+	//Ideally get active strategy other than local
+	if len(filteredRoles) < 1 {
+		for _, user := range resp.Payload.Users {
+			filteredRoles = user.Roles
+		}
+	}
 	tableRows := []utils.Row{}
 	for _, role := range filteredRoles {
 		tableRows = append(tableRows, &userRolesOut{role})
@@ -210,18 +219,21 @@ func AssignRolesToUserByName(c *cli.Context) {
 	log.Infof("[AssignRolesToUserByName] Adding roles to user")
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	var userinfo *model.UserInfo
-	userinfo = UserInfoImpl(dpClient.Dataplane.Oidc)
 	userID := getUserIDFromName(
 		dpClient.Dataplane.Users,
-		userinfo.StrategyID.String(),
+		c.String(fl.FlCaasStrategyName.Name),
 		c.String(fl.FlUserName.Name),
 	)
+	if userID == "" {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("Could not find user with Name %s ... exiting", c.String(fl.FlUserName.Name)))
+	}
 	roleIDs := getRoleIDsFromRoles(
 		dpClient.Dataplane.Roles,
-		userinfo.StrategyID.String(),
 		c.String(fl.FlRoleNames.Name),
 	)
+	if len(roleIDs) != len(utils.DelimitedStringToArray(c.String(fl.FlRoleNames.Name), ",")) {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("Not able to find all the specified roles names in system.  %s ... exiting", c.String(fl.FlRoleNames.Name)))
+	}
 	assignRolesImpl(dpClient.Dataplane.Users, userID, roleIDs, output.WriteList)
 }
 
@@ -239,18 +251,21 @@ func RevokeRoles(c *cli.Context) {
 func RevokeRolesFromUserByName(c *cli.Context) {
 	log.Infof("[RevokeRolesFromUserByName] revoke roles to user")
 	dpClient := oauth.NewDataplaneHTTPClientFromContext(c)
-	var userinfo *model.UserInfo
-	userinfo = UserInfoImpl(dpClient.Dataplane.Oidc)
 	userID := getUserIDFromName(
 		dpClient.Dataplane.Users,
-		userinfo.StrategyID.String(),
+		c.String(fl.FlCaasStrategyName.Name),
 		c.String(fl.FlUserName.Name),
 	)
+	if userID == "" {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("Could not find user with Name %s ... exiting", c.String(fl.FlUserName.Name)))
+	}
 	roleIDs := getRoleIDsFromRoles(
 		dpClient.Dataplane.Roles,
-		userinfo.StrategyID.String(),
 		c.String(fl.FlRoleNames.Name),
 	)
+	if len(roleIDs) != len(utils.DelimitedStringToArray(c.String(fl.FlRoleNames.Name), ",")) {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("Not able to find all the specified roles names in system.  %s ... exiting", c.String(fl.FlRoleNames.Name)))
+	}
 	revokeRolesImpl(dpClient.Dataplane.Users, userID, roleIDs)
 }
 
@@ -267,19 +282,27 @@ func revokeRolesImpl(client userClient, userid string, roleids []string) {
 	log.Infof("[revokeRolesImpl] roles deleted : %s ", strconv.FormatBool(resp.Payload))
 }
 
-func getUserIDFromName(client userClient, strategyid string, name string) string {
-	var userID string
+func getUserIDFromName(client userClient, strategy string, name string) string {
 	usersResponse := listUsersImpl(client)
-	for _, user := range usersResponse {
-		if name == swag.StringValue(user.Name) && strategyid == user.StrategyID.String() {
-			userID = user.ID.String()
-			break
+	//If startegy is local
+	if strings.EqualFold(strategy, "local") {
+		for _, user := range usersResponse {
+			if name == swag.StringValue(user.Name) && swag.StringValue(user.StrategyName) == "local0" {
+				return user.ID.String()
+			}
+		}
+	} else {
+		// There will only other strategy enabled at time and it will not be local
+		for _, user := range usersResponse {
+			if name == swag.StringValue(user.Name) && swag.StringValue(user.StrategyName) != "local0" {
+				return user.ID.String()
+			}
 		}
 	}
-	return userID
+	return ""
 }
 
-func getRoleIDsFromRoles(client roleClient, strategyid string, names string) []string {
+func getRoleIDsFromRoles(client roleClient, names string) []string {
 	roleNames := utils.DelimitedStringToArray(names, ",")
 	var roleIDs []string
 	rolesResponse := role.GetRoles(client)

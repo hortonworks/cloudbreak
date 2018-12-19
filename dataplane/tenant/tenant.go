@@ -135,6 +135,7 @@ func SendPasswordResetEMail(c *cli.Context) {
 
 }
 
+//DisableTenant : Disable a tenant
 func DisableTenant(c *cli.Context) {
 	log.Infof("[RegisterTenant] Disable a tenant")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}

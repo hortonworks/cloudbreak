@@ -61,18 +61,6 @@ func init() {
 					}
 				},
 			},
-			{
-				Name:   "disable",
-				Usage:  "disable a tenant",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCaasTenantName).AddAuthenticationFlags().AddOutputFlag().Build(),
-				Before: cf.CheckConfigAndCommandFlagsDP,
-				Action: tenant.DisableTenant,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCaasTenantName).AddAuthenticationFlags().AddOutputFlag().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
 		},
 	})
 }

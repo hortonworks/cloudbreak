@@ -869,7 +869,7 @@ var (
 	FlCaasStrategyName = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "name",
+			Name:  "strategy-name",
 			Usage: "name of strategy",
 		},
 	}
