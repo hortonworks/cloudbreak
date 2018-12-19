@@ -19,6 +19,7 @@
     "configurations": [
       {
         "core-site": {
+          "fs.defaultFS": "file:///",
           "fs.trash.interval": "4320",
           "hadoop.proxyuser.yarn.hosts": "*"
         }
