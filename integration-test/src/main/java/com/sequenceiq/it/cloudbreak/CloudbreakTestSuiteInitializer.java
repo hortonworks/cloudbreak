@@ -99,7 +99,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters({"cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
-            "stackName", "networkName", "securityGroupName"})
+            "stackName", "networkName", "securityGroupName" })
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
             @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
             @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
@@ -123,12 +123,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         itContext.putContextParam(CloudbreakITContextConstants.CAAS_ADDRESS, caasAddress);
 
         CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cbServerRoot, caasProtocol, caasAddress)
-                .withCertificateValidation(false)
-                .withIgnorePreValidation(true)
-                .withDebug(true)
-                .withCredential(refreshToken)
-                .build();
-
+                .withCertificateValidation(false).withIgnorePreValidation(true).withDebug(true).withCredential(refreshToken).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
