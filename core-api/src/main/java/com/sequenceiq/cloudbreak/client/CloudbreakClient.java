@@ -82,10 +82,6 @@ import net.jodah.expiringmap.ExpiringMap;
 
 public class CloudbreakClient {
 
-    protected static final Form EMPTY_FORM = new Form();
-
-    protected static final String TOKEN_KEY = "TOKEN";
-
     private static final List<Class<?>> ENDPOINTS = Arrays.asList(
             AccountPreferencesEndpoint.class,
             AuditEndpoint.class,
@@ -135,17 +131,21 @@ public class CloudbreakClient {
             KerberosConfigV3Endpoint.class
     );
 
+    private static final Form EMPTY_FORM = new Form();
+
+    private static final String TOKEN_KEY = "TOKEN";
+
+    private final Logger logger = LoggerFactory.getLogger(CloudbreakClient.class);
+
+    private final ExpiringMap<String, String> tokenCache;
+
     private final Client client;
+
+    private final CaasClient caasClient;
 
     private final String cloudbreakAddress;
 
     private WebTarget webTarget;
-
-    private final Logger logger = LoggerFactory.getLogger(CloudbreakClient.class);
-
-    private final CaasClient caasClient;
-
-    private final ExpiringMap<String, String> tokenCache;
 
     private EndpointWrapperHolder endpointWrapperHolder;
 
@@ -157,7 +157,7 @@ public class CloudbreakClient {
         this.refreshToken = refreshToken;
         caasClient = new CaasClient(caasProtocol, caasAddress, configKey);
         tokenCache = configTokenCache();
-        logger.info("CloudbreakClient has been created with token. cloudbreak: {}, refreshToken: {}, configKey: {}", cloudbreakAddress,
+        logger.info("CloudbreakClient has been created with token. cloudbreak: {}, refreshToken: {}", cloudbreakAddress,
                 refreshToken, configKey);
     }
 
@@ -369,18 +369,6 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(clazz, false);
     }
 
-    protected String getCloudbreakAddress() {
-        return cloudbreakAddress;
-    }
-
-    protected WebTarget getWebTarget() {
-        return webTarget;
-    }
-
-    protected void setWebTarget(WebTarget webTarget) {
-        this.webTarget = webTarget;
-    }
-
     @SuppressWarnings("unchecked")
     private <T> T refreshIfNeededAndGet(@Nullable Class<T> clazz, boolean forced) {
         if (refreshToken != null) {
@@ -407,7 +395,7 @@ public class CloudbreakClient {
         logger.info("Endpoints have been renewed for CloudbreakClient");
     }
 
-    private <T> Optional<?> getRequiredEndpoint(@Nullable Class<T> clazz) {
+    private  <T> Optional<?> getRequiredEndpoint(@Nullable Class<T> clazz) {
         return endpointWrapperHolder.endpoints.stream()
                 .filter(e -> e.endpointType.equals(clazz))
                 .map(e -> e.endPointProxy)
