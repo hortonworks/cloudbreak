@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 
@@ -12,6 +13,8 @@ public class CloudbreakClient extends Entity {
     private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
 
     private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
+
+    private IdentityClient identityClient;
 
     private Long workspaceId;
 
@@ -57,7 +60,10 @@ public class CloudbreakClient extends Entity {
                     integrationTestContext.getContextParam(CloudbreakTest.CAAS_PROTOCOL),
                     integrationTestContext.getContextParam(CloudbreakTest.CAAS_ADDRESS),
                     integrationTestContext.getContextParam(CloudbreakTest.REFRESH_TOKEN),
-                    new ConfigKey(false, true, true));
+                    new ConfigKey(false, true, true),
+                    integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
+                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_CLIENT_ID),
+                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_SECRET));
         }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
     }
@@ -69,7 +75,10 @@ public class CloudbreakClient extends Entity {
                 testParameter.get(CloudbreakTest.CAAS_PROTOCOL),
                 testParameter.get(CloudbreakTest.CAAS_ADDRESS),
                 cloudbreakUser.getToken(),
-                new ConfigKey(false, true, true));
+                new ConfigKey(false, true, true),
+                testParameter.get(CloudbreakTest.IDENTITY_URL),
+                testParameter.get(CloudbreakTest.AUTOSCALE_CLIENT_ID),
+                testParameter.get(CloudbreakTest.AUTOSCALE_SECRET));
         return clientEntity;
     }
 

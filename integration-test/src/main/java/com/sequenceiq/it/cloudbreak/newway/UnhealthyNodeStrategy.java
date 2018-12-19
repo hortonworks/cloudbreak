@@ -21,7 +21,7 @@ public class UnhealthyNodeStrategy implements Strategy {
     }
 
     @Override
-    public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public void doAction(IntegrationTestContext integrationTestContext, Entity entity) {
         Stack stack = (Stack) entity;
         StackResponse response = Objects.requireNonNull(stack.getResponse(), "Stack response is null; should get it before");
         Long id = Objects.requireNonNull(response.getId());
@@ -42,6 +42,9 @@ public class UnhealthyNodeStrategy implements Strategy {
                 integrationTestContext.getContextParam(CloudbreakTest.CAAS_PROTOCOL),
                 integrationTestContext.getContextParam(CloudbreakTest.CAAS_ADDRESS),
                 integrationTestContext.getContextParam(CloudbreakTest.REFRESH_TOKEN),
-                new ConfigKey(false, true, true));
+                new ConfigKey(false, true, true),
+                integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
+                integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_CLIENT_ID),
+                integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_SECRET));
     }
 }
