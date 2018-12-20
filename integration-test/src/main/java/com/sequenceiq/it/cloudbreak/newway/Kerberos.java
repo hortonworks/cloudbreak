@@ -7,7 +7,6 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.KerberosPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.BlueprintV3Action;
 import com.sequenceiq.it.cloudbreak.newway.v3.KerberosV3Action;
 
 @Prototype
@@ -34,7 +33,7 @@ public class Kerberos extends KerberosEntity {
 
     public static Kerberos isCreated() {
         Kerberos blueprint = new Kerberos();
-        blueprint.setCreationStrategy(BlueprintV3Action::createInGiven);
+        blueprint.setCreationStrategy(KerberosV3Action::createInGiven);
         return blueprint;
     }
 
@@ -80,5 +79,4 @@ public class Kerberos extends KerberosEntity {
     public static ActionV2<KerberosEntity> postV2() {
         return new KerberosPostAction();
     }
-
 }
