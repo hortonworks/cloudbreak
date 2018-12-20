@@ -258,6 +258,8 @@ public class StackCreatorService {
                     throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
                 }
             }
+        } else if (stack.getType() == null) {
+            stack.setType(StackType.WORKLOAD);
         }
     }
 
