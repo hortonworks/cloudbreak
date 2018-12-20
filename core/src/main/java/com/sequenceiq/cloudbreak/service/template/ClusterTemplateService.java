@@ -146,7 +146,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     private Set<ClusterTemplate> getAllAvailableInWorkspace(Workspace workspace) {
         Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
             LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{}' workspace.", workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
@@ -154,6 +153,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
                 ct.setStatus(ResourceStatus.OUTDATED);
                 delete(ct.getName(), ct.getWorkspace().getId());
             });
+            clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
             clusterTemplates = clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
             LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
