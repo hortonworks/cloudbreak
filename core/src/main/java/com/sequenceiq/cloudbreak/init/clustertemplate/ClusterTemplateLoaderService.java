@@ -88,11 +88,12 @@ public class ClusterTemplateLoaderService {
         Map<String, ClusterTemplate> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplates();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(templatesInDb);
         Collection<ClusterTemplate> templatesMissingFromDb = collectTemplatesMissingFromDb(defaultTemplates, defaultTemplatesInDb, workspace);
+        Collection<ClusterTemplate> updatedTemplates = collectOutdatedTemplatesInDb(defaultTemplatesInDb);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Templates missing from DB: {}",
                     templatesMissingFromDb.stream().map(ClusterTemplate::getName).collect(Collectors.joining(", ")));
         }
-        return Stream.concat(templatesMissingFromDb.stream(), defaultTemplates.values().stream()).collect(Collectors.toSet());
+        return Stream.concat(templatesMissingFromDb.stream(), updatedTemplates.stream()).collect(Collectors.toSet());
     }
 
     public Collection<ClusterTemplate> collectTemplatesMissingFromDb(Map<String, ClusterTemplate> defaultTemplates,
@@ -105,7 +106,7 @@ public class ClusterTemplateLoaderService {
         return templatesMissingFromDb;
     }
 
-    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Set<ClusterTemplate> clusterTemplates) {
+    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Collection<ClusterTemplate> clusterTemplates) {
         return collectOutdatedTemplatesInDb(defaultClusterTemplateCache.defaultClusterTemplateRequests(), clusterTemplates);
     }
 

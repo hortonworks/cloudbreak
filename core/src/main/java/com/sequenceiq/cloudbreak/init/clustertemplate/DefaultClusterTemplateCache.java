@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -105,10 +104,9 @@ public class DefaultClusterTemplateCache {
 
     public Map<String, ClusterTemplate> defaultClusterTemplates() {
         Map<String, ClusterTemplate> defaultTemplates = new HashMap<>();
-        defaultClusterTemplates.forEach((key, value) -> {
+        defaultClusterTemplateRequests().forEach((key, value) -> {
             ClusterTemplate clusterTemplate = converterUtil.convert(value, ClusterTemplate.class);
             defaultTemplates.put(key, clusterTemplate);
-            clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         });
         return defaultTemplates;
     }

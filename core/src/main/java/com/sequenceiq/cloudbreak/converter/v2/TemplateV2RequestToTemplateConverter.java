@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class TemplateV2RequestToTemplateConverter extends AbstractConversionServ
         template.setVolumeType(source.getVolumeType());
         CustomInstanceType customInstanceType = source.getCustomInstanceType();
 
-        Map<String, Object> parameters = source.getParameters();
+        Map<String, Object> parameters = new HashMap<>(source.getParameters());
 
         if (customInstanceType != null) {
             parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, customInstanceType.getMemory());

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType;
-import com.sequenceiq.cloudbreak.api.model.template.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -54,8 +53,7 @@ public class DefaultClusterTemplateRequestToClusterTemplateConverter
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
         clusterTemplate.setName(source.getName());
         clusterTemplate.setDescription(source.getDescription());
-        clusterTemplate.setDatalakeRequired(DatalakeRequired.REQUIRED);
-        clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
+        clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         if (source.getType() == null) {
             clusterTemplate.setType(ClusterTemplateType.OTHER);
         } else {
