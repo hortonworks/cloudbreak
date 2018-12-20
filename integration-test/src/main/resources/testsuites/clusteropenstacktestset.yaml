@@ -42,22 +42,6 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack base hdf flow magamenet"
-    preserveOrder: true
-    parameters:
-      clusterName: os-base-flowmgmt
-      provider: openstack
-      blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
-      image: base
-      instancegroupName: NiFi
-      enableKerberos: true
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewHdfCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
   - name: "openstack prewarm image datascience"
     preserveOrder: true
     parameters:
@@ -88,22 +72,6 @@ tests:
         includedMethods:
           - testCreateNewRegularCluster
           - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack prewarm hdf flow magamenet"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-flowmgmt
-      provider: openstack
-      blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
-      image: hdf
-      instancegroupName: NiFi
-      enableKerberos: true
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewHdfCluster
           - testStopCluster
           - testStartCluster
           - testTerminateCluster

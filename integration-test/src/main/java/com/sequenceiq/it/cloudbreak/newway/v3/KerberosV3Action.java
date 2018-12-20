@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosViewResponse;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -14,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class KerberosV3Action {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosV3Action.class);
 
     private KerberosV3Action() {
     }
@@ -79,6 +83,10 @@ public class KerberosV3Action {
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
-        post(integrationTestContext, entity);
+        try {
+            post(integrationTestContext, entity);
+        } catch (Exception e) {
+            LOGGER.info("Kerberos config probably exist", e);
+        }
     }
 }
