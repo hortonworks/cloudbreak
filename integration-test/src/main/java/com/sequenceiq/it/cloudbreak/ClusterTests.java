@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -29,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackGetWithEntriesStrategy;
 import com.sequenceiq.it.cloudbreak.newway.StackImageChangeEntity;
 import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
+import com.sequenceiq.it.cloudbreak.newway.cloud.AwsKerberos;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
@@ -62,30 +62,23 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "check ambari is running and components available");
     }
 
-    @Test(dataProvider = "providernameblueprintimagekerberos", priority = 10)
-    public void testCreateNewHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName,
-            String imageId, boolean enableKerberos, String imageDescription)
-            throws Exception {
+    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    public void testCreateHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        AmbariV2Request ambariV2Request = cloudProvider.ambariRequestWithBlueprintName(blueprintName);
-        if (org.apache.commons.lang3.StringUtils.equals(imageDescription, "base")) {
-            String basePropertyKey = "integrationtest.customAmbari." + cloudProvider.getPlatform().toLowerCase() + ".hdf.";
-            String customAmbariVersion = getTestParameter().get(basePropertyKey + "version");
-            String customAmbariRepoUrl = getTestParameter().get(basePropertyKey + "repoUrl");
-            String customAmbariRepoGpgKey = getTestParameter().get(basePropertyKey + "gpgKeyUrl");
-            ambariV2Request = cloudProvider.ambariRequestWithBlueprintNameAndCustomAmbari(blueprintName, customAmbariVersion,
-                    customAmbariRepoUrl, customAmbariRepoGpgKey);
-        }
-        given(Cluster.request().withAmbariRequest(ambariV2Request), "a cluster request");
+        given(AwsKerberos.kerberosOnAws(getTestParameter()));
+        given(Cluster.request()
+                        .withAmbariRequest(AwsKerberos.getAmbariV2RequestForAwsKerberos(cloudProvider, blueprintName, getTestParameter())),
+                "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(HostGroups.request()
                 .addHostGroups(cloudProvider.instanceGroups(HostGroupType.SERVICES, HostGroupType.NIFI, HostGroupType.ZOOKEEPER)));
         given(cloudProvider.aValidStackRequest()
-                .withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+                .withName(clusterName)
+                .withNetwork(AwsKerberos.getNetworkV2RequestForKerberosAws(getTestParameter())), "a stack request");
+        when(Stack.post());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -230,17 +223,23 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "ambari check");
     }
 
-    @Test(alwaysRun = true, dataProvider = "providernamekerberos", priority = 50)
-    public void testTerminateCluster(CloudProvider cloudProvider, String clusterName, boolean enableKerberos) throws Exception {
+    @Test(alwaysRun = true, dataProvider = "providername", priority = 50)
+    public void testTerminateCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        if (enableKerberos) {
-            when(Stack.delete(StackV3Action::deleteWithKerberos));
-        } else {
-            when(Stack.delete());
-        }
+        when(Stack.delete());
+        then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
+    }
+
+    @Test(alwaysRun = true, dataProvider = "providername", priority = 50)
+    public void testTerminateKerberosCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
+        given(CloudbreakClient.created());
+        given(cloudProvider.aValidCredential());
+        given(cloudProvider.aValidStackCreated()
+                .withName(clusterName), "a stack is created");
+        when(Stack.delete(StackV3Action::deleteWithKerberos));
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 

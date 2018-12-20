@@ -52,14 +52,13 @@ tests:
       blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
       image: base
       instancegroupName: NiFi
-      enableKerberos: true
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
-          - testCreateNewHdfCluster
+          - testCreateHdfCluster
           - testStopCluster
           - testStartCluster
-          - testTerminateCluster
+          - testTerminateKerberosCluster
   - name: "aws prewarm image datascience"
     preserveOrder: true
     parameters:
@@ -101,11 +100,10 @@ tests:
       blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
       image: hdf
       instancegroupName: NiFi
-      enableKerberos: true
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
-          - testCreateNewHdfCluster
+          - testCreateHdfCluster
           - testStopCluster
           - testStartCluster
-          - testTerminateCluster
+          - testTerminateKerberosCluster
