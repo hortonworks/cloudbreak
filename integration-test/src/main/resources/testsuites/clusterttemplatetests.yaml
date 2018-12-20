@@ -1,8 +1,0 @@
-name: Cluster_Templates_Tests
-parameters:
-  cleanUp: true
-
-tests:
-  - name: clustert_template_os_test
-    classes:
-      - com.sequenceiq.it.cloudbreak.ClusterTemplateTests
