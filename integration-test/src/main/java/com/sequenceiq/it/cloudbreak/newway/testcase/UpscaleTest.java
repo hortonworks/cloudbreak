@@ -46,7 +46,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testStackScaling(TestContext testContext) throws Exception {
         // GIVEN
-        testContext.given(Stack.class)
+        testContext.given(StackEntity.class)
                 .when(new StackPostAction())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(15))
@@ -90,7 +90,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testAmbariFailure(TestContext testContext) {
         mockAmbariBlueprintFail(testContext);
-        testContext.given(Stack.class)
+        testContext.given(StackEntity.class)
                 .when(Stack.postV2())
                 .await(STACK_FAILED)
                 .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").atLeast(1))

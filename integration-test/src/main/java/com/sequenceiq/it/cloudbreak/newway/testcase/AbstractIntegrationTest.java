@@ -60,9 +60,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @Inject
     private RandomNameCreator nameGenerator;
 
-    @Inject
-    private PurgeGarbageService purgeGarbageService;
-
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
         MDC.put("suite", "init of " + getClass().getSimpleName());
@@ -71,7 +68,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @BeforeClass
     public void createSharedObjects() {
         if (cleanupBeforeStart) {
-            purgeGarbageService.purge();
+            applicationContext.getBean(PurgeGarbageService.class).purge();
         }
     }
 

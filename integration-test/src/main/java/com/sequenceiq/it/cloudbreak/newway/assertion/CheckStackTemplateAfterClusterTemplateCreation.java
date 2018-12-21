@@ -18,7 +18,7 @@ public class CheckStackTemplateAfterClusterTemplateCreation implements Assertion
 
     @Override
     public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
-        Optional<ClusterTemplateResponse> first = entity.getResponses().stream().findFirst();
+        Optional<ClusterTemplateResponse> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
