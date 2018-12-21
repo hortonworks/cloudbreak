@@ -75,10 +75,7 @@ public class CloudbreakClient extends Entity {
                 testParameter.get(CloudbreakTest.CAAS_PROTOCOL),
                 testParameter.get(CloudbreakTest.CAAS_ADDRESS),
                 cloudbreakUser.getToken(),
-                new ConfigKey(false, true, true),
-                testParameter.get(CloudbreakTest.IDENTITY_URL),
-                testParameter.get(CloudbreakTest.AUTOSCALE_CLIENT_ID),
-                testParameter.get(CloudbreakTest.AUTOSCALE_SECRET));
+                new ConfigKey(false, true, true));
         return clientEntity;
     }
 

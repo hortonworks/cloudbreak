@@ -10,7 +10,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.PreDestroy;
 
@@ -31,6 +34,8 @@ public class SparkServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkServer.class);
 
+    private static final Set<Integer> ALLOCATED_PORTS = new ConcurrentSkipListSet<>();
+
     private final Map<Call, Response> requestResponseMap = new HashMap<>();
 
     private final java.util.Stack<Call> callStack = new java.util.Stack<>();
@@ -43,7 +48,6 @@ public class SparkServer {
     @Value("#{'${integrationtest.cloudbreak.server}' + '${server.contextPath:/cb}'}")
     private String cloudbreakServerRoot;
 
-    @Value("${mock.server.port:#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(9750, 9900 + 1)}}")
     private int port;
 
     @Value("${mock.server.request.response.print:false}")
@@ -74,13 +78,20 @@ public class SparkServer {
         return callStack;
     }
 
-    public void initSparkService() {
-        initSparkService(port);
+    private synchronized int generatePort(int min, int max) {
+        int randomPort;
+        do {
+            LOGGER.info("Generate new port between {} and {}", min, max);
+            randomPort = ThreadLocalRandom.current().nextInt(min, max + 1);
+        } while (ALLOCATED_PORTS.contains(randomPort));
+        ALLOCATED_PORTS.add(randomPort);
+        return randomPort;
     }
 
-    public void initSparkService(int sparkPort) {
-        port = sparkPort;
+    public void initSparkService(int min, int max) {
+        port = generatePort(min, max);
         if (sparkService == null) {
+            LOGGER.info("Try to ignite with endpoint: {}", getEndpoint());
             sparkService = Service.ignite();
         }
         sparkService.port(port);
@@ -130,12 +141,23 @@ public class SparkServer {
     @PreDestroy
     public void autoShutdown() {
         LOGGER.info("Invoking PreDestroy for Spark bean");
+        shutdown();
+    }
+
+    private synchronized void deallocatePort() {
+        ALLOCATED_PORTS.remove(port);
+        LOGGER.info("Port deallocated: {}", port);
+    }
+
+    public void shutdown() {
         stop();
+        deallocatePort();
     }
 
     public void stop() {
         if (sparkService != null) {
             sparkService.stop();
+            sparkService.awaitStop();
             LOGGER.info("spark server has stopped.");
         }
     }

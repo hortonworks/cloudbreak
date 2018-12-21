@@ -84,7 +84,7 @@ public class TestContext implements ApplicationContextAware {
 
     @PostConstruct
     private void init() {
-        sparkServer.initSparkService();
+        sparkServer.initSparkService(9750, 9900);
         imageCatalogMockServerSetup.configureImgCatalogMock();
         model = new DefaultModel();
         model.startModel(sparkServer.getSparkService(), mockServerAddress);
@@ -494,8 +494,8 @@ public class TestContext implements ApplicationContextAware {
     }
 
     public void shutdown() {
-        sparkServer.stop();
-        imageCatalogMockServerSetup.stop();
+        sparkServer.shutdown();
+        imageCatalogMockServerSetup.shutdown();
         shutdown = true;
     }
 

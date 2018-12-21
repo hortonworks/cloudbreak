@@ -48,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.testcase.ClusterTemplateTest;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
+@Prototype
 public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse, StackEntity> implements Purgable<StackResponse> {
 
     public static final String STACK = "STACK";

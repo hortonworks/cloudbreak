@@ -1,15 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.RecipePostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.RecipeV3Action;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
-@Prototype
 public class Recipe extends RecipeEntity {
 
     public Recipe() {

@@ -5,6 +5,13 @@
         <classes>
             <class name="com.sequenceiq.it.cloudbreak.newway.testcase.TerminationTest" />
             <class name="com.sequenceiq.it.cloudbreak.newway.testcase.UpscaleTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.ClusterStopTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.KerberosTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.RecipeTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.SharedServiceTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentClusterTest" />
+            <class name="com.sequenceiq.it.cloudbreak.newway.testcase.ClusterTemplateTest" />
         </classes>
     </test>
 </suite>

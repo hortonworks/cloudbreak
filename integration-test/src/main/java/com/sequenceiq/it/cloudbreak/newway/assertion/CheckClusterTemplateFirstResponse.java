@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion;
 
 import static com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType.OTHER;
-import static com.sequenceiq.cloudbreak.api.model.template.DatalakeRequired.REQUIRED;
+import static com.sequenceiq.cloudbreak.api.model.template.DatalakeRequired.OPTIONAL;
 
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public class CheckClusterTemplateFirstResponse implements AssertionV2<ClusterTem
 
     @Override
     public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
-        Optional<ClusterTemplateResponse> first = entity.getResponses().stream().findFirst();
+        Optional<ClusterTemplateResponse> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
@@ -33,21 +33,17 @@ public class CheckClusterTemplateFirstResponse implements AssertionV2<ClusterTem
 
         if (!OTHER.equals(clusterTemplateResponse.getType())) {
             throw new IllegalArgumentException(String
-                    .format("Mismatch type result, OTHER expected but got %s", clusterTemplateResponse.getDatalakeRequired()));
+                    .format("Mismatch type result, OTHER expected but got %s", clusterTemplateResponse.getType()));
         }
 
-        if (!REQUIRED.equals(clusterTemplateResponse.getDatalakeRequired())) {
+        if (!OPTIONAL.equals(clusterTemplateResponse.getDatalakeRequired())) {
             throw new IllegalArgumentException(String
-                    .format("Mismatch datalake required result, REQUIRED expected but got %s", clusterTemplateResponse.getDatalakeRequired()));
+                    .format("Mismatch datalake required result, OPTIONAL expected but got %s", clusterTemplateResponse.getDatalakeRequired()));
         }
 
         if (!ResourceStatus.USER_MANAGED.equals(clusterTemplateResponse.getStatus())) {
             throw new IllegalArgumentException(String
                     .format("Mismatch status result, USER_MANAGED expected but got %s", clusterTemplateResponse.getStatus()));
-        }
-
-        if (clusterTemplateResponse.getCloudPlatform() != null) {
-            throw new IllegalArgumentException("Cloudplatform is enabled in DEFAULT template only");
         }
 
         return entity;

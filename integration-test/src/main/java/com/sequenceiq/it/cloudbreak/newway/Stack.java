@@ -44,7 +44,6 @@ import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
-@Prototype
 public class Stack extends StackEntity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stack.class);

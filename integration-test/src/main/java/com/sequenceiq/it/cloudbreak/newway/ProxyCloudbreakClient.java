@@ -41,6 +41,13 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
         identityTokenCache = configTokenCache();
     }
 
+    public ProxyCloudbreakClient(String cloudbreakAddress, String caasProtocol, String caasAddress, String refreshToken, ConfigKey configKey) {
+        super(cloudbreakAddress, caasProtocol, caasAddress, refreshToken, configKey);
+        identityClient = null;
+        identityTokenCache = configTokenCache();
+        clientSecret = null;
+    }
+
     @Override
     public AutoscaleEndpoint autoscaleEndpoint() {
         return refreshIdentityTokenIfNeededAndGet();

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeViewResponse;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
+@Prototype
 public class RecipeEntity extends AbstractCloudbreakEntity<RecipeRequest, RecipeResponse, RecipeEntity> implements Purgable<RecipeViewResponse> {
     public static final String RECIPE = "RECIPE";
 
