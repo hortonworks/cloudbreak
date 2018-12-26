@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -240,7 +241,7 @@ public class AzureUtils {
                     for (CloudInstance instance : group.getInstances()) {
                         String id = getPrivateInstanceId(
                                 getStackName(cc), group.getName(), Long.toString(instance.getTemplate().getPrivateId()));
-                        if (vmName.equals(id)) {
+                        if (vmName.equals(id) && instance.getTemplate().getStatus().equals(InstanceStatus.CREATE_REQUESTED)) {
                             Map<String, Object> paramsMap = new HashMap<>();
                             paramsMap.put(RESOURCE_GROUP_NAME, resourceGroupNm);
                             CloudResource vm = CloudResource.builder()
@@ -253,6 +254,7 @@ public class AzureUtils {
                                     .params(paramsMap)
                                     .build();
                             cloudResourceList.add(vm);
+                            break;
                         }
                     }
                 }
