@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -141,6 +142,7 @@ public class AzureUtilsTest {
 
         when(instance.getTemplate()).thenReturn(instanceTemplate);
         when(instance.getTemplate().getPrivateId()).thenReturn(1L);
+        when(instance.getTemplate().getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
         when(group.getInstances()).thenReturn(List.of(instance));
         when(group.getName()).thenReturn("instanceGroupName");
         groupList.add(group);
