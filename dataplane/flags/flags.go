@@ -619,20 +619,6 @@ var (
 			Usage: "id of the image",
 		},
 	}
-	FlKey = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "key",
-			Usage: "key of the tag",
-		},
-	}
-	FlValue = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "value",
-			Usage: "value of the tag",
-		},
-	}
 	FlProxyHost = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -908,13 +894,6 @@ var (
 			Usage: "comma seperated values of role names",
 		},
 	}
-	FlCaasUsers = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "user-names",
-			Usage: "comma seperated values of user names",
-		},
-	}
 	FlVersion = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -1151,6 +1130,13 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "admin",
 			Usage: "kerberos admin",
+		},
+	}
+	FlShowUsage = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "show-usage",
+			Usage: "shows the command usage",
 		},
 	}
 )
