@@ -1139,6 +1139,13 @@ var (
 			Usage: "shows the command usage",
 		},
 	}
+	FlShowInternal = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "show-internal",
+			Usage: "shows the internal commands as well",
+		},
+	}
 )
 
 type RequiredFlag struct {

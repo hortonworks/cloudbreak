@@ -20,9 +20,9 @@ func init() {
 		Name:   "command-tree",
 		Usage:  "prints the command tree",
 		Action: printCommandTree,
-		Flags:  fl.NewFlagBuilder().AddFlags(fl.FlShowUsage).Build(),
+		Flags:  fl.NewFlagBuilder().AddFlags(fl.FlShowUsage, fl.FlShowInternal).Build(),
 		BashComplete: func(c *cli.Context) {
-			for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlShowUsage).Build() {
+			for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlShowUsage, fl.FlShowInternal).Build() {
 				fl.PrintFlagCompletion(f)
 			}
 		},
@@ -32,19 +32,21 @@ func init() {
 
 func printCommandTree(c *cli.Context) {
 	tree := New(c.App.Name)
-	buildTree(dpcmd.DataPlaneCommands, tree, c.Bool(fl.FlShowUsage.Name))
+	buildTree(dpcmd.DataPlaneCommands, tree, c.Bool(fl.FlShowUsage.Name), c.Bool(fl.FlShowInternal.Name))
 	fmt.Println(tree.Print())
 }
 
-func buildTree(commands []cli.Command, tree Tree, showUsage bool) {
+func buildTree(commands []cli.Command, tree Tree, showUsage, showInternal bool) {
 	for _, command := range commands {
-		name := command.Name
-		if showUsage {
-			name += " - " + command.Usage
-		}
-		subTree := tree.Add(name)
-		if command.Subcommands != nil && len(command.Subcommands) > 0 {
-			buildTree(command.Subcommands, subTree, showUsage)
+		if showInternal || !command.Hidden {
+			name := command.Name
+			if showUsage {
+				name += " - " + command.Usage
+			}
+			subTree := tree.Add(name)
+			if command.Subcommands != nil && len(command.Subcommands) > 0 {
+				buildTree(command.Subcommands, subTree, showUsage, showInternal)
+			}
 		}
 	}
 }
