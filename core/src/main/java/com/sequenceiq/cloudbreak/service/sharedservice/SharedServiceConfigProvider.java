@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,15 +19,11 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -50,9 +45,6 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private AmbariClientFactory ambariClientFactory;
-
-    @Inject
-    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Inject
     private KerberosConfigProvider kerberosConfigProvider;
@@ -81,8 +73,8 @@ public class SharedServiceConfigProvider {
         return requestedCluster;
     }
 
-    public boolean isConfigured(@Nonnull ClusterV2Request clusterV2Request) {
-        return clusterV2Request.getSharedService() != null && !Strings.isNullOrEmpty(clusterV2Request.getSharedService().getSharedCluster());
+    public boolean isConfigured(@Nonnull ClusterV4Request clusterRequest) {
+        return clusterRequest.getSharedService() != null && !Strings.isNullOrEmpty(clusterRequest.getSharedService().getSharedClusterName());
     }
 
     public Stack prepareDatalakeConfigs(Stack publicStack) {
@@ -137,7 +129,7 @@ public class SharedServiceConfigProvider {
         return datalakeId;
     }
 
-    public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
+    /*public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
         AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalake, datalake.getCluster());
         String blueprintText = blueprint.getBlueprintText();
         Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(blueprintText);
@@ -152,7 +144,7 @@ public class SharedServiceConfigProvider {
         configsResponse.setDatalakeInputs(results);
         configsResponse.setFixInputs(prepareAdditionalInputParameters(datalake.getName(), stackName));
         return configsResponse;
-    }
+    }*/
 
     private void addDatalakeRequiredProperties(Set<String> datalakeProperties) {
         datalakeProperties.add("ranger.audit.solr.zookeepers");

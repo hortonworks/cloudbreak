@@ -7,7 +7,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("TimeAlertValidationRequest")
+@ApiModel
 public class TimeAlertValidationRequest implements Json {
 
     @NotNull

@@ -3,10 +3,8 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,11 +15,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -33,7 +32,7 @@ import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class EnvironmentTest extends AbstractIntegrationTest  {
+public class EnvironmentTest extends AbstractIntegrationTest {
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
     private static final Set<String> INVALID_REGION = new HashSet<>(Collections.singletonList("MockRegion"));
@@ -474,7 +473,6 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentChangeCredWithCredRequest(TestContext testContext) {
-        Map<String, Object> parameters = new HashMap<>();
         testContext
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
@@ -484,7 +482,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
                 .given(EnvironmentEntity.class)
                 .withCredentialName(null)
-                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred", parameters))
+                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred"))
                 .then(Environment::changeCredential)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .validate();
@@ -563,8 +561,8 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     protected static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> rdsConfigs = new HashSet<>();
-        Set<RDSConfigResponse> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
-        for (RDSConfigResponse rdsConfigResponse : rdsConfigResponseSet) {
+        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
+        for (DatabaseV4Response rdsConfigResponse : rdsConfigResponseSet) {
             rdsConfigs.add(rdsConfigResponse.getName());
         }
         if (!rdsConfigs.contains(testContext.get(RdsConfigEntity.class).getName())) {
@@ -575,9 +573,9 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     protected static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> ldapConfigs = new HashSet<>();
-        Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
-        for (LdapConfigResponse ldapConfigResponse : ldapConfigResponseSet) {
-            ldapConfigs.add(ldapConfigResponse.getName());
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
+        for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
+            ldapConfigs.add(ldapV4Response.getName());
         }
         if (!ldapConfigs.contains(testContext.get(LdapConfigEntity.class).getName())) {
             throw new TestFailException("Ldap is not attached to environment");
@@ -587,9 +585,9 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     protected static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> proxyConfigs = new HashSet<>();
-        Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
-        for (ProxyConfigResponse proxyConfigResponse : proxyConfigResponseSet) {
-            proxyConfigs.add(proxyConfigResponse.getName());
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
+        for (ProxyV4Response proxyV4Response : proxyV4ResponseSet) {
+            proxyConfigs.add(proxyV4Response.getName());
         }
         if (!proxyConfigs.contains(testContext.get(ProxyConfigEntity.class).getName())) {
             throw new TestFailException("Proxy is not attached to environment");
@@ -598,8 +596,8 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     }
 
     private static EnvironmentEntity checkEnvIsListed(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<SimpleEnvironmentResponse> simpleEnvironmentResponses = testContext.get(EnvironmentEntity.class).getResponseSimpleEnvSet();
-        List<SimpleEnvironmentResponse> result = simpleEnvironmentResponses.stream()
+        Set<SimpleEnvironmentV4Response> simpleEnvironmentV4Respons = testContext.get(EnvironmentEntity.class).getResponseSimpleEnvSet();
+        List<SimpleEnvironmentV4Response> result = simpleEnvironmentV4Respons.stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {
@@ -608,12 +606,12 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         return environment;
     }
 
-    private CredentialRequest createCredentialRequest(String cloudPlatform, String description, String name, Map<String, Object> parameters) {
-        CredentialRequest credentialRequest = new CredentialRequest();
+    private CredentialV4Request createCredentialRequest(String cloudPlatform, String description, String name) {
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setCloudPlatform(cloudPlatform);
         credentialRequest.setDescription(description);
         credentialRequest.setName(name);
-        credentialRequest.setParameters(parameters);
+        credentialRequest.setMock(new MockCredentialV4Parameters());
         return credentialRequest;
     }
 }

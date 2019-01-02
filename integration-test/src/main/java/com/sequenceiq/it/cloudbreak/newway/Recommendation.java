@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.RecommendationV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.RecommendationV4Action;
 
 public class Recommendation extends RecommendationEntity {
 
@@ -22,12 +22,12 @@ public class Recommendation extends RecommendationEntity {
 
     public static Recommendation isCreated() {
         Recommendation recommendation = new Recommendation();
-        recommendation.setCreationStrategy(RecommendationAction::createInGiven);
+        recommendation.setCreationStrategy(RecommendationV4Action::createInGiven);
         return recommendation;
     }
 
     public static Action<Recommendation> post(String key) {
-        return new Action<>(getTestContext(key), RecommendationV3Action::post);
+        return new Action<>(getTestContext(key), RecommendationV4Action::post);
     }
 
     public static Action<Recommendation> post() {

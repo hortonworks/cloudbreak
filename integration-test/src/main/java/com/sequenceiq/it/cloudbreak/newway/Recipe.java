@@ -7,7 +7,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.RecipePostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.RecipeV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.RecipeV4Action;
 
 public class Recipe extends RecipeEntity {
 
@@ -32,25 +32,25 @@ public class Recipe extends RecipeEntity {
 
     public static Recipe isCreated() {
         Recipe recipe = new Recipe();
-        recipe.setCreationStrategy(RecipeV3Action::createInGiven);
+        recipe.setCreationStrategy(RecipeV4Action::createInGiven);
         return recipe;
     }
 
     public static Recipe isCreatedDeleted() {
         Recipe recipe = new Recipe();
-        recipe.setCreationStrategy(RecipeV3Action::createDeleteInGiven);
+        recipe.setCreationStrategy(RecipeV4Action::createDeleteInGiven);
         return recipe;
     }
 
     public static RecipeEntity getByName(TestContext testContext, RecipeEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().recipeV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().recipeV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }
 
     public static Action<Recipe> post(String key) {
-        return new Action<>(getTestContext(key), RecipeV3Action::post);
+        return new Action<>(getTestContext(key), RecipeV4Action::post);
     }
 
     public static Action<Recipe> post() {
@@ -58,7 +58,7 @@ public class Recipe extends RecipeEntity {
     }
 
     public static Action<Recipe> get(String key) {
-        return new Action<>(getTestContext(key), RecipeV3Action::get);
+        return new Action<>(getTestContext(key), RecipeV4Action::get);
     }
 
     public static Action<Recipe> get() {
@@ -66,11 +66,11 @@ public class Recipe extends RecipeEntity {
     }
 
     public static Action<Recipe> getAll() {
-        return new Action<>(getNew(), RecipeV3Action::getAll);
+        return new Action<>(getNew(), RecipeV4Action::getAll);
     }
 
     public static Action<Recipe> delete(String key) {
-        return new Action<>(getTestContext(key), RecipeV3Action::delete);
+        return new Action<>(getTestContext(key), RecipeV4Action::delete);
     }
 
     public static Action<Recipe> delete() {

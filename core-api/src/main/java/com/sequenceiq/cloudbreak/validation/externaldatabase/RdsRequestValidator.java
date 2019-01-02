@@ -6,18 +6,18 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.validation.ValidatorUtil;
 
-public class RdsRequestValidator implements ConstraintValidator<ValidRds, RDSConfigRequest> {
+public class RdsRequestValidator implements ConstraintValidator<ValidRds, DatabaseV4Request> {
 
     @Override
     public void initialize(ValidRds constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(RDSConfigRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(DatabaseV4Request request, ConstraintValidatorContext context) {
         boolean supportedScenario = false;
         Optional<DatabaseVendor> vendorByJdbcUrl = DatabaseVendor.getVendorByJdbcUrl(request);
 

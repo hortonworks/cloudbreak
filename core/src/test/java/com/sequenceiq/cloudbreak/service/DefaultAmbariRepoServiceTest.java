@@ -16,10 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
@@ -37,36 +37,36 @@ public class DefaultAmbariRepoServiceTest {
     public void init() {
         Map<String, AmbariInfo> entries = new HashMap<>();
 
-        StackMatrix stackMatrix = new StackMatrix();
-        Map<String, StackDescriptor> hdpMap = new HashMap<>();
-        Map<String, StackDescriptor> hdfMap = new HashMap<>();
+        StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
+        Map<String, StackDescriptorV4Response> hdpMap = new HashMap<>();
+        Map<String, StackDescriptorV4Response> hdfMap = new HashMap<>();
 
-        AmbariInfoJson ambariInfoJson26 = new AmbariInfoJson();
+        AmbariInfoV4Response ambariInfoJson26 = new AmbariInfoV4Response();
         ambariInfoJson26.setVersion("2.6");
-        ambariInfoJson26.setRepo(getAmbariRepoJson("2.6"));
+        ambariInfoJson26.setRepository(getAmbariRepoJson("2.6"));
 
-        AmbariInfoJson ambariInfoJson27 = new AmbariInfoJson();
+        AmbariInfoV4Response ambariInfoJson27 = new AmbariInfoV4Response();
         ambariInfoJson27.setVersion("2.7");
-        ambariInfoJson27.setRepo(getAmbariRepoJson("2.7"));
+        ambariInfoJson27.setRepository(getAmbariRepoJson("2.7"));
 
-        StackDescriptor hdpDescriptor26 = new StackDescriptor();
+        StackDescriptorV4Response hdpDescriptor26 = new StackDescriptorV4Response();
         hdpDescriptor26.setAmbari(ambariInfoJson26);
         hdpMap.put("2.7", hdpDescriptor26);
 
-        StackDescriptor hdpDescriptor30 = new StackDescriptor();
+        StackDescriptorV4Response hdpDescriptor30 = new StackDescriptorV4Response();
         hdpDescriptor30.setAmbari(ambariInfoJson27);
         hdpMap.put("3.0", hdpDescriptor30);
 
-        stackMatrix.setHdp(hdpMap);
+        stackMatrixV4Response.setHdp(hdpMap);
 
-        StackDescriptor hdfDescriptor31 = new StackDescriptor();
+        StackDescriptorV4Response hdfDescriptor31 = new StackDescriptorV4Response();
         hdfDescriptor31.setAmbari(ambariInfoJson27);
         hdfMap.put("3.1", hdfDescriptor31);
 
-        stackMatrix.setHdp(hdpMap);
-        stackMatrix.setHdf(hdfMap);
+        stackMatrixV4Response.setHdp(hdpMap);
+        stackMatrixV4Response.setHdf(hdfMap);
 
-        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrix);
+        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
 
         AmbariInfo ambariInfo26 = new AmbariInfo();
         ambariInfo26.setVersion("2.6");
@@ -80,15 +80,15 @@ public class DefaultAmbariRepoServiceTest {
         defaultAmbariRepoService.setEntries(entries);
     }
 
-    private Map<String, AmbariRepoDetailsJson> getAmbariRepoJson(String version) {
-        Map<String, AmbariRepoDetailsJson> ambariRepo = new HashMap<>();
+    private Map<String, AmbariRepositoryV4Response> getAmbariRepoJson(String version) {
+        Map<String, AmbariRepositoryV4Response> ambariRepo = new HashMap<>();
 
-        AmbariRepoDetailsJson redhat6RepoDetails = new AmbariRepoDetailsJson();
+        AmbariRepositoryV4Response redhat6RepoDetails = new AmbariRepositoryV4Response();
         redhat6RepoDetails.setBaseUrl("http://redhat6-base/" + version);
         redhat6RepoDetails.setGpgKeyUrl("http://redhat6-gpg/" + version);
         ambariRepo.put("redhat6", redhat6RepoDetails);
 
-        AmbariRepoDetailsJson redhat7RepoDetails = new AmbariRepoDetailsJson();
+        AmbariRepositoryV4Response redhat7RepoDetails = new AmbariRepositoryV4Response();
         redhat7RepoDetails.setBaseUrl("http://redhat7-base/" + version);
         redhat7RepoDetails.setGpgKeyUrl("http://redhat7-gpg/" + version);
         ambariRepo.put("redhat7", redhat7RepoDetails);

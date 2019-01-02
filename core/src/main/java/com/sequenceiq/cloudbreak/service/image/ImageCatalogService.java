@@ -22,13 +22,14 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -37,7 +38,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -86,6 +86,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     @Inject
     private PreferencesService preferencesService;
 
+    @Inject
+    private StackImageFilterService stackImageFilterService;
+
     @Override
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
         Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
@@ -100,7 +103,35 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public StatedImages getStatedImagesFilteredByOperatingSystems(String provider, Set<String> operatingSystems, CloudbreakUser cloudbreakUser, User user)
+    public Images getImagesByCatalogName(Long workspaceId, String catalogName, String stackName, String platform) throws CloudbreakImageCatalogException {
+        if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
+            throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
+        }
+        if (StringUtils.isNotEmpty(platform)) {
+            return getImages(workspaceId, catalogName, platform).getImages();
+        } else if (StringUtils.isNotEmpty(stackName)) {
+            return stackImageFilterService.getApplicableImages(workspaceId, catalogName, stackName);
+        } else {
+            throw new BadRequestException("Either platform or stackName should be filled in request.");
+        }
+    }
+
+    public Images getImagesFromDefault(Long workspaceId, String stackName, String platform, Set<String> operatingSystems)
+            throws CloudbreakImageCatalogException {
+        if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
+            throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
+        }
+        if (StringUtils.isNotEmpty(platform)) {
+            User user = getLoggedInUser();
+            return getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user).getImages();
+        } else if (StringUtils.isNotEmpty(stackName)) {
+            return stackImageFilterService.getApplicableImages(workspaceId, stackName);
+        } else {
+            throw new BadRequestException("Either platform or stackName should be filled in request.");
+        }
+    }
+
+    public StatedImages getStatedImagesFilteredByOperatingSystems(String provider, Set<String> operatingSystems, User user)
             throws CloudbreakImageCatalogException {
         StatedImages images = getImages(new ImageFilter(getDefaultImageCatalog(user), Collections.singleton(provider), cbVersion));
         if (!CollectionUtils.isEmpty(operatingSystems)) {
@@ -114,9 +145,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return images;
     }
 
-    public StatedImage getLatestBaseImageDefaultPreferred(String platform, Set<String> operatingSystems, CloudbreakUser cloudbreakUser, User user)
+    public StatedImage getLatestBaseImageDefaultPreferred(String platform, Set<String> operatingSystems, User user)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, cloudbreakUser, user);
+        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user);
         Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages);
         if (defaultBaseImage.isPresent()) {
             return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
@@ -130,10 +161,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getLatestImageDefaultPreferred(baseImages);
     }
 
-    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, Set<String> operatingSystems,
-            CloudbreakUser cloudbreakUser, User user)
+    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, Set<String> operatingSystems, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, cloudbreakUser, user);
+        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
@@ -199,7 +229,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return image;
     }
 
-    public ImageCatalog delete(Long workspaceId, String name, CloudbreakUser cloudbreakUser, User user) {
+    public ImageCatalog delete(Long workspaceId, String name) {
+        User user = getLoggedInUser();
         if (isEnvDefault(name)) {
             throw new BadRequestException(String.format("%s cannot be deleted because it is an environment default image catalog.", name));
         }
@@ -217,16 +248,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return isEnvDefault(name) ? getCloudbreakDefaultImageCatalog() : getByNameForWorkspaceId(name, workspaceId);
     }
 
-    public ImageCatalog setAsDefault(Long workspaceId, String name, CloudbreakUser cloudbreakUser, User user) {
-
+    public ImageCatalog setAsDefault(Long workspaceId, String name) {
+        User user = getLoggedInUser();
         removeDefaultFlag(user);
-
         if (!isEnvDefault(name)) {
             ImageCatalog imageCatalog = get(workspaceId, name);
             checkImageCatalog(imageCatalog, name);
-
             setImageCatalogAsDefault(imageCatalog, user);
-
             return imageCatalog;
         }
         return getCloudbreakDefaultImageCatalog();
@@ -242,7 +270,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         userProfileService.save(userProfile);
     }
 
-    public ImageCatalog update(Long workspaceId, ImageCatalog source, User user) {
+    public ImageCatalog update(Long workspaceId, ImageCatalog source) {
+        User user = getLoggedInUser();
         ImageCatalog imageCatalog = findImageCatalog(workspaceId, source.getName());
         checkImageCatalog(imageCatalog, source.getId());
         imageCatalog.setName(source.getName());
@@ -342,8 +371,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public Images propagateImagesIfRequested(Long workspaceId, String name, boolean withImages) {
-        if (withImages) {
+    public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages) {
+        if (BooleanUtils.isTrue(withImages)) {
             Set<String> platforms = preferencesService.enabledPlatforms();
             try {
                 return getImages(workspaceId, name, platforms).getImages();

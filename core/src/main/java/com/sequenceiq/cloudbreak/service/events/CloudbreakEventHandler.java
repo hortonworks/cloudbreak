@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.service.notification.NotificationAssemblingService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -38,7 +38,7 @@ public class CloudbreakEventHandler implements Consumer<Event<StructuredNotifica
     public void accept(Event<StructuredNotificationEvent> cloudbreakEvent) {
         StructuredNotificationEvent structuredNotificationEvent = cloudbreakEvent.getData();
         structuredEventClient.sendStructuredEvent(structuredNotificationEvent);
-        CloudbreakEventsJson cloudbreakEventsJson = conversionService.convert(structuredNotificationEvent, CloudbreakEventsJson.class);
-        notificationSender.send(notificationAssemblingService.createNotification(cloudbreakEventsJson));
+        CloudbreakEventV4Response cloudbreakEventV4Response = conversionService.convert(structuredNotificationEvent, CloudbreakEventV4Response.class);
+        notificationSender.send(notificationAssemblingService.createNotification(cloudbreakEventV4Response));
     }
 }

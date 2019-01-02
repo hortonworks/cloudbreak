@@ -27,7 +27,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
@@ -125,9 +125,9 @@ public class WorkspaceServiceTest {
         when(userService.getByUserId(USER_ID_2)).thenReturn(user2);
         User user3 = TestUtil.user(3L, USER_ID_3);
         when(userService.getByUserId(USER_ID_3)).thenReturn(user3);
-        Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons = changeWorkspaceUsersJsons();
+        Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests = changeWorkspaceUsersJsons();
 
-        Set<User> result = underTest.addUsers(WORKSPACE_NAME, changeWorkspaceUsersJsons, initiator);
+        Set<User> result = underTest.addUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         verify(userWorkspacePermissionsService, times(1)).saveAll(anySet());
         assertEquals(2L, result.size());
@@ -141,14 +141,14 @@ public class WorkspaceServiceTest {
         when(userService.getByUserId(USER_ID_2)).thenReturn(user2);
         User user3 = TestUtil.user(3L, USER_ID_3);
         when(userService.getByUserId(USER_ID_3)).thenReturn(user3);
-        Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons = changeWorkspaceUsersJsons();
+        Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests = changeWorkspaceUsersJsons();
 
         UserWorkspacePermissions permissions2 = TestUtil.userWorkspacePermissions(user2, testWorkspace, ALL_READ.value());
         UserWorkspacePermissions permissions3 = TestUtil.userWorkspacePermissions(user3, testWorkspace, ALL_READ.value());
         Set<UserWorkspacePermissions> permissionsSet = Set.of(permissions2, permissions3);
         when(verifierService.validateAllUsersAreAlreadyInTheWorkspace(any(), anySet())).thenReturn(permissionsSet);
 
-        Set<User> result = underTest.updateUsers(WORKSPACE_NAME, changeWorkspaceUsersJsons, initiator);
+        Set<User> result = underTest.updateUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         verify(userWorkspacePermissionsService, times(1)).saveAll(anySet());
         assertEquals(2L, result.size());
@@ -168,9 +168,9 @@ public class WorkspaceServiceTest {
         when(userWorkspacePermissionsService.findForWorkspace(testWorkspace)).thenReturn(permissionsSet);
         when(userService.getByUsersIds(anySet())).thenReturn(Set.of(user2, user3));
 
-        Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons = changeWorkspaceUsersJsons();
+        Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests = changeWorkspaceUsersJsons();
 
-        Set<User> result = underTest.changeUsers(WORKSPACE_NAME, changeWorkspaceUsersJsons, initiator);
+        Set<User> result = underTest.changeUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         verify(userWorkspacePermissionsService, times(1)).deleteAll(deleteCaptor.capture());
         verify(userWorkspacePermissionsService, times(2)).saveAll(saveCaptor.capture());
@@ -186,9 +186,9 @@ public class WorkspaceServiceTest {
 
     }
 
-    private Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons() {
-        ChangeWorkspaceUsersJson json1 = TestUtil.changeWorkspaceUsersJson(USER_ID_2, ALL_READ.value(), ALL_WRITE.value());
-        ChangeWorkspaceUsersJson json2 = TestUtil.changeWorkspaceUsersJson(USER_ID_3, ALL_READ.value(), ALL_WRITE.value());
+    private Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersJsons() {
+        ChangeWorkspaceUsersV4Request json1 = TestUtil.changeWorkspaceUsersJson(USER_ID_2, ALL_READ.value(), ALL_WRITE.value());
+        ChangeWorkspaceUsersV4Request json2 = TestUtil.changeWorkspaceUsersJson(USER_ID_3, ALL_READ.value(), ALL_WRITE.value());
         return Set.of(json1, json2);
     }
 }

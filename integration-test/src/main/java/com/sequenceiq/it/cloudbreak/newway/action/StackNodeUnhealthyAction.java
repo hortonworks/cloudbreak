@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
@@ -37,27 +35,26 @@ public class StackNodeUnhealthyAction implements ActionV2<StackEntity> {
 
     @Override
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getGeneral().getName()));
+        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, format(" Stack unhealthy request:%n"), entity.getRequest());
-        FailureReport failureReport = new FailureReport();
+        FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(entity)));
         CloudbreakClient autoscaleClient = testContext.as(Actor::secondUser).getCloudbreakClient(SECONDARY_REFRESH_TOKEN);
-        try (Response toClose = autoscaleClient.getCloudbreakClient().autoscaleEndpoint()
-                .failureReport(Objects.requireNonNull(entity.getResponse().getId()), failureReport)) {
+        autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(entity.getResponse().getId()), failureReport);
             logJSON(LOGGER, format(" Stack unhealthy was successful:%n"), entity.getResponse());
             log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
             return entity;
-        }
+
     }
 
-    private InstanceGroupResponse getInstanceGroupResponse(StackEntity entity) {
+    private InstanceGroupV4Response getInstanceGroupResponse(StackEntity entity) {
         return entity.getResponse().getInstanceGroups().stream()
-                .filter(ig -> ig.getGroup().equals(hostgroup)).collect(Collectors.toList()).get(0);
+                .filter(ig -> ig.getName().equals(hostgroup)).collect(Collectors.toList()).get(0);
     }
 
-    private List<String> getNodes(InstanceGroupResponse instanceGroup) {
+    private List<String> getNodes(InstanceGroupV4Response instanceGroup) {
         return instanceGroup.getMetadata().stream()
-                .map(InstanceMetaDataJson::getDiscoveryFQDN).collect(Collectors.toList()).subList(0, nodeCount);
+                .map(InstanceMetaDataV4Response::getDiscoveryFQDN).collect(Collectors.toList()).subList(0, nodeCount);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import org.junit.Before;
 import org.junit.Test;

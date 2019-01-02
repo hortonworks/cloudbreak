@@ -9,9 +9,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -22,15 +22,15 @@ public class ManagementPackValidator {
     @Inject
     private ManagementPackService mpackService;
 
-    public void validateMpacks(ClusterRequest clusterRequest, Workspace workspace) {
-        AmbariStackDetailsJson stackDetails = clusterRequest.getAmbariStackDetails();
+    public void validateMpacks(AmbariV4Request ambari, Workspace workspace) {
+        StackRepositoryV4Request stackDetails = ambari.getStackRepository();
         if (stackDetails == null) {
             return;
         }
         String mpackUrl = stackDetails.getMpackUrl();
-        List<ManagementPackDetails> mpackList = stackDetails.getMpacks();
-        Map<String, ManagementPackDetails> mpackDetailsMap = stackDetails.getMpacks().stream()
-                .collect(Collectors.toMap(ManagementPackDetails::getName, mp -> mp, (mp1, mp2) -> mp1));
+        List<ManagementPackDetailsV4Request> mpackList = stackDetails.getMpacks();
+        Map<String, ManagementPackDetailsV4Request> mpackDetailsMap = stackDetails.getMpacks().stream()
+                .collect(Collectors.toMap(ManagementPackDetailsV4Request::getName, mp -> mp, (mp1, mp2) -> mp1));
         if (mpackDetailsMap.size() != mpackList.size()) {
             throw new BadRequestException("Mpack list contains entries with the same name");
         }

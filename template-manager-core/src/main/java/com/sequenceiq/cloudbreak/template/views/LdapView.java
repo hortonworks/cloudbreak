@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.template.views;
 import javax.annotation.Nonnull;
 
 import com.google.common.xml.XmlEscapers;
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapView {

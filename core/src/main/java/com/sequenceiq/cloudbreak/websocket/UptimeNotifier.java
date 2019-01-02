@@ -8,8 +8,8 @@ import javax.inject.Inject;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -42,14 +42,14 @@ public class UptimeNotifier {
             Stack stack = stackService.getForCluster(cluster.getId());
             if (stack != null && !stack.isDeleteCompleted()) {
                 Long uptime = stackUtil.getUptimeForCluster(cluster, cluster.isAvailable());
-                Notification<CloudbreakEventsJson> notification = createUptimeNotification(stack, uptime);
+                Notification<CloudbreakEventV4Response> notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }
         }
     }
 
-    private Notification<CloudbreakEventsJson> createUptimeNotification(Stack stack, Long uptime) {
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+    private Notification<CloudbreakEventV4Response> createUptimeNotification(Stack stack, Long uptime) {
+        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setUserId(stack.getCreator().getUserId());
         notification.setWorkspaceId(stack.getWorkspace().getId());
         notification.setStackId(stack.getId());

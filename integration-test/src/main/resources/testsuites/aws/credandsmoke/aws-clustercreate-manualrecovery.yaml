@@ -58,7 +58,7 @@ tests:
       clusterName: it-aws-cred-mr
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: manual recovery with repair
     parameters:

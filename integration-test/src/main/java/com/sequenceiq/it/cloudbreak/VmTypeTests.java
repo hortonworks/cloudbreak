@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -81,7 +81,7 @@ public class VmTypeTests extends CloudbreakTest {
                 provider.getPlatform(), "credential and", provider.region(), "region."));
         then(VmType.assertThis(
                 (vmtype, t) -> {
-                    Set<VmTypeJson> azVirtualMachines = vmtype.getResponse().getVmTypes()
+                    Set<VmTypeV4Response> azVirtualMachines = vmtype.getResponse().getVmTypes()
                             .get(provider.availabilityZone())
                             .getVirtualMachines();
 
@@ -206,7 +206,7 @@ public class VmTypeTests extends CloudbreakTest {
                 + provider.region() + " region.");
         then(VmType.assertThis(
                 (vmtype, t) -> {
-                    Set<VmTypeJson> regionVirtualMachines = vmtype.getResponse().getVmTypes()
+                    Set<VmTypeV4Response> regionVirtualMachines = vmtype.getResponse().getVmTypes()
                             .get(provider.region())
                             .getVirtualMachines();
 

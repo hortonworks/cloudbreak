@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AttachedClusterStackPostStrategy;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -175,7 +175,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         when(LdapConfig.getAll());
         then(LdapConfig.assertThis((ldapConfig, testContext) -> {
             var responses = ldapConfig.getResponses();
-            for (LdapConfigResponse response : responses) {
+            for (LdapV4Response response : responses) {
                 if (response.getName().equals(resourceHelper.getLdapConfigName())) {
                     try {
                         given(LdapConfig.request().withName(response.getName()));
@@ -193,7 +193,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         when(RdsConfig.getAll());
         then(RdsConfig.assertThis((rdsConfig, testContext) -> {
             var responses = rdsConfig.getResponses();
-            for (RDSConfigResponse response : responses) {
+            for (DatabaseV4Response response : responses) {
                 if (response.getName().equals(getTestParameter().get(hiveConfigNameKey))
                         || response.getName().equals(getTestParameter().get(rangerConfigNameKey))) {
                     try {

@@ -3,8 +3,6 @@ package com.sequenceiq.it.cloudbreak.v2;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,18 +28,18 @@ public class StackStopV2Test extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakV2Constants.WORKSPACE_ID, Long.class);
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         //WHEN
-        Response response = getCloudbreakClient().stackV2Endpoint().putStop(stackName);
+        getCloudbreakClient().stackV4Endpoint().putStop(workspaceId, stackName);
         //THEN
-        CloudbreakUtil.checkResponse("StackStopV2", response);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "STOPPED");
         desiredStatuses.put("clusterStatus", "STOPPED");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
-        CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackV2Endpoint(), ambariPort, stackId, ambariUser, ambariPassword);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackId, desiredStatuses);
+        CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackV4Endpoint(), ambariPort, workspaceId, stackId, ambariUser, ambariPassword);
     }
 }

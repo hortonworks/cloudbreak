@@ -25,11 +25,9 @@ public class NetworksTest extends CloudbreakTest {
 
     private static final String INVALID_AV_ZONE = "invalid-avzone";
 
-    private static final long INVALID_CRED_ID = 9999L;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworksTest.class);
 
-    private Long credentialId;
+    private String credentialName;
 
     private CloudProvider cloudProvider;
 
@@ -50,7 +48,7 @@ public class NetworksTest extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
 
         IntegrationTestContext it = getItContext();
-        credentialId  = Credential.getTestContextCredential().apply(it).getResponse().getId();
+        credentialName  = Credential.getTestContextCredential().apply(it).getResponse().getName();
     }
 
     @Test
@@ -66,7 +64,7 @@ public class NetworksTest extends CloudbreakTest {
     @Test
     public void testGetNetworksWithCredId() throws Exception {
         given(Networks.request()
-                        .withCredentialId(credentialId)
+                        .withCredentialName(credentialName)
                         .withRegion(cloudProvider.region()), "with credential id"
         );
         when(Networks.post(), "post the request");
@@ -96,7 +94,7 @@ public class NetworksTest extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetNetworksInvalidCredId() throws Exception {
         given(Networks.request()
-                .withCredentialId(INVALID_CRED_ID)
+                .withCredentialName(INVALID_CRED_NAME)
                 .withRegion(cloudProvider.region()), "with no existing credential id"
         );
         when(Networks.post(), "post the request");
@@ -106,7 +104,7 @@ public class NetworksTest extends CloudbreakTest {
     @Test
     public void testGetNetworksWithInvalidAvZone() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialId)
+                .withCredentialName(credentialName)
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(INVALID_AV_ZONE), "get networks with invalid availability zone"
         );
@@ -117,7 +115,7 @@ public class NetworksTest extends CloudbreakTest {
     @Test
     public void testGetNetworksWithAvZoneEmpty() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialId)
+                .withCredentialName(credentialName)
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(""), "get networks with empty availability zone"
         );

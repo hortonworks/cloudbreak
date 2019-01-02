@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentEditRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
@@ -57,10 +57,10 @@ public class EnvironmentUtils {
         return environment;
     }
 
-    public static EnvironmentEditRequest getEnvironmentEditRequest(String description, String location, Set<String> regions) {
-        EnvironmentEditRequest editRequest = new EnvironmentEditRequest();
+    public static EnvironmentEditV4Request getEnvironmentEditRequest(String description, String location, Set<String> regions) {
+        EnvironmentEditV4Request editRequest = new EnvironmentEditV4Request();
         editRequest.setDescription(description);
-        LocationRequest locationRequest = new LocationRequest();
+        LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setLocationName(location);
         locationRequest.setLongitude(1D);
         locationRequest.setLatitude(2D);

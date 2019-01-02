@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;

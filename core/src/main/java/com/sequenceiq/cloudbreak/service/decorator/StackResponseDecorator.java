@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProvider;
 import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProviders;
@@ -17,7 +17,7 @@ public class StackResponseDecorator {
     @Inject
     private ResponseProviders responseProviders;
 
-    public StackResponse decorate(StackResponse stackResponse, Stack stack, Collection<String> entries) {
+    public StackV4Response decorate(StackV4Response stackResponse, Stack stack, Collection<String> entries) {
         if (entries != null && !entries.isEmpty() && !Status.DELETE_COMPLETED.equals(stackResponse.getStatus())) {
             for (String entry : entries) {
                 ResponseProvider responseProvider = responseProviders.get(entry);

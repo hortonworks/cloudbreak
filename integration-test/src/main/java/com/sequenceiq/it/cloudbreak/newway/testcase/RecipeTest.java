@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock.SALT_RUN;
@@ -19,7 +19,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
@@ -67,7 +68,7 @@ public class RecipeTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(TestContext testContext, HostGroupType hostGroup, int nodeCount,
-                    RecipeType type, int executionTime) {
+                                                                    RecipeV4Type type, int executionTime) {
         LOGGER.debug("testing recipe execution for type: {}", type.name());
         String recipeName = creator.getRandomNameForMock();
         testContext
@@ -76,7 +77,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(hostGroup).withNodeCount(nodeCount).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(WORKER_ID)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(executionTime))
                 .validate();
     }
@@ -90,10 +91,10 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(1).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(WORKER_ID)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
                 .when(Stack.deleteV2())
-                .await(STACK_DELETED)
+                .await(Status.DELETE_COMPLETED)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
     }
@@ -107,7 +108,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .when(LdapConfig.postV2())
                 .given(StackEntity.class).withCluster(new ClusterEntity(testContext).valid().withLdapConfigName(ldapName))
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
     }
@@ -121,9 +122,9 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(1).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(WORKER_ID)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(2))
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
                 .validate();
     }
@@ -138,9 +139,9 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .given(COMPUTE_ID, InstanceGroupEntity.class).withHostGroup(COMPUTE).withNodeCount(1).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(COMPUTE_ID)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(2))
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(5))
                 .validate();
     }

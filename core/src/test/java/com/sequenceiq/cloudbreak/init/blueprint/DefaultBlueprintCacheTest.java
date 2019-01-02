@@ -19,9 +19,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
+import com.sequenceiq.cloudbreak.converter.v4.blueprints.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -32,7 +32,7 @@ public class DefaultBlueprintCacheTest {
     private BlueprintUtils blueprintUtils;
 
     @Mock
-    private BlueprintRequestToBlueprintConverter converter;
+    private BlueprintV4RequestToBlueprintConverter converter;
 
     @InjectMocks
     private DefaultBlueprintCache underTest;
@@ -47,7 +47,7 @@ public class DefaultBlueprintCacheTest {
 
         when(blueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText);
-        when(converter.convert(any(BlueprintRequest.class))).thenReturn(bp1);
+        when(converter.convert(any(BlueprintV4Request.class))).thenReturn(bp1);
 
         underTest.defaultBlueprints().clear();
     }

@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MSSQL;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MYSQL;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE12;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.POSTGRES;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.MSSQL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.MYSQL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE11;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE12;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.POSTGRES;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -15,17 +15,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.sequenceiq.cloudbreak.api.model.rds.OracleParameters;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 
 @RunWith(Parameterized.class)
 public class DatabaseVendorTest {
 
-    private final RDSConfigRequest rdsConfigRequest;
+    private final DatabaseV4Request rdsConfigRequest;
 
     private final Optional<DatabaseVendor> expected;
 
-    public DatabaseVendorTest(RDSConfigRequest rdsConfigRequest, DatabaseVendor expected) {
+    public DatabaseVendorTest(DatabaseV4Request rdsConfigRequest, DatabaseVendor expected) {
         this.rdsConfigRequest = rdsConfigRequest;
         this.expected = Optional.ofNullable(expected);
     }
@@ -59,14 +60,14 @@ public class DatabaseVendorTest {
         });
     }
 
-    public static RDSConfigRequest rdsConfigRequest(String jdbcUrl, Optional<OracleParameters> oracleParameters) {
-        RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
+    public static DatabaseV4Request rdsConfigRequest(String jdbcUrl, Optional<OracleParameters> oracleParameters) {
+        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
         rdsConfigRequest.setConnectionURL(jdbcUrl);
         rdsConfigRequest.setOracle(oracleParameters.orElse(null));
         return rdsConfigRequest;
     }
 
-    public static RDSConfigRequest rdsConfigRequest(String jdbcUrl) {
+    public static DatabaseV4Request rdsConfigRequest(String jdbcUrl) {
         return rdsConfigRequest(jdbcUrl, Optional.empty());
     }
 

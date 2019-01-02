@@ -1,13 +1,10 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
@@ -24,13 +21,15 @@ public class RecoveryTests extends ClusterTests {
         when(Stack.makeNodeUnhealthy(HostGroupType.WORKER.getName(), 1));
         when(Stack.get());
         then(Stack.assertThis((stack, integrationTestContext) -> {
-            List<HostGroupResponse> hostgroupList = stack.getResponse().getCluster().getHostGroups().stream()
-                    .filter(hostGroup -> hostGroup.getName().equals(HostGroupType.WORKER.getName()))
+            var instanceGroupList = stack.getResponse().getInstanceGroups()
+                    .stream()
+                    .filter(resp -> resp.getName().equals(HostGroupType.WORKER.getName()))
                     .collect(Collectors.toList());
-            Assert.assertEquals(1, hostgroupList.size(), "Hostgroup list size does not match.");
-            List<HostMetadataResponse> nodeList = hostgroupList.get(0).getMetadata().stream()
-                    .filter(node -> node.getState().equals("UNHEALTHY"))
+            var nodeList = instanceGroupList.get(0).getMetadata()
+                    .stream()
+                    .filter(resp -> "UNHEALTHY".equals(resp.getState()))
                     .collect(Collectors.toList());
+            Assert.assertEquals(1, instanceGroupList.size(), "Hostgroup list size does not match.");
             Assert.assertEquals(1, nodeList.size(), "Host metadata list size does not match.");
         }));
         when(Stack.repair(HostGroupType.WORKER.getName()));

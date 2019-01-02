@@ -1,22 +1,31 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
-import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
-import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.NotImplementedException;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.JsonParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.P12Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
+import com.sequenceiq.it.cloudbreak.newway.Cluster;
+import com.sequenceiq.it.cloudbreak.newway.Credential;
+import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
+import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
 
 public class GcpCloudProvider extends CloudProviderHelper {
 
@@ -38,8 +47,6 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
-    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting gcp network";
-
     private static final String CREDENTIAL_NEWSERVICEACCOUNT_ID = "integrationtest.gcpcredential.newServiceAccountId";
 
     private final ResourceHelper resourceHelper;
@@ -56,7 +63,12 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(GCP_CAPITAL)
-                .withParameters(gcpCredentialDetails());
+                .withGcpParameters(gcpCredentialDetails());
+    }
+
+    @Override
+    public StackEntity aValidAttachedStackRequest() {
+        throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
     @Override
@@ -75,22 +87,27 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackAuthenticationRequest stackauth() {
-        StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackauth() {
+        StackAuthenticationV4Request stackauth = new StackAuthenticationV4Request();
 
         stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 
     @Override
-    public TemplateV2Request template() {
-        TemplateV2Request t = new TemplateV2Request();
-
+    public InstanceTemplateV4Request template() {
+        InstanceTemplateV4Request t = new InstanceTemplateV4Request();
         t.setInstanceType(getTestParameter().getWithDefault("gcpInstanceType", "n1-standard-8"));
-        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("gcpInstanceVolumeCount", "1")));
-        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("gcpInstanceVolumeSize", "100")));
-        t.setVolumeType(getTestParameter().getWithDefault("gcpInstanceVolumeType", "pd-standard"));
-        t.setRootVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("ROOT_VOLUME_SIZE", "100")));
+
+        VolumeV4Request volume = new VolumeV4Request();
+        volume.setCount(Integer.parseInt(getTestParameter().getWithDefault("gcpInstanceVolumeCount", "1")));
+        volume.setSize(Integer.parseInt(getTestParameter().getWithDefault("gcpInstanceVolumeSize", "100")));
+        volume.setType(getTestParameter().getWithDefault("gcpInstanceVolumeType", "pd-standard"));
+        t.setAttachedVolumes(Set.of(volume));
+
+        RootVolumeV4Request rootVolume = new RootVolumeV4Request();
+        rootVolume.setSize(Integer.parseInt(getTestParameter().getWithDefault("ROOT_VOLUME_SIZE", "100")));
+        t.setRootVolume(rootVolume);
 
         return t;
     }
@@ -167,34 +184,42 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public NetworkV2Request newNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request newNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
         return network;
     }
 
     @Override
-    public NetworkV2Request existingNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request existingNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(networkProperties());
+
+        GcpNetworkV4Parameters params = new GcpNetworkV4Parameters();
+        params.setNetworkId(getVpcId());
+        network.setGcp(params);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingSubnet() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setParameters(subnetProperties());
+    public NetworkV4Request existingSubnet() {
+        NetworkV4Request network = new NetworkV4Request();
+        GcpNetworkV4Parameters params = new GcpNetworkV4Parameters();
+        params.setNetworkId(getVpcId());
+        params.setSubnetId(getSubnetId());
+        params.setNoFirewallRules(getNoFirewallRules());
+        params.setNoPublicIp(getNoPublicIp());
+        network.setGcp(params);
         return network;
     }
 
     @Override
-    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
         var ambari = ambariRequestWithBlueprintName(blueprintName);
-        var stackDetails = new AmbariStackDetailsJson();
+        var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
-        ambari.setAmbariStackDetails(stackDetails);
+        ambari.setStackRepository(stackDetails);
         return ambari;
     }
 
@@ -226,38 +251,62 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .withLdapConfigName(resourceHelper.getLdapConfigName());
     }
 
-    public Map<String, Object> gcpCredentialDetails() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetails() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsJson() {
-        return Map.of("selector", "credential-json", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "credentialJson",
-                getTestParameter().get("integrationtest.gcpcredential.jsonFile").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsJson() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        JsonParameters jsonParameters = new JsonParameters();
+        jsonParameters.setCredentialJson(getTestParameter().get("integrationtest.gcpcredential.jsonFile").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setJson(jsonParameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsNewServiceAccount() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.newServiceAccountId"), "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.newP12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsNewServiceAccount() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.newServiceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.newP12File")
+                .substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsEmptyP12File() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "serviceAccountPrivateKey", "");
+    public GcpCredentialV4Parameters gcpCredentialDetailsEmptyP12File() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey("");
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsEmptyProjectId() {
-        return Map.of("selector", "credential-p12", "projectId", "", "serviceAccountId",
-                getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsEmptyProjectId() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId("");
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsEmptyServiceAccount() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", "", "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsEmptyServiceAccount() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId("");
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 }

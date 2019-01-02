@@ -4,10 +4,8 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -16,10 +14,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -37,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
 public class EnvironmentClusterTest extends AbstractIntegrationTest {
@@ -57,15 +58,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateWlClusterDelete(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+        testContext.given(EnvironmentSettingsV4Entity.class)
+                .given(StackEntity.class)
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .when(StackV3Action::deleteV2, withoutLogError())
-                .await(AbstractIntegrationTest.STACK_DELETED)
+                .await(Status.DELETE_COMPLETED)
 
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
@@ -83,11 +84,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testWlClusterNotAttachResourceDetachDeleteOk(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+        testContext.given(EnvironmentSettingsV4Entity.class)
+                .given(StackEntity.class)
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
 
                 .given(EnvironmentEntity.class)
                 .when(Environment::putDetachResources)
@@ -103,13 +104,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateWlClusterDeleteFails(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+        testContext.given(EnvironmentSettingsV4Entity.class)
+                .given(StackEntity.class)
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
 
                 .deleteGiven(ProxyConfigEntity.class, ProxyConfig::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(LdapConfigEntity.class, LdapConfig::delete, key(FORBIDDEN_KEY))
@@ -122,13 +123,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateWlClusterDetachFails(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+        testContext.given(EnvironmentSettingsV4Entity.class)
+                .given(StackEntity.class)
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .given(EnvironmentEntity.class)
                 .withRdsConfigs(getRdsAsList(testContext))
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -142,18 +143,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testSameEnvironmentWithDifferentClusters(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
-
+                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .given(StackEntity.class)
                 .withName("int-same-env")
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .validate();
     }
 
@@ -168,19 +166,17 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
+                .given(StackEntity.class).given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .given(StackEntity.class)
                 .withName("it-same-env-rds")
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .validate();
     }
 
@@ -200,13 +196,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
+                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment("int-env-reuse")
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .validate();
     }
 
@@ -214,9 +210,9 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testClusterWithRdsWithoutEnvironment(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         testContext.given(EnvironmentEntity.class)
+                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment("not-existing-env")
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV2(), key(FORBIDDEN_KEY))
@@ -226,14 +222,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "testContext")
     public void testWlClusterChangeCred(TestContext testContext) {
-        Map<String, Object> parameters = new HashMap<>();
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
+                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .withEnvironment(EnvironmentSettingsV4Entity.class)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
 
                 .given(CredentialEntity.class)
                 .withName("int-change-cred-cl")
@@ -241,7 +236,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)
-                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred-cl", parameters))
+                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred-cl"))
                 .when(Environment::changeCredential)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .validate();
@@ -301,17 +296,17 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return cluster;
     }
 
-    private CredentialRequest createCredentialRequest(String cloudPlatform, String description, String name, Map<String, Object> parameters) {
-        CredentialRequest credentialRequest = new CredentialRequest();
+    private CredentialV4Request createCredentialRequest(String cloudPlatform, String description, String name) {
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setCloudPlatform(cloudPlatform);
         credentialRequest.setDescription(description);
         credentialRequest.setName(name);
-        credentialRequest.setParameters(parameters);
+        credentialRequest.setMock(new MockCredentialV4Parameters());
         return credentialRequest;
     }
 
     private static StackEntity checkCredentialInStack(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
-        String credentialName = stack.getResponse().getCredential().getName();
+        String credentialName = stack.getResponse().getEnvironment().getCredential().getName();
         if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
             throw new TestFailException("Credential is not attached to cluster");
         }
@@ -319,7 +314,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoRds(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<RDSConfigResponse> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
+        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
         if (!rdsConfigResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached rds");
         }
@@ -327,16 +322,16 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoLdap(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
-        if (!ldapConfigResponseSet.isEmpty()) {
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
+        if (!ldapV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached ldap");
         }
         return environment;
     }
 
     private static EnvironmentEntity checkEnvHasNoProxy(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
-        if (!proxyConfigResponseSet.isEmpty()) {
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
+        if (!proxyV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached proxy");
         }
         return environment;

@@ -11,7 +11,7 @@ public class StackRefreshAction implements ActionV2<StackEntity> {
     @Override
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
         entity.setResponse(
-                client.getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
+                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
         );
         return entity;
     }

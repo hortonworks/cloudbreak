@@ -4,16 +4,16 @@ import java.util.function.Function;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeRequest, Response, StackImageChangeEntity> {
+public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeV4Request, Response, StackImageChangeEntity> {
     public static final String IMAGE_CHANGE = "IMAGE_CHANGE";
 
     protected StackImageChangeEntity(String newId) {
         super(newId);
-        setRequest(new StackImageChangeRequest());
+        setRequest(new StackImageChangeV4Request());
     }
 
     protected StackImageChangeEntity() {
@@ -36,9 +36,8 @@ public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageC
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
-        Log.log(" changeImage " + stack.getRequest().getGeneral().getName());
-        stackImageChange.setResponse(client.getCloudbreakClient().stackV2Endpoint()
-                .changeImage(stack.getRequest().getGeneral().getName(), stackImageChange.getRequest()));
+        Log.log(" changeImage " + stack.getRequest().getName());
+        client.getCloudbreakClient().stackV4Endpoint().changeImage(client.getWorkspaceId(), stack.getRequest().getName(), stackImageChange.getRequest());
     }
 
     public static StackImageChangeEntity request() {

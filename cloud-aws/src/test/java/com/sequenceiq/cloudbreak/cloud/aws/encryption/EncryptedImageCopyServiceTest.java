@@ -32,7 +32,7 @@ import com.amazonaws.services.ec2.model.CopyImageResult;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.EbsBlockDevice;
 import com.amazonaws.services.ec2.model.Image;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AMICopyStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;

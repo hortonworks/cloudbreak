@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -137,28 +136,27 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.waitForAutoScalingEvent(autoscaleClient, clusterId, currentTime);
     }
 
-    static void checkScaling(IntegrationTestContext itContext, CloudbreakClient cloudbreakClient, int scalingAdjustment, String stackId,
+    static void checkScaling(IntegrationTestContext itContext, CloudbreakClient cloudbreakClient, Long workspaceId, int scalingAdjustment, String stackName,
             int expectedNodeCountStack, int expectedNodeCountCluster) {
 
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
 
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class).stackV1Endpoint();
+        var stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class).stackV4Endpoint();
 
         if (scalingAdjustment < 0) {
-            CloudbreakUtil.waitAndCheckClusterStatus(cloudbreakClient, stackId, "AVAILABLE");
-            CloudbreakUtil.waitAndCheckStackStatus(cloudbreakClient, stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckClusterStatus(cloudbreakClient, workspaceId, stackName, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckStackStatus(cloudbreakClient, workspaceId, stackName, "AVAILABLE");
 
         } else {
-            CloudbreakUtil.waitAndCheckStackStatus(cloudbreakClient, stackId, "AVAILABLE");
-            CloudbreakUtil.waitAndCheckClusterStatus(cloudbreakClient, stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckStackStatus(cloudbreakClient, workspaceId, stackName, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckClusterStatus(cloudbreakClient, workspaceId, stackName, "AVAILABLE");
         }
 
-        ScalingUtil.checkStackScaled(stackV1Endpoint, stackId, expectedNodeCountStack);
-        ScalingUtil.checkClusterScaled(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
-        ScalingUtil.putInstanceCountToContext(itContext, stackId);
+        ScalingUtil.checkClusterScaled(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
+        ScalingUtil.putInstanceCountToContext(itContext, workspaceId, stackName);
     }
 
     static void deletePrometheusAlert(AutoscaleClient autoscaleClient, Long clusterId, Long alertId) {

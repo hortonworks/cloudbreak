@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,12 +38,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
@@ -52,10 +55,12 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -135,13 +140,19 @@ public class ImageCatalogServiceTest {
     private StackImageUpdateService stackImageUpdateService;
 
     @Mock
+    private StackImageFilterService stackImageFilterService;
+
+    @Mock
     private ComponentConfigProvider componentConfigProvider;
 
     @Mock
     private WorkspaceService workspaceService;
 
     @Mock
-    private CloudbreakUser cloudbreakUser;
+    private UserService userService;
+
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private User user;
@@ -151,6 +162,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
+        when(userService.getOrCreate(any())).thenReturn(user);
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -167,7 +179,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -179,7 +191,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -191,7 +203,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -203,7 +215,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, cloudbreakUser, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -214,7 +226,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
         Set<String> operatingSystems = new HashSet<>(Arrays.asList("redhat7", "redhat6", "amazonlinux2"));
-        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems("aws", operatingSystems, cloudbreakUser, user);
+        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems("aws", operatingSystems, user);
 
         Set<Image> allImage = Stream.of(images.getImages().getHdpImages(), images.getImages().getHdpImages(), images.getImages().getBaseImages())
                 .flatMap(Collection::stream)
@@ -412,7 +424,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(imageCatalog);
         setupUserProfileService();
 
-        underTest.delete(ORG_ID, name, cloudbreakUser, user);
+        underTest.delete(ORG_ID, name);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
@@ -427,7 +439,7 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("cloudbreak-default cannot be deleted because it is an environment default image catalog.");
         thrown.expect(BadRequestException.class);
 
-        underTest.delete(ORG_ID, name, cloudbreakUser, user);
+        underTest.delete(ORG_ID, name);
     }
 
     @Test
@@ -449,6 +461,87 @@ public class ImageCatalogServiceTest {
 
         assertEquals(actual.getName(), name);
         assertNull(actual.getId());
+    }
+
+    @Test
+    public void testGetImagesFromDefaultWithEmptyInput() throws CloudbreakImageCatalogException {
+        thrown.expect(BadRequestException.class);
+
+        underTest.getImagesFromDefault(ORG_ID, null, null, Collections.emptySet());
+
+        thrown.expectMessage("Either platform or stackName should be filled in request");
+    }
+
+    @Test
+    public void testGetImagesFromDefaultGivenBothInput() throws CloudbreakImageCatalogException {
+        thrown.expect(BadRequestException.class);
+
+        underTest.getImagesFromDefault(ORG_ID, "stack", "AWS", Collections.emptySet());
+
+        thrown.expectMessage("Platform or stackName cannot be filled in the same request");
+    }
+
+    @Test
+    public void testGetImagesFromDefaultWithStackName() throws CloudbreakImageCatalogException {
+        when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
+                Lists.newArrayList(), Sets.newHashSet()));
+
+        underTest.getImagesFromDefault(ORG_ID, "stack", null, Collections.emptySet());
+
+        verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
+        verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString());
+    }
+
+    @Test
+    public void testGetImagesFromDefaultWithPlatform() throws CloudbreakImageCatalogException, IOException {
+        setupUserProfileService();
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+
+        underTest.getImagesFromDefault(ORG_ID, null, "AWS", Collections.emptySet());
+
+        verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
+        verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
+    }
+
+    @Test
+    public void testGetImagesWithEmptyInput() throws CloudbreakImageCatalogException {
+        thrown.expect(BadRequestException.class);
+
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", null, null);
+
+        thrown.expectMessage("Either platform or stackName should be filled in request");
+    }
+
+    @Test
+    public void testGetImagesGivenBothInput() throws CloudbreakImageCatalogException {
+        thrown.expect(BadRequestException.class);
+
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", "AWS");
+
+        thrown.expectMessage("Platform or stackName cannot be filled in the same request");
+    }
+
+    @Test
+    public void testGetImagesWithStackName() throws CloudbreakImageCatalogException {
+        when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
+                Lists.newArrayList(), Sets.newHashSet()));
+
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", null);
+
+        verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString(), anyString());
+        verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
+    }
+
+    @Test
+    public void testGetImagesWithPlatform() throws CloudbreakImageCatalogException, IOException {
+        setupUserProfileService();
+        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new ImageCatalog());
+
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
+
+        verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
+        verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {

@@ -12,6 +12,7 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -50,7 +52,7 @@ public class TestContext implements ApplicationContextAware {
 
     private Map<String, CloudbreakClient> clients = new HashMap<>();
 
-    private Map<String, String> statuses = new HashMap<>();
+    private Optional<Pair<Status, String>> status = Optional.empty();
 
     private Map<String, Exception> exceptionMap = new HashMap<>();
 
@@ -179,8 +181,8 @@ public class TestContext implements ApplicationContextAware {
         if (clients.get(acting.getToken()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             clients.put(acting.getToken(), cloudbreakClient);
-            Optional<WorkspaceResponse> workspace = cloudbreakClient.getCloudbreakClient()
-                    .workspaceV3Endpoint().getAll().stream()
+            Optional<WorkspaceV4Response> workspace = cloudbreakClient.getCloudbreakClient()
+                    .workspaceV4Endpoint().list().getResponses().stream()
                     .filter(ws -> WorkspaceStatus.ACTIVE == ws.getStatus())
                     .findFirst();
             workspace.ifPresent(workspaceResponse -> cloudbreakClient.setWorkspaceId(workspaceResponse.getId()));
@@ -208,12 +210,12 @@ public class TestContext implements ApplicationContextAware {
         return (O) resources.computeIfAbsent(key, value -> init(clss));
     }
 
-    public void addStatuses(Map<String, String> statuses) {
-        this.statuses.putAll(statuses);
+    public void addStatuses(Status status, String statusReason) {
+        this.status = Optional.of(Pair.of(status, statusReason));
     }
 
-    public Map<String, String> getStatuses() {
-        return statuses;
+    public Optional<Pair<Status, String>> getStatus() {
+        return status;
     }
 
     public Map<String, Exception> getErrors() {
@@ -348,43 +350,43 @@ public class TestContext implements ApplicationContextAware {
         return getCloudbreakClient(getDefaultUser());
     }
 
-    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, String> desiredStatuses) {
-        return await(entityClass, desiredStatuses, emptyRunningParameter());
+    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Status desiredStatus) {
+        return await(entityClass, desiredStatus, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, String> desiredStatuses, RunningParameter runningParameter) {
-        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter);
+    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Status desiredStatus, RunningParameter runningParameter) {
+        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatus, runningParameter);
     }
 
-    public <T extends CloudbreakEntity> T await(T entity, Map<String, String> desiredStatuses) {
-        return await(entity, desiredStatuses, emptyRunningParameter());
+    public <T extends CloudbreakEntity> T await(T entity, Status desiredStatus) {
+        return await(entity, desiredStatus, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T await(T entity, Map<String, String> desiredStatuses, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T await(T entity, Status desiredStatus, RunningParameter runningParameter) {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatus);
             return entity;
         }
         String key = getKey(entity.getClass(), runningParameter);
         CloudbreakEntity awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
+        LOGGER.info("await {} for {}", key, desiredStatus);
         try {
             if (awaitEntity == null) {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
             CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter));
-            statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses));
-            if (!desiredStatuses.values().contains("DELETE_COMPLETED")) {
+            status = Optional.of(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatus));
+            if (desiredStatus != Status.DELETE_COMPLETED) {
                 awaitEntity.refresh(this, cloudbreakClient);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, e.getMessage(), entity.getName());
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatus, e.getMessage(), entity.getName());
             }
-            exceptionMap.put("await " + entity + " for desired statuses" + desiredStatuses, e);
+            exceptionMap.put("await " + entity + " for desired statuses" + desiredStatus, e);
         }
         return entity;
     }
@@ -441,7 +443,6 @@ public class TestContext implements ApplicationContextAware {
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
         if (!exceptionsDuringTest.isEmpty()) {
-            LOGGER.error("Status reason: {}", statuses.get("statusReason"));
             StringBuilder br = new StringBuilder("All Exceptions during test are logged before this message").append(System.lineSeparator());
             exceptionsDuringTest.forEach((msg, ex) -> {
                 LOGGER.error(msg, ex);

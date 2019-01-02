@@ -3,8 +3,10 @@ package com.sequenceiq.it.cloudbreak.newway;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
+import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RdsConfigAction {
@@ -18,8 +20,8 @@ public class RdsConfigAction {
                 CloudbreakClient.class);
         rdsconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .postPrivate(rdsconfigEntity.getRequest()));
+                        .databaseV4Endpoint()
+                        .create(client.getWorkspaceId(), rdsconfigEntity.getRequest()));
         logJSON("Rds config post request: ", rdsconfigEntity.getRequest());
     }
 
@@ -30,8 +32,8 @@ public class RdsConfigAction {
                 CloudbreakClient.class);
         rdsconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .getPrivate(rdsconfigEntity.getRequest().getName()));
+                        .databaseV4Endpoint()
+                        .get(client.getWorkspaceId(), rdsconfigEntity.getRequest().getName()));
         logJSON(" get rds config response: ", rdsconfigEntity.getResponse());
     }
 
@@ -41,9 +43,10 @@ public class RdsConfigAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         rdsconfigEntity.setResponses(
-                client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .getPrivates());
+                (Set<DatabaseV4Response>) client.getCloudbreakClient()
+                        .databaseV4Endpoint()
+                        .list(client.getWorkspaceId(), null, Boolean.FALSE)
+                        .getResponses());
         logJSON(" get all rds config response: ", rdsconfigEntity.getResponse());
     }
 
@@ -53,24 +56,24 @@ public class RdsConfigAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         client.getCloudbreakClient()
-                .rdsConfigEndpoint()
-                .deletePrivate(rdsconfigEntity.getName());
+                .databaseV4Endpoint()
+                .delete(client.getWorkspaceId(), rdsconfigEntity.getName());
     }
 
     static void testConnect(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
 
         RdsConfigEntity rdsConfigEntity = (RdsConfigEntity) entity;
 
-        RDSTestRequest rdsTestRequest = new RDSTestRequest();
-        rdsTestRequest.setRdsConfig(rdsConfigEntity.getRequest());
+        DatabaseTestV4Request databaseTestV4Request = new DatabaseTestV4Request();
+        databaseTestV4Request.setDatabase(rdsConfigEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         rdsConfigEntity.setResponseTestResult(
                 client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .testRdsConnection(rdsTestRequest));
+                        .databaseV4Endpoint()
+                        .test(client.getWorkspaceId(), databaseTestV4Request));
         logJSON("Rds test post request: ", rdsConfigEntity.getRequest());
     }
 

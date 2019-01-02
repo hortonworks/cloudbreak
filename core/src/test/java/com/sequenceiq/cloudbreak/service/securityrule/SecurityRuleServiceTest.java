@@ -12,8 +12,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityRuleServiceTest {
@@ -31,30 +31,50 @@ public class SecurityRuleServiceTest {
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsEnabled() {
-        SecurityRulesResponse defaultSecurityRules = underTest.getDefaultSecurityRules(true);
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(true);
 
         Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
     }
 
     @Test
-    public void getDefaultSecurityRulesWhenKnoxIsDisabled() {
-        SecurityRulesResponse defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+    public void getDefaultSecurityRulesWhenKnoxIsDisabledAndNoHttpsPort() {
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+
         Assert.assertEquals(2, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "443"));
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
+    }
+
+    @Test
+    public void getDefaultSecurityRulesWhenKnoxIsDisabledAndHttpsPortIsSet() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "443");
+
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+
+        Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
+        Assert.assertEquals(1, defaultSecurityRules.getCore().size());
+
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
     }
 
-    private boolean containsServicePort(List<SecurityRuleResponse> securityRulesResponses, String servicePort) {
+    private boolean containsServicePort(List<SecurityRuleV4Response> securityRulesResponses, String servicePort) {
         return securityRulesResponses.stream().anyMatch(securityRulesResponse -> securityRulesResponse.getPorts().contains(servicePort));
     }
+
 }

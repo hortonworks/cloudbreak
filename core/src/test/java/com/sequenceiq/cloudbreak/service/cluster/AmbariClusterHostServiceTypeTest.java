@@ -28,9 +28,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -152,7 +152,7 @@ public class AmbariClusterHostServiceTypeTest {
     @Test
     public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() {
         // GIVEN
-        HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request hga1 = new HostGroupAdjustmentV4Request();
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(0);
 
@@ -167,7 +167,7 @@ public class AmbariClusterHostServiceTypeTest {
     @Test
     public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() {
         // GIVEN
-        HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request hga1 = new HostGroupAdjustmentV4Request();
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(-2);
 
@@ -182,7 +182,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testUpdateHostsForDownscaleFilterAllHosts() {
-        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request json = new HostGroupAdjustmentV4Request();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
@@ -199,7 +199,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testUpdateHostsForDownscaleCannotGoBelowReplication() {
-        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request json = new HostGroupAdjustmentV4Request();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
@@ -220,7 +220,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testUpdateHostsForDownscaleFilterOneHost() {
-        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request json = new HostGroupAdjustmentV4Request();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
@@ -241,7 +241,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testUpdateHostsForDownscaleSelectNodesWithLessData() {
-        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request json = new HostGroupAdjustmentV4Request();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
@@ -262,7 +262,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() {
-        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request json = new HostGroupAdjustmentV4Request();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-2);
         HostMetadata metadata1 = mock(HostMetadata.class);
@@ -284,7 +284,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() {
-        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request json = new HostGroupAdjustmentV4Request();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);

@@ -1,5 +1,15 @@
 package com.sequenceiq.it.cloudbreak;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -7,16 +17,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.Map;
 
 public class CredentialProviderSpecTests extends CloudbreakTest {
 
@@ -103,7 +103,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_OSV3_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
-                .withParameters(openstackCloudProvider.openstackCredentialDetailsField()), "OpenStack V3 credential request.");
+                .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsField()), "OpenStack V3 credential request.");
         when(Credential.post(), "OpenStack V3 credential request has been posted.");
         then(Credential.assertThis(
                 (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_OSV3_CRED_NAME)),
@@ -118,7 +118,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_OSUSER_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
-                .withParameters(openstackCloudProvider.openstackCredentialDetailsInvalidUser()), "OpenStack user is not valid credential request.");
+                .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsInvalidUser()), "OpenStack user is not valid credential request.");
         when(Credential.post(), "OpenStack user is not valid credential request has been posted.");
     }
 
@@ -129,7 +129,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_OSENDPOINT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
-                .withParameters(openstackCloudProvider.openstackCredentialDetailsInvalidEndpoint()), "OpenStack endpoint is not valid credential request.");
+                .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsInvalidEndpoint()),
+                "OpenStack endpoint is not valid credential request.");
         when(Credential.post(), "OpenStack endpoint is not valid credential request has been posted.");
     }
 
@@ -142,19 +143,12 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_OSKILO_CRED_NAME), VALID_OSKILO_CRED_NAME + " credential is created.");
         given(Credential.request()
                 .withName(VALID_OSKILO_CRED_NAME)
-                .withParameters(provider.openstackCredentialDetailsEngineering())
+                .withOpenstackParameters(provider.openstackCredentialDetailsEngineering())
                 .withCloudPlatform(provider.getPlatform()), VALID_OSKILO_CRED_NAME + " credential Engineering OpenStack modification is requested.");
         when(Credential.put(), VALID_OSKILO_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("endpoint".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), provider.engOpenStackEndpoint(),
-                                    "Engineering OpenStack URL should be present as Endpoint in response!");
-                        }
-                    }
+                    Assert.assertEquals(credential.getResponse().getOpenstack().getEndpoint(), provider.engOpenStackEndpoint());
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }
@@ -166,7 +160,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_AWSKEY_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
-                .withParameters(awsCloudProvider.awsCredentialDetailsKey()), "AWS key based credential request.");
+                .withAwsParameters(awsCloudProvider.awsCredentialDetailsKey()), "AWS key based credential request.");
         when(Credential.post(), "AWS key based credential request has been posted.");
         then(Credential.assertThis(
                 (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_AWSKEY_CRED_NAME)),
@@ -181,7 +175,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_AWSACCESS_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
-                .withParameters(awsCloudProvider.awsCredentialDetailsInvalidAccessKey()), "AWS credential with not valid Access Key request.");
+                .withAwsParameters(awsCloudProvider.awsCredentialDetailsInvalidAccessKey()), "AWS credential with not valid Access Key request.");
         when(Credential.post(), "AWS credential with not valid Access Key request has been posted.");
     }
 
@@ -192,7 +186,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_AWSSECRET_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
-                .withParameters(awsCloudProvider.awsCredentialDetailsInvalidSecretKey()), "AWS credential with not valid Secret Key request.");
+                .withAwsParameters(awsCloudProvider.awsCredentialDetailsInvalidSecretKey()), "AWS credential with not valid Secret Key request.");
         when(Credential.post(), "AWS credential with not valid Secret Key request has been posted.");
     }
 
@@ -203,7 +197,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_AWSROLE_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
-                .withParameters(awsCloudProvider.awsCredentialDetailsInvalidArn()), "AWS credential with not valid Role ARN request.");
+                .withAwsParameters(awsCloudProvider.awsCredentialDetailsInvalidArn()), "AWS credential with not valid Role ARN request.");
         when(Credential.post(), "AWS credential with not valid Role ARN request has been posted.");
     }
 
@@ -216,19 +210,13 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_AWSROLE_CRED_NAME), VALID_AWSROLE_CRED_NAME + " credential is created.");
         given(Credential.request()
                 .withName(VALID_AWSROLE_CRED_NAME)
-                .withParameters(provider.awsCredentialDetailsKey())
+                .withAwsParameters(provider.awsCredentialDetailsKey())
                 .withCloudPlatform(provider.getPlatform()), VALID_AWSROLE_CRED_NAME + " credential Key Based modification is requested.");
         when(Credential.put(), VALID_AWSROLE_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("selector".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), "key-based",
-                                    "Key Based should be present as Selector in response!");
-                        }
-                    }
+                    Assert.assertNotNull(credential.getResponse().getAws().getKeyBased(), "The credential should be key-based!");
+                    Assert.assertNull(credential.getResponse().getAws().getRoleBased());
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }
@@ -240,22 +228,17 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(provider.aValidCredential()
                 .withName(VALID_AWSKEY_CRED_NAME)
-                .withParameters(provider.awsCredentialDetailsKey()), VALID_AWSKEY_CRED_NAME + " credential is created.");
+                .withAwsParameters(provider.awsCredentialDetailsKey()), VALID_AWSKEY_CRED_NAME + " credential is created.");
         given(Credential.request()
                 .withName(VALID_AWSKEY_CRED_NAME)
-                .withParameters(provider.awsCredentialDetailsArn())
+                .withAwsParameters(provider.awsCredentialDetailsArn())
                 .withCloudPlatform(provider.getPlatform()), VALID_AWSKEY_CRED_NAME + " credential Role Based modification is requested.");
         when(Credential.put(), VALID_AWSKEY_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("selector".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), "role-based",
-                                    "[role-based] should be present as Selector in response!");
-                        }
-                    }
+                    Assert.assertNotNull(credential.getResponse().getAws().getRoleBased(),
+                            "The credential should be role-based!");
+                    Assert.assertNull(credential.getResponse().getAws().getKeyBased());
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }
@@ -267,7 +250,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_ARMSECRET_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
-                .withParameters(azureCloudProvider.azureCredentialDetailsInvalidSecretKey()), "Azure credential with not valid Secret Key request.");
+                .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidSecretKey()), "Azure credential with not valid Secret Key request.");
         when(Credential.post(), "Azure credential with not valid Secret Key request has been posted.");
     }
 
@@ -278,7 +261,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_ARMACCESS_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
-                .withParameters(azureCloudProvider.azureCredentialDetailsInvalidAccessKey()), "Azure credential with not valid Access Key request.");
+                .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidAccessKey()), "Azure credential with not valid Access Key request.");
         when(Credential.post(), "Azure credential with not valid Access Key request has been posted.");
     }
 
@@ -289,7 +272,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_ARMTENANT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
-                .withParameters(azureCloudProvider.azureCredentialDetailsInvalidTenantID()), "Azure credential with not valid Tenant ID request.");
+                .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidTenantID()), "Azure credential with not valid Tenant ID request.");
         when(Credential.post(), "Azure credential with not valid Tenant ID request has been posted.");
     }
 
@@ -300,7 +283,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_ARMSUBSCRIPTION_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
-                .withParameters(azureCloudProvider.azureCredentialDetailsInvalidSubscriptionID()), "Azure credential with not valid Subscription ID request.");
+                .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidSubscriptionID()),
+                "Azure credential with not valid Subscription ID request.");
         when(Credential.post(), "Azure credential with not valid Subscription ID request has been posted.");
     }
 
@@ -313,19 +297,13 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_ARMINTTESTAPP_CRED_NAME), VALID_ARMINTTESTAPP_CRED_NAME + " credential is created.");
         given(Credential.request()
                 .withName(VALID_ARMINTTESTAPP_CRED_NAME)
-                .withParameters(provider.azureCredentialDetailsNewApplication())
+                .withAzureParameters(provider.azureCredentialDetailsNewApplication())
                 .withCloudPlatform(provider.getPlatform()), VALID_ARMINTTESTAPP_CRED_NAME + " credential Application modification is requested.");
         when(Credential.put(), VALID_ARMINTTESTAPP_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("accessKey".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), provider.getNewApplicationID(),
-                                    "New Appliction ID should be present as accessKey in response!");
-                        }
-                    }
+                    Assert.assertEquals(credential.getResponse().getAzure().getAppBased().getAccessKey(), provider.getNewApplicationID(),
+                            "New Appliction ID should be present as accessKey in response!");
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }
@@ -337,7 +315,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_GCPJSON_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
-                .withParameters(gcpCloudProvider.gcpCredentialDetailsJson()), "GCP Json credential request.");
+                .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsJson()), "GCP Json credential request.");
         when(Credential.post(), "GCP Json credential request has been posted.");
         then(Credential.assertThis(
                 (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_GCPJSON_CRED_NAME)),
@@ -352,7 +330,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_GCP12_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
-                .withParameters(gcpCloudProvider.gcpCredentialDetailsEmptyP12File()), "GCP credential with no P12 file request.");
+                .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsEmptyP12File()), "GCP credential with no P12 file request.");
         when(Credential.post(), "GCP credential with no P12 file request has been posted.");
     }
 
@@ -363,7 +341,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_GCPROJECT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
-                .withParameters(gcpCloudProvider.gcpCredentialDetailsEmptyProjectId()), "GCP credential with no Project ID request.");
+                .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsEmptyProjectId()), "GCP credential with no Project ID request.");
         when(Credential.post(), "GCP credential with no Project ID request has been posted.");
     }
 
@@ -376,7 +354,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_GCPSERVICEACCOUNT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
-                .withParameters(gcpCloudProvider.gcpCredentialDetailsEmptyServiceAccount()), "GCP credential with no Service Account request.");
+                .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsEmptyServiceAccount()), "GCP credential with no Service Account request.");
         when(Credential.post(), "GCP credential with no Service Account request has been posted.");
     }
 
@@ -389,19 +367,13 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_GCPSA_CRED_NAME), VALID_GCPSA_CRED_NAME + " credential is created.");
         given(Credential.request()
                 .withName(VALID_GCPSA_CRED_NAME)
-                .withParameters(provider.gcpCredentialDetailsNewServiceAccount())
+                .withGcpParameters(provider.gcpCredentialDetailsNewServiceAccount())
                 .withCloudPlatform(provider.getPlatform()), VALID_GCPSA_CRED_NAME + " credential Service Account modification is requested.");
         when(Credential.put(), VALID_GCPSA_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("serviceAccountId".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), provider.newServiceAccountID(),
-                                    "New Service Account ID should be present as serviceAccountId in response!");
-                        }
-                    }
+                    Assert.assertEquals(credential.getResponse().getGcp().getP12().getServiceAccountId(),
+                            provider.newServiceAccountID(), "New Service Account ID should be present as serviceAccountId in response!");
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }
@@ -415,19 +387,12 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(VALID_GCPKEY_CRED_NAME), VALID_GCPKEY_CRED_NAME + " credential is created.");
         given(Credential.request()
                 .withName(VALID_GCPKEY_CRED_NAME)
-                .withParameters(provider.gcpCredentialDetailsJson())
+                .withGcpParameters(provider.gcpCredentialDetailsJson())
                 .withCloudPlatform(provider.getPlatform()), VALID_GCPKEY_CRED_NAME + " credential Key Type modification is requested.");
         when(Credential.put(), VALID_GCPKEY_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("selector".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), "credential-json",
-                                    "[credential-json] should be present as Selector in response!");
-                        }
-                    }
+                    Assert.assertNotNull(credential.getResponse().getGcp().getJson(), "The credential should be JSON type!");
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }

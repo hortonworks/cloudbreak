@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.CompactViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public abstract class CompactViewToCompactViewResponseConverter<S extends CompactView, T extends CompactViewResponse>
+public abstract class CompactViewToCompactViewResponseConverter<S extends CompactView, T extends CompactViewV4Response>
         extends AbstractConversionServiceAwareConverter<S, T> {
     @Override
     public T convert(S source) {

@@ -16,9 +16,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 
 public class RecoveryUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryUtil.class);
@@ -26,12 +26,12 @@ public class RecoveryUtil {
     private RecoveryUtil() {
     }
 
-    public static String getInstanceId(StackResponse stackResponse, String hostGroup) {
-        List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
+    public static String getInstanceId(StackV4Response stackResponse, String hostGroup) {
+        List<InstanceGroupV4Response> instanceGroups = stackResponse.getInstanceGroups();
 
-        for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (hostGroup.equals(instanceGroup.getGroup())) {
-                Set<InstanceMetaDataJson> instanceMetaData = instanceGroup.getMetadata();
+        for (InstanceGroupV4Response instanceGroup : instanceGroups) {
+            if (hostGroup.equals(instanceGroup.getName())) {
+                Set<InstanceMetaDataV4Response> instanceMetaData = instanceGroup.getMetadata();
                 return instanceMetaData.iterator().next().getInstanceId();
             }
         }

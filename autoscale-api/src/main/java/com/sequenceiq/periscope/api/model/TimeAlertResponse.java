@@ -6,7 +6,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("TimeAlertResponse")
+@ApiModel
 public class TimeAlertResponse extends AbstractAlertJson {
 
     @ApiModelProperty(BaseAlertJsonProperties.ID)

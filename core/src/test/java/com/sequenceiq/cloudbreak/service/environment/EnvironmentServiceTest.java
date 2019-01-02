@@ -35,20 +35,20 @@ import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentEditRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -56,15 +56,15 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentRegionValidator;
-import com.sequenceiq.cloudbreak.converter.KerberosConfigToKerberosResponseConverter;
-import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
-import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConverter;
-import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
-import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
-import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToLocationRequestConverter;
-import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToLocationResponseConverter;
-import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
-import com.sequenceiq.cloudbreak.converter.stack.StackApiViewToStackViewResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToDetailedEnvironmentV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.RegionConverter;
+import com.sequenceiq.cloudbreak.converter.v4.kerberos.KerberosConfigToKerberosV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -170,28 +170,28 @@ public class EnvironmentServiceTest {
     private final RegionConverter regionConverter = new RegionConverter();
 
     @InjectMocks
-    private EnvironmentToLocationResponseConverter environmentToLocationResponseConverter;
+    private EnvironmentToLocationV4ResponseConverter environmentToLocationResponseConverter;
 
     @InjectMocks
-    private EnvironmentToLocationRequestConverter environmentToLocationRequestConverter;
+    private EnvironmentToLocationV4RequestConverter environmentToLocationRequestConverter;
 
     @InjectMocks
-    private EnvironmentToDetailedEnvironmentResponseConverter environmentConverter;
+    private EnvironmentToDetailedEnvironmentV4ResponseConverter environmentConverter;
 
     @InjectMocks
-    private LdapConfigToLdapConfigResponseConverter ldapConfigResponseConverter;
+    private LdapConfigToLdapV4ResponseConverter ldapConfigResponseConverter;
 
     @InjectMocks
-    private ProxyConfigToProxyConfigResponseConverter proxyConfigResponseConverter;
+    private ProxyConfigToProxyV4ResponseConverter proxyConfigResponseConverter;
 
     @InjectMocks
-    private RDSConfigToRDSConfigResponseConverter rdsConfigResponseConverter;
+    private RDSConfigToDatabaseV4ResponseConverter rdsConfigResponseConverter;
 
     @InjectMocks
-    private KerberosConfigToKerberosResponseConverter kerberosConfigResponseConverter;
+    private KerberosConfigToKerberosV4ResponseConverter kerberosConfigResponseConverter;
 
     @InjectMocks
-    private StackApiViewToStackViewResponseConverter stackApiViewToStackViewResponseConverter;
+    private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewResponseConverter;
 
     @Before
     public void setup() throws TransactionExecutionException {
@@ -206,7 +206,7 @@ public class EnvironmentServiceTest {
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", ""));
         when(userService.getOrCreate(any())).thenReturn(new User());
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class))).thenReturn(new DetailedEnvironmentResponse());
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class))).thenReturn(new DetailedEnvironmentV4Response());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
         assertNotNull(regionConverter);
@@ -216,45 +216,45 @@ public class EnvironmentServiceTest {
 
     @Test
     public void testCreateWithCredentialName() {
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setName(ENVIRONMENT_NAME);
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
 
-        environmentRequest.setCredentialName(CREDENTIAL_NAME);
-        CredentialRequest credentialRequest = new CredentialRequest();
+        environmentV4Request.setCredentialName(CREDENTIAL_NAME);
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("IgnoredCredRequestName");
-        environmentRequest.setCredential(credentialRequest);
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setLocationName("region1");
-        environmentRequest.setLocation(locationRequest);
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setLocationName("region1");
+        environmentV4Request.setLocation(locationV4Request);
 
-        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
-        DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
 
         assertNotNull(response);
     }
 
     @Test
     public void testCreateWithCredential() {
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setName(ENVIRONMENT_NAME);
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
 
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("CredRequestName");
-        environmentRequest.setCredential(credentialRequest);
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setLocationName("region1");
-        environmentRequest.setLocation(locationRequest);
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setLocationName("region1");
+        environmentV4Request.setLocation(locationV4Request);
 
-        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
-        DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
 
         assertNotNull(response);
     }
@@ -262,19 +262,19 @@ public class EnvironmentServiceTest {
     @Test
     public void testCreateWithRegions() {
         // GIVEN
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setName(ENVIRONMENT_NAME);
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
 
-        environmentRequest.setCredentialName(CREDENTIAL_NAME);
-        CredentialRequest credentialRequest = new CredentialRequest();
+        environmentV4Request.setCredentialName(CREDENTIAL_NAME);
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("IgnoredCredRequestName");
-        environmentRequest.setCredential(credentialRequest);
-        environmentRequest.setRegions(Set.of("region1", "region2"));
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setLocationName("region1");
-        environmentRequest.setLocation(locationRequest);
+        environmentV4Request.setCredential(credentialRequest);
+        environmentV4Request.setRegions(Set.of("region1", "region2"));
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setLocationName("region1");
+        environmentV4Request.setLocation(locationV4Request);
 
-        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         ArgumentCaptor<Environment> envCaptor = ArgumentCaptor.forClass(Environment.class);
         when(environmentRepository.save(envCaptor.capture())).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
@@ -282,7 +282,7 @@ public class EnvironmentServiceTest {
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         // WHEN
-        DetailedEnvironmentResponse response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
         // THEN
         assertNotNull(response);
         Set<com.sequenceiq.cloudbreak.domain.environment.Region> regions = envCaptor.getValue().getRegionSet();
@@ -346,24 +346,24 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         mockConverters();
 
-        EnvironmentDetachRequest detachRequest = new EnvironmentDetachRequest();
-        detachRequest.getLdapConfigs().add(ldapName1);
-        detachRequest.getLdapConfigs().add(notAttachedLdap);
-        detachRequest.getProxyConfigs().add(proxyName1);
-        detachRequest.getRdsConfigs().add(rdsName1);
-        detachRequest.getKerberosConfigs().add(kdcName1);
+        EnvironmentDetachV4Request detachRequest = new EnvironmentDetachV4Request();
+        detachRequest.getLdaps().add(ldapName1);
+        detachRequest.getLdaps().add(notAttachedLdap);
+        detachRequest.getProxies().add(proxyName1);
+        detachRequest.getDatabases().add(rdsName1);
+        detachRequest.getKerberoses().add(kdcName1);
 
-        DetailedEnvironmentResponse detachResponse = environmentService.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response detachResponse = environmentService.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
 
-        assertFalse(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(notAttachedLdap));
-        assertFalse(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName1));
-        assertFalse(detachResponse.getProxyConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName1));
-        assertFalse(detachResponse.getRdsConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName1));
-        assertFalse(detachResponse.getKerberosConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName1));
-        assertTrue(detachResponse.getLdapConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName2));
-        assertTrue(detachResponse.getProxyConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName2));
-        assertTrue(detachResponse.getRdsConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName2));
-        assertTrue(detachResponse.getKerberosConfigs().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName2));
+        assertFalse(detachResponse.getLdaps().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(notAttachedLdap));
+        assertFalse(detachResponse.getLdaps().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName1));
+        assertFalse(detachResponse.getProxies().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName1));
+        assertFalse(detachResponse.getDatabases().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName1));
+        assertFalse(detachResponse.getKerberoses().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName1));
+        assertTrue(detachResponse.getLdaps().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName2));
+        assertTrue(detachResponse.getProxies().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName2));
+        assertTrue(detachResponse.getDatabases().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName2));
+        assertTrue(detachResponse.getKerberoses().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName2));
     }
 
     @Test
@@ -391,15 +391,15 @@ public class EnvironmentServiceTest {
         when(stackApiViewService.canChangeCredential(any())).thenReturn(true);
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
-                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(StackApiView.class), eq(StackViewResponse.class)))
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
+                .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(StackApiView.class), eq(StackViewV4Response.class)))
                 .thenAnswer(invocation -> stackApiViewToStackViewResponseConverter.convert((StackApiView) invocation.getArgument(0)));
 
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(credentialName2);
 
-        DetailedEnvironmentResponse response = environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
+        DetailedEnvironmentV4Response response = environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
 
         verify(stackApiViewService, times(2)).save(stackApiViewCaptor.capture());
         assertEquals(ENVIRONMENT_NAME, response.getName());
@@ -429,7 +429,7 @@ public class EnvironmentServiceTest {
         when(stackApiViewService.canChangeCredential(stackApiView1)).thenReturn(true);
         when(stackApiViewService.canChangeCredential(stackApiView2)).thenReturn(false);
 
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(credentialName2);
 
         environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
@@ -454,7 +454,7 @@ public class EnvironmentServiceTest {
         when(environmentCredentialOperationService.validatePlatformAndGetCredential(any(), any(), anyLong()))
                 .thenThrow(new BadRequestException(""));
 
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName("credential2");
 
         environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
@@ -518,27 +518,27 @@ public class EnvironmentServiceTest {
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
         environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
-        EnvironmentDetachRequest request = new EnvironmentDetachRequest();
-        request.setLdapConfigs(Sets.newHashSet(ldapName1, ldapName2));
-        request.setProxyConfigs(Sets.newHashSet(proxyName1));
-        request.setRdsConfigs(Sets.newHashSet(rdsName1));
-        request.setKerberosConfigs(Sets.newHashSet(kdcName1));
+        EnvironmentDetachV4Request request = new EnvironmentDetachV4Request();
+        request.setLdaps(Sets.newHashSet(ldapName1, ldapName2));
+        request.setProxies(Sets.newHashSet(proxyName1));
+        request.setDatabases(Sets.newHashSet(rdsName1));
+        request.setKerberoses(Sets.newHashSet(kdcName1));
 
         when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         mockConverters();
 
-        DetailedEnvironmentResponse result = environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
+        DetailedEnvironmentV4Response result = environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
 
-        assertEquals(1, result.getLdapConfigs().size());
-        assertEquals(1, result.getProxyConfigs().size());
-        assertEquals(1, result.getRdsConfigs().size());
-        assertEquals(1, result.getKerberosConfigs().size());
-        assertEquals(ldapName3, result.getLdapConfigs().iterator().next().getName());
-        assertEquals(proxyName2, result.getProxyConfigs().iterator().next().getName());
-        assertEquals(rdsName2, result.getRdsConfigs().iterator().next().getName());
-        assertEquals(kdcName2, result.getKerberosConfigs().iterator().next().getName());
+        assertEquals(1, result.getLdaps().size());
+        assertEquals(1, result.getProxies().size());
+        assertEquals(1, result.getDatabases().size());
+        assertEquals(1, result.getKerberoses().size());
+        assertEquals(ldapName3, result.getLdaps().iterator().next().getName());
+        assertEquals(proxyName2, result.getProxies().iterator().next().getName());
+        assertEquals(rdsName2, result.getDatabases().iterator().next().getName());
+        assertEquals(kdcName2, result.getKerberoses().iterator().next().getName());
     }
 
     @Test
@@ -610,11 +610,11 @@ public class EnvironmentServiceTest {
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
         environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
-        EnvironmentDetachRequest request = new EnvironmentDetachRequest();
-        request.setLdapConfigs(Sets.newHashSet(ldapName1, ldapName2));
-        request.setProxyConfigs(Sets.newHashSet(proxyName1));
-        request.setRdsConfigs(Sets.newHashSet(rdsName1));
-        request.setKerberosConfigs(Sets.newHashSet(kdcName1));
+        EnvironmentDetachV4Request request = new EnvironmentDetachV4Request();
+        request.setLdaps(Sets.newHashSet(ldapName1, ldapName2));
+        request.setProxies(Sets.newHashSet(proxyName1));
+        request.setDatabases(Sets.newHashSet(rdsName1));
+        request.setKerberoses(Sets.newHashSet(kdcName1));
 
         when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
@@ -644,7 +644,7 @@ public class EnvironmentServiceTest {
         String newLocation = "eu-west-1";
         String newRegion1 = "eu-west-2";
         String newRegion2 = "eu-west-3";
-        EnvironmentEditRequest editRequest = EnvironmentUtils
+        EnvironmentEditV4Request editRequest = EnvironmentUtils
                 .getEnvironmentEditRequest(editedDescription, newLocation, Set.of(newLocation, newRegion1, newRegion2));
 
         Environment environment = EnvironmentUtils.getEnvironment("us-west-1", Set.of("us-west-1", "us-west-2", "us-west-3"));
@@ -662,15 +662,15 @@ public class EnvironmentServiceTest {
 
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
-                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(Environment.class), eq(LocationResponse.class)))
-                .thenAnswer((Answer<LocationResponse>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
+                .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(LocationV4Response.class)))
+                .thenAnswer((Answer<LocationV4Response>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
 
-        DetailedEnvironmentResponse result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+        DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
         assertEquals(editedDescription, result.getDescription());
-        assertEquals(newLocation, result.getLocation().getLocationName());
+        assertEquals(newLocation, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(newLocation));
         assertTrue(result.getRegions().getRegions().contains(newRegion1));
         assertTrue(result.getRegions().getRegions().contains(newRegion2));
@@ -682,8 +682,8 @@ public class EnvironmentServiceTest {
         String region2 = "us-west-2";
         String region3 = "us-west-3";
         String newLocation = region3;
-        EnvironmentEditRequest editRequest = new EnvironmentEditRequest();
-        LocationRequest locationRequest = new LocationRequest();
+        EnvironmentEditV4Request editRequest = new EnvironmentEditV4Request();
+        LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setLocationName(newLocation);
         editRequest.setLocation(locationRequest);
 
@@ -702,14 +702,14 @@ public class EnvironmentServiceTest {
 
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
-                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(Environment.class), eq(LocationResponse.class)))
-                .thenAnswer((Answer<LocationResponse>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
+                .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(LocationV4Response.class)))
+                .thenAnswer((Answer<LocationV4Response>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
 
-        DetailedEnvironmentResponse result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+        DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
-        assertEquals(newLocation, result.getLocation().getLocationName());
+        assertEquals(newLocation, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region1));
         assertTrue(result.getRegions().getRegions().contains(region2));
         assertTrue(result.getRegions().getRegions().contains(region3));
@@ -720,7 +720,7 @@ public class EnvironmentServiceTest {
         String region1 = "eu-west-1";
         String region2 = "eu-west-2";
         String region3 = "eu-west-3";
-        EnvironmentEditRequest editRequest = new EnvironmentEditRequest();
+        EnvironmentEditV4Request editRequest = new EnvironmentEditV4Request();
         editRequest.setRegions(Set.of(region2, region3));
 
         Environment environment = EnvironmentUtils.getEnvironment(region2, Set.of(region1, region2));
@@ -738,16 +738,16 @@ public class EnvironmentServiceTest {
 
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        when(conversionService.convert(any(Environment.class), eq(LocationRequest.class)))
-                .thenAnswer((Answer<LocationRequest>) invocation -> environmentToLocationRequestConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
-                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(Environment.class), eq(LocationResponse.class)))
-                .thenAnswer((Answer<LocationResponse>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(LocationV4Request.class)))
+                .thenAnswer((Answer<LocationV4Request>) invocation -> environmentToLocationRequestConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
+                .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(LocationV4Response.class)))
+                .thenAnswer((Answer<LocationV4Response>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
 
-        DetailedEnvironmentResponse result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+        DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
-        assertEquals(region2, result.getLocation().getLocationName());
+        assertEquals(region2, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region2));
         assertTrue(result.getRegions().getRegions().contains(region3));
     }
@@ -760,15 +760,15 @@ public class EnvironmentServiceTest {
     }
 
     private void mockConverters() {
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
-                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class)))
-                .thenAnswer((Answer<LdapConfigResponse>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyConfigResponse.class)))
-                .thenAnswer((Answer<ProxyConfigResponse>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class)))
-                .thenAnswer((Answer<RDSConfigResponse>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosResponse.class)))
-                .thenAnswer((Answer<KerberosResponse>) invocation -> kerberosConfigResponseConverter.convert((KerberosConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
+                .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(LdapConfig.class), eq(LdapV4Response.class)))
+                .thenAnswer((Answer<LdapV4Response>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyV4Response.class)))
+                .thenAnswer((Answer<ProxyV4Response>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Response.class)))
+                .thenAnswer((Answer<DatabaseV4Response>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosV4Response.class)))
+                .thenAnswer((Answer<KerberosV4Response>) invocation -> kerberosConfigResponseConverter.convert((KerberosConfig) invocation.getArgument(0)));
     }
 }

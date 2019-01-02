@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT_DELETED;
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED;
-import static org.mockito.ArgumentMatchers.eq;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,10 +25,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -74,9 +73,6 @@ public class SharedServiceConfigProviderTest {
     private Cluster publicStackCluster;
 
     @Mock
-    private ConfigsResponse configsResponse;
-
-    @Mock
     private KerberosConfigProvider kerberosConfigProvider;
 
     @Mock
@@ -88,8 +84,8 @@ public class SharedServiceConfigProviderTest {
     }
 
     @Test
-    public void testIsConfiguredWhenClusterV2RequestHasNoSharedServiceThenFalseExpected() {
-        ClusterV2Request request = new ClusterV2Request();
+    public void testIsConfiguredWhenClusterV4RequestHasNoSharedServiceThenFalseExpected() {
+        ClusterV4Request request = new ClusterV4Request();
         request.setSharedService(null);
 
         boolean result = underTest.isConfigured(request);
@@ -98,9 +94,9 @@ public class SharedServiceConfigProviderTest {
 
     @Test
     public void testIsConfiguredWhenSharedServiceNotNullButNullSharedClusterStoredThenFalseExpected() {
-        ClusterV2Request request = new ClusterV2Request();
-        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
-        sharedServiceRequest.setSharedCluster(null);
+        ClusterV4Request request = new ClusterV4Request();
+        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
+        sharedServiceRequest.setSharedClusterName(null);
         request.setSharedService(sharedServiceRequest);
 
         boolean result = underTest.isConfigured(request);
@@ -109,9 +105,9 @@ public class SharedServiceConfigProviderTest {
 
     @Test
     public void testIsConfiguredWhenSharedServiceNotNullButEmptySharedClusterStoredThenFalseExpected() {
-        ClusterV2Request request = new ClusterV2Request();
-        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
-        sharedServiceRequest.setSharedCluster("");
+        ClusterV4Request request = new ClusterV4Request();
+        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
+        sharedServiceRequest.setSharedClusterName("");
         request.setSharedService(sharedServiceRequest);
 
         boolean result = underTest.isConfigured(request);
@@ -120,9 +116,9 @@ public class SharedServiceConfigProviderTest {
 
     @Test
     public void testIsConfiguredSharedIsNotNullAndHasANotEmptySharedClusterThenTrueExpected() {
-        ClusterV2Request request = new ClusterV2Request();
-        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
-        sharedServiceRequest.setSharedCluster("some information");
+        ClusterV4Request request = new ClusterV4Request();
+        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
+        sharedServiceRequest.setSharedClusterName("some information");
         request.setSharedService(sharedServiceRequest);
 
         boolean result = underTest.isConfigured(request);
@@ -151,7 +147,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
         when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
@@ -175,7 +170,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
         when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
@@ -196,7 +190,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
         when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
@@ -215,7 +208,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
         underTest.configureCluster(requestedCluster, user, workspace);
@@ -234,7 +226,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(mockBlueprintAttributes.getValue()).thenReturn(null);
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
         underTest.configureCluster(requestedCluster, user, workspace);
@@ -253,7 +244,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(mockBlueprintAttributes.getValue()).thenReturn("");
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
         underTest.configureCluster(requestedCluster, user, workspace);
@@ -271,7 +261,6 @@ public class SharedServiceConfigProviderTest {
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(mockBlueprintAttributes.getValue()).thenReturn("some value which does not empty or null");
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
         when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
 
         underTest.configureCluster(requestedCluster, user, workspace);

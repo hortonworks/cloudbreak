@@ -1,0 +1,252 @@
+package com.sequenceiq.cloudbreak.converter.v4.stacks;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+
+public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<StackV4Request> {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
+    @InjectMocks
+    private StackV4RequestToStackConverter underTest;
+
+    @Mock
+    private ConversionService conversionService;
+
+    @Mock
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Mock
+    private PreferencesService preferencesService;
+
+    @Mock
+    private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private CredentialService credentialService;
+
+    @Mock
+    private ProviderParameterCalculator providerParameterCalculator;
+
+    @Mock
+    private CloudbreakUser cloudbreakUser;
+
+    @Mock
+    private Workspace workspace;
+
+    @Mock
+    private User user;
+
+    private Credential credential;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
+        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
+        when(workspaceService.get(1L, user)).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(1L);
+
+        credential = new Credential();
+        credential.setCloudPlatform("AWS");
+    }
+
+    @Test
+    public void testConvert() throws CloudbreakException {
+        initMocks();
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        StackV4Request request = getRequest("stack.json");
+
+        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
+        // WHEN
+        Stack stack = underTest.convert(request);
+        // THEN
+        assertAllFieldsNotNull(
+                stack,
+                Arrays.asList("description", "cluster", "credential", "gatewayPort", "network", "securityConfig",
+                        "version", "created", "platformVariant", "cloudPlatform", "flexSubscription", "datalakeId",
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
+                        "environment", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
+        assertEquals("eu-west-1", stack.getRegion());
+        assertEquals("AWS", stack.getCloudPlatform());
+        assertEquals("mystack", stack.getName());
+    }
+
+    private Mappable getMappable() {
+        return new Mappable() {
+            @Override
+            public Map<String, Object> asMap() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public CloudPlatform getCloudPlatform() {
+                return null;
+            }
+        };
+    }
+
+    @Test
+    public void testConvertWithLoginUserName() throws CloudbreakException {
+        initMocks();
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("You can not modify the default user!");
+        // WHEN
+        Stack stack = underTest.convert(getRequest("stack-with-loginusername.json"));
+        // THEN
+        assertAllFieldsNotNull(
+                stack,
+                Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
+                        "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "rootVolumeSize"));
+        assertEquals("eu-west-1", stack.getRegion());
+    }
+
+    @Test
+    public void testConvertSharedServicePreparateWhenSharedServiceIsNullThenDatalakeNameShouldNotBeSet() {
+        StackV4Request request = getRequest("stack.json");
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+
+        //GIVEN
+        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
+
+        //WHEN
+        Stack result = underTest.convert(request);
+
+        //THEN
+        Assert.assertNull(result.getDatalakeId());
+    }
+
+    @Test
+    public void testConvertSharedServicePreparateWhenThereIsNoDatalakeNameButSharedServiceIsNotNullThenThisDataShoudlBeTheDatalakeId() {
+        Long expectedDataLakeId = 1L;
+        StackV4Request request = getRequest("stack-with-shared-service.json");
+        Stack stack = new Stack();
+        stack.setId(expectedDataLakeId);
+
+        //GIVEN
+        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(stackService.getByNameInWorkspace("shared-cluster-name", 1L)).willReturn(stack);
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
+
+        //WHEN
+        Stack result = underTest.convert(request);
+
+        //THEN
+        assertEquals(expectedDataLakeId, result.getDatalakeId());
+    }
+
+    @Test
+    public void testConvertSharedServicePreparateWhenThereIsNoSharedServiceButDatalakeNameNotNullShouldBeSetAsDatalakeId() {
+        Long expectedDataLakeId = 1L;
+        StackV4Request request = getRequest("stack-with-datalake-name.json");
+        Stack stack = new Stack();
+        stack.setId(expectedDataLakeId);
+
+        //GIVEN
+        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(stackService.getByNameInWorkspace("datalake-name", 1L)).willReturn(stack);
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
+
+        //WHEN
+        Stack result = underTest.convert(request);
+
+        //THEN
+        assertEquals(expectedDataLakeId, result.getDatalakeId());
+    }
+
+    @Override
+    public Class<StackV4Request> getRequestClass() {
+        return StackV4Request.class;
+    }
+
+    private void initMocks() {
+        // GIVEN
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+
+        given(conversionService.convert(any(StackAuthenticationV4Request.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
+        given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+    }
+}

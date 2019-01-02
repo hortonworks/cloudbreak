@@ -38,6 +38,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 import com.sequenceiq.cloudbreak.controller.EndpointConfig;
 
 @RunWith(SpringRunner.class)
@@ -58,25 +59,30 @@ public class RestUrlParserTest {
     private String[] excludes = {"v3/utils"};
 
     @Test
-    public void testV1UserEventUrlParser() {
+    public void testEventUrlParser() {
         when(containerRequestContext.getMethod()).thenReturn("DELETE");
         when(containerRequestContext.getUriInfo()).thenReturn(uriInfo);
-        RestUrlParser v1UserEventUrlParser = new V1V2EventRestUrlParser();
+        RestUrlParser eventUrlParser = new V4ExistingResourceEventRestUrlParser();
 
-        when(uriInfo.getPath()).thenReturn("v1/users/evict");
+        when(uriInfo.getPath()).thenReturn("v4/2/users/johnny/evict");
         Map<String, String> params = new HashMap<>();
-        v1UserEventUrlParser.fillParams(containerRequestContext, params);
+        eventUrlParser.fillParams(containerRequestContext, params);
         assertEquals("users", params.get(RESOURCE_TYPE));
         assertEquals("evict", params.get(RESOURCE_EVENT));
 
-        when(uriInfo.getPath()).thenReturn("v1/users/evict/something");
+        when(uriInfo.getPath()).thenReturn("v4/2/users/evict");
         params = new HashMap<>();
-        v1UserEventUrlParser.fillParams(containerRequestContext, params);
+        eventUrlParser.fillParams(containerRequestContext, params);
         assertEquals(0, params.keySet().size());
 
-        when(uriInfo.getPath()).thenReturn("v1/users/12");
+        when(uriInfo.getPath()).thenReturn("v4/users/johnny/evict");
         params = new HashMap<>();
-        v1UserEventUrlParser.fillParams(containerRequestContext, params);
+        eventUrlParser.fillParams(containerRequestContext, params);
+        assertEquals(0, params.keySet().size());
+
+        when(uriInfo.getPath()).thenReturn("v4/2/users/johnny/12");
+        params = new HashMap<>();
+        eventUrlParser.fillParams(containerRequestContext, params);
         assertEquals(0, params.keySet().size());
     }
 
@@ -156,7 +162,7 @@ public class RestUrlParserTest {
                     .map(restUrlParser -> restUrlParser.getClass().getSimpleName())
                     .collect(Collectors.joining(", ")));
         } else {
-            LOGGER.info("Parser: " + matchedParsers.get(0).getClass().getSimpleName());
+            LOGGER.info("Parser: {}\n", matchedParsers.get(0).getClass().getSimpleName());
         }
     }
 
@@ -204,7 +210,9 @@ public class RestUrlParserTest {
                             ? methodPath.replace('{' + pathParamValue + '}', "1111")
                             : methodPath.replace('{' + pathParamValue + '}', "2222");
                 } else {
-                    methodPath = methodPath.replace('{' + pathParamValue + '}', "Some_Stupid:Resource Name:");
+                    methodPath = method.getDeclaringClass().equals(WorkspaceV4Endpoint.class)
+                            ? methodPath.replace('{' + pathParamValue + '}', "some-stupid-resource-name-34")
+                            : methodPath.replace('{' + pathParamValue + '}', "Some_Stupid:Resource Name:");
                 }
             }
         }

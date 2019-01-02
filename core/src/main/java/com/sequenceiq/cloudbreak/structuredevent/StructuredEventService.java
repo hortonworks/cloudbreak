@@ -15,4 +15,6 @@ public interface StructuredEventService extends StructuredEventSenderService {
     <T extends StructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId);
 
     StructuredEventContainer getEventsForUserWithResourceId(String resourceType, Long resourceId);
+
+    StructuredEventContainer getStructuredEventsForStack(String name, Long workspaceId);
 }

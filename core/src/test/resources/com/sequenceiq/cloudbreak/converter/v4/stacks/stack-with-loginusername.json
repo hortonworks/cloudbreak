@@ -1,0 +1,17 @@
+{
+  "name": "mystack",
+  "image": {
+    "catalog": "aws-catalog",
+    "id": "aws-image"
+  },
+  "failurePolicy": {
+    "id": 1,
+    "threshold": 10,
+    "adjustmentType": "EXACT"
+  },
+  "authentication": {
+    "publicKey": "ssh-key",
+    "loginUserName": "cloudbreak"
+  },
+  "instanceGroups": []
+}

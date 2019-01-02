@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
 
 public class AmbariKerberosDescriptorValidatorTest {
 

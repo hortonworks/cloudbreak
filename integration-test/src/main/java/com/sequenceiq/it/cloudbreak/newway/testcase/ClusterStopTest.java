@@ -12,10 +12,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.GeneralSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
@@ -48,12 +48,11 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);
         testContext
-                .given("generalEntity", GeneralSettingsEntity.class).withName(clusterName)
-                .given(StackEntity.class).valid().withGeneralSettings("generalEntity")
+                .given(StackEntity.class).valid().withName(clusterName)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .when(Stack.stopV2())
-                .await(STACK_STOPPED)
+                .await(Status.STOPPED)
                 .validate();
     }
 

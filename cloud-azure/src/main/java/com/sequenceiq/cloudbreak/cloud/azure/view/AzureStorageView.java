@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
-import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
+import com.sequenceiq.cloudbreak.cloud.azure.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;

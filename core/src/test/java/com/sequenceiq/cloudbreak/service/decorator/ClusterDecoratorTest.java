@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,15 +13,11 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
-import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -51,19 +46,10 @@ public class ClusterDecoratorTest {
     private StackService stackService;
 
     @Mock
-    private ConversionService conversionService;
-
-    @Mock
-    private HostGroupDecorator hostGroupDecorator;
-
-    @Mock
     private RdsConfigService rdsConfigService;
 
     @Mock
     private LdapConfigService ldapConfigService;
-
-    @Mock
-    private LdapConfigValidator ldapConfigValidator;
 
     @Mock
     private ClusterService clusterService;
@@ -75,13 +61,10 @@ public class ClusterDecoratorTest {
     private ClusterProxyDecorator clusterProxyDecorator;
 
     @Mock
-    private AmbariDatabaseMapper ambariDatabaseMapper;
-
-    @Mock
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private ClusterRequest request;
+    private ClusterV4Request request;
 
     @Mock
     private Stack stack;
@@ -103,7 +86,6 @@ public class ClusterDecoratorTest {
         Blueprint blueprint = new Blueprint();
         String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
         blueprint.setBlueprintText(blueprintText);
-        when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any())).thenReturn(expectedClusterInstance);

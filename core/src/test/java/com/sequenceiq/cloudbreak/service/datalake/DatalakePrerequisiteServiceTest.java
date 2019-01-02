@@ -23,14 +23,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.DatalakePrerequisiteV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -82,16 +82,16 @@ public class DatalakePrerequisiteServiceTest {
 
     @Before
     public void before() {
-        when(conversionService.convert(any(LdapConfigRequest.class), eq(LdapConfig.class))).thenReturn(ldapConfig());
+        when(conversionService.convert(any(LdapV4Request.class), eq(LdapConfig.class))).thenReturn(ldapConfig());
         when(conversionService.convert(any(LdapConfig.class), eq(LdapDetails.class))).thenReturn(ldapDetails());
-        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class))).thenReturn(ldapConfigResponse());
+        when(conversionService.convert(any(LdapConfig.class), eq(LdapV4Response.class))).thenReturn(ldapConfigResponse());
 
-        when(conversionService.convert(any(RDSConfigRequest.class), eq(RDSConfig.class))).thenReturn(rdsConfig());
-        when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class))).thenReturn(rdsConfigResponse());
+        when(conversionService.convert(any(DatabaseV4Request.class), eq(RDSConfig.class))).thenReturn(rdsConfig());
+        when(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Response.class))).thenReturn(rdsConfigResponse());
         when(conversionService.convert(any(RDSConfig.class), eq(RdsDetails.class))).thenReturn(rdsDetails());
 
-        when(conversionService.convert(any(KerberosRequest.class), eq(KerberosConfig.class))).thenReturn(kerberosConfig());
-        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosResponse.class))).thenReturn(kerberosResponse());
+        when(conversionService.convert(any(KerberosV4Request.class), eq(KerberosConfig.class))).thenReturn(kerberosConfig());
+        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosV4Response.class))).thenReturn(kerberosResponse());
     }
 
     @Test
@@ -133,16 +133,16 @@ public class DatalakePrerequisiteServiceTest {
 
     }
 
-    private DatalakePrerequisiteRequest datalakePrerequisiteRequest() {
-        DatalakePrerequisiteRequest datalakePrerequisiteRequest = new DatalakePrerequisiteRequest();
-        datalakePrerequisiteRequest.setKerberosConfig(kerberosRequest());
-        datalakePrerequisiteRequest.setLdapConfig(ldapConfigRequest());
-        datalakePrerequisiteRequest.setRdsConfigs(rdsConfigRequests());
-        return datalakePrerequisiteRequest;
+    private DatalakePrerequisiteV4Request datalakePrerequisiteRequest() {
+        DatalakePrerequisiteV4Request datalakePrerequisiteV4Request = new DatalakePrerequisiteV4Request();
+        datalakePrerequisiteV4Request.setKerberos(kerberosRequest());
+        datalakePrerequisiteV4Request.setLdap(ldapConfigRequest());
+        datalakePrerequisiteV4Request.setDatabases(rdsConfigRequests());
+        return datalakePrerequisiteV4Request;
     }
 
-    private Set<RDSConfigRequest> rdsConfigRequests() {
-        Set<RDSConfigRequest> rdsConfigRequests = new HashSet<>();
+    private Set<DatabaseV4Request> rdsConfigRequests() {
+        Set<DatabaseV4Request> rdsConfigRequests = new HashSet<>();
         rdsConfigRequests.add(rdsConfigRequest("HIVE"));
         rdsConfigRequests.add(rdsConfigRequest("HIVE_DAS"));
         rdsConfigRequests.add(rdsConfigRequest("AMBARI"));
@@ -150,16 +150,16 @@ public class DatalakePrerequisiteServiceTest {
         return rdsConfigRequests;
     }
 
-    private RDSConfigRequest rdsConfigRequest(String type) {
-        RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
+    private DatabaseV4Request rdsConfigRequest(String type) {
+        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
         rdsConfigRequest.setDescription("descriptiion");
         rdsConfigRequest.setName("rds-" + type);
         rdsConfigRequest.setType(type);
         return rdsConfigRequest;
     }
 
-    private LdapConfigRequest ldapConfigRequest() {
-        LdapConfigRequest ldapConfigRequest = new LdapConfigRequest();
+    private LdapV4Request ldapConfigRequest() {
+        LdapV4Request ldapConfigRequest = new LdapV4Request();
         ldapConfigRequest.setName("demo-ldap");
         ldapConfigRequest.setDescription("ldap description");
         return ldapConfigRequest;
@@ -172,8 +172,8 @@ public class DatalakePrerequisiteServiceTest {
         return ldapConfigRequest;
     }
 
-    private LdapConfigResponse ldapConfigResponse() {
-        LdapConfigResponse ldapConfigResponse = new LdapConfigResponse();
+    private LdapV4Response ldapConfigResponse() {
+        LdapV4Response ldapConfigResponse = new LdapV4Response();
         ldapConfigResponse.setName("demo-ldap");
         ldapConfigResponse.setDescription("ldap description");
         return ldapConfigResponse;
@@ -200,8 +200,8 @@ public class DatalakePrerequisiteServiceTest {
         return rdsDetails;
     }
 
-    private RDSConfigResponse rdsConfigResponse() {
-        RDSConfigResponse rdsConfigResponse = new RDSConfigResponse();
+    private DatabaseV4Response rdsConfigResponse() {
+        DatabaseV4Response rdsConfigResponse = new DatabaseV4Response();
         rdsConfigResponse.setName("demo-rds");
         rdsConfigResponse.setDescription("rds description");
         return rdsConfigResponse;
@@ -214,16 +214,16 @@ public class DatalakePrerequisiteServiceTest {
         return kerberosConfig;
     }
 
-    private KerberosRequest kerberosRequest() {
-        KerberosRequest kerberosRequest = new KerberosRequest();
+    private KerberosV4Request kerberosRequest() {
+        KerberosV4Request kerberosRequest = new KerberosV4Request();
         kerberosRequest.setName("demo-kerberos");
         kerberosRequest.setDescription("kerberos description");
         kerberosRequest.setFreeIpa(freeIPAKerberosDescriptor());
         return kerberosRequest;
     }
 
-    private KerberosResponse kerberosResponse() {
-        KerberosResponse kerberosResponse = new KerberosResponse();
+    private KerberosV4Response kerberosResponse() {
+        KerberosV4Response kerberosResponse = new KerberosV4Response();
         kerberosResponse.setName("demo-kerberos");
         kerberosResponse.setDescription("kerberos description");
         return kerberosResponse;

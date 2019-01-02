@@ -8,6 +8,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
@@ -29,7 +30,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
     public void testCreateNewRegularCluster(TestContext testContext) {
         testContext.given(StackEntity.class)
                 .when(Stack.postV2())
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .validate();
     }
 

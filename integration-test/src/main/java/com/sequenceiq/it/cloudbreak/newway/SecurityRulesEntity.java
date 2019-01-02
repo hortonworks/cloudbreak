@@ -1,16 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
+import java.util.Arrays;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleRequest, SecurityRulesResponse, SecurityRules> {
+public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleV4Request, SecurityRulesV4Response, SecurityRules> {
     public static final String SECURITYRULES = "SECURITYRULES";
 
     private SecurityRulesEntity(String newId) {
         super(newId);
-        setRequest(new SecurityRuleRequest());
     }
 
     SecurityRulesEntity() {
@@ -18,7 +19,7 @@ public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleRe
     }
 
     public SecurityRulesEntity(TestContext testContext) {
-        super(new SecurityRuleRequest(), testContext);
+        super(new SecurityRuleV4Request(), testContext);
     }
 
     public SecurityRulesEntity valid() {
@@ -37,8 +38,8 @@ public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleRe
         return this;
     }
 
-    public SecurityRulesEntity withPorts(String ports) {
-        getRequest().setPorts(ports);
+    public SecurityRulesEntity withPorts(String... ports) {
+        getRequest().setPorts(Arrays.asList(ports));
         return this;
     }
 }

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.testng.collections.Maps;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
@@ -28,10 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Service
 public class CloudResourceAdvisor {
@@ -52,27 +52,25 @@ public class CloudResourceAdvisor {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, User user,
-            Workspace workspace) {
-        String cloudPlatform = resourceRequest.getCloudPlatform();
-        String region = resourceRequest.getRegion();
-        String availabilityZone = resourceRequest.getAvailabilityZone();
+    @Inject
+    private CredentialService credentialService;
+
+    public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
+            String region, String platformVariant, String availabilityZone) {
+        Credential credential = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
+        String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
-        LOGGER.debug("Advising resources for blueprintId: {}, blueprintName: {}, provider: {} and region: {}.",
-                blueprintId, blueprintName, cloudPlatform, region);
+        LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
+                blueprintName, cloudPlatform, region);
 
-        Blueprint blueprint = getBlueprint(blueprintName, blueprintId, user, workspace);
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
         String blueprintText = blueprint.getBlueprintText();
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
 
-        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
-                resourceRequest.getCredential(),
-                resourceRequest.getRegion(),
-                resourceRequest.getPlatformVariant(),
-                resourceRequest.getFilters());
+        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(credential, region, platformVariant, Maps.newHashMap());
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         if (defaultVmType != null) {
             componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
@@ -103,14 +101,11 @@ public class CloudResourceAdvisor {
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
-    private Blueprint getBlueprint(String blueprintName, Long blueprintId, User user, Workspace workspace) {
-        Blueprint bp;
-        if (blueprintId != null) {
-            LOGGER.debug("Try to get validation by id: {}.", blueprintId);
-            bp = blueprintService.get(blueprintId);
-        } else {
+    private Blueprint getBlueprint(String blueprintName, Long workspaceId) {
+        Blueprint bp = null;
+        if (!Strings.isNullOrEmpty(blueprintName)) {
             LOGGER.debug("Try to get validation by name: {}.", blueprintName);
-            bp = blueprintService.getByNameForWorkspace(blueprintName, workspace);
+            bp = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         }
         return bp;
     }
