@@ -1,20 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway.v3;
 
 
-import static org.springframework.util.StringUtils.isEmpty;
-
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -45,8 +42,8 @@ public class StackV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
-                client.getCloudbreakClient().stackV3Endpoint()
-                        .getByNameInWorkspace(workspaceId, stackEntity.getName(), null));
+                client.getCloudbreakClient().stackV4Endpoint()
+                        .get(workspaceId, stackEntity.getName(), null));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }
 
@@ -56,14 +53,14 @@ public class StackV3Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all stack");
-        stackEntity.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV3Endpoint()
-                .listByWorkspace(workspaceId, null, false)));
+        stackEntity.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV4Endpoint()
+                .list(workspaceId, null, false).getResponses()));
     }
 
-    private static Set<StackResponse> toStackResponseSet(CloudbreakClient client, Long workspaceId, Set<StackViewResponse> stacks) {
-        Set<StackResponse> detailedStacks = new HashSet<>();
+    private static Set<StackV4Response> toStackResponseSet(CloudbreakClient client, Long workspaceId, Collection<StackViewV4Response> stacks) {
+        Set<StackV4Response> detailedStacks = new HashSet<>();
         stacks.stream().forEach(
-                stack -> detailedStacks.add(client.getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, stack.getName(), null)));
+                stack -> detailedStacks.add(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, stack.getName(), null)));
         return detailedStacks;
     }
 
@@ -76,27 +73,25 @@ public class StackV3Action {
     }
 
     private static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, Boolean forced) {
-        StackEntity stackEntity = entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(" delete: " + stackEntity.getName());
-        client.getCloudbreakClient().stackV3Endpoint()
-                .deleteInWorkspace(workspaceId, stackEntity.getName(), forced, false);
+        Log.log(" delete: " + entity.getName());
+        client.getCloudbreakClient().stackV4Endpoint()
+                .delete(workspaceId, entity.getName(), forced, false);
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, CloudbreakClient cloudbreakClient, Boolean forced) {
-        StackEntity stackEntity = entity;
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(" delete: " + stackEntity.getName());
-        cloudbreakClient.getCloudbreakClient().stackV3Endpoint()
-                .deleteInWorkspace(workspaceId, stackEntity.getName(), forced, false);
+        Log.log(" delete: " + entity.getName());
+        cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
+                .delete(workspaceId, entity.getName(), forced, false);
     }
 
     public static StackEntity deleteV2(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
         Log.log(LOGGER, " delete: " + entity.getName());
-        cloudbreakClient.getCloudbreakClient().stackV3Endpoint()
-                .deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName(), false, false);
+        cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
+                .delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false, false);
         return entity;
     }
 
@@ -106,8 +101,8 @@ public class StackV3Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + stackEntity.getName());
-        client.getCloudbreakClient().stackV3Endpoint()
-                .deleteWithKerberosInWorkspace(workspaceId, stackEntity.getName(), true, false);
+        client.getCloudbreakClient().stackV4Endpoint()
+                .deleteWithKerberos(workspaceId, stackEntity.getName(), true, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -124,12 +119,9 @@ public class StackV3Action {
         var stackEntity = (StackEntity) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
-            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
-            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
-
             prepareNetworkParam(stackEntity);
-            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
-            stackEntity.getRequest().getNetwork().getParameters().put(VPC_ID_KEY, networkId);
+            stackEntity.getRequest().getNetwork().getAws().setSubnetId(datalakeStack.getResponse().getNetwork().getAws().getSubnetId());
+            stackEntity.getRequest().getNetwork().getAws().setVpcId(datalakeStack.getResponse().getNetwork().getAws().getVpcId());
         } else {
             throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
         }
@@ -139,53 +131,19 @@ public class StackV3Action {
         var stackEntity = (StackEntity) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
-            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
-            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
-
             prepareNetworkParam(stackEntity);
-            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
-            stackEntity.getRequest().getNetwork().getParameters().put(NETWORK_ID_KEY, networkId);
-            stackEntity.getRequest().getNetwork().getParameters().put(RESOURCE_GROUP_NAME_KEY, networkId);
+            stackEntity.getRequest().getNetwork().getAzure().setSubnetId(datalakeStack.getResponse().getNetwork().getAzure().getSubnetId());
+            stackEntity.getRequest().getNetwork().getAzure().setNetworkId(datalakeStack.getResponse().getNetwork().getAzure().getNetworkId());
+            stackEntity.getRequest().getNetwork().getAzure().setResourceGroupName(datalakeStack.getResponse().getNetwork().getAzure().getResourceGroupName());
         } else {
             throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
         }
-    }
-
-    public static void determineNetworkFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
-        var stackEntity = (StackEntity) entity;
-        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
-        if (isDatalakeExistAndHasNetwork(datalakeStack)) {
-            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
-            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
-
-            prepareNetworkParam(stackEntity);
-            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
-            stackEntity.getRequest().getNetwork().getParameters().put(NETWORK_ID_KEY, networkId);
-        } else {
-            throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
-        }
-    }
-
-    private static String obtainFromNetworkParam(Map<String, Object> parameters, String key) {
-        if (parameters == null) {
-            return null;
-        }
-        Object value = parameters.get(key);
-        if (isEmpty(parameters.get(key))) {
-            return null;
-        }
-
-        return value.toString();
     }
 
     private static void prepareNetworkParam(StackEntity stackEntity) {
         if (stackEntity.getRequest().getNetwork() == null) {
-            var network = new NetworkV2Request();
+            var network = new NetworkV4Request();
             stackEntity.getRequest().setNetwork(network);
-        }
-        if (stackEntity.getRequest().getNetwork().getParameters() == null) {
-            var params = new LinkedHashMap<String, Object>();
-            stackEntity.getRequest().getNetwork().setParameters(params);
         }
     }
 

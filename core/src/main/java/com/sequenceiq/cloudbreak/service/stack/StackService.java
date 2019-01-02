@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
@@ -20,24 +20,21 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
@@ -188,9 +185,8 @@ public class StackService {
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    @Autowired
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    @Inject
+    private ConverterUtil converterUtil;
 
     @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
@@ -208,10 +204,10 @@ public class StackService {
         return stackRepository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
-    public Set<StackResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
+    public Set<StackV4Response> retrieveStacksByWorkspaceId(Long workspaceId) {
         try {
             return transactionService.required(() ->
-                    convertStacks(stackRepository.findForWorkspaceIdWithLists(workspaceId)));
+                    converterUtil.convertAllAsSet(stackRepository.findForWorkspaceIdWithLists(workspaceId), StackV4Response.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -221,11 +217,11 @@ public class StackService {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
-    public StackResponse getJsonById(Long id, Collection<String> entry) {
+    public StackV4Response getJsonById(Long id, Collection<String> entry) {
         try {
             return transactionService.required(() -> {
                 Stack stack = getByIdWithLists(id);
-                StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
                 return stackResponse;
             });
@@ -257,12 +253,9 @@ public class StackService {
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public Set<AutoscaleStackResponse> getAllForAutoscale() {
+    public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         try {
-            return transactionService.required(() -> {
-                Set<Stack> aliveOnes = stackRepository.findAliveOnesWithAmbari();
-                return convertStacksForAutoscale(aliveOnes);
-            });
+            return transactionService.required(() -> converterUtil.convertAllAsSet(stackRepository.findAliveOnesWithAmbari(), AutoscaleStackV4Response.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -339,22 +332,22 @@ public class StackService {
         return stackStatusRepository.findFirstByStackIdOrderByCreatedDesc(stackId);
     }
 
-    public StackResponse getByAmbariAddress(String ambariAddress) {
+    public StackV4Response getByAmbariAddress(String ambariAddress) {
         try {
-            return transactionService.required(() -> conversionService.convert(stackRepository.findByAmbari(ambariAddress), StackResponse.class));
+            return transactionService.required(() -> converterUtil.convert(stackRepository.findByAmbari(ambariAddress), StackV4Response.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public StackResponse getStackByNameInWorkspace(String name, Collection<String> entries, Workspace workspace) {
+    public StackV4Response getStackByNameInWorkspace(String name, Collection<String> entries, Workspace workspace) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
-                StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
             });
@@ -363,7 +356,7 @@ public class StackService {
         }
     }
 
-    public StackResponse getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user) {
+    public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user) {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
@@ -371,7 +364,7 @@ public class StackService {
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
-                StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
             });
@@ -380,28 +373,28 @@ public class StackService {
         }
     }
 
-    public StackV2Request getStackRequestByNameInWorkspace(String name, Workspace workspace) {
+    public StackV4Request getStackRequestByNameInWorkspace(String name, Workspace workspace) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
-                return conversionService.convert(stack, StackV2Request.class);
+                return converterUtil.convert(stack, StackV4Request.class);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public StackV2Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
+    public StackV4Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
-                return conversionService.convert(stack, StackV2Request.class);
+                return converterUtil.convert(stack, StackV4Request.class);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -418,10 +411,6 @@ public class StackService {
 
     public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
-    }
-
-    public Map<String, Object> getStatusByNameInWorkspace(String name, Long workspaceId) {
-        return conversionService.convert(getByNameInWorkspace(name, workspaceId), Map.class);
     }
 
     public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
@@ -585,16 +574,6 @@ public class StackService {
         return metaData;
     }
 
-    private Set<StackResponse> convertStacks(Set<Stack> stacks) {
-        return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
-    }
-
-    private Set<AutoscaleStackResponse> convertStacksForAutoscale(Set<Stack> stacks) {
-        return (Set<AutoscaleStackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(AutoscaleStackResponse.class)));
-    }
-
     private void repairFailedNodes(Stack stack, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
@@ -686,7 +665,7 @@ public class StackService {
         }
     }
 
-    public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
+    public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack1.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         try {
             transactionService.required(() -> {
@@ -766,12 +745,9 @@ public class StackService {
         return stackRepository.countDatalakeStacksInEnvironment(environmentId);
     }
 
-    public void validateStack(StackValidation stackValidation, boolean validateBlueprint) {
+    public void validateStack(StackValidation stackValidation) {
         if (stackValidation.getNetwork() != null) {
             networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
-        }
-        if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
         }
     }
 
@@ -816,7 +792,7 @@ public class StackService {
         return stackRepository.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, envId);
     }
 
-    private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
+    private void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));
         }
@@ -836,7 +812,7 @@ public class StackService {
         }
     }
 
-    private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
+    private void validateHostGroupAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
                 .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();

@@ -6,7 +6,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class BlueprintCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -18,12 +18,13 @@ public class BlueprintCreationTest extends AbstractCloudbreakIntegrationTest {
             @Optional("classpath:/blueprint/hdp-multinode-default.bp") String blueprintFile) throws Exception {
         // GIVEN
         String blueprintContent = ResourceUtil.readStringFromResource(applicationContext, blueprintFile);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
-        BlueprintRequest blueprintRequest = new BlueprintRequest();
+        BlueprintV4Request blueprintRequest = new BlueprintV4Request();
         blueprintRequest.setName(blueprintName);
         blueprintRequest.setDescription("Blueprint for integration testing");
         blueprintRequest.setAmbariBlueprint(blueprintContent);
-        String id = getCloudbreakClient().blueprintEndpoint().postPrivate(blueprintRequest).getId().toString();
+        String id = getCloudbreakClient().blueprintV4Endpoint().post(workspaceId, blueprintRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, id, true);

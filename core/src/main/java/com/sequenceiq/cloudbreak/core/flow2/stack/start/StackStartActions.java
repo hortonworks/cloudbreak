@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
 @Configuration
 public class StackStartActions {

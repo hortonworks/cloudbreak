@@ -1,7 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -9,10 +12,7 @@ import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Dat
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Storage.Adls;
 
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
-
-public class AzureAdlsResourceHelper extends ResourceHelper<AdlsCloudStorageParameters> {
+public class AzureAdlsResourceHelper extends ResourceHelper<AdlsCloudStorageParametersV4> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AZURE_RANGER_DB_CONFIG";
 
@@ -41,21 +41,21 @@ public class AzureAdlsResourceHelper extends ResourceHelper<AdlsCloudStoragePara
     }
 
     @Override
-    public CloudStorageRequest getCloudStorageRequestForDatalake() {
-        var request = new CloudStorageRequest();
+    public CloudStorageV4Request getCloudStorageRequestForDatalake() {
+        var request = new CloudStorageV4Request();
         request.setAdls(getCloudStorage());
         request.setLocations(defaultDatalakeStorageLocations(CloudStorageTypePathPrefix.ADLS, getTestParameter().get(Adls.ACCOUNT_NAME)));
         return request;
     }
 
     @Override
-    public CloudStorageRequest getCloudStorageRequestForAttachedCluster() {
+    public CloudStorageV4Request getCloudStorageRequestForAttachedCluster() {
         return getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix.ADLS, getTestParameter().get(Adls.ACCOUNT_NAME), getCloudStorage());
     }
 
     @Override
-    protected AdlsCloudStorageParameters getCloudStorage() {
-        var parameters = new AdlsCloudStorageParameters();
+    protected AdlsCloudStorageParametersV4 getCloudStorage() {
+        var parameters = new AdlsCloudStorageParametersV4();
         parameters.setCredential(getTestParameter().get("INTEGRATIONTEST_AZURERMCREDENTIAL_ACCESSKEY"));
         parameters.setClientId(getTestParameter().get("INTEGRATIONTEST_AZURERMCREDENTIAL_SECRETKEY"));
         parameters.setAccountName(getTestParameter().get(Adls.ACCOUNT_NAME));

@@ -62,7 +62,7 @@ tests:
       userDefinedTags: ittest:itvalue;openstacktag:openstackvalue;result:success
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: check tags
     parameters:

@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,8 +29,10 @@ import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
+import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -76,6 +82,9 @@ public class LdapConfigServiceTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private LdapConfigValidator ldapConfigValidator;
 
     @Spy
     private ResourceDetachValidator resourceDetachValidator = new ResourceDetachValidator();
@@ -325,5 +334,62 @@ public class LdapConfigServiceTest {
                 ldapConfig.getResource().getReadableName(), ldapConfig.getName(), envName2, env2Cluster1Name, env2Cluster2Name));
 
         underTest.detachFromEnvironments(LDAP_1, envNames, WORKSPACE_ID);
+    }
+
+    @Test
+    public void testConnectionWithEmptyInput() {
+        exceptionRule.expect(BadRequestException.class);
+
+        underTest.testConnection(1L, null, null);
+    }
+
+    @Test
+    public void testConnectionWithNameWhenValidatorThrowsAnException() {
+        String exceptionMessage = "test connection failed";
+        doThrow(new BadRequestException(exceptionMessage)).when(ldapConfigValidator).validateLdapConnection(any(LdapConfig.class));
+        when(ldapConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new LdapConfig());
+
+        String result = underTest.testConnection(1L, "LDAP", null);
+
+        assertEquals(exceptionMessage, result);
+        verify(ldapConfigValidator, never()).validateLdapConnection(any(LdapMinimalV4Request.class));
+        verify(ldapConfigValidator, times(1)).validateLdapConnection(any(LdapConfig.class));
+    }
+
+    @Test
+    public void testConnectionWithName() {
+        doNothing().when(ldapConfigValidator).validateLdapConnection(any(LdapConfig.class));
+        when(ldapConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new LdapConfig());
+
+        String result = underTest.testConnection(1L, "LDAP", null);
+
+        assertEquals("connected", result);
+        verify(ldapConfigValidator, never()).validateLdapConnection(any(LdapMinimalV4Request.class));
+        verify(ldapConfigValidator, times(1)).validateLdapConnection(any(LdapConfig.class));
+    }
+
+    @Test
+    public void testConnectionWithResourceWhenValidatorThrowsAnException() {
+        String exceptionMessage = "test connection failed";
+        doThrow(new BadRequestException(exceptionMessage)).when(ldapConfigValidator).validateLdapConnection(any(LdapMinimalV4Request.class));
+
+        String result = underTest.testConnection(1L, null, new LdapMinimalV4Request());
+
+        assertEquals(exceptionMessage, result);
+        verify(ldapConfigValidator, never()).validateLdapConnection(any(LdapConfig.class));
+        verify(ldapConfigValidator, times(1)).validateLdapConnection(any(LdapMinimalV4Request.class));
+        verify(ldapConfigRepository, never()).findByNameAndWorkspaceId(anyString(), anyLong());
+    }
+
+    @Test
+    public void testConnectionWitResource() {
+        doNothing().when(ldapConfigValidator).validateLdapConnection(any(LdapMinimalV4Request.class));
+
+        String result = underTest.testConnection(1L, null, new LdapMinimalV4Request());
+
+        assertEquals("connected", result);
+        verify(ldapConfigValidator, never()).validateLdapConnection(any(LdapConfig.class));
+        verify(ldapConfigValidator, times(1)).validateLdapConnection(any(LdapMinimalV4Request.class));
+        verify(ldapConfigRepository, never()).findByNameAndWorkspaceId(anyString(), anyLong());
     }
 }

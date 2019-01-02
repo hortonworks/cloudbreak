@@ -13,7 +13,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
@@ -94,8 +94,8 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         return stackStatus;
     }
 
-    private StackResponse getAStackResponse() {
-        return new StackResponse();
+    private StackV4Response getAStackResponse() {
+        return new StackV4Response();
     }
 
     private Workspace defaultWorkspace() {

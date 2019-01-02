@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 
 public class RDSConfigJsonValidatorTest {
 
@@ -46,7 +46,7 @@ public class RDSConfigJsonValidatorTest {
     private NodeBuilderCustomizableContext nodeBuilderCustomizableContext;
 
     @Mock
-    private RDSConfigJson json;
+    private DatabaseV4Base json;
 
     @Before
     public void setUp() {

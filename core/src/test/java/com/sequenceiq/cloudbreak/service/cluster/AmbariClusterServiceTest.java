@@ -20,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
@@ -115,12 +115,12 @@ public class AmbariClusterServiceTest {
                 + " To reset Ambari Server schema you must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources")));
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        when(rdsConfigService.findByClusterIdAndType(any(Long.class), any(RdsType.class))).thenReturn(rdsConfig);
-        clusterService.recreate(TestUtil.stack(), 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        when(rdsConfigService.findByClusterIdAndType(any(Long.class), any(DatabaseType.class))).thenReturn(rdsConfig);
+        clusterService.recreate(TestUtil.stack(), "bp-name", new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 
     @Test
     public void testRecreateSuccess() throws TransactionExecutionException {
-        clusterService.recreate(TestUtil.stack(), 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(TestUtil.stack(), "bp-name", new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }

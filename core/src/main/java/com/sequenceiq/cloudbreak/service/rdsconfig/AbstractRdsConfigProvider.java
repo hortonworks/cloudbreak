@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -63,7 +63,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
-            LOGGER.debug("Creating postgres RDSConfig for {}", getRdsType().name());
+            LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
             rdsConfigs = createPostgresRdsConf(stack, cluster, rdsConfigs, getDbUser(), getDbPort(), getDb());
         }
         return rdsConfigs;
@@ -112,7 +112,7 @@ public abstract class AbstractRdsConfigProvider {
 
     protected abstract String getPillarKey();
 
-    protected abstract RdsType getRdsType();
+    protected abstract DatabaseType getRdsType();
 
     protected abstract boolean isRdsConfigNeeded(Blueprint blueprint);
 

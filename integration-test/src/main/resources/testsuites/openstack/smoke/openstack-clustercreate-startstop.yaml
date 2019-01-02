@@ -54,7 +54,7 @@ tests:
       clusterName: it-openstack-cluster-ss
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: stop cluster and stack
     classes:

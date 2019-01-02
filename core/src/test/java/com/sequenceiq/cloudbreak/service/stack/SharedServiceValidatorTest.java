@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -28,13 +30,13 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 @RunWith(MockitoJUnitRunner.class)
 public class SharedServiceValidatorTest {
 
-    private static final String CLOUD_PLATFORM_1 = "GCP";
+    private static final String DATALAKE_NAME = "datalake";
 
-    private static final String CLOUD_PLATFORM_2 = "AWS";
+    private static final String LDAP_NAME = "ldap";
 
-    private static final long DATALAKE_ID = 1L;
+    private static final String RANGER_DB_NAME = "ranger";
 
-    private static final long LDAP_CONFIG_ID = 2L;
+    private static final String HIVE_DB_NAME = "hivetest";
 
     @Mock
     private RdsConfigService rdsConfigService;
@@ -47,21 +49,24 @@ public class SharedServiceValidatorTest {
 
     @Test
     public void testWithValidRequest() {
-        RDSConfigRequest rangerRequest = new RDSConfigRequest();
-        rangerRequest.setType(RdsType.RANGER.name());
-        RDSConfigRequest hiveRequest = new RDSConfigRequest();
-        hiveRequest.setType(RdsType.HIVE.name());
-        ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setRdsConfigJsons(Set.of(rangerRequest, hiveRequest));
-        clusterRequest.setLdapConfigId(LDAP_CONFIG_ID);
-        StackRequest stackRequest = new StackRequest();
-        stackRequest.setClusterRequest(clusterRequest);
-        stackRequest.setClusterToAttach(DATALAKE_ID);
-        stackRequest.setCloudPlatform(CLOUD_PLATFORM_1);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
+        clusterRequest.setLdapName(LDAP_NAME);
+        clusterRequest.setSharedService(new SharedServiceV4Request());
+        clusterRequest.getSharedService().setSharedClusterName(DATALAKE_NAME);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setCluster(clusterRequest);
+        stackRequest.setCloudPlatform(CloudPlatform.GCP);
         Workspace workspace = new Workspace();
         StackView stackView = new StackView();
-        stackView.setCloudPlatform(CLOUD_PLATFORM_1);
-        when(stackViewService.findById(DATALAKE_ID)).thenReturn(Optional.of(stackView));
+        stackView.setCloudPlatform("GCP");
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(stackView);
+        RDSConfig ranger = new RDSConfig();
+        ranger.setType("RANGER");
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(ranger);
+        RDSConfig hive = new RDSConfig();
+        hive.setType("HIVE");
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(hive);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, workspace);
 
@@ -70,19 +75,22 @@ public class SharedServiceValidatorTest {
 
     @Test
     public void testWithMissingHive() {
-        RDSConfigRequest rangerRequest = new RDSConfigRequest();
-        rangerRequest.setType(RdsType.RANGER.name());
-        ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setRdsConfigJsons(Set.of(rangerRequest));
-        clusterRequest.setLdapConfigId(LDAP_CONFIG_ID);
-        StackRequest stackRequest = new StackRequest();
-        stackRequest.setClusterRequest(clusterRequest);
-        stackRequest.setClusterToAttach(DATALAKE_ID);
-        stackRequest.setCloudPlatform(CLOUD_PLATFORM_1);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
+        clusterRequest.setLdapName(LDAP_NAME);
+        clusterRequest.setSharedService(new SharedServiceV4Request());
+        clusterRequest.getSharedService().setSharedClusterName(DATALAKE_NAME);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setCluster(clusterRequest);
+        stackRequest.setCloudPlatform(CloudPlatform.GCP);
         Workspace workspace = new Workspace();
         StackView stackView = new StackView();
-        stackView.setCloudPlatform(CLOUD_PLATFORM_1);
-        when(stackViewService.findById(DATALAKE_ID)).thenReturn(Optional.of(stackView));
+        stackView.setCloudPlatform("GCP");
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(stackView);
+        RDSConfig ranger = new RDSConfig();
+        ranger.setType("RANGER");
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(ranger);
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(null);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, workspace);
 
@@ -93,19 +101,22 @@ public class SharedServiceValidatorTest {
 
     @Test
     public void testWithMissingRangerAndWrongCloudPlatform() {
-        RDSConfigRequest hiveRequest = new RDSConfigRequest();
-        hiveRequest.setType(RdsType.HIVE.name());
-        ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setRdsConfigJsons(Set.of(hiveRequest));
-        clusterRequest.setLdapConfigId(LDAP_CONFIG_ID);
-        StackRequest stackRequest = new StackRequest();
-        stackRequest.setClusterRequest(clusterRequest);
-        stackRequest.setClusterToAttach(DATALAKE_ID);
-        stackRequest.setCloudPlatform(CLOUD_PLATFORM_2);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
+        clusterRequest.setLdapName(LDAP_NAME);
+        clusterRequest.setSharedService(new SharedServiceV4Request());
+        clusterRequest.getSharedService().setSharedClusterName(DATALAKE_NAME);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setCluster(clusterRequest);
+        stackRequest.setCloudPlatform(CloudPlatform.AWS);
         Workspace workspace = new Workspace();
         StackView stackView = new StackView();
-        stackView.setCloudPlatform(CLOUD_PLATFORM_1);
-        when(stackViewService.findById(DATALAKE_ID)).thenReturn(Optional.of(stackView));
+        stackView.setCloudPlatform("GCP");
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(stackView);
+        RDSConfig hive = new RDSConfig();
+        hive.setType("HIVE");
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(hive);
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(null);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, workspace);
 
@@ -117,20 +128,23 @@ public class SharedServiceValidatorTest {
 
     @Test
     public void testWithMissingLdap() {
-        RDSConfigRequest rangerRequest = new RDSConfigRequest();
-        rangerRequest.setType(RdsType.RANGER.name());
-        RDSConfigRequest hiveRequest = new RDSConfigRequest();
-        hiveRequest.setType(RdsType.HIVE.name());
-        ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setRdsConfigJsons(Set.of(rangerRequest, hiveRequest));
-        StackRequest stackRequest = new StackRequest();
-        stackRequest.setClusterRequest(clusterRequest);
-        stackRequest.setClusterToAttach(DATALAKE_ID);
-        stackRequest.setCloudPlatform(CLOUD_PLATFORM_1);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
+        clusterRequest.setSharedService(new SharedServiceV4Request());
+        clusterRequest.getSharedService().setSharedClusterName(DATALAKE_NAME);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setCluster(clusterRequest);
+        stackRequest.setCloudPlatform(CloudPlatform.GCP);
         Workspace workspace = new Workspace();
         StackView stackView = new StackView();
-        stackView.setCloudPlatform(CLOUD_PLATFORM_1);
-        when(stackViewService.findById(DATALAKE_ID)).thenReturn(Optional.of(stackView));
+        stackView.setCloudPlatform("GCP");
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(stackView);
+        RDSConfig ranger = new RDSConfig();
+        ranger.setType("RANGER");
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(ranger);
+        RDSConfig hive = new RDSConfig();
+        hive.setType("HIVE");
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(hive);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, workspace);
 

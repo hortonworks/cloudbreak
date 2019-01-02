@@ -1,17 +1,20 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod.KMS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod.RAW;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod.RSA;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider.GCP;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
@@ -22,8 +25,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 
 public class EncryptedClusterTests extends ClusterTests {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedClusterTests.class);
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
     public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
@@ -50,13 +51,13 @@ public class EncryptedClusterTests extends ClusterTests {
         var stack = cloudProvider.aValidStackRequest();
         if (stack.getRequest() != null && stack.getRequest().getInstanceGroups() != null && stack.getRequest().getInstanceGroups().size() == 3) {
             if (AWS.equalsIgnoreCase(cloudProvider.getPlatform())) {
-                stack.getRequest().getInstanceGroups().get(0).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.DEFAULT));
-                stack.getRequest().getInstanceGroups().get(1).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.CUSTOM));
-                stack.getRequest().getInstanceGroups().get(2).getTemplate().setAwsParameters(getAwsParametersWithEncryption(EncryptionType.NONE));
+                getInstanceGroup(stack, 0).setAws(getAwsParametersWithEncryption(getInstanceGroup(stack, 0).getAws(), EncryptionType.DEFAULT));
+                getInstanceGroup(stack, 1).setAws(getAwsParametersWithEncryption(getInstanceGroup(stack, 0).getAws(), EncryptionType.CUSTOM));
+                getInstanceGroup(stack, 2).setAws(getAwsParametersWithEncryption(getInstanceGroup(stack, 0).getAws(), EncryptionType.NONE));
             } else if (GCP.equalsIgnoreCase(cloudProvider.getPlatform())) {
-                stack.getRequest().getInstanceGroups().get(0).getTemplate().setGcpParameters(getGcpParametersWithEncryption(EncryptionMethod.RAW));
-                stack.getRequest().getInstanceGroups().get(1).getTemplate().setGcpParameters(getGcpParametersWithEncryption(EncryptionMethod.RSA));
-                stack.getRequest().getInstanceGroups().get(2).getTemplate().setGcpParameters(getGcpParametersWithEncryption(EncryptionMethod.KMS));
+                getInstanceGroup(stack, 0).setGcp(getGcpParametersWithEncryption(getInstanceGroup(stack, 0).getGcp(), RAW));
+                getInstanceGroup(stack, 1).setGcp(getGcpParametersWithEncryption(getInstanceGroup(stack, 1).getGcp(), RSA));
+                getInstanceGroup(stack, 2).setGcp(getGcpParametersWithEncryption(getInstanceGroup(stack, 2).getGcp(), KMS));
             }
         } else {
             throw new SkipException("Unable to set encrypted aws templates for instance groups!");
@@ -64,72 +65,52 @@ public class EncryptedClusterTests extends ClusterTests {
         return stack;
     }
 
-    private GcpParameters getGcpParametersWithEncryption(EncryptionMethod encryptionMethod) {
-        var params = new GcpParameters();
-        params.setEncryption(encryptionMethod.getEncryption(getTestParameter()));
-        return params;
+    private InstanceTemplateV4Request getInstanceGroup(StackEntity stack, int id) {
+        return stack.getRequest().getInstanceGroups().get(id).getTemplate();
     }
 
-    private AwsParameters getAwsParametersWithEncryption(EncryptionType type) {
-        var params = new AwsParameters();
-        params.setEncryption(type.getEncryption(getTestParameter()));
-        return params;
+    private GcpInstanceTemplateV4Parameters getGcpParametersWithEncryption(GcpInstanceTemplateV4Parameters parameters, KeyEncryptionMethod encryptionMethod) {
+        var templateParams = parameters;
+        var params = new GcpEncryptionV4Parameters();
+        params.setKeyEncryptionMethod(encryptionMethod);
+        if (parameters == null) {
+            templateParams = new GcpInstanceTemplateV4Parameters();
+        }
+        templateParams.setEncryption(params);
+        return templateParams;
+    }
+
+    private AwsInstanceTemplateV4Parameters getAwsParametersWithEncryption(AwsInstanceTemplateV4Parameters parameters, EncryptionType type) {
+        var templateParams = parameters;
+        if (parameters == null) {
+            templateParams = new AwsInstanceTemplateV4Parameters();
+        }
+        templateParams.setEncryption(type.getEncryption(getTestParameter()));
+        return templateParams;
     }
 
     private enum EncryptionType {
         DEFAULT {
-            public AwsEncryption getEncryption(TestParameter testParameter) {
-                var encryption = new AwsEncryption();
-                encryption.setType("DEFAULT");
+            public AwsEncryptionV4Parameters getEncryption(TestParameter testParameter) {
+                var encryption = new AwsEncryptionV4Parameters();
+                encryption.setType(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType.DEFAULT);
                 return encryption;
             }
         },
         CUSTOM {
-            public AwsEncryption getEncryption(TestParameter testParameter) {
-                var encryption = new AwsEncryption();
-                encryption.setType("CUSTOM");
+            public AwsEncryptionV4Parameters getEncryption(TestParameter testParameter) {
+                var encryption = new AwsEncryptionV4Parameters();
+                encryption.setType(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType.CUSTOM);
                 encryption.setKey(testParameter.getRequired("INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY"));
                 return encryption;
             }
         },
         NONE {
-            public AwsEncryption getEncryption(TestParameter testParameter) {
+            public AwsEncryptionV4Parameters getEncryption(TestParameter testParameter) {
                 return null;
             }
         };
 
-        public abstract AwsEncryption getEncryption(TestParameter testParameter);
-    }
-
-    private enum EncryptionMethod {
-        RAW {
-            public GcpEncryption getEncryption(TestParameter testParameter) {
-                var encryption = new GcpEncryption();
-                encryption.setType(EncryptionType.CUSTOM.name());
-                encryption.setKeyEncryptionMethod(RAW.name());
-                encryption.setKey("Hello World");
-                return encryption;
-            }
-        },
-        RSA {
-            public GcpEncryption getEncryption(TestParameter testParameter) {
-                var encryption = new GcpEncryption();
-                encryption.setType(EncryptionType.CUSTOM.name());
-                encryption.setKeyEncryptionMethod(RSA.name());
-                encryption.setKey("Hello World");
-                return encryption;
-            }
-        },
-        KMS {
-            public GcpEncryption getEncryption(TestParameter testParameter) {
-                var encryption = new GcpEncryption();
-                encryption.setType(EncryptionType.CUSTOM.name());
-                encryption.setKeyEncryptionMethod(KMS.name());
-                encryption.setKey(testParameter.getRequired("INTEGRATIONTEST_GCP_DISKENCRYPTIONKEY"));
-                return encryption;
-            }
-        };
-
-        public abstract GcpEncryption getEncryption(TestParameter testParameter);
+        public abstract AwsEncryptionV4Parameters getEncryption(TestParameter testParameter);
     }
 }

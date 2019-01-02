@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -47,7 +47,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
-        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getId(), RdsType.AMBARI);
+        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getId(), DatabaseType.AMBARI);
         if (rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.name());
             clusterDetails.setExternalDatabase(Boolean.FALSE);

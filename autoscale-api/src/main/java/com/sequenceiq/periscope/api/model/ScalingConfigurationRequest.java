@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ValidScalingConfiguration
-@ApiModel("ScalingConfiguration")
+@ApiModel
 public class ScalingConfigurationRequest implements Json {
 
     @ApiModelProperty(ScalingConfigurationJsonProperties.MINSIZE)

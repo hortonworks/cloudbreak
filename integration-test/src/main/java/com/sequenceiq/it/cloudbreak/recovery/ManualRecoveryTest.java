@@ -12,8 +12,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -46,7 +46,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
+        StackV4Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);
@@ -56,6 +56,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 - removedInstanceCount;
 
+
         WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV1Endpoint, stackId, hostGroup, "UNHEALTHY");
 
         if (waitResult == WaitResult.TIMEOUT) {
@@ -63,7 +64,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         }
         //WHEN
         List<String> hostgroupList = Arrays.asList(hostGroup.split(","));
-        ClusterRepairRequest clusterRepairRequest = new ClusterRepairRequest();
+        ClusterRepairV4Request clusterRepairRequest = new ClusterRepairV4Request();
         clusterRepairRequest.setHostGroups(hostgroupList);
         clusterRepairRequest.setRemoveOnly(removeOnly);
         getCloudbreakClient().clusterEndpoint().repairCluster(Long.valueOf(stackId), clusterRepairRequest);

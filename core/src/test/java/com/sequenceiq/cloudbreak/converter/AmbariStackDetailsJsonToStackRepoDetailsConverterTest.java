@@ -6,16 +6,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari.StackRepositoryV4RequestToStackRepoDetailsConverter;
 
-public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
+public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends AbstractJsonConverterTest<StackRepositoryV4Request> {
 
-    private AmbariStackDetailsJsonToStackRepoDetailsConverter underTest;
+    private StackRepositoryV4RequestToStackRepoDetailsConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new AmbariStackDetailsJsonToStackRepoDetailsConverter();
+        underTest = new StackRepositoryV4RequestToStackRepoDetailsConverter();
     }
 
     @Test
@@ -30,14 +31,14 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends Abstr
     @Test
     public void testConvertWhenVDFProvided() {
 
-        AmbariStackDetailsJson request = getRequest("stack/ambari-stack-details-vdf.json");
+        StackRepositoryV4Request request = getRequest("stack/ambari-stack-details-vdf.json");
         StackRepoDetails result = underTest.convert(request);
 
         Assert.assertFalse(result.getStack().containsKey(request.getOs()));
     }
 
     @Override
-    public Class<AmbariStackDetailsJson> getRequestClass() {
-        return AmbariStackDetailsJson.class;
+    public Class<StackRepositoryV4Request> getRequestClass() {
+        return StackRepositoryV4Request.class;
     }
 }

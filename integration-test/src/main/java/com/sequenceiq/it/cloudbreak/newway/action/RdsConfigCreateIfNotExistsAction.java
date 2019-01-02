@@ -17,14 +17,14 @@ public class RdsConfigCreateIfNotExistsAction implements ActionV2<RdsConfigEntit
         LOGGER.info("Create RdsConfig with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(
-                    client.getCloudbreakClient().rdsConfigV3Endpoint().createInWorkspace(client.getWorkspaceId(), entity.getRequest())
+                    client.getCloudbreakClient().databaseV4Endpoint().create(client.getWorkspaceId(), entity.getRequest())
             );
             logJSON(LOGGER, "RdsConfig created successfully: ", entity.getRequest());
         } catch (Exception e) {
             LOGGER.info("Cannot create RdsConfig, fetch existed one: {}", entity.getRequest().getName());
             entity.setResponse(
-                    client.getCloudbreakClient().rdsConfigV3Endpoint()
-                            .getByNameInWorkspace(client.getWorkspaceId(), entity.getRequest().getName()));
+                    client.getCloudbreakClient().databaseV4Endpoint()
+                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
         }
         if (entity.getResponse() == null) {
             throw new IllegalStateException("RdsConfigF could not be created.");

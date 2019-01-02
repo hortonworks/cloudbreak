@@ -4,13 +4,13 @@ import java.util.function.Function;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, KerberosResponse, KerberosEntity>  {
+public class KerberosEntity extends AbstractCloudbreakEntity<KerberosV4Request, KerberosV4Response, KerberosEntity>  {
 
     public static final String KERBEROS = "KERBEROS";
 
@@ -20,7 +20,7 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
 
     public static final String DEFAULT_ADMIN_PASSWORD = "password";
 
-    private KerberosRequest request;
+    private KerberosV4Request request;
 
     KerberosEntity() {
         this(KERBEROS);
@@ -28,7 +28,7 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
 
     KerberosEntity(String newId) {
         super(newId);
-        request = new KerberosRequest();
+        request = new KerberosV4Request();
         FreeIPAKerberosDescriptor ipa = new FreeIPAKerberosDescriptor();
         ipa.setPassword(DEFAULT_ADMIN_PASSWORD);
         ipa.setAdminUrl("http://someurl.com");
@@ -39,24 +39,24 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
     }
 
     public KerberosEntity(TestContext testContext) {
-        super(new KerberosRequest(), testContext);
+        super(new KerberosV4Request(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().kerberosConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+            cloudbreakClient.getCloudbreakClient().kerberosConfigV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend during the kerberos resource delete operation.");
         }
     }
 
-    public KerberosRequest getRequest() {
+    public KerberosV4Request getRequest() {
         return request;
     }
 
-    public void setRequest(KerberosRequest request) {
+    public void setRequest(KerberosV4Request request) {
         this.request = request;
     }
 
@@ -66,7 +66,7 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, Ke
         return this;
     }
 
-    public KerberosEntity withRequest(KerberosRequest request) {
+    public KerberosEntity withRequest(KerberosV4Request request) {
         setRequest(request);
         return this;
     }

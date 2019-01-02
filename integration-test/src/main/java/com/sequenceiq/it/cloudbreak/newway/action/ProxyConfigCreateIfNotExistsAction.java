@@ -17,14 +17,14 @@ public class ProxyConfigCreateIfNotExistsAction implements ActionV2<ProxyConfigE
         LOGGER.info("Create ProxyConfig with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(
-                    client.getCloudbreakClient().proxyConfigV3Endpoint().createInWorkspace(client.getWorkspaceId(), entity.getRequest())
+                    client.getCloudbreakClient().proxyConfigV4Endpoint().post(client.getWorkspaceId(), entity.getRequest())
             );
             logJSON(LOGGER, "ProxyConfig created successfully: ", entity.getRequest());
         } catch (Exception e) {
             LOGGER.info("Cannot create ProxyConfig, fetch existed one: {}", entity.getRequest().getName());
             entity.setResponse(
-                    client.getCloudbreakClient().proxyConfigV3Endpoint()
-                            .getByNameInWorkspace(client.getWorkspaceId(), entity.getRequest().getName()));
+                    client.getCloudbreakClient().proxyConfigV4Endpoint()
+                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
         }
         if (entity.getResponse() == null) {
             throw new IllegalStateException("ProxyConfig could not be created.");

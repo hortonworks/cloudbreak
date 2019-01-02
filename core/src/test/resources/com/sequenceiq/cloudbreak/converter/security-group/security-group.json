@@ -1,13 +1,15 @@
 {
-  "name" : "security-group-01",
-  "description" : "security group description",
-  "cloudPlatform" : "AWS",
-  "securityRules" : [
+  "name": "security-group-01",
+  "description": "security group description",
+  "cloudPlatform": "AWS",
+  "securityRules": [
     {
-      "subnet" : "0.0.0.0/0",
-      "ports" : "80",
-      "protocol" : "tcp",
-      "modifiable" : true
+      "subnet": "0.0.0.0/0",
+      "ports": [
+        "80"
+      ],
+      "protocol": "tcp",
+      "modifiable": true
     }
   ]
 }

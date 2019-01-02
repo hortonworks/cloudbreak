@@ -15,9 +15,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType;
-import com.sequenceiq.cloudbreak.api.model.template.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -53,10 +53,21 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     private DatalakeRequired datalakeRequired;
 
     @Enumerated(EnumType.STRING)
-    private ClusterTemplateType type;
+    private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String templateContent;
+
+    public ClusterTemplate() {
+
+    }
+
+    public ClusterTemplate(String templateContent, String name, ResourceStatus status, Workspace workspace) {
+        this.templateContent = templateContent;
+        this.name = name;
+        this.status = status;
+        this.workspace = workspace;
+    }
 
     public Stack getStackTemplate() {
         return stackTemplate;
@@ -131,11 +142,11 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
         this.datalakeRequired = datalakeRequired;
     }
 
-    public ClusterTemplateType getType() {
+    public ClusterTemplateV4Type getType() {
         return type;
     }
 
-    public void setType(ClusterTemplateType type) {
+    public void setType(ClusterTemplateV4Type type) {
         this.type = type;
     }
 

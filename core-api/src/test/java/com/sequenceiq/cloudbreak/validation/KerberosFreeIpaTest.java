@@ -14,7 +14,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
 
 @RunWith(Parameterized.class)
 public class KerberosFreeIpaTest {

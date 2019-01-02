@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogPostAction;
@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.newway.v3.ImageCatalogV3Action;
 public class ImageCatalog extends ImageCatalogEntity {
 
     public ImageCatalog(TestContext testContext) {
-        super(new ImageCatalogRequest(), testContext);
+        super(new ImageCatalogV4Request(), testContext);
     }
 
     public ImageCatalog() {
@@ -111,14 +111,14 @@ public class ImageCatalog extends ImageCatalogEntity {
 
     public static ImageCatalogEntity getByNameAndImages(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().imageCatalogV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName(), true)
+                cloudbreakClient.getCloudbreakClient().imageCatalogV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName(), Boolean.TRUE)
         );
         return entity;
     }
 
     public static ImageCatalogEntity getByNameWithoutImages(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().imageCatalogV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName(), false)
+                cloudbreakClient.getCloudbreakClient().imageCatalogV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName(), Boolean.FALSE)
         );
         return entity;
     }

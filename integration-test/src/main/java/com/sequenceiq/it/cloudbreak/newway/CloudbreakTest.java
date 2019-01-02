@@ -22,8 +22,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
-import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchProps;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
@@ -141,7 +141,7 @@ public class CloudbreakTest extends GherkinTest {
             CloudbreakClient client = CloudbreakClient.created();
             client.create(testContext);
 
-            UserProfileResponse profile = CloudbreakClient.getSingletonCloudbreakClient().userEndpoint().getProfile();
+            UserProfileV4Response profile = CloudbreakClient.getSingletonCloudbreakClient().userProfileV4Endpoint().get();
             LogSearchUtil.addQueryModelForLogSearchUrlToContext(testContext, LogSearchUtil.LOG_SEARCH_CBOWNER_ID,
                     LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, profile.getUsername());
 
@@ -151,9 +151,9 @@ public class CloudbreakTest extends GherkinTest {
         }
     }
 
-    private void setWorkspaceByUserProfile(IntegrationTestContext testContext, UserProfileResponse profile) {
-        WorkspaceResponse workspace = CloudbreakClient.getSingletonCloudbreakClient()
-                .workspaceV3Endpoint().getByName(profile.getUsername());
+    private void setWorkspaceByUserProfile(IntegrationTestContext testContext, UserProfileV4Response profile) {
+        WorkspaceV4Response workspace = CloudbreakClient.getSingletonCloudbreakClient()
+                .workspaceV4Endpoint().get(profile.getUsername());
         if (workspace != null) {
             LOGGER.info("put WORKSPACE_ID to context: {}", workspace.getId());
             testContext.putContextParam(WORKSPACE_ID, workspace.getId());

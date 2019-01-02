@@ -1,48 +1,52 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupV4RequestToInstanceGroupConverter;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
-import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
-public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupRequest> {
+@RunWith(MockitoJUnitRunner.class)
+public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
 
     @InjectMocks
-    private InstanceGroupRequestToInstanceGroupConverter underTest;
+    private InstanceGroupV4RequestToInstanceGroupConverter underTest;
 
     @Mock
-    private TemplateService templateService;
+    private ConversionService conversionService;
 
     @Mock
-    private SecurityGroupService securityGroupService;
-
-    @Before
-    public void setUp() {
-        underTest = new InstanceGroupRequestToInstanceGroupConverter();
-        MockitoAnnotations.initMocks(this);
-    }
+    private ProviderParameterCalculator providerParameterCalculator;
 
     @Test
     public void testConvert() {
+        InstanceGroupV4Request request = getRequest("instance-group.json");
         // GIVEN
-        given(templateService.get(anyLong())).willReturn(TestUtil.gcpTemplate(51L));
-        given(securityGroupService.get(anyLong())).willReturn(TestUtil.securityGroup(1L));
+        given(providerParameterCalculator.get(request)).willReturn(() -> new HashMap<>(Map.of("key", "value")));
+        given(conversionService.convert(any(InstanceTemplateV4Request.class), eq(Template.class))).willReturn(new Template());
+        given(conversionService.convert(any(SecurityGroupV4Request.class), eq(SecurityGroup.class))).willReturn(new SecurityGroup());
         // WHEN
-        InstanceGroup instanceGroup = underTest.convert(getRequest("instance-group.json"));
+        InstanceGroup instanceGroup = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(instanceGroup, Collections.singletonList("stack"));
     }
@@ -50,13 +54,12 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
     @Test(expected = AccessDeniedException.class)
     public void testConvertWhenAccessDenied() {
         // GIVEN
-        given(templateService.get(anyLong())).willThrow(new AccessDeniedException("exception"));
         // WHEN
         underTest.convert(getRequest("instance-group.json"));
     }
 
     @Override
-    public Class<InstanceGroupRequest> getRequestClass() {
-        return InstanceGroupRequest.class;
+    public Class<InstanceGroupV4Request> getRequestClass() {
+        return InstanceGroupV4Request.class;
     }
 }

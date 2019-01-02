@@ -23,9 +23,9 @@ import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -81,7 +81,7 @@ public class ClusterCreationSetupServiceTest {
     @InjectMocks
     private ClusterCreationSetupService underTest;
 
-    private ClusterRequest clusterRequest;
+    private ClusterV4Request clusterRequest;
 
     private Stack stack;
 
@@ -97,7 +97,7 @@ public class ClusterCreationSetupServiceTest {
     public void init() throws CloudbreakImageNotFoundException, JsonProcessingException {
         MockitoAnnotations.initMocks(this);
         workspace = new Workspace();
-        clusterRequest = new ClusterRequest();
+        clusterRequest = new ClusterV4Request();
         stack = new Stack();
         stack.setId(1L);
         stack.setWorkspace(workspace);
@@ -115,7 +115,7 @@ public class ClusterCreationSetupServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
-        when(conversionService.convert(any(ClusterRequest.class), eq(Cluster.class))).thenReturn(cluster);
+        when(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).thenReturn(cluster);
         when(clusterDecorator
                 .decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(component, imageComponent));
@@ -134,9 +134,9 @@ public class ClusterCreationSetupServiceTest {
         defaultHDPInfo.setVersion(version);
         when(defaultHDPEntries.getEntries()).thenReturn(Collections.singletonMap(version, defaultHDPInfo));
         when(componentConfigProvider.getImage(anyLong())).thenReturn(image);
-        StackMatrix stackMatrix = new StackMatrix();
-        stackMatrix.setHdp(Collections.singletonMap(version, null));
-        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrix);
+        StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
+        stackMatrixV4Response.setHdp(Collections.singletonMap(version, null));
+        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(false);
         when(clusterService.save(any(Cluster.class))).thenReturn(cluster);
     }
@@ -169,7 +169,7 @@ public class ClusterCreationSetupServiceTest {
     @Test
     public void testIncorrectKerberosSettingForWorkloadCluster() {
         stack.setDatalakeId(1L);
-        clusterRequest.setKerberosConfigName("attached_kerberos_which_not_allowed");
+        clusterRequest.setKerberosName("attached_kerberos_which_not_allowed");
 
         assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
     }

@@ -153,7 +153,7 @@ public class Mock extends SparkMockEntity {
                 CloudbreakClient.class);
         credentialName = mock.getCredentialName();
         Log.log(" delete by mock: " + credentialName);
-        client.getCloudbreakClient().credentialEndpoint().deletePrivate(credentialName);
+        client.getCloudbreakClient().credentialV4Endpoint().delete(1L, credentialName);
     }
 
     public static void setup(String hostName, int threadCount) {

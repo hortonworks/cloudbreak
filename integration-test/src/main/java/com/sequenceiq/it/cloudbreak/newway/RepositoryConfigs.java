@@ -5,18 +5,18 @@ import java.util.function.Function;
 
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RepositoryConfigs extends Entity {
     private static final String REPOSITORYCONFIGS = "REPOSITORYCONFIGS";
 
-    private RepoConfigValidationRequest repoConfigValidationRequest;
+    private RepoConfigValidationV4Request repoConfigValidationV4Request;
 
-    private RepoConfigValidationResponse response;
+    private RepoConfigValidationV4Response response;
 
-    private RepoConfigValidationRequest request;
+    private RepoConfigValidationV4Request request;
 
     private RepositoryConfigs(String id) {
         super(id);
@@ -26,9 +26,9 @@ public class RepositoryConfigs extends Entity {
         this(REPOSITORYCONFIGS);
     }
 
-    private RepositoryConfigs(RepoConfigValidationRequest repoConfigValidationRequest) {
+    private RepositoryConfigs(RepoConfigValidationV4Request repoConfigValidationV4Request) {
         this();
-        this.repoConfigValidationRequest = repoConfigValidationRequest;
+        this.repoConfigValidationV4Request = repoConfigValidationV4Request;
     }
 
     static Function<IntegrationTestContext, RepositoryConfigs> getTestContext(String key) {
@@ -39,24 +39,24 @@ public class RepositoryConfigs extends Entity {
         return new RepositoryConfigs();
     }
 
-    public static RepositoryConfigs request(RepoConfigValidationRequest nr) {
+    public static RepositoryConfigs request(RepoConfigValidationV4Request nr) {
         return new RepositoryConfigs(nr);
     }
 
-    public void setResponse(RepoConfigValidationResponse response) {
+    public void setResponse(RepoConfigValidationV4Response response) {
         this.response = response;
     }
 
-    public RepoConfigValidationResponse getRepoConfigsResponse() {
+    public RepoConfigValidationV4Response getRepoConfigsResponse() {
         return response;
     }
 
-    public void setRequest(RepoConfigValidationRequest request) {
+    public void setRequest(RepoConfigValidationV4Request request) {
         this.request = request;
     }
 
-    public RepoConfigValidationRequest getRequest() {
-        return repoConfigValidationRequest;
+    public RepoConfigValidationV4Request getRequest() {
+        return repoConfigValidationV4Request;
     }
 
     public static Action<RepositoryConfigs> post() {

@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.template.filesystem.adlsgen2;
 
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.ADLS_GEN_2;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
 
 @Component

@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -10,7 +7,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.P12Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -36,17 +35,19 @@ public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         serviceAccountId = StringUtils.hasLength(serviceAccountId) ? serviceAccountId : defaultServiceAccountId;
         serviceAccountPrivateKeyP12File = StringUtils.hasLength(serviceAccountPrivateKeyP12File) ? serviceAccountPrivateKeyP12File : defaultP12File;
         String serviceAccountPrivateKey = ResourceUtil.readBase64EncodedContentFromResource(applicationContext, serviceAccountPrivateKeyP12File);
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setCloudPlatform("GCP");
         credentialRequest.setDescription("GCP credential for integartiontest");
         credentialRequest.setName(credentialName);
-        Map<String, Object> map = new HashMap<>();
-        map.put("projectId", projectId);
-        map.put("serviceAccountId", serviceAccountId);
-        map.put("serviceAccountPrivateKey", serviceAccountPrivateKey);
-        credentialRequest.setParameters(map);
+        GcpCredentialV4Parameters credentialParameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(projectId);
+        p12Parameters.setServiceAccountId(serviceAccountId);
+        p12Parameters.setServiceAccountPrivateKey(serviceAccountPrivateKey);
+        credentialParameters.setP12(p12Parameters);
+        credentialRequest.setGcp(credentialParameters);
         // WHEN
-        String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
+        Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

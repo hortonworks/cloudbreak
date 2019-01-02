@@ -1,18 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
+import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.WASB;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Storage.Wasb;
 
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
-import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.WASB;
-
-public class AzureWasbResourceHelper extends ResourceHelper<WasbCloudStorageParameters> {
+public class AzureWasbResourceHelper extends ResourceHelper<WasbCloudStorageV4Parameters> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AZURE_RANGER_DB_CONFIG";
 
@@ -41,24 +41,25 @@ public class AzureWasbResourceHelper extends ResourceHelper<WasbCloudStoragePara
     }
 
     @Override
-    public CloudStorageRequest getCloudStorageRequestForDatalake() {
-        var request = new CloudStorageRequest();
+    public CloudStorageV4Request getCloudStorageRequestForDatalake() {
+        var request = new CloudStorageV4Request();
         request.setWasb(getCloudStorage());
         request.setLocations(defaultDatalakeStorageLocations(WASB, getTestParameter().get(Wasb.STORAGE_NAME)));
         return request;
     }
 
     @Override
-    public CloudStorageRequest getCloudStorageRequestForAttachedCluster() {
+    public CloudStorageV4Request getCloudStorageRequestForAttachedCluster() {
         return getCloudStorageForAttachedCluster(WASB, getTestParameter().get(Wasb.STORAGE_NAME), getCloudStorage());
     }
 
     @Override
-    protected WasbCloudStorageParameters getCloudStorage() {
-        var params = new WasbCloudStorageParameters();
+    protected WasbCloudStorageV4Parameters getCloudStorage() {
+        var params = new WasbCloudStorageV4Parameters();
         params.setAccountName(getTestParameter().get(Wasb.ACCOUNT));
         params.setAccountKey(getTestParameter().get(Wasb.ACCESS_KEY));
         params.setSecure(true);
         return params;
     }
+
 }

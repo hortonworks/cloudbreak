@@ -56,7 +56,7 @@ tests:
       clusterName: it-aws-cred-ud
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: upscale stack, upscale cluster
     parameters:

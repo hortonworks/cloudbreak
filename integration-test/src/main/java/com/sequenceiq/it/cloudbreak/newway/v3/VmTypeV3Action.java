@@ -22,20 +22,20 @@ public class VmTypeV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && vmtypeEntity.getRequest().getCredentialId() == null) {
+        if (credential != null && vmtypeEntity.getRequest().getCredentialName() == null) {
             vmtypeEntity.getRequest().setCredentialName(credential.getName());
         }
 
         Region region = Region.getTestContextRegion().apply(integrationTestContext);
         if (region != null && vmtypeEntity.getRequest().getRegion() == null) {
-            vmtypeEntity.getRequest().setRegion(region.getRegionResponse().getDefaultRegion());
+            vmtypeEntity.getRequest().setRegion(region.getRegionV4Response().getDefaultRegion());
         }
 
         Log.log(String.join(" ", " get Virtual Machine Types to",
                 vmtypeEntity.getRequest().getCredentialName(), "credential and to",
                 vmtypeEntity.getRequest().getRegion(), "region "));
         vmtypeEntity.setResponse(client.getCloudbreakClient()
-                .connectorV3Endpoint()
+                .connectorV4Endpoint()
                 .getVmTypesByCredential(workspaceId, vmtypeEntity.getRequest()));
         Log.logJSON(" get Virtual Machine Types response: ", vmtypeEntity.getResponse());
     }

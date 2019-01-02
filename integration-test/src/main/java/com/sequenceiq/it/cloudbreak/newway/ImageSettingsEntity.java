@@ -4,18 +4,18 @@ import java.util.function.Function;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ImageSettingsEntity extends AbstractCloudbreakEntity<com.sequenceiq.cloudbreak.api.model.v2.ImageSettings, Response, ImageSettingsEntity> {
+public class ImageSettingsEntity extends AbstractCloudbreakEntity<ImageSettingsV4Request, Response, ImageSettingsEntity> {
 
     public static final String IMAGESETTINGS_REQUEST = "IMAGESETTINGS_REQUEST";
 
     ImageSettingsEntity(String newId) {
         super(newId);
-        setRequest(new com.sequenceiq.cloudbreak.api.model.v2.ImageSettings());
+        setRequest(new ImageSettingsV4Request());
     }
 
     ImageSettingsEntity() {
@@ -23,7 +23,7 @@ public class ImageSettingsEntity extends AbstractCloudbreakEntity<com.sequenceiq
     }
 
     public ImageSettingsEntity(TestContext testContext) {
-        super(new ImageSettings(), testContext);
+        super(new ImageSettingsV4Request(), testContext);
     }
 
     @Override
@@ -32,12 +32,12 @@ public class ImageSettingsEntity extends AbstractCloudbreakEntity<com.sequenceiq
     }
 
     public ImageSettingsEntity withImageCatalog(String imageCatalog) {
-        getRequest().setImageCatalog(imageCatalog);
+        getRequest().setCatalog(imageCatalog);
         return this;
     }
 
     public ImageSettingsEntity withImageId(String imageId) {
-        getRequest().setImageId(imageId);
+        getRequest().setId(imageId);
         return this;
     }
 

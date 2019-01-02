@@ -16,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -33,25 +33,14 @@ public class GatewayConvertUtilTest {
     private final GatewayConvertUtil underTest = new GatewayConvertUtil();
 
     @Test
-    public void testSetTopologiesWithLegacyReqeust() {
-        GatewayJson source = new GatewayJson();
-        source.setTopologyName(DEPRECATED_TOPOLOGY_NAME);
-        Gateway result = new Gateway();
-
-        underTest.setTopologies(source, result);
-
-        assertEquals(DEPRECATED_TOPOLOGY_NAME, result.getTopologies().iterator().next().getTopologyName());
-    }
-
-    @Test
     public void testSetMultipleTopologies() {
-        GatewayJson source = new GatewayJson();
+        GatewayV4Request source = new GatewayV4Request();
 
-        GatewayTopologyJson topology1 = new GatewayTopologyJson();
+        GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
         topology1.setTopologyName("topology1");
         topology1.setExposedServices(Collections.singletonList("AMBARI"));
 
-        GatewayTopologyJson topology2 = new GatewayTopologyJson();
+        GatewayTopologyV4Request topology2 = new GatewayTopologyV4Request();
         topology2.setTopologyName("topology2");
         topology2.setExposedServices(Collections.singletonList("ALL"));
 
@@ -68,8 +57,8 @@ public class GatewayConvertUtilTest {
     @Test
     public void testGatewayPathConversionWhenNoPathInGatewayJson() {
         Gateway gateway = new Gateway();
-        GatewayJson gatewayJson = new GatewayJson();
-        underTest.setGatewayPathAndSsoProvider("cluster-name", gatewayJson, gateway);
+        GatewayV4Request gatewayJson = new GatewayV4Request();
+        underTest.setGatewayPathAndSsoProvider(gatewayJson, gateway);
 
         assertEquals('/' + gateway.getPath() + "/sso/api/v1/websso", gateway.getSsoProvider());
     }
@@ -78,10 +67,10 @@ public class GatewayConvertUtilTest {
     public void testGatewayPathConversionWhenPathIsInGatewayJson() {
         Gateway gateway = new Gateway();
         String gatewayPath = "gatewayPath";
-        GatewayJson gatewayJson = new GatewayJson();
+        GatewayV4Request gatewayJson = new GatewayV4Request();
         gatewayJson.setPath(gatewayPath);
 
-        underTest.setGatewayPathAndSsoProvider("cluster-name", gatewayJson, gateway);
+        underTest.setGatewayPathAndSsoProvider(gatewayJson, gateway);
 
         assertEquals('/' + gateway.getPath() + "/sso/api/v1/websso", gateway.getSsoProvider());
 

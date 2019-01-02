@@ -1,8 +1,22 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -13,21 +27,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CredentialModifyClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -67,12 +66,12 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
                 .withName(credentialName), "a credential is created.");
         given(Credential.request()
                 .withName(credentialName)
-                .withParameters(provider.awsCredentialDetailsKey())
+                .withAwsParameters(provider.awsCredentialDetailsKey())
                 .withCloudPlatform(provider.getPlatform()), " credential Key Based modification is requested.");
         when(Credential.put(), " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
+                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getAws().asMap().entrySet()) {
                         LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
                         LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
                         if ("selector".equalsIgnoreCase(parameterMapping.getKey())) {
@@ -147,22 +146,6 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 
-    @DataProvider(name = "providernameblueprintimage")
-    public Object[][] providerAndImage() throws Exception {
-        String blueprint = getTestParameter().get("blueprintName");
-        String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
-
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-
-        String clusterName = getTestParameter().get("clusterName");
-        String credentialName = getTestParameter().get("credentialName");
-        String image = getImageId(provider, imageDescription, blueprint);
-        return new Object[][]{
-                {cloudProvider, clusterName, credentialName, blueprint, image}
-        };
-    }
-
     @DataProvider(name = "providernamehostgroupdesiredno")
     public Object[][] providerAndHostgroup() {
         String hostgroupName = getTestParameter().get("instancegroupName");
@@ -191,36 +174,18 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         };
     }
 
-    private String getImageId(String provider, String imageDescription, String blueprintName) throws Exception {
-        given(CloudbreakClient.created());
-        CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
-        com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        BlueprintResponse blueprint = client.blueprintEndpoint().getPublic(blueprintName);
-        String stackVersion = new JSONObject(blueprint.getAmbariBlueprint())
-                .getJSONObject("Blueprints").getString("stack_version");
-        switch (imageDescription) {
-            case "hdf":
-                return getLastUuid(imagesByProvider.getHdfImages(), stackVersion);
-            case "hdp":
-                return getLastUuid(imagesByProvider.getHdpImages(), stackVersion);
-            default:
-                return getLastUuid(imagesByProvider.getBaseImages(), stackVersion);
-        }
-    }
-
-    private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {
-        List<? extends ImageResponse> result = images.stream()
-                .filter(ImageResponse::isDefaultImage)
+    private String getLastUuid(List<? extends ImageV4Response> images, String stackVersion) {
+        List<? extends ImageV4Response> result = images.stream()
+                .filter(ImageV4Response::isDefaultImage)
                 .filter(image -> {
-                    ImageResponse imageResponse = image;
-                    if (!StringUtils.isEmpty(imageResponse.getVersion())) {
-                        return imageResponse.getVersion().startsWith(stackVersion);
+                    ImageV4Response imageV4Response = image;
+                    if (!StringUtils.isEmpty(imageV4Response.getVersion())) {
+                        return imageV4Response.getVersion().startsWith(stackVersion);
                     }
-                    if (imageResponse.getStackDetails() == null) {
+                    if (imageV4Response.getStackDetails() == null) {
                         return true;
                     }
-                    if (imageResponse.getStackDetails().getVersion() == null) {
+                    if (imageV4Response.getStackDetails().getVersion() == null) {
                         return true;
                     }
                     return image.getStackDetails().getVersion().startsWith(stackVersion);
@@ -229,7 +194,7 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         if (result.isEmpty()) {
             result = images;
         }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(ImageV4Response::getDate)).collect(Collectors.toList());
         return result.get(result.size() - 1).getUuid();
     }
 

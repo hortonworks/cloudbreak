@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -121,6 +121,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     private void validateBeforeCreate(ClusterTemplate resource) {
+
+        if (resource.getStackTemplate() == null) {
+            throw new BadRequestException("The stack tempalte cannot be null.");
+        }
+
         if (resource.getStatus() != ResourceStatus.DEFAULT && resource.getStackTemplate().getEnvironment() == null) {
             throw new BadRequestException("The environment cannot be null.");
         }
@@ -133,31 +138,36 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Override
     public Set<ClusterTemplate> findAllByWorkspace(Workspace workspace) {
-        return getAllAvailableInWorkspace(workspace);
+        updateDefaultClusterTemplates(workspace);
+        return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
     @Override
     public Set<ClusterTemplate> findAllByWorkspaceId(Long workspaceId) {
+        updateDefaultClusterTemplates(workspaceId);
+        return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspaceId);
+    }
+
+    public void updateDefaultClusterTemplates(long workspaceId) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        return getAllAvailableInWorkspace(workspace);
+        updateDefaultClusterTemplates(workspace);
     }
 
-    private Set<ClusterTemplate> getAllAvailableInWorkspace(Workspace workspace) {
-        Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+    private void updateDefaultClusterTemplates(Workspace workspace) {
+        Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllTemplateContentNameStatusByNotDeletedInWorkspace(workspace.getId());
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
             LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{}' workspace.", workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
             outdatedTemplates.forEach(ct -> {
                 ct.setStatus(ResourceStatus.OUTDATED);
-                delete(ct.getName(), ct.getWorkspace().getId());
+                delete(ct);
             });
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-            clusterTemplates = clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
+            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
             LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
-        return clusterTemplates;
     }
 
     private Collection<ClusterTemplate> createAll(Iterable<ClusterTemplate> clusterTemplates) {
@@ -171,9 +181,16 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return WorkspaceResource.CLUSTER_TEMPLATE;
     }
 
-    public void delete(String name, Long workspaceId) {
+    public ClusterTemplate delete(String name, Long workspaceId) {
         ClusterTemplate clusterTemplate = getByNameForWorkspaceId(name, workspaceId);
         deleteByNameFromWorkspace(name, workspaceId);
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
+        return clusterTemplate;
+    }
+
+    public ClusterTemplate delete(ClusterTemplate clusterTemplate) {
+        super.delete(clusterTemplate);
+        stackTemplateService.delete(clusterTemplate.getStackTemplate());
+        return clusterTemplate;
     }
 }

@@ -9,7 +9,7 @@ public class Notes {
             + "running on different instance types. This will give you the option to group your "
             + "Hadoop services based on resource needs (e.g. high I/O, CPU or memory) "
             + "and create an infrastructure which fits your workload best.";
-    public static final String TEMPLATE_NOTES = "A template gives developers and systems administrators "
+    public static final String CLUSTER_TEMPLATE_NOTES = "A template gives developers and systems administrators "
             + "an easy way to create and manage a collection of cloud infrastructure related resources, "
             + "maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific "
             + "- and on top of the infrastructural setup they collect the information such as the used machine images, "
@@ -33,7 +33,6 @@ public class Notes {
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
     public static final String GATEWAY_NOTES = "Gateway is an Apache Knox Gateway, which is an Application Gateway for interacting with REST APIs and"
             + "UIs of Apache Hadoop deployments. Provides Authentication and other services.";
-    public static final String CLUSTER_TEMPLATE_NOTES = "Cluster templates are stored cluster configurations, which configurations are reusable any time";
     public static final String RECIPE_NOTES = "Recipes are basically script extensions to a cluster that run on a set of nodes"
             + " before or after the Ambari cluster installation.";
     public static final String USAGE_NOTES = "Cloudbreak gives you an up to date overview of cluster usage based "
@@ -49,8 +48,10 @@ public class Notes {
     public static final String MAINTENANCE_NOTES = "Setting maintenance mode for the cluster in order to be able to update Ambari and/or the Hadoop stack.";
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
+    public static final String USER_PROFILE_NOTES = "Users can be invited under an account by the administrator, and all resources "
+            + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
-    public static final String RDSCONFIG_NOTES = "An RDS Configuration describe a connection to an external Relational Database Service "
+    public static final String DATABASE_NOTES = "A Database Configuration describe a connection to an external Relational Database Service "
             + "that can be used as the Hive Metastore.";
     public static final String PROXY_CONFIG_NOTES = "An proxy Configuration describe a connection to an external proxy server which provides internet access "
             + "cluster members. It's applied for package manager and Ambari too";

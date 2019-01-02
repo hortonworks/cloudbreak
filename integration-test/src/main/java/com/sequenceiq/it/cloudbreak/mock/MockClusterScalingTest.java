@@ -10,10 +10,10 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -56,8 +56,8 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
         int stackIntId = Integer.parseInt(stackId);
         // WHEN
         if (scalingAdjustment < 0) {
-            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setHostGroup(instanceGroup);
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
@@ -65,26 +65,26 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
             CloudbreakUtil.checkResponse("DownscaleCluster", getCloudbreakClient().clusterEndpoint().put((long) stackIntId, updateClusterJson));
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
 
-            UpdateStackJson updateStackJson = new UpdateStackJson();
+            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(false);
-            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         } else {
-            UpdateStackJson updateStackJson = new UpdateStackJson();
+            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(false);
-            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
 
-            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setHostGroup(instanceGroup);
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);

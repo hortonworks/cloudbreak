@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
@@ -18,30 +18,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
-import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -225,8 +227,8 @@ public class TestUtil {
         return userWorkspacePermissions;
     }
 
-    public static ChangeWorkspaceUsersJson changeWorkspaceUsersJson(String userId, String... permissions) {
-        ChangeWorkspaceUsersJson json1 = new ChangeWorkspaceUsersJson();
+    public static ChangeWorkspaceUsersV4Request changeWorkspaceUsersJson(String userId, String... permissions) {
+        ChangeWorkspaceUsersV4Request json1 = new ChangeWorkspaceUsersV4Request();
         json1.setUserId(userId);
         json1.setPermissions(Set.of(permissions));
         return json1;
@@ -325,11 +327,6 @@ public class TestUtil {
     public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
             InstanceGroup instanceGroup) {
         return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.CORE);
-    }
-
-    public static InstanceMetaData primaryGateWayInstanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
-            InstanceGroup instanceGroup) {
-        return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.GATEWAY_PRIMARY);
     }
 
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
@@ -533,7 +530,7 @@ public class TestUtil {
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
             recipe.setContent("base64Content");
-            recipe.setRecipeType(RecipeType.POST_AMBARI_START);
+            recipe.setRecipeType(RecipeType.POST_CLUSTER_INSTALL);
             Workspace workspace = new Workspace();
             workspace.setId(1L);
             workspace.setName("Top Secret FBI");
@@ -693,20 +690,20 @@ public class TestUtil {
         return smartSenseSubscription;
     }
 
-    public static RDSConfig rdsConfig(RdsType rdsType, DatabaseVendor databaseVendor) {
+    public static RDSConfig rdsConfig(DatabaseType databaseType, DatabaseVendor databaseVendor) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(generateUniqueId());
-        rdsConfig.setName(rdsType.name());
+        rdsConfig.setName(databaseType.name());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
         if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + databaseType.name().toLowerCase());
         } else if (databaseVendor == DatabaseVendor.MYSQL) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + databaseType.name().toLowerCase());
         } else {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + databaseType.name().toLowerCase());
         }
-        rdsConfig.setType(rdsType.name());
+        rdsConfig.setType(databaseType.name());
         rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
         rdsConfig.setDatabaseEngine(databaseVendor);
         rdsConfig.setDescription("someDescription");
@@ -718,14 +715,14 @@ public class TestUtil {
         return rdsConfig;
     }
 
-    public static RDSConfig rdsConfig(RdsType rdsType) {
+    public static RDSConfig rdsConfig(DatabaseType databaseType) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(generateUniqueId());
-        rdsConfig.setName(rdsType.name());
+        rdsConfig.setName(databaseType.name());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
-        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
-        rdsConfig.setType(rdsType.name());
+        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + databaseType.name().toLowerCase());
+        rdsConfig.setType(databaseType.name());
         rdsConfig.setConnectionDriver("org.postgresql.Driver");
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         return rdsConfig;
@@ -849,6 +846,10 @@ public class TestUtil {
         }
 
         return testData;
+    }
+
+    public static <K, V> Map<K, V> combineMaps(Map<K, V> map1, Map<K, V> map2) {
+        return Stream.of(map1, map2).flatMap(m -> m.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static LdapNotificationDetails ldapNotificationDetails(String message, String type) {

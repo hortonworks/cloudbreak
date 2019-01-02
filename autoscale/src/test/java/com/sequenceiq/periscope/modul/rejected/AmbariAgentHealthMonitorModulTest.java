@@ -40,8 +40,8 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -112,7 +112,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
     @Test
     public void testWhenHeartBeatCritical() {
-        AutoscaleEndpoint autoscaleEndpoint = mock(AutoscaleEndpoint.class);
+        AutoscaleV4Endpoint autoscaleEndpoint = mock(AutoscaleV4Endpoint.class);
         Cluster cluster = new Cluster();
         long clusterId = 1L;
         long stackId = 0L;
@@ -134,7 +134,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
         waitForTasksToFinish();
 
-        verify(autoscaleEndpoint, times(1)).failureReport(eq(stackId), any(FailureReport.class));
+        verify(autoscaleEndpoint, times(1)).failureReport(eq(stackId), any(FailureReportV4Request.class));
     }
 
     @Test

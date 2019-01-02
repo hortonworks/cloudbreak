@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.component;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.periscope.component.MetricTest.PERISCOPE_NODE_ID;
 import static com.sequenceiq.periscope.component.MetricTest.THREADPOOL_MAX_SIZE;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -59,8 +59,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.vault.core.VaultTemplate;
 
-import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -199,7 +199,7 @@ public class MetricTest {
     private CloudbreakClient cloudbreakClient;
 
     @MockBean
-    private AutoscaleEndpoint autoscaleEndpoint;
+    private AutoscaleV4Endpoint autoscaleEndpoint;
 
     @MockBean
     private VaultTemplate vaultTemplate;

@@ -7,16 +7,13 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
@@ -24,10 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariInfoMapperImpl;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariRepoDetailsMapperImpl;
-import com.sequenceiq.cloudbreak.converter.mapper.ManagementPackComponentListMapMapperImpl;
-import com.sequenceiq.cloudbreak.converter.mapper.StackInfoMapperImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackMatrixServiceTest {
@@ -41,86 +34,68 @@ public class StackMatrixServiceTest {
     @Mock
     private DefaultAmbariRepoService defaultAmbariRepoService;
 
-    @Spy
-    private StackInfoMapperImpl stackInfoMapper;
-
-    @Spy
-    private ManagementPackComponentListMapMapperImpl managementPackComponentListMapMapper;
-
-    @Spy
-    private AmbariInfoMapperImpl ambariInfoMapper;
-
-    @Spy
-    private AmbariRepoDetailsMapperImpl ambariRepoDetailsMapper;
-
     @InjectMocks
     private StackMatrixService stackMatrixService;
-
-    @Before
-    public void setUp() {
-        Whitebox.setInternalState(ambariInfoMapper, ambariRepoDetailsMapper);
-        Whitebox.setInternalState(stackInfoMapper, managementPackComponentListMapMapper);
-    }
 
     @Test
     public void getStackMatrix() {
         setupStackEntries();
         setupAmbariEntries();
 
-        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
 
-        assertEquals(2L, stackMatrix.getHdf().size());
-        assertEquals(3L, stackMatrix.getHdp().size());
+        assertEquals(2L, stackMatrixV4Response.getHdf().size());
+        assertEquals(3L, stackMatrixV4Response.getHdp().size());
 
-        assertEquals("2.6", stackMatrix.getHdf().get("3.1").getMinAmbari());
-        assertEquals("3.1.2.0", stackMatrix.getHdf().get("3.1").getVersion());
-        assertEquals("2.6.1.0", stackMatrix.getHdf().get("3.1").getAmbari().getVersion());
-        assertEquals("http://redhat6-base/2.6.1.0", stackMatrix.getHdf().get("3.1").getAmbari().getRepo().get("redhat6").getBaseUrl());
+        assertEquals("2.6", stackMatrixV4Response.getHdf().get("3.1").getMinAmbari());
+        assertEquals("3.1.2.0", stackMatrixV4Response.getHdf().get("3.1").getVersion());
+        assertEquals("2.6.1.0", stackMatrixV4Response.getHdf().get("3.1").getAmbari().getVersion());
+        assertEquals("http://redhat6-base/2.6.1.0", stackMatrixV4Response.getHdf().get("3.1").getAmbari().getRepository().get("redhat6").getBaseUrl());
 
-        assertEquals("2.7", stackMatrix.getHdf().get("3.2").getMinAmbari());
-        assertEquals("3.2.4.1", stackMatrix.getHdf().get("3.2").getVersion());
-        assertEquals("2.7.0.3", stackMatrix.getHdf().get("3.2").getAmbari().getVersion());
-        assertEquals("http://redhat7-base/2.7.0.3", stackMatrix.getHdf().get("3.2").getAmbari().getRepo().get("redhat7").getBaseUrl());
+        assertEquals("2.7", stackMatrixV4Response.getHdf().get("3.2").getMinAmbari());
+        assertEquals("3.2.4.1", stackMatrixV4Response.getHdf().get("3.2").getVersion());
+        assertEquals("2.7.0.3", stackMatrixV4Response.getHdf().get("3.2").getAmbari().getVersion());
+        assertEquals("http://redhat7-base/2.7.0.3", stackMatrixV4Response.getHdf().get("3.2").getAmbari().getRepository().get("redhat7").getBaseUrl());
 
-        assertEquals("2.5", stackMatrix.getHdp().get("2.6").getMinAmbari());
-        assertEquals("2.6.5.0", stackMatrix.getHdp().get("2.6").getVersion());
-        assertEquals("2.5.0.0", stackMatrix.getHdp().get("2.6").getAmbari().getVersion());
-        assertEquals("http://redhat6-base/2.5.0.0", stackMatrix.getHdp().get("2.6").getAmbari().getRepo().get("redhat6").getBaseUrl());
+        assertEquals("2.5", stackMatrixV4Response.getHdp().get("2.6").getMinAmbari());
+        assertEquals("2.6.5.0", stackMatrixV4Response.getHdp().get("2.6").getVersion());
+        assertEquals("2.5.0.0", stackMatrixV4Response.getHdp().get("2.6").getAmbari().getVersion());
+        assertEquals("http://redhat6-base/2.5.0.0", stackMatrixV4Response.getHdp().get("2.6").getAmbari().getRepository().get("redhat6").getBaseUrl());
 
-        assertEquals("2.7", stackMatrix.getHdp().get("3.1").getMinAmbari());
-        assertEquals("3.1.8.0", stackMatrix.getHdp().get("3.1").getVersion());
-        assertEquals("2.7.0.3", stackMatrix.getHdp().get("3.1").getAmbari().getVersion());
-        assertEquals("http://redhat7-base/2.7.0.3", stackMatrix.getHdp().get("3.1").getAmbari().getRepo().get("redhat7").getBaseUrl());
+        assertEquals("2.7", stackMatrixV4Response.getHdp().get("3.1").getMinAmbari());
+        assertEquals("3.1.8.0", stackMatrixV4Response.getHdp().get("3.1").getVersion());
+        assertEquals("2.7.0.3", stackMatrixV4Response.getHdp().get("3.1").getAmbari().getVersion());
+        assertEquals("http://redhat7-base/2.7.0.3", stackMatrixV4Response.getHdp().get("3.1").getAmbari().getRepository().get("redhat7").getBaseUrl());
     }
 
     @Test
     public void getStackMatrixWithoutAmbari() {
         setupStackEntries();
 
-        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
 
-        assertEquals(2L, stackMatrix.getHdf().size());
-        assertEquals(3L, stackMatrix.getHdp().size());
+        assertEquals(2L, stackMatrixV4Response.getHdf().size());
+        assertEquals(3L, stackMatrixV4Response.getHdp().size());
 
-        assertEquals("2.6", stackMatrix.getHdf().get("3.1").getMinAmbari());
-        assertEquals("3.1.2.0", stackMatrix.getHdf().get("3.1").getVersion());
-        assertNull(stackMatrix.getHdf().get("3.1").getAmbari().getRepo());
-        assertNull(stackMatrix.getHdf().get("3.1").getAmbari().getVersion());
+        assertEquals("2.6", stackMatrixV4Response.getHdf().get("3.1").getMinAmbari());
+        assertEquals("3.1.2.0", stackMatrixV4Response.getHdf().get("3.1").getVersion());
+        assertNull(stackMatrixV4Response.getHdf().get("3.1").getAmbari().getRepository());
+        assertNull(stackMatrixV4Response.getHdf().get("3.1").getAmbari().getVersion());
 
-        assertEquals("2.7", stackMatrix.getHdf().get("3.2").getMinAmbari());
-        assertEquals("3.2.4.1", stackMatrix.getHdf().get("3.2").getVersion());
-        assertNull(stackMatrix.getHdf().get("3.2").getAmbari().getRepo());
-        assertNull(stackMatrix.getHdf().get("3.2").getAmbari().getVersion());
+        assertEquals("2.7", stackMatrixV4Response.getHdf().get("3.2").getMinAmbari());
+        assertEquals("3.2.4.1", stackMatrixV4Response.getHdf().get("3.2").getVersion());
+        assertNull(stackMatrixV4Response.getHdf().get("3.2").getAmbari().getRepository());
+        assertNull(stackMatrixV4Response.getHdf().get("3.2").getAmbari().getVersion());
 
-        assertEquals("2.5", stackMatrix.getHdp().get("2.6").getMinAmbari());
-        assertEquals("2.6.5.0", stackMatrix.getHdp().get("2.6").getVersion());
-        assertNull(stackMatrix.getHdp().get("2.6").getAmbari().getRepo());
-        assertNull(stackMatrix.getHdp().get("2.6").getAmbari().getVersion());
+        assertEquals("2.5", stackMatrixV4Response.getHdp().get("2.6").getMinAmbari());
+        assertEquals("2.6.5.0", stackMatrixV4Response.getHdp().get("2.6").getVersion());
+        assertNull(stackMatrixV4Response.getHdp().get("2.6").getAmbari().getRepository());
+        assertNull(stackMatrixV4Response.getHdp().get("2.6").getAmbari().getVersion());
 
-        assertEquals("2.7", stackMatrix.getHdp().get("3.1").getMinAmbari());
-        assertEquals("3.1.8.0", stackMatrix.getHdp().get("3.1").getVersion());
-        assertNull(stackMatrix.getHdp().get("3.1").getAmbari().getRepo());
-        assertNull(stackMatrix.getHdp().get("3.1").getAmbari().getVersion());
+        assertEquals("2.7", stackMatrixV4Response.getHdp().get("3.1").getMinAmbari());
+        assertEquals("3.1.8.0", stackMatrixV4Response.getHdp().get("3.1").getVersion());
+        assertNull(stackMatrixV4Response.getHdp().get("3.1").getAmbari().getRepository());
+        assertNull(stackMatrixV4Response.getHdp().get("3.1").getAmbari().getVersion());
     }
 
     private void setupStackEntries() {

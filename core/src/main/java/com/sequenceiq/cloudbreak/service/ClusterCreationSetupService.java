@@ -14,22 +14,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -50,8 +49,8 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreati
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
-import com.sequenceiq.cloudbreak.converter.AmbariStackDetailsJsonToStackRepoDetailsConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari.StackRepositoryV4RequestToStackRepoDetailsConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -86,14 +85,13 @@ public class ClusterCreationSetupService {
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
-
-    @Inject
-    private AmbariStackDetailsJsonToStackRepoDetailsConverter stackRepoDetailsConverter;
+    private ConverterUtil converterUtil;
 
     @Inject
     private ClusterDecorator clusterDecorator;
+
+    @Inject
+    private StackRepositoryV4RequestToStackRepoDetailsConverter stackRepoDetailsConverter;
 
     @Inject
     private ClusterService clusterService;
@@ -131,12 +129,12 @@ public class ClusterCreationSetupService {
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
 
-    public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
+    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
     }
 
-    public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
-        if ((stack.getDatalakeId() != null || stack.getDatalakeResourceId() != null) && StringUtils.isNotBlank(request.getKerberosConfigName())) {
+    public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
+        if ((stack.getDatalakeId() != null || stack.getDatalakeResourceId() != null) && StringUtils.isNotBlank(request.getKerberosName())) {
             throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
         MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());
@@ -144,9 +142,9 @@ public class ClusterCreationSetupService {
         if (credential == null) {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
         }
-        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem(),
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getCloudStorage(),
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        mpackValidator.validateMpacks(request, workspace);
+        mpackValidator.validateMpacks(request.getAmbari(), workspace);
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
         ValidationResult environmentValidationResult = environmentValidator.validate(request, stack);
         if (environmentValidationResult.hasError()) {
@@ -154,25 +152,25 @@ public class ClusterCreationSetupService {
         }
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, User user, Workspace workspace) throws CloudbreakImageNotFoundException,
+    public Cluster prepare(ClusterV4Request request, Stack stack, User user, Workspace workspace) throws CloudbreakImageNotFoundException,
             IOException, TransactionExecutionException {
         return prepare(request, stack, null, user, workspace);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, User user, Workspace workspace) throws IOException,
+    public Cluster prepare(ClusterV4Request request, Stack stack, Blueprint blueprint, User user, Workspace workspace) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
 
         long start = System.currentTimeMillis();
 
-        if (request.getFileSystem() != null) {
-            FileSystem fs = fileSystemConfigService.create(conversionService.convert(request.getFileSystem(), FileSystem.class), stack.getWorkspace(),
+        if (request.getCloudStorage() != null) {
+            FileSystem fs = fileSystemConfigService.create(converterUtil.convert(request.getCloudStorage(), FileSystem.class), stack.getWorkspace(),
                     stack.getCreator());
-            request.getFileSystem().setName(fs.getName());
+            request.getCloudStorage().setName(fs.getName());
             LOGGER.debug("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
 
-        Cluster cluster = conversionService.convert(request, Cluster.class);
+        Cluster cluster = converterUtil.convert(request, Cluster.class);
         cluster.setStack(stack);
         cluster.setWorkspace(stack.getWorkspace());
         LOGGER.debug("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -197,13 +195,13 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
 
         if (blueprint != null && blueprintService.isAmbariBlueprint(blueprint)) {
-            AmbariRepoDetailsJson repoDetailsJson = request.getAmbariRepoDetailsJson();
+            AmbariRepositoryV4Request repoDetailsJson = request.getAmbari().getRepository();
             ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);
             components.add(ambariRepoConfig);
             ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
                     stackImageComponent);
             components.add(hdpRepoConfig);
-            checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
+            checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get());
             checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
         }
 
@@ -222,45 +220,40 @@ public class ClusterCreationSetupService {
         }
     }
 
-    private void checkRepositories(ClusterComponent ambariRepoComponent, ClusterComponent stackRepoComponent, Component imageComponent, boolean strictCheck)
+    private void checkRepositories(ClusterComponent ambariRepoComponent, ClusterComponent stackRepoComponent, Component imageComponent)
             throws IOException {
         AmbariRepo ambariRepo = ambariRepoComponent.getAttributes().get(AmbariRepo.class);
         StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
         Image image = imageComponent.getAttributes().get(Image.class);
-        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
         String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
-        Map<String, StackDescriptor> stackDescriptorMap;
+        Map<String, StackDescriptorV4Response> stackDescriptorMap;
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {
             stackType = stackType.substring(0, stackType.indexOf("-"));
         }
         switch (stackType) {
             case "HDP":
-                stackDescriptorMap = stackMatrix.getHdp();
+                stackDescriptorMap = stackMatrixV4Response.getHdp();
                 break;
             case "HDF":
-                stackDescriptorMap = stackMatrix.getHdf();
+                stackDescriptorMap = stackMatrixV4Response.getHdf();
                 break;
             default:
-                LOGGER.debug("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
-                stackDescriptorMap = stackMatrix.getHdp();
+                LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
+                stackDescriptorMap = stackMatrixV4Response.getHdp();
         }
-        StackDescriptor stackDescriptor = stackDescriptorMap.get(stackMajorVersion);
-        if (stackDescriptor != null) {
-            boolean hasDefaultStackRepoUrlForOsType = stackDescriptor.getRepo().getStack().containsKey(image.getOsType());
-            boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptor.getAmbari().getRepo().containsKey(image.getOsType());
-            boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptor.getMinAmbari().length()),
-                    () -> stackDescriptor.getMinAmbari()) >= 0;
+        StackDescriptorV4Response stackDescriptorV4 = stackDescriptorMap.get(stackMajorVersion);
+        if (stackDescriptorV4 != null) {
+            boolean hasDefaultStackRepoUrlForOsType = stackDescriptorV4.getRepo().getStack().containsKey(image.getOsType());
+            boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptorV4.getAmbari().getRepository().containsKey(image.getOsType());
+            boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptorV4.getMinAmbari().length()),
+                    () -> stackDescriptorV4.getMinAmbari()) >= 0;
             if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
                 String message = String.format("The given repository information seems to be incompatible."
                                 + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),
                         stackType, stackRepoDetails.getHdpVersion(), image.getImageId(), image.getOsType());
-                if (strictCheck) {
-                    LOGGER.info(message);
-                    throw new BadRequestException(message);
-                } else {
-                    LOGGER.debug(message);
-                }
+                LOGGER.debug(message);
             }
         }
     }
@@ -275,7 +268,7 @@ public class ClusterCreationSetupService {
     }
 
     private ClusterComponent determineAmbariRepoConfig(Optional<Component> stackAmbariRepoConfig,
-            AmbariRepoDetailsJson ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
+            AmbariRepositoryV4Request ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (!stackAmbariRepoConfig.isPresent()) {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
@@ -283,7 +276,7 @@ public class ClusterCreationSetupService {
             String stackVersion = blueprintUtils.getBlueprintStackVersion(bluePrintJson);
             String stackName = blueprintUtils.getBlueprintStackName(bluePrintJson);
             AmbariRepo ambariRepo = ambariRepoDetailsJson != null
-                    ? conversionService.convert(ambariRepoDetailsJson, AmbariRepo.class)
+                    ? converterUtil.convert(ambariRepoDetailsJson, AmbariRepo.class)
                     : defaultAmbariRepoService.getDefault(getOsType(stackImageComponent), stackName, stackVersion);
             if (ambariRepo == null) {
                 throw new BadRequestException(String.format("Couldn't determine Ambari repo for the stack: %s", cluster.getStack().getName()));
@@ -296,10 +289,10 @@ public class ClusterCreationSetupService {
     }
 
     private ClusterComponent determineHDPRepoConfig(Blueprint blueprint, long stackId, Optional<Component> stackHdpRepoConfig,
-            ClusterRequest request, Cluster cluster, Workspace workspace, Optional<Component> stackImageComponent)
+            ClusterV4Request request, Cluster cluster, Workspace workspace, Optional<Component> stackImageComponent)
             throws IOException, CloudbreakImageNotFoundException {
         Json stackRepoDetailsJson;
-        AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
+        StackRepositoryV4Request ambariStackDetails = request.getAmbari().getStackRepository();
         if (!stackHdpRepoConfig.isPresent()) {
             if (ambariStackDetails != null && (stackRepoDetailsConverter.isBaseRepoRequiredFieldsExists(ambariStackDetails)
                     || stackRepoDetailsConverter.isVdfRequiredFieldsExists(ambariStackDetails))) {
@@ -314,7 +307,7 @@ public class ClusterCreationSetupService {
                 vdfUrl.ifPresent(s -> stackRepoDetails.getStack().put(CUSTOM_VDF_REPO_KEY, s));
                 if (ambariStackDetails != null) {
                     repo.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
-                            rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
+                            rmpack -> converterUtil.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
                 }
                 setEnableGplIfAvailable(repo, ambariStackDetails);
                 stackRepoDetailsJson = new Json(repo);
@@ -324,7 +317,7 @@ public class ClusterCreationSetupService {
             StackRepoDetails stackRepoDetails = stackRepoDetailsJson.get(StackRepoDetails.class);
             if (ambariStackDetails != null && !ambariStackDetails.getMpacks().isEmpty()) {
                 stackRepoDetails.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
-                        rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
+                        rmpack -> converterUtil.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
             }
             setEnableGplIfAvailable(stackRepoDetails, ambariStackDetails);
             stackRepoDetailsJson = new Json(stackRepoDetails);
@@ -332,7 +325,7 @@ public class ClusterCreationSetupService {
         return new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
     }
 
-    private void setEnableGplIfAvailable(StackRepoDetails repo, AmbariStackDetailsJson ambariStackDetails) {
+    private void setEnableGplIfAvailable(StackRepoDetails repo, StackRepositoryV4Request ambariStackDetails) {
         if (ambariStackDetails != null) {
             repo.setEnableGplRepo(ambariStackDetails.isEnableGplRepo());
         }
@@ -353,7 +346,7 @@ public class ClusterCreationSetupService {
     }
 
     private void setOsTypeFromImageIfMissing(Cluster cluster, Optional<Component> stackImageComponent,
-            AmbariStackDetailsJson ambariStackDetails) {
+            StackRepositoryV4Request ambariStackDetails) {
         if (StringUtils.isBlank(ambariStackDetails.getOs()) && stackImageComponent.isPresent()) {
             try {
                 String osType = getOsType(stackImageComponent);
@@ -380,7 +373,7 @@ public class ClusterCreationSetupService {
         return false;
     }
 
-    private StackInfo defaultHDPInfo(Blueprint blueprint, ClusterRequest request, Workspace workspace) {
+    private StackInfo defaultHDPInfo(Blueprint blueprint, ClusterV4Request request, Workspace workspace) {
         try {
             JsonNode root = getBlueprintJsonNode(blueprint, request, workspace);
             if (root != null) {
@@ -408,22 +401,15 @@ public class ClusterCreationSetupService {
         return defaultHDPEntries.getEntries().values().iterator().next();
     }
 
-    private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterRequest request, Workspace workspace) throws IOException {
-        JsonNode root;
+    private JsonNode getBlueprintJsonNode(Blueprint blueprint, ClusterV4Request request, Workspace workspace) throws IOException {
+        JsonNode root = null;
         if (blueprint != null) {
             String blueprintText = blueprint.getBlueprintText();
             root = JsonUtil.readTree(blueprintText);
-        } else {
-            // Backward compatibility to V1 cluster API
-            if (request.getBlueprintId() != null) {
-                root = JsonUtil.readTree(blueprintService.get(request.getBlueprintId()).getBlueprintText());
-            } else if (request.getBlueprintName() != null) {
-                blueprint = blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace);
-                String blueprintText = blueprint.getBlueprintText();
-                root = JsonUtil.readTree(blueprintText);
-            } else {
-                root = JsonUtil.readTree(request.getBlueprint().getAmbariBlueprint());
-            }
+        } else if (request.getAmbari().getBlueprintName() != null) {
+            blueprint = blueprintService.getByNameForWorkspace(request.getAmbari().getBlueprintName(), workspace);
+            String blueprintText = blueprint.getBlueprintText();
+            root = JsonUtil.readTree(blueprintText);
         }
         return root;
     }

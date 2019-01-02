@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.api.model.EndpointRule;
-
 public class Port {
 
     private final String localPort;

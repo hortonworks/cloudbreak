@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
@@ -55,7 +54,7 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
         }
     }
 
-    public KubernetesConfig updateByWorkspaceId(Long workspaceId, KubernetesConfig kubernetesConfig, User user) {
+    public KubernetesConfig updateByWorkspaceId(Long workspaceId, KubernetesConfig kubernetesConfig) {
         KubernetesConfig original = Optional.ofNullable(
                 kubernetesConfigRepository.findByNameAndWorkspaceId(kubernetesConfig.getName(), workspaceId))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, kubernetesConfig.getName()));

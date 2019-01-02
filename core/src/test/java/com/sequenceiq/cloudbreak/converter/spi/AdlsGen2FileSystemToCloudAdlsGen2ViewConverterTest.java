@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
 
 public class AdlsGen2FileSystemToCloudAdlsGen2ViewConverterTest {
 

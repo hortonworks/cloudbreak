@@ -15,11 +15,11 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
@@ -84,7 +84,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakInte
             igMap.add(instanceGroupRequest);
         }
 
-        String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
+        Long credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         StackRequest stackRequest = new StackRequest();
 
@@ -95,7 +95,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakInte
         stackRequest.setStackAuthentication(stackAuthenticationRequest);
 
         stackRequest.setName(stackName);
-        stackRequest.setCredentialId(Long.valueOf(credentialId));
+        stackRequest.setCredentialId(credentialId);
         stackRequest.setRegion(region);
         stackRequest.setOnFailureAction(OnFailureAction.valueOf(onFailureAction));
         FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();

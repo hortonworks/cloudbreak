@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock.SALT_RUN;
@@ -19,7 +19,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
@@ -67,7 +67,7 @@ public class RecipeTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(TestContext testContext, HostGroupType hostGroup, int nodeCount,
-                    RecipeType type, int executionTime) {
+                                                                    RecipeV4Type type, int executionTime) {
         LOGGER.debug("testing recipe execution for type: {}", type.name());
         String recipeName = creator.getRandomNameForMock();
         testContext

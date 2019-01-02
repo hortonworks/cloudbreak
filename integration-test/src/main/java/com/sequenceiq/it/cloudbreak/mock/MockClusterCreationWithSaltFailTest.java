@@ -26,9 +26,9 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupConstraintV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -71,7 +71,7 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         Integer stackId = Integer.valueOf(stackIdStr);
         Integer blueprintId = Integer.valueOf(itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID));
         List<HostGroup> hostgroups = itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class);
-        Set<HostGroupRequest> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts);
+        Set<HostGroupV4Request> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
         // WHEN
@@ -135,7 +135,7 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         }, gson()::toJson);
     }
 
-    private Set<HostGroupRequest> convertHostGroups(Iterable<HostGroup> hostGroups, String runRecipesOnHosts) {
+    private Set<HostGroupV4Request> convertHostGroups(Iterable<HostGroup> hostGroups, String runRecipesOnHosts) {
         Set<Long> recipeIds = Collections.emptySet();
         List<String> hostGroupsWithRecipe = Collections.emptyList();
         if (!runRecipesOnHosts.isEmpty()) {
@@ -143,13 +143,13 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
             Assert.assertFalse(recipeIds == null || recipeIds.isEmpty());
             hostGroupsWithRecipe = Arrays.asList(runRecipesOnHosts.split(","));
         }
-        Set<HostGroupRequest> hgMaps = new HashSet<>();
+        Set<HostGroupV4Request> hgMaps = new HashSet<>();
         for (HostGroup hostgroup : hostGroups) {
-            HostGroupRequest hostGroupBase = new HostGroupRequest();
+            HostGroupV4Request hostGroupBase = new HostGroupV4Request();
             hostGroupBase.setName(hostgroup.getName());
 
 
-            ConstraintJson constraintJson = new ConstraintJson();
+            HostGroupConstraintV4Request constraintJson = new HostGroupConstraintV4Request();
             constraintJson.setInstanceGroupName(hostgroup.getInstanceGroupName());
             constraintJson.setHostCount(hostgroup.getHostCount());
             hostGroupBase.setConstraint(constraintJson);

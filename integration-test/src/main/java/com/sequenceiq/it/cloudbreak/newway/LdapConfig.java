@@ -7,7 +7,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.LdapConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.LdapConfigV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.LdapConfigV4Action;
 
 @Prototype
 public class LdapConfig extends LdapConfigEntity {
@@ -35,26 +35,26 @@ public class LdapConfig extends LdapConfigEntity {
 
     public static LdapConfig isCreated() {
         var ldapConfig = new LdapConfig();
-        ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV4Action::createInGiven);
         return ldapConfig;
     }
 
     public static LdapConfig isCreatedDeleted() {
         var ldapConfig = new LdapConfig();
-        ldapConfig.setCreationStrategy(LdapConfigV3Action::createDeleteInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV4Action::createDeleteInGiven);
         return ldapConfig;
     }
 
     public static LdapConfigEntity post(TestContext testContext, LdapConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().ldapConfigV3Endpoint().createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+                cloudbreakClient.getCloudbreakClient().ldapConfigV4Endpoint().post(cloudbreakClient.getWorkspaceId(), entity.getRequest())
 
         );
         return entity;
     }
 
     public static Action<LdapConfig> post(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV3Action::post);
+        return new Action<>(getTestContext(key), LdapConfigV4Action::post);
     }
 
     public static Action<LdapConfig> post() {
@@ -62,7 +62,7 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     public static Action<LdapConfig> get(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV3Action::get);
+        return new Action<>(getTestContext(key), LdapConfigV4Action::get);
     }
 
     public static Action<LdapConfig> get() {
@@ -70,11 +70,11 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     public static Action<LdapConfig> getAll() {
-        return new Action<>(getNew(), LdapConfigV3Action::getAll);
+        return new Action<>(getNew(), LdapConfigV4Action::getAll);
     }
 
     public static Action<LdapConfig> delete(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV3Action::delete);
+        return new Action<>(getTestContext(key), LdapConfigV4Action::delete);
     }
 
     public static Action<LdapConfig> delete() {
@@ -83,7 +83,7 @@ public class LdapConfig extends LdapConfigEntity {
 
     public static LdapConfigEntity delete(TestContext testContext, LdapConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().ldapConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().ldapConfigV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName())
 
         );
         return entity;
@@ -96,14 +96,14 @@ public class LdapConfig extends LdapConfigEntity {
     public static LdapConfig isCreatedWithParameters(TestParameter testParameter) {
         var ldapConfig = new LdapConfig();
         ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithProperties(testParameter));
-        ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV4Action::createInGiven);
         return ldapConfig;
     }
 
     public static LdapConfig isCreatedWithParametersAndName(TestParameter testParameter, String name) {
         var ldapConfig = new LdapConfig();
         ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithPropertiesAndName(testParameter, name));
-        ldapConfig.setCreationStrategy(LdapConfigV3Action::createInGiven);
+        ldapConfig.setCreationStrategy(LdapConfigV4Action::createInGiven);
         return ldapConfig;
     }
 
@@ -113,7 +113,7 @@ public class LdapConfig extends LdapConfigEntity {
 
     public static LdapConfigEntity getByName(TestContext testContext, LdapConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().ldapConfigV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().ldapConfigV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }

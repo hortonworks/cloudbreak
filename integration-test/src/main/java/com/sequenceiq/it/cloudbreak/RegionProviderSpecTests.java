@@ -48,7 +48,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
                 + " credential");
         then(Region.assertThis(
                 (region, t) -> {
-                    Collection<String> availibilityZones = region.getRegionResponse().getAvailabilityZones()
+                    Collection<String> availibilityZones = region.getRegionV4Response().getAvailabilityZones()
                             .get(provider.region());
 
                     availibilityZones.forEach(zone ->
@@ -89,7 +89,7 @@ public class RegionProviderSpecTests extends CloudbreakTest {
         when(Region.getPlatformRegionsWithRetry(Integer.parseInt(getTestParameter().get("retryQuantity"))), "Regions are requested to Azure credential");
         then(Region.assertThis(
                 (region, t) -> {
-                    Collection<String> availibilityZones = region.getRegionResponse().getAvailabilityZones()
+                    Collection<String> availibilityZones = region.getRegionV4Response().getAvailabilityZones()
                             .get(provider.region());
 
                     LOGGER.info("Azure Default Region's Availibility Zone is not supported.");

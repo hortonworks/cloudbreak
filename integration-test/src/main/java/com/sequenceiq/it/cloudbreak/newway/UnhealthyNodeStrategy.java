@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
@@ -31,7 +31,7 @@ public class UnhealthyNodeStrategy implements Strategy {
         List<String> nodes = instanceGroup.getMetadata().stream()
                 .map(metadata -> metadata.getDiscoveryFQDN()).collect(Collectors.toList()).subList(0, nodeCount);
         ProxyCloudbreakClient client = getAutoscaleProxyCloudbreakClient(integrationTestContext);
-        FailureReport failureReport = new FailureReport();
+        FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(nodes);
         client.autoscaleEndpoint().failureReport(id, failureReport);
     }

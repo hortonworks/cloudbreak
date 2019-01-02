@@ -1,18 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
+import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.S3;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Storage;
 
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
-import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.S3;
-
-public class AwsResourceHelper extends ResourceHelper<S3CloudStorageParameters> {
+public class AwsResourceHelper extends ResourceHelper<S3CloudStorageParametersV4> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AWS_RANGER_DB_CONFIG";
 
@@ -41,20 +41,20 @@ public class AwsResourceHelper extends ResourceHelper<S3CloudStorageParameters> 
     }
 
     @Override
-    public CloudStorageRequest getCloudStorageRequestForDatalake() {
-        var request = new CloudStorageRequest();
+    public CloudStorageV4Request getCloudStorageRequestForDatalake() {
+        var request = new CloudStorageV4Request();
         request.setS3(getCloudStorage());
         request.setLocations(defaultDatalakeStorageLocations(S3, getTestParameter().get(Storage.S3_BUCKET_NAME)));
         return request;
     }
 
     @Override
-    public CloudStorageRequest getCloudStorageRequestForAttachedCluster() {
+    public CloudStorageV4Request getCloudStorageRequestForAttachedCluster() {
         return getCloudStorageForAttachedCluster(S3, getTestParameter().get(Storage.S3_BUCKET_NAME), getCloudStorage());
     }
 
     @Override
-    protected S3CloudStorageParameters getCloudStorage() {
-        return new S3CloudStorageParameters();
+    protected S3CloudStorageParametersV4 getCloudStorage() {
+        return new S3CloudStorageParametersV4();
     }
 }
