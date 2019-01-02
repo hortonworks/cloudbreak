@@ -391,9 +391,9 @@ public class OperationDescriptions {
     }
 
     public static class AuditOpDescription {
-        public static final String LIST_IN_WORKSPACE = "list audit events for the given workspace";
-        public static final String GET_BY_ORG = "Get audit event in workspace";
-        public static final String LIST_IN_WORKSPACE_ZIP = "list audit events for the given workspace in zip file";
+        public static final String LIST_IN_WORKSPACE = "List audit events for the given workspace";
+        public static final String GET_BY_WORKSPACE = "Get audit event in workspace by id";
+        public static final String LIST_IN_WORKSPACE_ZIP = "List audit events for the given workspace in zip file";
     }
 
     public static class KnoxServicesOpDescription {
