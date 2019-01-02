@@ -52,7 +52,7 @@ public class PurgeGarbageService {
                     .filter(purgable::deletable)
                     .collect(Collectors.toList());
             LOGGER.info("Purge all {}, count: {}", purgable.getClass().getSimpleName(), all.size());
-            all.forEach(e -> purgable.delete(e, cloudbreakClient));
+            all.forEach(e -> purgable.delete(testContext, e, cloudbreakClient));
         });
     }
 }

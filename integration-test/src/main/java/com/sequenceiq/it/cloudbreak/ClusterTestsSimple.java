@@ -58,7 +58,7 @@ public class ClusterTestsSimple extends CloudbreakTest {
                 .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest(), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(

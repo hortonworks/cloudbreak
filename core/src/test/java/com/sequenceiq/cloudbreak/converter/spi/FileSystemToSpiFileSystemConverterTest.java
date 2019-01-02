@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.ADLS;
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.S3;
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.S3;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,10 +19,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;

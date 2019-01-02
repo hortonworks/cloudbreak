@@ -5,17 +5,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -31,7 +30,7 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.AwsKerberos;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -51,7 +50,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -67,7 +66,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(AwsKerberos.kerberosOnAws(getTestParameter()));
         given(Cluster.request()
-                        .withAmbariRequest(AwsKerberos.getAmbariV2RequestForAwsKerberos(cloudProvider, blueprintName, getTestParameter())),
+                        .withKerberos(AwsKerberos.KERBEROS_CLOUDY)
+                        .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, blueprintName, getTestParameter())),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -77,7 +77,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName)
                 .withNetwork(AwsKerberos.getNetworkV2RequestForKerberosAws(getTestParameter())), "a stack request");
-        when(Stack.post());
+        when(Stack.postV3());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -100,7 +100,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .withOs(os));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -130,13 +130,11 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         );
         given(cloudProvider.aValidStackRequest().withName(clusterName), "a stack request");
 
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
-        then(Stack.checkClusterHasAmbariRunningThroughKnox(
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+        then(Stack.checkClusterHasAmbariRunningThroughKnox(),
                 "check if ambari is available through knox");
     }
 
@@ -237,37 +235,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        when(Stack.delete(StackV3Action::deleteWithKerberos));
+        when(Stack.delete(StackActionV4::deleteWithKerberos));
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
-    }
-
-    @DataProvider(name = "providernameblueprintimage")
-    public Object[][] providerAndImage() throws Exception {
-        String blueprint = getTestParameter().get("blueprintName");
-        String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        //String imageCatalog = getTestParameter().get("imageCatalog");
-        String clusterName = getTestParameter().get("clusterName");
-        String image = getImageId(provider, imageDescription, blueprint);
-        return new Object[][]{
-                {cloudProvider, clusterName, blueprint, image}
-        };
-    }
-
-    @DataProvider(name = "providernameblueprintimagekerberos")
-    public Object[][] providerAndImageAndKerberos() throws Exception {
-        String blueprint = getTestParameter().get("blueprintName");
-        String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        //String imageCatalog = getTestParameter().get("imageCatalog");
-        String clusterName = getTestParameter().get("clusterName");
-        String image = getImageId(provider, imageDescription, blueprint);
-        Boolean enableKerberos = Boolean.valueOf(getTestParameter().get("enableKerberos"));
-        return new Object[][]{
-                {cloudProvider, clusterName, blueprint, image, enableKerberos, imageDescription}
-        };
     }
 
     @DataProvider(name = "providernameblueprintimageos")
@@ -314,30 +283,12 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         };
     }
 
-    private String getImageId(String provider, String imageDescription, String blueprintName) throws Exception {
-        given(CloudbreakClient.created());
-        CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
-        com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        BlueprintResponse blueprint = client.blueprintEndpoint().getPublic(blueprintName);
-        String stackVersion = new JSONObject(blueprint.getAmbariBlueprint())
-                .getJSONObject("Blueprints").getString("stack_version");
-        switch (imageDescription) {
-            case "hdf":
-                return getLastUuid(imagesByProvider.getHdfImages(), stackVersion);
-            case "hdp":
-                return getLastUuid(imagesByProvider.getHdpImages(), stackVersion);
-            default:
-                return getLastUuid(imagesByProvider.getBaseImages(), stackVersion);
-        }
-    }
-
     protected String getImageIdWithPkgVersions(String provider, String imageDescription) throws Exception {
         given(CloudbreakClient.created());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        List<? extends ImageResponse> images;
+        ImagesV4Response imagesByProvider = client.imageCatalogV4Endpoint().getImages(clientContext.getWorkspaceId(), null, provider);
+        List<? extends ImageV4Response> images;
         switch (imageDescription) {
             case "hdf":
                 images = imagesByProvider.getHdfImages();
@@ -351,18 +302,21 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         }
 
         return images.stream().filter(imageResponse -> imageResponse.getPackageVersions() != null)
-                .max(Comparator.comparing(ImageResponse::getDate)).orElseThrow().getUuid();
+                .max(Comparator.comparing(ImageV4Response::getDate)).orElseThrow().getUuid();
     }
 
-    private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {
-        List<? extends ImageResponse> result = images.stream()
-                .filter(ImageResponse::isDefaultImage)
+    private String getLastUuid(List<? extends ImageV4Response> images, String stackVersion) {
+        List<? extends ImageV4Response> result = images.stream()
+                .filter(ImageV4Response::isDefaultImage)
                 .filter(image -> {
-                    ImageResponse imageResponse = (ImageResponse) image;
-                    if (imageResponse.getStackDetails() == null) {
+                    ImageV4Response imageV4Response = (ImageV4Response) image;
+                    if (!StringUtils.isEmpty(imageV4Response.getVersion())) {
+                        return imageV4Response.getVersion().startsWith(stackVersion);
+                    }
+                    if (imageV4Response.getStackDetails() == null) {
                         return true;
                     }
-                    if (imageResponse.getStackDetails().getVersion() == null) {
+                    if (imageV4Response.getStackDetails().getVersion() == null) {
                         return true;
                     }
                     return image.getStackDetails().getVersion().startsWith(stackVersion);
@@ -371,7 +325,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         if (result.isEmpty()) {
             result = images;
         }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(ImageV4Response::getDate)).collect(Collectors.toList());
         return result.get(result.size() - 1).getUuid();
     }
 

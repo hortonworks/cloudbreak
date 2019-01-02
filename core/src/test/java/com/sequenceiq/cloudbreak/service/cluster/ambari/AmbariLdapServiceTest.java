@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -84,7 +84,7 @@ public class AmbariLdapServiceTest {
         stack.setCluster(cluster);
 
         ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
+        when(ambariClientFactory.getAmbariClient(any(Stack.class), any())).thenReturn(ambariClient);
     }
 
     @Test

@@ -1,7 +1,21 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.ws.rs.BadRequestException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -11,18 +25,6 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.BadRequestException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 public class RecipeClusterTests extends CloudbreakTest {
 
@@ -88,7 +90,7 @@ public class RecipeClusterTests extends CloudbreakTest {
             given(Recipe.isCreated()
                     .withName(recipe)
                     .withDescription(VALID_RECIPE_DESCRIPTION)
-                    .withRecipeType(RecipeType.valueOf(recipe.replace("-", "_").toUpperCase()))
+                    .withRecipeType(RecipeV4Type.valueOf(recipe.replace("-", "_").toUpperCase()))
                     .withContent(Base64.encodeBase64String(("#!/bin/bash" + "\ntouch /tmp/" + recipe).getBytes()))
             );
         }
@@ -100,7 +102,7 @@ public class RecipeClusterTests extends CloudbreakTest {
         given(Recipe.isCreated()
                 .withName(INVALID_RECIPE_NAME)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_AMBARI_START)
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String("#!/bin/bash \nexit -1".getBytes()))
         );
     }
@@ -112,7 +114,7 @@ public class RecipeClusterTests extends CloudbreakTest {
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest().withInstanceGroups(cloudProvider.instanceGroups(RECIPE_NAMES)),  "a stack request");
-        when(Stack.post(), "post the stack request with recipes");
+        when(Stack.postV3(), "post the stack request with recipes");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -161,7 +163,7 @@ public class RecipeClusterTests extends CloudbreakTest {
                 "a cluster request");
         given(cloudProvider.aValidStackRequest().withInstanceGroups(cloudProvider.instanceGroups(invalidRecipe)).withName(INVALID_CLUSTER_NAME),
                 "a stack request");
-        when(Stack.post(), "post the stack request with an invalid recipe");
+        when(Stack.postV3(), "post the stack request with an invalid recipe");
         then(Stack.waitAndCheckClusterFailure(INVALID_RECIPE_NAME), "check cluster failed with given failure message");
     }
 

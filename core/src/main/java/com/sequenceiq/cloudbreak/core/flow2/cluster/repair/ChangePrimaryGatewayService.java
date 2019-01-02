@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.repair;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Optional;
 import java.util.Set;
@@ -11,8 +11,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

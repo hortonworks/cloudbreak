@@ -5,17 +5,13 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -23,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ClusterGateway;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.DatalakeCluster;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
@@ -47,8 +42,8 @@ public class StackPostV3Strategy implements Strategy {
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
-        if (credential != null && stackEntity.getRequest().getGeneral().getCredentialName() == null) {
-            stackEntity.getRequest().getGeneral().setCredentialName(credential.getName());
+        if (credential != null && stackEntity.getRequest().getEnvironment().getCredentialName() == null) {
+            stackEntity.getRequest().getEnvironment().setCredentialName(credential.getName());
         }
 
         Cluster cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
@@ -70,32 +65,28 @@ public class StackPostV3Strategy implements Strategy {
                 cluster.getRequest().getCloudStorage().getS3().setInstanceProfile(arns.get(0));
             } else if (cluster.getRequest().getCloudStorage() != null && cluster.getRequest().getCloudStorage().getGcs() != null && credential != null) {
                 cluster.getRequest().getCloudStorage().getGcs()
-                        .setServiceAccountEmail(credential.getResponse().getParameters().get("serviceAccountId").toString());
+                        .setServiceAccountEmail(credential.getResponse().getGcp().getP12().getServiceAccountId());
             }
         }
 
         KerberosEntity kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getAmbari().getKerberosConfigName() == null;
+                && stackEntity.getRequest().getCluster().getKerberosName() == null;
         if (kerberos != null && updateKerberos) {
-            AmbariV2Request ambariReq = stackEntity.getRequest().getCluster().getAmbari();
-            ambariReq.setKerberosConfigName(kerberos.getRequest().getName());
+            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
         }
 
         ClusterGateway clusterGateway = ClusterGateway.getTestContextGateway().apply(integrationTestContext);
         if (clusterGateway != null) {
             if (stackEntity.hasCluster()) {
-                ClusterV2Request clusterV2Request = stackEntity.getRequest().getCluster();
-                AmbariV2Request ambariV2Request = clusterV2Request.getAmbari();
-                if (ambariV2Request != null) {
-                    ambariV2Request.setGateway(clusterGateway.getRequest());
-                }
+                ClusterV4Request clusterV2Request = stackEntity.getRequest().getCluster();
+                clusterV2Request.setGateway(clusterGateway.getRequest());
             }
         }
 
         ImageSettingsEntity imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
-            stackEntity.getRequest().setImageSettings(imageSettings.getRequest());
+            stackEntity.getRequest().setImage(imageSettings.getRequest());
         }
 
         HostGroups hostGroups = HostGroups.getTestContextHostGroups().apply(integrationTestContext);
@@ -103,7 +94,9 @@ public class StackPostV3Strategy implements Strategy {
             stackEntity.getRequest().setInstanceGroups(hostGroups.getRequest());
         }
 
-        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
+        // TODO: we have to move this logic ot from here to the test or cloudprovider(helper) level -> @afarsang
+        // until that, I keep this body of logic here to keep in mind
+        /*DatalakeCluster datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (datalakeStack != null && datalakeStack.getResponse() != null && datalakeStack.getResponse().getNetwork() != null) {
             String subnetId = null;
             String networkId = null;
@@ -133,19 +126,19 @@ public class StackPostV3Strategy implements Strategy {
             stackEntity.getRequest().getNetwork().getParameters().put("noPublicIp", false);
             stackEntity.getRequest().getNetwork().getParameters().put("noFirewallRules", false);
             stackEntity.getRequest().getNetwork().getParameters().put("internetGatewayId", null);
-        }
+        }*/
 
         Integer gatewayPort = integrationTestContext.getContextParam("MOCK_PORT", Integer.class);
         if (gatewayPort != null) {
             stackEntity.getRequest().setGatewayPort(gatewayPort);
         }
 
-        log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());
+        log(" Name:\n" + stackEntity.getRequest().getName());
         logJSON(" Stack post request:\n", stackEntity.getRequest());
         stackEntity.setResponse(
                 client.getCloudbreakClient()
-                        .stackV3Endpoint()
-                        .createInWorkspace(workspaceId, stackEntity.getRequest()));
+                        .stackV4Endpoint()
+                        .post(workspaceId, stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
     }

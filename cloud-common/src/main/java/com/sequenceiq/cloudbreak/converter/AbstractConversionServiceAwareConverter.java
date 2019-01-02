@@ -10,7 +10,6 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
@@ -20,7 +19,6 @@ import com.google.common.base.Strings;
 public abstract class AbstractConversionServiceAwareConverter<S, T> implements Converter<S, T> {
 
     @Inject
-    @Qualifier("conversionService")
     private ConversionService conversionService;
 
     public ConversionService getConversionService() {

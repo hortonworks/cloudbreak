@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;

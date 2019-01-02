@@ -26,11 +26,7 @@ public class RecoveryItTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -45,7 +41,7 @@ public class RecoveryItTest extends AbstractIntegrationTest {
         testContext
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(1)
                 .given(StackEntity.class).withName(stackName).replaceInstanceGroups(WORKER_ID)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(Stack.sync())
                 .await(STACK_FAILED)

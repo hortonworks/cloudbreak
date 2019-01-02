@@ -11,7 +11,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AutoscaleClusterRequest")
+@ApiModel
 public class AutoscaleClusterRequest extends ClusterBaseJson {
 
     @ApiModelProperty(ClusterJsonsProperties.WORKSPACE_ID)

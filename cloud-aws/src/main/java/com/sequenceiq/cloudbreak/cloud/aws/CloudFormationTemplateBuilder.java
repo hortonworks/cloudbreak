@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

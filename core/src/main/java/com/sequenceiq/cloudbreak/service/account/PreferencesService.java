@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import static com.sequenceiq.cloudbreak.api.model.FeatureSwitch.DISABLE_SHOW_BLUEPRINT;
-import static com.sequenceiq.cloudbreak.api.model.FeatureSwitch.DISABLE_SHOW_CLI;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_BLUEPRINT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLI;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.FeatureSwitch;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 
 @Service
@@ -34,15 +34,15 @@ public class PreferencesService {
     @Inject
     private List<CloudConstant> cloudConstants;
 
-    public Set<FeatureSwitch> getFeatureSwitches() {
-        Set<FeatureSwitch> featureSwitches = Sets.newHashSet();
+    public Set<FeatureSwitchV4> getFeatureSwitches() {
+        Set<FeatureSwitchV4> featureSwitchV4s = Sets.newHashSet();
         if (disableShowBlueprint) {
-            featureSwitches.add(DISABLE_SHOW_BLUEPRINT);
+            featureSwitchV4s.add(DISABLE_SHOW_BLUEPRINT);
         }
         if (disableShowCli) {
-            featureSwitches.add(DISABLE_SHOW_CLI);
+            featureSwitchV4s.add(DISABLE_SHOW_CLI);
         }
-        return featureSwitches;
+        return featureSwitchV4s;
     }
 
     public Boolean isPlatformSelectionDisabled() {

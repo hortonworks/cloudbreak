@@ -22,9 +22,9 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -95,6 +95,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         springTestContextPrepareTestInstance();
 
         itContext = suiteContext.getItContext(testContext.getSuite().getName());
+        itContext.putContextParam(CloudbreakITContextConstants.WORKSPACE_ID, 1L);
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
@@ -130,16 +131,16 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 .build();
 
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         if (cleanUpBeforeStart) {
-            cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
+            cleanUpService.deleteTestStacksAndResources(cloudbreakClient, workspaceId);
         }
-        putBlueprintToContextIfExist(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
-        putCredentialToContext(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
-                credentialName);
-        putStackToContextIfExist(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint(), stackName);
+        putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+                .blueprintV4Endpoint(), blueprintName, workspaceId);
+        putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+                .credentialV4Endpoint(), cloudProvider, credentialName, workspaceId);
+        putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+                .stackV4Endpoint(), workspaceId, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
         }
@@ -156,14 +157,14 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     }
 
-    private void putBlueprintToContextIfExist(BlueprintEndpoint endpoint, String blueprintName) {
-        endpoint.getPublics();
+    private void putBlueprintToContextIfExist(BlueprintV4Endpoint endpoint, String blueprintName, Long workspaceId) {
+        endpoint.list(workspaceId);
         if (StringUtils.isEmpty(blueprintName)) {
             blueprintName = defaultBlueprintName;
         }
         if (StringUtils.hasLength(blueprintName)) {
-            String resourceId = endpoint.getPublic(blueprintName).getId().toString();
-            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
+            String resourceName = endpoint.get(workspaceId, blueprintName).getName();
+            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_NAME, resourceName);
         }
     }
 
@@ -183,15 +184,15 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID, ambariPort);
     }
 
-    private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
+    private void putStackToContextIfExist(StackV4Endpoint endpoint, Long workspaceId, String stackName) {
         if (StringUtils.hasLength(stackName)) {
-            Long resourceId = endpoint.getStackFromDefaultWorkspace(stackName, new HashSet<>()).getId();
+            Long resourceId = endpoint.getStatusByName(workspaceId, stackName).getId();
             itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId.toString());
             itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackName);
         }
     }
 
-    private void putCredentialToContext(CredentialEndpoint endpoint, String cloudProvider, String credentialName) {
+    private void putCredentialToContext(CredentialV4Endpoint endpoint, String cloudProvider, String credentialName, Long workspaceId) {
         if (StringUtils.isEmpty(credentialName)) {
             String defaultCredentialName = itProps.getCredentialName(cloudProvider);
             if (!"__ignored__".equals(defaultCredentialName)) {
@@ -199,8 +200,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             }
         }
         if (StringUtils.hasLength(credentialName)) {
-            Long resourceId = endpoint.getPublic(credentialName).getId();
-            itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId.toString());
+            Long resourceId = endpoint.get(workspaceId, credentialName).getId();
+            itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId);
         }
     }
 
@@ -217,8 +218,9 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     public void cleanUp(@Optional("true") boolean cleanUp) {
         if (isCleanUpNeeded(cleanUp)) {
             CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+            Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
-            cleanUpService.deleteStackAndWait(cloudbreakClient, stackId);
+            cleanUpService.deleteStackAndWait(cloudbreakClient, workspaceId, stackId);
             List<InstanceGroup> instanceGroups = itContext.getCleanUpParameter(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
             if (instanceGroups != null && !instanceGroups.isEmpty()) {
                 Collection<String> deletedTemplates = new HashSet<>();
@@ -231,13 +233,16 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
             if (recipeIds != null) {
                 for (Long recipeId : recipeIds) {
-                    cleanUpService.deleteRecipe(cloudbreakClient, recipeId);
+                    cleanUpService.deleteRecipe(workspaceId, cloudbreakClient, recipeId);
                 }
             }
 
-            cleanUpService.deleteCredential(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
-            cleanUpService.deleteBlueprint(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
-            cleanUpService.deleteRdsConfigs(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID));
+            cleanUpService.deleteCredential(workspaceId, cloudbreakClient,
+                    itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class));
+            cleanUpService.deleteBlueprint(workspaceId, cloudbreakClient,
+                    itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID, Long.class));
+            cleanUpService.deleteRdsConfigs(workspaceId, cloudbreakClient,
+                    itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID, Long.class));
 
         }
     }

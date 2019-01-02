@@ -2,11 +2,10 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,11 +16,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -31,9 +30,11 @@ import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 
-public class EnvironmentTest extends AbstractIntegrationTest  {
+public class EnvironmentTest extends AbstractIntegrationTest {
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
     private static final Set<String> INVALID_REGION = new HashSet<>(Collections.singletonList("MockRegion"));
@@ -55,12 +56,11 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         TestContext testContext = (TestContext) data[0];
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
+    public void tearDown(Object[] data) {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
@@ -123,60 +123,60 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentInvalidRegion(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withRegions(INVALID_REGION)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentNoRegion(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withRegions(null)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentNotExistCredential(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withCredentialName("notexistingcredendital")
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentNotExistProxy(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withProxyConfigs(INVALID_PROXY)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentNotExistLdap(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withLdapConfigs(INVALID_LDAP)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentNotExistRds(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withRdsConfigs(INVALID_RDS)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -186,10 +186,10 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         mixedRds.add(testContext.get(RdsConfigEntity.class).getName());
         mixedRds.add("invalidRds");
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withRdsConfigs(mixedRds)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -199,10 +199,10 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         mixedProxy.add(testContext.get(ProxyConfigEntity.class).getName());
         mixedProxy.add("invalidProxy");
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withProxyConfigs(mixedProxy)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -212,17 +212,17 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         mixedLdap.add(testContext.get(LdapConfigEntity.class).getName());
         mixedLdap.add("invalidLdap");
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withLdapConfigs(mixedLdap)
                 .when(Environment::post, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testDeleteEnvironment(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .when(Environment::getAll)
@@ -237,7 +237,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         Set<String> validProxy = new HashSet<>();
         validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withProxyConfigs(validProxy)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -253,7 +253,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapConfigEntity.class).getName());
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withLdapConfigs(validLdap)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -269,7 +269,7 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
@@ -282,9 +282,9 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     @Test(dataProvider = "testContext")
     public void testDeleteEnvironmentNotExist(TestContext testContext) {
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .when(Environment::delete, key(FORBIDDEN_KEY))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -424,11 +424,11 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
         testContext
-                .given(EnvironmentEntity.class)
+                .init(EnvironmentEntity.class)
                 .withName("int-no-env")
                 .withRdsConfigs(validRds)
                 .when(Environment::putAttachResources, key(FORBIDDEN_KEY))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -461,32 +461,31 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
 
-                .given(CredentialEntity.class)
+                .given("int-env-change-cred", CredentialEntity.class)
                 .withName("int-env-change-cred")
                 .when(new CredentialCreateAction())
 
                 .given(EnvironmentEntity.class)
-                .withCredentialName(testContext.get(CredentialEntity.class).getName())
+                .withCredentialName("int-env-change-cred")
                 .then(Environment::changeCredential)
-                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .then(new CheckEnvironmentCredential("int-env-change-cred"))
                 .validate();
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentChangeCredWithCredRequest(TestContext testContext) {
-        Map<String, Object> parameters = new HashMap<>();
         testContext
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
 
-                .given(CredentialEntity.class)
+                .given("int-change-cred", CredentialEntity.class)
                 .withName("int-change-cred")
 
                 .given(EnvironmentEntity.class)
                 .withCredentialName(null)
-                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred", parameters))
+                .withCredential("int-change-cred")
                 .then(Environment::changeCredential)
-                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .then(new CheckEnvironmentCredential("int-change-cred"))
                 .validate();
     }
 
@@ -510,17 +509,17 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
                 .given(EnvironmentEntity.class)
                 .withCredentialName("not-existing-cred")
                 .then(Environment::changeCredential, key(FORBIDDEN_KEY))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
     private static void attachRdsToEnv(TestContext testContext, String name, Set<String> validRds) {
         testContext
-                .given(EnvironmentEntity.class)
+                .given(name, EnvironmentEntity.class)
                 .withName(name)
                 .when(Environment::post)
 
-                .given(EnvironmentEntity.class)
+                .given(name, EnvironmentEntity.class)
                 .withRdsConfigs(validRds)
                 .when(Environment::putAttachResources)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
@@ -529,11 +528,11 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     private static void attachLdapToEnv(TestContext testContext, String name, Set<String> validLdap) {
         testContext
-                .given(EnvironmentEntity.class)
+                .given(name, EnvironmentEntity.class)
                 .withName(name)
                 .when(Environment::post)
 
-                .given(EnvironmentEntity.class)
+                .given(name, EnvironmentEntity.class)
                 .withLdapConfigs(validLdap)
                 .when(Environment::putAttachResources)
                 .then(EnvironmentTest::checkLdapAttachedToEnv)
@@ -542,11 +541,11 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     private static void attachProxyToEnv(TestContext testContext, String name, Set<String> validLdap) {
         testContext
-                .given(EnvironmentEntity.class)
+                .given(name, EnvironmentEntity.class)
                 .withName(name)
                 .when(Environment::post)
 
-                .given(EnvironmentEntity.class)
+                .given(name, EnvironmentEntity.class)
                 .withProxyConfigs(validLdap)
                 .when(Environment::putAttachResources)
                 .then(EnvironmentTest::checkProxyAttachedToEnv)
@@ -563,8 +562,8 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     protected static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> rdsConfigs = new HashSet<>();
-        Set<RDSConfigResponse> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
-        for (RDSConfigResponse rdsConfigResponse : rdsConfigResponseSet) {
+        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
+        for (DatabaseV4Response rdsConfigResponse : rdsConfigResponseSet) {
             rdsConfigs.add(rdsConfigResponse.getName());
         }
         if (!rdsConfigs.contains(testContext.get(RdsConfigEntity.class).getName())) {
@@ -573,11 +572,34 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
         return environment;
     }
 
+    public static EnvironmentEntity checkRdsDetachedFromEnv(TestContext testContext, EnvironmentEntity environment,
+            String rdsKey, CloudbreakClient cloudbreakClient) {
+        String rdsName = testContext.get(rdsKey).getName();
+        return checkRdsDetachedFromEnv(environment, rdsName);
+    }
+
+    public static <T extends CloudbreakEntity> EnvironmentEntity checkRdsDetachedFromEnv(TestContext testContext,
+            EnvironmentEntity environment, Class<T> rdsKey, CloudbreakClient cloudbreakClient) {
+        String rdsName = testContext.get(rdsKey).getName();
+        return checkRdsDetachedFromEnv(environment, rdsName);
+    }
+
+    private static EnvironmentEntity checkRdsDetachedFromEnv(EnvironmentEntity environment, String rdsName) {
+        Set<DatabaseV4Response> rdsConfigs = environment.getResponse().getDatabases();
+        boolean attached = rdsConfigs.stream().map(DatabaseV4Base::getName)
+                .anyMatch(rds -> rds.equals(rdsName));
+
+        if (attached) {
+            throw new TestFailException("Rds is attached to environment");
+        }
+        return environment;
+    }
+
     protected static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> ldapConfigs = new HashSet<>();
-        Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
-        for (LdapConfigResponse ldapConfigResponse : ldapConfigResponseSet) {
-            ldapConfigs.add(ldapConfigResponse.getName());
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
+        for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
+            ldapConfigs.add(ldapV4Response.getName());
         }
         if (!ldapConfigs.contains(testContext.get(LdapConfigEntity.class).getName())) {
             throw new TestFailException("Ldap is not attached to environment");
@@ -587,9 +609,9 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     protected static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> proxyConfigs = new HashSet<>();
-        Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
-        for (ProxyConfigResponse proxyConfigResponse : proxyConfigResponseSet) {
-            proxyConfigs.add(proxyConfigResponse.getName());
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
+        for (ProxyV4Response proxyV4Response : proxyV4ResponseSet) {
+            proxyConfigs.add(proxyV4Response.getName());
         }
         if (!proxyConfigs.contains(testContext.get(ProxyConfigEntity.class).getName())) {
             throw new TestFailException("Proxy is not attached to environment");
@@ -598,22 +620,13 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
     }
 
     private static EnvironmentEntity checkEnvIsListed(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<SimpleEnvironmentResponse> simpleEnvironmentResponses = testContext.get(EnvironmentEntity.class).getResponseSimpleEnvSet();
-        List<SimpleEnvironmentResponse> result = simpleEnvironmentResponses.stream()
+        Collection<SimpleEnvironmentV4Response> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
+        List<SimpleEnvironmentV4Response> result = simpleEnvironmentV4Respons.stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {
             throw new TestFailException("Environment is not listed");
         }
         return environment;
-    }
-
-    private CredentialRequest createCredentialRequest(String cloudPlatform, String description, String name, Map<String, Object> parameters) {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        credentialRequest.setCloudPlatform(cloudPlatform);
-        credentialRequest.setDescription(description);
-        credentialRequest.setName(name);
-        credentialRequest.setParameters(parameters);
-        return credentialRequest;
     }
 }

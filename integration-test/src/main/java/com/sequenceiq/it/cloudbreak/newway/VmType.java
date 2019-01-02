@@ -19,11 +19,11 @@ public class VmType extends VmTypeEntity {
         return new VmType();
     }
 
-    public static Action<VmType> getPlatformVmTypes(String key) {
-        return new Action<>(getTestContext(key), VmTypeV3Action::getVmTypesByCredentialId);
+    public static ResourceAction<VmType> getPlatformVmTypes(String key) {
+        return new ResourceAction<>(getTestContext(key), VmTypeV3Action::getVmTypesByCredentialId);
     }
 
-    public static Action<VmType> getPlatformVmTypes() {
+    public static ResourceAction<VmType> getPlatformVmTypes() {
         return getPlatformVmTypes(VMTYPE);
     }
 

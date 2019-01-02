@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.context;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.emptyRunningParameter;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,13 +22,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
@@ -39,7 +41,8 @@ import com.sequenceiq.it.cloudbreak.newway.finder.Finder;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.newway.mock.ImageCatalogMockServerSetup;
-import com.sequenceiq.it.cloudbreak.newway.wait.WaitUtil;
+import com.sequenceiq.it.cloudbreak.newway.wait.WaitUtilForMultipleStatuses;
+import com.sequenceiq.it.spark.DynamicRouteStack;
 
 @Prototype
 public class TestContext implements ApplicationContextAware {
@@ -65,7 +68,7 @@ public class TestContext implements ApplicationContextAware {
     private String mockServerAddress;
 
     @Inject
-    private WaitUtil waitUtil;
+    private WaitUtilForMultipleStatuses waitUtil;
 
     @Inject
     private TestParameter testParameter;
@@ -90,19 +93,19 @@ public class TestContext implements ApplicationContextAware {
         model.startModel(sparkServer.getSparkService(), mockServerAddress);
     }
 
-    public <T extends CloudbreakEntity> T when(Class<T> entityClass, ActionV2<T> action) {
+    public <T extends CloudbreakEntity> T when(Class<T> entityClass, Action<T> action) {
         return when(entityClass, action, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T when(Class<T> entityClass, ActionV2<T> action, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T when(Class<T> entityClass, Action<T> action, RunningParameter runningParameter) {
         return when(getEntityFromEntityClass(entityClass, runningParameter), action, runningParameter);
     }
 
-    public <T extends CloudbreakEntity> T when(T entity, ActionV2<T> action) {
+    public <T extends CloudbreakEntity> T when(T entity, Action<T> action) {
         return when(entity, action, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T when(T entity, ActionV2<T> action, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T when(T entity, Action<T> action, RunningParameter runningParameter) {
         checkShutdown();
         String key = runningParameter.getKey();
         if (StringUtils.isEmpty(key)) {
@@ -179,8 +182,8 @@ public class TestContext implements ApplicationContextAware {
         if (clients.get(acting.getToken()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             clients.put(acting.getToken(), cloudbreakClient);
-            Optional<WorkspaceResponse> workspace = cloudbreakClient.getCloudbreakClient()
-                    .workspaceV3Endpoint().getAll().stream()
+            Optional<WorkspaceV4Response> workspace = cloudbreakClient.getCloudbreakClient()
+                    .workspaceV4Endpoint().list().getResponses().stream()
                     .filter(ws -> WorkspaceStatus.ACTIVE == ws.getStatus())
                     .findFirst();
             workspace.ifPresent(workspaceResponse -> cloudbreakClient.setWorkspaceId(workspaceResponse.getId()));
@@ -206,10 +209,6 @@ public class TestContext implements ApplicationContextAware {
     public <O extends CloudbreakEntity> O given(String key, Class<O> clss) {
         checkShutdown();
         return (O) resources.computeIfAbsent(key, value -> init(clss));
-    }
-
-    public void addStatuses(Map<String, String> statuses) {
-        this.statuses.putAll(statuses);
     }
 
     public Map<String, String> getStatuses() {
@@ -348,19 +347,19 @@ public class TestContext implements ApplicationContextAware {
         return getCloudbreakClient(getDefaultUser());
     }
 
-    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, String> desiredStatuses) {
+    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, Status> desiredStatuses) {
         return await(entityClass, desiredStatuses, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, String> desiredStatuses, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
         return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter);
     }
 
-    public <T extends CloudbreakEntity> T await(T entity, Map<String, String> desiredStatuses) {
+    public <T extends CloudbreakEntity> T await(T entity, Map<String, Status> desiredStatuses) {
         return await(entity, desiredStatuses, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T await(T entity, Map<String, String> desiredStatuses, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
@@ -377,7 +376,7 @@ public class TestContext implements ApplicationContextAware {
 
             CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter));
             statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses));
-            if (!desiredStatuses.values().contains("DELETE_COMPLETED")) {
+            if (!desiredStatuses.values().contains(Status.DELETE_COMPLETED)) {
                 awaitEntity.refresh(this, cloudbreakClient);
             }
         } catch (Exception e) {
@@ -403,7 +402,7 @@ public class TestContext implements ApplicationContextAware {
                 //TODO this needs better implementation
                 entryset.cleanUp(this, clients.get(getDefaultUser()));
             } catch (Exception e) {
-                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before");
+                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before, {}", getErrorMessage(e), e);
             }
         });
         shutdown();
@@ -428,24 +427,28 @@ public class TestContext implements ApplicationContextAware {
         if (exception == null) {
             exceptionMap.put("expect", new RuntimeException("Expected an exception but cannot find with key: " + key));
         }
-        if (exception != null && !exception.getClass().equals(expectedException)) {
-            exceptionMap.put("expect", new RuntimeException(String.format("Expected exception (%s) is not match with the actual exception (%s).",
-                    expectedException, exception.getClass())));
+        if (exception != null && (!exception.getClass().equals(expectedException) || !isMessageEquals(exception, runningParameter))) {
+            exceptionMap.put("expect", new RuntimeException(
+                    String.format("Expected exception (%s) or message (%s) is not match with the actual exception (%s) or message(%s).",
+                    expectedException, runningParameter.getExpectedMessage(), exception.getClass(), getErrorMessage(exception))));
         } else {
             exceptionMap.remove(key);
         }
         return entity;
     }
 
+    private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
+        return StringUtils.isEmpty(runningParameter.getExpectedMessage()) || getErrorMessage(exception).matches(runningParameter.getExpectedMessage());
+    }
+
     public void handleExecptionsDuringTest() {
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
         if (!exceptionsDuringTest.isEmpty()) {
-            LOGGER.error("Status reason: {}", statuses.get("statusReason"));
             StringBuilder br = new StringBuilder("All Exceptions during test are logged before this message").append(System.lineSeparator());
             exceptionsDuringTest.forEach((msg, ex) -> {
                 LOGGER.error(msg, ex);
-                br.append(msg).append(": ").append(ex.getMessage()).append(System.lineSeparator());
+                br.append(msg).append(": ").append(getErrorMessage(ex)).append(System.lineSeparator());
             });
             exceptionsDuringTest.clear();
             Assert.fail(br.toString());
@@ -497,6 +500,10 @@ public class TestContext implements ApplicationContextAware {
         sparkServer.shutdown();
         imageCatalogMockServerSetup.shutdown();
         shutdown = true;
+    }
+
+    public DynamicRouteStack dynamicRouteStack() {
+        return model.getAmbariMock().getDynamicRouteStack();
     }
 
     @Override

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.google.common.collect.ImmutableList;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class Group extends DynamicModel {
 

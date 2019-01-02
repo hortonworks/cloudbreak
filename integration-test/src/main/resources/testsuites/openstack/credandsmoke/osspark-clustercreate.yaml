@@ -60,4 +60,4 @@ tests:
       clusterName: it-osspark-cred
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+

@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
@@ -50,7 +50,7 @@ public class ClusterCreationEvaluatorTest {
 
     @Test
     public void testRunCallsFinished() {
-        AutoscaleStackResponse response = new AutoscaleStackResponse();
+        AutoscaleStackV4Response response = new AutoscaleStackV4Response();
         response.setStackId(STACK_ID);
         underTest.setContext(new ClusterCreationEvaluatorContext(response));
         when(clusterService.findOneByStackId(STACK_ID)).thenThrow(new RuntimeException("exception from the test"));

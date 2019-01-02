@@ -1,27 +1,25 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.MaintenanceModeStatus;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -47,8 +45,7 @@ public class ClusterCommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCommonService.class);
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @Inject
     private HostGroupDecorator hostGroupDecorator;
@@ -71,63 +68,51 @@ public class ClusterCommonService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
-    public Response put(Long stackId, UpdateClusterJson updateJson, User user, Workspace workspace) {
+    public void put(Long stackId, UpdateClusterV4Request updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
-        UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
+        UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
         if (userNamePasswordJson != null) {
             ambariUserNamePasswordChange(stackId, stack, userNamePasswordJson);
-            return Response.status(Status.NO_CONTENT).build();
-        }
-
-        if (updateJson.getStatus() != null) {
+        } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
-            return Response.status(Status.NO_CONTENT).build();
-        }
-
-        if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
+        } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
                 recreateCluster(stack, updateJson, user, workspace);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
-            return Response.status(Status.NO_CONTENT).build();
-        }
-
-        if (updateJson.getHostGroupAdjustment() != null) {
+        } else if (updateJson.getHostGroupAdjustment() != null) {
             clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
-            return Response.status(Status.NO_CONTENT).build();
+        } else if (Objects.nonNull(updateJson.getStackRepository())) {
+            updateStackDetails(updateJson, stack);
+        } else {
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            throw new BadRequestException("Invalid update cluster request!");
         }
-
-        if (Objects.nonNull(updateJson.getAmbariStackDetails())) {
-            return updateStackDetails(updateJson, stack);
-        }
-        LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
-        throw new BadRequestException("Invalid update cluster request!");
     }
 
-    private Response updateStackDetails(UpdateClusterJson updateJson, Stack stack) {
+    private void updateStackDetails(UpdateClusterV4Request updateJson, Stack stack) {
         Cluster cluster = stack.getCluster();
         if (!cluster.isMaintenanceModeEnabled()) {
-            return Response.status(Status.BAD_REQUEST.getStatusCode(), String.format(
-                    "Repo update is only permitted in maintenance mode, current status is: '%s'", stack.getCluster().getStatus())).build();
+            throw new BadRequestException(String.format("Repo update is only permitted in maintenance mode, current status is: '%s'",
+                    stack.getCluster().getStatus()));
         }
 
-        AmbariStackDetailsJson ambariStackDetails = updateJson.getAmbariStackDetails();
+        StackRepositoryV4Request stackRepository = updateJson.getStackRepository();
         Long clusterId = cluster.getId();
-        if ("AMBARI".equals(ambariStackDetails.getStack())) {
-            clusterService.updateAmbariRepoDetails(clusterId, ambariStackDetails);
-        } else if ("HDP".equals(ambariStackDetails.getStack())) {
-            clusterService.updateHdpRepoDetails(clusterId, ambariStackDetails);
-        } else if ("HDF".equals(ambariStackDetails.getStack())) {
-            clusterService.updateHdfRepoDetails(clusterId, ambariStackDetails);
+        if ("AMBARI".equals(stackRepository.getStack())) {
+            clusterService.updateAmbariRepoDetails(clusterId, stackRepository);
+        } else if ("HDP".equals(stackRepository.getStack())) {
+            clusterService.updateHdpRepoDetails(clusterId, stackRepository);
+        } else if ("HDF".equals(stackRepository.getStack())) {
+            clusterService.updateHdfRepoDetails(clusterId, stackRepository);
         }
-        return Response.status(Status.NO_CONTENT).build();
     }
 
-    private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack) {
+    private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterV4Request updateJson, Stack stack) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
@@ -144,23 +129,23 @@ public class ClusterCommonService {
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
-    private void recreateCluster(Stack stack, UpdateClusterJson updateJson, User user, Workspace workspace) throws TransactionExecutionException {
+    private void recreateCluster(Stack stack, UpdateClusterV4Request updateCluster, User user, Workspace workspace) throws TransactionExecutionException {
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (HostGroupRequest json : updateJson.getHostgroups()) {
-            HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false, workspace, user);
+        for (HostGroupV4Request json : updateCluster.getHostgroups()) {
+            HostGroup hostGroup = converterUtil.convert(json, HostGroup.class);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false);
             hostGroups.add(hostGroup);
         }
-        AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
+        StackRepositoryV4Request stackDetails = updateCluster.getStackRepository();
         StackRepoDetails stackRepoDetails = null;
         if (stackDetails != null) {
-            stackRepoDetails = conversionService.convert(stackDetails, StackRepoDetails.class);
+            stackRepoDetails = converterUtil.convert(stackDetails, StackRepoDetails.class);
         }
-        clusterService.recreate(stack, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), stackRepoDetails,
-                updateJson.getKerberosPassword(), updateJson.getKerberosPrincipal());
+        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), stackRepoDetails,
+                updateCluster.getKerberosPassword(), updateCluster.getKerberosPrincipal());
     }
 
-    private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordJson userNamePasswordJson) {
+    private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
@@ -176,7 +161,7 @@ public class ClusterCommonService {
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
     }
 
-    public Response setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {
+    public void setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
@@ -190,7 +175,6 @@ public class ClusterCommonService {
                     cluster.getId(), cluster.getStatus()));
         }
 
-        Response status = Response.ok().build();
         switch (maintenanceMode) {
             case ENABLED:
                 saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), MAINTENANCE_MODE_ENABLED, ResourceEvent.MAINTENANCE_MODE_ENABLED);
@@ -207,18 +191,15 @@ public class ClusterCommonService {
                 }
                 clusterService.triggerMaintenanceModeValidation(stack);
                 clusterService.save(cluster);
-                status = Response.accepted().build();
                 break;
             default:
                 // Nothing to do here
                 break;
 
         }
-
-        return status;
     }
 
-    private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, com.sequenceiq.cloudbreak.api.model.Status status, ResourceEvent event) {
+    private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, ResourceEvent event) {
         if (!status.equals(cluster.getStatus())) {
             cluster.setStatus(status);
             clusterService.save(cluster);

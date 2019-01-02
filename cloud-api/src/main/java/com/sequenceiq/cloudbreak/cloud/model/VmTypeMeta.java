@@ -164,29 +164,23 @@ public class VmTypeMeta {
         }
 
         public VmTypeMetaBuilder withCpuAndMemory(Integer cpu, Float memory) {
-            properties.put(CPU, cpu.toString());
-            properties.put(MEMORY, memory.toString());
+            properties.put(CPU, cpu);
+            properties.put(MEMORY, memory);
             return this;
         }
 
         public VmTypeMetaBuilder withCpuAndMemory(int cpu, int memory) {
-            properties.put(CPU, String.valueOf(cpu));
-            properties.put(MEMORY, String.valueOf(memory));
-            return this;
-        }
-
-        public VmTypeMetaBuilder withCpuAndMemory(String cpu, String memory) {
             properties.put(CPU, cpu);
             properties.put(MEMORY, memory);
             return this;
         }
 
         public VmTypeMetaBuilder withMaximumPersistentDisksSizeGb(Float maximumPersistentDisksSizeGb) {
-            properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb.toString());
+            properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb);
             return this;
         }
 
-        public VmTypeMetaBuilder withMaximumPersistentDisksSizeGb(String maximumPersistentDisksSizeGb) {
+        public VmTypeMetaBuilder withMaximumPersistentDisksSizeGb(Long maximumPersistentDisksSizeGb) {
             properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb);
             return this;
         }

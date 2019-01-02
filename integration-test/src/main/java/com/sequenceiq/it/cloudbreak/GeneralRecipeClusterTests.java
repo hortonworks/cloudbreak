@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +16,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -90,7 +90,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
                         BASH_RECIPE_NAMES.stream(), PYTHON_RECIPE_NAMES.stream()).collect(Collectors.toSet())))
                 .withName(getTestParameter().getWithDefault("openstackClusterName", "e2e-cluster-py-recipe")),
                 "a stack request");
-        when(Stack.post(), "post the stack request with recipes");
+        when(Stack.postV3(), "post the stack request with recipes");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -142,7 +142,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
             given(Recipe.isCreated()
                     .withName(recipe)
                     .withDescription(VALID_RECIPE_DESCRIPTION)
-                    .withRecipeType(RecipeType.valueOf(recipe.replace("-", "_").toUpperCase()))
+                    .withRecipeType(RecipeV4Type.valueOf(recipe.replace("-", "_").toUpperCase()))
                     .withContent(Base64.encodeBase64String(BASH_SCRIPT.getBytes()))
             );
         }
@@ -150,7 +150,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
             given(Recipe.isCreated()
                     .withName(pythonRecipe)
                     .withDescription(VALID_RECIPE_DESCRIPTION)
-                    .withRecipeType(RecipeType.valueOf(pythonRecipe.substring(0, pythonRecipe.indexOf("-py")).replace("-", "_").toUpperCase()))
+                    .withRecipeType(RecipeV4Type.valueOf(pythonRecipe.substring(0, pythonRecipe.indexOf("-py")).replace("-", "_").toUpperCase()))
                     .withContent(Base64.encodeBase64String(PYTHON_SCRIPT.getBytes()))
             );
         }

@@ -16,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -39,8 +39,8 @@ public class RdsConfigToRdsDetailsConverterTest {
 
     private RDSConfig source;
 
-    public RdsConfigToRdsDetailsConverterTest(RdsType rdsType, DatabaseVendor vendor) {
-        source = TestUtil.rdsConfig(rdsType, vendor);
+    public RdsConfigToRdsDetailsConverterTest(DatabaseType databaseType, DatabaseVendor vendor) {
+        source = TestUtil.rdsConfig(databaseType, vendor);
     }
 
     @Before
@@ -53,7 +53,7 @@ public class RdsConfigToRdsDetailsConverterTest {
 
     @Parameters(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
     public static Object[][] data() {
-        return TestUtil.combinationOf(RdsType.values(), DatabaseVendor.values());
+        return TestUtil.combinationOf(DatabaseType.values(), DatabaseVendor.values());
     }
 
     @Test

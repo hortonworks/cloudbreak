@@ -9,9 +9,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.v2.AbstractStackCreationV2Test;
@@ -22,9 +22,9 @@ public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
     @Parameters({"stackName", "mockPort", "sshPort"})
     public void configMockServer(String stackName, @Optional("9443") int mockPort, @Optional("2020") int sshPort) {
         IntegrationTestContext itContext = getItContext();
-        Map<String, InstanceGroupV2Request> instanceGroupV2RequestMap = itContext.getContextParam(CloudbreakV2Constants.INSTANCEGROUP_MAP, Map.class);
+        Map<String, InstanceGroupV4Request> instanceGroupV2RequestMap = itContext.getContextParam(CloudbreakV2Constants.INSTANCEGROUP_MAP, Map.class);
         int numberOfServers = 0;
-        for (InstanceGroupV2Request igr : instanceGroupV2RequestMap.values()) {
+        for (InstanceGroupV4Request igr : instanceGroupV2RequestMap.values()) {
             numberOfServers += igr.getNodeCount();
         }
         StackCreationMock stackCreationMock = (StackCreationMock) applicationContext.getBean(
@@ -52,8 +52,8 @@ public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
         StackCreationMock stackCreationMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, StackCreationMock.class);
         String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         stackCreationMock.verifyCalls(stackName);
-        StackV2Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        AmbariV2Request ambariV2Request = stackV2Request.getCluster().getAmbari();
+        StackV4Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
+        ClusterV4Request ambariV2Request = stackV2Request.getCluster();
         if (ambariV2Request.getGateway() != null) {
             stackCreationMock.verifyGatewayCalls();
         }

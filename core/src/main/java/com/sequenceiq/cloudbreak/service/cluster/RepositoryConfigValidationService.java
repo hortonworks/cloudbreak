@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
 
 @Service
@@ -16,8 +16,8 @@ public class RepositoryConfigValidationService {
     @Inject
     private UrlAccessValidationService urlAccessValidationService;
 
-    public RepoConfigValidationResponse validate(RepoConfigValidationRequest request) {
-        RepoConfigValidationResponse result = new RepoConfigValidationResponse();
+    public RepoConfigValidationV4Response validate(RepoConfigValidationV4Request request) {
+        RepoConfigValidationV4Response result = new RepoConfigValidationV4Response();
         if (request != null) {
             String ambariBaseUrl = request.getAmbariBaseUrl();
             if (isNoneEmpty(ambariBaseUrl)) {

@@ -17,7 +17,7 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
                 .given("cm", AmbariEntity.class).withBlueprintName(name).withValidateBlueprint(Boolean.FALSE)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")
                 .given(StackEntity.class).withCluster("cmcluster")
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .validate();
     }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -29,7 +29,7 @@ public class ClouderaClusterTemplateGenerator {
         instantiator.put("clusterName", cluster.getName());
         ArrayNode hostArray = instantiator.putArray("hosts");
         hosts.forEach((host, hostGroup) -> hostArray.addObject().put("hostName", host).put("hostTemplateRefName", hostGroup));
-        Optional<RDSConfig> rdsConfigOptional = rdsConfigs.stream().filter(rds -> RdsType.HIVE.name().equalsIgnoreCase(rds.getType())).findFirst();
+        Optional<RDSConfig> rdsConfigOptional = rdsConfigs.stream().filter(rds -> DatabaseType.HIVE.name().equalsIgnoreCase(rds.getType())).findFirst();
         if (rdsConfigOptional.isPresent()) {
             RDSConfig hiveRds = rdsConfigOptional.get();
             ArrayNode variables = instantiator.putArray("variables");

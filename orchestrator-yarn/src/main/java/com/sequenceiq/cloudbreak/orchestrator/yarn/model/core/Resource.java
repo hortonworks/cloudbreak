@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model.core;
 
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 public class Resource implements JsonEntity {
 

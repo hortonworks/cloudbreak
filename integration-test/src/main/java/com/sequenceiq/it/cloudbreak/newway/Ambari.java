@@ -1,37 +1,31 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 
 public class Ambari extends Entity  {
-    public static final String AMBARI_REQUEST = "AMBARI_REQUEST";
 
-    private AmbariV2Request request;
+    private static final String AMBARI_REQUEST = "AMBARI_REQUEST";
+
+    private AmbariV4Request request;
 
     Ambari(String newId) {
         super(newId);
-        this.request = new AmbariV2Request();
+        this.request = new AmbariV4Request();
     }
 
     Ambari() {
         this(AMBARI_REQUEST);
     }
 
-    public AmbariV2Request getRequest() {
+    public AmbariV4Request getRequest() {
         return request;
     }
 
-    public void setRequest(AmbariV2Request request) {
+    public void setRequest(AmbariV4Request request) {
         this.request = request;
-    }
-
-    public Ambari withBlueprintId(Long blueprintId) {
-        request.setBlueprintId(blueprintId);
-        return this;
     }
 
     public Ambari withBlueprintName(String name) {
@@ -39,33 +33,18 @@ public class Ambari extends Entity  {
         return this;
     }
 
-    public Ambari withAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
-        request.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+    public Ambari withAmbariRepoDetailsJson(AmbariRepositoryV4Request ambariRepoDetailsJson) {
+        request.setRepository(ambariRepoDetailsJson);
         return this;
     }
 
-    public Ambari withAmbariStackDetails(AmbariStackDetailsJson ambariStackDetailsJson) {
-        request.setAmbariStackDetails(ambariStackDetailsJson);
+    public Ambari withAmbariStackDetails(StackRepositoryV4Request ambariStackDetailsJson) {
+        request.setStackRepository(ambariStackDetailsJson);
         return this;
     }
 
     public Ambari withConfigStrategy(ConfigStrategy configStrategy) {
         request.setConfigStrategy(configStrategy);
-        return this;
-    }
-
-    public Ambari withConnectedCluster(ConnectedClusterRequest connectedClusterRequest) {
-        request.setConnectedCluster(connectedClusterRequest);
-        return this;
-    }
-
-    public Ambari withGateway(GatewayJson gatewayJson) {
-        request.setGateway(gatewayJson);
-        return this;
-    }
-
-    public Ambari withKerberos(String kerberosConfigName) {
-        request.setKerberosConfigName(kerberosConfigName);
         return this;
     }
 

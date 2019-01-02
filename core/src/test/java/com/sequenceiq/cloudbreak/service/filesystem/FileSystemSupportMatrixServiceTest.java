@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Response;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -36,7 +36,7 @@ public class FileSystemSupportMatrixServiceTest {
 
     @Test
     public void testWithVersion265() {
-        Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("2.6.5");
+        Set<CloudStorageSupportedV4Response> matrix = underTest.getCloudStorageMatrix("2.6.5");
         assertEquals(3L, matrix.size());
         matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
         assertEquals(2L,
@@ -45,7 +45,7 @@ public class FileSystemSupportMatrixServiceTest {
 
     @Test
     public void testWithVersion260() {
-        Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("2.6.0");
+        Set<CloudStorageSupportedV4Response> matrix = underTest.getCloudStorageMatrix("2.6.0");
         assertEquals(2L, matrix.size());
         matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
         assertEquals(2L,
@@ -54,13 +54,13 @@ public class FileSystemSupportMatrixServiceTest {
 
     @Test
     public void testWithVersion250() {
-        Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("2.5.0");
+        Set<CloudStorageSupportedV4Response> matrix = underTest.getCloudStorageMatrix("2.5.0");
         assertTrue(matrix.isEmpty());
     }
 
     @Test
     public void testWithVersion300() {
-        Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("3.0.0");
+        Set<CloudStorageSupportedV4Response> matrix = underTest.getCloudStorageMatrix("3.0.0");
         assertEquals(3L, matrix.size());
         matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
         assertEquals(3L,

@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.db;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -12,10 +15,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
@@ -32,6 +37,9 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Inject
     private StructuredEventRepository structuredEventRepository;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     public void storeStructuredEvent(StructuredEvent structuredEvent) {
@@ -108,5 +116,14 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     @Override
     protected void prepareCreation(StructuredEventEntity resource) {
 
+    }
+
+    @Override
+    public StructuredEventContainer getStructuredEventsForStack(String name, Long workspaceId) {
+        return getEventsForUserWithResourceId("stacks", getStackIfAvailable(workspaceId, name).getId());
+    }
+
+    private Stack getStackIfAvailable(Long workspaceId, String name) {
+        return Optional.ofNullable(stackService.getByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
     }
 }

@@ -29,8 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -40,9 +41,11 @@ import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 public class RdsConfigServiceTest {
@@ -70,6 +73,18 @@ public class RdsConfigServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private User user;
+
+    @Mock
+    private CloudbreakUser cloudbreakUser;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @Captor
     private ArgumentCaptor<RDSConfig> rdsConfigCaptor;
 
@@ -90,6 +105,9 @@ public class RdsConfigServiceTest {
         testRdsConfig.setId(1L);
         testRdsConfig.setName(TEST_RDS_CONFIG_NAME);
         doNothing().when(rdsConfigRepository).delete(any());
+        when(userService.getOrCreate(any())).thenReturn(user);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(workspaceService.get(anyLong(), any())).thenReturn(defaultWorkspace);
     }
 
     @Test
@@ -242,8 +260,9 @@ public class RdsConfigServiceTest {
     @Test
     public void testRdsConnectionTestByNullRdsConfig() {
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
+        thrown.expect(BadRequestException.class);
 
-        String result = underTest.testRdsConnection(null);
+        String result = underTest.testRdsConnection(1L, null, null);
 
         assertEquals("access is denied", result);
     }
@@ -252,7 +271,7 @@ public class RdsConfigServiceTest {
     public void testRdsConnectionTestByExistingRdsConfig() {
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
 
-        String result = underTest.testRdsConnection(testRdsConfig);
+        String result = underTest.testRdsConnection(1L, null, testRdsConfig);
 
         assertEquals("connected", result);
     }
@@ -262,7 +281,7 @@ public class RdsConfigServiceTest {
         String testErrorString = "Test error";
         doThrow(new BadRequestException(testErrorString)).when(rdsConnectionValidator).validateRdsConnection(any());
 
-        String result = underTest.testRdsConnection(testRdsConfig);
+        String result = underTest.testRdsConnection(1L, null, testRdsConfig);
 
         assertEquals(testErrorString, result);
     }
@@ -272,16 +291,16 @@ public class RdsConfigServiceTest {
         when(rdsConfigRepository.findByNameAndWorkspaceId(any(), any())).thenReturn(testRdsConfig);
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
 
-        String result = underTest.testRdsConnection(TEST_RDS_CONFIG_NAME, defaultWorkspace);
+        String result = underTest.testRdsConnection(1L, TEST_RDS_CONFIG_NAME, null);
 
         assertEquals("connected", result);
     }
 
     @Test
     public void testRdsConnectionTestByNameWithException() {
-        when(rdsConfigRepository.findByNameAndWorkspace(eq(TEST_RDS_CONFIG_NAME), eq(defaultWorkspace))).thenReturn(null);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(defaultWorkspace.getId()))).thenReturn(null);
 
-        String result = underTest.testRdsConnection(TEST_RDS_CONFIG_NAME, defaultWorkspace);
+        String result = underTest.testRdsConnection(1L, TEST_RDS_CONFIG_NAME, null);
 
         assertEquals("access is denied", result);
     }

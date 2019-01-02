@@ -1,17 +1,16 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 
-import static org.springframework.util.StringUtils.isEmpty;
-
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.HashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackAction {
@@ -35,8 +34,9 @@ public class StackAction {
                 CloudbreakClient.class);
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .getStackFromDefaultWorkspace(stackEntity.getName(), null));
+                client.getCloudbreakClient().stackV4Endpoint()
+                        .get(integrationTestContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class), stackEntity.getName(),
+                                Collections.emptySet()));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }
 
@@ -46,10 +46,7 @@ public class StackAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Log.log(" get all stack");
-        stackEntity.setResponses(
-                client.getCloudbreakClient()
-                        .stackV2Endpoint()
-                        .getStacksInDefaultWorkspace());
+        stackEntity.setResponses(new HashSet<>(stackEntity.getAll(client)));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -66,8 +63,8 @@ public class StackAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Log.log(" delete: " + stackEntity.getName());
-        client.getCloudbreakClient().stackV2Endpoint()
-                .deletePrivate(stackEntity.getName(), forced, false);
+        client.getCloudbreakClient().stackV4Endpoint()
+                .delete(stackEntity.getResponse().getId(), stackEntity.getName(), forced, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -84,12 +81,9 @@ public class StackAction {
         var stackEntity = (StackEntity) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
-            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
-            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
-
             prepareNetworkParam(stackEntity);
-            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
-            stackEntity.getRequest().getNetwork().getParameters().put(VPC_ID_KEY, networkId);
+            stackEntity.getRequest().getNetwork().getAws().setSubnetId(datalakeStack.getResponse().getNetwork().getAws().getSubnetId());
+            stackEntity.getRequest().getNetwork().getAws().setVpcId(datalakeStack.getResponse().getNetwork().getAws().getVpcId());
         } else {
             throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
         }
@@ -99,53 +93,19 @@ public class StackAction {
         var stackEntity = (StackEntity) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
-            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
-            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
-
             prepareNetworkParam(stackEntity);
-            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
-            stackEntity.getRequest().getNetwork().getParameters().put(NETWORK_ID_KEY, networkId);
-            stackEntity.getRequest().getNetwork().getParameters().put(RESOURCE_GROUP_NAME_KEY, networkId);
+            stackEntity.getRequest().getNetwork().getAzure().setSubnetId(datalakeStack.getResponse().getNetwork().getAzure().getSubnetId());
+            stackEntity.getRequest().getNetwork().getAzure().setNetworkId(datalakeStack.getResponse().getNetwork().getAzure().getNetworkId());
+            stackEntity.getRequest().getNetwork().getAzure().setResourceGroupName(datalakeStack.getResponse().getNetwork().getAzure().getResourceGroupName());
         } else {
             throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
         }
-    }
-
-    public static void determineNetworkFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
-        var stackEntity = (StackEntity) entity;
-        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
-        if (isDatalakeExistAndHasNetwork(datalakeStack)) {
-            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
-            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
-
-            prepareNetworkParam(stackEntity);
-            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
-            stackEntity.getRequest().getNetwork().getParameters().put(NETWORK_ID_KEY, networkId);
-        } else {
-            throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
-        }
-    }
-
-    private static String obtainFromNetworkParam(Map<String, Object> parameters, String key) {
-        if (parameters == null) {
-            return null;
-        }
-        Object value = parameters.get(key);
-        if (isEmpty(parameters.get(key))) {
-            return null;
-        }
-
-        return value.toString();
     }
 
     private static void prepareNetworkParam(StackEntity stackEntity) {
         if (stackEntity.getRequest().getNetwork() == null) {
-            var network = new NetworkV2Request();
+            var network = new NetworkV4Request();
             stackEntity.getRequest().setNetwork(network);
-        }
-        if (stackEntity.getRequest().getNetwork().getParameters() == null) {
-            var params = new LinkedHashMap<String, Object>();
-            stackEntity.getRequest().getNetwork().setParameters(params);
         }
     }
 

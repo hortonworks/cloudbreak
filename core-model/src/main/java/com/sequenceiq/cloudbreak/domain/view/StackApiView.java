@@ -14,10 +14,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.stack.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

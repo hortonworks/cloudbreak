@@ -20,7 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -85,7 +85,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         this.template = template;
     }
 
-    public Integer getNodeCount() {
+    public int getNodeCount() {
         return getNotTerminatedInstanceMetaDataSet().size();
     }
 

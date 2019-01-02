@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest {
 
-    private final List<String> defaultSkippedFields = Arrays.asList("id", "owner", "account", "workspace");
+    private final List<String> defaultSkippedFields = Arrays.asList("id", "workspace");
 
     public S getRequest(String jsonFilePath) {
         return readJsonFile(jsonFilePath, getRequestClass());

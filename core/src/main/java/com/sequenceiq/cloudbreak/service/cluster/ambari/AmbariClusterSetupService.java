@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;

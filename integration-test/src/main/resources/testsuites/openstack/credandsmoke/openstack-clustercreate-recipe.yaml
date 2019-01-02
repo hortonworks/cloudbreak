@@ -69,7 +69,7 @@ tests:
       runRecipesOnHosts: "master,worker,compute"
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
 
   - name: upscale stack, upscale cluster

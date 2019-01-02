@@ -27,11 +27,11 @@ public class SecurityRules extends SecurityRulesEntity {
         return new SecurityRules();
     }
 
-    public static Action<SecurityRules> getDefaultSecurityRules(String key) {
-        return new Action<>(getTestContext(key), SecurityRulesAction::getDefaultSecurityRules);
+    public static ResourceAction<SecurityRules> getDefaultSecurityRules(String key) {
+        return new ResourceAction<>(getTestContext(key), SecurityRulesAction::getDefaultSecurityRules);
     }
 
-    public static Action<SecurityRules> getDefaultSecurityRules() {
+    public static ResourceAction<SecurityRules> getDefaultSecurityRules() {
         return getDefaultSecurityRules(SECURITYRULES);
     }
 

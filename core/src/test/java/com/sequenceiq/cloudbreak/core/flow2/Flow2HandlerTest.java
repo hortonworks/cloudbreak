@@ -39,7 +39,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;

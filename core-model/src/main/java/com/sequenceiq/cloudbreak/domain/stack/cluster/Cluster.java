@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLED;
-import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -37,9 +37,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;

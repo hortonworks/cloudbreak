@@ -58,7 +58,7 @@ tests:
       clusterName: it-aws-cred-spot
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: check spot instances after cluster creation
     parameters:

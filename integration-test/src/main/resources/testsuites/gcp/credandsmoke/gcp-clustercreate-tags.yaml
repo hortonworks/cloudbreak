@@ -60,7 +60,7 @@ tests:
       userDefinedTags: ittest:itvalue;gcptag:gcpvalue;result:success
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: check tags
     parameters:

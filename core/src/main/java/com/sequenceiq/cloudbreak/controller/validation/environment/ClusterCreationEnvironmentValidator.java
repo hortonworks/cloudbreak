@@ -9,12 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
@@ -39,7 +37,7 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private KerberosService kerberosService;
 
-    public ValidationResult validate(ClusterRequest clusterRequest, Stack stack) {
+    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         EnvironmentView stackEnv = stack.getEnvironment();
         if (stackEnv != null && !CollectionUtils.isEmpty(stackEnv.getRegionSet())
@@ -54,7 +52,7 @@ public class ClusterCreationEnvironmentValidator {
         return resultBuilder.build();
     }
 
-    public ValidationResult validate(RegisterDatalakeRequest registerDatalakeRequest, Environment environment) {
+    public ValidationResult validate(RegisterDatalakeV4Request registerDatalakeRequest, Environment environment) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Long workspaceId = environment.getWorkspace().getId();
         String environmentName = environment.getName();
@@ -63,7 +61,7 @@ public class ClusterCreationEnvironmentValidator {
         }
         validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId),
                 environmentName, resultBuilder);
-        for (String rdsConfigName : registerDatalakeRequest.getRdsNames()) {
+        for (String rdsConfigName : registerDatalakeRequest.getDatabaseNames()) {
             validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
         }
         if (StringUtils.isNoneEmpty(registerDatalakeRequest.getKerberosName())) {
@@ -73,46 +71,28 @@ public class ClusterCreationEnvironmentValidator {
         return resultBuilder.build();
     }
 
-    private void validateLdapConfig(Long workspaceId, ClusterRequest request, EnvironmentView stackEnv,
-            ValidationResult.ValidationResultBuilder resultBuilder) {
-        if (request.getLdapConfig() != null) {
-            validateEnvironments(request.getLdapConfig().getName(), LdapConfig.class.getSimpleName(), request.getLdapConfig().getEnvironments(), stackEnv,
-                    resultBuilder);
-        } else if (request.getLdapConfigName() != null) {
-            validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(request.getLdapConfigName(), workspaceId), stackEnv, resultBuilder);
-        } else if (request.getLdapConfigId() != null) {
-            validateEnvironmentAwareResource(ldapConfigService.get(request.getLdapConfigId()), stackEnv, resultBuilder);
+    private void validateLdapConfig(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
+        if (request.getLdapName() != null) {
+            validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(request.getLdapName(), workspaceId), stackEnv, resultBuilder);
         }
     }
 
-    private void validateProxyConfig(Long workspaceId, ClusterRequest request, EnvironmentView stackEnv,
-            ValidationResult.ValidationResultBuilder resultBuilder) {
+    private void validateProxyConfig(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isNotBlank(request.getProxyName())) {
             validateEnvironmentAwareResource(proxyConfigService.getByNameForWorkspaceId(request.getProxyName(), workspaceId), stackEnv, resultBuilder);
         }
     }
 
-    private void validateRdsConfigs(Long workspaceId, ClusterRequest request, EnvironmentView stackEnv,
-            ValidationResult.ValidationResultBuilder resultBuilder) {
-        if (request.getRdsConfigIds() != null) {
-            for (Long rdsConfigId : request.getRdsConfigIds()) {
-                validateEnvironmentAwareResource(rdsConfigService.get(rdsConfigId), stackEnv, resultBuilder);
-            }
-        }
-        if (request.getRdsConfigNames() != null) {
-            for (String rdsConfigName : request.getRdsConfigNames()) {
+    private void validateRdsConfigs(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
+        if (request.getDatabases() != null) {
+            for (String rdsConfigName : request.getDatabases()) {
                 validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), stackEnv, resultBuilder);
-            }
-        }
-        if (request.getRdsConfigJsons() != null) {
-            for (RDSConfigJson rdsConfig : request.getRdsConfigJsons()) {
-                validateEnvironments(rdsConfig.getName(), RDSConfig.class.getSimpleName(), rdsConfig.getEnvironments(), stackEnv, resultBuilder);
             }
         }
     }
 
     private void validateEnvironments(String resourceName, String resourceType, Set<String> environments, EnvironmentView stackEnv,
-            ValidationResult.ValidationResultBuilder resultBuilder) {
+            ValidationResultBuilder resultBuilder) {
         if (stackEnv == null) {
             if (!CollectionUtils.isEmpty(environments)) {
                 resultBuilder.error(String.format("Stack without environment cannot use %s %s resource which attached to an environment.",
@@ -128,7 +108,7 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     private <T extends EnvironmentAwareResource> void validateEnvironmentAwareResource(T resource,
-            EnvironmentView stackEnv, ValidationResult.ValidationResultBuilder resultBuilder) {
+            EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
         if (stackEnv == null) {
             if (!CollectionUtils.isEmpty(resource.getEnvironments())) {
                 resultBuilder.error(String.format("Stack without environment cannot use %s %s resource which attached to an environment.",
@@ -140,7 +120,7 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     private <T extends EnvironmentAwareResource> void validateEnvironmentAwareResource(T resource,
-            String environemntName, ValidationResult.ValidationResultBuilder resultBuilder) {
+            String environemntName, ValidationResultBuilder resultBuilder) {
         if (!CollectionUtils.isEmpty(resource.getEnvironments())
                 && resource.getEnvironments().stream().noneMatch(resEnv -> resEnv.getName().equals(environemntName))) {
             resultBuilder.error(String.format("Stack cannot use %s %s resource which is not attached to %s environment and not global.",
