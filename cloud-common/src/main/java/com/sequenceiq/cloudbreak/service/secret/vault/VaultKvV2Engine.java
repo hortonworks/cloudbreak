@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.Versioned;
 
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 
 @Component("VaultKvV2Engine")
 public class VaultKvV2Engine extends AbstractVautEngine<VaultKvV2Engine> {
@@ -59,9 +59,9 @@ public class VaultKvV2Engine extends AbstractVautEngine<VaultKvV2Engine> {
     }
 
     @Override
-    public SecretResponse convertToExternal(String secret) {
+    public SecretV4Response convertToExternal(String secret) {
         return Optional.ofNullable(convertToVaultSecret(secret))
-                .map(s -> new SecretResponse(s.getEnginePath(), s.getPath()))
+                .map(s -> new SecretV4Response(s.getEnginePath(), s.getPath()))
                 .orElse(null);
     }
 

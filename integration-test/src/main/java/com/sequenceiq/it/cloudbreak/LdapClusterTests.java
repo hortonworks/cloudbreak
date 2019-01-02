@@ -1,6 +1,16 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import javax.ws.rs.BadRequestException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -10,15 +20,6 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.BadRequestException;
 
 public class LdapClusterTests extends CloudbreakTest {
 
@@ -101,7 +102,7 @@ public class LdapClusterTests extends CloudbreakTest {
                         .withLdapConfigName(VALID_LDAP_CONFIG),
                 "a cluster request with ldap config");
         given(cloudProvider.aValidStackRequest(),  "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -110,7 +111,7 @@ public class LdapClusterTests extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari is running and components available");
         then(Stack.assertThis(
-                (stack, t) -> Assert.assertTrue(stack.getResponse().getCluster().getLdapConfig().getName().equals(VALID_LDAP_CONFIG))
+                (stack, t) -> Assert.assertTrue(stack.getResponse().getCluster().getLdap().getName().equals(VALID_LDAP_CONFIG))
         ));
     }
 

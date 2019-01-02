@@ -1,0 +1,22 @@
+{
+  "name" : "mycluster",
+  "knoxTopologyName" : "cb",
+  "emailNeeded" : true,
+  "blueprintId": 50,
+  "description" : "my cluster description",
+  "kerberosName" : "somename",
+  "gateway" : {
+    "enableKnoxGateway": "false"
+  },
+  "ambari":{
+    "userName" : "user",
+    "password" : "pass"
+  },
+  "validateBlueprint" : true,
+  "emailTo": "admin@example.com",
+  "cloudStorage" : {
+    "name": "teszt",
+    "type": "WASB",
+    "defaultFs": true
+  }
+}

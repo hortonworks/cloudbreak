@@ -7,7 +7,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackDeleteInstanceAction implements ActionV2<StackEntity> {
+public class StackDeleteInstanceAction implements Action<StackEntity> {
 
     public static final String INSTANCE_ID = "SDA-instanceId";
 
@@ -18,8 +18,8 @@ public class StackDeleteInstanceAction implements ActionV2<StackEntity> {
         String instanceId = testContext.getRequiredSelected(INSTANCE_ID);
         Boolean forced = testContext.getSelected("forced");
         client.getCloudbreakClient()
-                .stackV3Endpoint()
-                .deleteInstance(client.getWorkspaceId(), entity.getName(), instanceId, forced == null ? false : forced);
+                .stackV4Endpoint()
+                .deleteInstance(client.getWorkspaceId(), entity.getName(), forced != null && forced, instanceId);
         return entity;
     }
 

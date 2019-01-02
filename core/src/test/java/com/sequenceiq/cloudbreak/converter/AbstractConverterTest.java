@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,31 +19,37 @@ public class AbstractConverterTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConverterTest.class);
 
     public void assertAllFieldsNotNull(Object obj) {
-        Field[] fields = obtainFields(obj);
-        for (Field field : fields) {
-            assertFieldNotNull(obj, field);
-        }
+        assertAllFieldsNotNull(obj, Collections.emptyList());
     }
 
     public void assertAllFieldsNotNull(Object obj, List<String> skippedFields) {
         Field[] fields = obtainFields(obj);
         int count = 0;
         int skippedCount = 0;
+        Set<String> remainingFields = new HashSet<>(skippedFields);
+        remainingFields.remove("workspace");
+        remainingFields.remove("id");
+        Set<String> missing = new HashSet<>();
         for (Field field : fields) {
             if (!skippedFields.contains(field.getName())) {
-                assertFieldNotNull(obj, field);
+                if (isFieldNull(obj, field)) {
+                    missing.add(field.getName());
+                }
                 count++;
             } else {
                 skippedCount++;
             }
+            remainingFields.remove(field.getName());
         }
+        assertTrue("Field(s) \"" + String.join("\", \"", remainingFields) + "\" does not exist in class anymore.", remainingFields.isEmpty());
         LOGGER.info("Checked fields count: {}, skipped counts: {}", count, skippedCount);
+        assertTrue("Field(s) \"" + String.join("\", \"", missing) + "\" is null.", missing.isEmpty());
     }
 
-    private void assertFieldNotNull(Object obj, Field field) {
+    private boolean isFieldNull(Object obj, Field field) {
         try {
             field.setAccessible(true);
-            assertNotNull("Field '" + field.getName() + "' is null.", field.get(obj));
+            return field.get(obj) == null;
         } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new TestException(e.getMessage());
         }
@@ -51,4 +60,5 @@ public class AbstractConverterTest {
         Field[] parentFields = obj.getClass().getSuperclass().getDeclaredFields();
         return ObjectArrays.concat(fields, parentFields, Field.class);
     }
+
 }

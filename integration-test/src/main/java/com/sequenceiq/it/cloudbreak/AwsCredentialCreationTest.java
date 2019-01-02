@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -10,7 +7,10 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 
 public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.awscredential.name}")
@@ -34,22 +34,26 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         roleArn = StringUtils.hasLength(roleArn) ? roleArn : defaultRoleArn;
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccessKey;
         secretKey = StringUtils.hasLength(secretKey) ? secretKey : defaultSecretKey;
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Aws credential for integrationtest");
-        Map<String, Object> map = new HashMap<>();
+
+        AwsCredentialV4Parameters credentialParameters = new AwsCredentialV4Parameters();
         if (roleArn != null && !roleArn.isEmpty()) {
-            map.put("selector", "role-based");
-            map.put("roleArn", roleArn);
+            RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
+            roleBasedCredentialParameters.setRoleArn(roleArn);
+            credentialParameters.setRoleBased(roleBasedCredentialParameters);
         } else {
-            map.put("selector", "key-based");
-            map.put("accessKey", accessKey);
-            map.put("secretKey", secretKey);
+            KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+            keyBasedCredentialParameters.setAccessKey(accessKey);
+            keyBasedCredentialParameters.setSecretKey(secretKey);
+            credentialParameters.setKeyBased(keyBasedCredentialParameters);
         }
-        credentialRequest.setParameters(map);
+
+        credentialRequest.setAws(credentialParameters);
         credentialRequest.setCloudPlatform("AWS");
         // WHEN
-        String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
+        Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

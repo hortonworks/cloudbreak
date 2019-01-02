@@ -16,6 +16,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.ConverterUtilTest.MockConversionService;
 
 @RunWith(SpringRunner.class)

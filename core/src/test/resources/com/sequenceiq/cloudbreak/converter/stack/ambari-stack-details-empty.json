@@ -1,6 +1,0 @@
-{
-  "stack": "HDP",
-  "version" : "2.2",
-  "os" : "redhat6",
-  "verify" : true
-}

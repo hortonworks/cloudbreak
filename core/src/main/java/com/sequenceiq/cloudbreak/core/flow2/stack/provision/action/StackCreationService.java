@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
 import static java.lang.String.format;
@@ -25,10 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
@@ -216,8 +216,8 @@ public class StackCreationService {
         notificationSender.send(getImageCopyNotification(result, stack));
     }
 
-    private Notification<CloudbreakEventsJson> getImageCopyNotification(CheckImageResult result, Stack stack) {
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+    private Notification<CloudbreakEventV4Response> getImageCopyNotification(CheckImageResult result, Stack stack) {
+        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventType("IMAGE_COPY_STATE");
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));

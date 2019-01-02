@@ -1,54 +1,52 @@
 package com.sequenceiq.it.cloudbreak.filesystem;
 
-import javax.annotation.Nonnull;
-
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsGen2CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 
 public enum CloudStorageTypePathPrefix {
 
     S3("s3a") {
         @Override
-        public void setParameterForRequest(@Nonnull CloudStorageRequest request, CloudStorageParameters parameters) {
-            if (parameters == null || parameters instanceof S3CloudStorageParameters) {
-                request.setS3((S3CloudStorageParameters) parameters);
+        public void setParameterForRequest(CloudStorageV4Request request, CloudStorageV4Parameters parameters) {
+            if (parameters == null || parameters instanceof S3CloudStorageV4Parameters) {
+                request.setS3((S3CloudStorageV4Parameters) parameters);
             }
         }
     },
     WASB("wasb") {
         @Override
-        public void setParameterForRequest(@Nonnull CloudStorageRequest request, CloudStorageParameters parameters) {
-            if (parameters == null || parameters instanceof WasbCloudStorageParameters) {
-                request.setWasb((WasbCloudStorageParameters) parameters);
+        public void setParameterForRequest(CloudStorageV4Request request, CloudStorageV4Parameters parameters) {
+            if (parameters == null || parameters instanceof WasbCloudStorageV4Parameters) {
+                request.setWasb((WasbCloudStorageV4Parameters) parameters);
             }
         }
     },
     ADLS("adl") {
         @Override
-        public void setParameterForRequest(@Nonnull CloudStorageRequest request, CloudStorageParameters parameters) {
-            if (parameters == null || parameters instanceof AdlsCloudStorageParameters) {
-                request.setAdls((AdlsCloudStorageParameters) parameters);
+        public void setParameterForRequest(CloudStorageV4Request request, CloudStorageV4Parameters parameters) {
+            if (parameters == null || parameters instanceof AdlsCloudStorageV4Parameters) {
+                request.setAdls((AdlsCloudStorageV4Parameters) parameters);
             }
         }
     },
     GCS("gs") {
         @Override
-        public void setParameterForRequest(CloudStorageRequest request, CloudStorageParameters parameters) {
-            if (parameters == null || parameters instanceof GcsCloudStorageParameters) {
-                request.setGcs((GcsCloudStorageParameters) parameters);
+        public void setParameterForRequest(CloudStorageV4Request request, CloudStorageV4Parameters parameters) {
+            if (parameters == null || parameters instanceof GcsCloudStorageV4Parameters) {
+                request.setGcs((GcsCloudStorageV4Parameters) parameters);
             }
         }
     },
     ADLS_GEN_2("adlsgen2") {
         @Override
-        public void setParameterForRequest(CloudStorageRequest request, CloudStorageParameters parameters) {
-            if (parameters == null || parameters instanceof AdlsGen2CloudStorageParameters) {
-                request.setAdlsGen2((AdlsGen2CloudStorageParameters) parameters);
+        public void setParameterForRequest(CloudStorageV4Request request, CloudStorageV4Parameters parameters) {
+            if (parameters == null || parameters instanceof AdlsGen2CloudStorageV4Parameters) {
+                request.setAdlsGen2((AdlsGen2CloudStorageV4Parameters) parameters);
             }
         }
     };
@@ -63,6 +61,6 @@ public enum CloudStorageTypePathPrefix {
         return prefix;
     }
 
-    public abstract void setParameterForRequest(CloudStorageRequest request, CloudStorageParameters parameters);
+    public abstract void setParameterForRequest(CloudStorageV4Request request, CloudStorageV4Parameters parameters);
 
 }

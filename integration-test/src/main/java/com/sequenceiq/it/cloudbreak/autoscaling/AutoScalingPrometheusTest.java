@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -27,7 +26,7 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
     @BeforeMethod
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull("Stack id is mandatory.", itContext.getContextParam(CloudbreakITContextConstants.STACK_ID));
+        Assert.assertNotNull("Stack name is mandatory.", itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME));
         Assert.assertNotNull("Autoscale is mandatory.", itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT));
     }
 
@@ -38,17 +37,18 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
             Double threshold, String hostGroup, int scalingAdjustment) {
         // GIVEN
         itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class).stackV1Endpoint();
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        var stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class).stackV4Endpoint();
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         autoscaleClient = itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT, AutoscaleClient.class);
-        Long clusterId = AutoscalingUtil.getPeriscopeClusterId(autoscaleClient, stackId);
+        Long clusterId = AutoscalingUtil.getPeriscopeClusterId(autoscaleClient, stackName);
         long currentTime = RecoveryUtil.getCurentTimeStamp();
-        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackV1Endpoint, stackId) + scalingAdjustment;
-        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
+        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackEndpoint, workspaceId, stackName) + scalingAdjustment;
+        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext)
                 + scalingAdjustment;
 
         // WHEN
@@ -60,7 +60,8 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
         AutoscalingUtil.createPolicy(autoscaleClient, policyName, clusterId, alertId, hostGroup, scalingAdjustment);
         // THEN
         AutoscalingUtil.checkHistory(autoscaleClient, clusterId, currentTime);
-        AutoscalingUtil.checkScaling(itContext, getCloudbreakClient(), scalingAdjustment, stackId, expectedNodeCountStack, expectedNodeCountCluster);
+        AutoscalingUtil.checkScaling(itContext, getCloudbreakClient(), workspaceId, scalingAdjustment, stackName, expectedNodeCountStack,
+                expectedNodeCountCluster);
     }
 
     @AfterTest

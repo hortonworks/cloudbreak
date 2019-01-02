@@ -15,8 +15,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -43,9 +43,9 @@ public class EnvironmentCredentialOperationServiceTest {
 
     @Test
     public void testGetCredentialFromRequestByName() {
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(CRED_NAME);
-        request.setCredential(new CredentialRequest());
+        request.setCredential(new CredentialV4Request());
         Credential credential = new Credential();
         when(credentialService.getByNameForWorkspaceId(CRED_NAME, WORKSPACE_ID)).thenReturn(credential);
 
@@ -56,9 +56,9 @@ public class EnvironmentCredentialOperationServiceTest {
 
     @Test(expected = BadRequestException.class)
     public void testGetCredentialFromRequestByNameNotFound() {
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(CRED_NAME);
-        request.setCredential(new CredentialRequest());
+        request.setCredential(new CredentialV4Request());
         when(credentialService.getByNameForWorkspaceId(CRED_NAME, WORKSPACE_ID)).thenThrow(new NotFoundException(""));
 
         underTest.getCredentialFromRequest(request, WORKSPACE_ID);
@@ -66,13 +66,13 @@ public class EnvironmentCredentialOperationServiceTest {
 
     @Test
     public void testGetCredentialWithCreate() {
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
-        CredentialRequest credentialRequest = new CredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("credName2");
         credentialRequest.setCloudPlatform("AWS");
         request.setCredential(credentialRequest);
 
-        when(conversionService.convert(any(CredentialRequest.class), eq(Credential.class)))
+        when(conversionService.convert(any(CredentialV4Request.class), eq(Credential.class)))
                 .thenAnswer((Answer<Credential>) invocation -> {
                     Credential credential = new Credential();
                     credential.setId(2L);
@@ -92,9 +92,9 @@ public class EnvironmentCredentialOperationServiceTest {
     public void testValidatePlatformAndGetCredentialByNameWithInvalidCloudPlatform() {
         Environment environment = new Environment();
         environment.setCloudPlatform("AWS");
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(CRED_NAME);
-        request.setCredential(new CredentialRequest());
+        request.setCredential(new CredentialV4Request());
         Credential credential = new Credential();
         credential.setCloudPlatform("GCP");
         when(credentialService.getByNameForWorkspaceId(CRED_NAME, WORKSPACE_ID)).thenReturn(credential);
@@ -106,9 +106,9 @@ public class EnvironmentCredentialOperationServiceTest {
     public void testValidatePlatformAndGetCredentialByName() {
         Environment environment = new Environment();
         environment.setCloudPlatform("AWS");
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(CRED_NAME);
-        request.setCredential(new CredentialRequest());
+        request.setCredential(new CredentialV4Request());
         Credential credential = new Credential();
         credential.setCloudPlatform("AWS");
         when(credentialService.getByNameForWorkspaceId(CRED_NAME, WORKSPACE_ID)).thenReturn(credential);
@@ -122,11 +122,11 @@ public class EnvironmentCredentialOperationServiceTest {
     public void testValidatePlatformAndGetCredentialWithCreate() {
         Environment environment = new Environment();
         environment.setCloudPlatform(AWS);
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
-        request.setCredential(new CredentialRequest());
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
+        request.setCredential(new CredentialV4Request());
         request.getCredential().setCloudPlatform(AWS);
 
-        when(conversionService.convert(any(CredentialRequest.class), eq(Credential.class)))
+        when(conversionService.convert(any(CredentialV4Request.class), eq(Credential.class)))
                 .thenAnswer((Answer<Credential>) invocation -> {
                     Credential credential = new Credential();
                     credential.setCloudPlatform(AWS);

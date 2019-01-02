@@ -2,17 +2,17 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigRequest, ProxyConfigResponse, ProxyConfigEntity> {
+public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyV4Request, ProxyV4Response, ProxyConfigEntity> {
     public static final String PROXY_CONFIG = "PROXY_CONFIG";
 
     ProxyConfigEntity(String newId) {
         super(newId);
-        setRequest(new ProxyConfigRequest());
+        setRequest(new ProxyV4Request());
     }
 
     ProxyConfigEntity() {
@@ -20,11 +20,11 @@ public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigReque
     }
 
     public ProxyConfigEntity(TestContext testContext) {
-        super(new ProxyConfigRequest(), testContext);
+        super(new ProxyV4Request(), testContext);
     }
 
-    public ProxyConfigEntity(ProxyConfigRequest proxyConfigRequest, TestContext testContext) {
-        super(proxyConfigRequest, testContext);
+    public ProxyConfigEntity(ProxyV4Request proxyV4Request, TestContext testContext) {
+        super(proxyV4Request, testContext);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigReque
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+            cloudbreakClient.getCloudbreakClient().proxyConfigV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend.");
         }
@@ -70,17 +70,22 @@ public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyConfigReque
     }
 
     public ProxyConfigEntity withServerHost(String serverHost) {
-        getRequest().setServerHost(serverHost);
+        getRequest().setHost(serverHost);
         return this;
     }
 
     public ProxyConfigEntity withServerPort(Integer serverPort) {
-        getRequest().setServerPort(serverPort);
+        getRequest().setPort(serverPort);
         return this;
     }
 
     public ProxyConfigEntity withServerUser(String serverUser) {
         getRequest().setUserName(serverUser);
         return this;
+    }
+
+    @Override
+    public int order() {
+        return 500;
     }
 }

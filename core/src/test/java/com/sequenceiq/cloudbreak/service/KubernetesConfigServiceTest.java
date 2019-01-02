@@ -22,7 +22,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -52,7 +51,7 @@ public class KubernetesConfigServiceTest {
     public void testUpdateByWorkspaceIdNotFound() {
         thrown.expect(NotFoundException.class);
 
-        underTest.updateByWorkspaceId(1L, new KubernetesConfig(), new User());
+        underTest.updateByWorkspaceId(1L, new KubernetesConfig());
     }
 
     @Test
@@ -63,7 +62,7 @@ public class KubernetesConfigServiceTest {
         originalConfig.setEnvironments(Set.of(new EnvironmentView()));
         when(kubernetesConfigRepository.findByNameAndWorkspaceId(any(), anyLong())).thenReturn(originalConfig);
 
-        KubernetesConfig result = underTest.updateByWorkspaceId(1L, new KubernetesConfig(), new User());
+        KubernetesConfig result = underTest.updateByWorkspaceId(1L, new KubernetesConfig());
 
         verify(secretService, times(1)).delete(any());
 

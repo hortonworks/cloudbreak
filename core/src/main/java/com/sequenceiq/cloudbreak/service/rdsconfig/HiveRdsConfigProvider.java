@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -95,8 +95,8 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected RdsType getRdsType() {
-        return RdsType.HIVE;
+    protected DatabaseType getRdsType() {
+        return DatabaseType.HIVE;
     }
 
     @Override

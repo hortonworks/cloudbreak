@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 
@@ -20,11 +20,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -77,8 +76,7 @@ public class StackToCloudStackConverter {
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Autowired
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -263,7 +261,7 @@ public class StackToCloudStackConverter {
         if (stack.getCluster() != null) {
             FileSystem fileSystem = stack.getCluster().getFileSystem();
             if (fileSystem != null) {
-                cloudFileSystem = conversionService.convert(fileSystem, SpiFileSystem.class);
+                cloudFileSystem = converterUtil.convert(fileSystem, SpiFileSystem.class);
             }
         }
         return cloudFileSystem;

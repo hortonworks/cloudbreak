@@ -21,6 +21,9 @@ public class CloudbreakConversionServiceFactoryBean extends ConversionServiceFac
             try {
                 return super.convert(source, targetType);
             } catch (ConversionFailedException ex) {
+                if (ex.getCause() instanceof BadRequestException) {
+                    throw new BadRequestException(ex.getCause().getMessage(), ex.getCause());
+                }
                 throw new BadRequestException(String.format("Failed to convert from type [%s] to type [%s] %s", source.getClass().getName(),
                         targetType.getName(), ex.getCause().getMessage()), ex);
             }

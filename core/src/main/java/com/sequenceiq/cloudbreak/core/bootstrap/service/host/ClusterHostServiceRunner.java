@@ -25,10 +25,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -140,6 +142,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
 
     public void runClusterServices(Stack stack, Cluster cluster) {
         try {
@@ -312,7 +317,7 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithClouderaManagerDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        RDSConfig clouderaManagerRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), RdsType.CLOUDERA_MANAGER);
+        RDSConfig clouderaManagerRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stack");
         }
@@ -323,9 +328,9 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), RdsType.AMBARI);
+        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), DatabaseType.AMBARI);
         if (ambariRdsConfig == null) {
-            throw new CloudbreakOrchestratorFailedException("Ambari RDSConfig is missing for stack");
+            throw new CloudbreakOrchestratorFailedException("Ambari Database is missing for stack");
         }
         RdsView ambariRdsView = new RdsView(rdsConfigService.resolveVaultValues(ambariRdsConfig));
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
@@ -352,13 +357,17 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Long datalakeId = stack.getDatalakeId();
-        if (datalakeId != null) {
-            Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeId);
-            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
+        Long datalakeResourceId = stack.getDatalakeResourceId();
+        if (datalakeResourceId != null) {
+            Optional<DatalakeResources> datalakeResource = datalakeResourcesService.getDatalakeResourcesById(datalakeResourceId);
+            if (datalakeResource.isPresent() && datalakeResource.get().getDatalakeStackId() != null) {
+                Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
+                Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeStackId);
+                String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
+                List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+                servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                        singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
+            }
         }
     }
 

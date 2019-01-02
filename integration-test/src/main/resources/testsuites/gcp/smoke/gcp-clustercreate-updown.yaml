@@ -56,7 +56,7 @@ tests:
     }
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: upscale stack and cluster
     parameters:

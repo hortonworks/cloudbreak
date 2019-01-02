@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
@@ -35,8 +35,8 @@ public class RejectedThreadService {
     public void create(EvaluatorExecutor task) {
         Object data = task.getContext().getData();
         RejectedThread rejectedThread;
-        if (data instanceof AutoscaleStackResponse) {
-            Long stackId = ((AutoscaleStackResponse) data).getStackId();
+        if (data instanceof AutoscaleStackV4Response) {
+            Long stackId = ((AutoscaleStackV4Response) data).getStackId();
             rejectedThread = createOrUpdateRejectedThread(data, stackId);
         } else if (data instanceof Long) {
             rejectedThread = createOrUpdateRejectedThread(Collections.singletonMap("id", data), (Long) data);
@@ -64,8 +64,8 @@ public class RejectedThreadService {
 
     public void remove(Object data) {
         RejectedThread removed;
-        if (data instanceof AutoscaleStackResponse) {
-            removed = rejectedThreads.remove(((AutoscaleStackResponse) data).getStackId());
+        if (data instanceof AutoscaleStackV4Response) {
+            removed = rejectedThreads.remove(((AutoscaleStackV4Response) data).getStackId());
         } else if (data instanceof Long) {
             removed = rejectedThreads.remove(data);
         } else {

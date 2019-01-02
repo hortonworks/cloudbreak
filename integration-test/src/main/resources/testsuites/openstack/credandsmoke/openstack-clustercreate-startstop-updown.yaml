@@ -67,7 +67,7 @@ tests:
       clusterName: it-openstack-cred-ssud
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: stop cluster and stack
     parameters:

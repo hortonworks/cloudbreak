@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 
-public class LaunchClusterFromTemplateAction implements ActionV2<ClusterTemplateEntity> {
+public class LaunchClusterFromTemplateAction implements Action<ClusterTemplateEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchClusterFromTemplateAction.class);
 
@@ -26,8 +26,8 @@ public class LaunchClusterFromTemplateAction implements ActionV2<ClusterTemplate
         logJSON(LOGGER, "Stack from template post request:\n", entity.getRequest().getStackTemplate());
         StackTemplateEntity stackEntity = testContext.get(stackTemplateKey);
         stackEntity.setResponse(client.getCloudbreakClient()
-                .stackV3Endpoint()
-                .createInWorkspace(client.getWorkspaceId(), stackEntity.getRequest()));
+                .stackV4Endpoint()
+                .post(client.getWorkspaceId(), stackEntity.getRequest()));
         logJSON(LOGGER, " Stack from template created  successfully:\n", entity.getResponse());
         log(LOGGER, "Stack from template ID: " + entity.getResponse().getId());
         return entity;

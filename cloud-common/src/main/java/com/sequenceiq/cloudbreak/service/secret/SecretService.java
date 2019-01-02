@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.common.type.metric.MetricType;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
@@ -127,7 +127,7 @@ public class SecretService {
      * @param secret internal secret
      * @return public external secret JSON
      */
-    public SecretResponse convertToExternal(String secret) {
+    public SecretV4Response convertToExternal(String secret) {
         return getFirstEngineStream(secret)
                 .map(e -> e.convertToExternal(secret))
                 .orElse(null);

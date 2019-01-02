@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
@@ -126,12 +126,12 @@ public class TlsSecurityService {
         }
     }
 
-    public CertificateResponse getCertificates(Long stackId) {
+    public CertificateV4Response getCertificates(Long stackId) {
         SecurityConfig securityConfig = Optional.ofNullable(securityConfigRepository.findOneByStackId(stackId))
                 .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
         String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
                 .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
-        return new CertificateResponse(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
+        return new CertificateV4Response(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
     }
 
 }

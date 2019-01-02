@@ -18,11 +18,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.kerberos.MITKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.Kerberos;
@@ -64,7 +64,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = "dataProviderForTest")
     public void testClusterCreationWithValidKerberos(TestContext testContext, String blueprintName, KerberosTestData testData) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        KerberosRequest request = testData.getRequest();
+        KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
                 .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
@@ -76,11 +76,11 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
                         .valid()
+                        .withKerberos(request.getName())
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
-                                .withKerberos(request.getName())
                                 .withBlueprintName(blueprintName)))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(testData.getAssertions())
                 .validate();
@@ -98,11 +98,11 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
                         .valid()
+                        .withKerberos(null)
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
-                                .withKerberos(null)
                                 .withBlueprintName(blueprintName)))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .validate();
     }
@@ -111,7 +111,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
-        KerberosRequest request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
+        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
                 .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
@@ -123,12 +123,12 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
                         .valid()
+                        .withKerberos("")
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
-                                .withKerberos("")
                                 .withBlueprintName(blueprintName)))
-                .when(Stack.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .when(Stack.postV4(), key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -136,17 +136,17 @@ public class KerberosTest extends AbstractIntegrationTest {
     public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
-        KerberosRequest request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
+        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         String descriptor = "{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
                 + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}";
-        request.getAmbariKerberosDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
+        request.getAmbariDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
                 .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV2())
                 .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
                 .when(Kerberos.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -154,8 +154,8 @@ public class KerberosTest extends AbstractIntegrationTest {
     public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
-        KerberosRequest request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-        request.getAmbariKerberosDescriptor().setDescriptor(
+        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
+        request.getAmbariDescriptor().setDescriptor(
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
@@ -163,7 +163,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .when(Blueprint.postV2())
                 .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
                 .when(Kerberos.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -171,15 +171,15 @@ public class KerberosTest extends AbstractIntegrationTest {
     public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(TestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
-        KerberosRequest request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-        request.getAmbariKerberosDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
+        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
+        request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
                 .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV2())
                 .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
                 .when(Kerberos.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -236,8 +236,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 request.setName("adKerberos");
                 ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
                 activeDirectory.setTcpAllowed(true);
@@ -269,8 +269,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 request.setName("mitKerberos");
                 MITKerberosDescriptor mit = new MITKerberosDescriptor();
                 mit.setTcpAllowed(true);
@@ -302,8 +302,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 request.setName("customKerberos");
                 AmbariKerberosDescriptor ambariKerberosDescriptor = new AmbariKerberosDescriptor();
                 ambariKerberosDescriptor.setTcpAllowed(true);
@@ -313,7 +313,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}}";
                 ambariKerberosDescriptor.setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
                 ambariKerberosDescriptor.setKrb5Conf(Base64.encodeBase64String("{}".getBytes()));
-                request.setAmbariKerberosDescriptor(ambariKerberosDescriptor);
+                request.setAmbariDescriptor(ambariKerberosDescriptor);
                 return request;
             }
         },
@@ -331,8 +331,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 FreeIPAKerberosDescriptor freeIpaRequest = new FreeIPAKerberosDescriptor();
                 freeIpaRequest.setAdminUrl("http://someurl.com");
                 freeIpaRequest.setRealm("someRealm");
@@ -349,7 +349,7 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         public abstract List<AssertionV2<StackEntity>> getAssertions();
 
-        public abstract KerberosRequest getRequest();
+        public abstract KerberosV4Request getRequest();
 
         private static MockVerification blueprintPostToAmbariContains(String content) {
             return MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").bodyContains(content);

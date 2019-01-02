@@ -64,7 +64,7 @@ tests:
       userDefinedTags: ittest:itvalue;customtag:customvalue;result:success
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: check tags
     parameters:

@@ -3,8 +3,10 @@
   "emailNeeded" : true,
   "blueprintId": 50,
   "description" : "my cluster description",
-  "userName" : "user",
-  "password" : "pass",
+  "ambari":{
+    "userName" : "user",
+    "password" : "pass"
+  },
   "emailTo": "admin@example.com",
   "validateBlueprint" : true
 }

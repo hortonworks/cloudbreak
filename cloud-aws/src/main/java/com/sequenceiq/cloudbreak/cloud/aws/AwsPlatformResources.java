@@ -162,7 +162,7 @@ public class AwsPlatformResources implements PlatformResources {
             for (VmSpecification vmSpecification : oVms.getItems()) {
                 PropertySpecification properties = vmSpecification.getMetaSpecification().getProperties();
                 VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
-                        .withCpuAndMemory(properties.getCpu(), properties.getMemory())
+                        .withCpuAndMemory(Integer.valueOf(properties.getCpu()), Float.valueOf(properties.getMemory()))
                         .withPrice(properties.getPrice())
                         .withVolumeEncryptionSupport(properties.getEncryptionSupported());
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
@@ -187,6 +187,8 @@ public class AwsPlatformResources implements PlatformResources {
             }
         } catch (IOException e) {
             LOGGER.error("Cannot initialize platform parameters for aws", e);
+        } catch (NumberFormatException e) {
+            LOGGER.error("One of CPU or Memory fields has unexpected format", e);
         }
     }
 

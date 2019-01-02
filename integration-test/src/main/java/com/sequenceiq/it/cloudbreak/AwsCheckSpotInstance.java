@@ -19,10 +19,9 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult;
 import com.amazonaws.services.ec2.model.SpotInstanceRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
@@ -39,21 +38,21 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
         //GIVEN
         Integer spotInstanceCount = 0;
         IntegrationTestContext itContext = getItContext();
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
 
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        StackV4Response stackResponse = getCloudbreakClient().stackV4Endpoint().get(
+                itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class),
+                stackName, new HashSet<>());
 
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
-
-        List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
+        List<InstanceGroupV4Response> instanceGroups = stackResponse.getInstanceGroups();
 
         Collection<String> instanceIdList = new ArrayList<>();
         List<String> hostGroupList = Arrays.asList(hostGroupToCheck.split(","));
 
-        for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (hostGroupList.contains(instanceGroup.getGroup())) {
-                Set<InstanceMetaDataJson> instanceMetaData = instanceGroup.getMetadata();
-                for (InstanceMetaDataJson metaData : instanceMetaData) {
+        for (InstanceGroupV4Response instanceGroup : instanceGroups) {
+            if (hostGroupList.contains(instanceGroup.getName())) {
+                Set<InstanceMetaDataV4Response> instanceMetaData = instanceGroup.getMetadata();
+                for (InstanceMetaDataV4Response metaData : instanceMetaData) {
                     instanceIdList.add(metaData.getInstanceId());
                 }
             }

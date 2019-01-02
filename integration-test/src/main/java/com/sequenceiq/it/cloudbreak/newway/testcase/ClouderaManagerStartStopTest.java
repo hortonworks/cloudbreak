@@ -31,11 +31,11 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
                 .given("cm", AmbariEntity.class).withBlueprintName(name).withValidateBlueprint(Boolean.FALSE)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")
                 .given(StackEntity.class).withCluster("cmcluster")
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack.stopV2())
+                .when(Stack.stop())
                 .await(STACK_STOPPED)
-                .when(Stack.startV2())
+                .when(Stack.start())
                 .await(STACK_AVAILABLE)
                 .validate();
     }

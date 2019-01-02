@@ -10,7 +10,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;

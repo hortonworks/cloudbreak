@@ -43,9 +43,9 @@ import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class TagsUtil {
@@ -65,12 +65,12 @@ public class TagsUtil {
         return tagsToCheckMap;
     }
 
-    protected static List<String> getInstancesList(StackResponse stackResponse) {
-        List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
+    protected static List<String> getInstancesList(StackV4Response stackResponse) {
+        List<InstanceGroupV4Response> instanceGroups = stackResponse.getInstanceGroups();
         List<String> instanceIdList = new ArrayList<>();
-        for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            Set<InstanceMetaDataJson> instanceMetaData = instanceGroup.getMetadata();
-            for (InstanceMetaDataJson metaData : instanceMetaData) {
+        for (InstanceGroupV4Response instanceGroup : instanceGroups) {
+            Set<InstanceMetaDataV4Response> instanceMetaData = instanceGroup.getMetadata();
+            for (InstanceMetaDataV4Response metaData : instanceMetaData) {
                 instanceIdList.add(metaData.getInstanceId());
             }
         }
@@ -84,8 +84,8 @@ public class TagsUtil {
         }
     }
 
-    protected static Map<String, String> checkTagsStack(StackResponse stackResponse) {
-        Map<String, String> userDefinedTagsList = stackResponse.getUserDefinedTags();
+    protected static Map<String, String> checkTagsStack(StackV4Response stackResponse) {
+        Map<String, String> userDefinedTagsList = stackResponse.getTags().getUserDefinedTags();
         Assert.assertNotNull(userDefinedTagsList);
         return userDefinedTagsList;
     }

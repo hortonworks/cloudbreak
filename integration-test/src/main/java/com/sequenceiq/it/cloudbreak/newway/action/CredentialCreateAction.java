@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class CredentialCreateAction implements ActionV2<CredentialEntity> {
+public class CredentialCreateAction implements Action<CredentialEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialCreateAction.class);
 
     @Override
@@ -22,15 +22,15 @@ public class CredentialCreateAction implements ActionV2<CredentialEntity> {
         try {
             entity.setResponse(
                     client.getCloudbreakClient()
-                            .credentialV3Endpoint()
-                            .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
+                            .credentialV4Endpoint()
+                            .post(client.getWorkspaceId(), entity.getRequest()));
             logJSON(LOGGER, " Credential created successfully:\n", entity.getRequest());
         } catch (Exception e) {
             LOGGER.info("Creation of credential has failed, load from the CB");
             entity.setResponse(
                     client.getCloudbreakClient()
-                            .credentialV3Endpoint()
-                            .getByNameInWorkspace(client.getWorkspaceId(), entity.getRequest().getName()));
+                            .credentialV4Endpoint()
+                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
         }
         return entity;
     }

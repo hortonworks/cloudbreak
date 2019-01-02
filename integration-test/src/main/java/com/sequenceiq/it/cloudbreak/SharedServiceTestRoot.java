@@ -1,7 +1,16 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import java.util.Collections;
+
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AttachedClusterStackPostStrategy;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -14,13 +23,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.cloud.ResourceHelper;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
-import org.slf4j.Logger;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-
-import javax.annotation.Nonnull;
-import java.util.Collections;
 
 public abstract class SharedServiceTestRoot extends CloudbreakTest {
 
@@ -70,7 +72,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
                 .withInstanceGroups(cloudProvider.instanceGroups(HostGroupType.MASTER))
                 .withName(getDatalakeClusterName()));
 
-        when(Stack.post());
+        when(Stack.postV3());
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
@@ -87,8 +89,9 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(DatalakeCluster.isCreatedWithName(getDatalakeClusterName()));
-        given(cloudProvider.aValidAttachedCluster(getDatalakeClusterName()), "an attached cluster request");
-        given(cloudProvider.aValidAttachedStackRequest().withName(getAttachedClusterName()).withUserDefinedTags(Collections.emptyMap()));
+        given(cloudProvider.aValidAttachedCluster(), "an attached cluster request");
+        given(cloudProvider.aValidAttachedStackRequest(getDatalakeClusterName())
+                .withName(getAttachedClusterName()).withUserDefinedTags(Collections.emptyMap()));
 
         when(Stack.post(new AttachedClusterStackPostStrategy()));
 
@@ -175,7 +178,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         when(LdapConfig.getAll());
         then(LdapConfig.assertThis((ldapConfig, testContext) -> {
             var responses = ldapConfig.getResponses();
-            for (LdapConfigResponse response : responses) {
+            for (LdapV4Response response : responses) {
                 if (response.getName().equals(resourceHelper.getLdapConfigName())) {
                     try {
                         given(LdapConfig.request().withName(response.getName()));
@@ -193,7 +196,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         when(RdsConfig.getAll());
         then(RdsConfig.assertThis((rdsConfig, testContext) -> {
             var responses = rdsConfig.getResponses();
-            for (RDSConfigResponse response : responses) {
+            for (DatabaseV4Response response : responses) {
                 if (response.getName().equals(getTestParameter().get(hiveConfigNameKey))
                         || response.getName().equals(getTestParameter().get(rangerConfigNameKey))) {
                     try {

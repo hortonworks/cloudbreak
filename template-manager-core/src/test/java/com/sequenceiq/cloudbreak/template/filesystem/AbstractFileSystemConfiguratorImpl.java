@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 

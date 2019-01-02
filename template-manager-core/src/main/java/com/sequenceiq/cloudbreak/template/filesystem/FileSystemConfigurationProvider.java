@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -32,8 +32,8 @@ public class FileSystemConfigurationProvider {
         return fileSystemConfiguration(fs, stack.getId(), stack.getUuid(), stack.getCredential(), stack.getPlatformVariant(), resource);
     }
 
-    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fs, StackV2Request request, Credential credential) throws IOException {
-        Resource resource = new Resource(ResourceType.ARM_TEMPLATE, request.getGeneral().getName(), null);
+    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fs, StackV4Request request, Credential credential) throws IOException {
+        Resource resource = new Resource(ResourceType.ARM_TEMPLATE, request.getName(), null);
         return fileSystemConfiguration(fs, 0L, "fake-uuid", credential, credential.cloudPlatform(), Optional.of(resource));
     }
 

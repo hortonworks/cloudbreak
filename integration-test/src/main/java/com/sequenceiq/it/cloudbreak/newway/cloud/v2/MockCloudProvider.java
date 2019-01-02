@@ -1,16 +1,20 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
-import java.util.HashMap;
-import java.util.Map;
+import static com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity.EUROPE;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.TemplateEntity;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -54,14 +58,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String region() {
-        String region = "eu-west-1";
         String regionParam = getTestParameter().get("mockRegion");
 
-        return regionParam == null ? region : regionParam;
+        return regionParam == null ? EUROPE : regionParam;
     }
 
     @Override
-    public TemplateEntity template(TestContext testContext) {
+    public InstanceTemplateV4Entity template(TestContext testContext) {
         String instanceTypeDefaultValue = "large";
         String instanceTypeParam = getTestParameter().get("mockInstanceType");
 
@@ -74,11 +77,14 @@ public class MockCloudProvider extends AbstractCloudProvider {
         String volumeTypeDefault = "magnetic";
         String volumeTypeParam = getTestParameter().get("mockInstanceVolumeType");
 
-        return testContext.init(TemplateEntity.class)
+        var volume = new VolumeV4Request();
+        volume.setCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
+        volume.setSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
+        volume.setType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+
+        return testContext.init(InstanceTemplateV4Entity.class)
                 .withInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam)
-                .withVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam))
-                .withVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam))
-                .withVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+                .withAttachedVolumes(Set.of(volume));
     }
 
     @Override
@@ -99,20 +105,19 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public Map<String, Object> networkProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("internetGatewayId", getInternetGatewayId());
-        map.put("vpcId", getVpcId());
-        return map;
+    public Object networkProperties() {
+        var parameters = new MockNetworkV4Parameters();
+        parameters.setInternetGatewayId(getInternetGatewayId());
+        parameters.setVpcId(getVpcId());
+        return parameters;
     }
 
     @Override
-    public Map<String, Object> subnetProperties() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("subnetId", getSubnetId());
-        map.put("vpcId", getVpcId());
-
-        return map;
+    public Object subnetProperties() {
+        var parameters = new MockNetworkV4Parameters();
+        parameters.setSubnetId(getSubnetId());
+        parameters.setVpcId(getVpcId());
+        return parameters;
     }
 
     @Override
@@ -123,14 +128,21 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV2Entity existingNetwork(TestContext testContext) {
-        return testContext.init(NetworkV2Entity.class)
-                .withSubnetCIDR(getSubnetCIDR())
-                .withParameters(networkProperties());
+        var network = testContext.init(NetworkV2Entity.class)
+                .withSubnetCIDR(getSubnetCIDR());
+        network.getRequest().setMock((MockNetworkV4Parameters) networkProperties());
+        return network;
     }
 
     @Override
     public NetworkV2Entity existingSubnet(TestContext testContext) {
-        return testContext.given(NetworkV2Entity.class)
-                .withParameters(subnetProperties());
+        var network = testContext.given(NetworkV2Entity.class);
+        network.getRequest().setMock((MockNetworkV4Parameters) subnetProperties());
+        return network;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.MOCK;
     }
 }

@@ -22,7 +22,6 @@ import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -63,9 +62,6 @@ public class ImageCatalogServiceDefaultTest {
 
     @Mock
     private PreferencesService preferencesService;
-
-    @Mock
-    private CloudbreakUser cloudbreakUser;
 
     @Mock
     private User user;
@@ -134,14 +130,8 @@ public class ImageCatalogServiceDefaultTest {
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
         }
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems,
-                cloudbreakUser, user);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, user);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
-    }
-
-    private CloudbreakUser getCloudbreakUser() {
-        return new CloudbreakUser(ImageCatalogServiceTest.USER_ID, ImageCatalogServiceTest.USERNAME, ImageCatalogServiceTest.EMAIL,
-                ImageCatalogServiceTest.TENANT);
     }
 }

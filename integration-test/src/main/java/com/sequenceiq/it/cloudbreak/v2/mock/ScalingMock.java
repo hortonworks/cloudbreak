@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -174,7 +174,7 @@ public class ScalingMock extends MockServer {
         sparkService.post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
     }
 
-    public void verifyV2Calls(ClusterV2Request cluster, int desiredCount) {
+    public void verifyV2Calls(ClusterV4Request cluster, int desiredCount) {
         int scalingAdjustment = desiredCount - getNumberOfServers();
         String clusterName = cluster.getName();
         verifyDownScale(clusterName, scalingAdjustment);
@@ -244,11 +244,11 @@ public class ScalingMock extends MockServer {
         return !isDownScale(scalingAdjustment);
     }
 
-    private int calculateGrainsAppendCount(ClusterV2Request cluster) {
-        boolean securityEnabled = cluster.getAmbari().getKerberosConfigName() != null;
+    private int calculateGrainsAppendCount(ClusterV4Request cluster) {
+        boolean securityEnabled = cluster.getKerberosName() != null;
         boolean gatewayEnabled = false;
-        if (cluster.getAmbari().getGateway() != null) {
-            gatewayEnabled = !cluster.getAmbari().getGateway().getTopologies().isEmpty();
+        if (cluster.getGateway() != null) {
+            gatewayEnabled = !cluster.getGateway().getTopologies().isEmpty();
         }
         if (securityEnabled) {
             grainsBaseAppendCount++;

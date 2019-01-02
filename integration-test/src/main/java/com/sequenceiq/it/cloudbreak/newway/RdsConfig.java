@@ -4,10 +4,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.RdsConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.RdsConfigV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.RdsConfigV4Action;
 
 @Prototype
 public class RdsConfig extends RdsConfigEntity {
@@ -39,69 +39,69 @@ public class RdsConfig extends RdsConfigEntity {
 
     public static RdsConfig isCreated() {
         RdsConfig rdsConfig = new RdsConfig();
-        rdsConfig.setCreationStrategy(RdsConfigV3Action::createInGiven);
+        rdsConfig.setCreationStrategy(RdsConfigV4Action::createInGiven);
         return rdsConfig;
     }
 
     public static RdsConfig isCreated(String id) {
         var rdsConfig = new RdsConfig();
-        rdsConfig.setCreationStrategy(RdsConfigV3Action::createInGiven);
+        rdsConfig.setCreationStrategy(RdsConfigV4Action::createInGiven);
         return rdsConfig;
     }
 
     public static RdsConfig isCreatedDeleted() {
         RdsConfig rdsConfig = new RdsConfig();
-        rdsConfig.setCreationStrategy(RdsConfigV3Action::createDeleteInGiven);
+        rdsConfig.setCreationStrategy(RdsConfigV4Action::createDeleteInGiven);
         return rdsConfig;
     }
 
     public static RdsConfigEntity post(TestContext testContext, RdsConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().rdsConfigV3Endpoint().createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+                cloudbreakClient.getCloudbreakClient().databaseV4Endpoint().create(cloudbreakClient.getWorkspaceId(), entity.getRequest())
         );
         return entity;
     }
 
-    public static Action<RdsConfig> post(String key) {
-        return new Action<>(getTestContext(key), RdsConfigV3Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), RdsConfigV4Action::post);
     }
 
-    public static Action<RdsConfig> post() {
+    public static ResourceAction post() {
         return post(RDSCONFIG);
     }
 
-    public static Action<RdsConfig> get(String key) {
-        return new Action<>(getTestContext(key), RdsConfigV3Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), RdsConfigV4Action::get);
     }
 
-    public static Action<RdsConfig> get() {
+    public static ResourceAction get() {
         return get(RDSCONFIG);
     }
 
-    public static Action<RdsConfig> getAll() {
-        return new Action<>(getNew(), RdsConfigV3Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), RdsConfigV4Action::getAll);
     }
 
-    public static Action<RdsConfig> delete(String key) {
-        return new Action<>(getTestContext(key), RdsConfigV3Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), RdsConfigV4Action::delete);
     }
 
-    public static Action<RdsConfig> delete() {
+    public static ResourceAction delete() {
         return delete(RDSCONFIG);
     }
 
     public static RdsConfigEntity delete(TestContext testContext, RdsConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().rdsConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().databaseV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }
 
-    public static Action<RdsConfig> testConnect(String key) {
-        return new Action<>(getTestContext(key), RdsConfigV3Action::testConnect);
+    public static ResourceAction testConnect(String key) {
+        return new ResourceAction(getTestContext(key), RdsConfigV4Action::testConnect);
     }
 
-    public static Action<RdsConfig> testConnect() {
+    public static ResourceAction testConnect() {
         return testConnect(RDSCONFIG);
     }
 
@@ -109,7 +109,7 @@ public class RdsConfig extends RdsConfigEntity {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
 
-    public static ActionV2<RdsConfigEntity> postV2() {
+    public static Action<RdsConfigEntity> postV2() {
         return new RdsConfigPostAction();
     }
 }

@@ -5,11 +5,11 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 
-public class GeneralSettingsValidator implements ConstraintValidator<ValidGeneralSettings, GeneralSettings> {
+public class GeneralSettingsValidator implements ConstraintValidator<ValidEnvironmentSettings, EnvironmentSettingsV4Request> {
     @Override
-    public boolean isValid(GeneralSettings value, ConstraintValidatorContext context) {
-        return !StringUtils.isEmpty(value.getCredentialName()) || !StringUtils.isEmpty(value.getEnvironmentName());
+    public boolean isValid(EnvironmentSettingsV4Request value, ConstraintValidatorContext context) {
+        return !StringUtils.isEmpty(value.getCredentialName()) || !StringUtils.isEmpty(value.getName());
     }
 }

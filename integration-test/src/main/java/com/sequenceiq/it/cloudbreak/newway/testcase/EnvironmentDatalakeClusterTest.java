@@ -17,7 +17,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
@@ -33,7 +32,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 
 public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
@@ -66,13 +65,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::post)
 
-                .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .given("placement", PlacementSettingsEntity.class)
+                .given(StackEntity.class).withPlacement("placement")
+                .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_DL))
-                .when(Stack.postV2())
-                .when(StackV3Action::deleteV2, withoutLogError())
+                .when(Stack.postV4())
+                .when(Stack.deleteV4(), withoutLogError())
                 .await(AbstractIntegrationTest.STACK_DELETED)
 
                 .given(EnvironmentEntity.class)
@@ -96,12 +95,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::post)
 
-                .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .given("placement", PlacementSettingsEntity.class)
+                .given(StackEntity.class).withPlacement("placement")
+                .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_DL))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .deleteGiven(LdapConfigEntity.class, LdapConfig::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(RdsConfigEntity.class, RdsConfig::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
@@ -132,12 +131,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
         createDatalake(testContext, rdsList, "dl-changecred", BP_NAME_DL);
         testContext
+                .given("newCred", CredentialEntity.class).withDescription("Change credential")
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)
-                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred-cl", parameters))
+                .withCredential("newCred")
                 .when(Environment::changeCredential,  key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -154,7 +154,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::putDetachResources, key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -166,13 +166,14 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::post)
 
+                .given("placement", PlacementSettingsEntity.class)
                 .given(StackEntity.class)
                 .withName("dl-wl-same-env2")
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .withPlacement("placement")
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, getRdsAsList(testContext),
                         testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_WL))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .validate();
                 createDatalake(testContext, rdsList, "dl-wl-same-env", BP_NAME_DL);
     }
@@ -184,13 +185,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLocation(VALID_LOCATION)
                 .when(Environment::post)
 
-                .given(StackEntity.class)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .given("placement", PlacementSettingsEntity.class)
+                .given(StackEntity.class).withPlacement("placement")
+                .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, null,  null, null, BP_NAME_DL))
-                .when(Stack.postV2(), key(FORBIDDEN_KEY))
-                .except(BadRequestException.class, key(FORBIDDEN_KEY))
+                .when(Stack.postV4(), key(FORBIDDEN_KEY))
+                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -201,13 +202,14 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     private void createDatalake(TestContext testContext, Set<String> rdsList, String name, String bpName) {
-        testContext.given(StackEntity.class)
+        testContext.given("placement", PlacementSettingsEntity.class)
+                .given(StackEntity.class)
                 .withName(name)
-                .withRegion("Europe")
-                .withAttachEnvironment(testContext.get(EnvironmentEntity.class).getName())
+                .withPlacement("placement")
+                .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList, testContext.get(LdapConfigEntity.class).getName(), null, bpName))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .validate();
     }
 
@@ -250,15 +252,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             cluster.withProxyConfigName(proxyName);
         }
         return cluster;
-    }
-
-    private CredentialRequest createCredentialRequest(String cloudPlatform, String description, String name, Map<String, Object> parameters) {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        credentialRequest.setCloudPlatform(cloudPlatform);
-        credentialRequest.setDescription(description);
-        credentialRequest.setName(name);
-        credentialRequest.setParameters(parameters);
-        return credentialRequest;
     }
 
     private Collection<InstanceGroupEntity> setInstanceGroup(TestContext testContext) {

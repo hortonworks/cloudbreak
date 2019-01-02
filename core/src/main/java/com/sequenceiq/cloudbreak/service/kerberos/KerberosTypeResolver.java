@@ -2,21 +2,21 @@ package com.sequenceiq.cloudbreak.service.kerberos;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosTypeBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeBase;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.KerberosRequestValidator;
 
 @Component
 public class KerberosTypeResolver {
 
-    public KerberosTypeBase propagateKerberosConfiguration(KerberosRequest request) {
+    public KerberosTypeBase propagateKerberosConfiguration(KerberosV4Request request) {
         if (request == null || !KerberosRequestValidator.isValid(request)) {
-            throw new BadRequestException("Improper KerberosRequest!");
+            throw new BadRequestException("Improper KerberosV4Request!");
         }
         KerberosTypeBase kerberos;
-        if (request.getAmbariKerberosDescriptor() != null) {
-            kerberos = request.getAmbariKerberosDescriptor();
+        if (request.getAmbariDescriptor() != null) {
+            kerberos = request.getAmbariDescriptor();
         } else if (request.getFreeIpa() != null) {
             kerberos = request.getFreeIpa();
         } else if (request.getActiveDirectory() != null) {

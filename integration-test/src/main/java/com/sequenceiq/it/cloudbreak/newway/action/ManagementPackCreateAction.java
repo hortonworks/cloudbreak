@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
 
-public class ManagementPackCreateAction implements ActionV2<ManagementPackEntity> {
+public class ManagementPackCreateAction implements Action<ManagementPackEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPackCreateAction.class);
 
@@ -20,7 +20,7 @@ public class ManagementPackCreateAction implements ActionV2<ManagementPackEntity
         logJSON(LOGGER, " ManagementPack post request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
-                        .managementPackV3Endpoint()
+                        .managementPackV4Endpoint()
                         .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
         logJSON(LOGGER, " ManagementPack created  successfully:\n", entity.getResponse());
         log(LOGGER, "ManagementPack ID: " + entity.getResponse().getId());

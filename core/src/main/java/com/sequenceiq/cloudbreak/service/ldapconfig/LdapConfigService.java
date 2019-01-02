@@ -8,7 +8,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
@@ -24,6 +27,9 @@ public class LdapConfigService extends AbstractEnvironmentAwareService<LdapConfi
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private LdapConfigValidator ldapConfigValidator;
 
     public LdapConfig get(Long id) {
         return ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
@@ -55,5 +61,22 @@ public class LdapConfigService extends AbstractEnvironmentAwareService<LdapConfi
 
     @Override
     protected void prepareCreation(LdapConfig resource) {
+    }
+
+    public String testConnection(Long workspaceId, String existingName, LdapMinimalV4Request existingLdapConfig) {
+        if (existingName == null && existingLdapConfig == null) {
+            throw new BadRequestException("Either an existing resource 'name' or an LDAP 'validationRequest' needs to be specified in the request. ");
+        }
+        try {
+            if (existingName != null) {
+                LdapConfig ldapConfig = getByNameForWorkspaceId(existingName, workspaceId);
+                ldapConfigValidator.validateLdapConnection(ldapConfig);
+            } else {
+                ldapConfigValidator.validateLdapConnection(existingLdapConfig);
+            }
+            return "connected";
+        } catch (BadRequestException e) {
+            return e.getMessage();
+        }
     }
 }

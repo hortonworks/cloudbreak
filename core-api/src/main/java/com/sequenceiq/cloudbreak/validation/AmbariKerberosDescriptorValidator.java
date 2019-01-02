@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
 
 public class AmbariKerberosDescriptorValidator implements ConstraintValidator<ValidAmbariKerberosDescriptor, AmbariKerberosDescriptor> {
 

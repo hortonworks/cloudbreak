@@ -7,7 +7,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AutoscaleClusterResponse")
+@ApiModel
 public class AutoscaleClusterResponse extends ClusterBaseJson {
 
     @ApiModelProperty(ClusterJsonsProperties.ID)

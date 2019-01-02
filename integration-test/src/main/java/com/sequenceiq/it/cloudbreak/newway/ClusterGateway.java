@@ -4,18 +4,18 @@ import java.util.Collections;
 import java.util.function.Function;
 
 import com.amazonaws.services.apigateway.model.GatewayResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ClusterGateway extends AbstractCloudbreakEntity<GatewayJson, GatewayResponse, ClusterGateway> {
+public class ClusterGateway extends AbstractCloudbreakEntity<GatewayV4Request, GatewayResponse, ClusterGateway> {
 
     public static final String GATEWAY_REQUEST = "GATEWAY_REQUEST";
 
     ClusterGateway(String newId) {
         super(newId);
-        setRequest(new GatewayJson());
+        setRequest(new GatewayV4Request());
     }
 
     ClusterGateway() {
@@ -23,7 +23,7 @@ public class ClusterGateway extends AbstractCloudbreakEntity<GatewayJson, Gatewa
     }
 
     public ClusterGateway(TestContext testContext) {
-        super(new GatewayJson(), testContext);
+        super(new GatewayV4Request(), testContext);
     }
 
     public ClusterGateway withTopology(GatewayTopology topology) {
