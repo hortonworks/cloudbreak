@@ -21,7 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -48,9 +48,7 @@ public class AmbariSSOServiceTest {
     @Before
     public void initTest() {
         ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
-        ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
+        when(ambariClientFactory.getAmbariClient(any(Stack.class), any())).thenReturn(ambariClient);
         ReflectionTestUtils.setField(ambariSSOService, "knoxPort", "8443");
     }
 

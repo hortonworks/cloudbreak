@@ -1,44 +1,35 @@
 package com.sequenceiq.cloudbreak.service;
 
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
-import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
@@ -54,7 +45,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -62,12 +52,42 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
-public class StackCommonService implements StackEndpoint {
+public class StackCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
 
     @Inject
-    private StackService stackService;
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Inject
+    private PermissionCheckingUtils permissionCheckingUtils;
+
+    @Inject
+    private CentralBlueprintUpdater centralBlueprintUpdater;
+
+    @Inject
+    private OperationRetryService operationRetryService;
+
+    @Inject
+    private ClusterCommonService clusterCommonService;
+
+    @Inject
+    private CloudParameterCache cloudParameterCache;
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private FileSystemValidator fileSystemValidator;
+
+    @Inject
+    private StackCreatorService stackCreatorService;
 
     @Inject
     private StackApiViewService stackApiViewService;
@@ -76,55 +96,21 @@ public class StackCommonService implements StackEndpoint {
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private CloudParameterService parameterService;
-
-    @Inject
-    private FileSystemValidator fileSystemValidator;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
-    private StackCreatorService stackCreatorService;
-
-    @Inject
-    private ScalingHardLimitsService scalingHardLimitsService;
-
-    @Inject
     private WorkspaceService workspaceService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
-
-    @Inject
-    private CloudParameterCache cloudParameterCache;
-
-    @Inject
-    private ClusterCommonService clusterCommonService;
 
     @Inject
     private ClusterService clusterService;
 
     @Inject
-    private OperationRetryService operationRetryService;
+    private ConverterUtil converterUtil;
 
     @Inject
-    private CentralBlueprintUpdater centralBlueprintUpdater;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
-
-    @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private StackService stackService;
 
     @Inject
     private UserService userService;
 
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    public StackResponse createInWorkspace(StackRequest stackRequest, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
+    public StackV4Response createInWorkspace(StackV4Request stackRequest, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
         return stackCreatorService.createStack(cloudbreakUser, user, workspace, stackRequest);
     }
 
@@ -132,59 +118,29 @@ public class StackCommonService implements StackEndpoint {
         stackService.delete(name, workspaceId, forced, deleteDependencies, user);
     }
 
-    @Override
-    public Set<StackResponse> getStacksInDefaultWorkspace() {
-        return stackService.retrieveStacksByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId());
-    }
-
-    @Override
-    public StackResponse get(Long id, Set<String> entries) {
+    public StackV4Response get(Long id, Set<String> entries) {
         return stackService.getJsonById(id, entries);
     }
 
-    @Override
-    public StackResponse getStackFromDefaultWorkspace(String name, Set<String> entries) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackService.getStackByNameInWorkspace(name, entries, workspace);
-    }
-
-    @Override
-    public Map<String, Object> status(Long id) {
-        return conversionService.convert(stackService.getById(id), Map.class);
-    }
-
-    @Override
-    public void deleteById(Long id, Boolean forced, Boolean deleteDependencies) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackService.delete(id, forced, deleteDependencies, user);
-    }
-
-    @Override
-    public void deleteInDefaultWorkspace(String name, Boolean forced, Boolean deleteDependencies) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackService.delete(name, restRequestThreadLocalService.getRequestedWorkspaceId(), forced, deleteDependencies, user);
-    }
-
-    public Set<StackViewResponse> retrieveStacksByWorkspaceId(Long workspaceId, String environment, boolean onlyDatalakes) {
+    public Set<StackViewV4Response> retrieveStacksByWorkspaceId(Long workspaceId, String environment, boolean onlyDatalakes) {
         return stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environment, onlyDatalakes);
     }
 
-    public StackResponse findStackByNameAndWorkspaceId(String name, Long workspaceId, @QueryParam("entry") Set<String> entries) {
+    public StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return stackService.getByNameInWorkspaceWithEntries(name, workspaceId, entries, user);
     }
 
-    public Response putInDefaultWorkspace(Long id, UpdateStackJson updateRequest) {
+    public void putInDefaultWorkspace(Long id, UpdateStackV4Request updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(),
                 WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
-        return put(stack, updateRequest);
+        put(stack, updateRequest);
     }
 
-    public Response putStopInWorkspace(String name, Long workspaceId) {
+    public void putStopInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
@@ -192,24 +148,24 @@ public class StackCommonService implements StackEndpoint {
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
         }
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.STOPPED);
         updateStackJson.setWithClusterEvent(true);
-        return put(stack, updateStackJson);
+        put(stack, updateStackJson);
     }
 
-    public Response putSyncInWorkspace(String name, Long workspaceId) {
+    public void putSyncInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.FULL_SYNC);
         updateStackJson.setWithClusterEvent(true);
-        return put(stack, updateStackJson);
+        put(stack, updateStackJson);
     }
 
-    public Response putStartInWorkspace(String name, Long workspaceId) {
+    public void putStartInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
@@ -217,19 +173,19 @@ public class StackCommonService implements StackEndpoint {
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Start is not supported on %s cloudplatform", stack.cloudPlatform()));
         }
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.STARTED);
         updateStackJson.setWithClusterEvent(true);
-        return put(stack, updateStackJson);
+        put(stack, updateStackJson);
     }
 
-    public Response putScalingInWorkspace(String name, Long workspaceId, StackScaleRequestV2 updateRequest) {
+    public void putScalingInWorkspace(String name, Long workspaceId, StackScaleV4Request updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
-        UpdateStackJson updateStackJson = conversionService.convert(updateRequest, UpdateStackJson.class);
+        UpdateStackV4Request updateStackJson = converterUtil.convert(updateRequest, UpdateStackV4Request.class);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
@@ -238,11 +194,11 @@ public class StackCommonService implements StackEndpoint {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
         }
         if (scalingAdjustment > 0) {
-            return put(stack, updateStackJson);
+            put(stack, updateStackJson);
         } else {
-            UpdateClusterJson updateClusterJson = conversionService.convert(updateRequest, UpdateClusterJson.class);
+            UpdateClusterV4Request updateClusterJson = converterUtil.convert(updateRequest, UpdateClusterV4Request.class);
             Workspace workspace = workspaceService.get(workspaceId, user);
-            return clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
+            clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
         }
     }
 
@@ -254,7 +210,7 @@ public class StackCommonService implements StackEndpoint {
         clusterService.delete(stack.getId(), withStackDelete, deleteDependencies);
     }
 
-    public void repairCluster(Long workspaceId, String name, ClusterRepairRequest clusterRepairRequest) {
+    public void repairCluster(Long workspaceId, String name, ClusterRepairV4Request clusterRepairRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
@@ -273,84 +229,43 @@ public class StackCommonService implements StackEndpoint {
         operationRetryService.retry(stack);
     }
 
-    private Response put(Stack stack, UpdateStackJson updateRequest) {
-        MDCBuilder.buildMdcContext(stack);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (updateRequest.getStatus() != null) {
-            stackService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
-        } else {
-            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-            validateHardLimits(scalingAdjustment);
-            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
-        }
-        return Response.status(Status.NO_CONTENT).build();
-    }
-
-    public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
-        TemplatePreparationObject templatePreparationObject = conversionService.convert(stackRequest, TemplatePreparationObject.class);
+    public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {
+        TemplatePreparationObject templatePreparationObject = converterUtil.convert(stackRequest, TemplatePreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
-        return new GeneratedBlueprintResponse(blueprintText);
+        GeneratedBlueprintV4Response response = new GeneratedBlueprintV4Response();
+        response.setBlueprintText(blueprintText);
+        return response;
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public CertificateResponse getCertificate(Long stackId) {
+    public CertificateV4Response getCertificate(Long stackId) {
         return tlsSecurityService.getCertificates(stackId);
     }
 
-    public StackResponse getStackForAmbari(AmbariAddressJson json) {
+    public StackV4Response getStackForAmbari(AmbariAddressV4Request json) {
         return stackService.getByAmbariAddress(json.getAmbariAddress());
     }
 
-    public Set<AutoscaleStackResponse> getAllForAutoscale() {
+    public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         LOGGER.debug("Get all stack, autoscale authorized only.");
         return stackService.getAllForAutoscale();
     }
 
-    @Override
-    public Response validate(StackValidationRequest request) {
-        StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
-        stackService.validateStack(stackValidation, true);
+    public void validate(StackValidationV4Request request) {
+        StackValidation stackValidation = converterUtil.convert(request, StackValidation.class);
+        stackService.validateStack(stackValidation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
-        fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem(), null, null);
-        return Response.status(Status.NO_CONTENT).build();
+        fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential, request.getFileSystem(), null, null);
     }
 
-    @Override
-    public Response deleteInstance(Long stackId, String instanceId) {
-        return deleteInstance(stackId, instanceId, false);
-    }
-
-    @Override
-    public Response deleteInstance(Long stackId, String instanceId, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(), WorkspaceResource.STACK,
-                Action.WRITE, user);
-        stackService.removeInstance(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceId, forced, user);
-        return Response.status(Status.NO_CONTENT).build();
-    }
-
-    public Response deleteInstanceByNameInWorkspace(String name, Long workspaceId, String instanceId, boolean forced) {
+    public void deleteInstanceByNameInWorkspace(String name, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
-        return Response.status(Status.NO_CONTENT).build();
     }
 
-    @Override
-    public Response deleteInstances(Long stackId, Set<String> instanceIds) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackService.removeInstances(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceIds, user);
-        return Response.status(Status.NO_CONTENT).build();
-    }
-
-    @Override
-    public PlatformVariantsJson variants() {
-        PlatformVariants pv = parameterService.getPlatformVariants();
-        return conversionService.convert(pv, PlatformVariantsJson.class);
-    }
-
-    public Response changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeRequest stackImageChangeRequest) {
+    public void changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
         Stack stack = stackService.getByNameInWorkspace(name, organziationId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
@@ -360,7 +275,18 @@ public class StackCommonService implements StackEndpoint {
         } else {
             stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(), null, null, user);
         }
-        return Response.status(Status.NO_CONTENT).build();
+    }
+
+    private void put(Stack stack, UpdateStackV4Request updateRequest) {
+        MDCBuilder.buildMdcContext(stack);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        if (updateRequest.getStatus() != null) {
+            stackService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
+        } else {
+            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+            validateHardLimits(scalingAdjustment);
+            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
+        }
     }
 
     private void validateHardLimits(Integer scalingAdjustment) {
@@ -369,4 +295,5 @@ public class StackCommonService implements StackEndpoint {
                     scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
     }
+
 }

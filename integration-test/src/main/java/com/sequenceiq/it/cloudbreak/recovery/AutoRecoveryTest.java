@@ -10,13 +10,12 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
+import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
 
 public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
@@ -35,36 +34,38 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
     public void testAutoRecovery(String hostGroup, @Optional("0") Integer removedInstanceCount) {
         //GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
 
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        var stackV1Endpoint = getCloudbreakClient().stackV4Endpoint();
+        var stackResponse = stackV1Endpoint.get(workspaceId, stackName, new HashSet<>());
 
         String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);
         Assert.assertNotNull(instanceToDelete);
 
         RecoveryUtil.deleteInstance(cloudProviderParams, instanceToDelete);
 
-        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
-                - removedInstanceCount;
+        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword,
+                itContext) - removedInstanceCount;
 
-        WaitResult waitResult = CloudbreakUtil.waitForEvent(getCloudbreakClient(), stackResponse.getName(), "RECOVERY", "autorecovery requested",
+        WaitResult waitResult = CloudbreakV3Util.waitForEvent(getCloudbreakClient(), workspaceId, stackResponse.getName(), "RECOVERY", "autorecovery requested",
                 RecoveryUtil.getCurentTimeStamp());
 
         if (waitResult == WaitResult.TIMEOUT) {
             Assert.fail("Timeout happened when waiting for the desired host state");
         }
-        //WHEN: Cloudbreak automatically starts the recover
-        //THEN
+//        WHEN: Cloudbreak automatically starts the recover
+//        THEN
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
-        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
+        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword,
+                itContext);
         Assert.assertEquals(expectedNodeCountAmbari, actualNodeCountAmbari);
     }
 }

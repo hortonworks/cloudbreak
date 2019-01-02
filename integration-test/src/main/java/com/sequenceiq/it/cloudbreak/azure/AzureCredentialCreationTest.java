@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.azure;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -10,7 +7,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 
@@ -43,17 +42,19 @@ public class AzureCredentialCreationTest extends AbstractCloudbreakIntegrationTe
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccesKey;
 
         // WHEN
-        CredentialRequest credentialRequest = new CredentialRequest();
-        credentialRequest.setName(credentialName);
+        var credentialRequest = new CredentialV4Request();
+        var credentialParameters = new AzureCredentialV4Parameters();
+        var appBased = new AppBased();
+        appBased.setAccessKey(accessKey);
+        appBased.setSecretKey(secretKey);
         credentialRequest.setDescription("Azure credential for integartion test");
-        Map<String, Object> map = new HashMap<>();
-        map.put("subscriptionId", subscriptionId);
-        map.put("tenantId", tenantId);
-        map.put("accessKey", accessKey);
-        map.put("secretKey", secretKey);
-        credentialRequest.setParameters(map);
+        credentialRequest.setName(credentialName);
+        credentialRequest.setAzure(credentialParameters);
         credentialRequest.setCloudPlatform("AZURE");
-        String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
+        credentialParameters.setAppBased(appBased);
+        credentialParameters.setTenantId(tenantId);
+        credentialParameters.setSubscriptionId(subscriptionId);
+        Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

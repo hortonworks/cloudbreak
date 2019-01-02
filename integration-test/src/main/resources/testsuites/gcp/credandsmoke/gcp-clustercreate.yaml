@@ -57,4 +57,4 @@ tests:
       clusterName: it-gcp-cred
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+

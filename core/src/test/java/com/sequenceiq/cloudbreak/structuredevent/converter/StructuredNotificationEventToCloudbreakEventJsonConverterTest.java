@@ -17,7 +17,7 @@ import org.junit.runners.Parameterized;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -36,7 +36,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
 
     public StructuredNotificationEventToCloudbreakEventJsonConverterTest(StructuredNotificationEvent source, List<String> additionalElementsToSkip) {
-        skippedFields = Lists.newArrayList("availabilityZone", "owner", "account");
+        skippedFields = Lists.newArrayList("availabilityZone");
         skippedFields.addAll(additionalElementsToSkip);
         this.source = source;
     }
@@ -59,7 +59,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Test
     public void testConvert() {
-        CloudbreakEventsJson result = underTest.convert(source);
+        CloudbreakEventV4Response result = underTest.convert(source);
 
         assertNotNull(result);
         assertEquals(MESSAGE, result.getEventMessage());
@@ -74,11 +74,12 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     private static List<String> getFieldNamesExcept(List<String> exclusions) {
         List<String> fieldsToReturn = new LinkedList<>();
-        for (Field field : CloudbreakEventsJson.class.getDeclaredFields()) {
+        for (Field field : CloudbreakEventV4Response.class.getDeclaredFields()) {
             if (!exclusions.contains(field.getName())) {
                 fieldsToReturn.add(field.getName());
             }
         }
         return fieldsToReturn;
     }
+
 }

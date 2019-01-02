@@ -9,9 +9,9 @@ import javax.validation.ConstraintValidatorContext;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
 
-public class ManagementPackResourceValidator implements ConstraintValidator<ValidManagementPack, ManagementPackRequest> {
+public class ManagementPackResourceValidator implements ConstraintValidator<ValidManagementPack, ManagementPackV4Request> {
     private Set<String> validPurgeListElements;
 
     @Override
@@ -23,7 +23,7 @@ public class ManagementPackResourceValidator implements ConstraintValidator<Vali
     }
 
     @Override
-    public boolean isValid(ManagementPackRequest value, ConstraintValidatorContext context) {
+    public boolean isValid(ManagementPackV4Request value, ConstraintValidatorContext context) {
         boolean result = true;
         if (StringUtils.isEmpty(value.getMpackUrl())) {
             ValidatorUtil.addConstraintViolation(context, "mpackUrl cannot be empty", "mpackUrl");
@@ -39,7 +39,7 @@ public class ManagementPackResourceValidator implements ConstraintValidator<Vali
         return result;
     }
 
-    private boolean isValidPurgeList(ManagementPackRequest value, ConstraintValidatorContext context) {
+    private boolean isValidPurgeList(ManagementPackV4Request value, ConstraintValidatorContext context) {
         boolean result = true;
         if (value.getPurgeList().stream().anyMatch(p -> !validPurgeListElements.contains(p))) {
             ValidatorUtil.addConstraintViolation(context, String.format("purgelist contains only elements from %s", validPurgeListElements.stream().collect(

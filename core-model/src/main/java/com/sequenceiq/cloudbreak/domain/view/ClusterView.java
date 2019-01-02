@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,7 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

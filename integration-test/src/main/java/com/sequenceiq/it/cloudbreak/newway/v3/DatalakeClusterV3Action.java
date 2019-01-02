@@ -17,7 +17,7 @@ public class DatalakeClusterV3Action {
         DatalakeCluster datalake = (DatalakeCluster) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        datalake.setResponse(client.getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, name, Collections.emptySet()));
+        datalake.setResponse(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, name, Collections.emptySet()));
     }
 
 }

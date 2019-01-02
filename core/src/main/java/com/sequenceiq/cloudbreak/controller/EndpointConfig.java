@@ -15,11 +15,33 @@ import org.springframework.stereotype.Controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.controller.audit.AuditController;
-import com.sequenceiq.cloudbreak.controller.audit.AuditV3Controller;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.AutoscaleV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.CredentialV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.EnvironmentV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.FlexSubscriptionV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.KubernetesV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.LdapV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ManagementPackV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.PlatformParameterV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.SmartSenseSubscriptionV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.UserV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.WorkspaceV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -31,55 +53,33 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @Controller
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS  = Arrays.asList(
-        AccountPreferencesController.class,
-        AuditController.class,
-        AuditV3Controller.class,
-        BlueprintController.class,
-        BlueprintV3Controller.class,
-        CloudbreakEventController.class,
-        CloudbreakEventV3Controller.class,
-        ClusterV1Controller.class,
-        ClusterTemplateV3Controller.class,
-        CredentialController.class,
-        CredentialV3Controller.class,
-        EnvironmentV3Controller.class,
-        FlexSubscriptionController.class,
-        FlexSubscriptionV3Controller.class,
-        ImageCatalogV1Controller.class,
-        ImageCatalogV3Controller.class,
-        KerberosConfigV3Controller.class,
-        KnoxServicesV3Controller.class,
-        LdapController.class,
-        LdapV3Controller.class,
-        ManagementPackController.class,
-        ManagementPackV3Controller.class,
-        KubernetesConfigV3Endpoint.class,
-        WorkspaceV3Controller.class,
-        PlatformParameterV1Controller.class,
-        PlatformParameterV2Controller.class,
-        PlatformParameterV3Controller.class,
-        ProxyConfigController.class,
-        ProxyConfigV3Controller.class,
-        RdsConfigController.class,
-        RdsConfigV3Controller.class,
-        RecipeController.class,
-        RecipeV3Controller.class,
-        RepositoryConfigValidationController.class,
-        SecurityRuleController.class,
-        SettingsController.class,
-        SmartSenseSubscriptionController.class,
-        SmartSenseSubscriptionV3Controller.class,
-        StackV1Controller.class,
-        StackV2Controller.class,
-        StackV3Controller.class,
-        SubscriptionController.class,
-        UserController.class,
-        UserV3Controller.class,
-        UtilController.class,
-        UtilV3Controller.class,
-        FileSystemV3Controller.class,
-        AutoscaleController.class
+    private static final List<Class<?>> CONTROLLERS = Arrays.asList(
+            AuditEventV4Controller.class,
+            BlueprintV4Controller.class,
+            EventV4Controller.class,
+            ClusterTemplateV4Controller.class,
+            CredentialV4Controller.class,
+            DatabaseV4Controller.class,
+            EnvironmentV4Controller.class,
+            FlexSubscriptionV4Controller.class,
+            ImageCatalogV4Controller.class,
+            KerberosConfigV4Controller.class,
+            LdapV4Controller.class,
+            KubernetesV4Controller.class,
+            WorkspaceV4Controller.class,
+            PlatformParameterV4Controller.class,
+            ProxyV4Controller.class,
+            RecipesV4Controller.class,
+            SmartSenseSubscriptionV4Controller.class,
+            UserProfileV4Controller.class,
+            UserV4Controller.class,
+            FileSystemV4Controller.class,
+            UtilV4Controller.class,
+            FileSystemV4Controller.class,
+            WorkspaceAwareUtilV4Controller.class,
+            AutoscaleV4Controller.class,
+            ManagementPackV4Controller.class,
+            StackV4Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
@@ -114,7 +114,7 @@ public class EndpointConfig extends ResourceConfig {
         }
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
+        swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");

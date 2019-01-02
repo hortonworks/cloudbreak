@@ -8,11 +8,9 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class Cluster extends Entity {
@@ -23,13 +21,13 @@ public class Cluster extends Entity {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    private ClusterV2Request request;
+    private ClusterV4Request request;
 
     private String name;
 
     Cluster(String newId) {
         super(newId);
-        request = new ClusterV2Request();
+        request = new ClusterV4Request();
     }
 
     Cluster() {
@@ -44,11 +42,11 @@ public class Cluster extends Entity {
         this.name = name;
     }
 
-    public ClusterV2Request getRequest() {
+    public ClusterV4Request getRequest() {
         return request;
     }
 
-    public void setRequest(ClusterV2Request request) {
+    public void setRequest(ClusterV4Request request) {
         this.request = request;
     }
 
@@ -58,18 +56,18 @@ public class Cluster extends Entity {
         return this;
     }
 
-    public Cluster withAmbariRequest(AmbariV2Request ambariRequest) {
+    public Cluster withAmbariRequest(AmbariV4Request ambariRequest) {
         request.setAmbari(ambariRequest);
         return this;
     }
 
-    public Cluster withExecutorType(ExecutorType executorType) {
-        request.setExecutorType(executorType);
+    public Cluster withKerberos(String kerberosConfigName) {
+        request.setKerberosName(kerberosConfigName);
         return this;
     }
 
     public Cluster withLdapConfigName(String ldap) {
-        request.setLdapConfigName(ldap);
+        request.setLdapName(ldap);
         return this;
     }
 
@@ -79,19 +77,12 @@ public class Cluster extends Entity {
     }
 
     public Cluster withRdsConfigNames(Set<String> names) {
-        request.setRdsConfigNames(names);
+        request.setDatabases(names);
         return this;
     }
 
-    public Cluster withCloudStorage(CloudStorageRequest cloudStorage) {
+    public Cluster withCloudStorage(CloudStorageV4Request cloudStorage) {
         request.setCloudStorage(cloudStorage);
-        return this;
-    }
-
-    public Cluster withSharedService(String datalakeClusterName) {
-        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
-        sharedServiceRequest.setSharedCluster(datalakeClusterName);
-        request.setSharedService(sharedServiceRequest);
         return this;
     }
 

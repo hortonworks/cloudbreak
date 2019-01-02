@@ -64,7 +64,7 @@ tests:
       clusterName: it-gcp-cred-eln
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: delete vpc
     classes:

@@ -3,22 +3,22 @@ package com.sequenceiq.cloudbreak.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 
-public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpdateStackRequest, UpdateStackJson> {
+public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpdateStackRequest, UpdateStackV4Request> {
 
     @Override
     public void initialize(ValidUpdateStackRequest constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(UpdateStackJson value, ConstraintValidatorContext context) {
+    public boolean isValid(UpdateStackV4Request value, ConstraintValidatorContext context) {
         int updateResources = 0;
         if (value.getStatus() != null) {
             updateResources++;
         }
-        InstanceGroupAdjustmentJson instanceGroupAdjustment = value.getInstanceGroupAdjustment();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = value.getInstanceGroupAdjustment();
         if (instanceGroupAdjustment != null) {
             updateResources++;
             if (value.getWithClusterEvent() && instanceGroupAdjustment.getScalingAdjustment() < 0) {

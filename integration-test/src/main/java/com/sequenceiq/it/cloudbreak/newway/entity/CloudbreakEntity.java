@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Orderable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
@@ -27,7 +28,7 @@ public interface CloudbreakEntity extends Orderable {
         return this;
     }
 
-    default CloudbreakEntity wait(Map<String, String> desiredStatuses, RunningParameter runningParameter) {
+    default CloudbreakEntity wait(Map<String, Status> desiredStatus, RunningParameter runningParameter) {
         LOGGER.warn("Did not wait: {}", getName());
         return this;
     }

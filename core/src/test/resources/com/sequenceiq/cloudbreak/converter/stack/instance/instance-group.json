@@ -1,7 +1,19 @@
 {
-  "type" : "GATEWAY",
-  "group" : "groupName",
-  "nodeCount" : 1,
-  "templateId" : 51,
-  "securityGroupId" : 1
+  "type": "GATEWAY",
+  "name": "groupName",
+  "nodeCount": 1,
+  "cloudPlatform": "AZURE",
+  "template": {
+    "rootVolume": {
+      "size": 10
+    }
+  },
+  "securityGroup": {
+    "securityGroupIds": [
+      "id"
+    ]
+  },
+  "azure": {
+    "discoveryName": "name"
+  }
 }

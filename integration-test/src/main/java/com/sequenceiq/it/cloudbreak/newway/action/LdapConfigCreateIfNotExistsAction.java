@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class LdapConfigCreateIfNotExistsAction implements ActionV2<LdapConfigEntity> {
+public class LdapConfigCreateIfNotExistsAction implements Action<LdapConfigEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigCreateIfNotExistsAction.class);
 
     @Override
@@ -17,14 +17,14 @@ public class LdapConfigCreateIfNotExistsAction implements ActionV2<LdapConfigEnt
         LOGGER.info("Create LdapConfig with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(
-                    client.getCloudbreakClient().ldapConfigV3Endpoint().createInWorkspace(client.getWorkspaceId(), entity.getRequest())
+                    client.getCloudbreakClient().ldapConfigV4Endpoint().post(client.getWorkspaceId(), entity.getRequest())
             );
             logJSON(LOGGER, "LdapConfig created successfully: ", entity.getRequest());
         } catch (Exception e) {
             LOGGER.info("Cannot create LdapConfig, fetch existed one: {}", entity.getRequest().getName());
             entity.setResponse(
-                    client.getCloudbreakClient().ldapConfigV3Endpoint()
-                            .getByNameInWorkspace(client.getWorkspaceId(), entity.getRequest().getName()));
+                    client.getCloudbreakClient().ldapConfigV4Endpoint()
+                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
         }
         if (entity.getResponse() == null) {
             throw new IllegalStateException("LdapConfig could not be created.");

@@ -5,12 +5,12 @@ import java.util.Set;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
 
-public class ChangeWorkspaceUsersJsonValidator implements ConstraintValidator<ValidChangeWorkspaceUsersJson, ChangeWorkspaceUsersJson> {
+public class ChangeWorkspaceUsersJsonValidator implements ConstraintValidator<ValidChangeWorkspaceUsersJson, ChangeWorkspaceUsersV4Request> {
     @Override
-    public boolean isValid(ChangeWorkspaceUsersJson value, ConstraintValidatorContext context) {
+    public boolean isValid(ChangeWorkspaceUsersV4Request value, ConstraintValidatorContext context) {
         if (!isPermissionsValid(value.getPermissions())) {
             ValidatorUtil.addConstraintViolation(context, "permissions must be valid", "status")
                     .disableDefaultConstraintViolation();

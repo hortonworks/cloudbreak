@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.securityrule;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,8 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 
 @Component
 public class SecurityRuleService {
@@ -32,8 +33,8 @@ public class SecurityRuleService {
     @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
-    public SecurityRulesResponse getDefaultSecurityRules(Boolean knoxEnabled) {
-        SecurityRulesResponse ret = new SecurityRulesResponse();
+    public SecurityRulesV4Response getDefaultSecurityRules(Boolean knoxEnabled) {
+        SecurityRulesV4Response ret = new SecurityRulesV4Response();
         Set<String> defaultGatewayCidrs = defaultGatewayCidr
                 .stream()
                 .filter(StringUtils::isNotBlank)
@@ -44,7 +45,7 @@ public class SecurityRuleService {
         return ret;
     }
 
-    private void addCidrAndPort(SecurityRulesResponse ret, String cloudbreakCidr, Boolean knoxEnabled) {
+    private void addCidrAndPort(SecurityRulesV4Response ret, String cloudbreakCidr, Boolean knoxEnabled) {
         if (knoxEnabled) {
             ret.getGateway().addAll(createSecurityRuleResponse(cloudbreakCidr, gatewayPort, knoxPort));
         } else {
@@ -54,15 +55,15 @@ public class SecurityRuleService {
         ret.getCore().addAll(createSecurityRuleResponse(cloudbreakCidr, sshPort));
     }
 
-    private Collection<SecurityRuleResponse> createSecurityRuleResponse(String cidr, String... ports) {
-        Collection<SecurityRuleResponse> rules = new ArrayList<>();
+    private Collection<SecurityRuleV4Response> createSecurityRuleResponse(String cidr, String... ports) {
+        Collection<SecurityRuleV4Response> rules = new ArrayList<>();
         for (String port : ports) {
             if (StringUtils.isNotBlank(port)) {
-                SecurityRuleResponse securityRuleResponse = new SecurityRuleResponse();
-                securityRuleResponse.setPorts(port);
-                securityRuleResponse.setProtocol(TCP_PROTOCOL);
-                securityRuleResponse.setSubnet(cidr);
-                rules.add(securityRuleResponse);
+                SecurityRuleV4Response securityRuleV4Response = new SecurityRuleV4Response();
+                securityRuleV4Response.setPorts(Collections.singletonList(port));
+                securityRuleV4Response.setProtocol(TCP_PROTOCOL);
+                securityRuleV4Response.setSubnet(cidr);
+                rules.add(securityRuleV4Response);
             }
         }
         return rules;

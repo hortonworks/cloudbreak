@@ -10,12 +10,12 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = AmbariStackValidator.class)
+@Constraint(validatedBy = StackRepositoryV4Validator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidAmbariStack {
 
-    String message() default "HDP version is not valid. Only " + AmbariStackValidator.MIN_HDP_VERSION + " and later versions are supported";
+    String message() default "HDP version is not valid. Only " + StackRepositoryV4Validator.MIN_HDP_VERSION + " and later versions are supported";
 
     Class<?>[] groups() default { };
 

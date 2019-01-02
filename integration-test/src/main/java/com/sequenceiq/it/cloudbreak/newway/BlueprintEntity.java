@@ -1,18 +1,19 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-
-import javax.ws.rs.WebApplicationException;
 import java.util.List;
 
-public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintRequest, BlueprintResponse, BlueprintEntity> {
+import javax.ws.rs.WebApplicationException;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+
+public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request, BlueprintV4Response, BlueprintEntity> {
     public static final String BLUEPRINT = "BLUEPRINT";
 
     BlueprintEntity(String newId) {
         super(newId);
-        setRequest(new BlueprintRequest());
+        setRequest(new BlueprintV4Request());
     }
 
     BlueprintEntity() {
@@ -20,14 +21,14 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintRequest, 
     }
 
     public BlueprintEntity(TestContext testContext) {
-        super(new BlueprintRequest(), testContext);
+        super(new BlueprintV4Request(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().blueprintV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+            cloudbreakClient.getCloudbreakClient().blueprintV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend.");
         }
@@ -69,4 +70,8 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintRequest, 
         return this;
     }
 
+    @Override
+    public int order() {
+        return 500;
+    }
 }

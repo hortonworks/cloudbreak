@@ -2,18 +2,15 @@ package com.sequenceiq.it.cloudbreak.scaling;
 
 import java.util.HashSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -21,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
 public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackScalingTest.class);
 
     @BeforeMethod
     public void setContextParameters() {
@@ -33,23 +29,23 @@ public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
     public void testStackScaling(@Optional("slave_1") String instanceGroup, int scalingAdjustment) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.parseInt(stackId);
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class).stackV1Endpoint();
-        int expectedNodeCount = ScalingUtil.getNodeCountStack(stackV1Endpoint, stackId) + scalingAdjustment;
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        StackV4Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class).stackV4Endpoint();
+        int expectedNodeCount = ScalingUtil.getNodeCountStack(stackV1Endpoint, workspaceId, stackName) + scalingAdjustment;
         // WHEN
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setWithClusterEvent(false);
-        InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
-        instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
-        instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-        CloudbreakUtil.checkResponse("ScalingStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
-        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
+//        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//        updateStackJson.setWithClusterEvent(false);
+//        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
+//        instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
+//        instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+//        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+        getCloudbreakClient().stackV4Endpoint().putCluster(workspaceId, stackName, new UpdateClusterV4Request());
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         // THEN
-        ScalingUtil.checkStackScaled(stackV1Endpoint, stackId, expectedNodeCount);
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        ScalingUtil.checkStackScaled(stackV1Endpoint, workspaceId, stackName, expectedNodeCount);
+        StackV4Response stackResponse = stackV1Endpoint.get(workspaceId, stackName, new HashSet<>());
 
         itContext.putContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, ScalingUtil.getNodeCountByHostgroup(stackResponse));
     }

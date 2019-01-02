@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
@@ -28,8 +28,8 @@ public class StackGetWithEntriesStrategy implements Strategy {
                 CloudbreakClient.class);
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .getStackFromDefaultWorkspace(stackEntity.getName(), entries.stream()
+                client.getCloudbreakClient().stackV4Endpoint()
+                        .get(client.getWorkspaceId(), stackEntity.getName(), entries.stream()
                                 .map(StackResponseEntries::getEntryName).collect(Collectors.toSet())));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }

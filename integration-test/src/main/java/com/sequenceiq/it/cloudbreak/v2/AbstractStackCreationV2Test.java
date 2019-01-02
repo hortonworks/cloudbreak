@@ -13,18 +13,17 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -40,35 +39,33 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         credentialName = StringUtils.hasText(credentialName) ? credentialName : itContext.getContextParam(CloudbreakV2Constants.CREDENTIAL_NAME);
         region = StringUtils.hasText(region) ? region : itContext.getContextParam(CloudbreakV2Constants.REGION);
         availabilityZone = StringUtils.hasText(availabilityZone) ? availabilityZone : itContext.getContextParam(CloudbreakV2Constants.AVAILABILTYZONE);
-        imageCatalog = StringUtils.hasText(imageCatalog) ? imageCatalog : itContext.getContextParam(CloudbreakV2Constants.IMAGECATALOG);
-        imageId = StringUtils.hasText(imageId) ? imageId : itContext.getContextParam(CloudbreakV2Constants.IMAGEID);
-        Map<String, InstanceGroupV2Request> instanceGroupV2RequestMap = itContext.getContextParam(CloudbreakV2Constants.INSTANCEGROUP_MAP, Map.class);
+//        imageCatalog = StringUtils.hasText(imageCatalog) ? imageCatalog : itContext.getContextParam(CloudbreakV2Constants.IMAGECATALOG);
+//        imageId = StringUtils.hasText(imageId) ? imageId : itContext.getContextParam(CloudbreakV2Constants.IMAGEID);
+        Map<String, InstanceGroupV4Request> instanceGroupV2RequestMap = itContext.getContextParam(CloudbreakV2Constants.INSTANCEGROUP_MAP, Map.class);
 
         Assert.assertTrue(StringUtils.hasText(credentialName), "Credential name is mandatory.");
         Assert.assertTrue(StringUtils.hasText(region), "Region is mandatory.");
         Assert.assertTrue(StringUtils.hasText(availabilityZone), "AvailabilityZone is mandatory.");
         Assert.assertNotNull(instanceGroupV2RequestMap, "InstanceGroup map is mandatory");
 
-        StackV2Request stackV2Request = new StackV2Request();
-        GeneralSettings gs = new GeneralSettings();
-        stackV2Request.setGeneral(gs);
-        gs.setName(stackName);
-        gs.setCredentialName(credentialName);
-
-        PlacementSettings ps = new PlacementSettings();
-        stackV2Request.setPlacement(ps);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setName(stackName);
+        EnvironmentSettingsV4Request env = new EnvironmentSettingsV4Request();
+        env.setCredentialName(credentialName);
+        stackRequest.setEnvironment(env);
+        PlacementSettingsV4Request ps = new PlacementSettingsV4Request();
+        stackRequest.setPlacement(ps);
         ps.setRegion(region);
         ps.setAvailabilityZone(availabilityZone);
 
-        if (StringUtils.hasText(imageCatalog) || StringUtils.hasText(imageId)) {
-            ImageSettings is = new ImageSettings();
-            is.setImageCatalog(imageCatalog);
-            is.setImageId(imageId);
-            stackV2Request.setImageSettings(is);
-        }
-        stackV2Request.setInstanceGroups(Lists.newArrayList(instanceGroupV2RequestMap.values()));
+//        if (StringUtils.hasText(imageCatalog) || StringUtils.hasText(imageId)) {
+//            ImageSettingsV4Request is = new ImageSettingsV4Request();
+//            is.setCatalog(imageCatalog);
+//            is.setId(imageId);
+//        }
+        stackRequest.setInstanceGroups(Lists.newArrayList(instanceGroupV2RequestMap.values()));
 
-        itContext.putContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, stackV2Request);
+        itContext.putContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, stackRequest);
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
@@ -79,10 +76,10 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
 
         Assert.assertNotNull(publicKeyId, "Publickey id is mandatory.");
 
-        StackV2Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
+        StackV4Request stackRequest = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
+        StackAuthenticationV4Request stackAuthenticationRequest = new StackAuthenticationV4Request();
         stackAuthenticationRequest.setPublicKeyId(publicKeyId);
-        stackV2Request.setStackAuthentication(stackAuthenticationRequest);
+        stackRequest.setAuthentication(stackAuthenticationRequest);
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
@@ -95,56 +92,57 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password is mandatory.");
         Assert.assertNotNull(blueprintName, "blueprint name is mandatory.");
 
-        StackV2Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        ClusterV2Request clusterV2Request = new ClusterV2Request();
-        clusterV2Request.setName(stackV2Request.getGeneral().getName());
+        StackV4Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
+        ClusterV4Request clusterV2Request = new ClusterV4Request();
+        clusterV2Request.setName(stackV2Request.getName());
         stackV2Request.setCluster(clusterV2Request);
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
+        AmbariV4Request ambariV2Request = new AmbariV4Request();
         clusterV2Request.setAmbari(ambariV2Request);
         ambariV2Request.setBlueprintName(blueprintName);
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         if (enableGateway) {
-            addGatewayRequest(stackV2Request, ambariV2Request);
+            addGatewayRequest(stackV2Request);
         }
     }
 
-    private void addGatewayRequest(StackV2Request stackV2Request, AmbariV2Request ambariV2Request) {
-        GatewayJson gatewayJson = new GatewayJson();
+    private void addGatewayRequest(StackV4Request stackV2Request) {
+        GatewayV4Request gatewayJson = new GatewayV4Request();
         gatewayJson.setPath("gateway-path");
-        GatewayTopologyJson topology1 = new GatewayTopologyJson();
+        GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
         topology1.setTopologyName("topology1");
         topology1.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
-        GatewayTopologyJson topology2 = new GatewayTopologyJson();
+        GatewayTopologyV4Request topology2 = new GatewayTopologyV4Request();
         topology2.setTopologyName("topology2");
         topology2.setExposedServices(Collections.singletonList(ExposedService.ALL.getServiceName()));
         gatewayJson.setTopologies(Arrays.asList(topology1, topology2));
-        stackV2Request.getCluster().getAmbari().setGateway(gatewayJson);
-        ambariV2Request.setGateway(gatewayJson);
+        stackV2Request.getCluster().setGateway(gatewayJson);
     }
 
     @Test
     public void testStackCreation() throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        StackV2Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
+        StackV4Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
         // WHEN
-        String stackId = getCloudbreakClient().stackV2Endpoint().postPrivate(stackV2Request).getId().toString();
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String stackId = getCloudbreakClient().stackV4Endpoint().post(workspaceId, stackV2Request).getId().toString();
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId, true);
-        itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackV2Request.getGeneral().getName());
+        String stackName = stackV2Request.getName();
+        itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackName);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
     }
 
-    protected NetworkV2Request createNetworkRequest(IntegrationTestContext itContext, String subnetCidr) {
+    protected NetworkV4Request createNetworkRequest(IntegrationTestContext itContext, String subnetCidr) {
         subnetCidr = StringUtils.hasText(subnetCidr) ? subnetCidr : itContext.getContextParam(CloudbreakV2Constants.SUBNET_CIDR);
         Assert.assertNotNull(subnetCidr, "Subnet cidr is mandatory.");
-        StackV2Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        NetworkV2Request networkRequest = new NetworkV2Request();
+        StackV4Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
+        NetworkV4Request networkRequest = new NetworkV4Request();
         networkRequest.setSubnetCIDR(subnetCidr);
         stackV2Request.setNetwork(networkRequest);
         return networkRequest;

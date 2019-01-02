@@ -6,7 +6,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.MetricAlertJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("MetricAlertResponse")
+@ApiModel
 public class MetricAlertResponse extends AbstractAlertJson {
 
     @ApiModelProperty(BaseAlertJsonProperties.ID)

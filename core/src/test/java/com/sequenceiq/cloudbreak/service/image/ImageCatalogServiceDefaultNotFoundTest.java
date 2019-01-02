@@ -15,7 +15,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -50,13 +49,10 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @InjectMocks
     private ImageCatalogService underTest;
 
-    private CloudbreakUser cloudbreakUser;
-
     @Before
     public void beforeTest() throws Exception {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/no-default-imagecatalog.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
-        cloudbreakUser = getCloudbreakUser();
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
@@ -68,12 +64,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, cloudbreakUser, user);
+        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, user);
         // THEN throw CloudbreakImageNotFoundException
-    }
-
-    private CloudbreakUser getCloudbreakUser() {
-        return new CloudbreakUser(ImageCatalogServiceTest.USER_ID, ImageCatalogServiceTest.USERNAME, ImageCatalogServiceTest.EMAIL,
-                ImageCatalogServiceTest.TENANT);
     }
 }

@@ -61,7 +61,7 @@ tests:
       clusterName: it-nativeos-cred-ud
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: upscale stack and cluster
     parameters:

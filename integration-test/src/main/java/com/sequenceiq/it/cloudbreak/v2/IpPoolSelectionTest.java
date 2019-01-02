@@ -8,11 +8,11 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.IpPoolV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 
 public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
     @Test
@@ -21,19 +21,22 @@ public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
             String poolName) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         credentialName = StringUtils.hasText(credentialName) ? credentialName : itContext.getContextParam(CloudbreakV2Constants.CREDENTIAL_NAME);
         region = StringUtils.hasText(region) ? region : itContext.getContextParam(CloudbreakV2Constants.REGION);
         availabilityZone = StringUtils.hasText(availabilityZone) ? availabilityZone : itContext.getContextParam(CloudbreakV2Constants.AVAILABILTYZONE);
-        PlatformResourceRequestJson resourceRequestJson = new PlatformResourceRequestJson();
-        resourceRequestJson.setCredentialName(credentialName);
-        resourceRequestJson.setRegion(region);
-        resourceRequestJson.setAvailabilityZone(availabilityZone);
+//        PlatformResourceParameters resourceRequestJson = new PlatformResourceParameters();
+//        resourceRequestJson.setCredentialName(credentialName);
+//        resourceRequestJson.setRegion(region);
+//        resourceRequestJson.setAvailabilityZone(availabilityZone);
+        String platformVariant = getCloudbreakClient().credentialV4Endpoint().get(workspaceId, credentialName).getCloudPlatform();
         // WHEN
-        PlatformIpPoolsResponse response = getCloudbreakClient().connectorV1Endpoint().getIpPoolsCredentialId(resourceRequestJson);
+        PlatformIpPoolsV4Response ipPoolsResponse = getCloudbreakClient().connectorV4Endpoint().getIpPoolsCredentialId(workspaceId, credentialName, region,
+                platformVariant, availabilityZone);
         // THEN
-        Set<IpPoolJson> ipPools = response.getIppools().get(availabilityZone);
+        Set<IpPoolV4Response> ipPools = ipPoolsResponse.getIppools().get(availabilityZone);
         Assert.assertNotNull(ipPools, "ippools cannot be null for " + region);
-        java.util.Optional<IpPoolJson> selected = ipPools.stream().filter(rk -> rk.getName().equals(poolName)).findFirst();
+        java.util.Optional<IpPoolV4Response> selected = ipPools.stream().filter(rk -> rk.getName().equals(poolName)).findFirst();
         Assert.assertTrue(selected.isPresent(), "the ippool list doesn't contain [" + poolName + ']');
         getItContext().putContextParam(CloudbreakV2Constants.OPENSTACK_FLOATING_POOL, selected.get().getId());
     }

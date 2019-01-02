@@ -6,7 +6,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.PrometheusAlertJsonProperties
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("PrometheusAlertResponse")
+@ApiModel
 public class PrometheusAlertResponse extends AbstractAlertJson {
     private static final int DEFAULT_PERIOD = 1;
 

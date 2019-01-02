@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 
@@ -48,38 +48,38 @@ public class DefaultAmbariRepoService {
     }
 
     public AmbariRepo getDefault(String osType, String clusterType, String clusterVersion) {
-        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
-        Map<String, StackDescriptor> stackDescriptorMap;
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
+        Map<String, StackDescriptorV4Response> stackDescriptorMap;
 
         if (clusterType != null) {
             switch (clusterType) {
                 case "HDP":
-                    stackDescriptorMap = stackMatrix.getHdp();
+                    stackDescriptorMap = stackMatrixV4Response.getHdp();
                     break;
                 case "HDF":
-                    stackDescriptorMap = stackMatrix.getHdf();
+                    stackDescriptorMap = stackMatrixV4Response.getHdf();
                     break;
                 default:
                     stackDescriptorMap = null;
             }
         } else {
-            stackDescriptorMap = stackMatrix.getHdp();
+            stackDescriptorMap = stackMatrixV4Response.getHdp();
         }
 
         if (stackDescriptorMap != null) {
-            Optional<Entry<String, StackDescriptor>> descriptorEntry = stackDescriptorMap.entrySet().stream()
+            Optional<Entry<String, StackDescriptorV4Response>> descriptorEntry = stackDescriptorMap.entrySet().stream()
                     .filter(stackDescriptorEntry ->
                             clusterVersion == null || clusterVersion.equals(stackDescriptorEntry.getKey()))
                     .max(Comparator.comparing(Entry::getKey));
             if (descriptorEntry.isPresent()) {
-                Entry<String, StackDescriptor> stackDescriptorEntry = descriptorEntry.get();
-                AmbariInfoJson ambariInfoJson = stackDescriptorEntry.getValue().getAmbari();
-                if (ambariInfoJson.getRepo().get(osType) != null) {
+                Entry<String, StackDescriptorV4Response> stackDescriptorEntry = descriptorEntry.get();
+                AmbariInfoV4Response ambariInfoJson = stackDescriptorEntry.getValue().getAmbari();
+                if (ambariInfoJson.getRepository().get(osType) != null) {
                     AmbariRepo ambariRepo = new AmbariRepo();
                     ambariRepo.setPredefined(false);
                     ambariRepo.setVersion(ambariInfoJson.getVersion());
-                    ambariRepo.setBaseUrl(ambariInfoJson.getRepo().get(osType).getBaseUrl());
-                    ambariRepo.setGpgKeyUrl(ambariInfoJson.getRepo().get(osType).getGpgKeyUrl());
+                    ambariRepo.setBaseUrl(ambariInfoJson.getRepository().get(osType).getBaseUrl());
+                    ambariRepo.setGpgKeyUrl(ambariInfoJson.getRepository().get(osType).getGpgKeyUrl());
                     return ambariRepo;
                 }
             }

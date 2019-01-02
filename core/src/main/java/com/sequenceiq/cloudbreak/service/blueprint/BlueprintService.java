@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.PRE_DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
@@ -23,13 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -42,9 +41,7 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
@@ -81,12 +78,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintLoaderService blueprintLoaderService;
-
-    @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
@@ -130,13 +121,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Override
     public Set<Blueprint> findAllByWorkspaceId(Long workspaceId) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
+        User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         return getAllAvailableInWorkspace(workspace);
     }
 
-    public Set<BlueprintView> getAllAvailableViewInWorkspace(Workspace workspace) {
+    public Set<BlueprintView> getAllAvailableViewInWorkspace(Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         Set<Blueprint> blueprints = blueprintRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
         if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
             LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
@@ -235,14 +227,25 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     protected void prepareCreation(Blueprint resource) {
     }
 
-    public Set<String> queryCustomParameters(String name, Workspace workspace) {
-        Blueprint blueprint = getByNameForWorkspace(name, workspace);
+    private Set<String> queryCustomParameters(String name, Long workspaceId) {
+        Blueprint blueprint = getByNameForWorkspaceId(name, workspaceId);
         String blueprintText = blueprint.getBlueprintText();
         return centralBlueprintParameterQueryService.queryCustomParameters(blueprintText);
     }
 
+    public Map<String, String> queryCustomParametersMap(String name, Long workspaceId) {
+        Set<String> customParameters = queryCustomParameters(name, workspaceId);
+        Map<String, String> result = new HashMap<>();
+        for (String customParameter : customParameters) {
+            result.put(customParameter, "");
+        }
+        return result;
+    }
+
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
-            String storageName, String fileSystemType, String accountName, boolean attachedCluster, Workspace workspace) {
+            String storageName, String fileSystemType, String accountName, boolean attachedCluster, Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
         String blueprintText = blueprint.getBlueprintText();
         // Not necessarily the best way to figure out whether a DL or not. At the moment, DLs cannot be launched as

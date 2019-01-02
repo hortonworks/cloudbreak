@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.workspace;
 
-import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.DELETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus.DELETED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_READ;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.WORKSPACE_MANAGE;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -56,7 +56,7 @@ public class WorkspaceService {
     private WorkspaceModificationVerifierService verifierService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public Workspace create(User user, Workspace workspace) {
         try {
@@ -145,11 +145,11 @@ public class WorkspaceService {
         }
     }
 
-    public Set<User> addUsers(String workspaceName, Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJsons, User currentUser) {
+    public Set<User> addUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
         verifierService.authorizeWorkspaceManipulation(currentUser, workspace, Action.INVITE,
                 "You cannot add users to this workspace.");
-        Map<User, Set<String>> usersToAddWithPermissions = workspaceUserPermissionJsonSetToMap(changeWorkspaceUsersJsons);
+        Map<User, Set<String>> usersToAddWithPermissions = workspaceUserPermissionJsonSetToMap(changeWorkspaceUsersV4Requests);
         verifierService.validateUsersAreNotInTheWorkspaceYet(workspace, usersToAddWithPermissions.keySet());
         try {
             return transactionService.required(() -> {
@@ -172,7 +172,7 @@ public class WorkspaceService {
         }
     }
 
-    public Set<User> updateUsers(String workspaceName, Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJsons, User currentUser) {
+    public Set<User> updateUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> updateWorkspaceUsersJsons, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
         verifierService.authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE,
                 "You cannot modify the users in this workspace.");
@@ -207,7 +207,7 @@ public class WorkspaceService {
         return workspace.orElseThrow(() -> new NotFoundException("Cannot find workspace with name: " + workspaceName));
     }
 
-    public Set<User> changeUsers(String workspaceName, Set<ChangeWorkspaceUsersJson> newUserPermissions, User currentUser) {
+    public Set<User> changeUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> newUserPermissions, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
         verifierService.authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE,
                 "You cannot modify the users in this workspace.");
@@ -219,7 +219,7 @@ public class WorkspaceService {
                 Map<String, User> newUsers = userService.getByUsersIds(getUserIds(newUserPermissions)).stream()
                         .collect(Collectors.toMap(User::getUserId, user -> user));
                 Map<String, Set<String>> newPermissions = newUserPermissions.stream()
-                        .collect(Collectors.toMap(ChangeWorkspaceUsersJson::getUserId, ChangeWorkspaceUsersJson::getPermissions));
+                        .collect(Collectors.toMap(ChangeWorkspaceUsersV4Request::getUserId, ChangeWorkspaceUsersV4Request::getPermissions));
                 Map<String, User> oldUsers = oldPermissions.stream().map(UserWorkspacePermissions::getUser)
                         .collect(Collectors.toMap(User::getUserId, user -> user));
 
@@ -286,8 +286,8 @@ public class WorkspaceService {
         userWorkspacePermissionsService.saveAll(userPermissionsToAdd);
     }
 
-    private Set<String> getUserIds(Set<ChangeWorkspaceUsersJson> userPermissions) {
-        return userPermissions.stream().map(ChangeWorkspaceUsersJson::getUserId).collect(Collectors.toSet());
+    private Set<String> getUserIds(Set<ChangeWorkspaceUsersV4Request> userPermissions) {
+        return userPermissions.stream().map(ChangeWorkspaceUsersV4Request::getUserId).collect(Collectors.toSet());
     }
 
     public Workspace deleteByNameForUser(String workspaceName, User currentUser, Workspace defaultWorkspace) {
@@ -309,13 +309,19 @@ public class WorkspaceService {
         }
     }
 
-    private Map<User, Set<String>> workspaceUserPermissionJsonSetToMap(Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJsons) {
+    private Map<User, Set<String>> workspaceUserPermissionJsonSetToMap(Set<ChangeWorkspaceUsersV4Request> updateWorkspaceUsersJsons) {
         return updateWorkspaceUsersJsons.stream()
-                .collect(Collectors.toMap(json -> userService.getByUserId(json.getUserId()), ChangeWorkspaceUsersJson::getPermissions));
+                .collect(Collectors.toMap(json -> userService.getByUserId(json.getUserId()), ChangeWorkspaceUsersV4Request::getPermissions));
     }
 
     private void setupDeletionDateAndFlag(Workspace workspaceForDelete) {
         workspaceForDelete.setStatus(DELETED);
         workspaceForDelete.setDeletionTimestamp(Calendar.getInstance().getTimeInMillis());
+    }
+
+    public Workspace getForCurrentUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        return get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
     }
 }

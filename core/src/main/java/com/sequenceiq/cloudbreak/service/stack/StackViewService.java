@@ -18,4 +18,8 @@ public class StackViewService {
     public Optional<StackView> findById(Long id) {
         return stackViewRepository.findById(id);
     }
+
+    public StackView findByName(String name, Long workspaceId) {
+        return stackViewRepository.findByNameAndWorkspaceId(name, workspaceId);
+    }
 }

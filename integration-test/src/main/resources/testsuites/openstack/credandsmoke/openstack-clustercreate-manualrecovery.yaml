@@ -61,7 +61,7 @@ tests:
       clusterName: it-openstack-rec-mr
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: manual recovery with repair
     parameters:

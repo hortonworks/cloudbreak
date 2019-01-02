@@ -25,9 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
@@ -74,8 +74,8 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void shouldReturnTheNextFailureTransition() {
-        InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
-        HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
         instanceIdsByHostgroup.put("hostrgroup", Collections.singleton(1L));
 
@@ -167,7 +167,7 @@ public class ReactorFlowManagerTest {
         stack.getCluster().setStatus(Status.MAINTENANCE_MODE_ENABLED);
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
 
-        InstanceGroupAdjustmentJson instGroupAdjustment = new InstanceGroupAdjustmentJson();
+        InstanceGroupAdjustmentV4Request instGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         try {
             underTest.triggerStackUpscale(1L, instGroupAdjustment, false);
         } catch (CloudbreakApiException e) {

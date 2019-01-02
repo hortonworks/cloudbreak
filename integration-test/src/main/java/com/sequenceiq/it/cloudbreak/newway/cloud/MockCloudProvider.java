@@ -7,19 +7,23 @@ import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.MockInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.EntityCreationStrategy;
 import com.sequenceiq.it.cloudbreak.newway.PostCredentialWithNameFromMockStrategy;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class MockCloudProvider extends CloudProviderHelper {
@@ -65,6 +69,11 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    public StackEntity aValidAttachedStackRequest(String datalakeName) {
+        throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
+    }
+
+    @Override
     public String availabilityZone() {
         String availabilityZone = "eu-west-1a";
         String availabilityZoneParam = getTestParameter().get("mockAvailabilityZone");
@@ -73,7 +82,7 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
         return null;
     }
 
@@ -88,7 +97,7 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         return null;
     }
 
@@ -96,7 +105,7 @@ public class MockCloudProvider extends CloudProviderHelper {
         throw new NotImplementedException("Unimplemented operation!");
     }
 
-    public CloudStorageRequest fileSystemForDatalake() {
+    public CloudStorageV4Request fileSystemForDatalake() {
         throw new NotImplementedException("Unimplemented operation!");
     }
 
@@ -109,8 +118,8 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackAuthenticationRequest stackauth() {
-        StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackauth() {
+        StackAuthenticationV4Request stackauth = new StackAuthenticationV4Request();
 
         stackauth.setPublicKey("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLob"
                 + "pTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KV"
@@ -121,23 +130,30 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public TemplateV2Request template() {
-        TemplateV2Request t = new TemplateV2Request();
+    public InstanceTemplateV4Request template() {
+        InstanceTemplateV4Request t = new InstanceTemplateV4Request();
         String instanceTypeDefaultValue = "large";
         String instanceTypeParam = getTestParameter().get("mockInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
+        t.setMock(new MockInstanceTemplateV4Parameters());
+
+        VolumeV4Request volume = new VolumeV4Request();
+
         int volumeCountDefault = 1;
         String volumeCountParam = getTestParameter().get("mockInstanceVolumeCount");
-        t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
+        volume.setCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
         int volumeSizeDefault = 100;
         String volumeSizeParam = getTestParameter().get("mockInstanceVolumeSize");
-        t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
+        volume.setSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
 
         String volumeTypeDefault = "magnetic";
         String volumeTypeParam = getTestParameter().get("mockInstanceVolumeType");
-        t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+        volume.setType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+
+        t.setAttachedVolumes(Set.of(volume));
+
         return t;
     }
 
@@ -148,8 +164,8 @@ public class MockCloudProvider extends CloudProviderHelper {
         return clustername;
     }
 
-    public StackAuthenticationRequest stackAuthentication() {
-        StackAuthenticationRequest stackAuthentication = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackAuthentication() {
+        StackAuthenticationV4Request stackAuthentication = new StackAuthenticationV4Request();
         stackAuthentication.setPublicKeyId("aszegedi");
         return stackAuthentication;
     }
@@ -224,35 +240,41 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public NetworkV2Request newNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request newNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
         return network;
     }
 
     @Override
-    public NetworkV2Request existingNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request existingNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(networkProperties());
+        MockNetworkV4Parameters parameters = new MockNetworkV4Parameters();
+        parameters.setInternetGatewayId(getInternetGatewayId());
+        parameters.setVpcId(getVpcId());
+        network.setMock(parameters);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingSubnet() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setParameters(subnetProperties());
+    public NetworkV4Request existingSubnet() {
+        NetworkV4Request network = new NetworkV4Request();
+        MockNetworkV4Parameters parameters = new MockNetworkV4Parameters();
+        parameters.setSubnetId(getSubnetId());
+        parameters.setVpcId(getVpcId());
+        network.setMock(parameters);
         return network;
     }
 
-    private S3CloudStorageParameters s3CloudStorage() {
-        S3CloudStorageParameters s3 = new S3CloudStorageParameters();
+    private S3CloudStorageV4Parameters s3CloudStorage() {
+        S3CloudStorageV4Parameters s3 = new S3CloudStorageV4Parameters();
         s3.setInstanceProfile(getTestParameter().get("NN_AWS_INSTANCE_PROFILE"));
         return s3;
     }
 
-    private Set<StorageLocationRequest> defaultDatalakeStorageLocationsForProvider(String clusterName) {
-        Set<StorageLocationRequest> request = new LinkedHashSet<>(2);
+    private Set<StorageLocationV4Request> defaultDatalakeStorageLocationsForProvider(String clusterName) {
+        Set<StorageLocationV4Request> request = new LinkedHashSet<>(2);
         request.add(createLocation(
                 String.format("s3a://%s/%s/apps/hive/warehouse", getTestParameter().get("NN_AWS_S3_BUCKET_NAME"), clusterName),
                 "hive-site",
@@ -264,8 +286,8 @@ public class MockCloudProvider extends CloudProviderHelper {
         return request;
     }
 
-    protected StorageLocationRequest createLocation(String value, String propertyFile, String propertyName) {
-        StorageLocationRequest location = new StorageLocationRequest();
+    protected StorageLocationV4Request createLocation(String value, String propertyFile, String propertyName) {
+        StorageLocationV4Request location = new StorageLocationV4Request();
         location.setValue(value);
         location.setPropertyFile(propertyFile);
         location.setPropertyName(propertyName);

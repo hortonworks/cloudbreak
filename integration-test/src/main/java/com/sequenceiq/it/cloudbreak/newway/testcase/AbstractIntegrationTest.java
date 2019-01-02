@@ -23,8 +23,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.Environment;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
@@ -44,13 +47,13 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContextTests {
 
-    public static final Map<String, String> STACK_DELETED = Map.of("status", "DELETE_COMPLETED");
+    public static final Map<String, Status> STACK_DELETED = Map.of("status", Status.DELETE_COMPLETED);
 
-    protected static final Map<String, String> STACK_AVAILABLE = Map.of("status", "AVAILABLE", "clusterStatus", "AVAILABLE");
+    protected static final Map<String, Status> STACK_AVAILABLE = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.AVAILABLE);
 
-    protected static final Map<String, String> STACK_FAILED = Map.of("status", "AVAILABLE", "clusterStatus", "CREATE_FAILED");
+    protected static final Map<String, Status> STACK_FAILED = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.CREATE_FAILED);
 
-    protected static final Map<String, String> STACK_STOPPED = Map.of("status", "STOPPED", "clusterStatus", "STOPPED");
+    protected static final Map<String, Status> STACK_STOPPED = Map.of("status", Status.STOPPED, "clusterStatus", Status.STOPPED);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -103,6 +106,11 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return nameGenerator;
     }
 
+    protected void createDefaultEnvironment(TestContext testContext) {
+        testContext.given(EnvironmentEntity.class)
+                .when(Environment::post);
+    }
+
     protected void createDefaultCredential(TestContext testContext) {
         testContext.given(CredentialEntity.class)
                 .when(new CredentialCreateAction());
@@ -152,13 +160,14 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void initializeDefaultBlueprints(TestContext testContext) {
         testContext
-                .given(BlueprintEntity.class)
+                .init(BlueprintEntity.class)
                 .when(new BlueprintGetListAction());
     }
 
     protected void minimalSetupForClusterCreation(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }

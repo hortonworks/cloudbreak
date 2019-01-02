@@ -10,12 +10,12 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = AmbariRepoValidator.class)
+@Constraint(validatedBy = AmbariRepositoryV4Validator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidAmbariRepo {
 
-    String message() default "Ambari version is not valid. Only " + AmbariRepoValidator.MIN_AMBARI_VERSION + " and later versions are supported";
+    String message() default "Ambari version is not valid. Only " + AmbariRepositoryV4Validator.MIN_AMBARI_VERSION + " and later versions are supported";
 
     Class<?>[] groups() default { };
 

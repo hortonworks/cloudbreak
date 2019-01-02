@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
-import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.GATEWAY;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -88,7 +87,8 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
             String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
-                if (hostGroup.isInstanceGroupConfigured() && GATEWAY.equals(hostGroup.getInstanceGroupType()) && hostGroup.getNodeCount().equals(1)) {
+                if (hostGroup.isInstanceGroupConfigured() && InstanceGroupType.GATEWAY.equals(hostGroup.getInstanceGroupType())
+                        && hostGroup.getNodeCount().equals(1)) {
                     aHostGroupName = hostGroup.getName();
                     singleNodeGatewayFound = true;
                     break;

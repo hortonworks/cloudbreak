@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,16 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -50,9 +43,6 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private AmbariClientFactory ambariClientFactory;
-
-    @Inject
-    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Inject
     private KerberosConfigProvider kerberosConfigProvider;
@@ -81,43 +71,28 @@ public class SharedServiceConfigProvider {
         return requestedCluster;
     }
 
-    public boolean isConfigured(@Nonnull ClusterV2Request clusterV2Request) {
-        return clusterV2Request.getSharedService() != null && !Strings.isNullOrEmpty(clusterV2Request.getSharedService().getSharedCluster());
-    }
-
     public Stack prepareDatalakeConfigs(Stack publicStack) {
         try {
             AmbariClient ambariClient = null;
             Optional<DatalakeResources> datalakeResource = Optional.empty();
-            if (!CollectionUtils.isEmpty(publicStack.getEnvironment().getDatalakeResources())
-                    && publicStack.getEnvironment().getDatalakeResources().size() == 1) {
-                datalakeResource = datalakeResourcesRepository.findById(publicStack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
+            if (publicStack.getDatalakeResourceId() != null || (!CollectionUtils.isEmpty(publicStack.getEnvironment().getDatalakeResources())
+                    && publicStack.getEnvironment().getDatalakeResources().size() == 1)) {
+                Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack);
+                datalakeResource = datalakeResourcesRepository.findById(datalakeResourceId);
                 if (credentialPrerequisiteService.isCumulusCredential(publicStack.getCredential().getAttributes())) {
                     ambariClient = credentialPrerequisiteService.createCumulusAmbariClient(publicStack.getCredential().getAttributes());
                 }
             }
-            Long datalakeId = getDatalakeId(publicStack, datalakeResource);
-            if (datalakeId != null) {
-                Stack datalakeStack = stackService.getById(datalakeId);
+            Long datalakeStackId = getDatalakeStackId(publicStack, datalakeResource);
+            if (datalakeStackId != null) {
+                Stack datalakeStack = stackService.getById(datalakeStackId);
                 ambariClient = ambariClientFactory.getAmbariClient(datalakeStack, datalakeStack.getCluster());
                 if (!datalakeResource.isPresent()) {
-                    datalakeResource = Optional.of(datalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, ambariClient));
+                    datalakeResource = Optional.of(
+                            datalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, datalakeStack.getCluster(), ambariClient));
                 }
             }
-            if (datalakeResource.isPresent() && ambariClient != null) {
-                DatalakeResources datalakeResources = datalakeResource.get();
-                publicStack.setDatalakeResourceId(datalakeResources.getId());
-                Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
-                Map<String, String> blueprintConfigParams =
-                        datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, ambariClient);
-                StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
-                stackInputs.setDatalakeInputs((Map) blueprintConfigParams);
-                stackInputs.setFixInputs((Map) additionalParams);
-                try {
-                    publicStack.setInputs(new Json(stackInputs));
-                } catch (JsonProcessingException e) {
-                    throw new BadRequestException("An error occured under the stackinput persistence which cause a stack creation problem", e);
-                }
+            if (decorateStackWithConfigs(publicStack, ambariClient, datalakeResource)) {
                 return stackService.save(publicStack);
             }
             return publicStack;
@@ -127,31 +102,33 @@ public class SharedServiceConfigProvider {
         }
     }
 
-    private Long getDatalakeId(Stack publicStack, Optional<DatalakeResources> datalakeResource) {
-        Long datalakeId;
-        if (publicStack.getDatalakeId() != null) {
-            datalakeId = publicStack.getDatalakeId();
-        } else {
-            datalakeId = datalakeResource.isPresent() ? datalakeResource.get().getDatalakeStackId() : null;
+    private boolean decorateStackWithConfigs(Stack publicStack, AmbariClient ambariClient, Optional<DatalakeResources> datalakeResource) throws IOException {
+        if (datalakeResource.isPresent() && ambariClient != null) {
+            DatalakeResources datalakeResources = datalakeResource.get();
+            publicStack.setDatalakeResourceId(datalakeResources.getId());
+            Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
+            Map<String, String> blueprintConfigParams =
+                    datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, ambariClient);
+            StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
+            stackInputs.setDatalakeInputs((Map) blueprintConfigParams);
+            stackInputs.setFixInputs((Map) additionalParams);
+            try {
+                publicStack.setInputs(new Json(stackInputs));
+            } catch (JsonProcessingException e) {
+                throw new BadRequestException("An error occured under the stackinput persistence which cause a stack creation problem", e);
+            }
+            return true;
         }
-        return datalakeId;
+        return false;
     }
 
-    public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
-        AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalake, datalake.getCluster());
-        String blueprintText = blueprint.getBlueprintText();
-        Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(blueprintText);
-        addDatalakeRequiredProperties(datalakeProperties);
-        Map<String, Object> results = new HashMap<>();
-        if (datalake.getAmbariIp() != null) {
-            Map<String, String> configs = ambariClient.getConfigValuesByConfigIds(Lists.newArrayList(datalakeProperties));
-            results.putAll(configs);
-        }
-        ConfigsResponse configsResponse = new ConfigsResponse();
-        configsResponse.setInputs(new HashSet<>());
-        configsResponse.setDatalakeInputs(results);
-        configsResponse.setFixInputs(prepareAdditionalInputParameters(datalake.getName(), stackName));
-        return configsResponse;
+    private Long getDatalakeResourceIdFromEnvOrStack(Stack publicStack) {
+        return publicStack.getDatalakeResourceId() != null
+                ? publicStack.getDatalakeResourceId() : publicStack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId();
+    }
+
+    private Long getDatalakeStackId(Stack publicStack, Optional<DatalakeResources> datalakeResource) {
+        return datalakeResource.isPresent() ? datalakeResource.get().getDatalakeStackId() : null;
     }
 
     private void addDatalakeRequiredProperties(Set<String> datalakeProperties) {
@@ -181,7 +158,7 @@ public class SharedServiceConfigProvider {
             requestedCluster.getRdsConfigs().addAll(
                     datalakeResources.getRdsConfigs()
                             .stream()
-                            .filter(rdsConfig -> ResourceStatus.DEFAULT != rdsConfig.getStatus())
+                            .filter(rdsConfig -> ResourceStatus.USER_MANAGED == rdsConfig.getStatus())
                             .collect(toSet()));
         }
     }

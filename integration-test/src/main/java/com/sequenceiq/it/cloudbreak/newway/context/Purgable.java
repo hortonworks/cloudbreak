@@ -10,5 +10,5 @@ public interface Purgable<T> extends Orderable {
 
     boolean deletable(T entity);
 
-    void delete(T entity, CloudbreakClient client);
+    void delete(TestContext testContext, T entity, CloudbreakClient client);
 }

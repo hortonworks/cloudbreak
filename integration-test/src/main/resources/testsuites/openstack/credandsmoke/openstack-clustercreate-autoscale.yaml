@@ -61,7 +61,7 @@ tests:
       clusterName: it-openstack-cred-as
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: auto scaling with add node policy based on prometheus alert
     parameters:

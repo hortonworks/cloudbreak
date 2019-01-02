@@ -11,17 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariInfoMapper;
-import com.sequenceiq.cloudbreak.converter.mapper.StackInfoMapper;
 
 @Service
 public class StackMatrixService {
@@ -38,52 +37,49 @@ public class StackMatrixService {
     private DefaultAmbariRepoService defaultAmbariRepoService;
 
     @Inject
-    private StackInfoMapper stackInfoMapper;
+    private ConverterUtil converterUtil;
 
-    @Inject
-    private AmbariInfoMapper ambariInfoMapper;
-
-    public StackMatrix getStackMatrix() {
+    public StackMatrixV4Response getStackMatrix() {
         Map<String, DefaultHDFInfo> hdfEntries = defaultHDFEntries.getEntries();
         Map<String, DefaultHDPInfo> hdpEntries = defaultHDPEntries.getEntries();
-        StackMatrix stackMatrix = new StackMatrix();
+        StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
 
-        Map<String, StackDescriptor> hdfStackDescriptors = new HashMap<>();
+        Map<String, StackDescriptorV4Response> hdfStackDescriptors = new HashMap<>();
         for (Map.Entry<String, DefaultHDFInfo> defaultHDFInfoEntry : hdfEntries.entrySet()) {
             DefaultHDFInfo defaultHDFInfo = defaultHDFInfoEntry.getValue();
-            StackDescriptor stackDescriptor = getStackDescriptor(defaultHDFInfo);
-            hdfStackDescriptors.put(defaultHDFInfoEntry.getKey(), stackDescriptor);
+            StackDescriptorV4Response stackDescriptorV4 = getStackDescriptor(defaultHDFInfo);
+            hdfStackDescriptors.put(defaultHDFInfoEntry.getKey(), stackDescriptorV4);
         }
 
-        Map<String, StackDescriptor> hdpStackDescriptors = new HashMap<>();
+        Map<String, StackDescriptorV4Response> hdpStackDescriptors = new HashMap<>();
         for (Map.Entry<String, DefaultHDPInfo> defaultHDPInfoEntry : hdpEntries.entrySet()) {
             DefaultHDPInfo defaultHDPInfo = defaultHDPInfoEntry.getValue();
-            StackDescriptor stackDescriptor = getStackDescriptor(defaultHDPInfo);
-            hdpStackDescriptors.put(defaultHDPInfoEntry.getKey(), stackDescriptor);
+            StackDescriptorV4Response stackDescriptorV4 = getStackDescriptor(defaultHDPInfo);
+            hdpStackDescriptors.put(defaultHDPInfoEntry.getKey(), stackDescriptorV4);
         }
 
-        stackMatrix.setHdf(hdfStackDescriptors);
-        stackMatrix.setHdp(hdpStackDescriptors);
-        return stackMatrix;
+        stackMatrixV4Response.setHdf(hdfStackDescriptors);
+        stackMatrixV4Response.setHdp(hdpStackDescriptors);
+        return stackMatrixV4Response;
     }
 
     public Set<String> getSupportedOperatingSystems(String clusterType, String clusterVersion) {
-        StackDescriptor stackDescriptor = getStackDescriptor(clusterType, clusterVersion);
+        StackDescriptorV4Response stackDescriptor = getStackDescriptor(clusterType, clusterVersion);
         if (stackDescriptor != null) {
-            return stackDescriptor.getAmbari().getRepo().keySet();
+            return stackDescriptor.getAmbari().getRepository().keySet();
         } else {
             return Collections.emptySet();
         }
     }
 
-    public StackDescriptor getStackDescriptor(String clusterType, String clusterVersion) {
-        StackMatrix stackMatrix = getStackMatrix();
-        Map<String, StackDescriptor> stackDescriptorMap = getStackDescriptorMap(clusterType, stackMatrix, true);
+    public StackDescriptorV4Response getStackDescriptor(String clusterType, String clusterVersion) {
+        StackMatrixV4Response stackMatrix = getStackMatrix();
+        Map<String, StackDescriptorV4Response> stackDescriptorMap = getStackDescriptorMap(clusterType, stackMatrix, true);
         return stackDescriptorMap.get(clusterVersion);
     }
 
-    public Map<String, StackDescriptor> getStackDescriptorMap(String clusterType, StackMatrix stackMatrix, boolean fallbackToHDP) {
-        Map<String, StackDescriptor> stackDescriptorMap = null;
+    public Map<String, StackDescriptorV4Response> getStackDescriptorMap(String clusterType, StackMatrixV4Response stackMatrix, boolean fallbackToHDP) {
+        Map<String, StackDescriptorV4Response> stackDescriptorMap = null;
         switch (clusterType) {
             case "HDP":
                 stackDescriptorMap = stackMatrix.getHdp();
@@ -101,12 +97,12 @@ public class StackMatrixService {
         return stackDescriptorMap;
     }
 
-    private StackDescriptor getStackDescriptor(StackInfo stackInfo) {
+    private StackDescriptorV4Response getStackDescriptor(StackInfo stackInfo) {
         Map<String, AmbariInfo> ambariInfoEntries = defaultAmbariRepoService.getEntries();
-        StackDescriptor stackDescriptor = stackInfoMapper.mapStackInfoToStackDescriptor(stackInfo, stackInfo.getRepo().getMpacks());
-        AmbariInfo ambariInfo = ambariInfoEntries.getOrDefault(stackDescriptor.getMinAmbari(), new AmbariInfo());
-        AmbariInfoJson ambariInfoJson = ambariInfoMapper.mapAmbariInfoToAmbariInfoJson(ambariInfo);
-        stackDescriptor.setAmbari(ambariInfoJson);
-        return stackDescriptor;
+        StackDescriptorV4Response stackDescriptorV4 = converterUtil.convert(stackInfo, StackDescriptorV4Response.class);
+        AmbariInfo ambariInfo = ambariInfoEntries.getOrDefault(stackDescriptorV4.getMinAmbari(), new AmbariInfo());
+        AmbariInfoV4Response ambariInfoJson = converterUtil.convert(ambariInfo, AmbariInfoV4Response.class);
+        stackDescriptorV4.setAmbari(ambariInfoJson);
+        return stackDescriptorV4;
     }
 }

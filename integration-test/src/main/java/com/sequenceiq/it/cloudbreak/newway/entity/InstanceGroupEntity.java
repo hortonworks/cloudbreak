@@ -9,28 +9,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV2Request, InstanceGroupResponse, InstanceGroupEntity> {
+public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV4Request, InstanceGroupV4Response, InstanceGroupEntity> {
 
     private static final String AUTO = "auto";
 
     private static final String MANUAL = "manual";
 
-    protected InstanceGroupEntity(InstanceGroupV2Request request, TestContext testContext) {
+    protected InstanceGroupEntity(InstanceGroupV4Request request, TestContext testContext) {
         super(request, testContext);
     }
 
     protected InstanceGroupEntity(TestContext testContext) {
-        super(new InstanceGroupV2Request(), testContext);
+        super(new InstanceGroupV4Request(), testContext);
     }
 
     public InstanceGroupEntity() {
@@ -38,8 +38,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
     }
 
     public InstanceGroupEntity valid() {
-        HostGroupType hostGroupType = MASTER;
-        return withHostGroup(hostGroupType);
+        return withHostGroup(MASTER);
     }
 
     public InstanceGroupEntity withHostGroup(HostGroupType hostGroupType) {
@@ -48,6 +47,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(getTestContext().init(SecurityGroupEntity.class))
                 .withType(hostGroupType.getInstanceGroupType())
+                .withName(hostGroupType.getName().toLowerCase())
                 .withTemplate(getCloudProvider().template(getTestContext()));
     }
 
@@ -73,6 +73,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(testContext.init(SecurityGroupEntity.class))
                 .withType(hostGroupType.getInstanceGroupType())
+                .withName(hostGroupType.getName().toLowerCase())
                 .withTemplate(entity.getCloudProvider().template(testContext));
     }
 
@@ -89,7 +90,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
     }
 
     public InstanceGroupEntity withGroup(String group) {
-        getRequest().setGroup(group);
+        getRequest().setName(group);
         return this;
     }
 
@@ -108,13 +109,18 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
         return this;
     }
 
-    public InstanceGroupEntity withTemplate(TemplateEntity template) {
+    public InstanceGroupEntity withTemplate(InstanceTemplateV4Entity template) {
         getRequest().setTemplate(template.getRequest());
         return this;
     }
 
     public InstanceGroupEntity withRecoveryMode(RecoveryMode recoveryMode) {
         getRequest().setRecoveryMode(recoveryMode);
+        return this;
+    }
+
+    public InstanceGroupEntity withName(String name) {
+        getRequest().setName(name);
         return this;
     }
 

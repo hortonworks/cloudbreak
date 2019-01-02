@@ -18,7 +18,7 @@ public class CloudbreakAuthorizationService {
 
     @Cacheable(cacheNames = "stackAccessByUserIdAndTenantCache")
     public void hasAccess(Long stackId, String userId, String tenant, String permission) {
-        if (!cloudbreakClient.autoscaleEndpoint().authorizeForAutoscale(stackId, userId, tenant, permission)) {
+        if (!cloudbreakClient.autoscaleEndpoint().authorizeForAutoscale(stackId, userId, tenant, permission).isSuccess()) {
             throw new AccessDeniedException(String.format("Accessing to stack '%s' is not allowed for '%s' in '%s'", stackId, userId, tenant));
         }
     }

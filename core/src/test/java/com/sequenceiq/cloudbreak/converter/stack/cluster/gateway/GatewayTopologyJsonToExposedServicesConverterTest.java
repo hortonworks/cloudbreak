@@ -12,10 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -34,11 +35,11 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
     private final ExposedServiceListValidator exposedServiceListValidator = new ExposedServiceListValidator();
 
     @InjectMocks
-    private final GatewayTopologyJsonToExposedServicesConverter underTest = new GatewayTopologyJsonToExposedServicesConverter();
+    private final GatewayTopologyV4RequestToExposedServicesConverter underTest = new GatewayTopologyV4RequestToExposedServicesConverter();
 
     @Test
     public void testWithAllServices() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList("ALL"));
 
@@ -49,7 +50,7 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
 
     @Test
     public void testWithInvalidExposedService() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList(INVALID));
         thrown.expect(BadRequestException.class);
@@ -60,7 +61,7 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
 
     @Test
     public void testWithSingleExposedService() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList(AMBARI));
 

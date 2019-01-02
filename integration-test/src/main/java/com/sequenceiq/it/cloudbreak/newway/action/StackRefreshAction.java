@@ -6,12 +6,12 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackRefreshAction implements ActionV2<StackEntity> {
+public class StackRefreshAction implements Action<StackEntity> {
 
     @Override
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
         entity.setResponse(
-                client.getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
+                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
         );
         return entity;
     }

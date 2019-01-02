@@ -10,7 +10,7 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static java.lang.String.format;
 
-public class RecipePostAction implements ActionV2<RecipeEntity> {
+public class RecipePostAction implements Action<RecipeEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipePostAction.class);
 
@@ -20,8 +20,8 @@ public class RecipePostAction implements ActionV2<RecipeEntity> {
         logJSON(LOGGER, format(" Recipe post request:%n"), entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
-                        .recipeV3Endpoint()
-                        .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
+                        .recipeV4Endpoint()
+                        .post(client.getWorkspaceId(), entity.getRequest()));
         logJSON(LOGGER, format(" Recipe created  successfully:%n"), entity.getResponse());
         log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
 

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +19,9 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.v2.mock.SuiteInitializerMock;
@@ -64,40 +65,44 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
     @Parameters("mockPort")
     public void initSuiteMap(ITestContext testContext, @Optional("9443") int mockPort) throws Exception {
         CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
 
-        if (cleanUpBeforeStart && isImageCatalogExists(cloudbreakClient.imageCatalogEndpoint(), MOCK_IMAGE_CATALOG_NAME)) {
-            cleanUpService.deleteImageCatalog(cloudbreakClient, MOCK_IMAGE_CATALOG_NAME);
+        if (cleanUpBeforeStart && isImageCatalogExists(cloudbreakClient.imageCatalogV4Endpoint(), MOCK_IMAGE_CATALOG_NAME, workspaceId)) {
+            cleanUpService.deleteImageCatalog(cloudbreakClient, MOCK_IMAGE_CATALOG_NAME, workspaceId);
         }
 
-        if (!isImageCatalogExists(cloudbreakClient.imageCatalogEndpoint(), MOCK_IMAGE_CATALOG_NAME)) {
+        if (!isImageCatalogExists(cloudbreakClient.imageCatalogV4Endpoint(), MOCK_IMAGE_CATALOG_NAME, workspaceId)) {
             SuiteInitializerMock suiteInitializerMock = (SuiteInitializerMock) applicationContext.getBean(SuiteInitializerMock.NAME, mockPort);
             suiteInitializerMock.mockImageCatalogResponse(itContext);
 
-            createMockImageCatalog(cloudbreakClient.imageCatalogEndpoint());
+            createMockImageCatalog(cloudbreakClient.imageCatalogV4Endpoint(), workspaceId);
 
             suiteInitializerMock.stop();
         }
     }
 
-    private boolean isImageCatalogExists(ImageCatalogV1Endpoint endpoint, String mockImageCatalogName) {
+    private boolean isImageCatalogExists(ImageCatalogV4Endpoint endpoint, String mockImageCatalogName, Long workspaceId) {
         try {
-            return endpoint.getByName(mockImageCatalogName, false) != null;
+            return endpoint.list(workspaceId)
+                    .getResponses()
+                    .stream()
+                    .anyMatch(imageCatalog -> StringUtils.equals(imageCatalog.getName(), mockImageCatalogName));
         } catch (ForbiddenException e) {
             return false;
         }
     }
 
-    private void createMockImageCatalog(ImageCatalogV1Endpoint endpoint) throws Exception {
-        ImageCatalogRequest imageCatalogRequest = new ImageCatalogRequest();
+    private void createMockImageCatalog(ImageCatalogV4Endpoint endpoint, Long workspaceId) throws Exception {
+        ImageCatalogV4Request imageCatalogRequest = new ImageCatalogV4Request();
         imageCatalogRequest.setName(MOCK_IMAGE_CATALOG_NAME);
         imageCatalogRequest.setUrl(imageCatalogUrl);
-        ImageCatalogResponse imageCatalogResponse = endpoint.postPublic(imageCatalogRequest);
+        ImageCatalogV4Response imageCatalogResponse = endpoint.create(workspaceId, imageCatalogRequest);
 
         if (imageCatalogResponse == null) {
             throw new IllegalArgumentException("ImageCatalog creation failed.");
         }
 
-        endpoint.putSetDefaultByName(MOCK_IMAGE_CATALOG_NAME);
+        endpoint.setDefault(workspaceId, MOCK_IMAGE_CATALOG_NAME);
     }
 
     @AfterSuite(alwaysRun = true)
@@ -105,7 +110,8 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
     public void cleanUp(@Optional("true") boolean cleanUp) {
         if (isCleanUpNeeded(cleanUp)) {
             CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-            cleanUpService.deleteImageCatalog(cloudbreakClient, MOCK_IMAGE_CATALOG_NAME);
+            Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+            cleanUpService.deleteImageCatalog(cloudbreakClient, MOCK_IMAGE_CATALOG_NAME, workspaceId);
         }
     }
 

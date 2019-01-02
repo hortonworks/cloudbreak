@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_TERMINATION;
 
 import java.util.Collections;
 import java.util.Set;
@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
