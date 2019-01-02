@@ -14,9 +14,9 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 
-public class CheckClusterTemplateFirstResponse implements AssertionV2<ClusterTemplateEntity> {
+public class CheckClusterTemplateGetResponse implements AssertionV2<ClusterTemplateEntity> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CheckClusterTemplateFirstResponse.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckClusterTemplateGetResponse.class);
 
     @Override
     public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {

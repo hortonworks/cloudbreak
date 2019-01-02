@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -62,7 +63,10 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
 
     @Override
     public Collection<ClusterTemplateResponse> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().clusterTemplateV3EndPoint().listByWorkspace(client.getWorkspaceId());
+        return ClusterTemplateUtil.getResponseFromViews(
+                client.getCloudbreakClient()
+                        .clusterTemplateV3EndPoint()
+                        .listByWorkspace(client.getWorkspaceId()));
     }
 
     @Override
