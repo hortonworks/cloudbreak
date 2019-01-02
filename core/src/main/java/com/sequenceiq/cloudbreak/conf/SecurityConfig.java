@@ -92,6 +92,8 @@ public class SecurityConfig {
 
         private static final String V3_API = API_ROOT_CONTEXT + "/v3/**";
 
+        private static final String V4_API = API_ROOT_CONTEXT + "/v4/**";
+
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
         @Inject
@@ -137,6 +139,8 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
                     .access("#oauth2.isOAuth()")
                     .antMatchers(V3_API)
+                    .access("#oauth2.isOAuth()")
+                    .antMatchers(V4_API)
                     .access("#oauth2.isOAuth()")
                     .antMatchers(AUTOSCALE_API)
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")

@@ -27,7 +27,7 @@ public interface AuditV3Endpoint {
     @GET
     @Path("event/{auditId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AuditOpDescription.GET_BY_ORG, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = OperationDescriptions.AuditOpDescription.GET_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventByWorkspace")
     AuditEvent getAuditEventByWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
 

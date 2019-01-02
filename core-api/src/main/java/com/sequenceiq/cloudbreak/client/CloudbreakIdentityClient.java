@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -83,6 +84,7 @@ public class CloudbreakIdentityClient {
             AccountPreferencesEndpoint.class,
             AuditEndpoint.class,
             AuditV3Endpoint.class,
+            AuditEventV4Endpoint.class,
             AutoscaleEndpoint.class,
             BlueprintEndpoint.class,
             BlueprintV3Endpoint.class,
@@ -184,6 +186,10 @@ public class CloudbreakIdentityClient {
 
     public AuditV3Endpoint auditV3Endpoint() {
         return getEndpoint(AuditV3Endpoint.class);
+    }
+
+    public AuditEventV4Endpoint auditV4Endpoint() {
+        return getEndpoint(AuditEventV4Endpoint.class);
     }
 
     public AutoscaleEndpoint autoscaleEndpoint() {

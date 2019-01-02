@@ -56,6 +56,9 @@ public class ControllerDescription {
     public static final String ENVIRONMENT_V3_DESCRIPTION = "Operations on environments.";
     public static final String KERBEROS_CONFIG_V3_DESCRIPTION = "Operations on kerberos configs.";
 
+    public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
+    public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
+
     private ControllerDescription() {
     }
 
