@@ -308,6 +308,15 @@ public class ModelDescriptions {
         public static final String DATALAKE_REQUIRED = "datalake required which this template is compatible with";
     }
 
+    public static class ClusterTemplateViewModelDescription {
+        public static final String TYPE = "type of the cluster template";
+        public static final String CLOUD_PLATFORM = "cloudplatform which this template is compatible with";
+        public static final String DATALAKE_REQUIRED = "datalake required which this template is compatible with";
+        public static final String NODE_COUNT = "node count of the cluster template";
+        public static final String STACK_TYPE = "stack type of cluster template";
+        public static final String STACK_VERSION = "stack version of cluster template";
+    }
+
     public static class ConnectorModelDescription {
         public static final String PLATFORM_VARIANTS = "platform variants";
         public static final String DEFAULT_VARIANTS = "default variants";
