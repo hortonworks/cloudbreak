@@ -59,9 +59,12 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private VmRecommendations vmRecommendations;
 
+    private String prerequisitesCreationCommand;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
+        prerequisitesCreationCommand = resourceDefinition("prerequisites-creation-command");
     }
 
     @Override
@@ -134,13 +137,16 @@ public class GcpPlatformParameters implements PlatformParameters {
         return vmRecommendations;
     }
 
+    public String getPrerequisitesCreationCommand() {
+        return prerequisitesCreationCommand;
+    }
+
     public enum GcpDiskType {
         SSD("pd-ssd", "Solid-state persistent disks (SSD)"),
         HDD("pd-standard", "Standard persistent disks (HDD)");
 
         private final String value;
         private final String displayName;
-
         GcpDiskType(String value, String displayName) {
             this.value = value;
             this.displayName = displayName;
@@ -165,6 +171,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         public String getUrl(String projectId, AvailabilityZone zone) {
             return getUrl(projectId, zone, value);
         }
+
     }
 
     private VmRecommendations initVmRecommendations() {

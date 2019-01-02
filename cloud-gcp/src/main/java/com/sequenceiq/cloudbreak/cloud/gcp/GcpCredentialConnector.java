@@ -5,14 +5,18 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.gson.JsonParser;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -29,6 +33,9 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Inject
     private GcpCredentialVerifier gcpCredentialVerifier;
+
+    @Inject
+    private GcpPlatformParameters gcpPlatformParameters;
 
     @Override
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext) {
@@ -54,6 +61,13 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus delete(@Nonnull AuthenticatedContext authenticatedContext) {
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.DELETED);
+    }
+
+    @Override
+    public CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+        String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand();
+        GcpCredentialPrerequisites gcpPrereqs = new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()));
+        return new CredentialPrerequisites(cloudContext.getPlatform().value(), gcpPrereqs);
     }
 
     /**
