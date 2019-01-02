@@ -42,9 +42,9 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
   it "Cluster - Create - Without Name" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.cluster.create.name("").cli_input_json(@cli_input_json).build(false) 
+      result = cb.cluster.create.name("\"\"").cli_input_json(@cli_input_json).build(false)
       expect(result.exit_status).to eql 1
-      expect(result.stderr).to include("missing")    
+      expect(result.stderr).to include("Name of the cluster must be set either in the template or with the --name command line option")
     end
   end
 

@@ -1195,10 +1195,10 @@ func OptionalFlags(flags []cli.Flag) []cli.Flag {
 }
 
 func CheckRequiredFlagsAndArguments(c *cli.Context) error {
-	if err := checkRequiredFlags(c); err != nil {
+	if err := argumentsNotAllowed(c); err != nil {
 		return err
 	}
-	return argumentsNotAllowed(c)
+	return checkRequiredFlags(c)
 }
 
 func checkRequiredFlags(c *cli.Context) error {
@@ -1218,10 +1218,11 @@ func checkRequiredFlags(c *cli.Context) error {
 func argumentsNotAllowed(c *cli.Context) error {
 	args := c.Args()
 	if len(args) > 0 {
-		utils.LogErrorMessage(fmt.Sprintf("Argument %q is not allowed for this command", args.Get(0)))
+		msg := fmt.Sprintf("Argument %q is not allowed for this command. If you've specified a parameter for a logical "+
+			"(true/false) flag please remove it or use flag=true/false format.", args.Get(0))
+		utils.LogErrorMessage(msg)
 		return fmt.Errorf("no allowed argument")
 	}
-
 	return nil
 }
 
