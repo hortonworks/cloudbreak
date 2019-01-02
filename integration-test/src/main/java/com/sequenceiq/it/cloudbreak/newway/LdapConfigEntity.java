@@ -5,19 +5,20 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest, LdapConfigResponse, LdapConfigEntity> implements Purgable<LdapConfigResponse> {
+public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, LdapV4Response, LdapConfigEntity> implements Purgable<LdapV4Response> {
     public static final String LDAP_CONFIG = "LDAP_CONFIG";
 
     public LdapConfigEntity(String newId) {
         super(newId);
-        setRequest(new LdapConfigRequest());
+        setRequest(new LdapV4Request());
     }
 
     public LdapConfigEntity() {
@@ -25,14 +26,14 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest
     }
 
     public LdapConfigEntity(TestContext testContext) {
-        super(new LdapConfigRequest(), testContext);
+        super(new LdapV4Request(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().ldapConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+            cloudbreakClient.getCloudbreakClient().ldapConfigV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend.");
         }
@@ -59,7 +60,7 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest
                 .withUserDnPattern("userDnPattern");
     }
 
-    public LdapConfigEntity withRequest(LdapConfigRequest request) {
+    public LdapConfigEntity withRequest(LdapV4Request request) {
         setRequest(request);
         return this;
     }
@@ -131,12 +132,12 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest
     }
 
     public LdapConfigEntity withServerPort(Integer serverPort) {
-        getRequest().setServerPort(serverPort);
+        getRequest().setPort(serverPort);
         return this;
     }
 
     public LdapConfigEntity withServerHost(String serverHost) {
-        getRequest().setServerHost(serverHost);
+        getRequest().setHost(serverHost);
         return this;
     }
 
@@ -156,22 +157,23 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapConfigRequest
     }
 
     @Override
-    public List<LdapConfigResponse> getAll(CloudbreakClient client) {
-        LdapConfigV3Endpoint ldapConfigV3Endpoint = client.getCloudbreakClient().ldapConfigV3Endpoint();
-        return ldapConfigV3Endpoint.listConfigsByWorkspace(client.getWorkspaceId(), null, null).stream()
+    public List<LdapV4Response> getAll(CloudbreakClient client) {
+        LdapConfigV4Endpoint ldapConfigV4Endpoint = client.getCloudbreakClient().ldapConfigV4Endpoint();
+        return ldapConfigV4Endpoint.list(client.getWorkspaceId(), new ListV4Filter()).getResponses()
+                .stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public boolean deletable(LdapConfigResponse entity) {
+    public boolean deletable(LdapV4Response entity) {
         return entity.getName().startsWith("mock-");
     }
 
     @Override
-    public void delete(LdapConfigResponse entity, CloudbreakClient client) {
+    public void delete(LdapV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().ldapConfigV3Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName());
+            client.getCloudbreakClient().ldapConfigV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
         }

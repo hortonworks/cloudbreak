@@ -5,15 +5,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -241,35 +241,6 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 
-    @DataProvider(name = "providernameblueprintimage")
-    public Object[][] providerAndImage() throws Exception {
-        String blueprint = getTestParameter().get("blueprintName");
-        String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        //String imageCatalog = getTestParameter().get("imageCatalog");
-        String clusterName = getTestParameter().get("clusterName");
-        String image = getImageId(provider, imageDescription, blueprint);
-        return new Object[][]{
-                {cloudProvider, clusterName, blueprint, image}
-        };
-    }
-
-    @DataProvider(name = "providernameblueprintimagekerberos")
-    public Object[][] providerAndImageAndKerberos() throws Exception {
-        String blueprint = getTestParameter().get("blueprintName");
-        String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        //String imageCatalog = getTestParameter().get("imageCatalog");
-        String clusterName = getTestParameter().get("clusterName");
-        String image = getImageId(provider, imageDescription, blueprint);
-        Boolean enableKerberos = Boolean.valueOf(getTestParameter().get("enableKerberos"));
-        return new Object[][]{
-                {cloudProvider, clusterName, blueprint, image, enableKerberos, imageDescription}
-        };
-    }
-
     @DataProvider(name = "providernameblueprintimageos")
     public Object[][] providerAndImageOs() {
         String blueprint = getTestParameter().get("blueprintName");
@@ -314,30 +285,14 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         };
     }
 
-    private String getImageId(String provider, String imageDescription, String blueprintName) throws Exception {
-        given(CloudbreakClient.created());
-        CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
-        com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        BlueprintResponse blueprint = client.blueprintEndpoint().getPublic(blueprintName);
-        String stackVersion = new JSONObject(blueprint.getAmbariBlueprint())
-                .getJSONObject("Blueprints").getString("stack_version");
-        switch (imageDescription) {
-            case "hdf":
-                return getLastUuid(imagesByProvider.getHdfImages(), stackVersion);
-            case "hdp":
-                return getLastUuid(imagesByProvider.getHdpImages(), stackVersion);
-            default:
-                return getLastUuid(imagesByProvider.getBaseImages(), stackVersion);
-        }
-    }
-
     protected String getImageIdWithPkgVersions(String provider, String imageDescription) throws Exception {
         given(CloudbreakClient.created());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        List<? extends ImageResponse> images;
+        ImageCatalogGetImagesV4Filter filter = new ImageCatalogGetImagesV4Filter();
+        filter.setPlatform(provider);
+        ImagesV4Response imagesByProvider = client.imageCatalogV4Endpoint().getImages(clientContext.getWorkspaceId(), filter);
+        List<? extends ImageV4Response> images;
         switch (imageDescription) {
             case "hdf":
                 images = imagesByProvider.getHdfImages();
@@ -351,18 +306,21 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         }
 
         return images.stream().filter(imageResponse -> imageResponse.getPackageVersions() != null)
-                .max(Comparator.comparing(ImageResponse::getDate)).orElseThrow().getUuid();
+                .max(Comparator.comparing(ImageV4Response::getDate)).orElseThrow().getUuid();
     }
 
-    private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {
-        List<? extends ImageResponse> result = images.stream()
-                .filter(ImageResponse::isDefaultImage)
+    private String getLastUuid(List<? extends ImageV4Response> images, String stackVersion) {
+        List<? extends ImageV4Response> result = images.stream()
+                .filter(ImageV4Response::isDefaultImage)
                 .filter(image -> {
-                    ImageResponse imageResponse = (ImageResponse) image;
-                    if (imageResponse.getStackDetails() == null) {
+                    ImageV4Response imageV4Response = (ImageV4Response) image;
+                    if (!StringUtils.isEmpty(imageV4Response.getVersion())) {
+                        return imageV4Response.getVersion().startsWith(stackVersion);
+                    }
+                    if (imageV4Response.getStackDetails() == null) {
                         return true;
                     }
-                    if (imageResponse.getStackDetails().getVersion() == null) {
+                    if (imageV4Response.getStackDetails().getVersion() == null) {
                         return true;
                     }
                     return image.getStackDetails().getVersion().startsWith(stackVersion);
@@ -371,7 +329,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         if (result.isEmpty()) {
             result = images;
         }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(ImageV4Response::getDate)).collect(Collectors.toList());
         return result.get(result.size() - 1).getUuid();
     }
 

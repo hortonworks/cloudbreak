@@ -9,7 +9,7 @@ import org.mapstruct.Named;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -30,7 +30,7 @@ public interface AmbariDatabaseMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "stackVersion", ignore = true),
             @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)"),
-            @Mapping(target = "type", expression = "java(com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name())"),
+            @Mapping(target = "type", expression = "java(com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.AMBARI.name())"),
             @Mapping(target = "connectorJarUrl", ignore = true),
             @Mapping(target = "workspace", ignore = true),
             @Mapping(target = "environments", ignore = true)
@@ -45,7 +45,7 @@ public interface AmbariDatabaseMapper {
 
     @Named("name")
     default String mapName(@Context Stack stack, Cluster cluster) {
-        return stack == null ? RdsType.AMBARI.name() + "_CLUSTER_" + cluster.getId() : RdsType.AMBARI.name() + "_STACK_" + stack.getId();
+        return stack == null ? DatabaseType.AMBARI.name() + "_CLUSTER_" + cluster.getId() : DatabaseType.AMBARI.name() + "_STACK_" + stack.getId();
     }
 
     @Mapping(source = "ambariDatabase.vendor", target = "vendor", qualifiedByName = "vendor")

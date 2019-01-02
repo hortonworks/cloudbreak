@@ -24,19 +24,19 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.model.v2.AttachedClusterInfoResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -126,8 +126,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         setExtendedBlueprintText(source, clusterResponse);
         convertRdsConfigs(source, clusterResponse);
-        clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
-        clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
+        clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapV4Response.class));
+        clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4Response.class));
         convertCustomQueue(source, clusterResponse);
         convertNullableProperties(source, clusterResponse);
         convertContainerConfig(source, clusterResponse);
@@ -137,7 +137,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         decorateResponseWithProxyConfig(source, clusterResponse);
         addFilesystem(source, clusterResponse);
         addSharedServiceResponse(source, clusterResponse);
-        clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         return clusterResponse;
     }
 
@@ -221,7 +221,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private void convertRdsConfigs(Cluster source, ClusterResponse clusterResponse) {
         Set<RDSConfig> rdsConfigs = rdsConfigService.findUserManagedByClusterId(source.getId());
         for (RDSConfig rdsConfig : rdsConfigs) {
-            clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, RDSConfigResponse.class));
+            clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, DatabaseV4Response.class));
         }
     }
 
@@ -288,7 +288,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private void convertKerberosConfig(Cluster source, ClusterResponse clusterResponse) {
         KerberosConfig kerberosConfig = source.getKerberosConfig();
         if (kerberosConfig != null) {
-            clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
+            clusterResponse.setKerberosV4Response(getConversionService().convert(source.getKerberosConfig(), KerberosV4Response.class));
         }
     }
 

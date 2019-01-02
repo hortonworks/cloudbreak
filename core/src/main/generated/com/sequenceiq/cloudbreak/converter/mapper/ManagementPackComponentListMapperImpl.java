@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,28 +14,28 @@ import org.springframework.stereotype.Component;
 public class ManagementPackComponentListMapperImpl implements ManagementPackComponentListMapper {
 
     @Override
-    public List<ManagementPackEntry> mapManagementPackComponentMap(List<ManagementPackComponent> mpacks) {
+    public List<ManagementPackV4Entry> mapManagementPackComponentMap(List<ManagementPackComponent> mpacks) {
         if ( mpacks == null ) {
             return null;
         }
 
-        List<ManagementPackEntry> list = new ArrayList<ManagementPackEntry>( mpacks.size() );
+        List<ManagementPackV4Entry> list = new ArrayList<ManagementPackV4Entry>( mpacks.size() );
         for ( ManagementPackComponent managementPackComponent : mpacks ) {
-            list.add( managementPackComponentToManagementPackEntry( managementPackComponent ) );
+            list.add( managementPackComponentToManagementPackV4Entry( managementPackComponent ) );
         }
 
         return list;
     }
 
-    protected ManagementPackEntry managementPackComponentToManagementPackEntry(ManagementPackComponent managementPackComponent) {
+    protected ManagementPackV4Entry managementPackComponentToManagementPackV4Entry(ManagementPackComponent managementPackComponent) {
         if ( managementPackComponent == null ) {
             return null;
         }
 
-        ManagementPackEntry managementPackEntry = new ManagementPackEntry();
+        ManagementPackV4Entry managementPackV4Entry = new ManagementPackV4Entry();
 
-        managementPackEntry.setMpackUrl( managementPackComponent.getMpackUrl() );
+        managementPackV4Entry.setMpackUrl( managementPackComponent.getMpackUrl() );
 
-        return managementPackEntry;
+        return managementPackV4Entry;
     }
 }

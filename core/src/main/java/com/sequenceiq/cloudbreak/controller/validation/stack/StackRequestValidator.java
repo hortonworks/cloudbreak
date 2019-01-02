@@ -14,23 +14,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
-import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -53,9 +51,6 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     @Inject
     private StackRepository stackRepository;
-
-    @Inject
-    private PlatformParameterV1Controller parameterV1Controller;
 
     @Inject
     private CredentialService credentialService;
@@ -159,9 +154,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupRequest instanceGroupRequest, String credentialName,
             String region, ValidationResultBuilder validationBuilder) {
-        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
-        Credential cred = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
-        Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region);
+        Optional<PlatformEncryptionKeysV4Response> keys = Optional.empty();
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
             if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
@@ -172,17 +165,8 @@ public class StackRequestValidator implements Validator<StackRequest> {
         }
     }
 
-    private Optional<PlatformEncryptionKeysResponse> getEncryptionKeysWithExceptionHandling(Long id, String region) {
-        try {
-            return Optional.ofNullable(parameterV1Controller.getEncryptionKeys(getRequestForEncryptionKeys(id, region)));
-        } catch (RuntimeException ignore) {
-            return Optional.empty();
-        }
-    }
-
-    private PlatformResourceRequestJson getRequestForEncryptionKeys(Long credentialId, String region) {
-        PlatformResourceRequestJson request = new PlatformResourceRequestJson();
-        request.setCredentialId(credentialId);
+    private PlatformResourceV4Filter getRequestForEncryptionKeys(Long credentialId, String region) {
+        PlatformResourceV4Filter request = new PlatformResourceV4Filter();
         request.setRegion(region);
         return request;
     }
@@ -192,13 +176,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 .getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
         boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
-            Set<String> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
+            Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "
                     + "rds/database configuration to the Cluster request";
-            if (!rdsTypes.contains(RdsType.HIVE.name())) {
+            if (!databaseTypes.contains(DatabaseType.HIVE.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
             }
-            if (!rdsTypes.contains(RdsType.RANGER.name())) {
+            if (!databaseTypes.contains(DatabaseType.RANGER.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
             }
             if (isLdapNotProvided(stackRequest.getClusterRequest())) {

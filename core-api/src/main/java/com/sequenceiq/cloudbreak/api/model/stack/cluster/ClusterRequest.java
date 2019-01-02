@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -51,7 +51,7 @@ public class ClusterRequest implements JsonEntity {
     private String blueprintName;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintRequest blueprint;
+    private BlueprintV4Request blueprint;
 
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
@@ -87,7 +87,7 @@ public class ClusterRequest implements JsonEntity {
     private String ldapConfigName;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
-    private LdapConfigRequest ldapConfig;
+    private LdapV4Request ldapConfig;
 
     @TransformGetterType
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
@@ -120,7 +120,7 @@ public class ClusterRequest implements JsonEntity {
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
-    private Set<RDSConfigRequest> rdsConfigJsons = new HashSet<>();
+    private Set<DatabaseV4Request> rdsConfigJsons = new HashSet<>();
 
     @Valid
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
@@ -243,11 +243,11 @@ public class ClusterRequest implements JsonEntity {
         this.rdsConfigIds = rdsConfigIds;
     }
 
-    public Set<RDSConfigRequest> getRdsConfigJsons() {
+    public Set<DatabaseV4Request> getRdsConfigJsons() {
         return rdsConfigJsons;
     }
 
-    public void setRdsConfigJsons(Set<RDSConfigRequest> rdsConfigJsons) {
+    public void setRdsConfigJsons(Set<DatabaseV4Request> rdsConfigJsons) {
         this.rdsConfigJsons = rdsConfigJsons;
     }
 
@@ -328,19 +328,19 @@ public class ClusterRequest implements JsonEntity {
         this.kerberosConfigName = kerberosConfigName;
     }
 
-    public LdapConfigRequest getLdapConfig() {
+    public LdapV4Request getLdapConfig() {
         return ldapConfig;
     }
 
-    public void setLdapConfig(LdapConfigRequest ldapConfig) {
+    public void setLdapConfig(LdapV4Request ldapConfig) {
         this.ldapConfig = ldapConfig;
     }
 
-    public BlueprintRequest getBlueprint() {
+    public BlueprintV4Request getBlueprint() {
         return blueprint;
     }
 
-    public void setBlueprint(BlueprintRequest blueprint) {
+    public void setBlueprint(BlueprintV4Request blueprint) {
         this.blueprint = blueprint;
     }
 

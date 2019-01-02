@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -18,14 +18,14 @@ public class CheckStackTemplateAfterClusterTemplateCreation implements Assertion
 
     @Override
     public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
-        Optional<ClusterTemplateResponse> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
+        Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
 
-        ClusterTemplateResponse clusterTemplateResponse = first.get();
+        ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-        StackV2Request stackTemplate = clusterTemplateResponse.getStackTemplate();
+        StackV2Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
         if (stackTemplate == null) {
             throw new IllegalArgumentException("Stack template is empty");
         }

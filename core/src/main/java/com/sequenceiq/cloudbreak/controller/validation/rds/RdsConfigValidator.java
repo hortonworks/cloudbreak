@@ -10,8 +10,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -41,12 +41,12 @@ public class RdsConfigValidator {
             }
         }
         if (request.getRdsConfigJsons() != null) {
-            for (RDSConfigJson rdsConfig : request.getRdsConfigJsons()) {
+            for (DatabaseV4Base rdsConfig : request.getRdsConfigJsons()) {
                 increaseCount(rdsConfig.getType(), typeCountMap, multipleTypes);
             }
         }
         if (request.getAmbariDatabaseDetails() != null) {
-            increaseCount(RdsType.AMBARI.name(), typeCountMap, multipleTypes);
+            increaseCount(DatabaseType.AMBARI.name(), typeCountMap, multipleTypes);
         }
         if (!multipleTypes.isEmpty()) {
             throw new BadRequestException("Mutliple Rds are defined for the following types: "

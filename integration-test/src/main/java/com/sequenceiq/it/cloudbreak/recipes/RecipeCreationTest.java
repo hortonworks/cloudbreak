@@ -4,14 +4,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
+import org.testng.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -25,10 +25,10 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         if (!preScript.isEmpty()) {
-            createRecipe(name + "pre", preScript, RecipeType.POST_AMBARI_START, description);
+            createRecipe(name + "pre", preScript, RecipeV4Type.POST_CLUSTER_MANAGER_START, description);
         }
         if (!postScript.isEmpty()) {
-            createRecipe(name + "post", postScript, RecipeType.POST_CLUSTER_INSTALL, description);
+            createRecipe(name + "post", postScript, RecipeV4Type.POST_CLUSTER_INSTALL, description);
         }
     }
 
@@ -40,15 +40,17 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         itContext.putContextParam(CloudbreakITContextConstants.RECIPE_ID, recipeIds);
     }
 
-    private void createRecipe(String name, String script, RecipeType recipeType, String description) {
-        RecipeRequest recipeRequest = new RecipeRequest();
-        recipeRequest.setRecipeType(recipeType);
+    private void createRecipe(String name, String script, RecipeV4Type recipeType, String description) {
+        RecipeV4Request recipeRequest = new RecipeV4Request();
+        recipeRequest.setType(recipeType);
         recipeRequest.setName(name);
         recipeRequest.setContent(Base64.encodeBase64String(script.getBytes()));
         recipeRequest.setDescription(description);
 
-        RecipeEndpoint recipeEndpoint = getCloudbreakClient().recipeEndpoint();
-        Long id = recipeEndpoint.postPrivate(recipeRequest).getId();
+        RecipeV4Endpoint recipeEndpoint = getCloudbreakClient().recipeV4Endpoint();
+        // TOOD
+        Long workspaceId = 1L;
+        Long id = recipeEndpoint.post(workspaceId, recipeRequest).getId();
         //then
         Assert.assertNotNull(id, "Recipe is not created.");
         addRecipeToContext(id);

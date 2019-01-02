@@ -34,12 +34,12 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
@@ -127,8 +127,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(rdsConfigService.findByClusterId(anyLong())).willReturn(new HashSet<>());
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
-        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
-                .willReturn(new WorkspaceResourceResponse());
+        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
+                .willReturn(new WorkspaceResourceV4Response());
         given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
     }
 
@@ -150,7 +150,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "userName", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
                 "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers", "extendedBlueprintText",
-                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosResponse", "fileSystemResponse"));
+                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosV4Response", "fileSystemResponse"));
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockIterator.next()).willReturn(jsonNode);
-        given(conversionService.convert(any(RDSConfig.class), eq(RDSConfigJson.class))).willReturn(new RDSConfigRequest());
+        given(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Base.class))).willReturn(new DatabaseV4Request());
         given(conversionService.convert(any(Gateway.class), eq(GatewayJson.class))).willReturn(new GatewayJson());
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
         given(instanceGroup.getNotDeletedInstanceMetaDataSet()).willReturn(Sets.newHashSet(instanceMetaData));
@@ -240,8 +240,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(nameJsonNode.get(anyString())).willReturn(nameJsonNode);
         given(nameJsonNode.asText()).willReturn("dummyName");
         given(componentConfigProvider.getAmbariRepo(any(Set.class))).willReturn(null);
-        ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
-        proxyConfigResponse.setId(1L);
+        ProxyV4Response proxyV4Response = new ProxyV4Response();
+        proxyV4Response.setId(1L);
         given(serviceEndpointCollector.getAmbariServerUrl(any(), anyString())).willReturn("http://ambari.com");
         Map<String, Collection<ClusterExposedServiceResponse>> exposedServiceResponseMap = new HashMap<>();
         List<ClusterExposedServiceResponse> clusterExposedServiceResponseList = new ArrayList<>();

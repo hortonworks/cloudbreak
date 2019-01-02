@@ -13,11 +13,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
@@ -26,9 +24,6 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @Transactional(TxType.REQUIRED)
 @WorkspaceResourceType(resource = WorkspaceResource.CREDENTIAL)
 public interface CredentialRepository extends WorkspaceResourceRepository<Credential, Long> {
-
-    @CheckPermissionsByReturnValue
-    Set<Credential> findAllByCloudPlatform(@Param("cloudPlatform") String cloudPlatform);
 
     @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT c FROM Credential c WHERE c.workspace.id= :workspaceId AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms)")
@@ -44,6 +39,4 @@ public interface CredentialRepository extends WorkspaceResourceRepository<Creden
     Credential findActiveByIdAndWorkspaceFilterByPlatforms(@Param("id") Long id, @Param("workspaceId") Long workspaceId,
                     @Param("cloudPlatforms") Collection<String> cloudPlatforms);
 
-    @CheckPermissionsByReturnValue
-    Set<Credential> findByTopology(Topology topology);
 }

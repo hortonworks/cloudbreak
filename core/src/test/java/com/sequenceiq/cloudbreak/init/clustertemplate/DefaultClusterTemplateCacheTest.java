@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
@@ -75,7 +75,7 @@ public class DefaultClusterTemplateCacheTest {
         ClusterTemplate clusterTemplateAwsRanger = new ClusterTemplate();
         clusterTemplateAwsRanger.setName("cluster-template-aws-ranger");
 
-        when(converterUtil.convert(any(DefaultClusterTemplateRequest.class), eq(ClusterTemplate.class)))
+        when(converterUtil.convert(any(DefaultClusterTemplateV4Request.class), eq(ClusterTemplate.class)))
                 .thenReturn(clusterTemplate)
                 .thenReturn(clusterTemplate2)
                 .thenReturn(clusterTemplateAws)

@@ -59,7 +59,6 @@ public class GatewayTests extends CloudbreakTest {
     public void testGetGatewaysWithCredendtialId() throws Exception {
         given(cloudProvider.aValidCredential());
         given(Gateway.request()
-                .withCredentialId(credentialId)
                 .withCredentialName("")
                 .withRegion(cloudProvider.region()), "with credential id"
         );
@@ -81,7 +80,6 @@ public class GatewayTests extends CloudbreakTest {
     @Test
     public void testGetGatewaysWithAvZone() throws Exception {
         given(Gateway.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(cloudProvider.availabilityZone()), "with availability zone "
@@ -93,7 +91,6 @@ public class GatewayTests extends CloudbreakTest {
     @Test
     public void testGetGatewaysWithInvalidAvZone() throws Exception {
         given(Gateway.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(INVALID_AV_ZONE), "with invalid availability zone "
@@ -105,7 +102,6 @@ public class GatewayTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetGatewaysInvalidCredName() throws Exception {
         given(Gateway.request()
-                .withCredentialId(null)
                 .withCredentialName(INVALID_CRED_NAME), "with invalid credential name"
         );
         when(Gateway.get(), "get the request");
@@ -115,7 +111,6 @@ public class GatewayTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetGatewaysWithoutCred() throws Exception {
         given(Gateway.request()
-                .withCredentialId(null)
                 .withCredentialName(null)
                 .withRegion(cloudProvider.region()), "without credential"
         );
@@ -126,7 +121,6 @@ public class GatewayTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetGatewaysInvalidCredId() throws Exception {
         given(Gateway.request()
-                .withCredentialId(INVALID_CRED_ID)
                 .withCredentialName(null)
                 .withRegion(cloudProvider.region()),  "with invalid credential id"
         );
@@ -137,7 +131,6 @@ public class GatewayTests extends CloudbreakTest {
     @Test
     public void testGetGatewaysInvalidRegion() throws Exception {
         given(Gateway.request()
-                .withCredentialId(credentialId)
                 .withRegion(INVALID_REGION), "with invalid credential id"
         );
         when(Gateway.get(), "get the request");

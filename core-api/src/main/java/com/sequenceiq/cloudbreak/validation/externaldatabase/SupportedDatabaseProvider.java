@@ -29,6 +29,7 @@ public final class SupportedDatabaseProvider {
         supportedExternalDatabases.add(getSupportedServiceEntry("Beacon", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Registry", MYSQL, ORACLE11, ORACLE12));
+        supportedExternalDatabases.add(getSupportedServiceEntry("Cloudera Manager", POSTGRES));
     }
 
     public static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases() {

@@ -1,25 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import java.util.Map;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
-
-public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformVmtypesResponse, VmTypeEntity> {
+public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceV4Filter, PlatformVmtypesV4Response, VmTypeEntity> {
     public static final String VMTYPE = "VMTYPE";
 
     VmTypeEntity(String newId) {
         super(newId);
-        setRequest(new PlatformResourceRequestJson());
+        setRequest(new PlatformResourceV4Filter());
     }
 
     VmTypeEntity() {
         this(VMTYPE);
-    }
-
-    public VmTypeEntity withCredentialId(Long credentialId) {
-        getRequest().setCredentialId(credentialId);
-        return this;
     }
 
     public VmTypeEntity withCredentialName(String credentialName) {
@@ -39,11 +32,6 @@ public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceReque
 
     public VmTypeEntity withAvailabilityZone(String availabilityZone) {
         getRequest().setAvailabilityZone(availabilityZone);
-        return this;
-    }
-
-    public VmTypeEntity withFilters(Map<String, String> filters) {
-        getRequest().setFilters(filters);
         return this;
     }
 }

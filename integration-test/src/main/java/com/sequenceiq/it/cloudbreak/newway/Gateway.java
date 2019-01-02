@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformGatewaysV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.GatewayV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.GatewayV4Action;
 
 public class Gateway extends Entity {
     private static final String IPPOOL = "IPPOOL";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Gateway.class);
 
-    private PlatformResourceRequestJson request = new PlatformResourceRequestJson();
+    private PlatformResourceV4Filter request = new PlatformResourceV4Filter();
 
-    private PlatformGatewaysResponse response;
+    private PlatformGatewaysV4Response response;
 
     private Gateway(String id) {
         super(id);
@@ -32,7 +32,7 @@ public class Gateway extends Entity {
         this(IPPOOL);
     }
 
-    public void setRequest(PlatformResourceRequestJson request) {
+    public void setRequest(PlatformResourceV4Filter request) {
         this.request = request;
     }
 
@@ -40,11 +40,11 @@ public class Gateway extends Entity {
         return response.getGateways();
     }
 
-    public PlatformResourceRequestJson getRequest() {
+    public PlatformResourceV4Filter getRequest() {
         return request;
     }
 
-    public void setResponse(PlatformGatewaysResponse response) {
+    public void setResponse(PlatformGatewaysV4Response response) {
         this.response = response;
     }
 
@@ -53,18 +53,8 @@ public class Gateway extends Entity {
         return this;
     }
 
-    public Gateway withCredentialId(Long id) {
-        request.setCredentialId(id);
-        return this;
-    }
-
     public Gateway withCredentialName(String name) {
         request.setCredentialName(name);
-        return this;
-    }
-
-    public Gateway withFilter(Map<String, String> filter) {
-        request.setFilters(filter);
         return this;
     }
 
@@ -91,7 +81,7 @@ public class Gateway extends Entity {
     }
 
     public static Action<Gateway> get(String key) {
-        return new Action<>(getTestContext(key), GatewayV3Action::get);
+        return new Action<>(getTestContext(key), GatewayV4Action::get);
     }
 
     public static Action<Gateway> get() {

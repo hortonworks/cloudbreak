@@ -13,7 +13,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -31,7 +31,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworksProviderSpecificTests.class);
 
-    private final Map<String, Long> credentialIdMap = new HashMap<>();
+    private final Map<String, String> credentialIdMap = new HashMap<>();
 
     @BeforeTest
     public void beforeTest() throws Exception {
@@ -51,7 +51,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetNetworksInvalidRegionAWS() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("aws"))
+                .withCredentialName(credentialIdMap.get("aws"))
                 .withRegion(INVALID_REGION), "get networks with invalid region"
         );
         when(Networks.post(), "post the request");
@@ -61,7 +61,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     @Test
     public void testGetNetworksInvalidRegionAZURE() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("azure"))
+                .withCredentialName(credentialIdMap.get("azure"))
                 .withRegion(INVALID_REGION), "get networks with invalid region"
         );
         when(Networks.post(), "post the request");
@@ -71,7 +71,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetNetworksInvalidRegionGCP() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("gcp"))
+                .withCredentialName(credentialIdMap.get("gcp"))
                 .withRegion(INVALID_REGION), "get networks with invalid region"
         );
         when(Networks.post(), "post the request");
@@ -81,7 +81,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     @Test
     public void testGetNetworksInvalidRegionOs() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("openstack"))
+                .withCredentialName(credentialIdMap.get("openstack"))
                 .withRegion(INVALID_REGION), "get networks with invalid region"
         );
         when(Networks.post(), "post the request");
@@ -92,7 +92,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     public void testGetNetworksInvalidAvZoneGCP() throws Exception {
         GcpCloudProvider gcpCloudProvider = new GcpCloudProvider(getTestParameter());
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("gcp"))
+                .withCredentialName(credentialIdMap.get("gcp"))
                 .withRegion(gcpCloudProvider.region())
                 .withAvailabilityZone(null), "get networks with availability zone"
         );
@@ -103,7 +103,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     @Test
     public void testGetNetworksInvalidAvZoneAzure() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("azure"))
+                .withCredentialName(credentialIdMap.get("azure"))
                 .withAvailabilityZone(null), "get networks with availability zone"
         );
         when(Networks.post(), "post the request");
@@ -114,7 +114,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     public void testGetNetworksInvalidAvZoneAWS() throws Exception {
         AwsCloudProvider awsCloudProvider = new AwsCloudProvider(getTestParameter());
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("aws"))
+                .withCredentialName(credentialIdMap.get("aws"))
                 .withRegion(awsCloudProvider.region())
                 .withAvailabilityZone(null), "get networks with availability zone"
         );
@@ -125,7 +125,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
     @Test
     public void testGetNetworksInvalidAvZonOS() throws Exception {
         given(Networks.request()
-                .withCredentialId(credentialIdMap.get("openstack"))
+                .withCredentialName(credentialIdMap.get("openstack"))
                 .withAvailabilityZone(null), "get networks with availability zone"
         );
         when(Networks.post(), "post the request");
@@ -139,10 +139,10 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
         when(Credential.getAll());
         then(Credential.assertThis(
                 (credential, t) -> {
-                    Set<CredentialResponse> credentialResponses = credential.getResponses();
-                    for (CredentialResponse response : credentialResponses) {
+                    Set<CredentialV4Response> credentialResponses = credential.getResponses();
+                    for (CredentialV4Response response : credentialResponses) {
                         if (response.getName().equals(credentialName)) {
-                            credentialIdMap.put(provider, response.getId());
+                            credentialIdMap.put(provider, response.getName());
                         }
                     }
                 })

@@ -7,7 +7,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.BlueprintPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.BlueprintV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.BlueprintV4Action;
 
 @Prototype
 public class Blueprint extends BlueprintEntity {
@@ -33,12 +33,12 @@ public class Blueprint extends BlueprintEntity {
 
     public static Blueprint isCreated() {
         Blueprint blueprint = new Blueprint();
-        blueprint.setCreationStrategy(BlueprintV3Action::createInGiven);
+        blueprint.setCreationStrategy(BlueprintV4Action::createInGiven);
         return blueprint;
     }
 
     public static Action<Blueprint> post(String key) {
-        return new Action<>(getTestContext(key), BlueprintV3Action::post);
+        return new Action<>(getTestContext(key), BlueprintV4Action::post);
     }
 
     public static Action<Blueprint> post() {
@@ -46,7 +46,7 @@ public class Blueprint extends BlueprintEntity {
     }
 
     public static Action<Blueprint> get(String key) {
-        return new Action<>(getTestContext(key), BlueprintV3Action::get);
+        return new Action<>(getTestContext(key), BlueprintV4Action::get);
     }
 
     public static Action<Blueprint> get() {
@@ -54,11 +54,11 @@ public class Blueprint extends BlueprintEntity {
     }
 
     public static Action<Blueprint> getAll() {
-        return new Action<>(getNew(), BlueprintV3Action::getAll);
+        return new Action<>(getNew(), BlueprintV4Action::getAll);
     }
 
     public static Action<Blueprint> delete(String key) {
-        return new Action<>(getTestContext(key), BlueprintV3Action::delete);
+        return new Action<>(getTestContext(key), BlueprintV4Action::delete);
     }
 
     public static Action<Blueprint> delete() {
@@ -71,7 +71,7 @@ public class Blueprint extends BlueprintEntity {
 
     public static BlueprintEntity getByName(TestContext testContext, BlueprintEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().blueprintV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().blueprintV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }

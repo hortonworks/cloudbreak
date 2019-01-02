@@ -24,21 +24,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
 public class ServiceEndpointCollector {
@@ -57,12 +56,7 @@ public class ServiceEndpointCollector {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName, Workspace workspace) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, workspace);
-        return getKnoxServices(blueprint);
-    }
-
-    public Collection<ExposedServiceResponse> getKnoxServices(Long workspaceId, String blueprintName) {
+    public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         return getKnoxServices(blueprint);
     }
@@ -145,12 +139,12 @@ public class ServiceEndpointCollector {
                 ExposedService.LOGSEARCH);
     }
 
-    private Collection<ExposedServiceResponse> getKnoxServices(Blueprint blueprint) {
+    private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
         haComponents.remove(ExposedService.RANGER.getServiceName());
-        return ExposedServiceResponse.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
+        return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {

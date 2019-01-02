@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceMetaDataModelDesc
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("InstanceMetaData")
+@ApiModel
 public class InstanceMetaDataJson implements JsonEntity {
 
     @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)

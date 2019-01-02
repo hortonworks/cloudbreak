@@ -16,23 +16,23 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -66,7 +66,7 @@ public class ClusterResponse implements JsonEntity {
     private Long blueprintId;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintResponse blueprint;
+    private BlueprintV4Response blueprint;
 
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
@@ -93,7 +93,7 @@ public class ClusterResponse implements JsonEntity {
     private Set<Long> rdsConfigIds = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIGS)
-    private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
+    private Set<DatabaseV4Response> rdsConfigs = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
@@ -108,7 +108,7 @@ public class ClusterResponse implements JsonEntity {
     private Long ldapConfigId;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
-    private LdapConfigResponse ldapConfig;
+    private LdapV4Response ldapConfig;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes = new HashMap<>();
@@ -142,7 +142,7 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CREATION_FINISHED)
     private Long creationFinished;
 
-    private KerberosResponse kerberosResponse;
+    private KerberosV4Response kerberosV4Response;
 
     @ApiModelProperty(ClusterModelDescription.UPTIME)
     private Long uptime;
@@ -159,7 +159,7 @@ public class ClusterResponse implements JsonEntity {
     private FileSystemResponse fileSystemResponse;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     public String getDescription() {
         return description;
@@ -331,27 +331,27 @@ public class ClusterResponse implements JsonEntity {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
     }
 
-    public Set<RDSConfigResponse> getRdsConfigs() {
+    public Set<DatabaseV4Response> getRdsConfigs() {
         return rdsConfigs;
     }
 
-    public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
+    public void setRdsConfigs(Set<DatabaseV4Response> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
     }
 
-    public LdapConfigResponse getLdapConfig() {
+    public LdapV4Response getLdapConfig() {
         return ldapConfig;
     }
 
-    public void setLdapConfig(LdapConfigResponse ldapConfig) {
+    public void setLdapConfig(LdapV4Response ldapConfig) {
         this.ldapConfig = ldapConfig;
     }
 
-    public BlueprintResponse getBlueprint() {
+    public BlueprintV4Response getBlueprint() {
         return blueprint;
     }
 
-    public void setBlueprint(BlueprintResponse blueprint) {
+    public void setBlueprint(BlueprintV4Response blueprint) {
         this.blueprint = blueprint;
     }
 
@@ -419,12 +419,12 @@ public class ClusterResponse implements JsonEntity {
         this.creationFinished = creationFinished;
     }
 
-    public KerberosResponse getKerberosResponse() {
-        return kerberosResponse;
+    public KerberosV4Response getKerberosV4Response() {
+        return kerberosV4Response;
     }
 
-    public void setKerberosResponse(KerberosResponse kerberosResponse) {
-        this.kerberosResponse = kerberosResponse;
+    public void setKerberosV4Response(KerberosV4Response kerberosV4Response) {
+        this.kerberosV4Response = kerberosV4Response;
     }
 
     public Long getUptime() {
@@ -467,11 +467,11 @@ public class ClusterResponse implements JsonEntity {
         this.fileSystemResponse = fileSystemResponse;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 }

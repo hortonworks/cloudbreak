@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,8 +22,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -133,11 +131,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
         }
-        putBlueprintToContextIfExist(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
-        putCredentialToContext(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
-                credentialName);
+        putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+                .credentialV4Endpoint(), cloudProvider, credentialName);
         putStackToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint(), stackName);
         if (StringUtils.hasLength(instanceGroups)) {
@@ -153,18 +148,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Parameters({"ambariUser", "ambariPassword", "ambariPort"})
     public void initAmbariCredentials(@Optional("") String ambariUser, @Optional("") String ambariPassword, @Optional("") String ambariPort) {
         putAmbariCredentialsToContext(ambariUser, ambariPassword, ambariPort);
-
-    }
-
-    private void putBlueprintToContextIfExist(BlueprintEndpoint endpoint, String blueprintName) {
-        endpoint.getPublics();
-        if (StringUtils.isEmpty(blueprintName)) {
-            blueprintName = defaultBlueprintName;
-        }
-        if (StringUtils.hasLength(blueprintName)) {
-            String resourceId = endpoint.getPublic(blueprintName).getId().toString();
-            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
-        }
     }
 
     private void putAmbariCredentialsToContext(String ambariUser, String ambariPassword, String ambariPort) {
@@ -191,7 +174,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putCredentialToContext(CredentialEndpoint endpoint, String cloudProvider, String credentialName) {
+    private void putCredentialToContext(CredentialV4Endpoint endpoint, String cloudProvider, String credentialName) {
         if (StringUtils.isEmpty(credentialName)) {
             String defaultCredentialName = itProps.getCredentialName(cloudProvider);
             if (!"__ignored__".equals(defaultCredentialName)) {
@@ -199,7 +182,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             }
         }
         if (StringUtils.hasLength(credentialName)) {
-            Long resourceId = endpoint.getPublic(credentialName).getId();
+            Long resourceId = endpoint.get(1L, credentialName).getId();
             itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId.toString());
         }
     }
@@ -228,16 +211,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                     }
                 }
             }
-            Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
-            if (recipeIds != null) {
-                for (Long recipeId : recipeIds) {
-                    cleanUpService.deleteRecipe(cloudbreakClient, recipeId);
-                }
-            }
-
             cleanUpService.deleteCredential(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
-            cleanUpService.deleteBlueprint(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
-            cleanUpService.deleteRdsConfigs(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID));
 
         }
     }

@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
@@ -65,7 +65,7 @@ public class ClusterTemplateLoaderServiceTest {
 
     @Test
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenHasDefaultClusterTemplateAndNoDefaultInDB() {
-        DefaultClusterTemplateRequest clusterTemplate = new DefaultClusterTemplateRequest();
+        DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName("cluster-template");
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(singletonMap(clusterTemplate.getName(), clusterTemplate));
@@ -77,7 +77,7 @@ public class ClusterTemplateLoaderServiceTest {
 
     @Test
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSame() {
-        DefaultClusterTemplateRequest clusterTemplateFromDefault = sameClusterTemplateRequest();
+        DefaultClusterTemplateV4Request clusterTemplateFromDefault = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplate = sameClusterTemplate();
         clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(writeValueAsStringSilent(clusterTemplateFromDefault).getBytes()));
 
@@ -91,7 +91,7 @@ public class ClusterTemplateLoaderServiceTest {
 
     @Test
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreNotSame() {
-        DefaultClusterTemplateRequest clusterTemplateFromDefault = clusterTemplateRequest("cluster-template");
+        DefaultClusterTemplateV4Request clusterTemplateFromDefault = clusterTemplateRequest("cluster-template");
         ClusterTemplate clusterTemplateFromDB = clusterTemplate("cluster-template", "gcp", "hostgroup2", "worker");
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
@@ -104,9 +104,9 @@ public class ClusterTemplateLoaderServiceTest {
 
     @Test
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenOneTemplateContentsAreSameAndOtherOneTemplateContentsAreNotSame() {
-        DefaultClusterTemplateRequest clusterTemplateFromDefault1 = sameClusterTemplateRequest();
+        DefaultClusterTemplateV4Request clusterTemplateFromDefault1 = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplateFromDB1 = sameClusterTemplate();
-        DefaultClusterTemplateRequest clusterTemplateFromDefault2 = clusterTemplateRequest("cluster-template2");
+        DefaultClusterTemplateV4Request clusterTemplateFromDefault2 = clusterTemplateRequest("cluster-template2");
         ClusterTemplate clusterTemplateFromDB2 = clusterTemplate("cluster-template2", "gcp", "hostgroup2", "worker");
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(
@@ -144,12 +144,12 @@ public class ClusterTemplateLoaderServiceTest {
         return clusterTemplate;
     }
 
-    private DefaultClusterTemplateRequest sameClusterTemplateRequest() {
+    private DefaultClusterTemplateV4Request sameClusterTemplateRequest() {
         return clusterTemplateRequest("cluster-template");
     }
 
-    private DefaultClusterTemplateRequest clusterTemplateRequest(String templateName) {
-        DefaultClusterTemplateRequest clusterTemplate = new DefaultClusterTemplateRequest();
+    private DefaultClusterTemplateV4Request clusterTemplateRequest(String templateName) {
+        DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName(templateName);
         StackV2Request stack = new StackV2Request();
         ClusterV2Request cluster = new ClusterV2Request();

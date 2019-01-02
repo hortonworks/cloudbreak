@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
@@ -33,7 +33,7 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
     public void accept(Event<InteractiveCredentialCreationStatus> interactiveCredentialCreationStatusEvent) {
         InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationStatusEvent.getData();
         String message = interactiveCredentialCreationStatus.getMessage();
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         if (interactiveCredentialCreationStatus.isError()) {
             notification.setEventType("CREDENTIAL_CREATE_FAILED");
         } else {

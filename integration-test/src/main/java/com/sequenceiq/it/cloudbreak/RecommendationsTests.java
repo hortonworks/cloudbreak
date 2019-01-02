@@ -1,17 +1,14 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.DiskResponse;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.Recommendation;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -23,13 +20,18 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.api.model.DiskResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
+import com.sequenceiq.it.cloudbreak.newway.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.Credential;
+import com.sequenceiq.it.cloudbreak.newway.Recommendation;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 
 public class RecommendationsTests extends CloudbreakTest {
 
@@ -60,21 +62,6 @@ public class RecommendationsTests extends CloudbreakTest {
         ObjectMapper mapper = new ObjectMapper();
 
         return new HashSet<>(mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(Set.class, DiskResponse.class)));
-    }
-
-    private String setCustomDiskResponses(Recommendation recommendations) {
-        String expectedDisplayName = "";
-
-        try {
-            Set<DiskResponse> customDiskResponseSet = getCustomDiskResponses();
-            expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
-
-            recommendations.getResponse().setDiskResponses(customDiskResponseSet);
-        } catch (IOException e) {
-            LOGGER.info("Set custom Disk Response Exception message ::: {}", e.getMessage());
-        }
-
-        return expectedDisplayName;
     }
 
     private void createBlueprint() throws Exception {
@@ -133,6 +120,21 @@ public class RecommendationsTests extends CloudbreakTest {
         }
     }
 
+    private String setCustomDiskResponses(Recommendation recommendations) {
+        String expectedDisplayName = "";
+
+        try {
+            Set<DiskResponse> customDiskResponseSet = getCustomDiskResponses();
+            expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
+
+            recommendations.getResponse().setDiskResponses(customDiskResponseSet);
+        } catch (IOException e) {
+            LOGGER.info("Set custom Disk Response Exception message ::: {}", e.getMessage());
+        }
+
+        return expectedDisplayName;
+    }
+
     @Test(priority = 1, groups = "recommendations")
     public void testListRecommendations() throws Exception {
         given(CloudbreakClient.created());
@@ -143,9 +145,9 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Map<String, VmTypeJson> recommendationsForBlueprint = recommendations.getResponse().getRecommendations();
+                    Map<String, VmTypeV4Response> recommendationsForBlueprint = recommendations.getResponse().getRecommendations();
 
-                    for (Entry<String, VmTypeJson> recommendationForBlueprint : recommendationsForBlueprint.entrySet()) {
+                    for (Entry<String, VmTypeV4Response> recommendationForBlueprint : recommendationsForBlueprint.entrySet()) {
                         LOGGER.debug("{} Recommendations are ::: {}", recommendationForBlueprint.getKey(), recommendationForBlueprint.getValue());
                         Assert.assertFalse(recommendationForBlueprint.getValue().getValue().isEmpty(),
                                 "Recommendations should be present in response!");
@@ -184,9 +186,9 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Set<VmTypeJson> virtualMachineSet = recommendations.getResponse().getVirtualMachines();
+                    Set<VmTypeV4Response> virtualMachineSet = recommendations.getResponse().getVirtualMachines();
 
-                    for (VmTypeJson virtualMachine : virtualMachineSet) {
+                    for (VmTypeV4Response virtualMachine : virtualMachineSet) {
                         LOGGER.debug("Virtual Machine is ::: {}", virtualMachine.getValue());
                         Assert.assertFalse(virtualMachine.getValue().isEmpty(), "Virtual Machines should be present in response!");
                     }

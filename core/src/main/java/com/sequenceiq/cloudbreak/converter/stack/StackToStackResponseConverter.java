@@ -17,9 +17,9 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -80,7 +80,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         } else {
             stackJson.setCloudPlatform(source.cloudPlatform());
             stackJson.setCredentialId(source.getCredential().getId());
-            stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
+            stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialV4Response.class));
         }
         stackJson.setStatus(source.getStatus());
         stackJson.setTerminated(source.getTerminated());
@@ -115,7 +115,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         stackJson.setCustomHostname(source.getCustomHostname());
         stackJson.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
         stackJson.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
-        stackJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        stackJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         addNodeCount(source, stackJson);
         putSubnetIdIntoResponse(source, stackJson);
         putVpcIdIntoResponse(source, stackJson);
@@ -238,7 +238,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
     private void addFlexSubscription(StackResponse stackJson, Stack source) {
         if (source.getFlexSubscription() != null) {
             try {
-                FlexSubscriptionResponse flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionResponse.class);
+                FlexSubscriptionV4Response flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionV4Response.class);
                 stackJson.setFlexSubscription(flexSubscription);
             } catch (Exception ex) {
                 LOGGER.warn("Flex subscription could not be added to stack response.", ex);

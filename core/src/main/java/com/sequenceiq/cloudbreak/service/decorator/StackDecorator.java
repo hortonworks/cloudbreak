@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -180,20 +180,20 @@ public class StackDecorator {
 
     private boolean isSharedServiceRequirementsMeets(StackRequest request, User user, Workspace workspace) {
         boolean hasConfiguredLdap = hasConfiguredLdap(request);
-        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, workspace, RdsType.HIVE);
-        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, workspace, RdsType.RANGER);
+        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, workspace, DatabaseType.HIVE);
+        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, workspace, DatabaseType.RANGER);
         return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
     }
 
-    private boolean hasConfiguredRdsByType(StackRequest request, User user, Workspace workspace, RdsType rdsType) {
+    private boolean hasConfiguredRdsByType(StackRequest request, User user, Workspace workspace, DatabaseType databaseType) {
         boolean hasConfiguredRds = false;
         if (!request.getClusterRequest().getRdsConfigJsons().isEmpty()) {
             hasConfiguredRds = request.getClusterRequest().getRdsConfigJsons().stream()
-                    .anyMatch(rdsConfigRequest -> rdsType.name().equalsIgnoreCase(rdsConfigRequest.getType()));
+                    .anyMatch(rdsConfigRequest -> databaseType.name().equalsIgnoreCase(rdsConfigRequest.getType()));
         }
         if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
             for (String rds : request.getClusterRequest().getRdsConfigNames()) {
-                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getByNameForWorkspace(rds, workspace).getType())) {
+                if (databaseType.name().equalsIgnoreCase(rdsConfigService.getByNameForWorkspace(rds, workspace).getType())) {
                     hasConfiguredRds = true;
                     break;
                 }
@@ -201,7 +201,7 @@ public class StackDecorator {
         }
         if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
             for (Long rds : request.getClusterRequest().getRdsConfigIds()) {
-                if (rdsType.name().equalsIgnoreCase(rdsConfigService.get(rds).getType())) {
+                if (databaseType.name().equalsIgnoreCase(rdsConfigService.get(rds).getType())) {
                     hasConfiguredRds = true;
                     break;
                 }

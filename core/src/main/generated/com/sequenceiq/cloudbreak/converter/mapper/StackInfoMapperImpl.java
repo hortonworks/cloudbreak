@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
@@ -22,47 +22,47 @@ public class StackInfoMapperImpl implements StackInfoMapper {
     private ManagementPackComponentListMapMapper managementPackComponentListMapMapper;
 
     @Override
-    public StackDescriptor mapStackInfoToStackDescriptor(StackInfo stackInfo, Map<String, List<ManagementPackComponent>> mpacks) {
+    public StackDescriptorV4 mapStackInfoToStackDescriptor(StackInfo stackInfo, Map<String, List<ManagementPackComponent>> mpacks) {
         if ( stackInfo == null && mpacks == null ) {
             return null;
         }
 
-        StackDescriptor stackDescriptor = new StackDescriptor();
+        StackDescriptorV4 stackDescriptorV4 = new StackDescriptorV4();
 
         if ( stackInfo != null ) {
-            stackDescriptor.setVersion( stackInfo.getVersion() );
-            stackDescriptor.setMinAmbari( stackInfo.getMinAmbari() );
-            stackDescriptor.setRepo( defaultStackRepoDetailsToStackRepoDetailsJson( stackInfo.getRepo() ) );
+            stackDescriptorV4.setVersion( stackInfo.getVersion() );
+            stackDescriptorV4.setMinAmbari( stackInfo.getMinAmbari() );
+            stackDescriptorV4.setRepo( defaultStackRepoDetailsToStackRepoDetailsV4Response( stackInfo.getRepo() ) );
         }
         if ( mpacks != null ) {
-            stackDescriptor.setMpacks( managementPackComponentListMapMapper.mapManagementPackComponentMap( mpacks ) );
+            stackDescriptorV4.setMpacks( managementPackComponentListMapMapper.mapManagementPackComponentMap( mpacks ) );
         }
 
-        return stackDescriptor;
+        return stackDescriptorV4;
     }
 
-    protected StackRepoDetailsJson defaultStackRepoDetailsToStackRepoDetailsJson(DefaultStackRepoDetails defaultStackRepoDetails) {
+    protected StackRepoDetailsV4Response defaultStackRepoDetailsToStackRepoDetailsV4Response(DefaultStackRepoDetails defaultStackRepoDetails) {
         if ( defaultStackRepoDetails == null ) {
             return null;
         }
 
-        StackRepoDetailsJson stackRepoDetailsJson = new StackRepoDetailsJson();
+        StackRepoDetailsV4Response stackRepoDetailsV4Response = new StackRepoDetailsV4Response();
 
         Map<String, String> map = defaultStackRepoDetails.getStack();
         if ( map != null ) {
-            stackRepoDetailsJson.setStack( new HashMap<String, String>( map ) );
+            stackRepoDetailsV4Response.setStack( new HashMap<String, String>( map ) );
         }
         else {
-            stackRepoDetailsJson.setStack( null );
+            stackRepoDetailsV4Response.setStack( null );
         }
         Map<String, String> map1 = defaultStackRepoDetails.getUtil();
         if ( map1 != null ) {
-            stackRepoDetailsJson.setUtil( new HashMap<String, String>( map1 ) );
+            stackRepoDetailsV4Response.setUtil( new HashMap<String, String>( map1 ) );
         }
         else {
-            stackRepoDetailsJson.setUtil( null );
+            stackRepoDetailsV4Response.setUtil( null );
         }
 
-        return stackRepoDetailsJson;
+        return stackRepoDetailsV4Response;
     }
 }

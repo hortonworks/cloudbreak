@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,9 +35,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.TemplateModelContextBuilder;
@@ -435,7 +435,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> beaconWhenRdsPresentedThenShouldReturnWithRdsConfigs() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.BEACON)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.BEACON)))
                 .build();
     }
 
@@ -580,7 +580,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.SUPERSET)))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
@@ -676,7 +676,7 @@ public class HandlebarTemplateTest {
     }
 
     public static Map<String, Object> registryRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.REGISTRY, DatabaseVendor.MYSQL);
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.REGISTRY, DatabaseVendor.MYSQL);
         BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
@@ -685,7 +685,7 @@ public class HandlebarTemplateTest {
     }
 
     public static Map<String, Object> registryRdsConfigWhenPostGresDBEngineShouldReturnWithCorrectDatabaseTypeConfig() {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.REGISTRY, DatabaseVendor.POSTGRES);
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.REGISTRY, DatabaseVendor.POSTGRES);
         BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
@@ -695,7 +695,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.HIVE)))
                 .build();
     }
 
@@ -770,28 +770,28 @@ public class HandlebarTemplateTest {
     }
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.POSTGRES);
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.RANGER, DatabaseVendor.POSTGRES);
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.MYSQL);
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.RANGER, DatabaseVendor.MYSQL);
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle11hRdsConfig() {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11);
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.RANGER, DatabaseVendor.ORACLE11);
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle12hRdsConfig() {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE12);
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.RANGER, DatabaseVendor.ORACLE12);
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
@@ -799,49 +799,49 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithPotgresRdsConfig() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.POSTGRES)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.HIVE, DatabaseVendor.POSTGRES)))
                 .build();
     }
 
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithOracle11RdsConfig() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.ORACLE11)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.HIVE, DatabaseVendor.ORACLE11)))
                 .build();
     }
 
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithOracle12RdsConfig() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.ORACLE12)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.HIVE, DatabaseVendor.ORACLE12)))
                 .build();
     }
 
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.MYSQL)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.HIVE, DatabaseVendor.MYSQL)))
                 .build();
     }
 
     public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithPostgresRdsConfigs() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.POSTGRES)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.OOZIE, DatabaseVendor.POSTGRES)))
                 .build();
     }
 
     public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithOracle11RdsConfigs() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.ORACLE11)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.OOZIE, DatabaseVendor.ORACLE11)))
                 .build();
     }
 
     public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithOracle12RdsConfigs() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.ORACLE12)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.OOZIE, DatabaseVendor.ORACLE12)))
                 .build();
     }
 
     public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithMySQLRdsConfigs() {
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.MYSQL)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.OOZIE, DatabaseVendor.MYSQL)))
                 .build();
     }
 
@@ -853,7 +853,7 @@ public class HandlebarTemplateTest {
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID, DatabaseVendor.POSTGRES)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.DRUID, DatabaseVendor.POSTGRES)))
                 .build();
     }
 
@@ -864,7 +864,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET, DatabaseVendor.MYSQL)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.SUPERSET, DatabaseVendor.MYSQL)))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
@@ -876,7 +876,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
         return new TemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID, DatabaseVendor.MYSQL)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(DatabaseType.DRUID, DatabaseVendor.MYSQL)))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }

@@ -10,10 +10,10 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -47,7 +47,7 @@ public class StackResponse extends StackBase {
     private String statusReason;
 
     @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialResponse credential;
+    private CredentialV4Response credential;
 
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkResponse network;
@@ -78,7 +78,7 @@ public class StackResponse extends StackBase {
     private CloudbreakDetailsJson cloudbreakDetails;
 
     @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
-    private FlexSubscriptionResponse flexSubscription;
+    private FlexSubscriptionV4Response flexSubscription;
 
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationResponse stackAuthentication;
@@ -90,10 +90,10 @@ public class StackResponse extends StackBase {
     private Set<HardwareInfoGroupResponse> hardwareInfoGroups = new HashSet<>();
 
     @ApiModelProperty(StackModelDescription.EVENTS)
-    private List<CloudbreakEventsJson> cloudbreakEvents = new ArrayList<>();
+    private List<CloudbreakEventV4Response> cloudbreakEvents = new ArrayList<>();
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     public ClusterResponse getCluster() {
         return cluster;
@@ -192,11 +192,11 @@ public class StackResponse extends StackBase {
         this.failurePolicy = failurePolicy;
     }
 
-    public CredentialResponse getCredential() {
+    public CredentialV4Response getCredential() {
         return credential;
     }
 
-    public void setCredential(CredentialResponse credential) {
+    public void setCredential(CredentialV4Response credential) {
         this.credential = credential;
     }
 
@@ -208,11 +208,11 @@ public class StackResponse extends StackBase {
         this.network = network;
     }
 
-    public FlexSubscriptionResponse getFlexSubscription() {
+    public FlexSubscriptionV4Response getFlexSubscription() {
         return flexSubscription;
     }
 
-    public void setFlexSubscription(FlexSubscriptionResponse flexSubscription) {
+    public void setFlexSubscription(FlexSubscriptionV4Response flexSubscription) {
         this.flexSubscription = flexSubscription;
     }
 
@@ -232,11 +232,11 @@ public class StackResponse extends StackBase {
         this.hardwareInfoGroups = hardwareInfoGroups;
     }
 
-    public List<CloudbreakEventsJson> getCloudbreakEvents() {
+    public List<CloudbreakEventV4Response> getCloudbreakEvents() {
         return cloudbreakEvents;
     }
 
-    public void setCloudbreakEvents(List<CloudbreakEventsJson> cloudbreakEvents) {
+    public void setCloudbreakEvents(List<CloudbreakEventV4Response> cloudbreakEvents) {
         this.cloudbreakEvents = cloudbreakEvents;
     }
 
@@ -248,11 +248,11 @@ public class StackResponse extends StackBase {
         this.stackAuthentication = stackAuthentication;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 

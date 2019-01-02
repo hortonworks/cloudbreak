@@ -1,5 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -14,12 +21,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class AzureCloudProvider extends CloudProviderHelper {
 
@@ -96,7 +97,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AZURE_CAPITAL)
-                .withParameters(azureCredentialDetails());
+                .withAzureParameters(azureCredentialDetails());
     }
 
     @Override
@@ -278,40 +279,58 @@ public class AzureCloudProvider extends CloudProviderHelper {
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake());
     }
 
-    public Map<String, Object> azureCredentialDetails() {
-        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
-                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
-                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+    public AzureCredentialV4Parameters azureCredentialDetails() {
+        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
+        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+        return credentialParameters;
     }
 
-    public Map<String, Object> azureCredentialDetailsNewApplication() {
-        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_NEWACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
-                getTestParameter().get(CREDENTIAL_NEWSECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
-                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+    public AzureCredentialV4Parameters azureCredentialDetailsNewApplication() {
+        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
+        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_NEWACCESS_KEY_ENV_KEY));
+        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_NEWSECRET_KEY_ENV_KEY));
+        credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+        return credentialParameters;
     }
 
-    public Map<String, Object> azureCredentialDetailsInvalidAccessKey() {
-        return Map.of(ACCESS_KEY_PARAM_KEY, GENERIC_TEST_VALUE, SECRET_KEY_PARAM_KEY,
-                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
-                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+    public AzureCredentialV4Parameters azureCredentialDetailsInvalidAccessKey() {
+        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
+        credentialParameters.setAccessKey(GENERIC_TEST_VALUE);
+        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+        return credentialParameters;
     }
 
-    public Map<String, Object> azureCredentialDetailsInvalidSecretKey() {
-        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
-                GENERIC_TEST_VALUE, SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
-                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+    public AzureCredentialV4Parameters azureCredentialDetailsInvalidSecretKey() {
+        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
+        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setSecretKey(GENERIC_TEST_VALUE);
+        credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+        return credentialParameters;
     }
 
-    public Map<String, Object> azureCredentialDetailsInvalidSubscriptionID() {
-        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
-                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, GENERIC_TEST_VALUE,
-                TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+    public AzureCredentialV4Parameters azureCredentialDetailsInvalidSubscriptionID() {
+        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
+        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        credentialParameters.setSubscriptionId(GENERIC_TEST_VALUE);
+        credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
+        return credentialParameters;
     }
 
-    public Map<String, Object> azureCredentialDetailsInvalidTenantID() {
-        return Map.of(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY), SECRET_KEY_PARAM_KEY,
-                getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY), SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY),
-                TENANT_ID_PARAM_KEY, GENERIC_TEST_VALUE);
+    public AzureCredentialV4Parameters azureCredentialDetailsInvalidTenantID() {
+        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
+        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        credentialParameters.setTenantId(GENERIC_TEST_VALUE);
+        return credentialParameters;
     }
 
     @Override

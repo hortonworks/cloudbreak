@@ -25,14 +25,12 @@ import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -272,34 +270,6 @@ public class CloudbreakUtil {
         if (currentStatuses.values().stream().anyMatch(cs -> cs.contains("FAILED")) || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {
             waitResult = WaitResult.FAILED;
         }
-        if (retryCount == MAX_RETRY) {
-            waitResult = WaitResult.TIMEOUT;
-        }
-        return waitResult;
-    }
-
-    public static WaitResult waitForEvent(CloudbreakClient cloudbreakClient, String stackName, String eventType,
-            String eventMessage, long sinceTimeStamp) {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
-        Boolean exitCriteria = FALSE;
-
-        int retryCount = 0;
-        do {
-            LOGGER.info("Waiting for event type {} and event message contains {} ...", eventType, eventMessage);
-            sleep();
-            EventEndpoint eventEndpoint = cloudbreakClient.eventEndpoint();
-            List<CloudbreakEventsJson> list = eventEndpoint.getCloudbreakEventsSince(sinceTimeStamp);
-            for (CloudbreakEventsJson event : list) {
-                if (event.getStackName().equals(stackName) && event.getEventMessage().contains(eventMessage) && event.getEventType().equals(eventType)) {
-                    exitCriteria = Boolean.TRUE;
-                    break;
-                }
-            }
-            retryCount++;
-        } while (!exitCriteria && retryCount < MAX_RETRY);
-
-        LOGGER.info("Event {} for {} happened and event message contains {}", eventType, stackName, eventMessage);
-
         if (retryCount == MAX_RETRY) {
             waitResult = WaitResult.TIMEOUT;
         }

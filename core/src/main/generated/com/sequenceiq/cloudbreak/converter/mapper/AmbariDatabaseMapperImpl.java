@@ -32,7 +32,7 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
             rDSConfig.setDescription( cluster.getDescription() );
         }
         rDSConfig.setCreationDate( new java.util.Date().getTime() );
-        rDSConfig.setType( com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name() );
+        rDSConfig.setType( com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.AMBARI.name() );
         rDSConfig.setConnectionDriver( "org.postgresql.Driver" );
         rDSConfig.setStatus( com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED );
 

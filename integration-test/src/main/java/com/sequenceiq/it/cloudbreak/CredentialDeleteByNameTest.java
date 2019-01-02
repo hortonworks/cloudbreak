@@ -9,7 +9,7 @@ public class CredentialDeleteByNameTest extends AbstractCloudbreakIntegrationTes
     public void testDeleteCredentialByName(String credentialName) {
         // GIVEN
         // WHEN
-        getCloudbreakClient().credentialEndpoint().deletePublic(credentialName);
+        getCloudbreakClient().credentialV4Endpoint().delete(1L, credentialName);
         // THEN no exception
     }
 }

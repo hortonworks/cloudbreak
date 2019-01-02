@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.service.platform;
 
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -15,19 +21,13 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class PlatformParameterService {
@@ -86,16 +86,13 @@ public class PlatformParameterService {
                 request.getPlatformVariant(), request.getFilters());
     }
 
-    public PlatformRecommendation getRecommendation(Long workspaceId, RecommendationRequestJson request) {
+    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, RecommendationV4Filter request) {
         PlatformResourceRequest resourceRequest = conversionService.convert(request, PlatformResourceRequest.class);
-        if (request.getBlueprintId() == null && Strings.isNullOrEmpty(request.getBlueprintName())) {
-            checkFieldIsNotEmpty(request.getBlueprintId(), "blueprintId");
-        }
         checkFieldIsNotEmpty(request.getRegion(), "region");
         checkFieldIsNotEmpty(request.getAvailabilityZone(), "availabilityZone");
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return cloudResourceAdvisor.createForBlueprint(request.getBlueprintName(), request.getBlueprintId(),
+        return cloudResourceAdvisor.createForBlueprint(blueprintName,
                         resourceRequest, user, workspace);
     }
 

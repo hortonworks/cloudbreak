@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
@@ -33,7 +33,7 @@ public class StackRequest extends StackBase {
     private FailurePolicyRequest failurePolicy;
 
     @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialRequest credential;
+    private CredentialV4Request credential;
 
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationRequest stackAuthentication;
@@ -104,11 +104,11 @@ public class StackRequest extends StackBase {
         this.instanceGroups = instanceGroups;
     }
 
-    public CredentialRequest getCredential() {
+    public CredentialV4Request getCredential() {
         return credential;
     }
 
-    public void setCredential(CredentialRequest credential) {
+    public void setCredential(CredentialV4Request credential) {
         this.credential = credential;
     }
 

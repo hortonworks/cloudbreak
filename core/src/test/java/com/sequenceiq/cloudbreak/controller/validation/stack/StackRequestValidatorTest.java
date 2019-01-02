@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -29,11 +29,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
@@ -287,7 +287,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
         request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setLdapConfig(new LdapConfigRequest());
+        request.getClusterRequest().setLdapConfig(new LdapV4Request());
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
@@ -490,7 +490,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setHostGroups(hostGroupSet);
-        BlueprintRequest bpRequest = new BlueprintRequest();
+        BlueprintV4Request bpRequest = new BlueprintV4Request();
         bpRequest.setName(TEST_BP_NAME);
         clusterRequest.setBlueprint(bpRequest);
         clusterRequest.setBlueprintName(TEST_BP_NAME);
@@ -524,7 +524,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         ClusterRequest clusterRequest = new ClusterRequest();
         hostGroupRequest.setName("master");
         clusterRequest.setHostGroups(Sets.newHashSet(hostGroupRequest));
-        BlueprintRequest bpRequest = new BlueprintRequest();
+        BlueprintV4Request bpRequest = new BlueprintV4Request();
         bpRequest.setName(TEST_BP_NAME);
         clusterRequest.setBlueprint(bpRequest);
         clusterRequest.setBlueprintName(TEST_BP_NAME);
@@ -538,14 +538,14 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         return stackRequest;
     }
 
-    private RDSConfig rdsConfig(RdsType type) {
+    private RDSConfig rdsConfig(DatabaseType type) {
         RDSConfig rds = new RDSConfig();
         rds.setType(type.name());
         return rds;
     }
 
-    private RDSConfigRequest rdsConfigRequest(RdsType type) {
-        RDSConfigRequest request = new RDSConfigRequest();
+    private DatabaseV4Request rdsConfigRequest(DatabaseType type) {
+        DatabaseV4Request request = new DatabaseV4Request();
         request.setType(type.name());
         return request;
     }

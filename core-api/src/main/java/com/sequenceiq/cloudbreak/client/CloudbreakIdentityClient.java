@@ -27,52 +27,33 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.AuditEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ClusterTemplateV3EndPoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KerberosConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ProxyConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.FlexSubscriptionV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.SmartSenseSubscriptionV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.user.UserV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -80,50 +61,32 @@ import net.jodah.expiringmap.ExpiringMap;
 public class CloudbreakIdentityClient {
 
     private static final List<Class<?>> ENDPOINTS = Arrays.asList(
-            AccountPreferencesEndpoint.class,
-            AuditEndpoint.class,
-            AuditV3Endpoint.class,
+            AuditEventV4Endpoint.class,
             AutoscaleEndpoint.class,
-            BlueprintEndpoint.class,
-            BlueprintV3Endpoint.class,
-            EventEndpoint.class,
-            EventV3Endpoint.class,
+            BlueprintV4Endpoint.class,
+            EventV4Endpoint.class,
             ClusterV1Endpoint.class,
-            ClusterTemplateV3EndPoint.class,
-            CredentialEndpoint.class,
-            CredentialV3Endpoint.class,
-            FlexSubscriptionEndpoint.class,
-            FlexSubscriptionV3Endpoint.class,
-            ImageCatalogV1Endpoint.class,
-            ImageCatalogV3Endpoint.class,
-            KnoxServicesV3Endpoint.class,
-            LdapConfigEndpoint.class,
-            LdapConfigV3Endpoint.class,
+            ClusterTemplateV4Endpoint.class,
+            CredentialV4Endpoint.class,
+            DatabaseV4Endpoint.class,
+            FlexSubscriptionV4Endpoint.class,
+            ImageCatalogV4Endpoint.class,
+            KerberosConfigV4Endpoint.class,
+            LdapConfigV4Endpoint.class,
             ManagementPackEndpoint.class,
             ManagementPackV3Endpoint.class,
-            KubernetesConfigV3Endpoint.class,
-            WorkspaceV3Endpoint.class,
-            ConnectorV1Endpoint.class,
-            ConnectorV2Endpoint.class,
-            ConnectorV3Endpoint.class,
-            ProxyConfigEndpoint.class,
-            ProxyConfigV3Endpoint.class,
-            RdsConfigEndpoint.class,
-            RdsConfigV3Endpoint.class,
-            RecipeEndpoint.class,
-            RecipeV3Endpoint.class,
-            RepositoryConfigValidationEndpoint.class,
-            SecurityRuleEndpoint.class,
-            SettingsEndpoint.class,
-            SmartSenseSubscriptionEndpoint.class,
-            SmartSenseSubscriptionV3Endpoint.class,
+            KubernetesV4Endpoint.class,
+            WorkspaceV4Endpoint.class,
+            ConnectorV4Endpoint.class,
+            ProxyV4Endpoint.class,
+            RecipeV4Endpoint.class,
+            SmartSenseSubscriptionV4Endpoint.class,
             StackV1Endpoint.class,
             StackV2Endpoint.class,
             StackV3Endpoint.class,
-            SubscriptionEndpoint.class,
-            UserEndpoint.class,
-            UserV3Endpoint.class,
-            UtilEndpoint.class
+            UserProfileV4Endpoint.class,
+            UserV4Endpoint.class,
+            UtilV4Endpoint.class
     );
 
     private static final Form EMPTY_FORM = new Form();
@@ -174,76 +137,40 @@ public class CloudbreakIdentityClient {
                 identityServerAddress, clientId, configKey);
     }
 
-    public AccountPreferencesEndpoint accountPreferencesEndpoint() {
-        return getEndpoint(AccountPreferencesEndpoint.class);
-    }
-
-    public AuditEndpoint auditEndpoint() {
-        return getEndpoint(AuditEndpoint.class);
-    }
-
-    public AuditV3Endpoint auditV3Endpoint() {
-        return getEndpoint(AuditV3Endpoint.class);
+    public AuditEventV4Endpoint auditV4Endpoint() {
+        return getEndpoint(AuditEventV4Endpoint.class);
     }
 
     public AutoscaleEndpoint autoscaleEndpoint() {
         return getEndpoint(AutoscaleEndpoint.class);
     }
 
-    public BlueprintEndpoint blueprintEndpoint() {
-        return getEndpoint(BlueprintEndpoint.class);
+    public BlueprintV4Endpoint blueprintV4Endpoint() {
+        return getEndpoint(BlueprintV4Endpoint.class);
     }
 
-    public BlueprintV3Endpoint blueprintV3Endpoint() {
-        return getEndpoint(BlueprintV3Endpoint.class);
-    }
-
-    public EventEndpoint eventEndpoint() {
-        return getEndpoint(EventEndpoint.class);
-    }
-
-    public EventV3Endpoint eventV3Endpoint() {
-        return getEndpoint(EventV3Endpoint.class);
+    public EventV4Endpoint eventV3Endpoint() {
+        return getEndpoint(EventV4Endpoint.class);
     }
 
     public ClusterV1Endpoint clusterEndpoint() {
         return getEndpoint(ClusterV1Endpoint.class);
     }
 
-    public CredentialEndpoint credentialEndpoint() {
-        return getEndpoint(CredentialEndpoint.class);
+    public CredentialV4Endpoint credentialV4Endpoint() {
+        return getEndpoint(CredentialV4Endpoint.class);
     }
 
-    public CredentialV3Endpoint credentialV3Endpoint() {
-        return getEndpoint(CredentialV3Endpoint.class);
+    public FlexSubscriptionV4Endpoint flexSubscriptionV4Endpoint() {
+        return getEndpoint(FlexSubscriptionV4Endpoint.class);
     }
 
-    public FlexSubscriptionEndpoint flexSubscriptionEndpoint() {
-        return getEndpoint(FlexSubscriptionEndpoint.class);
+    public ImageCatalogV4Endpoint imageCatalogV4Endpoint() {
+        return getEndpoint(ImageCatalogV4Endpoint.class);
     }
 
-    public FlexSubscriptionV3Endpoint flexSubscriptionV3Endpoint() {
-        return getEndpoint(FlexSubscriptionV3Endpoint.class);
-    }
-
-    public ImageCatalogV1Endpoint imageCatalogEndpoint() {
-        return getEndpoint(ImageCatalogV1Endpoint.class);
-    }
-
-    public ImageCatalogV3Endpoint imageCatalogV3Endpoint() {
-        return getEndpoint(ImageCatalogV3Endpoint.class);
-    }
-
-    public KnoxServicesV3Endpoint knoxServicesV3Endpoint() {
-        return getEndpoint(KnoxServicesV3Endpoint.class);
-    }
-
-    public LdapConfigEndpoint ldapConfigEndpoint() {
-        return getEndpoint(LdapConfigEndpoint.class);
-    }
-
-    public LdapConfigV3Endpoint ldapConfigV3Endpoint() {
-        return getEndpoint(LdapConfigV3Endpoint.class);
+    public LdapConfigV4Endpoint ldapConfigV3Endpoint() {
+        return getEndpoint(LdapConfigV4Endpoint.class);
     }
 
     public ManagementPackEndpoint managementPackEndpoint() {
@@ -254,68 +181,32 @@ public class CloudbreakIdentityClient {
         return getEndpoint(ManagementPackV3Endpoint.class);
     }
 
-    public KubernetesConfigV3Endpoint kiubernetesConfigV3Endpoint() {
-        return getEndpoint(KubernetesConfigV3Endpoint.class);
+    public KubernetesV4Endpoint kiubernetesConfigV3Endpoint() {
+        return getEndpoint(KubernetesV4Endpoint.class);
     }
 
-    public WorkspaceV3Endpoint workspaceV3Endpoint() {
-        return getEndpoint(WorkspaceV3Endpoint.class);
+    public WorkspaceV4Endpoint workspaceV3Endpoint() {
+        return getEndpoint(WorkspaceV4Endpoint.class);
     }
 
-    public ConnectorV1Endpoint connectorV1Endpoint() {
-        return getEndpoint(ConnectorV1Endpoint.class);
+    public ConnectorV4Endpoint connectorV3Endpoint() {
+        return getEndpoint(ConnectorV4Endpoint.class);
     }
 
-    public ConnectorV2Endpoint connectorV2Endpoint() {
-        return getEndpoint(ConnectorV2Endpoint.class);
+    public ProxyV4Endpoint proxyConfigV3Endpoint() {
+        return getEndpoint(ProxyV4Endpoint.class);
     }
 
-    public ConnectorV3Endpoint connectorV3Endpoint() {
-        return getEndpoint(ConnectorV3Endpoint.class);
+    public DatabaseV4Endpoint databaseV4Endpoint() {
+        return getEndpoint(DatabaseV4Endpoint.class);
     }
 
-    public ProxyConfigEndpoint proxyConfigEndpoint() {
-        return getEndpoint(ProxyConfigEndpoint.class);
+    public RecipeV4Endpoint recipeV4Endpoint() {
+        return getEndpoint(RecipeV4Endpoint.class);
     }
 
-    public ProxyConfigV3Endpoint proxyConfigV3Endpoint() {
-        return getEndpoint(ProxyConfigV3Endpoint.class);
-    }
-
-    public RdsConfigEndpoint rdsConfigEndpoint() {
-        return getEndpoint(RdsConfigEndpoint.class);
-    }
-
-    public RdsConfigV3Endpoint rdsConfigV3Endpoint() {
-        return getEndpoint(RdsConfigV3Endpoint.class);
-    }
-
-    public RecipeEndpoint recipeEndpoint() {
-        return getEndpoint(RecipeEndpoint.class);
-    }
-
-    public RecipeV3Endpoint recipeV3Endpoint() {
-        return getEndpoint(RecipeV3Endpoint.class);
-    }
-
-    public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {
-        return getEndpoint(RepositoryConfigValidationEndpoint.class);
-    }
-
-    public SecurityRuleEndpoint securityRuleEndpoint() {
-        return getEndpoint(SecurityRuleEndpoint.class);
-    }
-
-    public SettingsEndpoint settingsEndpoint() {
-        return getEndpoint(SettingsEndpoint.class);
-    }
-
-    public SmartSenseSubscriptionEndpoint smartSenseSubscriptionEndpoint() {
-        return getEndpoint(SmartSenseSubscriptionEndpoint.class);
-    }
-
-    public SmartSenseSubscriptionV3Endpoint smartSenseSubscriptionV3Endpoint() {
-        return getEndpoint(SmartSenseSubscriptionV3Endpoint.class);
+    public SmartSenseSubscriptionV4Endpoint smartSenseSubscriptionV4Endpoint() {
+        return getEndpoint(SmartSenseSubscriptionV4Endpoint.class);
     }
 
     public StackV1Endpoint stackV1Endpoint() {
@@ -330,36 +221,32 @@ public class CloudbreakIdentityClient {
         return getEndpoint(StackV3Endpoint.class);
     }
 
-    public SubscriptionEndpoint subscriptionEndpoint() {
-        return getEndpoint(SubscriptionEndpoint.class);
+    public UserProfileV4Endpoint userProfileV4Endpoint() {
+        return getEndpoint(UserProfileV4Endpoint.class);
     }
 
-    public UserEndpoint userEndpoint() {
-        return getEndpoint(UserEndpoint.class);
+    public UserV4Endpoint userV4Endpoint() {
+        return getEndpoint(UserV4Endpoint.class);
     }
 
-    public UserV3Endpoint userV3Endpoint() {
-        return getEndpoint(UserV3Endpoint.class);
+    public FileSystemV4Endpoint filesystemV4Endpoint() {
+        return getEndpoint(FileSystemV4Endpoint.class);
     }
 
-    public UtilEndpoint utilEndpoint() {
-        return getEndpoint(UtilEndpoint.class);
+    public UtilV4Endpoint utilV4Endpoint() {
+        return getEndpoint(UtilV4Endpoint.class);
     }
 
-    public FileSystemV3Endpoint filesystemV3Endpoint() {
-        return getEndpoint(FileSystemV3Endpoint.class);
+    public WorkspaceAwareUtilV4Endpoint workspaceAwareUtilV4Endpoint() {
+        return getEndpoint(WorkspaceAwareUtilV4Endpoint.class);
     }
 
-    public UtilV3Endpoint utilV3Endpoint() {
-        return getEndpoint(UtilV3Endpoint.class);
+    public ClusterTemplateV4Endpoint clusterTemplateV3EndPoint() {
+        return getEndpoint(ClusterTemplateV4Endpoint.class);
     }
 
-    public ClusterTemplateV3EndPoint clusterTemplateV3EndPoint() {
-        return getEndpoint(ClusterTemplateV3EndPoint.class);
-    }
-
-    public KerberosConfigV3Endpoint kerberosConfigV3Endpoint() {
-        return getEndpoint(KerberosConfigV3Endpoint.class);
+    public KerberosConfigV4Endpoint kerberosConfigV4Endpoint() {
+        return getEndpoint(KerberosConfigV4Endpoint.class);
     }
 
     protected <E> E getEndpoint(Class<E> clazz) {

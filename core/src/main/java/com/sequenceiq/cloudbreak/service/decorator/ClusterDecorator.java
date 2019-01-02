@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
@@ -165,8 +165,8 @@ public class ClusterDecorator {
         cluster.setLdapConfig(ldapConfig);
     }
 
-    private void prepareLdap(Cluster cluster, Workspace workspace, @NotNull LdapConfigRequest ldapConfigRequest, User user) {
-        LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
+    private void prepareLdap(Cluster cluster, Workspace workspace, @NotNull LdapV4Request ldapV4Request, User user) {
+        LdapConfig ldapConfig = conversionService.convert(ldapV4Request, LdapConfig.class);
         ldapConfigValidator.validateLdapConnection(ldapConfig);
         ldapConfig = ldapConfigService.create(ldapConfig, workspace, user);
         cluster.setLdapConfig(ldapConfig);
@@ -186,7 +186,7 @@ public class ClusterDecorator {
             }
         }
         if (request.getRdsConfigJsons() != null) {
-            for (RDSConfigRequest requestRdsConfig : request.getRdsConfigJsons()) {
+            for (DatabaseV4Request requestRdsConfig : request.getRdsConfigJsons()) {
                 RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
                 rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
                 subject.getRdsConfigs().add(rdsConfig);

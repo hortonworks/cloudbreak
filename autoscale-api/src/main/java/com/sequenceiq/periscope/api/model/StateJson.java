@@ -5,7 +5,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.StateJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ClusterState")
+@ApiModel
 public class StateJson implements Json {
 
     @ApiModelProperty(StateJsonProperties.STATE)

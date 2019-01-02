@@ -19,7 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
@@ -117,13 +116,6 @@ public interface StackV1Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.GET_STATUS_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "statusStack")
     Map<String, Object> status(@PathParam("id") Long id);
-
-    @GET
-    @Path("platformVariants")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    @ApiOperation(value = StackOpDescription.GET_PLATFORM_VARIANTS, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "variantsStack")
-    PlatformVariantsJson variants();
 
     @DELETE
     @Path("{stackId}/{instanceId}")

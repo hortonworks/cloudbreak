@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("HostGroupAdjustment")
+@ApiModel
 public class HostGroupAdjustmentJson implements JsonEntity {
 
     @NotNull

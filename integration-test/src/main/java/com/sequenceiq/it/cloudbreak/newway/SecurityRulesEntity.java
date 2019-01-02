@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleRequest, SecurityRulesResponse, SecurityRules> {
+public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleRequest, SecurityRulesV4Response, SecurityRules> {
     public static final String SECURITYRULES = "SECURITYRULES";
 
     private SecurityRulesEntity(String newId) {

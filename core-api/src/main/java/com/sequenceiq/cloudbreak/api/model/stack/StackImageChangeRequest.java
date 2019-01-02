@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("StackImageChangeRequest")
+@ApiModel
 public class StackImageChangeRequest implements JsonEntity {
 
     @ApiModelProperty(value = StackModelDescription.IMAGE_ID, required = true)

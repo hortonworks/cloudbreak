@@ -1,0 +1,38 @@
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests;
+
+import javax.validation.Valid;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DatabaseTestV4Request implements JsonEntity {
+
+    @ApiModelProperty(ModelDescriptions.Database.NAME)
+    private String existingDatabaseName;
+
+    @Valid
+    @ApiModelProperty(ModelDescriptions.Database.DATABASE_REQUEST)
+    private DatabaseV4Request database;
+
+    public String getExistingDatabaseName() {
+        return existingDatabaseName;
+    }
+
+    public void setExistingDatabaseName(String existingDatabaseName) {
+        this.existingDatabaseName = existingDatabaseName;
+    }
+
+    public DatabaseV4Request getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(DatabaseV4Request database) {
+        this.database = database;
+    }
+}

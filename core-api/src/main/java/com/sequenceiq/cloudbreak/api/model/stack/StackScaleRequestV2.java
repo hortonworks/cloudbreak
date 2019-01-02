@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("StackScaleRequestV2")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackScaleRequestV2 implements JsonEntity {
 

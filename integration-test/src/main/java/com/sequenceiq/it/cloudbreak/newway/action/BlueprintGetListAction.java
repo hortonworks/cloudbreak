@@ -20,8 +20,8 @@ public class BlueprintGetListAction implements ActionV2<BlueprintEntity> {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, format(" Blueprint list by workspace request:%n"), entity.getRequest());
         var blueprints = client.getCloudbreakClient()
-                .blueprintV3Endpoint()
-                .listByWorkspace(client.getWorkspaceId());
+                .blueprintV4Endpoint()
+                .list(client.getWorkspaceId());
         logJSON(LOGGER, format(" Blueprint list has executed successfully:%n"), blueprints);
 
         return entity;

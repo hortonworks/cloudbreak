@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
 import org.junit.Before;
 import org.junit.Test;
 

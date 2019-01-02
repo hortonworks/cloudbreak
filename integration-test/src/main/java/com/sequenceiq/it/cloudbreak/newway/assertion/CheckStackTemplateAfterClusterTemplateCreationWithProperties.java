@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -29,14 +29,14 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
     @Override
     public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
         ClusterTemplateEntity clusterTemplate = testContext.get(ClusterTemplateEntity.class);
-        Optional<ClusterTemplateResponse> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
+        Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
 
-        ClusterTemplateResponse clusterTemplateResponse = first.get();
+        ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-        StackV2Request stackTemplate = clusterTemplateResponse.getStackTemplate();
+        StackV2Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
         if (stackTemplate == null) {
             throw new IllegalArgumentException("Stack template is empty");
         }

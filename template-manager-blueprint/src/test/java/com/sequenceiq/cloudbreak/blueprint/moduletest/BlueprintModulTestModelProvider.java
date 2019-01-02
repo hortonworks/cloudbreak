@@ -27,8 +27,8 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -50,35 +50,35 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.HIVE))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.HIVE))))
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.DRUID))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.DRUID))))
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.SUPERSET))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.SUPERSET))))
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenDruidSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.SUPERSET))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.SUPERSET))))
                 .build();
     }
 
@@ -99,7 +99,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject bpObjectWithThreeHostAndLdapRangerConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
@@ -174,7 +174,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenLdapConfiguredWithRdsRanger() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
@@ -182,7 +182,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenADConfiguredWithRdsRanger() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
                 .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
@@ -190,7 +190,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenLdapConfiguredWithOracleRdsRanger() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER, DatabaseVendor.ORACLE11))))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
@@ -198,7 +198,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenRdsConfiguredWithRdsOozie() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.OOZIE))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.OOZIE))))
                 .build();
     }
 
@@ -213,7 +213,7 @@ class BlueprintModulTestModelProvider {
         return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGeneralClusterConfigs(configs)
                 .withSharedServiceConfigs(datalakeSharedServiceConfig().get())
@@ -230,7 +230,7 @@ class BlueprintModulTestModelProvider {
         return Builder.builder()
                 .withHostgroups(groups)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGeneralClusterConfigs(configs)
                 .build();
@@ -242,7 +242,7 @@ class BlueprintModulTestModelProvider {
         return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.BEACON)))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGateway(gatewayEnabled(), "/cb/secret/signkey")
                 .withGeneralClusterConfigs(configs)
@@ -255,7 +255,7 @@ class BlueprintModulTestModelProvider {
         return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.BEACON)))
                 .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .withGateway(gatewayEnabled(), "/cb/secret/signkey")
                 .withGeneralClusterConfigs(configs)
@@ -309,7 +309,7 @@ class BlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.DRUID))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.DRUID))))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }

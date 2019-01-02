@@ -5,22 +5,23 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse, RdsConfigEntity> implements Purgable<RDSConfigResponse> {
+public class RdsConfigEntity extends AbstractCloudbreakEntity<DatabaseV4Request, DatabaseV4Response, RdsConfigEntity> implements Purgable<DatabaseV4Response> {
 
     public static final String RDS_CONFIG = "RDS_CONFIG";
 
-    private RdsTestResult response;
+    private DatabaseTestV4Response response;
 
     RdsConfigEntity(String newId) {
         super(newId);
-        setRequest(new RDSConfigRequest());
+        setRequest(new DatabaseV4Request());
     }
 
     RdsConfigEntity() {
@@ -28,14 +29,14 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, 
     }
 
     public RdsConfigEntity(TestContext testContext) {
-        super(new RDSConfigRequest(), testContext);
+        super(new DatabaseV4Request(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().rdsConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), getName());
+            cloudbreakClient.getCloudbreakClient().databaseV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend.");
         }
@@ -49,7 +50,7 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, 
                 .withType("HIVE");
     }
 
-    public RdsConfigEntity withRequest(RDSConfigRequest request) {
+    public RdsConfigEntity withRequest(DatabaseV4Request request) {
         setRequest(request);
         return this;
     }
@@ -80,29 +81,31 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, 
         return this;
     }
 
-    public RdsTestResult getResponseTestResult() {
+    public DatabaseTestV4Response getResponseTestResult() {
         return response;
     }
 
-    public void setResponseTestResult(RdsTestResult response) {
+    public void setResponseTestResult(DatabaseTestV4Response response) {
         this.response = response;
     }
 
     @Override
-    public List<RDSConfigResponse> getAll(CloudbreakClient client) {
-        RdsConfigV3Endpoint rdsConfigV3Endpoint = client.getCloudbreakClient().rdsConfigV3Endpoint();
-        return rdsConfigV3Endpoint.listByWorkspace(client.getWorkspaceId(), null, false).stream()
+    public List<DatabaseV4Response> getAll(CloudbreakClient client) {
+        DatabaseV4Endpoint databaseV4Endpoint = client.getCloudbreakClient().databaseV4Endpoint();
+        DatabaseV4ListFilter listRequest = new DatabaseV4ListFilter();
+        listRequest.setAttachGlobal(false);
+        return databaseV4Endpoint.list(client.getWorkspaceId(), listRequest).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public boolean deletable(RDSConfigResponse entity) {
+    public boolean deletable(DatabaseV4Response entity) {
         return entity.getName().startsWith("mock-");
     }
 
     @Override
-    public void delete(RDSConfigResponse entity, CloudbreakClient client) {
+    public void delete(DatabaseV4Response entity, CloudbreakClient client) {
         try {
             client.getCloudbreakClient().stackV3Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName(), true, false);
         } catch (Exception e) {

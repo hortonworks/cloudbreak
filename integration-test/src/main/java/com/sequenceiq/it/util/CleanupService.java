@@ -37,40 +37,17 @@ public class CleanupService {
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
 
-        cloudbreakClient.blueprintEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(blueprint -> blueprint.getName().startsWith("it-"))
-                .forEach(blueprint -> deleteBlueprint(cloudbreakClient, String.valueOf(blueprint.getId())));
-
-        cloudbreakClient.recipeEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(recipe -> recipe.getName().startsWith("it-"))
-                .forEach(recipe -> deleteRecipe(cloudbreakClient, recipe.getId()));
-
-        cloudbreakClient.credentialEndpoint()
-                .getPrivates()
+        cloudbreakClient.credentialV4Endpoint()
+                .list(1L)
+                .getResponses()
                 .stream()
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
-                .forEach(credential -> deleteCredential(cloudbreakClient, String.valueOf(credential.getId())));
-
-        cloudbreakClient.rdsConfigEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(rds -> rds.getName().startsWith("it-"))
-                .forEach(rds -> deleteRdsConfigs(cloudbreakClient, rds.getId().toString()));
+                .forEach(credential -> deleteCredential(cloudbreakClient, credential.getName()));
     }
 
     public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
         if (credentialId != null) {
-            cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
-        }
-    }
-
-    public void deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) {
-        if (blueprintId != null) {
-            cloudbreakClient.blueprintEndpoint().delete(Long.valueOf(blueprintId));
+            cloudbreakClient.credentialV4Endpoint().delete(1L, credentialId);
         }
     }
 
@@ -97,19 +74,5 @@ public class CleanupService {
             result = true;
         }
         return result;
-    }
-
-    public void deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
-        cloudbreakClient.recipeEndpoint().delete(recipeId);
-    }
-
-    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
-        cloudbreakClient.imageCatalogEndpoint().deletePublic(name);
-    }
-
-    public void deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
-        if (rdsConfigId != null) {
-            cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
-        }
     }
 }

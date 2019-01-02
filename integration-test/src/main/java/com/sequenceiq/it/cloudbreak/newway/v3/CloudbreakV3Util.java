@@ -26,9 +26,10 @@ import org.springframework.util.StringUtils;
 import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.filters.EventSinceV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
@@ -316,9 +317,11 @@ public class CloudbreakV3Util {
         do {
             LOGGER.info("Waiting for event type {} and event message contains {} ...", eventType, eventMessage);
             sleep();
-            EventV3Endpoint eventEndpoint = cloudbreakClient.eventV3Endpoint();
-            List<CloudbreakEventsJson> list = eventEndpoint.getCloudbreakEventsSince(workspaceId, sinceTimeStamp);
-            for (CloudbreakEventsJson event : list) {
+            EventV4Endpoint eventEndpoint = cloudbreakClient.eventV3Endpoint();
+            EventSinceV4Filter eventSinceV4Filter = new EventSinceV4Filter();
+            eventSinceV4Filter.setSince(sinceTimeStamp);
+            List<CloudbreakEventV4Response> list = eventEndpoint.list(workspaceId, eventSinceV4Filter).getResponses();
+            for (CloudbreakEventV4Response event : list) {
                 if (event.getStackName().equals(stackName) && event.getEventMessage().contains(eventMessage) && event.getEventType().equals(eventType)) {
                     exitCriteria = Boolean.TRUE;
                     break;

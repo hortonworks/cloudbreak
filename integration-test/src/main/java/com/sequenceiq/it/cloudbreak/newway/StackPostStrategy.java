@@ -56,7 +56,7 @@ public class StackPostStrategy implements Strategy {
                 cluster.getRequest().getCloudStorage().getS3().setInstanceProfile(arns.get(0));
             } else if (cluster.getRequest().getCloudStorage() != null && cluster.getRequest().getCloudStorage().getGcs() != null && credential != null) {
                 cluster.getRequest().getCloudStorage().getGcs()
-                        .setServiceAccountEmail(credential.getResponse().getParameters().get("serviceAccountId").toString());
+                        .setServiceAccountEmail(credential.getResponse().getGcp().getP12().getServiceAccountId());
             }
         }
 

@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -54,7 +54,7 @@ public class ClusterCreationEnvironmentValidator {
         return resultBuilder.build();
     }
 
-    public ValidationResult validate(RegisterDatalakeRequest registerDatalakeRequest, Environment environment) {
+    public ValidationResult validate(RegisterDatalakeV4Request registerDatalakeRequest, Environment environment) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Long workspaceId = environment.getWorkspace().getId();
         String environmentName = environment.getName();
@@ -63,7 +63,7 @@ public class ClusterCreationEnvironmentValidator {
         }
         validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId),
                 environmentName, resultBuilder);
-        for (String rdsConfigName : registerDatalakeRequest.getRdsNames()) {
+        for (String rdsConfigName : registerDatalakeRequest.getDatabaseNames()) {
             validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
         }
         if (StringUtils.isNoneEmpty(registerDatalakeRequest.getKerberosName())) {
@@ -105,7 +105,7 @@ public class ClusterCreationEnvironmentValidator {
             }
         }
         if (request.getRdsConfigJsons() != null) {
-            for (RDSConfigJson rdsConfig : request.getRdsConfigJsons()) {
+            for (DatabaseV4Base rdsConfig : request.getRdsConfigJsons()) {
                 validateEnvironments(rdsConfig.getName(), RDSConfig.class.getSimpleName(), rdsConfig.getEnvironments(), stackEnv, resultBuilder);
             }
         }

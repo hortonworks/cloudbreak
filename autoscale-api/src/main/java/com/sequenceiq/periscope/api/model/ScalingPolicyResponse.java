@@ -5,7 +5,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.ScalingPolicyJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ScalingPolicyResponse")
+@ApiModel
 public class ScalingPolicyResponse extends ScalingPolicyBase {
 
     @ApiModelProperty(ScalingPolicyJsonProperties.ID)

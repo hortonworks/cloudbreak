@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -62,7 +62,7 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
     }
 
     private void sendNotification(ExtendedCloudCredential extendedCloudCredential, String message, String eventType) {
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventType(eventType);
         notification.setEventTimestamp(new Date().getTime());
         notification.setUserId(extendedCloudCredential.getUserId());

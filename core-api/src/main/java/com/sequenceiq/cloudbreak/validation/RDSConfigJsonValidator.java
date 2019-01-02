@@ -8,9 +8,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 
-public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfigJson, RDSConfigJson> {
+public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfigJson, DatabaseV4Base> {
 
     private static final int MIN_NAME_LENGTH = 4;
 
@@ -35,7 +35,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     }
 
     @Override
-    public boolean isValid(RDSConfigJson value, ConstraintValidatorContext context) {
+    public boolean isValid(DatabaseV4Base value, ConstraintValidatorContext context) {
         if (!isConnectionUrlValid(value.getConnectionURL())
                 || !isNameValid(value.getName())
                 || !isTypeValid(value.getType())

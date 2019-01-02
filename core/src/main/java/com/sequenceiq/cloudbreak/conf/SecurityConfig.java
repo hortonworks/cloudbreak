@@ -82,7 +82,7 @@ public class SecurityConfig {
 
         private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/stacks/**", API_ROOT_CONTEXT + "/v2/stacks/**"};
 
-        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/clustertemplates/**"};
+        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/cluster_templates/**"};
 
         private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/v1/accountpreferences/**";
 
@@ -91,6 +91,8 @@ public class SecurityConfig {
         private static final String SECURITY_RULE_URL_PATTERNS = API_ROOT_CONTEXT + "/v1/securityrules/**";
 
         private static final String V3_API = API_ROOT_CONTEXT + "/v3/**";
+
+        private static final String V4_API = API_ROOT_CONTEXT + "/v4/**";
 
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
@@ -137,6 +139,8 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
                     .access("#oauth2.isOAuth()")
                     .antMatchers(V3_API)
+                    .access("#oauth2.isOAuth()")
+                    .antMatchers(V4_API)
                     .access("#oauth2.isOAuth()")
                     .antMatchers(AUTOSCALE_API)
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")

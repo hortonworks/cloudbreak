@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("instanceGroups")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupRequest extends InstanceGroupBase {
 

@@ -115,7 +115,7 @@ public class DatalakeConfigProvider {
             datalakeParamKeys.addAll(sddEntry.getValue().getBlueprintParamKeys());
         }
         Map<String, ServiceDescriptor> serviceDescriptors = new HashMap<>();
-        Map<String, String> datalakeParameters = datalakeAmbari.getConfigValuesByConfigIdsAndType(Lists.newArrayList(datalakeParamKeys));
+        Map<String, String> datalakeParameters = datalakeAmbari.getConfigValuesByConfigIds(Lists.newArrayList(datalakeParamKeys));
         for (Map.Entry<String, ServiceDescriptorDefinition> sddEntry : serviceDescriptorDefinitionProvider.getServiceDescriptorDefinitionMap().entrySet()) {
             ServiceDescriptor serviceDescriptor = new ServiceDescriptor();
             serviceDescriptor.setServiceName(sddEntry.getValue().getServiceName());
