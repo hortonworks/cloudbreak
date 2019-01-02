@@ -14,8 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
@@ -41,6 +41,10 @@ public class StackStatus implements ProvisionEntity {
     private DetailedStackStatus detailedStackStatus;
 
     public StackStatus() {
+    }
+
+    public StackStatus(Stack stack, DetailedStackStatus detailedStackStatus) {
+        this(stack, detailedStackStatus.getStatus(), "", detailedStackStatus);
     }
 
     public StackStatus(Stack stack, Status status, String statusReason, DetailedStackStatus detailedStackStatus) {

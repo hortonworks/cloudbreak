@@ -8,15 +8,14 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
-import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -39,12 +38,11 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
     private HostGroupService hostGroupService;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @Override
-    public StackResponse providerEntriesToStackResponse(Stack stack, StackResponse stackResponse) {
-        Set<HardwareInfoGroupResponse> hardwareInfoResponses = stack.getInstanceGroups().stream()
+    public StackV4Response providerEntriesToStackResponse(Stack stack, StackV4Response stackResponse) {
+        Set<HardwareInfoGroupV4Response> hardwareInfoResponses = stack.getInstanceGroups().stream()
                 .map(instanceGroup -> hardwareInfoGroupResponse(stack, instanceGroup))
                 .collect(Collectors.toSet());
         stackResponse.setHardwareInfoGroups(hardwareInfoResponses);
@@ -56,7 +54,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
         return StackResponseEntries.HARDWARE_INFO.getEntryName();
     }
 
-    private HardwareInfoGroupResponse hardwareInfoGroupResponse(Stack stack, InstanceGroup instanceGroup) {
+    private HardwareInfoGroupV4Response hardwareInfoGroupResponse(Stack stack, InstanceGroup instanceGroup) {
 
         Template template = instanceGroup.getTemplate();
         Set<InstanceMetaData> allInstanceMetaData = instanceGroup.getAllInstanceMetaData();
@@ -65,7 +63,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
             hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), instanceGroup.getGroupName());
         }
 
-        HardwareInfoGroupResponse hardwareInfoGroupResponse = new HardwareInfoGroupResponse();
+        HardwareInfoGroupV4Response hardwareInfoGroupResponse = new HardwareInfoGroupV4Response();
         if (hostGroup != null) {
             hardwareInfoGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
         }
@@ -74,7 +72,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
 
         for (InstanceMetaData instanceMetaData : allInstanceMetaData) {
 
-            HardwareInfoResponse hardwareInfoResponse = new HardwareInfoResponse();
+            HardwareInfoV4Response hardwareInfoResponse = new HardwareInfoV4Response();
             hardwareInfoResponse.setAmbariServer(instanceMetaData.getAmbariServer());
             hardwareInfoResponse.setDiscoveryFQDN(instanceMetaData.getDiscoveryFQDN());
             hardwareInfoResponse.setInstanceGroup(instanceMetaData.getInstanceGroupName());
@@ -89,7 +87,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
             if (stack.getCluster() != null) {
                 hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
                 if (template != null) {
-                    hardwareInfoResponse.setTemplate(conversionService.convert(template, TemplateResponse.class));
+                    hardwareInfoResponse.setTemplate(converterUtil.convert(template, InstanceTemplateV4Response.class));
                 }
             }
 

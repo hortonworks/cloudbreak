@@ -7,8 +7,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -30,13 +28,13 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
 
     protected void postStackAndSetRequestForEntity(IntegrationTestContext integrationTestContext, CloudbreakClient client, StackEntity stackEntity)
             throws Exception {
-        log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());
+        log(" Name:\n" + stackEntity.getRequest().getName());
         logJSON(" Stack post request:\n", stackEntity.getRequest());
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         stackEntity.setResponse(
                 client.getCloudbreakClient()
-                        .stackV3Endpoint()
-                        .createInWorkspace(workspaceId, stackEntity.getRequest()));
+                        .stackV4Endpoint()
+                        .post(workspaceId, stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
     }
@@ -44,7 +42,7 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
     protected void setImageSettingsIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
         var imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
-            stackEntity.getRequest().setImageSettings(imageSettings.getRequest());
+            stackEntity.getRequest().setImage(imageSettings.getRequest());
         }
     }
 
@@ -57,8 +55,8 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
 
     protected Credential setCredentialIfNeededAndReturnIt(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
         var credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && stackEntity.getRequest().getGeneral().getCredentialName() == null) {
-            stackEntity.getRequest().getGeneral().setCredentialName(credential.getName());
+        if (credential != null && stackEntity.getRequest().getEnvironment().getCredentialName() == null) {
+            stackEntity.getRequest().getEnvironment().setCredentialName(credential.getName());
         }
         return credential;
     }
@@ -80,10 +78,9 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
     protected void setKerberosIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
         var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getAmbari().getKerberosConfigName() == null;
+                && stackEntity.getRequest().getCluster().getKerberosName() == null;
         if (kerberos != null && updateKerberos) {
-            AmbariV2Request ambariReq = stackEntity.getRequest().getCluster().getAmbari();
-            ambariReq.setKerberosConfigName(kerberos.getRequest().getName());
+            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
         }
     }
 
@@ -91,11 +88,7 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
         var clusterGateway = ClusterGateway.getTestContextGateway().apply(integrationTestContext);
         if (clusterGateway != null) {
             if (stackEntity.hasCluster()) {
-                ClusterV2Request clusterV2Request = stackEntity.getRequest().getCluster();
-                AmbariV2Request ambariV2Request = clusterV2Request.getAmbari();
-                if (ambariV2Request != null) {
-                    ambariV2Request.setGateway(clusterGateway.getRequest());
-                }
+                stackEntity.getRequest().getCluster().setGateway(clusterGateway.getRequest());
             }
         }
     }
@@ -115,6 +108,6 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
 
     private void setGcsCloudStorageForCluster(Cluster cluster, Credential credential) {
         cluster.getRequest().getCloudStorage().getGcs()
-                .setServiceAccountEmail(credential.getResponse().getParameters().get("serviceAccountId").toString());
+                .setServiceAccountEmail(credential.getResponse().getGcp().getP12().getServiceAccountId());
     }
 }

@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerConstraintFactory;
@@ -83,7 +83,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
         when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenReturn(cluster);
@@ -119,7 +119,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);

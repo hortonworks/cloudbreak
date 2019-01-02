@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
@@ -25,7 +25,7 @@ public class EnvironmentRegionValidator {
         return resultBuilder;
     }
 
-    public ValidationResultBuilder validateLocation(LocationRequest location, Set<String> requestedRegions,
+    public ValidationResultBuilder validateLocation(LocationV4Request location, Set<String> requestedRegions,
             Environment environment, ValidationResultBuilder resultBuilder) {
         String cloudPlatform = environment.getCloudPlatform();
         if (!requestedRegions.contains(location.getLocationName())

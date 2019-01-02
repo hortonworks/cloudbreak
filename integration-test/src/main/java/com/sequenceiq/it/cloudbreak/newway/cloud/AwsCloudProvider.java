@@ -1,12 +1,28 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import static java.util.Set.of;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -16,14 +32,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-
-import static java.util.Set.of;
 
 public class AwsCloudProvider extends CloudProviderHelper {
 
@@ -63,37 +71,61 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential(boolean create) {
         String credentialType = getTestParameter().get("awsCredentialType");
-        Map<String, Object> credentialParameters;
-        credentialParameters = KEY_BASED_CREDENTIAL.equals(credentialType) ? awsCredentialDetailsKey() : awsCredentialDetailsArn();
+        AwsCredentialV4Parameters parameters;
+        if (KEY_BASED_CREDENTIAL.equals(credentialType)) {
+            parameters = awsCredentialDetailsKey();
+        } else {
+            parameters = awsCredentialDetailsArn();
+        }
         CredentialEntity credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AWS_CAPITAL)
-                .withParameters(credentialParameters);
+                .withAwsParameters(parameters);
     }
 
-    public Map<String, Object> awsCredentialDetailsArn() {
-        return Map.of("selector", "role-based", "roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
+    public AwsCredentialV4Parameters awsCredentialDetailsArn() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
+        roleBasedCredentialParameters.setRoleArn(getTestParameter().get("integrationtest.awscredential.roleArn"));
+        parameters.setRoleBased(roleBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsInvalidArn() {
-        return Map.of("selector", "role-based", "roleArn", "arn:aws:iam::123456789012:role/fake");
+    public AwsCredentialV4Parameters awsCredentialDetailsInvalidArn() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
+        roleBasedCredentialParameters.setRoleArn("arn:aws:iam::123456789012:role/fake");
+        parameters.setRoleBased(roleBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsKey() {
-        return Map.of("selector", "key-based", "accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"), "secretKey",
-                getTestParameter().get("integrationtest.awscredential.secretKey"));
+    public AwsCredentialV4Parameters awsCredentialDetailsKey() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+        keyBasedCredentialParameters.setAccessKey(getTestParameter().get("integrationtest.awscredential.accessKey"));
+        keyBasedCredentialParameters.setSecretKey(getTestParameter().get("integrationtest.awscredential.secretKey"));
+        parameters.setKeyBased(keyBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
-        return Map.of("selector", "key-based", "accessKey", "ABCDEFGHIJKLMNOPQRST", "secretKey",
-                getTestParameter().get("integrationtest.awscredential.secretKey"));
+    public AwsCredentialV4Parameters awsCredentialDetailsInvalidAccessKey() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+        keyBasedCredentialParameters.setAccessKey("ABCDEFGHIJKLMNOPQRST");
+        keyBasedCredentialParameters.setSecretKey(getTestParameter().get("integrationtest.awscredential.secretKey"));
+        parameters.setKeyBased(keyBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
-        return Map.of("selector", "key-based", "accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"), "secretKey",
-                "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
+    public AwsCredentialV4Parameters awsCredentialDetailsInvalidSecretKey() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+        keyBasedCredentialParameters.setSecretKey("123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
+        keyBasedCredentialParameters.setAccessKey(getTestParameter().get("integrationtest.awscredential.accessKey"));
+        parameters.setKeyBased(keyBasedCredentialParameters);
+        return parameters;
     }
 
     @Override
@@ -107,20 +139,22 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackAuthenticationRequest stackauth() {
-        StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
-
+    public StackAuthenticationV4Request stackauth() {
+        StackAuthenticationV4Request stackauth = new StackAuthenticationV4Request();
         stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 
     @Override
-    public TemplateV2Request template() {
-        TemplateV2Request t = new TemplateV2Request();
+    public InstanceTemplateV4Request template() {
+        InstanceTemplateV4Request t = new InstanceTemplateV4Request();
         t.setInstanceType(getTestParameter().getWithDefault("awsInstanceType", "m5.xlarge"));
-        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("awsInstanceVolumeCount", "1")));
-        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("awsInstanceVolumeSize", "100")));
-        t.setVolumeType(getTestParameter().getWithDefault("awsInstanceVolumeType", "gp2"));
+        VolumeV4Request volumeV4Request = new VolumeV4Request();
+        volumeV4Request.setCount(Integer.parseInt(getTestParameter().getWithDefault("awsInstanceVolumeCount", "1")));
+        volumeV4Request.setType(getTestParameter().getWithDefault("awsInstanceVolumeType", "gp2"));
+        volumeV4Request.setSize(Integer.parseInt(getTestParameter().getWithDefault("awsInstanceVolumeSize", "100")));
+        t.setAttachedVolumes(Set.of(volumeV4Request));
+        t.setCloudPlatform(CloudPlatform.AWS);
         return t;
     }
 
@@ -129,8 +163,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
         return getTestParameter().getWithDefault("awsClusterName", AWS_CLUSTER_DEFAULT_NAME);
     }
 
-    public StackAuthenticationRequest stackAuthentication() {
-        StackAuthenticationRequest stackAuthentication = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackAuthentication() {
+        StackAuthenticationV4Request stackAuthentication = new StackAuthenticationV4Request();
         stackAuthentication.setPublicKeyId("aszegedi");
         return stackAuthentication;
     }
@@ -190,34 +224,40 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public NetworkV2Request newNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request newNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
         return network;
     }
 
     @Override
-    public NetworkV2Request existingNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request existingNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(networkProperties());
+        AwsNetworkV4Parameters parameters = new AwsNetworkV4Parameters();
+        parameters.setVpcId(getVpcId());
+        parameters.setInternetGatewayId(getInternetGatewayId());
+        network.setAws(parameters);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingSubnet() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setParameters(subnetProperties());
+    public NetworkV4Request existingSubnet() {
+        NetworkV4Request network = new NetworkV4Request();
+        AwsNetworkV4Parameters parameters = new AwsNetworkV4Parameters();
+        parameters.setVpcId(getVpcId());
+        parameters.setSubnetId(getSubnetId());
+        network.setAws(parameters);
         return network;
     }
 
     @Override
-    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
         var ambari = ambariRequestWithBlueprintName(blueprintName);
-        var stackDetails = new AmbariStackDetailsJson();
-        stackDetails.setMpacks(Collections.emptyList());
+        var stackRepoDetails = new StackRepositoryV4Request();
+        stackRepoDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
-        ambari.setAmbariStackDetails(stackDetails);
+        ambari.setStackRepository(stackRepoDetails);
         return ambari;
     }
 
@@ -237,9 +277,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         return Cluster.request()
-                .withSharedService(datalakeClusterName)
                 .withAmbariRequest(ambariRequestWithBlueprintName(getBlueprintName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
@@ -249,24 +288,25 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest() {
+    public StackEntity aValidAttachedStackRequest(String datalakeName) {
         var request = new StackCreation(aValidStackRequest());
         request.setCreationStrategy(StackAction::determineNetworkAwsFromDatalakeStack);
+        request.withSharedService(datalakeName);
         return request.getStack();
     }
 
     @Override
-    public AmbariV2Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+    public AmbariV4Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
         var req = ambariRequestWithBlueprintName(bluePrintName);
         if (StringUtils.isNoneEmpty(customAmbariVersion)) {
             Preconditions.checkNotNull(customAmbariRepoUrl);
             Preconditions.checkNotNull(customAmbariRepoGpgKey);
-            AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
-            ambariRepoDetailsJson.setVersion(customAmbariVersion);
-            ambariRepoDetailsJson.setBaseUrl(customAmbariRepoUrl);
-            ambariRepoDetailsJson.setGpgKeyUrl(customAmbariRepoGpgKey);
-            req.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+            AmbariRepositoryV4Request ambariRepo = new AmbariRepositoryV4Request();
+            ambariRepo.setVersion(customAmbariVersion);
+            ambariRepo.setBaseUrl(customAmbariRepoUrl);
+            ambariRepo.setGpgKeyUrl(customAmbariRepoGpgKey);
+            req.setRepository(ambariRepo);
         }
         return req;
     }

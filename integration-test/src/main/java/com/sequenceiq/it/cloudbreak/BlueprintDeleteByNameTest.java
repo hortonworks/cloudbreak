@@ -8,8 +8,9 @@ public class BlueprintDeleteByNameTest extends AbstractCloudbreakIntegrationTest
     @Parameters("blueprintName")
     public void testDeleteBlueprintByName(String blueprintName) {
         // GIVEN
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
-        getCloudbreakClient().blueprintEndpoint().deletePublic(blueprintName);
+        getCloudbreakClient().blueprintV4Endpoint().delete(workspaceId, blueprintName);
         // THEN no exception
     }
 }

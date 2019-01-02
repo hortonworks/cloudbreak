@@ -7,22 +7,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.securitygroup.SecurityGroupV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class SecurityGroupEntity extends AbstractCloudbreakEntity<SecurityGroupV2Request, SecurityGroupResponse, SecurityGroupEntity> {
+public class SecurityGroupEntity extends AbstractCloudbreakEntity<SecurityGroupV4Request, SecurityGroupV4Response, SecurityGroupEntity> {
 
-    protected SecurityGroupEntity(SecurityGroupV2Request request, TestContext testContext) {
+    protected SecurityGroupEntity(SecurityGroupV4Request request, TestContext testContext) {
         super(request, testContext);
     }
 
     protected SecurityGroupEntity(TestContext testContext) {
-        super(new SecurityGroupV2Request(), testContext);
+        super(new SecurityGroupV4Request(), testContext);
     }
 
     public SecurityGroupEntity() {

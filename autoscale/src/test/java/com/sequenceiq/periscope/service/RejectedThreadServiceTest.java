@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
@@ -24,7 +24,7 @@ public class RejectedThreadServiceTest {
 
     @Test
     public void testCreateWhenAutoscaleStackResponse() {
-        AutoscaleStackResponse response = new AutoscaleStackResponse();
+        AutoscaleStackV4Response response = new AutoscaleStackV4Response();
         response.setStackId(1L);
         EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(response));
 
@@ -37,7 +37,7 @@ public class RejectedThreadServiceTest {
 
     @Test
     public void testCreateWhenAutoscaleStackResponseCountEqualsTwo() {
-        AutoscaleStackResponse response = new AutoscaleStackResponse();
+        AutoscaleStackV4Response response = new AutoscaleStackV4Response();
         response.setStackId(1L);
         EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(response));
 
@@ -52,7 +52,7 @@ public class RejectedThreadServiceTest {
 
     @Test
     public void testCreateWhenAutoscaleStackResponseAndRemove() {
-        AutoscaleStackResponse response = new AutoscaleStackResponse();
+        AutoscaleStackV4Response response = new AutoscaleStackV4Response();
         response.setStackId(1L);
         EvaluatorExecutor task = new TestEvaluatorExecutor(getContext(response));
 

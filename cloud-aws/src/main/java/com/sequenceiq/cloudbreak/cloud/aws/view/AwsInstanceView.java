@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 

@@ -1,5 +1,19 @@
 package com.sequenceiq.it.cloudbreak;
 
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -9,19 +23,6 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.Response;
 
 public class NetworkClusterTests extends CloudbreakTest {
 
@@ -83,10 +84,9 @@ public class NetworkClusterTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithBlueprintName(cloudProvider.getBlueprintName())), cloudProvider.getPlatform() + " cluster request ");
-        given(cloudProvider.aValidStackRequest().withRegion(cloudProvider.region()).withAvailabilityZone(cloudProvider
-                        .availabilityZone()).withNetwork(cloudProvider.existingSubnet()),
+        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
                 " stack request ");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER), getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
@@ -99,8 +99,9 @@ public class NetworkClusterTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithBlueprintName(cloudProvider.getBlueprintName())), cloudProvider.getPlatform() + " cluster request ");
-        given(cloudProvider.aValidStackRequest().withRegion(cloudProvider.region()).withNetwork(cloudProvider.existingSubnet()), " stack request ");
-        when(Stack.post(), "post the stack request");
+        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
+                " stack request ");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER), getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),

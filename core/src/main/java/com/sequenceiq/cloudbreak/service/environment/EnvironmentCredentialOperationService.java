@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.CredentialAwareEnvRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.CredentialAwareEnvV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -24,7 +24,7 @@ public class EnvironmentCredentialOperationService {
     @Named("conversionService")
     private ConversionService conversionService;
 
-    public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, Long workspaceId) {
+    public Credential getCredentialFromRequest(CredentialAwareEnvV4Request request, Long workspaceId) {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             try {
@@ -40,7 +40,7 @@ public class EnvironmentCredentialOperationService {
         return credential;
     }
 
-    public Credential validatePlatformAndGetCredential(CredentialAwareEnvRequest request, Environment environment, Long workspaceId) {
+    public Credential validatePlatformAndGetCredential(CredentialAwareEnvV4Request request, Environment environment, Long workspaceId) {
         String requestedPlatform;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             Credential credential = credentialService.getByNameForWorkspaceId(request.getCredentialName(), workspaceId);

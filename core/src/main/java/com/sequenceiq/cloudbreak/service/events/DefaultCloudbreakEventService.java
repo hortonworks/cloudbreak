@@ -11,7 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
@@ -41,6 +45,15 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Inject
     private StructuredEventService structuredEventService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private WorkspaceService workspaceService;
 
     @PostConstruct
     public void setup() {
@@ -81,7 +94,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<StructuredNotificationEvent> cloudbreakEvents(Workspace workspace, Long since) {
+    public List<StructuredNotificationEvent> cloudbreakEvents(Long workspaceId, Long since) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        Workspace workspace = workspaceService.get(workspaceId, user);
         List<StructuredNotificationEvent> events;
         events = null == since ? structuredEventService.getEventsForWorkspaceWithType(workspace, StructuredNotificationEvent.class)
                 : structuredEventService.getEventsForWorkspaceWithTypeSince(workspace, StructuredNotificationEvent.class, since);

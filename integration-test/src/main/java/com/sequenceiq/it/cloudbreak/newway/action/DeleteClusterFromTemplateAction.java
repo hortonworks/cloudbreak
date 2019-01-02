@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 
-public class DeleteClusterFromTemplateAction implements ActionV2<ClusterTemplateEntity> {
+public class DeleteClusterFromTemplateAction implements Action<ClusterTemplateEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteClusterFromTemplateAction.class);
 
@@ -30,8 +30,8 @@ public class DeleteClusterFromTemplateAction implements ActionV2<ClusterTemplate
         logJSON(LOGGER, "Stack from template post request:\n", entity.getRequest().getStackTemplate());
         StackTemplateEntity stackEntity = testContext.get(stackTemplateKey);
         client.getCloudbreakClient()
-                .stackV3Endpoint()
-                .deleteInWorkspace(client.getWorkspaceId(), stackEntity.getResponse().getName(), false, null);
+                .stackV4Endpoint()
+                .delete(client.getWorkspaceId(), stackEntity.getResponse().getName(), false, null);
         logJSON(LOGGER, " Stack from template created  successfully:\n", entity.getResponse());
         log(LOGGER, "Stack from template ID: " + entity.getResponse().getId());
         return entity;

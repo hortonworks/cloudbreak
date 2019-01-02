@@ -28,8 +28,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -94,7 +94,7 @@ public class StackToCloudStackConverterTest {
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     @Mock
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @Mock
     private Stack stack;
@@ -125,7 +125,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertFalse(result.getFileSystem().isPresent());
-        verify(conversionService, times(0)).convert(any(FileSystem.class), eq(SpiFileSystem.class));
+        verify(converterUtil, times(0)).convert(any(FileSystem.class), eq(SpiFileSystem.class));
     }
 
     @Test
@@ -134,13 +134,13 @@ public class StackToCloudStackConverterTest {
         FileSystem fileSystem = new FileSystem();
         SpiFileSystem expected = mock(SpiFileSystem.class);
         when(cluster.getFileSystem()).thenReturn(fileSystem);
-        when(conversionService.convert(fileSystem, SpiFileSystem.class)).thenReturn(expected);
+        when(converterUtil.convert(fileSystem, SpiFileSystem.class)).thenReturn(expected);
 
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getFileSystem().isPresent());
         assertEquals(expected, result.getFileSystem().get());
-        verify(conversionService, times(1)).convert(fileSystem, SpiFileSystem.class);
+        verify(converterUtil, times(1)).convert(fileSystem, SpiFileSystem.class);
     }
 
     @Test

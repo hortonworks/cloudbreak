@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissionAuthorizer;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -109,13 +109,13 @@ public class WorkspaceModificationVerifierService {
         }
     }
 
-    public void ensureWorkspaceManagementForUserUpdates(Workspace workspace, Set<ChangeWorkspaceUsersJson> userUpdates) {
+    public void ensureWorkspaceManagementForUserUpdates(Workspace workspace, Set<ChangeWorkspaceUsersV4Request> userUpdates) {
         Set<UserWorkspacePermissions> existingUserPermissions = userWorkspacePermissionsService.findForWorkspace(workspace);
         Set<String> usersWithManagePermission = existingUserPermissions.stream()
                 .filter(it -> it.getPermissionSet().contains(WORKSPACE_MANAGE.value()))
                 .map(it -> it.getUser().getUserId())
                 .collect(Collectors.toSet());
-        Set<String> updateUserIds = userUpdates.stream().map(ChangeWorkspaceUsersJson::getUserId).collect(Collectors.toSet());
+        Set<String> updateUserIds = userUpdates.stream().map(ChangeWorkspaceUsersV4Request::getUserId).collect(Collectors.toSet());
 
         usersWithManagePermission.removeAll(updateUserIds);
         if (usersWithManagePermission.isEmpty()) {
@@ -126,7 +126,7 @@ public class WorkspaceModificationVerifierService {
         }
     }
 
-    public void ensureWorkspaceManagementForChangeUsers(Set<ChangeWorkspaceUsersJson> usersPermissions) {
+    public void ensureWorkspaceManagementForChangeUsers(Set<ChangeWorkspaceUsersV4Request> usersPermissions) {
         if (usersPermissions.stream().noneMatch(userPermissions -> userPermissions.getPermissions().contains(WORKSPACE_MANAGE.value()))) {
             throw new BadRequestException(String.format("No new user would have '%s' permission after user change operation, "
                     + "therefore it cannot be executed.", WORKSPACE_MANAGE));

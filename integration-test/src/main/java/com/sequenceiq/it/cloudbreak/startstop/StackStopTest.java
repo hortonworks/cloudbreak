@@ -4,8 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -17,7 +15,7 @@ public class StackStopTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME), "Stack name is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID), "Ambari port id is mandatory.");
@@ -27,18 +25,16 @@ public class StackStopTest extends AbstractCloudbreakIntegrationTest {
     public void testStackStop() {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        Integer stackIntId = Integer.valueOf(stackId);
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         // WHEN
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setStatus(StatusRequest.valueOf(STOPPED));
-        CloudbreakUtil.checkResponse("StopStack", getCloudbreakClient().stackV1Endpoint().put(Long.valueOf(stackIntId), updateStackJson));
-        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, STOPPED);
+        getCloudbreakClient().stackV4Endpoint().putStop(workspaceId, stackName);
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, STOPPED);
         // THEN
-        CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackId, ambariUser, ambariPassword);
+        CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackV4Endpoint(), ambariPort, workspaceId, stackName, ambariUser, ambariPassword);
     }
 }
 

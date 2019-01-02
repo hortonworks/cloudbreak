@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.template.views;
 
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 

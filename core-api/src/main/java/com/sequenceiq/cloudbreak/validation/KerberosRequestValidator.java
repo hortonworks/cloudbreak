@@ -7,18 +7,18 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 
-public class KerberosRequestValidator implements ConstraintValidator<ValidKerberosRequest, KerberosRequest> {
+public class KerberosRequestValidator implements ConstraintValidator<ValidKerberosRequest, KerberosV4Request> {
 
     @Override
-    public boolean isValid(KerberosRequest req, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(KerberosV4Request req, ConstraintValidatorContext constraintValidatorContext) {
         return isValid(req);
     }
 
-    public static boolean isValid(KerberosRequest request) {
+    public static boolean isValid(KerberosV4Request request) {
         return List.of(request.getActiveDirectory() != null, request.getFreeIpa() != null,
-                    request.getMit() != null, request.getAmbariKerberosDescriptor() != null)
+                    request.getMit() != null, request.getAmbariDescriptor() != null)
                 .stream()
                 .filter(fieldIsNotNull -> fieldIsNotNull)
                 .count() == 1 && StringUtils.isNotEmpty(request.getName());

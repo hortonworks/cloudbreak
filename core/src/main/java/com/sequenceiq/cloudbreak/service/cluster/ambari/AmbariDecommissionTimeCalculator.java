@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
 
 import java.util.Collection;

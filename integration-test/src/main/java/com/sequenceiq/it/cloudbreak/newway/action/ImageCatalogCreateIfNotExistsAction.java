@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ImageCatalogCreateIfNotExistsAction implements ActionV2<ImageCatalogEntity> {
+public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 
@@ -18,14 +18,14 @@ public class ImageCatalogCreateIfNotExistsAction implements ActionV2<ImageCatalo
         LOGGER.info("Create Imagecatalog with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(
-                    client.getCloudbreakClient().imageCatalogV3Endpoint().createInWorkspace(client.getWorkspaceId(), entity.getRequest())
+                    client.getCloudbreakClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), entity.getRequest())
             );
             logJSON(LOGGER, "Imagecatalog created successfully: ", entity.getRequest());
         } catch (Exception e) {
             LOGGER.info("Cannot create Imagecatalog, fetch existed one: {}", entity.getRequest().getName());
             entity.setResponse(
-                    client.getCloudbreakClient().imageCatalogV3Endpoint()
-                            .getByNameInWorkspace(client.getWorkspaceId(), entity.getRequest().getName(), false));
+                    client.getCloudbreakClient().imageCatalogV4Endpoint()
+                            .get(client.getWorkspaceId(), entity.getRequest().getName(), Boolean.FALSE));
         }
         if (entity.getResponse() == null) {
             throw new IllegalStateException("ImageCatalog could not be created.");

@@ -26,7 +26,7 @@ public class MockClusterTests extends CloudbreakMockClusterTest {
                 "a cluster request");
         given(getMockProvider().aValidStackRequest()
                 .withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Mock.assertCalls(verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_all").atLeast(2)));

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public enum HostGroupType {
@@ -42,15 +42,15 @@ public enum HostGroupType {
         return instanceGroupType;
     }
 
-    public InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter) {
+    public InstanceGroupV4Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter) {
         return hostgroup(cloudProvider, name, instanceGroupType, determineInstanceCount(testParameter), getSecurityGroupV2Request());
     }
 
-    public InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, Set<String> recipes) {
+    public InstanceGroupV4Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, Set<String> recipes) {
         return hostgroup(cloudProvider, name, instanceGroupType, determineInstanceCount(testParameter), recipes);
     }
 
-    public InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, String securityGroupId) {
+    public InstanceGroupV4Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, String securityGroupId) {
         return hostgroup(cloudProvider, name, instanceGroupType, determineInstanceCount(testParameter), securityGroupId);
     }
 
@@ -65,11 +65,11 @@ public enum HostGroupType {
         return instanceCountInt;
     }
 
-    private InstanceGroupV2Request hostgroup(CloudProvider cloudProvider, String groupName, InstanceGroupType groupType, int nodeCount,
-            SecurityGroupV2Request securityGroupV2Request) {
-        InstanceGroupV2Request r = new InstanceGroupV2Request();
+    private InstanceGroupV4Request hostgroup(CloudProvider cloudProvider, String groupName, InstanceGroupType groupType, int nodeCount,
+            SecurityGroupV4Request securityGroupV2Request) {
+        InstanceGroupV4Request r = new InstanceGroupV4Request();
         r.setNodeCount(nodeCount);
-        r.setGroup(groupName);
+        r.setName(groupName);
         r.setType(groupType);
         r.setSecurityGroup(securityGroupV2Request);
         r.setTemplate(cloudProvider.template());
@@ -77,35 +77,29 @@ public enum HostGroupType {
         return r;
     }
 
-    private InstanceGroupV2Request hostgroup(CloudProvider cloudProvider, String groupName, InstanceGroupType groupType, int nodeCount, String securityGroupId) {
-        InstanceGroupV2Request r = hostgroup(cloudProvider, groupName, groupType, nodeCount, getSecurityGroupV2Request(securityGroupId));
+    private InstanceGroupV4Request hostgroup(CloudProvider cloudProvider, String groupName, InstanceGroupType groupType, int nodeCount, String securityGroupId) {
+        InstanceGroupV4Request r = hostgroup(cloudProvider, groupName, groupType, nodeCount, getSecurityGroupV2Request());
         return r;
     }
 
-    private InstanceGroupV2Request hostgroup(CloudProvider cloudProvider, String groupName, InstanceGroupType groupType, int nodeCount, Set<String> recipes) {
-        InstanceGroupV2Request r = hostgroup(cloudProvider, groupName, groupType, nodeCount, getSecurityGroupV2Request());
+    private InstanceGroupV4Request hostgroup(CloudProvider cloudProvider, String groupName, InstanceGroupType groupType, int nodeCount, Set<String> recipes) {
+        InstanceGroupV4Request r = hostgroup(cloudProvider, groupName, groupType, nodeCount, getSecurityGroupV2Request());
         r.setRecipeNames(recipes);
         return r;
     }
 
-    private SecurityGroupV2Request getSecurityGroupV2Request() {
-        SecurityGroupV2Request s = new SecurityGroupV2Request();
+    private SecurityGroupV4Request getSecurityGroupV2Request() {
+        SecurityGroupV4Request s = new SecurityGroupV4Request();
         s.setSecurityRules(rules());
         return s;
     }
 
-    private SecurityGroupV2Request getSecurityGroupV2Request(String securityGroupId) {
-        SecurityGroupV2Request s = new SecurityGroupV2Request();
-        s.setSecurityGroupId(securityGroupId);
-        return s;
-    }
-
-    private List<SecurityRuleRequest> rules() {
-        List<SecurityRuleRequest> rules = new ArrayList<>();
-        SecurityRuleRequest a = new SecurityRuleRequest();
+    private List<SecurityRuleV4Request> rules() {
+        List<SecurityRuleV4Request> rules = new ArrayList<>();
+        SecurityRuleV4Request a = new SecurityRuleV4Request();
         a.setSubnet("0.0.0.0/0");
         a.setProtocol("tcp");
-        a.setPorts("22,443,8443,9443,8080");
+        a.setPorts(List.of("22", "443", "8443", "9443", "8080"));
         rules.add(a);
 
         return rules;

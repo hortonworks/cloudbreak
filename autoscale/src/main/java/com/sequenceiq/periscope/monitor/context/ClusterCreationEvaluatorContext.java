@@ -1,12 +1,12 @@
 package com.sequenceiq.periscope.monitor.context;
 
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 
 public class ClusterCreationEvaluatorContext implements EvaluatorContext {
 
-    private final AutoscaleStackResponse stack;
+    private final AutoscaleStackV4Response stack;
 
-    public ClusterCreationEvaluatorContext(AutoscaleStackResponse stack) {
+    public ClusterCreationEvaluatorContext(AutoscaleStackV4Response stack) {
         this.stack = stack;
     }
 

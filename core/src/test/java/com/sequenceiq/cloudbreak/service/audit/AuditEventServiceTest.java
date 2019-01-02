@@ -1,31 +1,32 @@
 package com.sequenceiq.cloudbreak.service.audit;
 
-import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.security.access.AccessDeniedException;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.access.AccessDeniedException;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
 
 public class AuditEventServiceTest {
 
@@ -41,7 +42,7 @@ public class AuditEventServiceTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @Mock
     private StructuredEventRepository structuredEventRepository;
@@ -78,15 +79,15 @@ public class AuditEventServiceTest {
 
     @Test
     public void testGetAuditEventWhenEventExistsAndHasPermissionToReadItThenTheExpectedEventShouldReturn() {
-        AuditEvent expected = mock(AuditEvent.class);
+        AuditEventV4Response expected = mock(AuditEventV4Response.class);
         StructuredEventEntity repoResult = new StructuredEventEntity();
-        when(conversionService.convert(repoResult, AuditEvent.class)).thenReturn(expected);
+        when(converterUtil.convert(repoResult, AuditEventV4Response.class)).thenReturn(expected);
         when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
 
-        AuditEvent actual = underTest.getAuditEvent(TEST_AUDIT_ID);
+        AuditEventV4Response actual = underTest.getAuditEvent(TEST_AUDIT_ID);
 
         Assert.assertEquals(expected, actual);
-        verify(conversionService, times(1)).convert(repoResult, AuditEvent.class);
+        verify(converterUtil, times(1)).convert(repoResult, AuditEventV4Response.class);
         verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
     }
 
@@ -100,7 +101,7 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(conversionService, times(0)).convert(any(StructuredEventEntity.class), AuditEvent.class);
+        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 
     @Test
@@ -114,20 +115,20 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(conversionService, times(0)).convert(any(StructuredEventEntity.class), AuditEvent.class);
+        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 
     @Test
     public void testGetAuditEventByWorkspaceIdWhenEventExistsAndHasPermissionToReadItThenTheExpectedEventShouldReturn() {
-        AuditEvent expected = mock(AuditEvent.class);
+        AuditEventV4Response expected = mock(AuditEventV4Response.class);
         StructuredEventEntity repoResult = new StructuredEventEntity();
-        when(conversionService.convert(repoResult, AuditEvent.class)).thenReturn(expected);
+        when(converterUtil.convert(repoResult, AuditEventV4Response.class)).thenReturn(expected);
         when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
 
-        AuditEvent actual = underTest.getAuditEventByWorkspaceId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        AuditEventV4Response actual = underTest.getAuditEventByWorkspaceId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
 
         Assert.assertEquals(expected, actual);
-        verify(conversionService, times(1)).convert(repoResult, AuditEvent.class);
+        verify(converterUtil, times(1)).convert(repoResult, AuditEventV4Response.class);
         verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
     }
 
@@ -141,7 +142,7 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(conversionService, times(0)).convert(any(StructuredEventEntity.class), AuditEvent.class);
+        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 
     @Test
@@ -155,6 +156,6 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(conversionService, times(0)).convert(any(StructuredEventEntity.class), AuditEvent.class);
+        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 }

@@ -7,8 +7,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
@@ -32,21 +32,22 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
         rdsPassword = StringUtils.hasLength(rdsPassword) ? rdsPassword : defaultRdsPassword;
         rdsConnectionUrl = StringUtils.hasLength(rdsConnectionUrl) ? rdsConnectionUrl : defaultRdsConnectionUrl;
 
-        RDSConfigRequest rdsCreateRequest = new RDSConfigRequest();
+        DatabaseV4Request rdsCreateRequest = new DatabaseV4Request();
         rdsCreateRequest.setName(rdsName);
         rdsCreateRequest.setConnectionUserName(rdsUser);
         rdsCreateRequest.setConnectionPassword(rdsPassword);
         rdsCreateRequest.setConnectionURL(rdsConnectionUrl);
-        RDSTestRequest testRequest = new RDSTestRequest();
-        testRequest.setRdsConfig(rdsCreateRequest);
+        DatabaseTestV4Request testRequest = new DatabaseTestV4Request();
+        testRequest.setDatabase(rdsCreateRequest);
         // WHEN
-        String rdsConnectionResult = getCloudbreakClient().rdsConfigEndpoint().testRdsConnection(testRequest).getConnectionResult();
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String rdsConnectionResult = getCloudbreakClient().databaseV4Endpoint().test(workspaceId, testRequest).getResult();
         Assert.assertEquals(rdsConnectionResult, "connected", "RDS connection test failed. Set the RDS configuration parameters properly.");
-        String rdsConfigId = getCloudbreakClient().rdsConfigEndpoint().postPrivate(rdsCreateRequest).getId().toString();
+        String rdsConfigId = getCloudbreakClient().databaseV4Endpoint().create(workspaceId, rdsCreateRequest).getId().toString();
         itContext.putContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID, rdsConfigId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.RDS_CONFIG_ID, rdsConfigId);
         //THEN
-        String listedRDSByName = getCloudbreakClient().rdsConfigEndpoint().getPrivate(rdsName).getName();
+        String listedRDSByName = getCloudbreakClient().databaseV4Endpoint().get(workspaceId, rdsName).getName();
         Assert.assertEquals(listedRDSByName, rdsName);
     }
 

@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.RepositoryConfigs;
@@ -123,15 +123,15 @@ public class RepositoryConfigsTests extends CloudbreakTest {
         then(RepositoryConfigs.assertAllFalse());
     }
 
-    private RepoConfigValidationRequest createRepoConfigValidationReqest(String ambariBaseUrl, String ambariGpgKeyUrl, String mPackUrl,
+    private RepoConfigValidationV4Request createRepoConfigValidationReqest(String ambariBaseUrl, String ambariGpgKeyUrl, String mPackUrl,
             String stackBaseUrl, String utilsBaseUrl, String versionDefinitionFileUrl) {
-        RepoConfigValidationRequest repoConfigValidationRequest = new RepoConfigValidationRequest();
-        repoConfigValidationRequest.setAmbariBaseUrl(ambariBaseUrl);
-        repoConfigValidationRequest.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
-        repoConfigValidationRequest.setMpackUrl(mPackUrl);
-        repoConfigValidationRequest.setStackBaseURL(stackBaseUrl);
-        repoConfigValidationRequest.setUtilsBaseURL(utilsBaseUrl);
-        repoConfigValidationRequest.setVersionDefinitionFileUrl(versionDefinitionFileUrl);
-        return repoConfigValidationRequest;
+        RepoConfigValidationV4Request repoConfigValidationV4Request = new RepoConfigValidationV4Request();
+        repoConfigValidationV4Request.setAmbariBaseUrl(ambariBaseUrl);
+        repoConfigValidationV4Request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
+        repoConfigValidationV4Request.setMpackUrl(mPackUrl);
+        repoConfigValidationV4Request.setStackBaseURL(stackBaseUrl);
+        repoConfigValidationV4Request.setUtilsBaseURL(utilsBaseUrl);
+        repoConfigValidationV4Request.setVersionDefinitionFileUrl(versionDefinitionFileUrl);
+        return repoConfigValidationV4Request;
     }
 }

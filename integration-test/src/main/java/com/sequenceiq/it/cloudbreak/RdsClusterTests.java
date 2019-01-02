@@ -79,7 +79,7 @@ public class RdsClusterTests extends CloudbreakTest {
                         .withRdsConfigNames(rdsConfigNames),
                 "a cluster request with rds config");
         given(cloudProvider.aValidStackRequest(),  "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -88,7 +88,7 @@ public class RdsClusterTests extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari is running and components available");
         then(Stack.assertThis(
-                (stack, t) -> Assert.assertEquals(stack.getResponse().getCluster().getRdsConfigs().iterator().next().getName(), VALID_RDS_CONFIG)
+                (stack, t) -> Assert.assertEquals(stack.getResponse().getCluster().getDatabases().iterator().next().getName(), VALID_RDS_CONFIG)
         ));
     }
 

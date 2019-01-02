@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.ACTIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus.ACTIVE;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.UserPreferencesRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.UserRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -52,6 +53,9 @@ public class UserService {
 
     @Inject
     private UserPreferencesRepository userPreferencesRepository;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Retryable(value = RetryException.class, maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(CloudbreakUser cloudbreakUser) {
@@ -94,6 +98,12 @@ public class UserService {
     public Set<User> getAll(CloudbreakUser cloudbreakUser) {
         User user = userRepository.findByUserId(cloudbreakUser.getUserId());
         return userRepository.findAllByTenant(user.getTenant());
+    }
+
+    public String evictCurrentUserDetailsForLoggedInUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        cachedUserService.evictByIdentityUser(cloudbreakUser);
+        return cloudbreakUser.getUsername();
     }
 
     private User createUser(CloudbreakUser cloudbreakUser) {

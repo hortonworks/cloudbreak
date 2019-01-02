@@ -5,105 +5,119 @@
   "cloudPlatform": "AZURE",
   "datalakeRequired": "NONE",
   "stackTemplate": {
+    "type": "TEMPLATE",
     "cluster": {
       "ambari": {
         "blueprintName": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
         "validateBlueprint": false,
-        "gateway": {
-          "enableGateway": true,
-          "topologies": [
-            {
-              "topologyName": "dp-proxy",
-              "exposedServices": [
-                "ALL"
-              ]
-            }
-          ],
-          "ssoType": "NONE"
-        },
-        "ambariStackDetails": {
+        "stackRepository": {
           "stack": "HDP",
           "version": "3.0",
           "verify": false,
           "enableGplRepo": false
         }
       },
-      "rdsConfigNames": []
+      "gateway": {
+        "enableGateway": true,
+        "topologies": [
+          {
+            "topologyName": "dp-proxy",
+            "exposedServices": [
+              "ALL"
+            ]
+          }
+        ],
+        "ssoType": "NONE"
+      },
+      "databases": []
     },
     "instanceGroups": [
       {
-        "group": "master",
+        "name": "master",
         "template": {
+          "rootVolume": {
+            "size": 30
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "Standard_LRS",
+              "size": 100
+            }
+          ],
           "instanceType": "Standard_D12_v2",
-          "rootVolumeSize": 30,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "Standard_LRS",
-          "parameters": {
+          "azure": {
             "manageDisk": true
           }
         },
         "nodeCount": 1,
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
-        "parameters": {},
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "9443",
-              "protocol": "tcp"
-            },
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": "8443",
-              "protocol": "tcp"
-            },
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22",
+                "8443",
+                "9443"
+              ],
               "protocol": "tcp"
             }
           ]
         }
       },
       {
-        "group": "worker",
+        "name": "worker",
         "template": {
+          "rootVolume": {
+            "size": 30
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "Standard_LRS",
+              "size": 100
+            }
+          ],
           "instanceType": "Standard_D3_v2",
-          "rootVolumeSize": 30,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "Standard_LRS",
-          "parameters": {
+          "azure": {
             "manageDisk": true
           }
         },
         "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL",
-        "parameters": {
+        "azure": {
           "availabilitySet": {}
         },
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22"
+              ],
               "protocol": "tcp"
             }
           ]
         }
       },
       {
-        "group": "compute",
+        "name": "compute",
         "template": {
+          "rootVolume": {
+            "size": 30
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "Standard_LRS",
+              "size": 100
+            }
+          ],
           "instanceType": "Standard_D3_v2",
-          "rootVolumeSize": 30,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "Standard_LRS",
-          "parameters": {
+          "azure": {
             "manageDisk": true
           }
         },
@@ -115,7 +129,9 @@
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22"
+              ],
               "protocol": "tcp"
             }
           ]
@@ -123,7 +139,7 @@
       }
     ],
     "network": {
-      "parameters": {
+      "azure": {
         "noFirewallRules": false,
         "noPublicIp": false
       },

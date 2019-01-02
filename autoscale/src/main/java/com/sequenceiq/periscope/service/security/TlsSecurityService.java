@@ -7,7 +7,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -28,7 +28,7 @@ public class TlsSecurityService {
     private SecretService secretService;
 
     public SecurityConfig prepareSecurityConfig(Long stackId) {
-        CertificateResponse response = cloudbreakClient.autoscaleEndpoint().getCertificate(stackId);
+        CertificateV4Response response = cloudbreakClient.autoscaleEndpoint().getCertificate(stackId);
         return new SecurityConfig(response.getClientKeyPath(), response.getClientCertPath(), response.getServerCert());
     }
 

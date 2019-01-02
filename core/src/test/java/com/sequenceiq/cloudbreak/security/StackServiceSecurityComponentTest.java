@@ -13,7 +13,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -66,8 +68,8 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Test
-    public void dummy() {
-
+    public void testDummy() {
+        // FIXME see BUG-110304
     }
 
     private Exception getRootCauseOfTransactionException(TransactionRuntimeExecutionException e) {
@@ -94,8 +96,8 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         return stackStatus;
     }
 
-    private StackResponse getAStackResponse() {
-        return new StackResponse();
+    private StackV4Response getAStackResponse() {
+        return new StackV4Response();
     }
 
     private Workspace defaultWorkspace() {
@@ -186,7 +188,13 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         private UserService userService;
 
         @MockBean
+        private ConverterUtil converterUtil;
+
+        @MockBean
         private WorkspaceService workspaceService;
+
+        @MockBean
+        private DatalakeResourcesService datalakeResourcesService;
 
         @Bean
         public StackRepository stackRepository() {
@@ -202,5 +210,7 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         public StackStatusRepository stackStatusRepository() {
             return mock(StackStatusRepository.class);
         }
+
     }
+
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.util;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
@@ -14,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.config.ITProps;
 
 @Component
 public class CleanupService {
+
     private static final Logger LOG = LoggerFactory.getLogger(CleanupService.class);
 
     private static final int DELETE_SLEEP = 30000;
@@ -26,58 +33,78 @@ public class CleanupService {
     @Inject
     private ITProps itProps;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId) {
         if (cleanedUp) {
             return;
         }
+        LOG.error("should replace the invalid environment value on stack deletion!");
+        String environment = "suchAnInvalidValueWhichShouldBeReplacedAfterApiRefactor";
         cleanedUp = true;
-        cloudbreakClient.stackV2Endpoint()
-                .getStacksInDefaultWorkspace()
+        cloudbreakClient.stackV4Endpoint()
+                .list(workspaceId, environment, false).getResponses()
                 .stream()
                 .filter(stack -> stack.getName().startsWith("it-"))
-                .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
+                .forEach(stack -> deleteStackAndWait(cloudbreakClient, workspaceId, stack.getName()));
 
-        cloudbreakClient.blueprintEndpoint()
-                .getPrivates()
+        cloudbreakClient.blueprintV4Endpoint()
+                .list(workspaceId)
+                .getResponses()
                 .stream()
                 .filter(blueprint -> blueprint.getName().startsWith("it-"))
-                .forEach(blueprint -> deleteBlueprint(cloudbreakClient, String.valueOf(blueprint.getId())));
+                .forEach(blueprint -> deleteBlueprint(workspaceId, cloudbreakClient, blueprint.getId()));
 
-        cloudbreakClient.recipeEndpoint()
-                .getPrivates()
+        cloudbreakClient.recipeV4Endpoint()
+                .list(workspaceId)
+                .getResponses()
                 .stream()
                 .filter(recipe -> recipe.getName().startsWith("it-"))
-                .forEach(recipe -> deleteRecipe(cloudbreakClient, recipe.getId()));
+                .forEach(recipe -> deleteRecipe(workspaceId, cloudbreakClient, recipe.getId()));
 
-        cloudbreakClient.credentialEndpoint()
-                .getPrivates()
+        cloudbreakClient.credentialV4Endpoint()
+                .list(workspaceId)
+                .getResponses()
                 .stream()
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
-                .forEach(credential -> deleteCredential(cloudbreakClient, String.valueOf(credential.getId())));
+                .forEach(credential -> deleteCredential(workspaceId, cloudbreakClient, credential.getId()));
 
-        cloudbreakClient.rdsConfigEndpoint()
-                .getPrivates()
+        cloudbreakClient.databaseV4Endpoint()
+                .list(workspaceId, null, Boolean.FALSE)
+                .getResponses()
                 .stream()
                 .filter(rds -> rds.getName().startsWith("it-"))
-                .forEach(rds -> deleteRdsConfigs(cloudbreakClient, rds.getId().toString()));
+                .forEach(rds -> deleteRdsConfigs(workspaceId, cloudbreakClient, rds.getId()));
     }
 
-    public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
+    public void deleteCredential(Long workspaceId, CloudbreakClient cloudbreakClient, Long credentialId) {
         if (credentialId != null) {
-            cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
+            Optional<CredentialV4Response> response = cloudbreakClient.credentialV4Endpoint().list(workspaceId)
+                    .getResponses()
+                    .stream()
+                    .filter(credential -> credential.getId().equals(credentialId))
+                    .findFirst();
+            if (response.isPresent()) {
+                cloudbreakClient.credentialV4Endpoint().delete(workspaceId, response.get().getName());
+            }
         }
     }
 
-    public void deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) {
+    public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
         if (blueprintId != null) {
-            cloudbreakClient.blueprintEndpoint().delete(Long.valueOf(blueprintId));
+            Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId)
+                    .getResponses()
+                    .stream()
+                    .filter(blueprint -> blueprint.getId().equals(blueprintId))
+                    .findFirst();
+            if (response.isPresent()) {
+                cloudbreakClient.blueprintV4Endpoint().delete(workspaceId, response.get().getName());
+            }
         }
     }
 
-    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, String stackId) {
+    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
         for (int i = 0; i < cleanUpRetryCount; i++) {
-            if (deleteStack(cloudbreakClient, stackId)) {
-                WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, stackId, "DELETE_COMPLETED");
+            if (deleteStack(cloudbreakClient, workspaceId, stackName)) {
+                WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, workspaceId, stackName, "DELETE_COMPLETED");
                 if (waitResult == WaitResult.SUCCESSFUL) {
                     break;
                 }
@@ -90,26 +117,40 @@ public class CleanupService {
         }
     }
 
-    public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
+    public boolean deleteStack(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
         boolean result = false;
-        if (stackId != null) {
-            cloudbreakClient.stackV2Endpoint().deleteById(Long.valueOf(stackId), false, false);
+        if (stackName != null) {
+            cloudbreakClient.stackV4Endpoint().delete(workspaceId, stackName, false, false);
             result = true;
         }
         return result;
     }
 
-    public void deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
-        cloudbreakClient.recipeEndpoint().delete(recipeId);
+    public void deleteRecipe(Long workspaceId, CloudbreakClient cloudbreakClient, Long recipeId) {
+        Optional<RecipeViewV4Response> response = cloudbreakClient.recipeV4Endpoint().list(workspaceId)
+                .getResponses()
+                .stream()
+                .filter(recipe -> recipe.getId().equals(recipeId))
+                .findFirst();
+        if (response.isPresent()) {
+            cloudbreakClient.recipeV4Endpoint().delete(workspaceId, response.get().getName());
+        }
     }
 
-    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
-        cloudbreakClient.imageCatalogEndpoint().deletePublic(name);
+    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name, Long workspaceId) {
+        cloudbreakClient.imageCatalogV4Endpoint().delete(workspaceId, name);
     }
 
-    public void deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
-        if (rdsConfigId != null) {
-            cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
+    public void deleteRdsConfigs(Long workspaceId, CloudbreakClient cloudbreakClient, Long databaseId) {
+        if (databaseId != null) {
+            Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, null, Boolean.FALSE)
+                    .getResponses()
+                    .stream()
+                    .filter(database -> database.getId().equals(databaseId))
+                    .findFirst();
+            if (response.isPresent()) {
+                cloudbreakClient.databaseV4Endpoint().delete(workspaceId, response.get().getName());
+            }
         }
     }
 }

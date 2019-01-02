@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = KerberosRequestValidator.class)
 public @interface ValidKerberosRequest {
 
-    String message() default "KerberosRequest contains one or more invalid data.";
+    String message() default "KerberosV4Request contains one or more invalid data.";
 
     Class<?>[] groups() default {};
 

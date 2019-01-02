@@ -64,7 +64,7 @@ tests:
       clusterName: it-gcp-cred-ss
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: stop cluster and stack
     classes:

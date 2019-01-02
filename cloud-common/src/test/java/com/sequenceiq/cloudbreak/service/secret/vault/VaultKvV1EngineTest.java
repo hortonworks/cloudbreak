@@ -15,7 +15,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
 import com.google.gson.Gson;
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VaultKvV1EngineTest {
@@ -100,7 +100,7 @@ public class VaultKvV1EngineTest {
 
     @Test
     public void testConvertToExternalOk() {
-        SecretResponse actual = underTest.convertToExternal(gson.toJson(secret));
+        SecretV4Response actual = underTest.convertToExternal(gson.toJson(secret));
 
         Assert.assertNull(actual.getEnginePath());
         Assert.assertEquals(secret.getPath(), actual.getSecretPath());

@@ -15,16 +15,19 @@ import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponseW;
-import com.sequenceiq.it.spark.ambari.AmbariComponentStatusOnHostResponse;
+import com.sequenceiq.it.spark.ambari.AmbariHostComponents;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponseV2;
+import com.sequenceiq.it.spark.ambari.AmbariServiceComponents;
 import com.sequenceiq.it.spark.ambari.AmbariServiceConfigResponseV2;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariServicesResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.AmbariViewResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.ambari.v2.AmbariCategorizedHostComponentStateResponse;
+import com.sequenceiq.it.spark.ambari.v2.AmbariRequestIdRespone;
 import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Service;
@@ -48,6 +51,10 @@ public class AmbariMock extends AbstractModelMock {
     public static final String CLUSTERS_CLUSTER_HOSTS_HOSTNAME = CLUSTERS_CLUSTER + "/hosts/:hostname";
 
     public static final String CLUSTERS_CLUSTER_SERVICES = CLUSTERS_CLUSTER + "/services/*";
+
+    public static final String CLUSTERS_CLUSTER_SERVICES_ROOT = CLUSTERS_CLUSTER + "/services";
+
+    public static final String CLUSTERS_CLUSTER_SERVICE_COMPONENTS = CLUSTERS_CLUSTER + "/services/:servicename/components";
 
     public static final String CLUSTERS_CLUSTER_SERVICES_HDFS_COMPONENTS_NAMENODE = CLUSTERS_CLUSTER + "/services/HDFS/components/NAMENODE";
 
@@ -116,6 +123,8 @@ public class AmbariMock extends AbstractModelMock {
         deleteClusterHostComponents();
         deleteAmbariClusterHost();
         getAmbariViews();
+        getAmbariClusterServicesRoot();
+        getAmbariServiceComponents();
     }
 
     public DynamicRouteStack getDynamicRouteStack() {
@@ -158,6 +167,10 @@ public class AmbariMock extends AbstractModelMock {
         });
     }
 
+    private void getAmbariServiceComponents() {
+        dynamicRouteStack.get(CLUSTERS_CLUSTER_SERVICE_COMPONENTS, new AmbariServiceComponents());
+    }
+
     private void getAmbariClusterServicesComponentsNamenode() {
         dynamicRouteStack.get(CLUSTERS_CLUSTER_SERVICES_HDFS_COMPONENTS_NAMENODE, (request, response, model) -> {
             response.type("text/plain");
@@ -192,17 +205,16 @@ public class AmbariMock extends AbstractModelMock {
                 new AmbariServiceConfigResponseV2());
     }
 
-    private void getAmbariClusterHostComponents() {
-        dynamicRouteStack.get(CLUSTERS_CLUSTER_HOSTS_HOSTNAME_HOST_COMPONENTS,
-                new AmbariComponentStatusOnHostResponse());
-    }
-
     private void postAmbariClusterHosts() {
         dynamicRouteStack.post(CLUSTERS_CLUSTER_HOSTS, new AmbariClusterRequestsResponse());
     }
 
     private void putAmbariClusterServices() {
         dynamicRouteStack.put(CLUSTERS_CLUSTER_SERVICES, new AmbariClusterRequestsResponse());
+    }
+
+    private void getAmbariClusterServicesRoot() {
+        dynamicRouteStack.get(CLUSTERS_CLUSTER_SERVICES_ROOT, new AmbariServicesResponse());
     }
 
     public void getAmbariCluster() {
@@ -223,6 +235,10 @@ public class AmbariMock extends AbstractModelMock {
 
     private void putAmbariClusterHostComponents() {
         dynamicRouteStack.put(CLUSTERS_CLUSTER_HOST_COMPONENTS, new AmbariClusterRequestsResponse());
+    }
+
+    private void getAmbariClusterHostComponents() {
+        dynamicRouteStack.get(CLUSTERS_CLUSTER_HOST_COMPONENTS, new AmbariHostComponents());
     }
 
     private void deleteClusterHostComponents() {
@@ -280,4 +296,15 @@ public class AmbariMock extends AbstractModelMock {
         dynamicRouteStack.get(CHECK, new AmbariCheckResponse());
     }
 
+    public void putConfigureSso() {
+        dynamicRouteStack.put("/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/sso-configuration", new AmbariRequestIdRespone(12));
+    }
+
+    public void postSyncLdap() {
+        dynamicRouteStack.post("/api/v1/ldap_sync_events", new EmptyAmbariResponse());
+    }
+
+    public void putConfigureLdap() {
+        dynamicRouteStack.put("/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/ldap-configuration", new AmbariRequestIdRespone(12));
+    }
 }

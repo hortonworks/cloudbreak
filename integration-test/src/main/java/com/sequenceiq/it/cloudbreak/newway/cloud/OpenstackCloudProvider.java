@@ -2,17 +2,24 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV2Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.OpenstackCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
@@ -41,8 +48,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
-    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting os network";
-
     private static final String NETWORKING_DEFAULT_OPTION = "self-service";
 
     private static final String CREDENTIAL_ENGENDPOINT_URL = "integrationtest.openstackEngcredential.endpoint";
@@ -65,7 +70,12 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
-                .withParameters(openstackCredentialDetailsKilo());
+                .withOpenstackParameters(openstackCredentialDetailsKilo());
+    }
+
+    @Override
+    public StackEntity aValidAttachedStackRequest(String datalakeClusterName) {
+        throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
     @Override
@@ -79,21 +89,25 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackAuthenticationRequest stackauth() {
-        StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackauth() {
+        StackAuthenticationV4Request stackauth = new StackAuthenticationV4Request();
 
         stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 
     @Override
-    public TemplateV2Request template() {
-        TemplateV2Request t = new TemplateV2Request();
+    public InstanceTemplateV4Request template() {
+        InstanceTemplateV4Request t = new InstanceTemplateV4Request();
+        t.setCloudPlatform(CloudPlatform.OPENSTACK);
+
+        VolumeV4Request vol = new VolumeV4Request();
+        vol.setCount(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeCount", "0")));
+        vol.setSize(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeSize", "50")));
+        vol.setType(getTestParameter().getWithDefault("openstackInstanceVolumeType", "HDD"));
+        t.setAttachedVolumes(Set.of(vol));
 
         t.setInstanceType(getTestParameter().getWithDefault("openstackInstanceType", "m1.xlarge"));
-        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeCount", "0")));
-        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeSize", "50")));
-        t.setVolumeType(getTestParameter().getWithDefault("openstackInstanceVolumeType", "HDD"));
 
         return t;
     }
@@ -181,35 +195,47 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public NetworkV2Request newNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request newNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(newNetworkProperties());
+        OpenStackNetworkV4Parameters params = new OpenStackNetworkV4Parameters();
+        params.setPublicNetId(getPublicNetId());
+        network.setOpenstack(params);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request existingNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(networkProperties());
+        OpenStackNetworkV4Parameters params = new OpenStackNetworkV4Parameters();
+        params.setPublicNetId(getPublicNetId());
+        params.setNetworkId(getVpcId());
+        params.setRouterId(getRouterId());
+        network.setOpenstack(params);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingSubnet() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setParameters(subnetProperties());
+    public NetworkV4Request existingSubnet() {
+        NetworkV4Request network = new NetworkV4Request();
+        OpenStackNetworkV4Parameters params = new OpenStackNetworkV4Parameters();
+        params.setPublicNetId(getPublicNetId());
+        params.setNetworkId(getVpcId());
+        params.setRouterId(getRouterId());
+        params.setNetworkingOption(getNetworkingOption());
+        params.setSubnetId(getSubnetId());
+        network.setOpenstack(params);
         return network;
     }
 
     @Override
-    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
         var ambari = ambariRequestWithBlueprintName(blueprintName);
-        var stackDetails = new AmbariStackDetailsJson();
+        var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
-        ambari.setAmbariStackDetails(stackDetails);
+        ambari.setStackRepository(stackDetails);
         return ambari;
     }
 
@@ -224,62 +250,51 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         throw new NotImplementedException("not implemented!");
     }
 
-    public Map<String, Object> openstackCredentialDetailsKilo() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackcredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsKilo() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackcredential.userName"));
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackcredential.endpoint"));
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsKiloAdmin() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackAdmincredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackAdmincredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackAdmincredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackAdmincredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsEngineering() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackEngcredential.userName"));
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackEngcredential.endpoint"));
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackEngcredential.password"));
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackEngcredential.tenantName"));
+        credentialParameters.setKeystoneV2(keystoneV2Parameters);
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsEngineering() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackEngcredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackEngcredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackEngcredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackEngcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsField() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackFieldcredential.password"));
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackFieldcredential.userName"));
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackFieldcredential.endpoint"));
+        credentialParameters.setFacing("internal");
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsField() {
-        Map<String, Object> map = Map.ofEntries(
-                Map.entry("tenantName", getTestParameter().get("integrationtest.openstackFieldcredential.tenantName")),
-                Map.entry("userDomain", getTestParameter().get("integrationtest.openstackFieldcredential.userDomain")),
-                Map.entry("userName", getTestParameter().get("integrationtest.openstackFieldcredential.userName")),
-                Map.entry("password", getTestParameter().get("integrationtest.openstackFieldcredential.password")),
-                Map.entry("endpoint", getTestParameter().get("integrationtest.openstackFieldcredential.endpoint")),
-                Map.entry("projectDomainName", getTestParameter().get("integrationtest.openstackFieldcredential.projectDomainName")),
-                Map.entry("projectName", getTestParameter().get("integrationtest.openstackFieldcredential.projectName")),
-                Map.entry("keystoneAuthScope", "cb-keystone-v3-project-scope"),
-                Map.entry("keystoneVersion", "cb-keystone-v3"),
-                Map.entry("apiFacing", "internal"),
-                Map.entry("selector", "cb-keystone-v3-project-scope"));
-
-        return map;
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsInvalidUser() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setUserName("kisnyul");
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackcredential.endpoint"));
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsInvalidUser() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName", "kisnyul",
-                "password", getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
-    }
-
-    public Map<String, Object> openstackCredentialDetailsInvalidEndpoint() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackcredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
-                "https://index.hu/", "keystoneVersion", "cb-keystone-v2", "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsInvalidEndpoint() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackcredential.userName"));
+        credentialParameters.setEndpoint("https://index.hu/");
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
+        return credentialParameters;
     }
 }

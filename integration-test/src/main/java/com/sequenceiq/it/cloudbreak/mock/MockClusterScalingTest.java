@@ -10,10 +10,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -52,50 +51,72 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
     public void testScaling(@Optional("slave_1") String instanceGroup, @Optional("1") int scalingAdjustment, @Optional("9443") int mockPort) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.parseInt(stackId);
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long stackId = Long.valueOf(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID));
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
         if (scalingAdjustment < 0) {
-            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+//            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setHostGroup(instanceGroup);
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("DownscaleCluster", getCloudbreakClient().clusterEndpoint().put((long) stackIntId, updateClusterJson));
-            CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
+//            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
 
-            UpdateStackJson updateStackJson = new UpdateStackJson();
-            updateStackJson.setWithClusterEvent(false);
-            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
-            instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
-            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
-            CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
+            var stackScaleRequest = new StackScaleV4Request();
+            stackScaleRequest.setGroup(hostGroupAdjustmentJson.getHostGroup());
+            stackScaleRequest.setDesiredCount(scalingAdjustment);
+            stackScaleRequest.setStackId(stackId);
+
+            getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest);
+            CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+
+//            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//            updateStackJson.setWithClusterEvent(false);
+//            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
+//            instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
+//            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+//            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+
+            stackScaleRequest.setGroup(hostGroupAdjustmentJson.getHostGroup());
+            stackScaleRequest.setDesiredCount(scalingAdjustment);
+            stackScaleRequest.setStackId(stackId);
+
+            getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest);
+            CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         } else {
-            UpdateStackJson updateStackJson = new UpdateStackJson();
-            updateStackJson.setWithClusterEvent(false);
-            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+//            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//            updateStackJson.setWithClusterEvent(false);
+            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
-            CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
+//            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
-            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-            hostGroupAdjustmentJson.setHostGroup(instanceGroup);
-            hostGroupAdjustmentJson.setWithStackUpdate(false);
-            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("UpscaleCluster", getCloudbreakClient().clusterEndpoint().put((long) stackIntId, updateClusterJson));
-            CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
+            var stackScaleRequest3 = new StackScaleV4Request();
+            stackScaleRequest3.setGroup(instanceGroupAdjustmentJson.getInstanceGroup());
+            stackScaleRequest3.setDesiredCount(scalingAdjustment);
+            stackScaleRequest3.setStackId(stackId);
+
+            getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest3);
+            CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+
+//            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+//            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
+//            hostGroupAdjustmentJson.setHostGroup(instanceGroup);
+//            hostGroupAdjustmentJson.setWithStackUpdate(false);
+//            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+//            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+
+            stackScaleRequest3.setGroup(instanceGroupAdjustmentJson.getInstanceGroup());
+            stackScaleRequest3.setDesiredCount(scalingAdjustment);
+            stackScaleRequest3.setStackId(stackId);
+            getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest3);
+            CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         }
         // THEN
         CloudbreakUtil.checkClusterAvailability(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint(),
-                "8080", stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV4Endpoint(),
+                "8080", workspaceId, stackName, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), false);
 
         ScalingMock scalingMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, ScalingMock.class);

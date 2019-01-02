@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -23,15 +22,15 @@ public class UnhealthyNodeStrategy implements Strategy {
     @Override
     public void doAction(IntegrationTestContext integrationTestContext, Entity entity) {
         Stack stack = (Stack) entity;
-        StackResponse response = Objects.requireNonNull(stack.getResponse(), "Stack response is null; should get it before");
+        var response = Objects.requireNonNull(stack.getResponse(), "Stack response is null; should get it before");
         Long id = Objects.requireNonNull(response.getId());
 
-        InstanceGroupResponse instanceGroup = response.getInstanceGroups().stream()
-                .filter(ig -> ig.getGroup().equals(hostgroup)).collect(Collectors.toList()).get(0);
+        var instanceGroup = response.getInstanceGroups().stream()
+                .filter(ig -> ig.getName().equals(hostgroup)).collect(Collectors.toList()).get(0);
         List<String> nodes = instanceGroup.getMetadata().stream()
-                .map(metadata -> metadata.getDiscoveryFQDN()).collect(Collectors.toList()).subList(0, nodeCount);
+                .map(InstanceMetaDataV4Response::getDiscoveryFQDN).collect(Collectors.toList()).subList(0, nodeCount);
         ProxyCloudbreakClient client = getAutoscaleProxyCloudbreakClient(integrationTestContext);
-        FailureReport failureReport = new FailureReport();
+        FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(nodes);
         client.autoscaleEndpoint().failureReport(id, failureReport);
     }

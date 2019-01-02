@@ -18,9 +18,9 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerConfigService;
 import com.sequenceiq.cloudbreak.domain.Container;
@@ -65,7 +65,7 @@ public class ClusterContainerRunner {
     private ContainerService containerService;
 
     @Inject
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @Inject
     private ContainerConstraintFactory constraintFactory;
@@ -218,7 +218,7 @@ public class ClusterContainerRunner {
     private List<Container> convert(Iterable<ContainerInfo> containerInfo, Cluster cluster) {
         List<Container> containers = new ArrayList<>();
         for (ContainerInfo source : containerInfo) {
-            Container container = conversionService.convert(source, Container.class);
+            Container container = converterUtil.convert(source, Container.class);
             container.setCluster(cluster);
             containers.add(container);
         }

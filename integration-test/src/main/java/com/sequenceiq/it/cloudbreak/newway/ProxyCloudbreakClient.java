@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.client.AccessToken;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
@@ -31,7 +31,7 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
 
     private final String clientSecret;
 
-    private AutoscaleEndpoint autoscaleEndpoint;
+    private AutoscaleV4Endpoint autoscaleEndpoint;
 
     public ProxyCloudbreakClient(String cloudbreakAddress, String caasProtocol, String caasAddress, String refreshToken,
             ConfigKey configKey, String identityUrl, String clientId, String clientSecret) {
@@ -49,12 +49,12 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
     }
 
     @Override
-    public AutoscaleEndpoint autoscaleEndpoint() {
+    public AutoscaleV4Endpoint autoscaleEndpoint() {
         return refreshIdentityTokenIfNeededAndGet();
     }
 
     @SuppressWarnings("unchecked")
-    private AutoscaleEndpoint refreshIdentityTokenIfNeededAndGet() {
+    private AutoscaleV4Endpoint refreshIdentityTokenIfNeededAndGet() {
         String token = identityTokenCache.get(TOKEN_KEY);
         if (token == null || autoscaleEndpoint == null) {
             AccessToken accessToken = identityClient.getToken(clientSecret);
@@ -67,11 +67,11 @@ public class ProxyCloudbreakClient extends com.sequenceiq.cloudbreak.client.Clou
         return autoscaleEndpoint;
     }
 
-    private AutoscaleEndpoint refreshIdentityToken(String token) {
+    private AutoscaleV4Endpoint refreshIdentityToken(String token) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
         setWebTarget(getClient().target(getCloudbreakAddress()).path(CoreApi.API_ROOT_CONTEXT));
-        return WebResourceFactory.newResource(AutoscaleEndpoint.class, getWebTarget(), false, headers, Collections.emptyList(), EMPTY_FORM);
+        return WebResourceFactory.newResource(AutoscaleV4Endpoint.class, getWebTarget(), false, headers, Collections.emptyList(), EMPTY_FORM);
     }
 
     @Override

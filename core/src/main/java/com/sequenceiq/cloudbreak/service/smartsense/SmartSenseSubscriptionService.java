@@ -20,7 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -46,8 +46,8 @@ public class SmartSenseSubscriptionService {
 
     @PostConstruct
     public void init() {
-        if (!defaultSmartsenseId.isEmpty() && !Pattern.matches(SmartSenseSubscriptionJson.ID_PATTERN, defaultSmartsenseId)) {
-            throw new IllegalArgumentException(SmartSenseSubscriptionJson.ID_FORMAT);
+        if (!defaultSmartsenseId.isEmpty() && !Pattern.matches(SmartSenseSubscriptionV4Response.ID_PATTERN, defaultSmartsenseId)) {
+            throw new IllegalArgumentException(SmartSenseSubscriptionV4Response.ID_FORMAT);
         }
     }
 
