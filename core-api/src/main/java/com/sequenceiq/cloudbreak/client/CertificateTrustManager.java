@@ -25,7 +25,7 @@ public class CertificateTrustManager {
 
         // Do not verify host names
         return (hostname, sslSession) -> {
-            LOGGER.info("verify hostname: {}", hostname);
+            LOGGER.debug("verify hostname: {}", hostname);
             return true;
         };
 
