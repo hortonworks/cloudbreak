@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import static ch.qos.logback.classic.Level.INFO;
+
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
@@ -8,8 +10,15 @@ import org.springframework.validation.FieldError;
 
 import com.sequenceiq.cloudbreak.json.ValidationResult;
 
+import ch.qos.logback.classic.Level;
+
 @Component
 public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<MethodArgumentNotValidException> {
+
+    @Override
+    protected Level getLogLevel() {
+        return INFO;
+    }
 
     @Override
     protected Object getEntity(MethodArgumentNotValidException exception) {
