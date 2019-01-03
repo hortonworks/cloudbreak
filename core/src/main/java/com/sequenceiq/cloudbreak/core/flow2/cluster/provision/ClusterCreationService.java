@@ -69,7 +69,7 @@ public class ClusterCreationService {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
         } else {
             String message = String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType());
-            LOGGER.info(message);
+            LOGGER.error(message);
             throw new CloudbreakException(message);
         }
     }

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import static ch.qos.logback.classic.Level.DEBUG;
 import static ch.qos.logback.classic.Level.DEBUG_INT;
 import static ch.qos.logback.classic.Level.ERROR_INT;
-import static ch.qos.logback.classic.Level.INFO;
 import static ch.qos.logback.classic.Level.INFO_INT;
 import static ch.qos.logback.classic.Level.WARN_INT;
 
@@ -67,7 +67,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     }
 
     protected Level getLogLevel() {
-        return INFO;
+        return DEBUG;
     }
 
     abstract Status getResponseStatus();
