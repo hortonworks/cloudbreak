@@ -20,6 +20,7 @@ public final class SupportedDatabaseProvider {
 
     static {
         supportedExternalDatabases.add(getSupportedServiceEntry("Hive", POSTGRES, MYSQL, ORACLE11, ORACLE12));
+        supportedExternalDatabases.add(getSupportedServiceEntry("Hive DAS", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Oozie", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Ranger", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Other", POSTGRES, MYSQL, ORACLE11, ORACLE12));
@@ -40,7 +41,7 @@ public final class SupportedDatabaseProvider {
 
     private static SupportedExternalDatabaseServiceEntry getSupportedServiceEntry(String name, DatabaseVendor... vendors) {
         SupportedExternalDatabaseServiceEntry entry = new SupportedExternalDatabaseServiceEntry();
-        entry.setName(name.toUpperCase());
+        entry.setName(name.toUpperCase().replaceAll(" ", "_"));
         entry.setDisplayName(name);
         for (DatabaseVendor databaseVendor : vendors) {
             entry.getDatabases().add(new SupportedDatabaseEntry(databaseVendor.name(), databaseVendor.displayName(),
