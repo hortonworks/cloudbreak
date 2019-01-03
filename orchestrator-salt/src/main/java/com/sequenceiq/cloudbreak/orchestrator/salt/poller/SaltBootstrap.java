@@ -54,7 +54,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     public Boolean call() throws Exception {
         LOGGER.info("Bootstrapping of nodes [{}/{}]", originalTargets.size() - targets.size(), originalTargets.size());
         if (!targets.isEmpty()) {
-            LOGGER.info("Missing targets for SaltBootstrap: {}", targets);
+            LOGGER.debug("Missing targets for SaltBootstrap: {}", targets);
 
             SaltAction saltAction = createBootstrap();
             GenericResponses responses = sc.action(saltAction);
@@ -91,7 +91,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         if (!targets.isEmpty()) {
             throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
         }
-        LOGGER.info("Bootstrapping of nodes completed: {}", originalTargets.size());
+        LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
         return true;
     }
 
