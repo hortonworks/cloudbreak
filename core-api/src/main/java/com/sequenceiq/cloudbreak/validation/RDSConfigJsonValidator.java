@@ -74,7 +74,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     }
 
     private boolean isTypeValid(String type) {
-        if (!type.matches("(^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)")) {
+        if (!type.matches("(^[a-zA-Z_][-a-zA-Z0-9_]*[a-zA-Z0-9_]$)")) {
             failMessage = "The type can only contain alphanumeric characters and hyphens and has start with an alphanumeric character. "
                     + "The length of the name has to be in range of 3 to 12";
             return false;
