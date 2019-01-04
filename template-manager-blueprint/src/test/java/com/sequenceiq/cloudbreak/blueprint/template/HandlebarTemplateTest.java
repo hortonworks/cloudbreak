@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.TemplateModelContextBuilder;
@@ -231,11 +231,15 @@ public class HandlebarTemplateTest {
 
                 // METRICS_MONITOR
                 {"blueprints/configurations/metrics_monitor/shared_service.handlebars", "configurations/metrics_monitor/metrics-monitor.json",
-                        sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig()},
+                        sSConfigWhenAttachedWLThenShouldReturnWithAttachedWLConfig()},
 
                 // YARN_CLIENT
                 {"blueprints/configurations/yarn_client/shared_service.handlebars", "configurations/yarn_client/yarn-client.json",
-                        sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig()},
+                        sSConfigWhenAttachedWLThenShouldReturnWithAttachedWLConfig()},
+
+                // KAFKA_BROKER
+                {"blueprints/configurations/kafka_broker/shared_service.handlebars", "configurations/kafka_broker/shared-service-attached.json",
+                        sSConfigWhenAttachedWLThenShouldReturnWithAttachedWLConfig()},
 
                 // LOGSEARCH_LOGFEEDER
                 {"blueprints/configurations/logsearch_logfeeder/cloud_storage.handlebars", "configurations/logsearch_logfeeder/logsearch-logfeeder-empty.json",
@@ -729,7 +733,7 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    private static Object sSConfigWhenMetricsMonitorInWLThenShouldReturnWithMetricsCollectorConfig() {
+    private static Object sSConfigWhenAttachedWLThenShouldReturnWithAttachedWLConfig() {
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
         sharedServiceConfigsView.setDatalakeAmbariFqdn("ambarifqdn");
 
