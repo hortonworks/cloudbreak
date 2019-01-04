@@ -84,6 +84,7 @@ public class ClusterDecorator {
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, User user, Workspace workspace,
             @Nonnull Stack stack) {
         prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(blueprint), user);
+        prepareClusterManagerVariant(cluster);
         prepareHostGroups(stack, cluster, request.getHostGroups(), workspace, user);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
@@ -127,6 +128,14 @@ public class ClusterDecorator {
         }
         removeHaComponentsFromGatewayTopologies(subject);
         subject.setTopologyValidation(request.getValidateBlueprint());
+    }
+
+    private void prepareClusterManagerVariant(Cluster cluster) {
+        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
+            cluster.setVariant("AMBARI");
+        } else {
+            cluster.setVariant("CLOUDERA_MANAGER");
+        }
     }
 
     // because KNOX does not support them

@@ -7,6 +7,16 @@ base:
     - docker
     - recipes.runner
 
+  'G@roles:manager_server':
+    - postgresql
+    - cloudera.repo
+    - cloudera.manager
+    - cloudera.agent
+
+  'G@roles:manager_agent':
+    - cloudera.repo
+    - cloudera.agent
+
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound
     - sssd.ad

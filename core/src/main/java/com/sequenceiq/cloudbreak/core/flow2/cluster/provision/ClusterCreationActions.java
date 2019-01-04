@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
@@ -130,16 +130,16 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new StartAmbariRequest(context.getStackId());
+                return new StartClusterRequest(context.getStackId());
             }
         };
     }
 
     @Bean(name = "CONFIGURE_LDAP_SSO_STATE")
     public Action<?, ?> configureLdapSSOAction() {
-        return new AbstractClusterAction<>(StartAmbariSuccess.class) {
+        return new AbstractClusterAction<>(StartClusterSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, StartClusterSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

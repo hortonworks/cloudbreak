@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;

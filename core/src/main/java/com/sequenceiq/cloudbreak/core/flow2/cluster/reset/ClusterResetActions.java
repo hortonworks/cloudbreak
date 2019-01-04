@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetResult;
 
@@ -54,16 +54,16 @@ public class ClusterResetActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new StartAmbariRequest(context.getStackId());
+                return new StartClusterRequest(context.getStackId());
             }
         };
     }
 
     @Bean(name = "CLUSTER_RESET_START_AMBARI_FINISHED_STATE")
     public Action<?, ?> finishStartAmbari() {
-        return new AbstractClusterResetAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
+        return new AbstractClusterResetAction<StartClusterSuccess>(StartClusterSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, StartClusterSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

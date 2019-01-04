@@ -63,6 +63,10 @@ public class BlueprintTextProcessor {
 
     private static final String NAME_NODE = "name";
 
+    private static final String ROLE_CONFIG_GROUPS = "roleConfigGroups";
+
+    private static final String ROLE_TYPE = "roleType";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ObjectNode blueprint;
@@ -607,12 +611,12 @@ public class BlueprintTextProcessor {
         }
     }
 
-    public boolean componentExistsInHostGroup(String component, String hostGroup) {
+    public boolean isComponentExistsInHostGroup(String component, String hostGroup) {
         Set<String> componentsInHostGroup = getComponentsInHostGroup(hostGroup);
         return componentsInHostGroup.stream().anyMatch(component::equals);
     }
 
-    public boolean componentExistsInBlueprint(String component) {
+    public boolean isComponentExistsInBlueprint(String component) {
         boolean componentExists = false;
         ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
@@ -623,9 +627,28 @@ public class BlueprintTextProcessor {
         return componentExists;
     }
 
-    public boolean componentsExistsInBlueprint(Set<String> components) {
+    public boolean isCMComponentExistsInBlueprint(String component) {
+        boolean componentExists = false;
+        ArrayNode servicesNode = getArrayFromObjectNodeByPath(blueprint, SERVICES_NODE);
+        Iterator<JsonNode> services = servicesNode.elements();
+        while (services.hasNext() && !componentExists) {
+            JsonNode roles = services.next().get(ROLE_CONFIG_GROUPS);
+            if (roles != null) {
+                Iterator<JsonNode> roleElements = roles.elements();
+                while (roleElements.hasNext() && !componentExists) {
+                    JsonNode role = roleElements.next();
+                    if (role.path(ROLE_TYPE).asText().equalsIgnoreCase(component)) {
+                        componentExists = true;
+                    }
+                }
+            }
+        }
+        return componentExists;
+    }
+
+    public boolean isComponentsExistsInBlueprint(Set<String> components) {
         for (String component : components) {
-            if (componentExistsInBlueprint(component)) {
+            if (isComponentExistsInBlueprint(component)) {
                 return true;
             }
         }

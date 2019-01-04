@@ -1,4 +1,4 @@
-{%- from 'ambari/settings.sls' import ambari with context %}
+{%- from 'metadata/settings.sls' import metadata with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 
 /etc/unbound/conf.d/00-cluster.conf:
@@ -7,7 +7,7 @@
     - source: salt://unbound/config/00-cluster.conf
     - template: jinja
     - context:
-        ambari_server_address: {{ ambari.server_address }}
+        server_address: {{ metadata.server_address }}
 
 /etc/dhcp/dhclient.d/google_hostname.sh:
   file.managed:

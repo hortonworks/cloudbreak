@@ -251,7 +251,7 @@ public class BlueprintTextProcessorTest {
 
         String result = underTest.get(testBlueprint).addComponentToHostgroups("HST_SERVER", Collections.singletonList("slave_1")).asText();
 
-        assertTrue(underTest.get(result).componentExistsInBlueprint("HST_SERVER"));
+        assertTrue(underTest.get(result).isComponentExistsInBlueprint("HST_SERVER"));
     }
 
     @Test

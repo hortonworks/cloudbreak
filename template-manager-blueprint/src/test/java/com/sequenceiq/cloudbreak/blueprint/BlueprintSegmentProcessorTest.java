@@ -66,7 +66,7 @@ public class BlueprintSegmentProcessorTest {
 
         when(blueprintSegmentReader.collectAllConfigFile()).thenReturn(configFiles);
         when(blueprintSegmentReader.collectAllServiceFile()).thenReturn(serviceFiles);
-        when(blueprintProcessor.componentsExistsInBlueprint(anySet())).thenReturn(true);
+        when(blueprintProcessor.isComponentsExistsInBlueprint(anySet())).thenReturn(true);
         when(templateProcessor.process(anyString(), any(TemplatePreparationObject.class), anyMap())).thenReturn(expectedBlueprint);
         when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyBoolean())).thenReturn(blueprintProcessor);
         when(blueprintProcessor.asText()).thenReturn(expectedBlueprint);

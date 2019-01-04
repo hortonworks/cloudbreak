@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
@@ -50,7 +51,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     private AmbariUserHandler ambariUserHandler;
 
     @Inject
-    private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;
+    private ClusterConnectorPollingResultChecker clusterConnectorPollingResultChecker;
 
     @Inject
     private AmbariOperationService ambariOperationService;
@@ -76,7 +77,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
                 return;
             }
             Pair<PollingResult, Exception> pair = ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING);
-            ambariClusterConnectorPollingResultChecker.checkPollingResult(
+            clusterConnectorPollingResultChecker.checkPollingResult(
                     pair.getLeft(), cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code()));
         } catch (CancellationException cancellationException) {
             throw cancellationException;
@@ -109,7 +110,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             }
             Map<String, Integer> operationRequests = singletonMap("DISABLE_KERBEROS_REQUEST", opId);
             Pair<PollingResult, Exception> pair = ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE);
-            ambariClusterConnectorPollingResultChecker.checkPollingResult(
+            clusterConnectorPollingResultChecker.checkPollingResult(
                     pair.getLeft(), cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code()));
         } catch (CancellationException cancellationException) {
             throw cancellationException;
@@ -138,7 +139,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException {
+    public void changeOriginalCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         LOGGER.debug("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
         AmbariClient client = clientFactory.getDefaultAmbariClient(stack);

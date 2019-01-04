@@ -60,7 +60,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment"));
+                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant"));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment"));
+                "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant"));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment"));
+                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment", "variant"));
         assertNull(result.getGateway());
     }
 

@@ -1,5 +1,6 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 {%- from 'nodes/settings.sls' import host with context %}
+{%- from 'metadata/settings.sls' import metadata with context %}
 
 include:
   - ambari.repo
@@ -25,11 +26,11 @@ parallel_task_execution:
     - unless: cat /etc/environment | grep SPARK_CLASSPATH
 {% endif %}
 
-set_ambari_server_address:
+set_server_address:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
     - pattern: "^hostname[ ]{0,1}=.*"
-    - repl: "hostname=ambari-server.{{ ambari.cluster_domain }}"
+    - repl: "hostname=server.{{ metadata.cluster_domain }}"
 
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:

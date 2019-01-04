@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Component
@@ -31,12 +32,18 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
+    @Inject
+    private BlueprintService blueprintService;
+
     private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText();
-        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
-        return blueprintProcessor.componentExistsInBlueprint("RANGER_ADMIN")
-                && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")
-                && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
+        if (blueprintService.isAmbariBlueprint(blueprint)) {
+            String blueprintText = blueprint.getBlueprintText();
+            BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
+            return blueprintProcessor.isComponentExistsInBlueprint("RANGER_ADMIN")
+                    && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
+                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
+        }
+        return false;
     }
 
     @Override

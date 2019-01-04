@@ -10,10 +10,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -36,6 +37,9 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     /**
      *  For 2.4 compatibility we also need some extra field to be in the pillar so it will look like this:
@@ -62,9 +66,12 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
-        return blueprintProcessor.componentExistsInBlueprint("HIVE_METASTORE")
-                && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")
-                && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
+        if (blueprintService.isAmbariBlueprint(blueprint)) {
+            return blueprintProcessor.isComponentExistsInBlueprint("HIVE_METASTORE")
+                    && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
+                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
+        }
+        return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 
     @Override

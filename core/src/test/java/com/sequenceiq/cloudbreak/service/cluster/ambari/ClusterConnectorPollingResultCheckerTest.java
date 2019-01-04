@@ -10,15 +10,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AmbariClusterConnectorPollingResultCheckerTest {
+public class ClusterConnectorPollingResultCheckerTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private final AmbariClusterConnectorPollingResultChecker underTest = new AmbariClusterConnectorPollingResultChecker();
+    private final ClusterConnectorPollingResultChecker underTest = new ClusterConnectorPollingResultChecker();
 
     @Test
     public void testCheckPollingResultWhenExited() throws ClusterException {

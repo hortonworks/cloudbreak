@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterUpscaleService;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
@@ -20,7 +20,7 @@ public class UploadUpscaleRecipesHandler implements ReactorEventHandler<UploadUp
     private EventBus eventBus;
 
     @Inject
-    private AmbariClusterUpscaleService clusterUpscaleService;
+    private ClusterUpscaleService clusterUpscaleService;
 
     @Override
     public String selector() {

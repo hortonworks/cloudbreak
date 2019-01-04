@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
@@ -61,6 +62,9 @@ public class ClusterCreationSetupServiceTest {
 
     @Mock
     private BlueprintUtils blueprintUtils;
+
+    @Mock
+    private BlueprintService blueprintService;
 
     @Mock
     private DefaultHDPEntries defaultHDPEntries;

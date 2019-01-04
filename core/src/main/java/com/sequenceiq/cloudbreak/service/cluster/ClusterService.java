@@ -114,6 +114,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;

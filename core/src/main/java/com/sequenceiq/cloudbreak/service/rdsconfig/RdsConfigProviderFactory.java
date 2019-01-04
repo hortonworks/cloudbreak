@@ -6,18 +6,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-
 @Component
 public class RdsConfigProviderFactory {
 
     @Inject
     private Set<AbstractRdsConfigProvider> rdsConfigProviders;
-
-    private AbstractRdsConfigProvider getRdsConfigProviderForRdsType(RdsType type) {
-        return rdsConfigProviders.stream().filter(rdsConfigProvider -> rdsConfigProvider.getRdsType() == type).findFirst()
-                .orElseThrow(() -> new UnsupportedOperationException(type.name() + " RdsConfigProvider is not supported!"));
-    }
 
     public Set<AbstractRdsConfigProvider> getAllSupportedRdsConfigProviders() {
         return rdsConfigProviders;

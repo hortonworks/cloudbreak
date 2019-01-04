@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -116,6 +117,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
 
+    @Mock
+    private BlueprintService blueprintService;
+
     @Before
     public void setUp() throws CloudbreakException {
         underTest = new ClusterToClusterResponseConverter();
@@ -125,6 +129,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
                 .willReturn(new WorkspaceResourceResponse());
+        given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
     }
 
     @Test

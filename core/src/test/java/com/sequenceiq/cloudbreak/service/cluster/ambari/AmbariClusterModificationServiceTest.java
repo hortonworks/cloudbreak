@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -48,7 +49,7 @@ public class AmbariClusterModificationServiceTest {
     private AmbariClientFactory clientFactory;
 
     @Mock
-    private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;
+    private ClusterConnectorPollingResultChecker clusterConnectorPollingResultChecker;
 
     @Mock
     private AmbariOperationService ambariOperationService;

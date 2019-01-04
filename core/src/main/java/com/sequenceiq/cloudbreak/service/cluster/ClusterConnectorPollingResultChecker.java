@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.ambari;
+package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 
 @Service
-public class AmbariClusterConnectorPollingResultChecker {
+public class ClusterConnectorPollingResultChecker {
 
     public void checkPollingResult(PollingResult pollingResult, String message) throws ClusterException {
         if (isExited(pollingResult)) {

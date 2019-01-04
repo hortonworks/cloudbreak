@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult;
 
 public enum ClusterUpgradeEvent implements FlowEvent {
@@ -11,8 +11,8 @@ public enum ClusterUpgradeEvent implements FlowEvent {
     CLUSTER_UPGRADE_FINISHED_EVENT(EventSelectorUtil.selector(ClusterUpgradeResult.class)),
     CLUSTER_UPGRADE_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterUpgradeResult.class)),
 
-    CLUSTER_UPGRADE_START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariSuccess.class)),
-    CLUSTER_UPGRADE_START_AMBARI_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(StartAmbariFailed.class)),
+    CLUSTER_UPGRADE_START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
+    CLUSTER_UPGRADE_START_AMBARI_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(StartClusterFailed.class)),
 
     FINALIZED_EVENT("CLUSTERUPGRADEFINALIZEDEVENT"),
     FAILURE_EVENT("CLUSTERUPGRADEFAILUREEVENT"),

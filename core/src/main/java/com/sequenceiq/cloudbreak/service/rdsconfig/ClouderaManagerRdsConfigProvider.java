@@ -1,0 +1,53 @@
+package com.sequenceiq.cloudbreak.service.rdsconfig;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+
+@Component
+public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider {
+
+    private static final String PILLAR_KEY = "clouderamanager";
+
+    @Value("${cb.clouderamanager.database.port:5432}")
+    private String port;
+
+    @Value("${cb.clouderamanager.database.user:clouderamanager}")
+    private String userName;
+
+    @Value("${cb.clouderamanager.database.db:clouderamanager}")
+    private String db;
+
+    @Override
+    protected String getDbUser() {
+        return userName;
+    }
+
+    @Override
+    protected String getDb() {
+        return db;
+    }
+
+    @Override
+    protected String getDbPort() {
+        return port;
+    }
+
+    @Override
+    protected String getPillarKey() {
+        return PILLAR_KEY;
+    }
+
+    @Override
+    protected RdsType getRdsType() {
+        return RdsType.CLOUDERA_MANAGER;
+    }
+
+    @Override
+    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
+        return true;
+    }
+
+}

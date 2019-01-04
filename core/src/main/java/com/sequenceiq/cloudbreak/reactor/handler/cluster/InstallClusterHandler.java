@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterCreationService;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
@@ -21,7 +21,7 @@ public class InstallClusterHandler implements ReactorEventHandler<InstallCluster
     private EventBus eventBus;
 
     @Inject
-    private AmbariClusterCreationService ambariClusterCreationService;
+    private ClusterBuilderService clusterBuilderService;
 
     @Override
     public String selector() {
@@ -33,7 +33,7 @@ public class InstallClusterHandler implements ReactorEventHandler<InstallCluster
         Long stackId = event.getData().getStackId();
         Selectable response;
         try {
-            ambariClusterCreationService.buildAmbariCluster(stackId);
+            clusterBuilderService.buildAmbariCluster(stackId);
             response = new InstallClusterSuccess(stackId);
         } catch (RuntimeException e) {
             response = new InstallClusterFailed(stackId, e);

@@ -19,7 +19,6 @@
 {% set is_container_executor = salt['pillar.get']('docker:enableContainerExecutor') %}
 {% set version = salt['pillar.get']('ambari:repo:version') %}
 {% set ambari_database = salt['pillar.get']('ambari:database') %}
-{% set cluster_domain = salt['pillar.get']('hosts')[server_address]['domain'] %}
 {% set is_local_ldap = salt['pillar.get']('ldap:local', False) %}
 {% set ldap = salt['pillar.get']('ldap') %}
 {% set gateway = salt['pillar.get']('gateway') %}
@@ -42,7 +41,6 @@
     'is_gpl_repo_enabled' : is_gpl_repo_enabled,
     'version': version,
     'ambari_database': ambari_database,
-    'cluster_domain': cluster_domain,
     'is_container_executor': is_container_executor,
     'is_local_ldap': is_local_ldap,
     'secure_ldap': secure_ldap,

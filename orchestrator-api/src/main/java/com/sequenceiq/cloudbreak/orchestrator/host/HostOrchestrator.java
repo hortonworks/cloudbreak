@@ -30,7 +30,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
     void initServiceRun(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
-            SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+            SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel, boolean clouderaManager) throws CloudbreakOrchestratorException;
 
     void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;

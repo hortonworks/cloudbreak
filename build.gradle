@@ -41,10 +41,7 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   group = 'com.sequenceiq'
-  repositories {
-    mavenLocal()
-    maven { url = "$repoUrl" }
-  }
+
   configurations {
     testRuntime {
       exclude group: "org.springframework.cloud"
@@ -166,5 +163,6 @@ subprojects {
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
   }
 }

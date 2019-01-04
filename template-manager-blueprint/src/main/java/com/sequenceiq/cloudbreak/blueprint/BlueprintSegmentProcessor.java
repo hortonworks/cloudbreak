@@ -130,7 +130,7 @@ public class BlueprintSegmentProcessor {
                     shouldGenerate = true;
                 } else {
                     LOGGER.debug("Related services list is not empty checking the blueprint that components {} are exist.", relatedServices.getServices());
-                    shouldGenerate = blueprintProcessorFactory.get(blueprintText).componentsExistsInBlueprint(relatedServices.getServices());
+                    shouldGenerate = blueprintProcessorFactory.get(blueprintText).isComponentsExistsInBlueprint(relatedServices.getServices());
                     LOGGER.debug("The mechanism should generate configurations [{}] for {} services.", shouldGenerate, relatedServices.getServices());
                 }
             } catch (IOException e) {

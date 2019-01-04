@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -80,6 +81,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Inject
     private ConversionService conversionService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
@@ -112,9 +116,13 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setDpAmbariUser(conversionService.convert(source.getDpAmbariUserSecret(), SecretResponse.class));
             clusterResponse.setDpAmbariPassword(conversionService.convert(source.getDpAmbariPasswordSecret(), SecretResponse.class));
         }
-        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies =
-                serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);
-        clusterResponse.setClusterExposedServicesForTopologies(clusterExposedServicesForTopologies);
+
+        if (blueprintService.isAmbariBlueprint(source.getBlueprint())) {
+            Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies =
+                    serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);
+            clusterResponse.setClusterExposedServicesForTopologies(clusterExposedServicesForTopologies);
+        }
+
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         setExtendedBlueprintText(source, clusterResponse);
         convertRdsConfigs(source, clusterResponse);

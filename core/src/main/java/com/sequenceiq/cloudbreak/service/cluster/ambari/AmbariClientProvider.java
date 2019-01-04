@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import java.net.URL;
 import java.util.regex.Pattern;
@@ -14,7 +14,6 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.proxy.ApplicationProxyConfig;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 
 @Service
 public class AmbariClientProvider {

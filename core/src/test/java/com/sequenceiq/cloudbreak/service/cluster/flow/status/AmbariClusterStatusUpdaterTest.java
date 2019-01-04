@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;

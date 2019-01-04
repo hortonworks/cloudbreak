@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -56,7 +57,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     private AmbariClientFactory clientFactory;
 
     @Inject
-    private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;
+    private ClusterConnectorPollingResultChecker clusterConnectorPollingResultChecker;
 
     @Inject
     private AmbariOperationService ambariOperationService;
@@ -102,7 +103,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             String message = pollingResult.getRight() == null
                     ? cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_UPSCALE_FAILED.code())
                     : pollingResult.getRight().getMessage();
-            ambariClusterConnectorPollingResultChecker.checkPollingResult(pollingResult.getLeft(), message);
+            clusterConnectorPollingResultChecker.checkPollingResult(pollingResult.getLeft(), message);
         }
     }
 

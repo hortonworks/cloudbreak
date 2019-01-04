@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
@@ -137,7 +138,10 @@ public class ClusterHostServiceRunner {
     @Inject
     private ServiceProviderConnectorAdapter connector;
 
-    public void runAmbariServices(Stack stack, Cluster cluster) {
+    @Inject
+    private BlueprintService blueprintService;
+
+    public void runClusterServices(Stack stack, Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -145,8 +149,9 @@ public class ClusterHostServiceRunner {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
+            boolean clouderaManager = blueprintService.isClouderaManagerBlueprint(cluster.getBlueprint());
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel, clouderaManager);
+            recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -155,12 +160,12 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+    public Map<String, String> addClusterServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Map<String, String> candidates;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
         candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-        runAmbariServices(stack, cluster);
+        runClusterServices(stack, cluster);
         return candidates;
     }
 
@@ -208,24 +213,28 @@ public class ClusterHostServiceRunner {
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
         saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
-        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-        if (ambariRepo != null) {
-            Map<String, Object> ambariRepoMap = ambariRepo.asMap();
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            Json blueprint = new Json(blueprintText);
-            ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
-            ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
-            servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
-            boolean setupLdapAndSsoOnApi = ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
-            servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
-                    singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
-        }
-        servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
-                clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
-        decoratePillarWithAmbariDatabase(cluster, servicePillar);
+        if (blueprintService.isClouderaManagerBlueprint(cluster.getBlueprint())) {
+            decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
+        } else {
+            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
+            if (ambariRepo != null) {
+                Map<String, Object> ambariRepoMap = ambariRepo.asMap();
+                String blueprintText = cluster.getBlueprint().getBlueprintText();
+                Json blueprint = new Json(blueprintText);
+                ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
+                ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
+                servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
+                boolean setupLdapAndSsoOnApi = ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
+                servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
+                        singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
+            }
+            servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
+                    clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
+            decoratePillarWithAmbariDatabase(cluster, servicePillar);
+        }
 
         if (cluster.getLdapConfig() != null) {
             LdapConfig ldapConfig = cluster.getLdapConfig().copyWithoutWorkspace();
@@ -297,6 +306,17 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("server", kerberosConfig.getUrl());
             servicePillar.put("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls", singletonMap("sssd-ipa", sssdConnfig)));
         }
+    }
+
+    private void decoratePillarWithClouderaManagerDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
+            throws CloudbreakOrchestratorFailedException {
+        RDSConfig clouderaManagerRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), RdsType.CLOUDERA_MANAGER);
+        if (clouderaManagerRdsConfig == null) {
+            throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stack");
+        }
+        RdsView rdsView = new RdsView(rdsConfigService.resolveVaultValues(clouderaManagerRdsConfig));
+        servicePillar.put("cloudera-manager-database",
+                new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
     }
 
     private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
@@ -372,15 +392,18 @@ public class ClusterHostServiceRunner {
         }
 
         gateway.put("kerberos", cluster.getKerberosConfig() != null);
-        Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
 
-        List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
-        if (rangerLocations != null && !rangerLocations.isEmpty()) {
-            serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
+            Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
+
+            List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
+            if (rangerLocations != null && !rangerLocations.isEmpty()) {
+                serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+            }
+
+            gateway.put("location", serviceLocation);
+            servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
         }
-
-        gateway.put("location", serviceLocation);
-        servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
     private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {

@@ -533,7 +533,7 @@ public class TestUtil {
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
             recipe.setContent("base64Content");
-            recipe.setRecipeType(RecipeType.POST_AMBARI_START);
+            recipe.setRecipeType(RecipeType.POST_CLUSTER_MANAGER_START);
             Workspace workspace = new Workspace();
             workspace.setId(1L);
             workspace.setName("Top Secret FBI");
