@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_CLUSTER_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
@@ -133,7 +133,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             TestContext testContext) {
         String recipeName = creator.getRandomNameForMock();
         testContext
-                .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
+                .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_CLUSTER_MANAGER_START)
                 .when(Recipe.postV2())
                 .given(COMPUTE_ID, InstanceGroupEntity.class).withHostGroup(COMPUTE).withNodeCount(1).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(COMPUTE_ID)
@@ -148,8 +148,8 @@ public class RecipeTest extends AbstractIntegrationTest {
     @DataProvider(name = "dataProviderForNonPreTerminationRecipeTypes")
     public Object[][] getData() {
         return new Object[][]{
-                {applicationContext.getBean(TestContext.class), WORKER, 1, PRE_AMBARI_START, 3},
-                {applicationContext.getBean(TestContext.class), WORKER, 1, POST_AMBARI_START, 3},
+                {applicationContext.getBean(TestContext.class), WORKER, 1, PRE_CLUSTER_MANAGER_START, 3},
+                {applicationContext.getBean(TestContext.class), WORKER, 1, POST_CLUSTER_MANAGER_START, 3},
                 {applicationContext.getBean(TestContext.class), WORKER, 1, POST_CLUSTER_INSTALL, 2}
         };
     }

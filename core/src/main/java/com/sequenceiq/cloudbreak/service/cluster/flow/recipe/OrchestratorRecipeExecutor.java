@@ -103,7 +103,7 @@ class OrchestratorRecipeExecutor {
         }
     }
 
-    public void preAmbariStartRecipes(Stack stack) throws CloudbreakException {
+    public void preClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
@@ -115,7 +115,7 @@ class OrchestratorRecipeExecutor {
         }
     }
 
-    public void postAmbariStartRecipes(Stack stack) throws CloudbreakException {
+    public void postClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {

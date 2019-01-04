@@ -26,7 +26,8 @@ public class JidInfoResponseTransformer {
             } else if (stringObjectEntry.getValue() instanceof List) {
                 List<String> listValue = (List<String>) stringObjectEntry.getValue();
                 if (!listValue.isEmpty()) {
-                    throw new RuntimeException("Salt execution went wrong: " + listValue.get(0));
+                    String errorMessage = listValue.stream().reduce((s, s2) -> s + "; " + s2).get();
+                    throw new RuntimeException("Salt execution went wrong: " + errorMessage);
                 }
             } else {
                 throw new UnsupportedOperationException("Not supported Salt response: " + stringObjectEntry.getValue().getClass());

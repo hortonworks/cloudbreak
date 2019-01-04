@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
 
 @Component
 public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
@@ -23,7 +23,7 @@ public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEv
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(CLUSTER_RESET_EVENT.event(), event.getStackId(), event.accepted()));
-        flowEventChain.add(new StartAmbariSuccess(CLUSTER_INSTALL_EVENT.event(), event.getStackId()));
+        flowEventChain.add(new StartClusterSuccess(CLUSTER_INSTALL_EVENT.event(), event.getStackId()));
         return flowEventChain;
     }
 }

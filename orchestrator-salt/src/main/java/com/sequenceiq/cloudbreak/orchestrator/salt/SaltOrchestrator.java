@@ -243,7 +243,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, boolean clouderaManager)
             throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
@@ -262,18 +262,48 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
 
             Set<String> server = Sets.newHashSet(ambariServerAddress);
-            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            Set<String> allNodeIP = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
-            setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, all);
-            setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, all);
+            setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeIP);
+            setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeIP);
 
             // knox
-            if (primaryGateway.getKnoxGatewayEnabled()) {
+            if (!clouderaManager && primaryGateway.getKnoxGatewayEnabled()) {
                 runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitModel);
             }
 
             setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, server);
 
+            addClusterManagerRoles(allNodes, exitModel, gatewayTargets, sc, server, allNodeIP, clouderaManager);
+
+            // kerberos
+            if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
+                runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "kerberized"), exitModel);
+            }
+            // smartsense
+            if (configureSmartSense) {
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "smartsense_agent_update"), exitModel);
+            }
+            uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
+
+            runSaltCommand(sc, new SyncAllRunner(allNodeIP, allNodes), exitModel);
+            runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during ambari bootstrap", e);
+            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    private void addClusterManagerRoles(Set<Node> allNodes, ExitCriteriaModel exitModel, Set<String> gatewayTargets,
+            SaltConnector sc, Set<String> server, Set<String> allNodeIP, boolean clouderaManager) throws ExecutionException, InterruptedException {
+        if (clouderaManager) {
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "manager_server"), exitModel);
+            runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "manager_agent"), exitModel);
+        } else {
             // ambari server
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server_install"), exitModel);
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitModel);
@@ -284,27 +314,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitModel);
             }
             // ambari agent
-            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent_install"), exitModel);
-            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitModel);
-            // kerberos
-            if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "kerberized"), exitModel);
-            }
-            // smartsense
-            if (configureSmartSense) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitModel);
-                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense_agent_update"), exitModel);
-            }
-            uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
-
-            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitModel);
-            runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during ambari bootstrap", e);
-            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
-                throw (CloudbreakOrchestratorFailedException) e.getCause();
-            }
-            throw new CloudbreakOrchestratorFailedException(e);
+            runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "ambari_agent_install"), exitModel);
+            runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "ambari_agent"), exitModel);
         }
     }
 

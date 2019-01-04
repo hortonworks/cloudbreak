@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterSecurityService {
 
-    void replaceUserNamePassword(Stack stackId, String newUserName, String newPassword) throws CloudbreakException;
+    void replaceUserNamePassword(Stack stack, String newUserName, String newPassword) throws CloudbreakException;
 
     void updateUserNamePassword(Stack stack, String newPassword) throws CloudbreakException;
 
@@ -13,5 +13,5 @@ public interface ClusterSecurityService {
 
     void disableSecurity(Stack stack);
 
-    void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException;
+    void changeOriginalCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException;
 }

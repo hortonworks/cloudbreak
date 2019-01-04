@@ -22,10 +22,6 @@ public interface ClusterApi {
         clusterSetupService().waitForHosts(stack);
     }
 
-    default boolean available(Stack stack) throws CloudbreakSecuritySetupException {
-        return clusterSetupService().available(stack);
-    }
-
     default void waitForServices(Stack stack, int requestId) throws CloudbreakException {
         clusterSetupService().waitForServices(stack, requestId);
     }
@@ -46,8 +42,8 @@ public interface ClusterApi {
         clusterSecurityService().disableSecurity(stack);
     }
 
-    default void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException {
-        clusterSecurityService().changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
+    default void changeOriginalCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException {
+        clusterSecurityService().changeOriginalCredentialsAndCreateCloudbreakUser(stack);
     }
 
     default void upscaleCluster(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata) throws CloudbreakException {
@@ -67,5 +63,7 @@ public interface ClusterApi {
     ClusterModificationService clusterModificationService();
 
     ClusterSecurityService clusterSecurityService();
+
+    String clusterVariant();
 
 }

@@ -12,7 +12,5 @@ public interface ClusterSetupService {
 
     void waitForHosts(Stack stack) throws CloudbreakSecuritySetupException;
 
-    boolean available(Stack stack) throws CloudbreakSecuritySetupException;
-
     void waitForServices(Stack stack, int requestId) throws CloudbreakException;
 }

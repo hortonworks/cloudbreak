@@ -1,9 +1,12 @@
 base:
-  '*':
+  'G@roles:ambari_server or G@roles:ambari_agent':
+    - match: compound
     - ambari.config
     - ambari.repo
     - ambari.gpl
     - hdp.repo
+
+  '*':
     - network
     - nodes.hosts
     - discovery.init
@@ -34,6 +37,10 @@ base:
   'roles:postgresql_server':
     - match: grain
     - postgresql.postgre
+
+  'roles:manager_server':
+    - match: grain
+    - cloudera-manager.database
 
   'roles:ambari_server*':
     - match: grain

@@ -27,16 +27,17 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
-public class AmbariClusterUpscaleService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterUpscaleService.class);
+public class ClusterUpscaleService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleService.class);
 
     @Inject
     private StackService stackService;
@@ -54,7 +55,7 @@ public class AmbariClusterUpscaleService {
     private ClusterHostServiceRunner hostRunner;
 
     @Inject
-    private AmbariClusterConnector ambariClusterConnector;
+    private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -65,7 +66,7 @@ public class AmbariClusterUpscaleService {
     @Inject
     private RecipeEngine recipeEngine;
 
-    public void upscaleAmbari(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start adding cluster containers");
         Orchestrator orchestrator = stack.getOrchestrator();
@@ -79,7 +80,7 @@ public class AmbariClusterUpscaleService {
             }
             clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
-            Map<String, String> hosts = hostRunner.addAmbariServices(stackId, hostGroupName, scalingAdjustment);
+            Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
             for (String hostName : hosts.keySet()) {
                 if (!hostsPerHostGroup.keySet().contains(hostGroupName)) {
                     hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
@@ -96,7 +97,8 @@ public class AmbariClusterUpscaleService {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
         }
         instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
-        ambariClusterConnector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId));
+        ClusterApi connector = clusterApiConnectors.getConnector(stack.getCluster().getVariant());
+        connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId));
     }
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
@@ -112,7 +114,8 @@ public class AmbariClusterUpscaleService {
         LOGGER.debug("Start installing Ambari services");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        ambariClusterConnector.upscaleCluster(stack, hostGroup, hostMetadata);
+        ClusterApi connector = clusterApiConnectors.getConnector(stack.getCluster().getVariant());
+        connector.upscaleCluster(stack, hostGroup, hostMetadata);
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {

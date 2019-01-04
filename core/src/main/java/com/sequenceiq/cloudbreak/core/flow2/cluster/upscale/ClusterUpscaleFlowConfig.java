@@ -19,7 +19,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPLOAD_UPSCALE_RECIPES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_AMBARI_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_CLUSTER_MANAGER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_CLUSTER_STATE;
 
 import java.util.List;
@@ -35,9 +35,9 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
             new Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
                     .from(INIT_STATE).to(UPLOAD_UPSCALE_RECIPES_STATE).event(CLUSTER_UPSCALE_TRIGGER_EVENT).noFailureEvent()
-                    .from(UPLOAD_UPSCALE_RECIPES_STATE).to(UPSCALING_AMBARI_STATE).event(UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT)
+                    .from(UPLOAD_UPSCALE_RECIPES_STATE).to(UPSCALING_CLUSTER_MANAGER_STATE).event(UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT)
                         .failureEvent(UPLOAD_UPSCALE_RECIPES_FAILED_EVENT)
-                    .from(UPSCALING_AMBARI_STATE).to(UPSCALING_CLUSTER_STATE).event(UPSCALE_AMBARI_FINISHED_EVENT)
+                    .from(UPSCALING_CLUSTER_MANAGER_STATE).to(UPSCALING_CLUSTER_STATE).event(UPSCALE_AMBARI_FINISHED_EVENT)
                         .failureEvent(UPSCALE_AMBARI_FAILED_EVENT)
                     .from(UPSCALING_CLUSTER_STATE).to(EXECUTING_POSTRECIPES_STATE).event(CLUSTER_UPSCALE_FINISHED_EVENT)
                         .failureEvent(CLUSTER_UPSCALE_FAILED_EVENT)

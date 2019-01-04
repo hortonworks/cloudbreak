@@ -74,6 +74,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne
     private Stack stack;
 
+    @Column(columnDefinition = "TEXT")
+    private String variant;
+
     @ManyToOne
     private Blueprint blueprint;
 
@@ -220,6 +223,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
     }
 
     public Blueprint getBlueprint() {

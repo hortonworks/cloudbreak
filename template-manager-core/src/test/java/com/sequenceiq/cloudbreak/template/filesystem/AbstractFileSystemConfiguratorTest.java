@@ -33,7 +33,7 @@ public class AbstractFileSystemConfiguratorTest {
         AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
         List<RecipeScript> actual = underTest.getScripts(credential, adlsFileSystemConfigurationsView);
 
-        List<RecipeScript> expected = singletonList(new RecipeScript("echo 'newContent'", ExecutionType.ALL_NODES, RecipeType.POST_AMBARI_START));
+        List<RecipeScript> expected = singletonList(new RecipeScript("echo 'newContent'", ExecutionType.ALL_NODES, RecipeType.POST_CLUSTER_MANAGER_START));
         Assert.assertEquals(expected, actual);
     }
 
@@ -44,7 +44,7 @@ public class AbstractFileSystemConfiguratorTest {
         AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
         List<RecipeScript> actual = underTest.getScripts(credential, adlsFileSystemConfigurationsView);
 
-        List<RecipeScript> expected = singletonList(new RecipeScript("echo '$replace'", ExecutionType.ALL_NODES, RecipeType.POST_AMBARI_START));
+        List<RecipeScript> expected = singletonList(new RecipeScript("echo '$replace'", ExecutionType.ALL_NODES, RecipeType.POST_CLUSTER_MANAGER_START));
         Assert.assertEquals(expected, actual);
     }
 

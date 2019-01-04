@@ -31,7 +31,7 @@ public class StackScaleRequestV2ToUpdateClusterRequestConverter extends Abstract
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup != null) {
             String blueprintText = oneByStackId.getBlueprint().getBlueprintText();
-            boolean dataNodeComponentInHostGroup = new BlueprintTextProcessor(blueprintText).componentExistsInHostGroup("DATANODE", hostGroup.getName());
+            boolean dataNodeComponentInHostGroup = new BlueprintTextProcessor(blueprintText).isComponentExistsInHostGroup("DATANODE", hostGroup.getName());
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setValidateNodeCount(dataNodeComponentInHostGroup);

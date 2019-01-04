@@ -41,12 +41,34 @@ public class BlueprintUtils {
         return hostGroupCount;
     }
 
+    public int countHostTemplates(JsonNode root) {
+        int hostTemplateCount = 0;
+        Iterator<JsonNode> hostGroups = root.get("hostTemplates").elements();
+        while (hostGroups.hasNext()) {
+            hostGroups.next();
+            hostTemplateCount++;
+        }
+        return hostTemplateCount;
+    }
+
     public boolean isValidHostGroupName(String hostGroupName) {
         return StringUtils.isNotEmpty(hostGroupName) && validHostGroupNamePattern.matcher(hostGroupName).matches();
     }
 
+    public boolean isAmbariBlueprint(String blueprint) {
+        return isAmbariBlueprint(convertStringToJsonNode(blueprint));
+    }
+
+    public boolean isAmbariBlueprint(JsonNode blueprint) {
+        return blueprint.path("cdhVersion").isMissingNode();
+    }
+
     public String getBlueprintName(JsonNode root) {
         return root.get("Blueprints").get("blueprint_name").asText();
+    }
+
+    public String getCDHDisplayName(JsonNode root) {
+        return root.get("displayName").asText();
     }
 
     public String getBlueprintStackVersion(JsonNode root) {
@@ -55,6 +77,10 @@ public class BlueprintUtils {
 
     public String getBlueprintStackName(JsonNode root) {
         return root.get("Blueprints").get("stack_name").asText();
+    }
+
+    public String getCDHStackVersion(JsonNode root) {
+        return root.get("cdhVersion").asText();
     }
 
     public JsonNode convertStringToJsonNode(String json) {

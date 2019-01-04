@@ -195,14 +195,17 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
         Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
-        ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, request.getAmbariRepoDetailsJson(), stackImageComponent, cluster);
-        components.add(ambariRepoConfig);
-        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
-                stackImageComponent);
-        components.add(hdpRepoConfig);
 
-        checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
-        checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
+        if (blueprint != null && blueprintService.isAmbariBlueprint(blueprint)) {
+            AmbariRepoDetailsJson repoDetailsJson = request.getAmbariRepoDetailsJson();
+            ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);
+            components.add(ambariRepoConfig);
+            ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
+                    stackImageComponent);
+            components.add(hdpRepoConfig);
+            checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
+            checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
+        }
 
         LOGGER.debug("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 

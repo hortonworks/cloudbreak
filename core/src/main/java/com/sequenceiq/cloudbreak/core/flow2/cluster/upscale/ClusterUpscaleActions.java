@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
@@ -63,18 +63,18 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "UPSCALING_AMBARI_STATE")
-    public Action<?, ?> upscalingAmbariAction() {
+    @Bean(name = "UPSCALING_CLUSTER_MANAGER_STATE")
+    public Action<?, ?> upscalingClusterManagerAction() {
         return new AbstractClusterUpscaleAction<UploadUpscaleRecipesResult>(UploadUpscaleRecipesResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) {
-                clusterUpscaleFlowService.upscalingAmbari(context.getStackId());
+                clusterUpscaleFlowService.upscalingClusterManager(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new UpscaleAmbariRequest(context.getStackId(), context.getHostGroupName(), context.getAdjustment());
+                return new UpscaleClusterManagerRequest(context.getStackId(), context.getHostGroupName(), context.getAdjustment());
             }
 
         };
@@ -82,10 +82,10 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPSCALING_CLUSTER_STATE")
     public Action<?, ?> installServicesAction() {
-        return new AbstractClusterUpscaleAction<UpscaleAmbariResult>(UpscaleAmbariResult.class) {
+        return new AbstractClusterUpscaleAction<UpscaleClusterManagerResult>(UpscaleClusterManagerResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, UpscaleAmbariResult payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterUpscaleContext context, UpscaleClusterManagerResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -167,6 +167,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public Blueprint delete(Long id) {
         return delete(get(id));
+    }
+
+    public boolean isClouderaManagerBlueprint(Blueprint blueprint) {
+        return !isAmbariBlueprint(blueprint);
+    }
+
+    public boolean isAmbariBlueprint(Blueprint blueprint) {
+        return blueprintUtils.isAmbariBlueprint(blueprint.getBlueprintText());
     }
 
     @Override

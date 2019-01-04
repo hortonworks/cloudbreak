@@ -52,7 +52,7 @@ public class ClusterUpscaleFlowService {
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 
-    public void upscalingAmbari(long stackId) {
+    public void upscalingClusterManager(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
     }

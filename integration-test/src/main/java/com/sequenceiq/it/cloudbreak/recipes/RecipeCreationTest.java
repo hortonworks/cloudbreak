@@ -25,7 +25,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         if (!preScript.isEmpty()) {
-            createRecipe(name + "pre", preScript, RecipeType.POST_AMBARI_START, description);
+            createRecipe(name + "pre", preScript, RecipeType.POST_CLUSTER_MANAGER_START, description);
         }
         if (!postScript.isEmpty()) {
             createRecipe(name + "post", postScript, RecipeType.POST_CLUSTER_INSTALL, description);

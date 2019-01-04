@@ -84,7 +84,7 @@ public class ClusterServiceRunner {
             }
             clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
-            hostRunner.runAmbariServices(stack, cluster);
+            hostRunner.runClusterServices(stack, cluster);
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
             HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
@@ -111,7 +111,7 @@ public class ClusterServiceRunner {
             LOGGER.debug("Container orchestrator is not supported for this action.");
         } else {
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
-            hostRunner.runAmbariServices(stack, cluster);
+            hostRunner.runClusterServices(stack, cluster);
         }
     }
 

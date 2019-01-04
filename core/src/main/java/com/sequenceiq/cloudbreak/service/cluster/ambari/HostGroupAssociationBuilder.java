@@ -33,7 +33,6 @@ public class HostGroupAssociationBuilder {
         LOGGER.debug("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
             List<Map<String, String>> hostInfoForHostGroup = buildHostGroupAssociation(hostGroup);
-
             hostGroupMappings.put(hostGroup.getName(), hostInfoForHostGroup);
         }
         LOGGER.debug("Computed host-hostGroup associations: {}", hostGroupMappings);

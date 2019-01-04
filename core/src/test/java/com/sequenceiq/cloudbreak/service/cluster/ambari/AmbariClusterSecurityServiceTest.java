@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -55,7 +56,7 @@ public class AmbariClusterSecurityServiceTest {
     private AmbariUserHandler ambariUserHandler;
 
     @Mock
-    private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;
+    private ClusterConnectorPollingResultChecker clusterConnectorPollingResultChecker;
 
     @Mock
     private AmbariOperationService ambariOperationService;
@@ -157,7 +158,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, ambariClient)).thenReturn(ambariClient);
         when(ambariClient.deleteUser("admin")).thenReturn(ambariClient);
 
-        underTest.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
+        underTest.changeOriginalCredentialsAndCreateCloudbreakUser(stack);
 
         verify(clientFactory, times(1)).getDefaultAmbariClient(stack);
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakAmbariUserName(stack.getCluster());
@@ -184,7 +185,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster)).thenReturn("cloudbreak123");
         when(ambariUserHandler.createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient)).thenReturn(ambariClient);
 
-        underTest.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
+        underTest.changeOriginalCredentialsAndCreateCloudbreakUser(stack);
 
         verify(clientFactory, times(1)).getDefaultAmbariClient(stack);
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakAmbariUserName(stack.getCluster());
@@ -210,7 +211,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariSecurityConfigProvider.getCloudbreakAmbariPassword(cluster)).thenReturn("cloudbreak123");
         when(ambariUserHandler.createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient)).thenReturn(ambariClient);
 
-        underTest.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
+        underTest.changeOriginalCredentialsAndCreateCloudbreakUser(stack);
 
         verify(clientFactory, times(1)).getDefaultAmbariClient(stack);
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakAmbariUserName(stack.getCluster());
@@ -242,13 +243,13 @@ public class AmbariClusterSecurityServiceTest {
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING)).thenReturn(pair);
         when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code())).thenReturn("failed");
-        doNothing().when(ambariClusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
+        doNothing().when(clusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
 
         underTest.prepareSecurity(stack);
 
         verify(ambariOperationService, times(1)).waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING);
         verify(cloudbreakMessagesService, times(1)).getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code());
-        verify(ambariClusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
+        verify(clusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
     }
 
     @Test
@@ -280,7 +281,7 @@ public class AmbariClusterSecurityServiceTest {
 
         verify(ambariOperationService, times(1)).waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING);
         verify(cloudbreakMessagesService, times(1)).getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code());
-        verify(ambariClusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
+        verify(clusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
     }
 
     @Test
@@ -314,7 +315,7 @@ public class AmbariClusterSecurityServiceTest {
 
         verify(ambariOperationService, times(1)).waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING);
         verify(cloudbreakMessagesService, times(1)).getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code());
-        verify(ambariClusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
+        verify(clusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
     }
 
     @Test
@@ -333,13 +334,13 @@ public class AmbariClusterSecurityServiceTest {
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE)).thenReturn(pair);
         when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code())).thenReturn("failed");
-        doNothing().when(ambariClusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
+        doNothing().when(clusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
 
         underTest.disableSecurity(stack);
 
         verify(ambariOperationService, times(1)).waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE);
         verify(cloudbreakMessagesService, times(1)).getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code());
-        verify(ambariClusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
+        verify(clusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
     }
 
     @Test
@@ -364,7 +365,7 @@ public class AmbariClusterSecurityServiceTest {
 
         verify(ambariOperationService, times(1)).waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE);
         verify(cloudbreakMessagesService, times(1)).getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code());
-        verify(ambariClusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
+        verify(clusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
     }
 
     @Test
@@ -390,7 +391,7 @@ public class AmbariClusterSecurityServiceTest {
 
         verify(ambariOperationService, times(1)).waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE);
         verify(cloudbreakMessagesService, times(1)).getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code());
-        verify(ambariClusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
+        verify(clusterConnectorPollingResultChecker, times(1)).checkPollingResult(pair.getLeft(), failed);
     }
 
 }

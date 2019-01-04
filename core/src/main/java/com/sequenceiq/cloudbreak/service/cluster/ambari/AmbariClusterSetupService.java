@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSetupService;
@@ -69,7 +70,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private AmbariClientFactory clientFactory;
 
     @Inject
-    private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;
+    private ClusterConnectorPollingResultChecker clusterConnectorPollingResultChecker;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -149,7 +150,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             cluster.setExtendedBlueprintText(blueprintText);
             clusterService.updateCluster(cluster);
             PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
-            ambariClusterConnectorPollingResultChecker
+            clusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
             ambariClusterTemplateSubmitter.addClusterTemplate(cluster, hostGroupMappings, ambariClient);
             Pair<PollingResult, Exception> pollingResult =
@@ -157,7 +158,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
             String message =
                     pollingResult.getRight() == null ? constructClusterFailedMessage(cluster.getId(), ambariClient) : pollingResult.getRight().getMessage();
-            ambariClusterConnectorPollingResultChecker.checkPollingResult(pollingResult.getLeft(), message);
+            clusterConnectorPollingResultChecker.checkPollingResult(pollingResult.getLeft(), message);
             Pair<PollingResult, Exception> pollingResultExceptionPair = ambariOperationService
                     .waitForOperations(stack, ambariClient, new HashMap<>() {
                         {
@@ -165,7 +166,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
                         }
                     }, INSTALL_AMBARI_PROGRESS_STATE);
 
-            ambariClusterConnectorPollingResultChecker
+            clusterConnectorPollingResultChecker
                     .checkPollingResult(pollingResultExceptionPair.getLeft(), constructClusterFailedMessage(cluster.getId(), ambariClient));
             recipeEngine.executePostInstallRecipes(stack, hostGroups);
             ambariSmartSenseCapturer.capture(0, ambariClient);
@@ -208,12 +209,6 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         }
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTED.code()));
-    }
-
-    @Override
-    public boolean available(Stack stack) {
-        AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
-        return ambariPollingServiceProvider.isAmbariAvailable(stack, ambariClient);
     }
 
     private void addBlueprint(Long stackId, AmbariClient ambariClient, String blueprintText, Boolean topologyValidation) {
