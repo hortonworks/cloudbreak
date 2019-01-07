@@ -1,17 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.event.rest;
 
-import static com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails.KAFKA_PROPERTY_FILTER_NAME;
-
 import java.io.Serializable;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 
-@JsonFilter(KAFKA_PROPERTY_FILTER_NAME)
 public class RestResponseDetails implements Serializable {
     private Integer statusCode;
 

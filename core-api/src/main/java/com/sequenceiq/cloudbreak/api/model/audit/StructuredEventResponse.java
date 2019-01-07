@@ -92,4 +92,19 @@ public class StructuredEventResponse {
     public String getRawNotification() {
         return getType().equals(StructuredNotificationEvent.class.getSimpleName()) ? getEventJson() : null;
     }
+
+    @JsonRawValue
+    public void setRawFlowEvent(String event) {
+        eventJson = event;
+    }
+
+    @JsonRawValue
+    public void setRawRestEvent(String event) {
+        eventJson = event;
+    }
+
+    @JsonRawValue
+    public void setRawNotification(String event) {
+        eventJson = event;
+    }
 }

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.kafka;
 
-import static org.junit.Assert.assertFalse;
+import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.REPLACEMENT;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,10 +20,8 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
@@ -45,14 +42,9 @@ public class KafkaStructuredEventHandlerTest {
     @InjectMocks
     private KafkaStructuredEventHandler classIntest;
 
-    @Before
-    public void setup() {
-        classIntest.init();
-    }
-
     @Test
     public void checkEventTypeBasedTopicDistribution() throws ExecutionException, InterruptedException {
-        StructuredRestCallEvent structuredEvent = generateValidRestEvent();
+        StructuredRestCallEvent structuredEvent = createDummyStructuredRestEvent();
         Event<StructuredEvent> event = new Event<>(structuredEvent);
         ListenableFuture<SendResult<String, String>> futures = generateMockFutureWrappers();
         when(kafkaTemplate.send(eq("cbStructuredRestCallEvent"), anyString())).thenReturn(futures);
@@ -66,16 +58,18 @@ public class KafkaStructuredEventHandlerTest {
     public void checkIfPropertiesGetFilteredWithCustomMapper() throws JsonProcessingException {
         StructuredRestCallEvent restEvent = createDummyStructuredRestEvent();
 
-        ObjectMapper mapper = classIntest.createObjectMapper();
-        String result = mapper.writeValueAsString(restEvent);
-        assertTrue("Unaffected property by the filter", result.contains("content-length"));
-        assertFalse("Filtered because of JsonFilter", result.contains("BodyContent"));
-        assertFalse("Filtered because of JsonFilter", result.contains("body"));
+        classIntest.sanitizeSensitiveRestData(restEvent);
+        RestRequestDetails requestDetails = restEvent.getRestCall().getRestRequest();
+
+        assertTrue("Should be sanitized from Kafka event", requestDetails.getBody().contains(REPLACEMENT));
+        assertTrue("Should be empty because of ", requestDetails.getHeaders().isEmpty());
+        assertTrue("Should be left intact", requestDetails.getRequestUri().equals("/v3/clusters"));
     }
 
     private StructuredRestCallEvent createDummyStructuredRestEvent() {
         RestRequestDetails requestDetails = new RestRequestDetails();
         requestDetails.setBody("RequestBodyContent");
+        requestDetails.setRequestUri("/v3/clusters");
         RestResponseDetails restResponseDetails = new RestResponseDetails();
         restResponseDetails.setStatusCode(200);
         restResponseDetails.setBody("BodyContent");
@@ -85,6 +79,7 @@ public class KafkaStructuredEventHandlerTest {
         restCallDetails.setRestResponse(restResponseDetails);
         StructuredRestCallEvent restEvent = new StructuredRestCallEvent();
         restEvent.setRestCall(restCallDetails);
+        restEvent.setType("StructuredRestCallEvent");
         return restEvent;
     }
 
@@ -94,16 +89,4 @@ public class KafkaStructuredEventHandlerTest {
         return (ListenableFuture<SendResult<String, String>>) futureMock;
     }
 
-    private StructuredRestCallEvent generateValidRestEvent() {
-        OperationDetails opDetails = new OperationDetails();
-        opDetails.setTimestamp(1542641796L);
-        RestCallDetails details = new RestCallDetails();
-        details.setDuration(15L);
-        StructuredRestCallEvent structuredEvent = new StructuredRestCallEvent(opDetails, details);
-        RestResponseDetails restResponseDetails = new RestResponseDetails();
-        restResponseDetails.setStatusCode(200);
-        details.setRestResponse(restResponseDetails);
-        structuredEvent.setType("StructuredRestCallEvent");
-        return structuredEvent;
-    }
 }
