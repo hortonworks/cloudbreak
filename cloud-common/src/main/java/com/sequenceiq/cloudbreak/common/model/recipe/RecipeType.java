@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.common.model.recipe;
 
 public enum RecipeType {
     PRE_AMBARI_START,

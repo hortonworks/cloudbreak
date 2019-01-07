@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -66,8 +67,7 @@ public class EndpointConfig extends ResourceConfig {
             ProxyConfigV3Controller.class,
             RdsConfigController.class,
             RdsConfigV3Controller.class,
-            RecipeController.class,
-            RecipeV3Controller.class,
+            RecipesV4Controller.class,
             RepositoryConfigValidationController.class,
             SecurityRuleController.class,
             SettingsController.class,

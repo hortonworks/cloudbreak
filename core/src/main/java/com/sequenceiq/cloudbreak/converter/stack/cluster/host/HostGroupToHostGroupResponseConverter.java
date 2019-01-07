@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -32,7 +31,6 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
         hostGroupBase.setRecipeIds(getRecipeIds(source.getRecipes()));
         hostGroupBase.setMetadata(getHostMetadata(source.getHostMetadata()));
         hostGroupBase.setRecoveryMode(source.getRecoveryMode());
-        hostGroupBase.setRecipes(getRecipes(source.getRecipes()));
         hostGroupBase.setExtendedRecipes(getExtendedRecipes(source.getGeneratedRecipes()));
         return hostGroupBase;
     }
@@ -57,13 +55,5 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
 
     private Set<Long> getRecipeIds(Collection<Recipe> recipes) {
         return recipes.stream().map(Recipe::getId).collect(Collectors.toSet());
-    }
-
-    private Set<RecipeResponse> getRecipes(Iterable<Recipe> recipes) {
-        Set<RecipeResponse> recipeResponseSet = new HashSet<>();
-        for (Recipe recipe : recipes) {
-            recipeResponseSet.add(getConversionService().convert(recipe, RecipeResponse.class));
-        }
-        return recipeResponseSet;
     }
 }

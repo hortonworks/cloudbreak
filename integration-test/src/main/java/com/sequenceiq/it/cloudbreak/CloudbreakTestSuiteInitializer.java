@@ -228,13 +228,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                     }
                 }
             }
-            Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
-            if (recipeIds != null) {
-                for (Long recipeId : recipeIds) {
-                    cleanUpService.deleteRecipe(cloudbreakClient, recipeId);
-                }
-            }
-
             cleanUpService.deleteCredential(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
             cleanUpService.deleteBlueprint(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
             cleanUpService.deleteRdsConfigs(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID));

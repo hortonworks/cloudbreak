@@ -43,7 +43,6 @@ public class ControllerDescription {
     public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by workspace";
     public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Workspace";
     public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by workspace";
-    public static final String RECIPE_V3_DESCRIPTION = "Operations on recipes by workspace";
     public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
     public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
@@ -58,6 +57,7 @@ public class ControllerDescription {
 
     public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
+    public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
 
     private ControllerDescription() {
     }
