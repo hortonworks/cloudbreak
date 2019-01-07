@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
@@ -238,9 +239,9 @@ public class StackCreatorService {
     }
 
     private void decorateWithDatalakeResourceId(Stack stack) {
-        if (stack.getEnvironment() != null
-                && stack.getEnvironment().getDatalakeResourcesId() != null && stack.getDatalakeResourceId() == null) {
-            stack.setDatalakeResourceId(stack.getEnvironment().getDatalakeResourcesId());
+        if (stack.getEnvironment() != null && !CollectionUtils.isEmpty(stack.getEnvironment().getDatalakeResources())
+                &&  stack.getEnvironment().getDatalakeResources().size() == 1 && stack.getDatalakeResourceId() == null) {
+            stack.setDatalakeResourceId(stack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
         } else if (stack.getDatalakeId() != null) {
             DatalakeResources datalakeResources = datalakeResourcesService.getDatalakeResources(stack.getDatalakeId());
             if (datalakeResources != null) {

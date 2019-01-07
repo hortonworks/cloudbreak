@@ -509,7 +509,7 @@ serviceDescriptorDefinitionMap:
   RANGER:
     serviceName: RANGER
     blueprintParamKeys:
-      - ranger.service.http.port
+      - ranger-admin-site/ranger.service.http.port
       - ranger.audit.solr.zookeepers
       - ranger_admin_username
       - policymgr_external_url

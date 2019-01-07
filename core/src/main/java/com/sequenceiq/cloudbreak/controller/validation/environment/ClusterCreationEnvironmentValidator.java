@@ -9,15 +9,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -33,6 +36,9 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private RdsConfigService rdsConfigService;
 
+    @Inject
+    private KerberosService kerberosService;
+
     public ValidationResult validate(ClusterRequest clusterRequest, Stack stack) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         EnvironmentView stackEnv = stack.getEnvironment();
@@ -45,6 +51,25 @@ public class ClusterCreationEnvironmentValidator {
         validateLdapConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
         validateProxyConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
         validateRdsConfigs(workspaceId, clusterRequest, stackEnv, resultBuilder);
+        return resultBuilder.build();
+    }
+
+    public ValidationResult validate(RegisterDatalakeRequest registerDatalakeRequest, Environment environment) {
+        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        Long workspaceId = environment.getWorkspace().getId();
+        String environmentName = environment.getName();
+        if (!CollectionUtils.isEmpty(environment.getDatalakeResources())) {
+            resultBuilder.error("Only one external datalake can be registered to an environment!");
+        }
+        validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId),
+                environmentName, resultBuilder);
+        for (String rdsConfigName : registerDatalakeRequest.getRdsNames()) {
+            validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
+        }
+        if (StringUtils.isNoneEmpty(registerDatalakeRequest.getKerberosName())) {
+            validateEnvironmentAwareResource(kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId),
+                    environmentName, resultBuilder);
+        }
         return resultBuilder.build();
     }
 
@@ -110,11 +135,16 @@ public class ClusterCreationEnvironmentValidator {
                         resource.getName(), resource.getClass().getSimpleName()));
             }
         } else {
-            if (!CollectionUtils.isEmpty(resource.getEnvironments())
-                    && resource.getEnvironments().stream().noneMatch(resEnv -> resEnv.getName().equals(stackEnv.getName()))) {
-                resultBuilder.error(String.format("Stack cannot use %s %s resource which is not attached to %s environment and not global.",
-                        resource.getName(), resource.getClass().getSimpleName(), stackEnv.getName()));
-            }
+            validateEnvironmentAwareResource(resource, stackEnv.getName(), resultBuilder);
+        }
+    }
+
+    private <T extends EnvironmentAwareResource> void validateEnvironmentAwareResource(T resource,
+            String environemntName, ValidationResult.ValidationResultBuilder resultBuilder) {
+        if (!CollectionUtils.isEmpty(resource.getEnvironments())
+                && resource.getEnvironments().stream().noneMatch(resEnv -> resEnv.getName().equals(environemntName))) {
+            resultBuilder.error(String.format("Stack cannot use %s %s resource which is not attached to %s environment and not global.",
+                    resource.getName(), resource.getClass().getSimpleName(), environemntName));
         }
     }
 }

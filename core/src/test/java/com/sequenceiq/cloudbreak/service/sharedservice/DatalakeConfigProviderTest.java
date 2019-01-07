@@ -82,7 +82,7 @@ public class DatalakeConfigProviderTest {
         when(serviceDescriptorDefinitionProvider.getServiceDescriptorDefinitionMap()).thenReturn(Map.ofEntries(
                 Map.entry(serviceDescriptorDefinition1.getServiceName(), serviceDescriptorDefinition1),
                 Map.entry(serviceDescriptorDefinition2.getServiceName(), serviceDescriptorDefinition2)));
-        when(ambariClient.getConfigValuesByConfigIds(Lists.newArrayList(configIds))).thenReturn(ambariParameters);
+        when(ambariClient.getConfigValuesByConfigIdsAndType(Lists.newArrayList(configIds))).thenReturn(ambariParameters);
         when(ambariClient.getHostNamesByComponent("component1")).thenReturn(List.of("host1"));
         when(ambariClient.getHostNamesByComponent("component2")).thenReturn(List.of("host1", "host2"));
         when(ambariClient.getHostNamesByComponent("component3")).thenReturn(List.of("host2"));

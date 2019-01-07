@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.repository.cluster.ServiceDescriptorRepository;
@@ -80,6 +81,7 @@ public class DatalakeConfigProvider {
                                 Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, datalakeStack.getCluster().getPassword()))));
                         datalakeResources = collectDatalakeResources(datalakeStack, ambariClient, serviceSecretParamMap);
                         datalakeResources.setDatalakeStackId(datalakeStack.getId());
+                        datalakeResources.setEnvironment(datalakeStack.getEnvironment());
                         Workspace workspace = datalakeStack.getWorkspace();
                         storeDatalakeResources(datalakeResources, workspace);
                     }
@@ -114,13 +116,13 @@ public class DatalakeConfigProvider {
             datalakeParamKeys.addAll(sddEntry.getValue().getBlueprintParamKeys());
         }
         Map<String, ServiceDescriptor> serviceDescriptors = new HashMap<>();
-        Map<String, String> datalakeParameters = datalakeAmbari.getConfigValuesByConfigIds(Lists.newArrayList(datalakeParamKeys));
+        Map<String, String> datalakeParameters = datalakeAmbari.getConfigValuesByConfigIdsAndType(Lists.newArrayList(datalakeParamKeys));
         for (Map.Entry<String, ServiceDescriptorDefinition> sddEntry : serviceDescriptorDefinitionProvider.getServiceDescriptorDefinitionMap().entrySet()) {
             ServiceDescriptor serviceDescriptor = new ServiceDescriptor();
             serviceDescriptor.setServiceName(sddEntry.getValue().getServiceName());
             Map<String, String> serviceParams = datalakeParameters.entrySet().stream()
                     .filter(dp -> sddEntry.getValue().getBlueprintParamKeys().contains(dp.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toMap(dp -> getDatalakeParameterKey(dp.getKey()), Map.Entry::getValue));
             serviceDescriptor.setBlueprintParam(new Json(serviceParams));
             Map<String, String> serviceSecretParams = serviceSecretParamMap.getOrDefault(sddEntry.getKey(), new HashMap<>());
             serviceDescriptor.setBlueprintSecretParams(new Json(serviceSecretParams));
@@ -142,12 +144,13 @@ public class DatalakeConfigProvider {
         return datalakeResources;
     }
 
-    public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
-            AmbariClient datalakeAmbari, Map<String, Map<String, String>> serviceSecretParamMap, LdapConfig ldapConfig, KerberosConfig kerberosConfig,
-            Set<RDSConfig> rdsConfigs, Workspace workspace) {
+    public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, EnvironmentView environment, String datalakeAmbariUrl,
+            String datalakeAmbariIp, String datalakeAmbariFqdn, AmbariClient datalakeAmbari, Map<String, Map<String, String>> serviceSecretParamMap,
+            LdapConfig ldapConfig, KerberosConfig kerberosConfig, Set<RDSConfig> rdsConfigs, Workspace workspace) {
         try {
             DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn,
                     datalakeAmbari, serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
+            datalakeResources.setEnvironment(environment);
             return transactionService.required(() -> {
                 storeDatalakeResources(datalakeResources, workspace);
                 return datalakeResources;
@@ -233,5 +236,10 @@ public class DatalakeConfigProvider {
             components.addAll(componentMap.keySet());
         }
         datalakeResources.setDatalakeComponentSet(components);
+    }
+
+    private String getDatalakeParameterKey(String fullKey) {
+        String[] parts = fullKey.split("/");
+        return parts.length > 1 ? parts[1] : parts[0];
     }
 }

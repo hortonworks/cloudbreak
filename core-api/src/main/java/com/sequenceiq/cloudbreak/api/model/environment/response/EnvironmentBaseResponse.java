@@ -35,8 +35,8 @@ public abstract class EnvironmentBaseResponse {
 
     private WorkspaceResourceResponse workspace;
 
-    @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES_NAME)
-    private String datalakeResourcesName;
+    @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES_NAMES)
+    private Set<String> datalakeResourcesNames;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_CLUSTER_NAMES)
     private Set<String> datalakeClusterNames;
@@ -44,12 +44,12 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTER_NAMES)
     private Set<String> workloadClusterNames;
 
-    public String getDatalakeResourcesName() {
-        return datalakeResourcesName;
+    public Set<String> getDatalakeResourcesNames() {
+        return datalakeResourcesNames;
     }
 
-    public void setDatalakeResourcesName(String datalakeResourcesName) {
-        this.datalakeResourcesName = datalakeResourcesName;
+    public void setDatalakeResourcesNames(Set<String> datalakeResourcesNames) {
+        this.datalakeResourcesNames = datalakeResourcesNames;
     }
 
     public Set<String> getDatalakeClusterNames() {
