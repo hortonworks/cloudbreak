@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.kafka;
 
-import static com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails.KAFKA_PROPERTY_FILTER_NAME;
+import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.REPLACEMENT;
 
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.kafka.common.errors.InvalidTopicException;
@@ -16,11 +16,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import reactor.bus.Event;
 
@@ -28,8 +29,6 @@ import reactor.bus.Event;
 public class KafkaStructuredEventHandler<T extends StructuredEvent> implements ReactorEventHandler<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaStructuredEventHandler.class);
-
-    private ObjectMapper objectMapper;
 
     @Inject
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -43,8 +42,10 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
     public void accept(Event<T> structuredEvent) {
         String topicByType = getTopicNameForEvent(structuredEvent);
         try {
+            StructuredEvent event = structuredEvent.getData();
+            sanitizeSensitiveRestData(event);
             ListenableFuture<SendResult<String, String>> sendResultFuture =
-                    kafkaTemplate.send(topicByType, objectMapper.writeValueAsString(structuredEvent.getData()));
+                    kafkaTemplate.send(topicByType, JsonUtil.writeValueAsString(structuredEvent.getData()));
             SendResult<String, String> sendResult = sendResultFuture.get();
             LOGGER.trace("Structured event sent to kafka with topic {}: {}", topicByType, sendResult.getProducerRecord());
         } catch (InvalidTopicException e) {
@@ -56,17 +57,16 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
         }
     }
 
-    @PostConstruct
-    protected void init() {
-        objectMapper = createObjectMapper();
-    }
-
-    protected ObjectMapper createObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-        filterProvider.addFilter(KAFKA_PROPERTY_FILTER_NAME, SimpleBeanPropertyFilter.serializeAllExcept("body", "cookies"));
-        mapper.setFilterProvider(filterProvider);
-        return mapper;
+    protected void sanitizeSensitiveRestData(StructuredEvent event) {
+        if (event.getType().equals("StructuredRestCallEvent")) {
+            StructuredRestCallEvent restEvent = (StructuredRestCallEvent) event;
+            RestRequestDetails restRequestDetails = restEvent.getRestCall().getRestRequest();
+            restRequestDetails.setBody(REPLACEMENT);
+            restRequestDetails.setHeaders(new HashMap());
+            RestResponseDetails restResponseDetails = restEvent.getRestCall().getRestResponse();
+            restResponseDetails.setBody(REPLACEMENT);
+            restResponseDetails.setHeaders(new HashMap<>());
+        }
     }
 
     private String getTopicNameForEvent(Event<T> event) {

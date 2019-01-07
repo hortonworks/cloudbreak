@@ -12,6 +12,9 @@ public class AuditEvent {
 
     private StructuredEventResponse structuredEvent;
 
+    public AuditEvent() {
+    }
+
     public AuditEvent(Long auditId, StructuredEventResponse structuredEvent) {
         this.auditId = auditId;
         this.structuredEvent = structuredEvent;
