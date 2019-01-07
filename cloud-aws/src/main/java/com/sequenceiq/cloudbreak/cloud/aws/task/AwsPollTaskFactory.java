@@ -48,6 +48,10 @@ public class AwsPollTaskFactory {
         return createPollTask(CreateSnapshotReadyStatusCheckerTask.NAME, authenticatedContext, snapshotId, ec2Client);
     }
 
+    public PollTask<Boolean> newInstanceTerminationStatusCheckerTask(AuthenticatedContext authenticatedContext, String instanceId, AmazonEC2Client ec2Client) {
+        return createPollTask(AwsInstanceTerminatedStatusCheckerTask.NAME, authenticatedContext, instanceId, ec2Client);
+    }
+
     public PollTask<Boolean> newAMICopyStatusCheckerTask(AuthenticatedContext authenticatedContext, Collection<String> imageIds, AmazonEC2Client client) {
         return createPollTask(AMICopyStatusCheckerTask.NAME, authenticatedContext, imageIds, client);
     }
