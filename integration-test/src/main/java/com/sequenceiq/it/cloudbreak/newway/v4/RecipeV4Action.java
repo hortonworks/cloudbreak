@@ -1,19 +1,19 @@
-package com.sequenceiq.it.cloudbreak.newway.v3;
+package com.sequenceiq.it.cloudbreak.newway.v4;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.RecipeViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.RecipeEntity;
 
-public class RecipeV3Action {
+public class RecipeV4Action {
 
-    private RecipeV3Action() {
+    private RecipeV4Action() {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -23,7 +23,7 @@ public class RecipeV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         recipeEntity.setResponse(
                 client.getCloudbreakClient()
-                        .recipeV3Endpoint().createInWorkspace(workspaceId, recipeEntity.getRequest()));
+                        .recipeV4Endpoint().post(workspaceId, recipeEntity.getRequest()));
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -33,8 +33,8 @@ public class RecipeV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         recipeEntity.setResponse(
                 client.getCloudbreakClient()
-                        .recipeV3Endpoint()
-                        .getByNameInWorkspace(workspaceId, recipeEntity.getName()));
+                        .recipeV4Endpoint()
+                        .get(workspaceId, recipeEntity.getName()));
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -42,10 +42,10 @@ public class RecipeV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Set<RecipeViewResponse> recipes = client.getCloudbreakClient().recipeV3Endpoint().listByWorkspace(workspaceId);
-        Set<RecipeResponse> detailedRecipes = new HashSet<>();
+        Set<RecipeV4ViewResponse> recipes = client.getCloudbreakClient().recipeV4Endpoint().list(workspaceId).getRecipes();
+        Set<RecipeV4Response> detailedRecipes = new HashSet<>();
         recipes.stream().forEach(
-                recipe -> detailedRecipes.add(client.getCloudbreakClient().recipeV3Endpoint().getByNameInWorkspace(workspaceId, recipe.getName())));
+                recipe -> detailedRecipes.add(client.getCloudbreakClient().recipeV4Endpoint().get(workspaceId, recipe.getName())));
         recipeEntity.setResponses(detailedRecipes);
     }
 
@@ -54,8 +54,8 @@ public class RecipeV3Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        client.getCloudbreakClient().recipeV3Endpoint()
-                .deleteInWorkspace(workspaceId, recipeEntity.getName());
+        client.getCloudbreakClient().recipeV4Endpoint()
+                .delete(workspaceId, recipeEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

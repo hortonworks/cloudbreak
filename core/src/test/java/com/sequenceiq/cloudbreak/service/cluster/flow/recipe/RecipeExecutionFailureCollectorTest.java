@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
-
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_AMBARI_START;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

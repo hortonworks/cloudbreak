@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.common.model.recipe;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
 
 public class RecipeScript {
 

@@ -21,6 +21,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
@@ -43,7 +44,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ProxyConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.RecipeV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
@@ -120,8 +119,7 @@ public class CloudbreakClient {
             ProxyConfigV3Endpoint.class,
             RdsConfigEndpoint.class,
             RdsConfigV3Endpoint.class,
-            RecipeEndpoint.class,
-            RecipeV3Endpoint.class,
+            RecipeV4Endpoint.class,
             RepositoryConfigValidationEndpoint.class,
             SecurityRuleEndpoint.class,
             SettingsEndpoint.class,
@@ -287,12 +285,9 @@ public class CloudbreakClient {
         return getEndpoint(RdsConfigV3Endpoint.class);
     }
 
-    public RecipeEndpoint recipeEndpoint() {
-        return getEndpoint(RecipeEndpoint.class);
-    }
 
-    public RecipeV3Endpoint recipeV3Endpoint() {
-        return getEndpoint(RecipeV3Endpoint.class);
+    public RecipeV4Endpoint recipeV4Endpoint() {
+        return getEndpoint(RecipeV4Endpoint.class);
     }
 
     public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.common.type;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 
 public enum RecipeExecutionPhase {
 

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static org.mockito.Mockito.when;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4ResponseConverter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,18 +13,17 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverterTest<Recipe> {
+public class RecipeToRecipeV4ResponseConverterTest extends AbstractEntityConverterTest<Recipe> {
 
     @Mock
     private ConversionService conversionService;
 
     @InjectMocks
-    private RecipeToRecipeResponseConverter underTest;
+    private RecipeToRecipeV4ResponseConverter underTest;
 
     @Test
     public void testConvert() {
@@ -30,7 +31,7 @@ public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverter
         // WHEN
         Recipe recipe = getSource();
         when(conversionService.convert(recipe.getWorkspace(), WorkspaceResourceResponse.class)).thenReturn(new WorkspaceResourceResponse());
-        RecipeResponse result = underTest.convert(recipe);
+        RecipeV4Response result = underTest.convert(recipe);
         // THEN
         assertAllFieldsNotNull(result, Lists.newArrayList("id", "plugins"));
     }

@@ -14,7 +14,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -61,7 +60,6 @@ public class HostGroupDecorator {
     public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, Stack stack, boolean postRequest, Workspace workspace, User user) {
         ConstraintJson constraintJson = hostGroupRequest.getConstraint();
         Set<Long> recipeIds = hostGroupRequest.getRecipeIds();
-        Set<RecipeRequest> recipes = hostGroupRequest.getRecipes();
         Set<String> recipeNames = hostGroupRequest.getRecipeNames();
         LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
         Constraint constraint = conversionService.convert(constraintJson, Constraint.class);
@@ -79,24 +77,12 @@ public class HostGroupDecorator {
         if (recipeNames != null && !recipeNames.isEmpty()) {
             prepareRecipesByName(subject, stack.getWorkspace(), recipeNames);
         }
-        if (recipes != null && !recipes.isEmpty()) {
-            prepareRecipesByRequests(subject, recipes, workspace, user);
-        }
-
         return subject;
     }
 
     private void prepareRecipesByName(HostGroup subject, Workspace workspace, Collection<String> recipeNames) {
         Set<Recipe> recipes = recipeService.getRecipesByNamesForWorkspace(workspace, recipeNames);
         subject.getRecipes().addAll(recipes);
-    }
-
-    private void prepareRecipesByRequests(HostGroup subject, Iterable<RecipeRequest> recipes, Workspace workspace, User user) {
-        for (RecipeRequest recipe : recipes) {
-            Recipe convertedRecipe = conversionService.convert(recipe, Recipe.class);
-            convertedRecipe = recipeService.create(convertedRecipe, workspace, user);
-            subject.getRecipes().add(convertedRecipe);
-        }
     }
 
     private void prepareRecipesByIds(HostGroup subject, Iterable<Long> recipeIds) {

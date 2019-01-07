@@ -43,12 +43,6 @@ public class CleanupService {
                 .filter(blueprint -> blueprint.getName().startsWith("it-"))
                 .forEach(blueprint -> deleteBlueprint(cloudbreakClient, String.valueOf(blueprint.getId())));
 
-        cloudbreakClient.recipeEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(recipe -> recipe.getName().startsWith("it-"))
-                .forEach(recipe -> deleteRecipe(cloudbreakClient, recipe.getId()));
-
         cloudbreakClient.credentialEndpoint()
                 .getPrivates()
                 .stream()
@@ -97,10 +91,6 @@ public class CleanupService {
             result = true;
         }
         return result;
-    }
-
-    public void deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
-        cloudbreakClient.recipeEndpoint().delete(recipeId);
     }
 
     public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
