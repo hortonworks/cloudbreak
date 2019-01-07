@@ -16,7 +16,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -104,8 +103,9 @@ public class Environment implements WorkspaceAwareResource {
     @JoinColumn(name = "environment_id")
     private Set<ClusterApiView> clusters = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private DatalakeResources datalakeResources;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "environment_id")
+    private Set<DatalakeResources> datalakeResources = new HashSet<>();
 
     @Override
     public Long getId() {
@@ -212,11 +212,11 @@ public class Environment implements WorkspaceAwareResource {
         this.clusters = clusters;
     }
 
-    public DatalakeResources getDatalakeResources() {
+    public Set<DatalakeResources> getDatalakeResources() {
         return datalakeResources;
     }
 
-    public void setDatalakeResources(DatalakeResources datalakeResources) {
+    public void setDatalakeResources(Set<DatalakeResources> datalakeResources) {
         this.datalakeResources = datalakeResources;
     }
 

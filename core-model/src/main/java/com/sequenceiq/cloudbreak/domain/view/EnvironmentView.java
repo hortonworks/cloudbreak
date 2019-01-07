@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Entity
@@ -42,8 +46,8 @@ public class EnvironmentView extends CompactView {
     @Column(nullable = false)
     private Double latitude;
 
-    @Column(name = "datalakeresources_id")
-    private Long datalakeResourcesId;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "environment")
+    private Set<DatalakeResources> datalakeResources = new HashSet<>();
 
     public Json getRegions() {
         return regions;
@@ -102,12 +106,12 @@ public class EnvironmentView extends CompactView {
         return WorkspaceResource.ENVIRONMENT;
     }
 
-    public Long getDatalakeResourcesId() {
-        return datalakeResourcesId;
+    public Set<DatalakeResources> getDatalakeResources() {
+        return datalakeResources;
     }
 
-    public void setDatalakeResourcesId(Long datalakeResourcesId) {
-        this.datalakeResourcesId = datalakeResourcesId;
+    public void setDatalakeResources(Set<DatalakeResources> datalakeResources) {
+        this.datalakeResources = datalakeResources;
     }
 
     @Override

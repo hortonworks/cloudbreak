@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAttachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -65,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
@@ -138,6 +141,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     @Inject
     private AmbariClientProvider ambariClientProvider;
 
+    @Inject
+    private ClusterCreationEnvironmentValidator clusterCreationEnvironmentValidator;
+
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
+
     public Set<SimpleEnvironmentResponse> listByWorkspaceId(Long workspaceId) {
         Set<SimpleEnvironmentResponse> environmentResponses = environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
@@ -147,6 +156,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             environmentResponse.setDatalakeClusterNames(datalakeNames);
             Set<String> workloadNames = stackService.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, environmentResponse.getId());
             environmentResponse.setWorkloadClusterNames(workloadNames);
+            Set<String> datalakeResourcesNames =
+                    datalakeResourcesService.findDatalakeResourcesNamesByWorkspaceAndEnvironment(workspaceId, environmentResponse.getId());
+            environmentResponse.setDatalakeResourcesNames(datalakeResourcesNames);
         }
         return environmentResponses;
     }
@@ -380,6 +392,11 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             return transactionService.required(() -> {
                 try {
                     Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                    EnvironmentView envView = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
+                    ValidationResult validationResult = clusterCreationEnvironmentValidator.validate(registerDatalakeRequest, environment);
+                    if (validationResult.hasError()) {
+                        throw new BadRequestException(validationResult.getFormattedErrors());
+                    }
                     Credential credential = environment.getCredential();
                     String attributesStr = credential.getAttributes();
                     Map<String, Object> attributes = isEmpty(attributesStr) ? new HashMap<>() : new Json(attributesStr).getMap();
@@ -397,10 +414,10 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                     Map<String, Map<String, String>> serviceSecretParamMap = StringUtils.isEmpty(registerDatalakeRequest.getRangerAdminPassword())
                             ? new HashMap<>() : Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE, Map.ofEntries(
                             Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, registerDatalakeRequest.getRangerAdminPassword()))));
-                    DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, datalakeAmbariUrl,
+                    DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, envView, datalakeAmbariUrl,
                             ambariUrl.getHost(), ambariUrl.getHost(), ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig, rdssConfigs,
                             environment.getWorkspace());
-                    environment.setDatalakeResources(datalakeResources);
+                    environment.getDatalakeResources().add(datalakeResources);
                     return conversionService.convert(environmentRepository.save(environment), DetailedEnvironmentResponse.class);
                 } catch (MalformedURLException ex) {
                     throw new CloudbreakServiceException("", ex);

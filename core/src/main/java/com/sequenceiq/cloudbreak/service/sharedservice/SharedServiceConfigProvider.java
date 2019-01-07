@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
@@ -88,8 +89,9 @@ public class SharedServiceConfigProvider {
         try {
             AmbariClient ambariClient = null;
             Optional<DatalakeResources> datalakeResource = Optional.empty();
-            if (publicStack.getEnvironment().getDatalakeResourcesId() != null) {
-                datalakeResource = datalakeResourcesRepository.findById(publicStack.getEnvironment().getDatalakeResourcesId());
+            if (!CollectionUtils.isEmpty(publicStack.getEnvironment().getDatalakeResources())
+                    && publicStack.getEnvironment().getDatalakeResources().size() == 1) {
+                datalakeResource = datalakeResourcesRepository.findById(publicStack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
                 if (credentialPrerequisiteService.isCumulusCredential(publicStack.getCredential().getAttributes())) {
                     ambariClient = credentialPrerequisiteService.createCumulusAmbariClient(publicStack.getCredential().getAttributes());
                 }

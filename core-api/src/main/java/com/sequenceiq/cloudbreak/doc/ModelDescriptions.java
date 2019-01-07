@@ -672,7 +672,7 @@ public class ModelDescriptions {
         public static final String WORKLOAD_CLUSTER_NAMES = "Names of the workload clusters created in the environment.";
         public static final String DATALAKE_CLUSTERS = "Datalake clusters created in the environment.";
         public static final String DATALAKE_CLUSTER_NAMES = "Names of the datalake clusters created in the environment.";
-        public static final String DATALAKE_RESOURCES_NAME = "Datalake cluster resources registered to the environment.";
+        public static final String DATALAKE_RESOURCES_NAMES = "Datalake cluster resources registered to the environment.";
         public static final String DATALAKE_RESOURCES = "Datalake cluster resources registered to the environment.";
         public static final String KERBEROS_CONFIGS = "Kerberos configs in the environment.";
     }

@@ -20,15 +20,17 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-public class DatalakeResources implements WorkspaceAwareResource {
+public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "datalakeresources_generator")
     @SequenceGenerator(name = "datalakeresources_generator", sequenceName = "datalakeresources_id_seq", allocationSize = 1)
@@ -64,6 +66,9 @@ public class DatalakeResources implements WorkspaceAwareResource {
 
     @ManyToOne
     private KerberosConfig kerberosConfig;
+
+    @ManyToOne
+    private EnvironmentView environment;
 
     @Override
     public Long getId() {
@@ -176,5 +181,13 @@ public class DatalakeResources implements WorkspaceAwareResource {
 
     public void setKerberosConfig(KerberosConfig kerberosConfig) {
         this.kerberosConfig = kerberosConfig;
+    }
+
+    public EnvironmentView getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentView environment) {
+        this.environment = environment;
     }
 }

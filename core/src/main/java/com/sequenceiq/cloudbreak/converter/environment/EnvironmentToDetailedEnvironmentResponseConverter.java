@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.environment;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -90,9 +92,10 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .stream()
                         .map(StackViewResponse::getName)
                         .collect(Collectors.toSet()));
-        if (source.getDatalakeResources() != null) {
-            DatalakeResources datalakeResources = source.getDatalakeResources();
-            response.setDatalakeResourcesName(datalakeResources.getName());
+        Set<String> datalakeResourcesNames = new HashSet<>();
+        Set<DatalakeResourcesResponse> datalakeResourcesResponses = new HashSet<>();
+        for (DatalakeResources datalakeResources : source.getDatalakeResources()) {
+            datalakeResourcesNames.add(datalakeResources.getName());
             DatalakeResourcesResponse datalakeResourcesResponse = new DatalakeResourcesResponse();
             datalakeResourcesResponse.setAmbariUrl(datalakeResources.getDatalakeAmbariUrl());
             if (datalakeResources.getLdapConfig() != null) {
@@ -113,8 +116,10 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                 serviceDescriptorResponses.put(serviceDescriptor.getServiceName(), serviceDescriptorResponse);
             }
             datalakeResourcesResponse.setServiceDescriptorMap(serviceDescriptorResponses);
-            response.setDatalakeResourcesResponse(datalakeResourcesResponse);
+            datalakeResourcesResponses.add(datalakeResourcesResponse);
         }
+        response.setDatalakeResourcesNames(datalakeResourcesNames);
+        response.setDatalakeResourcesResponses(datalakeResourcesResponses);
         return response;
     }
 }

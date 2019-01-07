@@ -11,6 +11,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -19,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-public class ServiceDescriptor implements WorkspaceAwareResource {
+public class ServiceDescriptor implements ProvisionEntity, WorkspaceAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "servicedescriptor_generator")
     @SequenceGenerator(name = "servicedescriptor_generator", sequenceName = "servicedescriptor_id_seq", allocationSize = 1)

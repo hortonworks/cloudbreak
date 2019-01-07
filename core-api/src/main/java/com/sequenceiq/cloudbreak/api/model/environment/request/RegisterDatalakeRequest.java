@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.model.environment.request;
 
 import java.util.Set;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -10,14 +12,17 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class RegisterDatalakeRequest {
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.LDAP_CONFIG_NAME)
+    @NotEmpty
     private String ldapName;
 
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.RDSCONFIG_NAMES)
+    @NotEmpty
     private Set<String> rdsNames;
 
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.KERBEROSCONFIG_NAME)
     private String kerberosName;
 
+    @NotEmpty
     private String rangerAdminPassword;
 
     public String getLdapName() {

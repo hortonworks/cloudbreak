@@ -26,9 +26,6 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends Abstrac
         response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
-        if (source.getDatalakeResourcesId() != null) {
-            response.setDatalakeResourcesName(source.getName());
-        }
         return response;
     }
 }
