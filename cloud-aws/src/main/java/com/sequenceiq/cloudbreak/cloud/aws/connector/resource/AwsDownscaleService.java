@@ -21,14 +21,18 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Service
 public class AwsDownscaleService {
@@ -46,6 +50,12 @@ public class AwsDownscaleService {
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
+
+    @Inject
+    private AwsPollTaskFactory awsPollTaskFactory;
+
+    @Inject
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Object resourcesToRemove) {
@@ -77,6 +87,17 @@ public class AwsDownscaleService {
                         .withMaxSize(getInstanceCount(stack, vms.get(0).getTemplate().getGroupName())));
             } catch (AmazonServiceException e) {
                 LOGGER.warn(e.getErrorMessage());
+            }
+
+            for (String instanceId : instanceIds) {
+                LOGGER.debug("Polling instance until terminated. [stack: {}, instance: {}]", auth.getCloudContext().getId(),
+                        asGroupName);
+                PollTask<Boolean> task = awsPollTaskFactory.newInstanceTerminationStatusCheckerTask(auth, instanceId, amazonEC2Client);
+                try {
+                    awsBackoffSyncPollingScheduler.schedule(task);
+                } catch (Exception e) {
+                    throw new CloudConnectorException(e.getMessage(), e);
+                }
             }
         }
         return awsResourceConnector.check(auth, resources);
