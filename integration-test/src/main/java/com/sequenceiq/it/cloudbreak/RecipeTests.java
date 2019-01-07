@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -13,8 +15,6 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Recipe;
@@ -40,7 +40,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-post-ambari")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -55,7 +59,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-pre-ambari")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.PRE_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.PRE_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -70,7 +78,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-post-cluster")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_INSTALL)
+                .withRecipeType(RecipeV4Type.POST_CLUSTER_INSTALL)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -86,7 +94,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-pre-term")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.PRE_TERMINATION)
+                .withRecipeType(RecipeV4Type.PRE_TERMINATION)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -101,7 +109,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-from-file")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
         );
         when(Recipe.post());
@@ -116,7 +128,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(SPECIAL_RECIPE_NAME)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
         );
         when(Recipe.post());
@@ -130,7 +146,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-again")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -145,7 +165,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(INVALID_RECIPE_NAME_SHORT)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -160,7 +184,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(createLongString("a", 101))
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -175,7 +203,11 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME)
                 .withDescription(createLongString("a", 1001))
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -191,14 +223,22 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.isCreatedDeleted()
                 .withName(VALID_RECIPE_NAME + "-delete-create")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
 
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-delete-create")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -213,8 +253,8 @@ public class RecipeTests extends CloudbreakTest {
         when(Recipe.getAll());
         then(Recipe.assertThis(
                 (recipe, t) -> {
-                    Set<RecipeResponse> recipeResponses = recipe.getResponses();
-                    for (RecipeResponse response : recipeResponses) {
+                    Set<RecipeV4Response> recipeResponses = recipe.getResponses();
+                    for (RecipeV4Response response : recipeResponses) {
 
                         if (response.getName().startsWith("valid")) {
                             try {

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 
@@ -18,7 +18,7 @@ public class HostGroupResponse extends HostGroupBase {
     private Long id;
 
     @ApiModelProperty(HostGroupModelDescription.RECIPES)
-    private Set<RecipeResponse> recipes;
+    private Set<RecipeV4Response> recipes;
 
     @ApiModelProperty(HostGroupModelDescription.EXTENDED_RECIPES)
     private Set<String> extendedRecipes;
@@ -42,11 +42,11 @@ public class HostGroupResponse extends HostGroupBase {
         this.metadata = metadata;
     }
 
-    public Set<RecipeResponse> getRecipes() {
+    public Set<RecipeV4Response> getRecipes() {
         return recipes;
     }
 
-    public void setRecipes(Set<RecipeResponse> recipes) {
+    public void setRecipes(Set<RecipeV4Response> recipes) {
         this.recipes = recipes;
     }
 

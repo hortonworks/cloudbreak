@@ -2,19 +2,20 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Collections;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeV4RequestToRecipeConverter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
-public class RecipeBaseToRecipeConverterTest extends AbstractJsonConverterTest<RecipeRequest> {
+public class RecipeBaseToRecipeV4ConverterTest extends AbstractJsonConverterTest<RecipeV4Request> {
 
-    private RecipeRequestToRecipeConverter underTest;
+    private RecipeV4RequestToRecipeConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new RecipeRequestToRecipeConverter();
+        underTest = new RecipeV4RequestToRecipeConverter();
     }
 
     @Test
@@ -27,7 +28,7 @@ public class RecipeBaseToRecipeConverterTest extends AbstractJsonConverterTest<R
     }
 
     @Override
-    public Class<RecipeRequest> getRequestClass() {
-        return RecipeRequest.class;
+    public Class<RecipeV4Request> getRequestClass() {
+        return RecipeV4Request.class;
     }
 }

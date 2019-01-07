@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -88,7 +88,7 @@ public class RecipeClusterTests extends CloudbreakTest {
             given(Recipe.isCreated()
                     .withName(recipe)
                     .withDescription(VALID_RECIPE_DESCRIPTION)
-                    .withRecipeType(RecipeType.valueOf(recipe.replace("-", "_").toUpperCase()))
+                    .withRecipeType(RecipeV4Type.valueOf(recipe.replace("-", "_").toUpperCase()))
                     .withContent(Base64.encodeBase64String(("#!/bin/bash" + "\ntouch /tmp/" + recipe).getBytes()))
             );
         }
@@ -100,7 +100,11 @@ public class RecipeClusterTests extends CloudbreakTest {
         given(Recipe.isCreated()
                 .withName(INVALID_RECIPE_NAME)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
+<<<<<<< HEAD
                 .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+=======
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
+>>>>>>> recipes
                 .withContent(Base64.encodeBase64String("#!/bin/bash \nexit -1".getBytes()))
         );
     }

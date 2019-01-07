@@ -9,7 +9,6 @@ public class ModelDescriptions {
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
-    public static final String REQUESTS = "request object";
     public static final String RESPONSE = "response object";
     public static final String FIXINPUTS = "fixinputs object";
     public static final String DATALAKEINPUTS = "datalakeinputs object";
@@ -403,8 +402,12 @@ public class ModelDescriptions {
     }
 
     public static class RecipeModelDescription {
+        public static final String DESCRIPTION = "A recipe is a script that runs on all nodes of a selected node "
+                + "group at a specific time. You can use recipes for tasks such as installing additional software "
+                + "or performing advanced cluster configuration. For example, you can use a recipe to put a JAR file "
+                + "on the Hadoop classpath.";
         public static final String CONTENT = "content of recipe";
-        public static final String TYPE = "type of recipe";
+        public static final String TYPE = "type of recipe [PRE_CLUSTER_MANAGER_START,PRE_TERMINATION,POST_CLUSTER_MANAGER_START,POST_CLUSTER_INSTALL]. The default is PRE_CLUSTER_MANAGER_START";
         public static final String WORKSPACE_ID = "id of the workspace";
         public static final String WORKSPACE_NAME = "name of the workspace";
     }
