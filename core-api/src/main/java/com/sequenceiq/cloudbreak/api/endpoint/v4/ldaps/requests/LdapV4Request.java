@@ -1,8 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model.ldap;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -10,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LdapConfigRequest extends LdapConfigBase {
+public class LdapV4Request extends LdapV4Base {
 
     @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)

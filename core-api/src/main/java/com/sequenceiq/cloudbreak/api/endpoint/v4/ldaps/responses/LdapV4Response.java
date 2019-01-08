@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.api.model.ldap;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapV4Base;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
@@ -9,28 +10,16 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class LdapConfigResponse extends LdapConfigBase {
+public class LdapV4Response extends LdapV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
-
-    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount = true;
 
     @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN)
     private SecretResponse bindDn;
 
     @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD)
     private SecretResponse bindPassword;
-
-    @JsonProperty("public")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
 
     @JsonProperty("id")
     public Long getId() {

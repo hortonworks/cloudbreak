@@ -5,10 +5,10 @@ import javax.ws.rs.QueryParam;
 public class DatabaseV4ListFilter {
 
     @QueryParam("environment")
-    String environment;
+    private String environment;
 
     @QueryParam("attachGlobal")
-    Boolean attachGlobal;
+    private Boolean attachGlobal;
 
     public String getEnvironment() {
         return environment;

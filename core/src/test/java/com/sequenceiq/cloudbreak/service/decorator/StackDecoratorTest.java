@@ -22,7 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
@@ -186,7 +186,7 @@ public class StackDecoratorTest {
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
         when(request.getClusterToAttach()).thenReturn(1L);
         when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
+        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
         underTest.decorate(subject, request, user, workspace);
@@ -234,7 +234,7 @@ public class StackDecoratorTest {
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
         when(request.getClusterToAttach()).thenReturn(1L);
         when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
+        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
         thrown.expect(BadRequestException.class);
@@ -261,7 +261,7 @@ public class StackDecoratorTest {
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
         when(request.getClusterToAttach()).thenReturn(1L);
         when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
+        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
         thrown.expect(BadRequestException.class);
@@ -288,7 +288,7 @@ public class StackDecoratorTest {
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
         when(request.getClusterToAttach()).thenReturn(1L);
         when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
+        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
         thrown.expect(BadRequestException.class);

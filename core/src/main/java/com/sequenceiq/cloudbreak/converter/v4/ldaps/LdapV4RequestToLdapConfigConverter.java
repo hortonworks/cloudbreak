@@ -1,24 +1,25 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.ldaps;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
 @Component
-public class LdapConfigRequestToLdapConfigConverter extends AbstractConversionServiceAwareConverter<LdapConfigRequest, LdapConfig> {
+public class LdapV4RequestToLdapConfigConverter extends AbstractConversionServiceAwareConverter<LdapV4Request, LdapConfig> {
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
-    public LdapConfig convert(LdapConfigRequest json) {
+    public LdapConfig convert(LdapV4Request json) {
         LdapConfig config = new LdapConfig();
         if (Strings.isNullOrEmpty(json.getName())) {
             config.setName(missingResourceNameGenerator.generateName(APIResourceType.LDAP_CONFIG));
@@ -28,8 +29,8 @@ public class LdapConfigRequestToLdapConfigConverter extends AbstractConversionSe
         config.setDescription(json.getDescription());
         config.setBindDn(json.getBindDn());
         config.setBindPassword(json.getBindPassword());
-        config.setServerHost(json.getServerHost());
-        config.setServerPort(json.getServerPort());
+        config.setServerHost(json.getHost());
+        config.setServerPort(json.getPort());
         config.setProtocol(json.getProtocol());
         config.setGroupSearchBase(json.getGroupSearchBase());
         config.setUserSearchBase(json.getUserSearchBase());

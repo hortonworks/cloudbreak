@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.LdapV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
@@ -58,8 +59,7 @@ public class EndpointConfig extends ResourceConfig {
             ImageCatalogV3Controller.class,
             KerberosConfigV4Controller.class,
             KnoxServicesV3Controller.class,
-            LdapController.class,
-            LdapV3Controller.class,
+            LdapV4Controller.class,
             ManagementPackController.class,
             ManagementPackV3Controller.class,
             KubernetesV4Endpoint.class,
@@ -118,7 +118,7 @@ public class EndpointConfig extends ResourceConfig {
         }
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
+        swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");

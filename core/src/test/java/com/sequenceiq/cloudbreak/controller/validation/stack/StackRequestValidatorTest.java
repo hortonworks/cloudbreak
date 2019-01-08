@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
@@ -287,7 +287,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
         request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setLdapConfig(new LdapConfigRequest());
+        request.getClusterRequest().setLdapConfig(new LdapV4Request());
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 

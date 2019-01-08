@@ -39,17 +39,17 @@ import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -58,12 +58,12 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.converter.KerberosConfigToKerberosV4ResponseConverter;
-import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.RDSConfigToDatabaseV4ResponseConverter;
-import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
 import com.sequenceiq.cloudbreak.converter.stack.StackApiViewToStackViewResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -168,7 +168,7 @@ public class EnvironmentServiceTest {
     private EnvironmentToDetailedEnvironmentResponseConverter environmentConverter;
 
     @InjectMocks
-    private LdapConfigToLdapConfigResponseConverter ldapConfigResponseConverter;
+    private LdapConfigToLdapV4ResponseConverter ldapConfigResponseConverter;
 
     @InjectMocks
     private ProxyConfigToProxyV4ResponseConverter proxyConfigResponseConverter;
@@ -654,8 +654,8 @@ public class EnvironmentServiceTest {
     private void mockConverters() {
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
                 .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class)))
-                .thenAnswer((Answer<LdapConfigResponse>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(LdapConfig.class), eq(LdapV4Response.class)))
+                .thenAnswer((Answer<LdapV4Response>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
         when(conversionService.convert(any(ProxyConfig.class), eq(ProxyV4Response.class)))
                 .thenAnswer((Answer<ProxyV4Response>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
         when(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Response.class)))

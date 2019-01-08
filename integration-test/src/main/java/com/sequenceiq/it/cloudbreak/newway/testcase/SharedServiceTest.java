@@ -21,7 +21,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -310,11 +310,11 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getServerHost()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserSearchBase()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupSearchBase()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupNameAttribute()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getServerHost()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
         return verifications;
     }
 
@@ -328,8 +328,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-    private LdapConfigRequest ldapRequest(String name) {
-        LdapConfigRequest request = new LdapConfigRequest();
+    private LdapV4Request ldapRequest(String name) {
+        LdapV4Request request = new LdapV4Request();
         request.setGroupMemberAttribute("memberAttribute");
         request.setUserNameAttribute("userNameAttribute");
         request.setGroupNameAttribute("nameAttribute");
@@ -342,11 +342,11 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         request.setBindPassword("bindPassword");
         request.setDescription("descrition");
         request.setAdminGroup("group");
-        request.setServerHost("host");
+        request.setHost("host");
         request.setBindDn("bindDn");
         request.setDomain("domain");
         request.setProtocol("http");
-        request.setServerPort(1234);
+        request.setPort(1234);
         request.setName(name);
         return request;
     }

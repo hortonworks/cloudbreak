@@ -1,10 +1,11 @@
-package com.sequenceiq.it.cloudbreak.newway.v3;
+package com.sequenceiq.it.cloudbreak.newway.v4;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4TestRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -12,8 +13,8 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapTestEntity;
 
-public class LdapConfigV3Action {
-    private LdapConfigV3Action() {
+public class LdapConfigV4Action {
+    private LdapConfigV4Action() {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -23,8 +24,8 @@ public class LdapConfigV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .ldapConfigV3Endpoint()
-                        .createInWorkspace(workspaceId, ldapconfigEntity.getRequest()));
+                        .ldapConfigV4Endpoint()
+                        .post(workspaceId, ldapconfigEntity.getRequest()));
         logJSON("Ldap config post request: ", ldapconfigEntity.getRequest());
     }
 
@@ -35,8 +36,8 @@ public class LdapConfigV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .ldapConfigV3Endpoint()
-                        .getByNameInWorkspace(workspaceId, ldapconfigEntity.getRequest().getName()));
+                        .ldapConfigV4Endpoint()
+                        .get(workspaceId, ldapconfigEntity.getRequest().getName()));
         logJSON(" get ldap config response: ", ldapconfigEntity.getResponse());
     }
 
@@ -47,8 +48,8 @@ public class LdapConfigV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapconfigEntity.setResponses(
                 client.getCloudbreakClient()
-                        .ldapConfigV3Endpoint()
-                        .listConfigsByWorkspace(workspaceId, null, null));
+                        .ldapConfigV4Endpoint()
+                        .list(workspaceId, new ListV4Filter()).getLdaps());
         logJSON(" get all ldap config response: ", ldapconfigEntity.getResponse());
     }
 
@@ -58,24 +59,24 @@ public class LdapConfigV3Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         client.getCloudbreakClient()
-                .ldapConfigV3Endpoint()
-                .deleteInWorkspace(workspaceId, ldapconfigEntity.getName());
+                .ldapConfigV4Endpoint()
+                .delete(workspaceId, ldapconfigEntity.getName());
     }
 
     public static void testConnect(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
 
         LdapTestEntity ldapTestEntity = (LdapTestEntity) entity;
 
-        LDAPTestRequest ldapTestRequest = new LDAPTestRequest();
-        ldapTestRequest.setValidationRequest(ldapTestEntity.getRequest());
+        LdapV4TestRequest ldapV4TestRequest = new LdapV4TestRequest();
+        ldapV4TestRequest.setValidationRequest(ldapTestEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ldapTestEntity.setResponse(
                 client.getCloudbreakClient()
-                        .ldapConfigV3Endpoint()
-                        .testLdapConnection(workspaceId, ldapTestRequest));
+                        .ldapConfigV4Endpoint()
+                        .test(workspaceId, ldapV4TestRequest));
         logJSON("Ldap test post request: ", ldapTestEntity.getRequest());
     }
 

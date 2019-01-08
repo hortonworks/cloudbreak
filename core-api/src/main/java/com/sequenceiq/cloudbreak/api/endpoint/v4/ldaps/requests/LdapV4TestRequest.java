@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.ldap;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests;
 
 import javax.validation.Valid;
 
@@ -11,14 +11,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LDAPTestRequest implements JsonEntity {
+public class LdapV4TestRequest implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
 
     @Valid
     @ApiModelProperty(ModelDescriptions.LdapConfigModelDescription.VALIDATION_REQUEST)
-    private LdapValidationRequest validationRequest;
+    private LdapV4ValidationRequest validationRequest;
 
     public String getName() {
         return name;
@@ -28,11 +28,11 @@ public class LDAPTestRequest implements JsonEntity {
         this.name = name;
     }
 
-    public LdapValidationRequest getValidationRequest() {
+    public LdapV4ValidationRequest getValidationRequest() {
         return validationRequest;
     }
 
-    public void setValidationRequest(LdapValidationRequest validationRequest) {
+    public void setValidationRequest(LdapV4ValidationRequest validationRequest) {
         this.validationRequest = validationRequest;
     }
 }

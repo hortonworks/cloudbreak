@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.ldap;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LdapValidationRequest implements JsonEntity {
+public class LdapV4ValidationRequest implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)

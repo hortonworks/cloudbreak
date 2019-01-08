@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
@@ -108,7 +108,7 @@ public class ClusterResponse implements JsonEntity {
     private Long ldapConfigId;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
-    private LdapConfigResponse ldapConfig;
+    private LdapV4Response ldapConfig;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes = new HashMap<>();
@@ -339,11 +339,11 @@ public class ClusterResponse implements JsonEntity {
         this.rdsConfigs = rdsConfigs;
     }
 
-    public LdapConfigResponse getLdapConfig() {
+    public LdapV4Response getLdapConfig() {
         return ldapConfig;
     }
 
-    public void setLdapConfig(LdapConfigResponse ldapConfig) {
+    public void setLdapConfig(LdapV4Response ldapConfig) {
         this.ldapConfig = ldapConfig;
     }
 

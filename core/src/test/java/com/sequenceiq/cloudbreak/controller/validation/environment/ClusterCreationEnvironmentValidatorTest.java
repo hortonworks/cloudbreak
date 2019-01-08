@@ -16,7 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -220,10 +220,10 @@ public class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         ClusterRequest clusterRequest = new ClusterRequest();
-        LdapConfigRequest ldapConfigRequest = new LdapConfigRequest();
-        ldapConfigRequest.setName("ldap");
-        ldapConfigRequest.setEnvironments(Sets.newHashSet("env2", "env3"));
-        clusterRequest.setLdapConfig(ldapConfigRequest);
+        LdapV4Request ldapV4Request = new LdapV4Request();
+        ldapV4Request.setName("ldap");
+        ldapV4Request.setEnvironments(Sets.newHashSet("env2", "env3"));
+        clusterRequest.setLdapConfig(ldapV4Request);
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
