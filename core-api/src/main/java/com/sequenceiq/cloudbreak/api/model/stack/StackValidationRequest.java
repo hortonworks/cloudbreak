@@ -5,7 +5,7 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -34,7 +34,7 @@ public class StackValidationRequest implements JsonEntity {
     private String blueprintName;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintRequest blueprint;
+    private BlueprintV4Request blueprint;
 
     @ApiModelProperty(StackModelDescription.NETWORK_ID)
     private Long networkId;
@@ -109,7 +109,7 @@ public class StackValidationRequest implements JsonEntity {
         this.platform = platform;
     }
 
-    public BlueprintRequest getBlueprint() {
+    public BlueprintV4Request getBlueprint() {
         return blueprint;
     }
 
@@ -121,7 +121,7 @@ public class StackValidationRequest implements JsonEntity {
         this.blueprintName = blueprintName;
     }
 
-    public void setBlueprint(BlueprintRequest blueprint) {
+    public void setBlueprint(BlueprintV4Request blueprint) {
         this.blueprint = blueprint;
     }
 

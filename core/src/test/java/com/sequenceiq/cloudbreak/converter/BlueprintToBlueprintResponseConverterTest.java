@@ -5,7 +5,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.blueprints.BlueprintToBlueprintV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -14,11 +15,11 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
 
     private static final JsonToString JSON_TO_STRING = new JsonToString();
 
-    private BlueprintToBlueprintResponseConverter underTest = new BlueprintToBlueprintResponseConverter();
+    private BlueprintToBlueprintV4ResponseConverter underTest = new BlueprintToBlueprintV4ResponseConverter();
 
     @Test
     public void testConvert() {
-        BlueprintResponse result = underTest.convert(createSource());
+        BlueprintV4Response result = underTest.convert(createSource());
         assertAllFieldsNotNull(result);
     }
 
@@ -26,7 +27,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
     public void testConvertContainsEmptyMapInTagsProperty() throws JsonProcessingException {
         Blueprint source = createSource();
         source.setTags(new Json(""));
-        BlueprintResponse result = underTest.convert(source);
+        BlueprintV4Response result = underTest.convert(source);
         Assert.assertTrue(result.getTags().isEmpty());
     }
 
@@ -37,7 +38,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Blueprint source = createSource();
         source.setTags(new JsonToString().convertToEntityAttribute(String.format("{\"%s\":\"%s\"}", key, name)));
 
-        BlueprintResponse result = underTest.convert(source);
+        BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().containsKey(key));
@@ -54,7 +55,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Blueprint source = createSource();
         source.setTags(JSON_TO_STRING.convertToEntityAttribute(String.format("{\"%s\":\"%s\", \"%s\":\"%s\"}", nameKey, nameValue, ageKey, ageValue)));
 
-        BlueprintResponse result = underTest.convert(source);
+        BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().containsKey(nameKey));
@@ -74,7 +75,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Blueprint source = createSource();
         source.setTags(JSON_TO_STRING.convertToEntityAttribute(String.format("{\"%s\":\"%s\", \"%s\":%d}", nameKey, nameValue, intKey, intValue)));
 
-        BlueprintResponse result = underTest.convert(source);
+        BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().containsKey(nameKey));
@@ -91,7 +92,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         source.setDescription(null);
         source.setTags(JSON_TO_STRING.convertToEntityAttribute("{}"));
 
-        BlueprintResponse result = underTest.convert(source);
+        BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result);
         Assert.assertEquals(source.getId(), result.getId());
@@ -111,7 +112,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         source.setDescription("some description");
         source.setTags(JSON_TO_STRING.convertToEntityAttribute("{}"));
 
-        BlueprintResponse result = underTest.convert(source);
+        BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result);
         Assert.assertEquals(source.getId(), result.getId());

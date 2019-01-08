@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
+import com.sequenceiq.cloudbreak.converter.v4.blueprints.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
@@ -41,7 +41,7 @@ public class DefaultBlueprintCache {
     private BlueprintUtils blueprintUtils;
 
     @Inject
-    private BlueprintRequestToBlueprintConverter converter;
+    private BlueprintV4RequestToBlueprintConverter converter;
 
     @PostConstruct
     public void loadBlueprintsFromFile() {
@@ -51,7 +51,7 @@ public class DefaultBlueprintCache {
                 String[] split = blueprintText.trim().split("=");
                 if (blueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
                     LOGGER.debug("Load default validation '{}'.", blueprintText);
-                    BlueprintRequest blueprintJson = new BlueprintRequest();
+                    BlueprintV4Request blueprintJson = new BlueprintV4Request();
                     blueprintJson.setName(split[0].trim());
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
                     blueprintJson.setAmbariBlueprint(jsonNode.get("blueprint").toString());

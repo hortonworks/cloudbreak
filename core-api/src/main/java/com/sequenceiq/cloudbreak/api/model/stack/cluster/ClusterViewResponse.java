@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.model.stack.cluster;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.model.CompactViewResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -23,7 +23,7 @@ public class ClusterViewResponse extends CompactViewResponse {
     private String ambariServerIp;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintViewResponse blueprint;
+    private BlueprintV4ViewResponse blueprint;
 
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupViewResponse> hostGroups = new HashSet<>();
@@ -63,11 +63,11 @@ public class ClusterViewResponse extends CompactViewResponse {
         this.hostGroups = hostGroups;
     }
 
-    public BlueprintViewResponse getBlueprint() {
+    public BlueprintV4ViewResponse getBlueprint() {
         return blueprint;
     }
 
-    public void setBlueprint(BlueprintViewResponse blueprint) {
+    public void setBlueprint(BlueprintV4ViewResponse blueprint) {
         this.blueprint = blueprint;
     }
 

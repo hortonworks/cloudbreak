@@ -4,23 +4,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
 public class BlueprintToBlueprintRequestConverter
-        extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintRequest> {
+        extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintV4Request> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintRequestConverter.class);
 
     @Override
-    public BlueprintRequest convert(Blueprint source) {
-        BlueprintRequest blueprintRequest = new BlueprintRequest();
-        blueprintRequest.setName("");
-        blueprintRequest.setDescription(source.getDescription());
-        blueprintRequest.setAmbariBlueprint(source.getBlueprintText());
-        return blueprintRequest;
+    public BlueprintV4Request convert(Blueprint source) {
+        BlueprintV4Request blueprintV4Request = new BlueprintV4Request();
+        blueprintV4Request.setName("");
+        blueprintV4Request.setDescription(source.getDescription());
+        blueprintV4Request.setAmbariBlueprint(source.getBlueprintText());
+        return blueprintV4Request;
     }
 
 }
