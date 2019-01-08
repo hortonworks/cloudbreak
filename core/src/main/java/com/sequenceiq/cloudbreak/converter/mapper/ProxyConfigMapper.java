@@ -10,8 +10,8 @@ import org.mapstruct.Mappings;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 
 @Mapper(componentModel = "spring")
@@ -33,14 +33,14 @@ public abstract class ProxyConfigMapper {
             @Mapping(target = "workspace", ignore = true),
             @Mapping(target = "environments", ignore = true)
     })
-    public abstract ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest);
+    public abstract ProxyConfig mapRequestToEntity(ProxyV4Request proxyV4Request);
 
     @Mappings({
             @Mapping(target = "userName", expression = "java(getConversionService().convert(proxyConfig.getUserName(), getClazz()))"),
             @Mapping(target = "password", expression = "java(getConversionService().convert(proxyConfig.getPasswordSecret(), getClazz()))"),
             @Mapping(target = "environments", ignore = true)
     })
-    public abstract ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfig);
+    public abstract ProxyV4Response mapEntityToResponse(ProxyConfig proxyConfig);
 
-    public abstract Set<ProxyConfigResponse> mapEntityToResponse(Set<ProxyConfig> proxyConfigRequest);
+    public abstract Set<ProxyV4Response> mapEntityToResponse(Set<ProxyConfig> proxyConfigRequest);
 }

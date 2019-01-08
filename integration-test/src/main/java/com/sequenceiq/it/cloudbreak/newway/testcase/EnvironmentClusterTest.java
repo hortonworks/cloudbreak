@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -335,8 +335,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoProxy(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
-        if (!proxyConfigResponseSet.isEmpty()) {
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxyConfigs();
+        if (!proxyV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached proxy");
         }
         return environment;

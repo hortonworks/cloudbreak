@@ -65,7 +65,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ProxyConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
@@ -108,7 +108,7 @@ public class CloudbreakIdentityClient {
             ConnectorV2Endpoint.class,
             ConnectorV3Endpoint.class,
             ProxyConfigEndpoint.class,
-            ProxyConfigV3Endpoint.class,
+            ProxyConfigV4Endpoint.class,
             RdsConfigEndpoint.class,
             RdsConfigV3Endpoint.class,
             RecipeV4Endpoint.class,
@@ -282,8 +282,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(ProxyConfigEndpoint.class);
     }
 
-    public ProxyConfigV3Endpoint proxyConfigV3Endpoint() {
-        return getEndpoint(ProxyConfigV3Endpoint.class);
+    public ProxyConfigV4Endpoint proxyConfigV3Endpoint() {
+        return getEndpoint(ProxyConfigV4Endpoint.class);
     }
 
     public RdsConfigEndpoint rdsConfigEndpoint() {

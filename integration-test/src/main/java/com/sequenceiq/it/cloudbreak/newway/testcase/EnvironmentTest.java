@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -587,9 +587,9 @@ public class EnvironmentTest extends AbstractIntegrationTest  {
 
     protected static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> proxyConfigs = new HashSet<>();
-        Set<ProxyConfigResponse> proxyConfigResponseSet = environment.getResponse().getProxyConfigs();
-        for (ProxyConfigResponse proxyConfigResponse : proxyConfigResponseSet) {
-            proxyConfigs.add(proxyConfigResponse.getName());
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxyConfigs();
+        for (ProxyV4Response proxyV4Response : proxyV4ResponseSet) {
+            proxyConfigs.add(proxyV4Response.getName());
         }
         if (!proxyConfigs.contains(testContext.get(ProxyConfigEntity.class).getName())) {
             throw new TestFailException("Proxy is not attached to environment");

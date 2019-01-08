@@ -1,12 +1,19 @@
-package com.sequenceiq.cloudbreak.api.model.proxy;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ProxyConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ProxyConfigRequest")
-public class ProxyConfigRequest extends ProxyConfigBase {
+
+@ApiModel(description = ModelDescriptions.ProxyConfigModelDescription.DESCRIPTION)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProxyV4Request extends ProxyV4Base {
 
     @ApiModelProperty(ProxyConfigModelDescription.USERNAME)
     private String userName;

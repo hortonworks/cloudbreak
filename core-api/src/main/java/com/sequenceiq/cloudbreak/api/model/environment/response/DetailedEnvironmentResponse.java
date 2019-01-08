@@ -6,7 +6,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIGS)
-    private Set<ProxyConfigResponse> proxyConfigs = new HashSet<>();
+    private Set<ProxyV4Response> proxyConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS)
     private Set<LdapConfigResponse> ldapConfigs = new HashSet<>();
@@ -40,11 +40,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_CLUSTERS)
     private Set<StackViewResponse> datalakeClusters = new HashSet<>();
 
-    public Set<ProxyConfigResponse> getProxyConfigs() {
+    public Set<ProxyV4Response> getProxyConfigs() {
         return proxyConfigs;
     }
 
-    public void setProxyConfigs(Set<ProxyConfigResponse> proxyConfigs) {
+    public void setProxyConfigs(Set<ProxyV4Response> proxyConfigs) {
         this.proxyConfigs = proxyConfigs;
     }
 

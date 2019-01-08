@@ -12,8 +12,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -31,67 +31,67 @@ public interface ProxyConfigEndpoint {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES, nickname = "getProxyConfig")
-    ProxyConfigResponse get(@PathParam("id") Long id);
+    ProxyV4Response get(@PathParam("id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES, nickname = "deleteProxyConfig")
-    ProxyConfigResponse delete(@PathParam("id") Long id);
+    ProxyV4Response delete(@PathParam("id") Long id);
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "postPrivateProxyConfig")
-    ProxyConfigResponse postPrivate(@Valid ProxyConfigRequest proxyConfigRequest);
+    ProxyV4Response postPrivate(@Valid ProxyV4Request proxyV4Request);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getPrivatesProxyConfig")
-    Set<ProxyConfigResponse> getPrivates();
+    Set<ProxyV4Response> getPrivates();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getPrivateProxyConfig")
-    ProxyConfigResponse getPrivate(@PathParam("name") String name);
+    ProxyV4Response getPrivate(@PathParam("name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deletePrivateProxyConfig")
-    ProxyConfigResponse deletePrivate(@PathParam("name") String name);
+    ProxyV4Response deletePrivate(@PathParam("name") String name);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "postPublicProxyConfig")
-    ProxyConfigResponse postPublic(@Valid ProxyConfigRequest proxyConfigRequest);
+    ProxyV4Response postPublic(@Valid ProxyV4Request proxyV4Request);
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getPublicsProxyConfig")
-    Set<ProxyConfigResponse> getPublics();
+    Set<ProxyV4Response> getPublics();
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getPublicProxyConfig")
-    ProxyConfigResponse getPublic(@PathParam("name") String name);
+    ProxyV4Response getPublic(@PathParam("name") String name);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deletePublicProxyConfig")
-    ProxyConfigResponse deletePublic(@PathParam("name") String name);
+    ProxyV4Response deletePublic(@PathParam("name") String name);
 }

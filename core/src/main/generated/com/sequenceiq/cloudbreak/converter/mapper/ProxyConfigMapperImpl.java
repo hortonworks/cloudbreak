@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -17,53 +17,53 @@ import org.springframework.stereotype.Component;
 public class ProxyConfigMapperImpl extends ProxyConfigMapper {
 
     @Override
-    public ProxyConfig mapRequestToEntity(ProxyConfigRequest proxyConfigRequest) {
-        if ( proxyConfigRequest == null ) {
+    public ProxyConfig mapRequestToEntity(ProxyV4Request proxyV4Request) {
+        if ( proxyV4Request == null ) {
             return null;
         }
 
         ProxyConfig proxyConfig = new ProxyConfig();
 
-        proxyConfig.setName( proxyConfigRequest.getName() );
-        proxyConfig.setServerHost( proxyConfigRequest.getServerHost() );
-        proxyConfig.setServerPort( proxyConfigRequest.getServerPort() );
-        proxyConfig.setProtocol( proxyConfigRequest.getProtocol() );
-        proxyConfig.setUserName( proxyConfigRequest.getUserName() );
-        proxyConfig.setPassword( proxyConfigRequest.getPassword() );
-        proxyConfig.setDescription( proxyConfigRequest.getDescription() );
+        proxyConfig.setName( proxyV4Request.getName() );
+        proxyConfig.setServerHost( proxyV4Request.getHost() );
+        proxyConfig.setServerPort( proxyV4Request.getPort() );
+        proxyConfig.setProtocol( proxyV4Request.getProtocol() );
+        proxyConfig.setUserName( proxyV4Request.getUserName() );
+        proxyConfig.setPassword( proxyV4Request.getPassword() );
+        proxyConfig.setDescription( proxyV4Request.getDescription() );
 
         return proxyConfig;
     }
 
     @Override
-    public ProxyConfigResponse mapEntityToResponse(ProxyConfig proxyConfig) {
+    public ProxyV4Response mapEntityToResponse(ProxyConfig proxyConfig) {
         if ( proxyConfig == null ) {
             return null;
         }
 
-        ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
+        ProxyV4Response proxyV4Response = new ProxyV4Response();
 
-        proxyConfigResponse.setName( proxyConfig.getName() );
-        proxyConfigResponse.setServerHost( proxyConfig.getServerHost() );
-        proxyConfigResponse.setServerPort( proxyConfig.getServerPort() );
-        proxyConfigResponse.setProtocol( proxyConfig.getProtocol() );
-        proxyConfigResponse.setDescription( proxyConfig.getDescription() );
-        proxyConfigResponse.setId( proxyConfig.getId() );
-        proxyConfigResponse.setWorkspace( workspaceToWorkspaceResourceResponse( proxyConfig.getWorkspace() ) );
+        proxyV4Response.setName( proxyConfig.getName() );
+        proxyV4Response.setHost( proxyConfig.getServerHost() );
+        proxyV4Response.setPort( proxyConfig.getServerPort() );
+        proxyV4Response.setProtocol( proxyConfig.getProtocol() );
+        proxyV4Response.setDescription( proxyConfig.getDescription() );
+        proxyV4Response.setId( proxyConfig.getId() );
+        proxyV4Response.setWorkspace( workspaceToWorkspaceResourceResponse( proxyConfig.getWorkspace() ) );
 
-        proxyConfigResponse.setPassword( getConversionService().convert(proxyConfig.getPasswordSecret(), getClazz()) );
-        proxyConfigResponse.setUserName( getConversionService().convert(proxyConfig.getUserName(), getClazz()) );
+        proxyV4Response.setPassword( getConversionService().convert(proxyConfig.getPasswordSecret(), getClazz()) );
+        proxyV4Response.setUserName( getConversionService().convert(proxyConfig.getUserName(), getClazz()) );
 
-        return proxyConfigResponse;
+        return proxyV4Response;
     }
 
     @Override
-    public Set<ProxyConfigResponse> mapEntityToResponse(Set<ProxyConfig> proxyConfigRequest) {
+    public Set<ProxyV4Response> mapEntityToResponse(Set<ProxyConfig> proxyConfigRequest) {
         if ( proxyConfigRequest == null ) {
             return null;
         }
 
-        Set<ProxyConfigResponse> set = new HashSet<ProxyConfigResponse>( Math.max( (int) ( proxyConfigRequest.size() / .75f ) + 1, 16 ) );
+        Set<ProxyV4Response> set = new HashSet<ProxyV4Response>( Math.max( (int) ( proxyConfigRequest.size() / .75f ) + 1, 16 ) );
         for ( ProxyConfig proxyConfig : proxyConfigRequest ) {
             set.add( mapEntityToResponse( proxyConfig ) );
         }

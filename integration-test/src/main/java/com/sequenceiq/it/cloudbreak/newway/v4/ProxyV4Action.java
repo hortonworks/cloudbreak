@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.v3;
+package com.sequenceiq.it.cloudbreak.newway.v4;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
@@ -10,8 +10,8 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 
-public class ProxyConfigV3Action {
-    private ProxyConfigV3Action() {
+public class ProxyV4Action {
+    private ProxyV4Action() {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -21,8 +21,8 @@ public class ProxyConfigV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         proxyconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .proxyConfigV3Endpoint()
-                        .createInWorkspace(workspaceId, proxyconfigEntity.getRequest()));
+                        .proxyConfigV4Endpoint()
+                        .post(workspaceId, proxyconfigEntity.getRequest()));
         logJSON("Proxy config post request: ", proxyconfigEntity.getRequest());
     }
 
@@ -33,8 +33,8 @@ public class ProxyConfigV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         proxyconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .proxyConfigV3Endpoint()
-                        .getByNameInWorkspace(workspaceId, proxyconfigEntity.getName()));
+                        .proxyConfigV4Endpoint()
+                        .get(workspaceId, proxyconfigEntity.getName()));
         logJSON(" get proxy config response: ", proxyconfigEntity.getResponse());
     }
 
@@ -45,8 +45,8 @@ public class ProxyConfigV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         proxyconfigEntity.setResponses(
                 client.getCloudbreakClient()
-                        .proxyConfigV3Endpoint()
-                        .listByWorkspace(workspaceId, null, null));
+                        .proxyConfigV4Endpoint()
+                        .list(workspaceId, null, null).getProxies());
         logJSON(" get all proxy config response: ", proxyconfigEntity.getResponse());
     }
 
@@ -56,8 +56,8 @@ public class ProxyConfigV3Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         client.getCloudbreakClient()
-                .proxyConfigV3Endpoint()
-                .deleteInWorkspace(workspaceId, proxyconfigEntity.getName());
+                .proxyConfigV4Endpoint()
+                .delete(workspaceId, proxyconfigEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
