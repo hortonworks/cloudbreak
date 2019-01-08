@@ -1,8 +1,22 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -13,21 +27,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CredentialModifyClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -147,22 +146,6 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 
-    @DataProvider(name = "providernameblueprintimage")
-    public Object[][] providerAndImage() throws Exception {
-        String blueprint = getTestParameter().get("blueprintName");
-        String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
-
-        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-
-        String clusterName = getTestParameter().get("clusterName");
-        String credentialName = getTestParameter().get("credentialName");
-        String image = getImageId(provider, imageDescription, blueprint);
-        return new Object[][]{
-                {cloudProvider, clusterName, credentialName, blueprint, image}
-        };
-    }
-
     @DataProvider(name = "providernamehostgroupdesiredno")
     public Object[][] providerAndHostgroup() {
         String hostgroupName = getTestParameter().get("instancegroupName");
@@ -189,24 +172,6 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         return new Object[][]{
                 {cloudProvider, clusterName, credentialName}
         };
-    }
-
-    private String getImageId(String provider, String imageDescription, String blueprintName) throws Exception {
-        given(CloudbreakClient.created());
-        CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
-        com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        BlueprintResponse blueprint = client.blueprintEndpoint().getPublic(blueprintName);
-        String stackVersion = new JSONObject(blueprint.getAmbariBlueprint())
-                .getJSONObject("Blueprints").getString("stack_version");
-        switch (imageDescription) {
-            case "hdf":
-                return getLastUuid(imagesByProvider.getHdfImages(), stackVersion);
-            case "hdp":
-                return getLastUuid(imagesByProvider.getHdpImages(), stackVersion);
-            default:
-                return getLastUuid(imagesByProvider.getBaseImages(), stackVersion);
-        }
     }
 
     private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {

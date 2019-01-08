@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
@@ -66,7 +66,7 @@ public class ClusterResponse implements JsonEntity {
     private Long blueprintId;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintResponse blueprint;
+    private BlueprintV4Response blueprint;
 
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
@@ -347,11 +347,11 @@ public class ClusterResponse implements JsonEntity {
         this.ldapConfig = ldapConfig;
     }
 
-    public BlueprintResponse getBlueprint() {
+    public BlueprintV4Response getBlueprint() {
         return blueprint;
     }
 
-    public void setBlueprint(BlueprintResponse blueprint) {
+    public void setBlueprint(BlueprintV4Response blueprint) {
         this.blueprint = blueprint;
     }
 

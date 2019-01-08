@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.HostGroupViewResponse;
@@ -34,7 +34,7 @@ public class ClusterApiViewToClusterViewResponseConverter extends CompactViewToC
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setSecure(source.getKerberosConfig() != null);
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterViewResponse.setBlueprint(conversionService.convert(source.getBlueprint(), BlueprintViewResponse.class));
+        clusterViewResponse.setBlueprint(conversionService.convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
         addSharedServiceResponse(source, clusterViewResponse);
         return clusterViewResponse;
     }

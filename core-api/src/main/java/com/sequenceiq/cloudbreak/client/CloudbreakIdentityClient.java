@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AuditEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
@@ -50,7 +49,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ClusterTemplateV3EndPoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
@@ -62,14 +60,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
@@ -83,8 +82,7 @@ public class CloudbreakIdentityClient {
             AuditV3Endpoint.class,
             AuditEventV4Endpoint.class,
             AutoscaleEndpoint.class,
-            BlueprintEndpoint.class,
-            BlueprintV3Endpoint.class,
+            BlueprintV4Endpoint.class,
             EventEndpoint.class,
             EventV3Endpoint.class,
             ClusterV1Endpoint.class,
@@ -190,12 +188,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(AutoscaleEndpoint.class);
     }
 
-    public BlueprintEndpoint blueprintEndpoint() {
-        return getEndpoint(BlueprintEndpoint.class);
-    }
-
-    public BlueprintV3Endpoint blueprintV3Endpoint() {
-        return getEndpoint(BlueprintV3Endpoint.class);
+    public BlueprintV4Endpoint blueprintV4Endpoint() {
+        return getEndpoint(BlueprintV4Endpoint.class);
     }
 
     public EventEndpoint eventEndpoint() {

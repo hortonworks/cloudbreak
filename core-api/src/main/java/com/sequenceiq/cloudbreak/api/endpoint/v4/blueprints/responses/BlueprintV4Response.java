@@ -1,26 +1,21 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Base;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("BlueprintResponse")
-public class BlueprintResponse extends BlueprintBase {
-
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
-    private String name;
+@ApiModel
+public class BlueprintV4Response extends BlueprintV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
     @ApiModelProperty(BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
-
-    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount = true;
 
     @ApiModelProperty(BlueprintModelDescription.STATUS)
     private ResourceStatus status;
@@ -39,23 +34,6 @@ public class BlueprintResponse extends BlueprintBase {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @JsonProperty("public")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public ResourceStatus getStatus() {

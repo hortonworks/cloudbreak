@@ -1,20 +1,21 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.blueprints;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
+public class BlueprintToBlueprintV4ResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintV4Response> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintResponseConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintV4ResponseConverter.class);
 
     @Override
-    public BlueprintResponse convert(Blueprint entity) {
-        BlueprintResponse blueprintJson = new BlueprintResponse();
+    public BlueprintV4Response convert(Blueprint entity) {
+        BlueprintV4Response blueprintJson = new BlueprintV4Response();
         blueprintJson.setId(entity.getId());
         blueprintJson.setName(entity.getName());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());

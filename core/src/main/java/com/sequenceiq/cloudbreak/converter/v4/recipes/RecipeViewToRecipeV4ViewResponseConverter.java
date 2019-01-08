@@ -1,12 +1,13 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.recipes;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
+import com.sequenceiq.cloudbreak.converter.CompactViewToCompactViewResponseConverter;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 
 @Component
-public class RecipeViewToRecipeViewResponseConverter extends CompactViewToCompactViewResponseConverter<RecipeView, RecipeV4ViewResponse> {
+public class RecipeViewToRecipeV4ViewResponseConverter extends CompactViewToCompactViewResponseConverter<RecipeView, RecipeV4ViewResponse> {
     @Override
     public RecipeV4ViewResponse convert(RecipeView recipe) {
         RecipeV4ViewResponse json = super.convert(recipe);

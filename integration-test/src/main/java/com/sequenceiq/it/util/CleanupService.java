@@ -37,12 +37,6 @@ public class CleanupService {
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
 
-        cloudbreakClient.blueprintEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(blueprint -> blueprint.getName().startsWith("it-"))
-                .forEach(blueprint -> deleteBlueprint(cloudbreakClient, String.valueOf(blueprint.getId())));
-
         cloudbreakClient.credentialEndpoint()
                 .getPrivates()
                 .stream()
@@ -53,12 +47,6 @@ public class CleanupService {
     public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
         if (credentialId != null) {
             cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
-        }
-    }
-
-    public void deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) {
-        if (blueprintId != null) {
-            cloudbreakClient.blueprintEndpoint().delete(Long.valueOf(blueprintId));
         }
     }
 

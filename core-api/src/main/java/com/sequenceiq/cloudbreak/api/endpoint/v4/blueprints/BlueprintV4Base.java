@@ -1,12 +1,15 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
@@ -16,16 +19,23 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public abstract class BlueprintBase implements JsonEntity {
+public abstract class BlueprintV4Base implements JsonEntity {
+
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @NotNull
+    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
+            + "and percentage character.")
+    @Pattern(regexp = "^[^;\\/%]*$")
+    private String name;
+
+    @Size(max = 1000)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    private String description;
 
     @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String ambariBlueprint;
-
-    @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
-    private String description;
 
     @ApiModelProperty(BlueprintModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
@@ -44,6 +54,14 @@ public abstract class BlueprintBase implements JsonEntity {
 
     public void setAmbariBlueprint(String ambariBlueprint) {
         this.ambariBlueprint = ambariBlueprint;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

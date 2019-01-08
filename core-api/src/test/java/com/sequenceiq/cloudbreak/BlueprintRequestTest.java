@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import java.util.Arrays;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.HibernateValidator;
 import org.junit.Assert;
@@ -11,9 +15,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import javax.validation.ConstraintViolation;
-import java.util.Arrays;
-import java.util.Set;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 
 @RunWith(Parameterized.class)
 public class BlueprintRequestTest {
@@ -24,7 +26,7 @@ public class BlueprintRequestTest {
 
     private final String name;
 
-    private BlueprintRequest underTest;
+    private BlueprintV4Request underTest;
 
     private LocalValidatorFactoryBean localValidatorFactory;
 
@@ -35,7 +37,7 @@ public class BlueprintRequestTest {
 
     @Before
     public void setUp() {
-        underTest = new BlueprintRequest();
+        underTest = new BlueprintV4Request();
         localValidatorFactory = new LocalValidatorFactoryBean();
         localValidatorFactory.setProviderClass(HibernateValidator.class);
         localValidatorFactory.afterPropertiesSet();
@@ -69,11 +71,11 @@ public class BlueprintRequestTest {
     @Test
     public void testBlueprintName() {
         underTest.setName(name);
-        Set<ConstraintViolation<BlueprintRequest>> constraintViolations = localValidatorFactory.validate(underTest);
+        Set<ConstraintViolation<BlueprintV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
         Assert.assertEquals(expectedViolationAmount, countViolationsExceptSpecificOne(constraintViolations));
     }
 
-    private long countViolationsExceptSpecificOne(Set<ConstraintViolation<BlueprintRequest>> constraintViolations) {
+    private long countViolationsExceptSpecificOne(Set<ConstraintViolation<BlueprintV4Request>> constraintViolations) {
         return constraintViolations.stream().filter(violation -> !NOT_NULL_VIOLATION_TEMPLATE.equalsIgnoreCase(violation.getMessageTemplate())).count();
     }
 

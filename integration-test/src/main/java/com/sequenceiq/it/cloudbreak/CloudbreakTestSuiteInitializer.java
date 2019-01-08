@@ -1,16 +1,12 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.SuiteContext;
-import com.sequenceiq.it.cloudbreak.config.ITProps;
-import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
-import com.sequenceiq.it.config.IntegrationTestConfiguration;
-import com.sequenceiq.it.util.CleanupService;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +21,16 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.SuiteContext;
+import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
+import com.sequenceiq.it.config.IntegrationTestConfiguration;
+import com.sequenceiq.it.util.CleanupService;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
@@ -130,9 +131,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
         }
-        putBlueprintToContextIfExist(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
-        putCredentialToContext(
+           putCredentialToContext(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
                 credentialName);
         putStackToContextIfExist(
@@ -150,18 +149,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Parameters({"ambariUser", "ambariPassword", "ambariPort"})
     public void initAmbariCredentials(@Optional("") String ambariUser, @Optional("") String ambariPassword, @Optional("") String ambariPort) {
         putAmbariCredentialsToContext(ambariUser, ambariPassword, ambariPort);
-
-    }
-
-    private void putBlueprintToContextIfExist(BlueprintEndpoint endpoint, String blueprintName) {
-        endpoint.getPublics();
-        if (StringUtils.isEmpty(blueprintName)) {
-            blueprintName = defaultBlueprintName;
-        }
-        if (StringUtils.hasLength(blueprintName)) {
-            String resourceId = endpoint.getPublic(blueprintName).getId().toString();
-            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
-        }
     }
 
     private void putAmbariCredentialsToContext(String ambariUser, String ambariPassword, String ambariPort) {
@@ -226,7 +213,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 }
             }
             cleanUpService.deleteCredential(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
-            cleanUpService.deleteBlueprint(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
 
         }
     }

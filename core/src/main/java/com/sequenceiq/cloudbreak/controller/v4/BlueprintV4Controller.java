@@ -1,4 +1,6 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.controller.v4;
+
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses.blueprintV4ViewResponses;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +15,15 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.NotificationController;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -32,7 +36,7 @@ import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(Blueprint.class)
-public class BlueprintV3Controller extends NotificationController implements BlueprintV3Endpoint {
+public class BlueprintV4Controller extends NotificationController implements BlueprintV4Endpoint {
 
     @Inject
     private BlueprintService blueprintService;
@@ -51,43 +55,45 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     private WorkspaceService workspaceService;
 
     @Override
-    public Set<BlueprintViewResponse> listByWorkspace(Long workspaceId) {
+    public BlueprintV4ViewResponses list(Long workspaceId) {
         Workspace workspace = getWorkspace(workspaceId);
-        return blueprintService.getAllAvailableViewInWorkspace(workspace).stream()
-                .map(blueprint -> conversionService.convert(blueprint, BlueprintViewResponse.class))
+        Set<BlueprintV4ViewResponse> blueprints = blueprintService.getAllAvailableViewInWorkspace(workspace)
+                .stream()
+                .map(blueprint -> conversionService.convert(blueprint, BlueprintV4ViewResponse.class))
                 .collect(Collectors.toSet());
+        return blueprintV4ViewResponses(blueprints);
     }
 
     @Override
-    public BlueprintResponse getByNameInWorkspace(Long workspaceId, String name) {
+    public BlueprintV4Response get(Long workspaceId, String name) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
-        return conversionService.convert(blueprint, BlueprintResponse.class);
+        return conversionService.convert(blueprint, BlueprintV4Response.class);
     }
 
     @Override
-    public BlueprintResponse createInWorkspace(Long workspaceId, BlueprintRequest request) {
+    public BlueprintV4Response post(Long workspaceId, BlueprintV4Request request) {
         Blueprint blueprint = conversionService.convert(request, Blueprint.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         blueprint = blueprintService.create(blueprint, workspaceId, user);
         notify(ResourceEvent.BLUEPRINT_CREATED);
-        return conversionService.convert(blueprint, BlueprintResponse.class);
+        return conversionService.convert(blueprint, BlueprintV4Response.class);
     }
 
     @Override
-    public BlueprintResponse deleteInWorkspace(Long workspaceId, String name) {
+    public BlueprintV4Response delete(Long workspaceId, String name) {
         Blueprint deleted = blueprintService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
-        return conversionService.convert(deleted, BlueprintResponse.class);
+        return conversionService.convert(deleted, BlueprintV4Response.class);
     }
 
     @Override
-    public BlueprintRequest getRequestFromName(Long workspaceId, String name) {
+    public BlueprintV4Request getRequest(Long workspaceId, String name) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
-        return conversionService.convert(blueprint, BlueprintRequest.class);
+        return conversionService.convert(blueprint, BlueprintV4Request.class);
     }
 
     @Override
-    public ParametersQueryResponse getCustomParameters(Long workspaceId, String name) {
+    public ParametersQueryResponse getParameters(Long workspaceId, String name) {
         Set<String> customParameters = blueprintService.queryCustomParameters(name, getWorkspace(workspaceId));
         Map<String, String> result = new HashMap<>();
         for (String customParameter : customParameters) {
