@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironm
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.ServiceDescriptorResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
@@ -50,7 +50,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setProxyConfigs(
                 source.getProxyConfigs()
                         .stream()
-                        .map(proxyConfig -> getConversionService().convert(proxyConfig, ProxyConfigResponse.class))
+                        .map(proxyConfig -> getConversionService().convert(proxyConfig, ProxyV4Response.class))
                         .collect(Collectors.toSet()));
         response.setRdsConfigs(
                 source.getRdsConfigs()

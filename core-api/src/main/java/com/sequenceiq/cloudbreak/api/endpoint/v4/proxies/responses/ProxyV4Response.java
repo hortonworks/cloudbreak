@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.api.model.proxy;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses;
 
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -9,8 +10,8 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ProxyConfigModelDescripti
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ProxyConfigResponse")
-public class ProxyConfigResponse extends ProxyConfigBase {
+@ApiModel(description = ModelDescriptions.ProxyConfigModelDescription.DESCRIPTION)
+public class ProxyV4Response extends ProxyV4Base {
 
     @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG_ID)
     private Long id;

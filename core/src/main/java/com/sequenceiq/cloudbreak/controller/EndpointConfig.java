@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,8 +64,7 @@ public class EndpointConfig extends ResourceConfig {
             PlatformParameterV1Controller.class,
             PlatformParameterV2Controller.class,
             PlatformParameterV3Controller.class,
-            ProxyConfigController.class,
-            ProxyConfigV3Controller.class,
+            ProxyV4Controller.class,
             RdsConfigController.class,
             RdsConfigV3Controller.class,
             RecipesV4Controller.class,

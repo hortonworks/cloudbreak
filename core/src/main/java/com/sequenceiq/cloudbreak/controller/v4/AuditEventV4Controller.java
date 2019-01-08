@@ -28,7 +28,7 @@ public class AuditEventV4Controller extends BaseAuditController implements Audit
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
-    
+
     @Inject
     private ConverterUtil converterUtil;
 
