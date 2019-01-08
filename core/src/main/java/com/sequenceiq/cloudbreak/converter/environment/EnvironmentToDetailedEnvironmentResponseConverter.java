@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironm
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.ServiceDescriptorResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -55,7 +55,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setRdsConfigs(
                 source.getRdsConfigs()
                         .stream()
-                        .map(rdsConfig -> getConversionService().convert(rdsConfig, RDSConfigResponse.class))
+                        .map(rdsConfig -> getConversionService().convert(rdsConfig, DatabaseV4Response.class))
                         .collect(Collectors.toSet()));
         response.setKubernetesConfigs(
                 source.getKubernetesConfigs()

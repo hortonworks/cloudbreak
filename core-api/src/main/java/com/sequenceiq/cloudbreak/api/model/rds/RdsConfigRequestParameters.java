@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class RdsConfigRequestParameters implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.VERSION, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.VERSION, required = true)
     private String version;
 
     public String getVersion() {

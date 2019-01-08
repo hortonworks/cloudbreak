@@ -62,10 +62,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
-        if (withRDSConfig) {
-            clusterRequest = setRDSConfiguration(itContext, clusterRequest);
-        }
-
         if (withFs) {
             clusterRequest = setFileSystem(itContext, clusterRequest);
         }
@@ -76,10 +72,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertNotNull(clusterId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
-
-        if (Boolean.TRUE.equals(withRDSConfig)) {
-            checkRDSConfigWithCluster(itContext, clusterName);
-        }
     }
 
     private Set<HostGroupRequest> convertHostGroups(Collection<HostGroup> hostGroups, String runRecipesOnHosts, Boolean autoRecoveryMode) {
@@ -107,28 +99,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             hgMaps.add(hostGroupBase);
         }
         return hgMaps;
-    }
-
-    private ClusterRequest setRDSConfiguration(IntegrationTestContext itContext, ClusterRequest clusterRequest) {
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID), "RDS configuration id is missing.");
-        long rdsConfigId = Long.parseLong(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID));
-        Set<Long> rdsConfigIds = new HashSet<>();
-        rdsConfigIds.add(rdsConfigId);
-        clusterRequest.setRdsConfigIds(rdsConfigIds);
-        return clusterRequest;
-    }
-
-    private void checkRDSConfigWithCluster(IntegrationTestContext itContext, String clusterName) {
-        boolean clusterIsFound = false;
-        long rdsConfigId = Long.parseLong(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID));
-        Set<String> clusterNames = getCloudbreakClient().rdsConfigEndpoint().get(rdsConfigId).getClusterNames();
-        for (String name : clusterNames) {
-            if (name.equals(clusterName)) {
-                clusterIsFound = true;
-                break;
-            }
-        }
-        Assert.assertTrue(clusterIsFound, "The RDS configuration is not connected to the cluster");
     }
 
     private ClusterRequest setFileSystem(IntegrationTestContext itContext, ClusterRequest clusterRequest) {

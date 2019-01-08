@@ -63,7 +63,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
-            LOGGER.debug("Creating postgres RDSConfig for {}", getRdsType().name());
+            LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
             rdsConfigs = createPostgresRdsConf(stack, cluster, rdsConfigs, getDbUser(), getDbPort(), getDb());
         }
         return rdsConfigs;

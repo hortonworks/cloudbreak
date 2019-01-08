@@ -48,12 +48,6 @@ public class CleanupService {
                 .stream()
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
                 .forEach(credential -> deleteCredential(cloudbreakClient, String.valueOf(credential.getId())));
-
-        cloudbreakClient.rdsConfigEndpoint()
-                .getPrivates()
-                .stream()
-                .filter(rds -> rds.getName().startsWith("it-"))
-                .forEach(rds -> deleteRdsConfigs(cloudbreakClient, rds.getId().toString()));
     }
 
     public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
@@ -95,11 +89,5 @@ public class CleanupService {
 
     public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
         cloudbreakClient.imageCatalogEndpoint().deletePublic(name);
-    }
-
-    public void deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
-        if (rdsConfigId != null) {
-            cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
-        }
     }
 }

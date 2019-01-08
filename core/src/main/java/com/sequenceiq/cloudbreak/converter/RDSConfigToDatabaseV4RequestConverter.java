@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.OracleParameters;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public class RDSConfigToRDSConfigRequestConverter extends AbstractConversionServiceAwareConverter<RDSConfig, RDSConfigRequest> {
+public class RDSConfigToDatabaseV4RequestConverter extends AbstractConversionServiceAwareConverter<RDSConfig, DatabaseV4Request> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToRDSConfigRequestConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToDatabaseV4RequestConverter.class);
 
     @Override
-    public RDSConfigRequest convert(RDSConfig source) {
-        RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
+    public DatabaseV4Request convert(RDSConfig source) {
+        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
         rdsConfigRequest.setName(source.getName());
         rdsConfigRequest.setConnectorJarUrl(source.getConnectorJarUrl());
         rdsConfigRequest.setConnectionUserName("fake-username");

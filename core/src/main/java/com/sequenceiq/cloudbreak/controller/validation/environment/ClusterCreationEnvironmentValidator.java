@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -80,7 +80,7 @@ public class ClusterCreationEnvironmentValidator {
             }
         }
         if (request.getRdsConfigJsons() != null) {
-            for (RDSConfigJson rdsConfig : request.getRdsConfigJsons()) {
+            for (DatabaseV4Base rdsConfig : request.getRdsConfigJsons()) {
                 validateEnvironments(rdsConfig.getName(), RDSConfig.class.getSimpleName(), rdsConfig.getEnvironments(), stackEnv, resultBuilder);
             }
         }

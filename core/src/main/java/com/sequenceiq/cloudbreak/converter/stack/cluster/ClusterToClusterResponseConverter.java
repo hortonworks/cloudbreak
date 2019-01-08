@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
@@ -221,7 +221,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private void convertRdsConfigs(Cluster source, ClusterResponse clusterResponse) {
         Set<RDSConfig> rdsConfigs = rdsConfigService.findUserManagedByClusterId(source.getId());
         for (RDSConfig rdsConfig : rdsConfigs) {
-            clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, RDSConfigResponse.class));
+            clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, DatabaseV4Response.class));
         }
     }
 

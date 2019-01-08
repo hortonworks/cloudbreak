@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
@@ -93,7 +93,7 @@ public class ClusterResponse implements JsonEntity {
     private Set<Long> rdsConfigIds = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIGS)
-    private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
+    private Set<DatabaseV4Response> rdsConfigs = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
@@ -331,11 +331,11 @@ public class ClusterResponse implements JsonEntity {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
     }
 
-    public Set<RDSConfigResponse> getRdsConfigs() {
+    public Set<DatabaseV4Response> getRdsConfigs() {
         return rdsConfigs;
     }
 
-    public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
+    public void setRdsConfigs(Set<DatabaseV4Response> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
     }
 

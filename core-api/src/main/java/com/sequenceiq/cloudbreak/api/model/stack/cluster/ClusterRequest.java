@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -120,7 +120,7 @@ public class ClusterRequest implements JsonEntity {
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
-    private Set<RDSConfigRequest> rdsConfigJsons = new HashSet<>();
+    private Set<DatabaseV4Request> rdsConfigJsons = new HashSet<>();
 
     @Valid
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
@@ -243,11 +243,11 @@ public class ClusterRequest implements JsonEntity {
         this.rdsConfigIds = rdsConfigIds;
     }
 
-    public Set<RDSConfigRequest> getRdsConfigJsons() {
+    public Set<DatabaseV4Request> getRdsConfigJsons() {
         return rdsConfigJsons;
     }
 
-    public void setRdsConfigJsons(Set<RDSConfigRequest> rdsConfigJsons) {
+    public void setRdsConfigJsons(Set<DatabaseV4Request> rdsConfigJsons) {
         this.rdsConfigJsons = rdsConfigJsons;
     }
 
