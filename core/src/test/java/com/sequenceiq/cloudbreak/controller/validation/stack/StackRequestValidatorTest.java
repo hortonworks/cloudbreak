@@ -29,7 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -490,7 +490,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setHostGroups(hostGroupSet);
-        BlueprintRequest bpRequest = new BlueprintRequest();
+        BlueprintV4Request bpRequest = new BlueprintV4Request();
         bpRequest.setName(TEST_BP_NAME);
         clusterRequest.setBlueprint(bpRequest);
         clusterRequest.setBlueprintName(TEST_BP_NAME);
@@ -524,7 +524,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         ClusterRequest clusterRequest = new ClusterRequest();
         hostGroupRequest.setName("master");
         clusterRequest.setHostGroups(Sets.newHashSet(hostGroupRequest));
-        BlueprintRequest bpRequest = new BlueprintRequest();
+        BlueprintV4Request bpRequest = new BlueprintV4Request();
         bpRequest.setName(TEST_BP_NAME);
         clusterRequest.setBlueprint(bpRequest);
         clusterRequest.setBlueprintName(TEST_BP_NAME);

@@ -21,21 +21,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.v4.blueprints.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
-public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintRequest> {
+public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintV4Request> {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private BlueprintRequestToBlueprintConverter underTest;
+    private BlueprintV4RequestToBlueprintConverter underTest;
 
     @Mock
     private JsonHelper jsonHelper;
@@ -83,7 +84,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     @Test
     public void testConvertWhenUrlIsNotEmptyButInvalidThenExceptionWouldCome() {
         String wrongUrl = "some wrong content for url";
-        BlueprintRequest request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("stack/blueprint.json");
         request.setUrl(wrongUrl);
 
         thrown.expect(BadRequestException.class);
@@ -94,7 +95,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
 
     @Test
     public void testConvertWhenUrlIsNotNullButEmptyThenBlueprintTextShouldBeTheProvidedAmbariBlueprint() {
-        BlueprintRequest request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("stack/blueprint.json");
         request.setUrl("");
 
         Blueprint result = underTest.convert(request);
@@ -107,7 +108,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     @Test
     public void testConvertWhenNameIsFilledThenTheSameShoulBeInTheBlueprintObject() {
         String name = "name";
-        BlueprintRequest request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("stack/blueprint.json");
         request.setName(name);
 
         Blueprint result = underTest.convert(request);
@@ -120,7 +121,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     @Test
     public void testConvertWhenNameIsNullThenGeneratedNameShouldBeRepresentedInTheBlueprintObject() {
         String generatedName = "something generated here";
-        BlueprintRequest request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("stack/blueprint.json");
         request.setName(null);
         when(missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT)).thenReturn(generatedName);
 
@@ -177,7 +178,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
 
     @Test
     public void testConvertWhenUnableToCreateJsonFromIncomingTagsThenExceptionWouldCome() {
-        BlueprintRequest request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("stack/blueprint.json");
         Map<String, Object> invalidTags = new HashMap<>(1);
         invalidTags.put(null, null);
         request.setTags(invalidTags);
@@ -200,8 +201,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     }
 
     @Override
-    public Class<BlueprintRequest> getRequestClass() {
-        return BlueprintRequest.class;
+    public Class<BlueprintV4Request> getRequestClass() {
+        return BlueprintV4Request.class;
     }
 
 }

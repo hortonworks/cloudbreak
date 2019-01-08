@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.blueprints;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,11 +13,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -27,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class BlueprintRequestToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintRequest, Blueprint> {
+public class BlueprintV4RequestToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintV4Request, Blueprint> {
 
     private static final String JSON_PARSE_EXCEPTION_MESSAGE = "Invalid Blueprint: Failed to parse JSON.";
 
@@ -41,7 +42,7 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
-    public Blueprint convert(BlueprintRequest json) {
+    public Blueprint convert(BlueprintV4Request json) {
         Blueprint blueprint = new Blueprint();
         if (StringUtils.isNoneEmpty(json.getUrl())) {
             String sourceUrl = json.getUrl().trim();

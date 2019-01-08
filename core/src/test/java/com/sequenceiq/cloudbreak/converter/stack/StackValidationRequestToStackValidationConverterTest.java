@@ -23,7 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -168,7 +168,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     @Test
     public void validBlueprintByText() {
         validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprint(new BlueprintRequest());
+        validationRequest.setBlueprint(new BlueprintV4Request());
 
         when(credentialService.get(any(), eq(workspace))).thenReturn(credential);
         when(conversionService.convert(any(), eq(Blueprint.class))).thenReturn(TestUtil.blueprint(bpName));
