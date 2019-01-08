@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KerberosConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
@@ -72,6 +71,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
@@ -126,7 +126,7 @@ public class CloudbreakClient {
             UserEndpoint.class,
             UserV3Endpoint.class,
             UtilEndpoint.class,
-            KerberosConfigV3Endpoint.class
+            KerberosConfigV4Endpoint.class
     );
 
     private final Client client;
@@ -331,8 +331,8 @@ public class CloudbreakClient {
         return getEndpoint(ClusterTemplateV3EndPoint.class);
     }
 
-    public KerberosConfigV3Endpoint kerberosConfigV3Endpoint() {
-        return getEndpoint(KerberosConfigV3Endpoint.class);
+    public KerberosConfigV4Endpoint kerberosConfigV4Endpoint() {
+        return getEndpoint(KerberosConfigV4Endpoint.class);
     }
 
     protected <E> E getEndpoint(Class<E> clazz) {

@@ -4,17 +4,17 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Response;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public class KerberosConfigViewToKerberosConfigViewResponseConverter extends AbstractConversionServiceAwareConverter<KerberosConfig,
-        KerberosViewResponse> {
+public class KerberosConfigViewToKerberosConfigViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<KerberosConfig,
+        KerberosViewV4Response> {
 
     @Override
-    public KerberosViewResponse convert(KerberosConfig entity) {
-        KerberosViewResponse response = new KerberosViewResponse();
+    public KerberosViewV4Response convert(KerberosConfig entity) {
+        KerberosViewV4Response response = new KerberosViewV4Response();
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setType(entity.getType());

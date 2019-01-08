@@ -52,8 +52,8 @@ public class ControllerDescription {
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
     public static final String USER_V3_DESCRIPTION = "Operations on users in workspace";
     public static final String ENVIRONMENT_V3_DESCRIPTION = "Operations on environments.";
-    public static final String KERBEROS_CONFIG_V3_DESCRIPTION = "Operations on kerberos configs.";
 
+    public static final String KERBEROS_CONFIG_V4_DESCRIPTION = "Operations on kerberos configs.";
     public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";

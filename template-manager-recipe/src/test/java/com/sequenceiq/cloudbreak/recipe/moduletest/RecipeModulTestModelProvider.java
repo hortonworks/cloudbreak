@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -47,7 +47,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplatePreparationObject() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.HIVE))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.HIVE))))
                 .build();
     }
 
@@ -149,14 +149,14 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWithDruidRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.DRUID), rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.DRUID), rdsConfig(DatabaseType.HIVE)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithRangerAndHiveRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -172,7 +172,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithOnlyHiveRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.HIVE)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -180,7 +180,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithOnlyRangerRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -188,7 +188,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWhenBlueprintVersionIs25() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.5", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -201,7 +201,7 @@ class RecipeModulTestModelProvider {
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withSmartSenseSubscription(smartSenseSubscription)
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
                 .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames));
     }
 

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -112,7 +112,7 @@ public abstract class AbstractRdsConfigProvider {
 
     protected abstract String getPillarKey();
 
-    protected abstract RdsType getRdsType();
+    protected abstract DatabaseType getRdsType();
 
     protected abstract boolean isRdsConfigNeeded(Blueprint blueprint);
 

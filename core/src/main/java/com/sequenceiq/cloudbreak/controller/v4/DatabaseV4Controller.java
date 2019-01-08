@@ -9,11 +9,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.constraints.NotEmpty;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -102,12 +102,12 @@ public class DatabaseV4Controller extends NotificationController implements Data
     }
 
     @Override
-    public DatabaseV4Response attach(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
-        return databaseService.attachToEnvironmentsAndConvert(name, environmentNames, workspaceId, DatabaseV4Response.class);
+    public DatabaseV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
+        return databaseService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Response detach(Long workspaceId, String name, @NotEmpty Set<String> environmentNames) {
-        return databaseService.detachFromEnvironmentsAndConvert(name, environmentNames, workspaceId, DatabaseV4Response.class);
+    public DatabaseV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
+        return databaseService.detachFromEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, DatabaseV4Response.class);
     }
 }

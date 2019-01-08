@@ -14,7 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -106,8 +106,8 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
         return rdsConfigRepository.findByClusterId(clusterId);
     }
 
-    public RDSConfig findByClusterIdAndType(Long clusterId, RdsType rdsType) {
-        return rdsConfigRepository.findByClusterIdAndType(clusterId, rdsType.name());
+    public RDSConfig findByClusterIdAndType(Long clusterId, DatabaseType databaseType) {
+        return rdsConfigRepository.findByClusterIdAndType(clusterId, databaseType.name());
     }
 
     public Set<RDSConfig> findUserManagedByClusterId(Long clusterId) {

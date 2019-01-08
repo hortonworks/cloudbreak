@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 

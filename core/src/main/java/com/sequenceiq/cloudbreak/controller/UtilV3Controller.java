@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4BuildResponse;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
@@ -48,22 +48,22 @@ public class UtilV3Controller implements UtilV3Endpoint {
     }
 
     @Override
-    public RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest, Set<String> targets) {
-        RdsBuildResult rdsBuildResult = new RdsBuildResult();
+    public DatabaseV4BuildResponse buildRdsConnection(@Valid DatabaseV4BuildRequest databaseV4BuildRequest, Set<String> targets) {
+        DatabaseV4BuildResponse databaseV4BuildResponse = new DatabaseV4BuildResponse();
         try {
-            String clusterName = rdsBuildRequest.getClusterName().replaceAll("[^a-zA-Z0-9]", "");
+            String clusterName = databaseV4BuildRequest.getClusterName().replaceAll("[^a-zA-Z0-9]", "");
             Map<String, String> result = rdsConnectionBuilder.buildRdsConnection(
-                    rdsBuildRequest.getRdsConfigRequest().getConnectionURL(),
-                    rdsBuildRequest.getRdsConfigRequest().getConnectionUserName(),
-                    rdsBuildRequest.getRdsConfigRequest().getConnectionPassword(),
+                    databaseV4BuildRequest.getRdsConfigRequest().getConnectionURL(),
+                    databaseV4BuildRequest.getRdsConfigRequest().getConnectionUserName(),
+                    databaseV4BuildRequest.getRdsConfigRequest().getConnectionPassword(),
                     clusterName,
                     targets);
 
-            rdsBuildResult.setResults(result);
+            databaseV4BuildResponse.setResults(result);
         } catch (BadRequestException e) {
             throw new BadRequestException("Could not create databases in metastore - " + e.getMessage(), e);
         }
-        return rdsBuildResult;
+        return databaseV4BuildResponse;
     }
 
     @Override

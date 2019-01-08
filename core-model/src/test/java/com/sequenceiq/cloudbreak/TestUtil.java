@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
@@ -688,33 +688,33 @@ public class TestUtil {
         return smartSenseSubscription;
     }
 
-    public static RDSConfig rdsConfig(RdsType rdsType, DatabaseVendor databaseVendor) {
+    public static RDSConfig rdsConfig(DatabaseType databaseType, DatabaseVendor databaseVendor) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(generateUniqueId());
-        rdsConfig.setName(rdsType.name());
+        rdsConfig.setName(databaseType.name());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
         if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + databaseType.name().toLowerCase());
         } else if (databaseVendor == DatabaseVendor.MYSQL) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + databaseType.name().toLowerCase());
         } else {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + databaseType.name().toLowerCase());
         }
-        rdsConfig.setType(rdsType.name());
+        rdsConfig.setType(databaseType.name());
         rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
         rdsConfig.setDatabaseEngine(databaseVendor);
         return rdsConfig;
     }
 
-    public static RDSConfig rdsConfig(RdsType rdsType) {
+    public static RDSConfig rdsConfig(DatabaseType databaseType) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(generateUniqueId());
-        rdsConfig.setName(rdsType.name());
+        rdsConfig.setName(databaseType.name());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
-        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
-        rdsConfig.setType(rdsType.name());
+        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + databaseType.name().toLowerCase());
+        rdsConfig.setType(databaseType.name());
         rdsConfig.setConnectionDriver("org.postgresql.Driver");
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         return rdsConfig;

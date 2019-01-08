@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.template.views.dialect.DefaultRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.OracleRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.RdsViewDialect;
@@ -69,7 +69,7 @@ public class RdsView {
         connectionDriver = rdsConfig.getConnectionDriver();
         databaseVendor = rdsConfig.getDatabaseEngine();
         String pattern;
-        if (rdsConfig.getType().equalsIgnoreCase(RdsType.RANGER.name())) {
+        if (rdsConfig.getType().equalsIgnoreCase(DatabaseType.RANGER.name())) {
             pattern = databaseVendor == DatabaseVendor.ORACLE11 || databaseVendor == DatabaseVendor.ORACLE12
                     ? "%s:%s" + rdsViewDialect.databaseNameSplitter() + "%s"
                     : "%s:%s";

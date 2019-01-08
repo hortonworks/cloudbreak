@@ -8,8 +8,8 @@ import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Datab
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Storage;
 
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
-import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
 import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.GCS;
 
 public class GcpResourceHelper extends ResourceHelper<GcsCloudStorageParameters> {

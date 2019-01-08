@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 
 @Component
 public class RdsConfigProviderFactory {
@@ -14,7 +14,7 @@ public class RdsConfigProviderFactory {
     @Inject
     private Set<AbstractRdsConfigProvider> rdsConfigProviders;
 
-    private AbstractRdsConfigProvider getRdsConfigProviderForRdsType(RdsType type) {
+    private AbstractRdsConfigProvider getRdsConfigProviderForRdsType(DatabaseType type) {
         return rdsConfigProviders.stream().filter(rdsConfigProvider -> rdsConfigProvider.getRdsType() == type).findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException(type.name() + " RdsConfigProvider is not supported!"));
     }

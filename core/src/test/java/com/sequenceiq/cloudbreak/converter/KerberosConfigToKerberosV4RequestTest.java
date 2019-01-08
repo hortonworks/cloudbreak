@@ -10,15 +10,15 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
-public class KerberosConfigToKerberosRequestTest {
+public class KerberosConfigToKerberosV4RequestTest {
 
     @InjectMocks
-    private KerberosConfigToKerberosRequestConverter underTest;
+    private KerberosConfigToKerberosV4RequestConverter underTest;
 
     @Before
     public void setup() {
@@ -27,36 +27,36 @@ public class KerberosConfigToKerberosRequestTest {
 
     @Test
     public void testAd() {
-        KerberosRequest kerberosRequest = underTest.convert(createConfig(KerberosType.ACTIVE_DIRECTORY));
+        KerberosV4Request kerberosV4Request = underTest.convert(createConfig(KerberosType.ACTIVE_DIRECTORY));
 
-        assertNotNull(kerberosRequest.getActiveDirectory());
-        assertEquals("fake-realm", kerberosRequest.getActiveDirectory().getRealm());
+        assertNotNull(kerberosV4Request.getActiveDirectory());
+        assertEquals("fake-realm", kerberosV4Request.getActiveDirectory().getRealm());
     }
 
     @Test
     public void testMit() {
-        KerberosRequest kerberosRequest = underTest.convert(createConfig(KerberosType.MIT));
+        KerberosV4Request kerberosV4Request = underTest.convert(createConfig(KerberosType.MIT));
 
-        assertNotNull(kerberosRequest.getMit());
-        assertEquals("fake-password", kerberosRequest.getMit().getPassword());
-        assertEquals("fake-principal", kerberosRequest.getMit().getPrincipal());
+        assertNotNull(kerberosV4Request.getMit());
+        assertEquals("fake-password", kerberosV4Request.getMit().getPassword());
+        assertEquals("fake-principal", kerberosV4Request.getMit().getPrincipal());
     }
 
     @Test
     public void testFreeIpa() {
-        KerberosRequest kerberosRequest = underTest.convert(createConfig(KerberosType.FREEIPA));
+        KerberosV4Request kerberosV4Request = underTest.convert(createConfig(KerberosType.FREEIPA));
 
-        assertNotNull(kerberosRequest.getFreeIpa());
-        assertEquals("fake-password", kerberosRequest.getFreeIpa().getPassword());
-        assertEquals("fake-realm", kerberosRequest.getFreeIpa().getRealm());
+        assertNotNull(kerberosV4Request.getFreeIpa());
+        assertEquals("fake-password", kerberosV4Request.getFreeIpa().getPassword());
+        assertEquals("fake-realm", kerberosV4Request.getFreeIpa().getRealm());
     }
 
     @Test
     public void testAmbariKerberosDescriptor() {
-        KerberosRequest kerberosRequest = underTest.convert(createConfig(KerberosType.AMBARI_DESCRIPTOR));
+        KerberosV4Request kerberosV4Request = underTest.convert(createConfig(KerberosType.AMBARI_DESCRIPTOR));
 
-        assertNotNull(kerberosRequest.getAmbariKerberosDescriptor());
-        assertEquals("{}", new String(Base64.decodeBase64(kerberosRequest.getAmbariKerberosDescriptor().getKrb5Conf())));
+        assertNotNull(kerberosV4Request.getAmbariDescriptor());
+        assertEquals("{}", new String(Base64.decodeBase64(kerberosV4Request.getAmbariDescriptor().getKrb5Conf())));
     }
 
     private KerberosConfig createConfig(KerberosType type) {
