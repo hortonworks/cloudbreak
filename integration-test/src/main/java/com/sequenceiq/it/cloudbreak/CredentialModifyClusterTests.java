@@ -16,7 +16,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -174,18 +174,18 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         };
     }
 
-    private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {
-        List<? extends ImageResponse> result = images.stream()
-                .filter(ImageResponse::isDefaultImage)
+    private String getLastUuid(List<? extends ImageV4Response> images, String stackVersion) {
+        List<? extends ImageV4Response> result = images.stream()
+                .filter(ImageV4Response::isDefaultImage)
                 .filter(image -> {
-                    ImageResponse imageResponse = image;
-                    if (!StringUtils.isEmpty(imageResponse.getVersion())) {
-                        return imageResponse.getVersion().startsWith(stackVersion);
+                    ImageV4Response imageV4Response = image;
+                    if (!StringUtils.isEmpty(imageV4Response.getVersion())) {
+                        return imageV4Response.getVersion().startsWith(stackVersion);
                     }
-                    if (imageResponse.getStackDetails() == null) {
+                    if (imageV4Response.getStackDetails() == null) {
                         return true;
                     }
-                    if (imageResponse.getStackDetails().getVersion() == null) {
+                    if (imageV4Response.getStackDetails().getVersion() == null) {
                         return true;
                     }
                     return image.getStackDetails().getVersion().startsWith(stackVersion);
@@ -194,7 +194,7 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         if (result.isEmpty()) {
             result = images;
         }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(ImageV4Response::getDate)).collect(Collectors.toList());
         return result.get(result.size() - 1).getUuid();
     }
 

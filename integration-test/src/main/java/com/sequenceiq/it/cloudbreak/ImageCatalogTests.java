@@ -14,7 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
@@ -189,8 +189,8 @@ public class ImageCatalogTests extends CloudbreakTest {
         when(ImageCatalog.getAll());
         then(ImageCatalog.assertThis(
                 (imageCatalog, t) -> {
-                    Set<ImageCatalogResponse> imageCatalogResponses = imageCatalog.getResponses();
-                    for (ImageCatalogResponse response : imageCatalogResponses) {
+                    Set<ImageCatalogV4Response> imageCatalogResponses = imageCatalog.getResponses();
+                    for (ImageCatalogV4Response response : imageCatalogResponses) {
                         if (response.getName().equals(VALID_IMAGECATALOG_NAME + "-old")) {
                             Assert.assertEquals(response.isUsedAsDefault(), false);
                         }

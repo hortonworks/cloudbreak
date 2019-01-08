@@ -352,21 +352,11 @@ public class OperationDescriptions {
     }
 
     public static class ImageCatalogOpDescription {
-        public static final String GET_PUBLICS_IMAGE_CATALOGS = "list available custom image catalogs as public resources";
-        public static final String GET_PUBLIC_IMAGE_CATALOG_BY_NAME = "get custom image catalog by name";
-        public static final String GET_PUBLIC_IMAGE_CATALOG_BY_ID = "get custom image catalog by id";
-        public static final String GET_IMAGES_BY_PROVIDER = "determines available images for the Cloudbreak version "
-                + "by the given provider and default image catalog url";
-        public static final String GET_IMAGES_BY_PROVIDER_AND_CUSTOM_IMAGE_CATALOG = "determines available images for the Cloudbreak version "
-                + "by the given provider and given image catalog url";
-        public static final String POST_PUBLIC = "create Image Catalog as public resources";
-        public static final String POST_PRIVATE = "create Image Catalog as private resources";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Image Catalog by id";
         public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
-        public static final String GET_IMAGES_BY_STACK_NAME_AND_CUSTOM_IMAGE_CATALOG = "determines available images for the given stack"
+        public static final String GET_IMAGES_BY_NAME = "determines available images for the given stack or platform"
                 + "from the given imagecatalog name";
-        public static final String GET_IMAGES_BY_STACK_NAME = "determines available images for the given stack"
+        public static final String GET_IMAGES = "determines available images for the given stack or platform"
                 + "from the default image catalog";
         public static final String LIST_BY_WORKSPACE = "list image catalogs for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get image catalog by name in workspace";

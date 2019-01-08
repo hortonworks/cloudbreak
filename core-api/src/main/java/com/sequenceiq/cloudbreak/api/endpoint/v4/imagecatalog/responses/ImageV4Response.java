@@ -1,16 +1,23 @@
-package com.sequenceiq.cloudbreak.api.model.imagecatalog;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-import java.util.Map;
+import java.util.Set;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackDetailsJson;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ImageResponse implements JsonEntity {
+@NotNull
+public class ImageV4Response implements JsonEntity {
 
     @JsonProperty("date")
     private String date;
@@ -30,11 +37,11 @@ public class ImageResponse implements JsonEntity {
     @JsonProperty("version")
     private String version;
 
-    @JsonProperty("repo")
-    private Map<String, String> repo;
+    @JsonProperty("ambariRepoUrl")
+    private String ambariRepoUrl;
 
-    @JsonProperty("images")
-    private Map<String, Map<String, String>> imageSetsByProvider;
+    @JsonProperty("locations")
+    private Set<ImageLocationV4Response> locations;
 
     @JsonProperty("stackDetails")
     @JsonInclude(NON_EMPTY)
@@ -44,7 +51,7 @@ public class ImageResponse implements JsonEntity {
     private boolean defaultImage;
 
     @JsonProperty("packageVersions")
-    private Map<String, String> packageVersions;
+    private Set<PackageVersionV4Response> packageVersions;
 
     public String getDate() {
         return date;
@@ -86,20 +93,20 @@ public class ImageResponse implements JsonEntity {
         this.version = version;
     }
 
-    public Map<String, String> getRepo() {
-        return repo;
+    public String getAmbariRepoUrl() {
+        return ambariRepoUrl;
     }
 
-    public void setRepo(Map<String, String> repo) {
-        this.repo = repo;
+    public void setAmbariRepoUrl(String ambariRepoUrl) {
+        this.ambariRepoUrl = ambariRepoUrl;
     }
 
-    public Map<String, Map<String, String>> getImageSetsByProvider() {
-        return imageSetsByProvider;
+    public Set<ImageLocationV4Response> getLocations() {
+        return locations;
     }
 
-    public void setImageSetsByProvider(Map<String, Map<String, String>> imageSetsByProvider) {
-        this.imageSetsByProvider = imageSetsByProvider;
+    public void setLocations(Set<ImageLocationV4Response> locations) {
+        this.locations = locations;
     }
 
     public StackDetailsJson getStackDetails() {
@@ -126,11 +133,11 @@ public class ImageResponse implements JsonEntity {
         this.defaultImage = defaultImage;
     }
 
-    public Map<String, String> getPackageVersions() {
+    public Set<PackageVersionV4Response> getPackageVersions() {
         return packageVersions;
     }
 
-    public void setPackageVersions(Map<String, String> packageVersions) {
+    public void setPackageVersions(Set<PackageVersionV4Response> packageVersions) {
         this.packageVersions = packageVersions;
     }
 }

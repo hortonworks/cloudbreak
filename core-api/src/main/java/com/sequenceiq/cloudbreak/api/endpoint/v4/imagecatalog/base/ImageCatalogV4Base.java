@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.imagecatalog;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class ImageCatalogBase {
+public class ImageCatalogV4Base {
 
     @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
