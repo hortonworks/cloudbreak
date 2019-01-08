@@ -1,18 +1,19 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class RDSConfigResponse extends RDSConfigJson {
+public class DatabaseV4Response extends DatabaseV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
@@ -26,22 +27,22 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
-    @ApiModelProperty(value = RDSConfig.STACK_VERSION)
+    @ApiModelProperty(value = Database.STACK_VERSION)
     private String stackVersion;
 
-    @ApiModelProperty(value = RDSConfig.DB_ENGINE, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.DB_ENGINE, required = true)
     private String databaseEngine;
 
-    @ApiModelProperty(value = RDSConfig.CONNECTION_DRIVER_NAME, required = true)
+    @ApiModelProperty(value = Database.CONNECTION_DRIVER_NAME, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(value = RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
+    @ApiModelProperty(value = Database.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
 
-    @ApiModelProperty(value = RDSConfig.USERNAME)
+    @ApiModelProperty(value = Database.USERNAME)
     private SecretResponse connectionUserName;
 
-    @ApiModelProperty(value = RDSConfig.PASSWORD)
+    @ApiModelProperty(value = ModelDescriptions.Database.PASSWORD)
     private SecretResponse connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)

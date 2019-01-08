@@ -23,7 +23,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.RdsRequestValidator;
 
 @RunWith(Parameterized.class)
@@ -113,13 +113,13 @@ public class RdsRequestValidatorTest {
 
     @Test
     public void test() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest(serviceName, databaseVendor);
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest(serviceName, databaseVendor);
         boolean valid = rdsRequestValidator.isValid(rdsConfigRequest, constraintValidatorContext);
         Assert.assertEquals(result, valid);
     }
 
-    private RDSConfigRequest rdsConfigRequest(String serviceName, DatabaseVendor databaseVendor) {
-        RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
+    private DatabaseV4Request rdsConfigRequest(String serviceName, DatabaseVendor databaseVendor) {
+        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
         rdsConfigRequest.setType(serviceName);
         rdsConfigRequest.setConnectionURL(String.format("jdbc:%s:dsfdsdfsdfsdfdsf:%s.host.com:5432/%s",
                 databaseVendor.jdbcUrlDriverId(), serviceName, serviceName));

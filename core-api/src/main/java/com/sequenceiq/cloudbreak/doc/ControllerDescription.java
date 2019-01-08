@@ -58,6 +58,8 @@ public class ControllerDescription {
     public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
+    public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source " +
+            "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
 
     private ControllerDescription() {
     }

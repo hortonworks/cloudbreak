@@ -11,23 +11,23 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionServiceAwareConverter<RDSConfig, RDSConfigResponse> {
+public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionServiceAwareConverter<RDSConfig, DatabaseV4Response> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToRDSConfigResponseConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToDatabaseV4ResponseConverter.class);
 
     @Inject
     private ConversionService conversionService;
 
     @Override
-    public RDSConfigResponse convert(RDSConfig source) {
-        RDSConfigResponse json = new RDSConfigResponse();
+    public DatabaseV4Response convert(RDSConfig source) {
+        DatabaseV4Response json = new DatabaseV4Response();
         json.setId(source.getId());
         json.setName(source.getName());
         json.setDescription(source.getDescription());
