@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DatalakeResourcesResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
@@ -60,7 +60,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setKubernetesConfigs(
                 source.getKubernetesConfigs()
                         .stream()
-                        .map(kubeConfig -> getConversionService().convert(kubeConfig, KubernetesConfigResponse.class))
+                        .map(kubeConfig -> getConversionService().convert(kubeConfig, KubernetesV4Response.class))
                         .collect(Collectors.toSet()));
         response.setKerberosConfigs(
                 source.getKerberosConfigs()

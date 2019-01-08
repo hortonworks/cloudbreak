@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.KubernetesConfig;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class KubernetesConfigBase {
+public abstract class KubernetesV4Base {
 
     @ApiModelProperty(value = KubernetesConfig.NAME, required = true)
     @NotNull
