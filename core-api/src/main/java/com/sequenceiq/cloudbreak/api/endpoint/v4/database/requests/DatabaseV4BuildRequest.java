@@ -1,18 +1,17 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RDSBuildRequest")
+@ApiModel("DatabaseV4BuildRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RDSBuildRequest implements JsonEntity {
+public class DatabaseV4BuildRequest implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.Database.DATABASE_REQUEST, required = true)

@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Kerberos;
@@ -58,8 +58,8 @@ public class AwsKerberos {
                 .withRequest(getKerberosRequest(testParameter)).withName(KERBEROS_CLOUDY);
     }
 
-    private static KerberosRequest getKerberosRequest(TestParameter testParameter) {
-        KerberosRequest kerberosRequest = new KerberosRequest();
+    private static KerberosV4Request getKerberosRequest(TestParameter testParameter) {
+        KerberosV4Request kerberosV4Request = new KerberosV4Request();
         ActiveDirectoryKerberosDescriptor activeDirectoryKerberosDescriptor = new ActiveDirectoryKerberosDescriptor();
         activeDirectoryKerberosDescriptor.setUrl(DEV_DPS_SITE);
         activeDirectoryKerberosDescriptor.setAdminUrl(DEV_DPS_SITE);
@@ -71,8 +71,8 @@ public class AwsKerberos {
         activeDirectoryKerberosDescriptor.setDomain(DEV_DPS_SITE);
         activeDirectoryKerberosDescriptor.setTcpAllowed(TCP_ALLOWED);
         activeDirectoryKerberosDescriptor.setVerifyKdcTrust(VERIFY_KDC_TRUST);
-        kerberosRequest.setActiveDirectory(activeDirectoryKerberosDescriptor);
-        kerberosRequest.setName(KERBEROS_CLOUDY);
-        return kerberosRequest;
+        kerberosV4Request.setActiveDirectory(activeDirectoryKerberosDescriptor);
+        kerberosV4Request.setName(KERBEROS_CLOUDY);
+        return kerberosV4Request;
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests;
 
 import javax.validation.constraints.NotNull;
 
@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RdsConfigRequestParameters implements JsonEntity {
+public class DatabaseRequestParameters implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.Database.VERSION, required = true)

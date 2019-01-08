@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.kerberos;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_ADMIN_URL;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_URL;

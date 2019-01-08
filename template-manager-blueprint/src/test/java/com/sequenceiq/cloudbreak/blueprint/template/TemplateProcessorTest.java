@@ -18,7 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -281,10 +281,10 @@ public class TemplateProcessorTest {
     private Cluster cluster() {
         Cluster cluster = TestUtil.cluster();
         Set<RDSConfig> rdsConfigSet = new HashSet<>();
-        rdsConfigSet.add(rdsConfig(RdsType.DRUID.name().toLowerCase()));
-        RDSConfig hiveRds = rdsConfig(RdsType.HIVE.name().toLowerCase());
+        rdsConfigSet.add(rdsConfig(DatabaseType.DRUID.name().toLowerCase()));
+        RDSConfig hiveRds = rdsConfig(DatabaseType.HIVE.name().toLowerCase());
         rdsConfigSet.add(hiveRds);
-        rdsConfigSet.add(rdsConfig(RdsType.RANGER.name().toLowerCase()));
+        rdsConfigSet.add(rdsConfig(DatabaseType.RANGER.name().toLowerCase()));
         cluster.setRdsConfigs(rdsConfigSet);
         return cluster;
     }

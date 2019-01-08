@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RdsBuildResult")
-public class RdsBuildResult implements JsonEntity {
+@ApiModel("DatabaseV4BuildResponse")
+public class DatabaseV4BuildResponse implements JsonEntity {
 
     @ApiModelProperty(value = ClusterModelDescription.RESULT_DBS, required = true)
     private Map<String, String> results = new HashMap<>();

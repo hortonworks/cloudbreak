@@ -21,8 +21,8 @@ public class KerberosPostAction implements ActionV2<KerberosEntity> {
         logJSON(LOGGER, format(" Kerberos post request:%n"), entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
-                        .kerberosConfigV3Endpoint()
-                        .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
+                        .kerberosConfigV4Endpoint()
+                        .create(client.getWorkspaceId(), entity.getRequest()));
         logJSON(LOGGER, format(" Kerberos created  successfully:%n"), entity.getResponse());
         log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
         return entity;

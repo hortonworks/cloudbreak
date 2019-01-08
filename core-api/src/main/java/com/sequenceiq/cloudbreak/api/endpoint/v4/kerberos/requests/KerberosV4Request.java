@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.kerberos;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_CONFIG_NAME;
 
@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ValidKerberosRequest
-public class KerberosRequest implements JsonEntity {
+public class KerberosV4Request implements JsonEntity {
 
     @Valid
     @ApiModelProperty
@@ -39,7 +39,7 @@ public class KerberosRequest implements JsonEntity {
 
     @Valid
     @ApiModelProperty
-    private AmbariKerberosDescriptor ambariKerberosDescriptor;
+    private AmbariKerberosDescriptor ambariDescriptor;
 
     @ApiModelProperty(value = KERBEROS_CONFIG_NAME, required = true)
     @NotNull
@@ -85,12 +85,12 @@ public class KerberosRequest implements JsonEntity {
         this.mit = mitKerberosDescriptor;
     }
 
-    public AmbariKerberosDescriptor getAmbariKerberosDescriptor() {
-        return ambariKerberosDescriptor;
+    public AmbariKerberosDescriptor getAmbariDescriptor() {
+        return ambariDescriptor;
     }
 
-    public void setAmbariKerberosDescriptor(AmbariKerberosDescriptor ambariKerberosDescriptor) {
-        this.ambariKerberosDescriptor = ambariKerberosDescriptor;
+    public void setAmbariDescriptor(AmbariKerberosDescriptor ambariDescriptor) {
+        this.ambariDescriptor = ambariDescriptor;
     }
 
     public String getDescription() {

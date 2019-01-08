@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
@@ -41,8 +41,8 @@ public class AmbariRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected RdsType getRdsType() {
-        return RdsType.AMBARI;
+    protected DatabaseType getRdsType() {
+        return DatabaseType.AMBARI;
     }
 
     @Override

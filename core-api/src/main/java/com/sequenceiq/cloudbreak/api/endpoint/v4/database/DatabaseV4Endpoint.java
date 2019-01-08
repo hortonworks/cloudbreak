@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.database;
 
-import java.util.Set;
-
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -15,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4TestRequest;
@@ -82,7 +81,7 @@ public interface DatabaseV4Endpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.ATTACH_TO_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "attachDatabaseToEnvironments")
-    DatabaseV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @NotEmpty Set<String> environmentNames);
+    DatabaseV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid @NotNull EnvironmentNames environmentNames);
 
     @PUT
     @Path("{name}/detach")
@@ -91,5 +90,5 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DETACH_FROM_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "detachDatabaseFromEnvironments")
     DatabaseV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @NotEmpty Set<String> environmentNames);
+            @Valid @NotNull EnvironmentNames environmentNames);
 }

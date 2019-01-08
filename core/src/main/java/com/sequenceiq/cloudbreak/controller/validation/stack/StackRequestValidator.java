@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
@@ -192,13 +192,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 .getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
         boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
-            Set<RdsType> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
+            Set<DatabaseType> databaseTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "
                     + "rds/database configuration to the Cluster request";
-            if (!rdsTypes.contains(RdsType.HIVE)) {
+            if (!databaseTypes.contains(DatabaseType.HIVE)) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
             }
-            if (!rdsTypes.contains(RdsType.RANGER)) {
+            if (!databaseTypes.contains(DatabaseType.RANGER)) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
             }
             if (isLdapNotProvided(stackRequest.getClusterRequest())) {
@@ -212,12 +212,12 @@ public class StackRequestValidator implements Validator<StackRequest> {
         return clusterRequest.getLdapConfig() == null && clusterRequest.getLdapConfigName() == null && clusterRequest.getLdapConfigId() == null;
     }
 
-    private Set<RdsType> getGivenRdsTypes(ClusterRequest clusterRequest) {
-        Set<RdsType> types = clusterRequest.getRdsConfigIds().stream().map(id -> RdsType.valueOf(rdsConfigService.get(id).getType()))
+    private Set<DatabaseType> getGivenRdsTypes(ClusterRequest clusterRequest) {
+        Set<DatabaseType> types = clusterRequest.getRdsConfigIds().stream().map(id -> DatabaseType.valueOf(rdsConfigService.get(id).getType()))
                 .collect(Collectors.toSet());
-        types.addAll(clusterRequest.getRdsConfigJsons().stream().map(rdsConfigRequest -> RdsType.valueOf(rdsConfigRequest.getType()))
+        types.addAll(clusterRequest.getRdsConfigJsons().stream().map(rdsConfigRequest -> DatabaseType.valueOf(rdsConfigRequest.getType()))
                 .collect(Collectors.toSet()));
-        types.addAll(clusterRequest.getRdsConfigNames().stream().map(s -> RdsType.valueOf(
+        types.addAll(clusterRequest.getRdsConfigNames().stream().map(s -> DatabaseType.valueOf(
                 rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType())).collect(Collectors.toSet()));
         return types;
     }

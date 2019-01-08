@@ -15,8 +15,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4BuildResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -41,7 +41,7 @@ public interface UtilV3Endpoint {
     @Path("rds-database")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.CREATE_DATABASE, produces = ContentType.JSON, nickname = "createRDSDatabaseUtilV3")
-    RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest, @QueryParam("target") Set<String> targets);
+    DatabaseV4BuildResponse buildRdsConnection(@Valid DatabaseV4BuildRequest databaseV4BuildRequest, @QueryParam("target") Set<String> targets);
 
     @GET
     @Path("stackmatrix")

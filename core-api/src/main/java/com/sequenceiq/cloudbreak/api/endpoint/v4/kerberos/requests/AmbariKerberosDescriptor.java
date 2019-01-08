@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.kerberos;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.DESCRIPTOR;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KRB_5_CONF;

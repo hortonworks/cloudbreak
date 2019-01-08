@@ -7,14 +7,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.MITKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 
 @RunWith(Parameterized.class)
-public class KerberosRequestValidatorTest {
+public class KerberosV4RequestValidatorTest {
 
     private static final String TEST_PASSWORD = "someTestPassword";
 
@@ -26,16 +26,16 @@ public class KerberosRequestValidatorTest {
 
     private static final AmbariKerberosDescriptor AMBARI_KERBEROS_DESCRIPTOR = new AmbariKerberosDescriptor();
 
-    private KerberosRequest request;
+    private KerberosV4Request request;
 
     private boolean expected;
 
-    public KerberosRequestValidatorTest(KerberosRequest request, boolean expected) {
+    public KerberosV4RequestValidatorTest(KerberosV4Request request, boolean expected) {
         this.request = request;
         this.expected = expected;
     }
 
-    @Parameterized.Parameters(name = "[{index}] Test KerberosRequest: {0}")
+    @Parameterized.Parameters(name = "[{index}] Test KerberosV4Request: {0}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {createRequest(ACTIVE_DIRECTORY, FREEIPA, MIT, AMBARI_KERBEROS_DESCRIPTOR), false},
@@ -72,14 +72,14 @@ public class KerberosRequestValidatorTest {
         Assert.assertFalse(KerberosRequestValidator.isValid(request));
     }
 
-    private static KerberosRequest createRequest(ActiveDirectoryKerberosDescriptor existingAd, FreeIPAKerberosDescriptor existingFreeIpaKerberosDescriptor,
+    private static KerberosV4Request createRequest(ActiveDirectoryKerberosDescriptor existingAd, FreeIPAKerberosDescriptor existingFreeIpaKerberosDescriptor,
             MITKerberosDescriptor existingMitKerberosDescriptor,
             AmbariKerberosDescriptor ambariKerberosDescriptor) {
-        KerberosRequest request = new KerberosRequest();
+        KerberosV4Request request = new KerberosV4Request();
         request.setMit(existingMitKerberosDescriptor);
         request.setFreeIpa(existingFreeIpaKerberosDescriptor);
         request.setActiveDirectory(existingAd);
-        request.setAmbariKerberosDescriptor(ambariKerberosDescriptor);
+        request.setAmbariDescriptor(ambariKerberosDescriptor);
         request.setName(TEST_PASSWORD);
         return request;
     }

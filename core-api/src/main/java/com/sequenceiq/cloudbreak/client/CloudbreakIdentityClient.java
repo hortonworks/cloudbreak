@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KerberosConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
@@ -68,6 +67,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 
@@ -94,6 +94,7 @@ public class CloudbreakIdentityClient {
             FlexSubscriptionV3Endpoint.class,
             ImageCatalogV1Endpoint.class,
             ImageCatalogV3Endpoint.class,
+            KerberosConfigV4Endpoint.class,
             KnoxServicesV3Endpoint.class,
             LdapConfigEndpoint.class,
             LdapConfigV3Endpoint.class,
@@ -340,8 +341,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(ClusterTemplateV3EndPoint.class);
     }
 
-    public KerberosConfigV3Endpoint kerberosConfigV3Endpoint() {
-        return getEndpoint(KerberosConfigV3Endpoint.class);
+    public KerberosConfigV4Endpoint kerberosConfigV4Endpoint() {
+        return getEndpoint(KerberosConfigV4Endpoint.class);
     }
 
     protected <E> E getEndpoint(Class<E> clazz) {

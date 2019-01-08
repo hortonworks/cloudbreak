@@ -6,17 +6,17 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosTypeBase;
-import com.sequenceiq.cloudbreak.api.model.kerberos.MITKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public class KerberosConfigToKerberosRequestConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosRequest> {
+public class KerberosConfigToKerberosV4RequestConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosV4Request> {
 
     private static final String EMPTY_JSON = "{}";
 
@@ -32,8 +32,8 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
     private static final String FAKE_PASSWORD_POSTFIX = "password";
 
     @Override
-    public KerberosRequest convert(KerberosConfig source) {
-        KerberosRequest request = new KerberosRequest();
+    public KerberosV4Request convert(KerberosConfig source) {
+        KerberosV4Request request = new KerberosV4Request();
         request.setName(source.getName());
         request.setDescription(source.getDescription());
         request.setEnvironments(source.getEnvironments().stream()
@@ -43,7 +43,7 @@ public class KerberosConfigToKerberosRequestConverter extends AbstractConversion
                 request.setActiveDirectory(getActiveDirectory(source));
                 break;
             case AMBARI_DESCRIPTOR:
-                request.setAmbariKerberosDescriptor(getCustom(source));
+                request.setAmbariDescriptor(getCustom(source));
                 break;
             case MIT:
                 request.setMit(getMit(source));

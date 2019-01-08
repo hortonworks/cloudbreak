@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsConfigRequestParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseRequestParameters;
 
 public enum DatabaseVendor {
     POSTGRES("postgres", "PostgreSQL", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
@@ -83,7 +83,7 @@ public enum DatabaseVendor {
     }
 
     public static Optional<DatabaseVendor> getVendorByJdbcUrl(DatabaseV4Request configRequest) {
-        Optional<RdsConfigRequestParameters> rdsConfigRequestParameters = getParameters(configRequest);
+        Optional<DatabaseRequestParameters> rdsConfigRequestParameters = getParameters(configRequest);
         Optional<String> version = databaseVersion(rdsConfigRequestParameters);
         for (DatabaseVendor databaseVendor : values()) {
             if (configRequest.getConnectionURL().startsWith(String.format("jdbc:%s:", databaseVendor.jdbcUrlDriverId))) {
@@ -102,14 +102,14 @@ public enum DatabaseVendor {
         return Optional.empty();
     }
 
-    private static Optional<RdsConfigRequestParameters> getParameters(DatabaseV4Request configRequest) {
+    private static Optional<DatabaseRequestParameters> getParameters(DatabaseV4Request configRequest) {
         if (configRequest.getConnectionURL().contains(String.format("jdbc:%s:", ORACLE11.jdbcUrlDriverId))) {
             return Optional.ofNullable(configRequest.getOracle());
         }
         return Optional.empty();
     }
 
-    private static Optional<String> databaseVersion(Optional<RdsConfigRequestParameters> rdsConfigRequestParameters) {
+    private static Optional<String> databaseVersion(Optional<DatabaseRequestParameters> rdsConfigRequestParameters) {
         if (rdsConfigRequestParameters.isPresent()) {
             return Optional.of(rdsConfigRequestParameters.get().getVersion());
         } else {

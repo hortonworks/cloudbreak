@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 public class RdsViewTest {
@@ -62,7 +62,7 @@ public class RdsViewTest {
     @Test
     public void testCreateRdsViewConnectionStringWhenRangerAndPostgreSQL() {
         String connectionUrl = "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, RdsType.RANGER);
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, DatabaseType.RANGER);
 
         RdsView underTest = new RdsView(rdsConfig);
 
@@ -72,7 +72,7 @@ public class RdsViewTest {
     @Test
     public void testCreateRdsViewConnectionStringWhenHiveAndPostgreSQL() {
         String connectionUrl = "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, RdsType.HIVE);
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, DatabaseType.HIVE);
 
         RdsView underTest = new RdsView(rdsConfig);
 
@@ -82,7 +82,7 @@ public class RdsViewTest {
     @Test
     public void testCreateRdsViewConnectionStringWhenRangerAndOracle() {
         String connectionUrl = "jdbc:oracle:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521/orcl";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, RdsType.RANGER);
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, DatabaseType.RANGER);
 
         RdsView underTest = new RdsView(rdsConfig);
 
@@ -92,7 +92,7 @@ public class RdsViewTest {
     @Test
     public void testCreateRdsViewConnectionStringWhenHiveAndOracle() {
         String connectionUrl = "jdbc:oracle:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521:orcl";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, RdsType.HIVE);
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, DatabaseType.HIVE);
 
         RdsView underTest = new RdsView(rdsConfig);
 
@@ -148,20 +148,20 @@ public class RdsViewTest {
     }
 
     private RDSConfig createRdsConfig(String connectionUrl) {
-        return createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, RdsType.HIVE);
+        return createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, DatabaseType.HIVE);
     }
 
     private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor databaseVendor) {
-        return createRdsConfig(connectionUrl, databaseVendor, RdsType.HIVE);
+        return createRdsConfig(connectionUrl, databaseVendor, DatabaseType.HIVE);
     }
 
-    private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor databaseVendor, RdsType rdsType) {
+    private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor databaseVendor, DatabaseType databaseType) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setConnectionURL(connectionUrl);
         rdsConfig.setConnectionPassword("admin");
         rdsConfig.setConnectionUserName("admin");
         rdsConfig.setDatabaseEngine(databaseVendor);
-        rdsConfig.setType(rdsType.name());
+        rdsConfig.setType(databaseType.name());
         return rdsConfig;
     }
 
