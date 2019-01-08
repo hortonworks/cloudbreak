@@ -145,6 +145,7 @@ knox-create-sign-jks:
 
 /var/lib/ambari-server/resources/stacks/{{ ambari.stack_type|upper }}/{{ ambari.stack_version }}/services/KNOX/configuration/gateway-site.xml:
   file.managed:
+    - makedirs: true
     - source: salt://gateway/config/gateway-site.xml.j2
     - template: jinja
 
