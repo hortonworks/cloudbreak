@@ -43,7 +43,7 @@ tests:
     parameters:
       clusterName: aws-ubuntu-datasci
       provider: aws
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelinn"
+      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
       imageos: ubuntu16
       instancegroupName: worker
     classes:
