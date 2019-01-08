@@ -11,6 +11,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.audit.AuditV3Controller;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -48,6 +50,7 @@ public class EndpointConfig extends ResourceConfig {
             ClusterTemplateV3Controller.class,
             CredentialController.class,
             CredentialV3Controller.class,
+            DatabaseV4Controller.class,
             EnvironmentV3Controller.class,
             FlexSubscriptionController.class,
             FlexSubscriptionV3Controller.class,
@@ -65,8 +68,6 @@ public class EndpointConfig extends ResourceConfig {
             PlatformParameterV2Controller.class,
             PlatformParameterV3Controller.class,
             ProxyV4Controller.class,
-            RdsConfigController.class,
-            RdsConfigV3Controller.class,
             RecipesV4Controller.class,
             RepositoryConfigValidationController.class,
             SecurityRuleController.class,

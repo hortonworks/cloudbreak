@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
@@ -53,8 +53,8 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
         return testParameter;
     }
 
-    protected RDSConfigRequest createRdsRequestWithProperties(String configName, String userName, String password, String connectionUrl, RdsType rdsType) {
-        var request = new RDSConfigRequest();
+    protected DatabaseV4Request createRdsRequestWithProperties(String configName, String userName, String password, String connectionUrl, RdsType rdsType) {
+        var request = new DatabaseV4Request();
         request.setName(getParam(configName));
         request.setConnectionUserName(getParam(userName));
         request.setConnectionPassword(getParam(password));

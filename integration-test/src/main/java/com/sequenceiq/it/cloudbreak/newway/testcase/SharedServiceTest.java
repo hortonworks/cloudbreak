@@ -22,8 +22,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
@@ -90,8 +90,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String rangerRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        RDSConfigRequest hiveRds = rdsRequest(RdsType.HIVE, hiveRdsName);
-        RDSConfigRequest rangerRds = rdsRequest(RdsType.RANGER, rangerRdsName);
+        DatabaseV4Request hiveRds = rdsRequest(RdsType.HIVE, hiveRdsName);
+        DatabaseV4Request rangerRds = rdsRequest(RdsType.RANGER, rangerRdsName);
         testContext
                 .given(HIVE, RdsConfigEntity.class).withRequest(hiveRds)
                 .when(RdsConfig.postV2())
@@ -318,7 +318,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-    private List<AssertionV2<StackEntity>> rdsParametersHasPassedToAmbariBlueprint(RDSConfigRequest hive, RDSConfigRequest ranger) {
+    private List<AssertionV2<StackEntity>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
         List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains("ranger_privelege_user_jdbc_url"));
         verifications.add(blueprintPostToAmbariContains(ranger.getConnectionURL()));
@@ -351,8 +351,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return request;
     }
 
-    private RDSConfigRequest rdsRequest(RdsType type, String name) {
-        RDSConfigRequest request = new RDSConfigRequest();
+    private DatabaseV4Request rdsRequest(RdsType type, String name) {
+        DatabaseV4Request request = new DatabaseV4Request();
         request.setConnectionURL(format("jdbc:postgresql://somedb.com:5432/%s-mydb", type.name().toLowerCase()));
         request.setConnectionPassword("password");
         request.setConnectionUserName("someuser");
@@ -366,7 +366,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private static Set<String> rdsConfigNamesFromResponse(StackEntity entity) {
-        return entity.getResponse().getCluster().getRdsConfigs().stream().map(RDSConfigJson::getName).collect(Collectors.toSet());
+        return entity.getResponse().getCluster().getRdsConfigs().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet());
     }
 
     private static Set<String> rdsConfigNamesFromRequest(StackEntity entity) {

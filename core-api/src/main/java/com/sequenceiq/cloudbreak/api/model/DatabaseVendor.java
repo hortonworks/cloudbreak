@@ -8,7 +8,7 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsConfigRequestParameters;
 
 public enum DatabaseVendor {
@@ -82,7 +82,7 @@ public enum DatabaseVendor {
         throw new UnsupportedOperationException(String.format("%s is not a DatabaseVendor", databaseType));
     }
 
-    public static Optional<DatabaseVendor> getVendorByJdbcUrl(RDSConfigRequest configRequest) {
+    public static Optional<DatabaseVendor> getVendorByJdbcUrl(DatabaseV4Request configRequest) {
         Optional<RdsConfigRequestParameters> rdsConfigRequestParameters = getParameters(configRequest);
         Optional<String> version = databaseVersion(rdsConfigRequestParameters);
         for (DatabaseVendor databaseVendor : values()) {
@@ -102,7 +102,7 @@ public enum DatabaseVendor {
         return Optional.empty();
     }
 
-    private static Optional<RdsConfigRequestParameters> getParameters(RDSConfigRequest configRequest) {
+    private static Optional<RdsConfigRequestParameters> getParameters(DatabaseV4Request configRequest) {
         if (configRequest.getConnectionURL().contains(String.format("jdbc:%s:", ORACLE11.jdbcUrlDriverId))) {
             return Optional.ofNullable(configRequest.getOracle());
         }

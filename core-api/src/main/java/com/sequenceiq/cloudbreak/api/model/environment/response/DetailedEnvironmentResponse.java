@@ -6,8 +6,8 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.KubernetesConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
 
@@ -23,7 +23,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     private Set<LdapConfigResponse> ldapConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIGS)
-    private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
+    private Set<DatabaseV4Response> rdsConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.KUBERNETES_CONFIGS)
     private Set<KubernetesConfigResponse> kubernetesConfigs = new HashSet<>();
@@ -56,11 +56,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         this.ldapConfigs = ldapConfigs;
     }
 
-    public Set<RDSConfigResponse> getRdsConfigs() {
+    public Set<DatabaseV4Response> getRdsConfigs() {
         return rdsConfigs;
     }
 
-    public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
+    public void setRdsConfigs(Set<DatabaseV4Response> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
     }
 

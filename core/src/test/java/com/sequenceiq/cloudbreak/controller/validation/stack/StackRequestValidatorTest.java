@@ -32,7 +32,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
@@ -544,8 +544,8 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         return rds;
     }
 
-    private RDSConfigRequest rdsConfigRequest(RdsType type) {
-        RDSConfigRequest request = new RDSConfigRequest();
+    private DatabaseV4Request rdsConfigRequest(RdsType type) {
+        DatabaseV4Request request = new DatabaseV4Request();
         request.setType(type.name());
         return request;
     }

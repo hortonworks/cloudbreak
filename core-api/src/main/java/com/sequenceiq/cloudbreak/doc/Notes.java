@@ -50,7 +50,7 @@ public class Notes {
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
-    public static final String RDSCONFIG_NOTES = "An RDS Configuration describe a connection to an external Relational Database Service "
+    public static final String DATABASE_NOTES = "A Database Configuration describe a connection to an external Relational Database Service "
             + "that can be used as the Hive Metastore.";
     public static final String PROXY_CONFIG_NOTES = "An proxy Configuration describe a connection to an external proxy server which provides internet access "
             + "cluster members. It's applied for package manager and Ambari too";

@@ -14,13 +14,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RDSConfigRequestToRDSConfigConverterTest {
+public class DatabaseV4RequestToRDSConfigConverterTest {
 
     private static final String NAME = "test";
 
@@ -28,7 +28,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @InjectMocks
-    private RDSConfigRequestToRDSConfigConverter underTest;
+    private DatabaseV4RequestToRDSConfigConverter underTest;
 
     @Before
     public void before() {
@@ -37,7 +37,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void postgresJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnPostgresVendorProperties() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
@@ -47,7 +47,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void mysqlJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnMysqlVendorProperties() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:mysql://test.eu-west-1.rds.amazonaws.com:5432/test");
         rdsConfigRequest.setConnectorJarUrl("http://anexampleofmysqlconnectorjarurl/connector.jar");
 
@@ -58,7 +58,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void oracleJdbcConverterTestWhenValidOracleJdbcUrl() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:oracle:thin:@test.eu-west-1.rds.amazonaws.com:5432:test");
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
@@ -69,7 +69,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void rdsConfigConverterTestWhenValidMySQLJdbcUrl() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:mysql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
@@ -79,7 +79,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void rdsConfigConverterTestWhenValidPostgresJdbcUrl() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
@@ -89,7 +89,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void rdsConfigConverterTestWhenValidPostgresWithSubnameJdbcUrl() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:postgresql:subname://test.eu-west-1.rds.amazonaws.com:5432/test");
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
@@ -99,7 +99,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
 
     @Test
     public void testConverterWhenNameIsNullThenShouldReturnGeneratedName() {
-        RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
+        DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setName(null);
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
@@ -114,8 +114,8 @@ public class RDSConfigRequestToRDSConfigConverterTest {
         verify(missingResourceNameGenerator, times(1)).generateName(any(APIResourceType.class));
     }
 
-    private RDSConfigRequest rdsConfigRequest() {
-        RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
+    private DatabaseV4Request rdsConfigRequest() {
+        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
         rdsConfigRequest.setConnectionPassword("password");
         rdsConfigRequest.setConnectionUserName("username");
         rdsConfigRequest.setConnectionURL("jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/test");
@@ -124,7 +124,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
         return rdsConfigRequest;
     }
 
-    private void assertResult(RDSConfigRequest rdsConfigRequest, RDSConfig rdsConfig, DatabaseVendor databaseVendor) {
+    private void assertResult(DatabaseV4Request rdsConfigRequest, RDSConfig rdsConfig, DatabaseVendor databaseVendor) {
         Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
         Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
         Assert.assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());

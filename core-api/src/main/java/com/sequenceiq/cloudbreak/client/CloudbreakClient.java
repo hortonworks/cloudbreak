@@ -21,7 +21,6 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
@@ -42,7 +41,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
@@ -67,14 +65,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -93,6 +92,7 @@ public class CloudbreakClient {
             AutoscaleEndpoint.class,
             BlueprintEndpoint.class,
             BlueprintV3Endpoint.class,
+            DatabaseV4Endpoint.class,
             EnvironmentV3Endpoint.class,
             EventEndpoint.class,
             EventV3Endpoint.class,
@@ -115,8 +115,6 @@ public class CloudbreakClient {
             ConnectorV2Endpoint.class,
             ConnectorV3Endpoint.class,
             ProxyV4Endpoint.class,
-            RdsConfigEndpoint.class,
-            RdsConfigV3Endpoint.class,
             RecipeV4Endpoint.class,
             RepositoryConfigValidationEndpoint.class,
             SecurityRuleEndpoint.class,
@@ -271,12 +269,8 @@ public class CloudbreakClient {
         return getEndpoint(ProxyV4Endpoint.class);
     }
 
-    public RdsConfigEndpoint rdsConfigEndpoint() {
-        return getEndpoint(RdsConfigEndpoint.class);
-    }
-
-    public RdsConfigV3Endpoint rdsConfigV3Endpoint() {
-        return getEndpoint(RdsConfigV3Endpoint.class);
+    public DatabaseV4Endpoint databaseV4Endpoint() {
+        return getEndpoint(DatabaseV4Endpoint.class);
     }
 
     public RecipeV4Endpoint recipeV4Endpoint() {

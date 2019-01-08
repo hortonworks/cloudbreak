@@ -1,9 +1,10 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.ValidRds;
 
 import io.swagger.annotations.ApiModel;
@@ -12,17 +13,17 @@ import io.swagger.annotations.ApiModelProperty;
 @ValidRds
 @ApiModel("RdsConfig")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RDSConfigRequest extends RDSConfigJson {
+public class DatabaseV4Request extends DatabaseV4Base {
 
     @NotNull
-    @ApiModelProperty(value = RDSConfig.USERNAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = RDSConfig.PASSWORD, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.PASSWORD, required = true)
     private String connectionPassword;
 
-    @ApiModelProperty(RDSConfig.ORACLE)
+    @ApiModelProperty(ModelDescriptions.Database.ORACLE)
     private OracleParameters oracle;
 
     public String getConnectionUserName() {

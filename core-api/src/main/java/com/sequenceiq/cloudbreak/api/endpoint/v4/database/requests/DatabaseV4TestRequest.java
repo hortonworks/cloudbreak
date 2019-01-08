@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests;
 
 import javax.validation.Valid;
 
@@ -11,14 +11,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("RdsTestRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RDSTestRequest implements JsonEntity {
+public class DatabaseV4TestRequest implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.RDSConfig.NAME)
+    @ApiModelProperty(ModelDescriptions.Database.NAME)
     private String name;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.RDSConfig.RDS_CONFIG_REQUEST)
-    private RDSConfigRequest rdsConfig;
+    @ApiModelProperty(ModelDescriptions.Database.DATABASE_REQUEST)
+    private DatabaseV4Request rdsConfig;
 
     public String getName() {
         return name;
@@ -28,11 +28,11 @@ public class RDSTestRequest implements JsonEntity {
         this.name = name;
     }
 
-    public RDSConfigRequest getRdsConfig() {
+    public DatabaseV4Request getRdsConfig() {
         return rdsConfig;
     }
 
-    public void setRdsConfig(RDSConfigRequest rdsConfig) {
+    public void setRdsConfig(DatabaseV4Request rdsConfig) {
         this.rdsConfig = rdsConfig;
     }
 }

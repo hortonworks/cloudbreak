@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.api.model.rds;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,18 +15,18 @@ import io.swagger.annotations.ApiModelProperty;
 public class RDSBuildRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = RDSConfig.RDS_REQUEST, required = true)
-    private RDSConfigRequest rdsConfigRequest;
+    @ApiModelProperty(value = ModelDescriptions.Database.DATABASE_REQUEST, required = true)
+    private DatabaseV4Request rdsConfigRequest;
 
     @NotNull
-    @ApiModelProperty(value = RDSConfig.RDS_REQUEST_CLUSTER_NAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.DATABASE_REQUEST_CLUSTER_NAME, required = true)
     private String clusterName;
 
-    public RDSConfigRequest getRdsConfigRequest() {
+    public DatabaseV4Request getRdsConfigRequest() {
         return rdsConfigRequest;
     }
 
-    public void setRdsConfigRequest(RDSConfigRequest rdsConfigRequest) {
+    public void setRdsConfigRequest(DatabaseV4Request rdsConfigRequest) {
         this.rdsConfigRequest = rdsConfigRequest;
     }
 

@@ -361,7 +361,7 @@ public class ModelDescriptions {
         public static final String MPACKS = "Management packs which are needed for the HDP / HDF clusters";
     }
 
-    public static class RDSConfig {
+    public static class Database {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>";
         public static final String CONNECTION_DRIVER_NAME = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
         public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
@@ -374,11 +374,9 @@ public class ModelDescriptions {
         public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
         public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
         public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
-        public static final String RDS_REQUEST = "rds config request";
-        public static final String RDS_REQUEST_CLUSTER_NAME = "requested cluster name";
-        public static final String RDS_CONNECTION_TEST_RESULT = "result of RDS connection test";
-        public static final String RDS_CONFIG_ID = "id of the RDS config to be tested by connectivity";
-        public static final String RDS_CONFIG_REQUEST = "unsaved RDS config to be tested by connectivity";
+        public static final String DATABASE_REQUEST_CLUSTER_NAME = "requested cluster name";
+        public static final String DATABASE_CONNECTION_TEST_RESULT = "result of RDS connection test";
+        public static final String DATABASE_REQUEST = "unsaved RDS config to be tested by connectivity";
     }
 
     public static class FileSystem {

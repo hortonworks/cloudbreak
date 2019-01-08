@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.rds;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.database.base;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,20 +10,20 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.validation.ValidRDSConfigJson;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @ValidRDSConfigJson
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class RDSConfigJson implements JsonEntity {
+public abstract class DatabaseV4Base implements JsonEntity {
 
     @NotNull
     @Size(max = 100, min = 5, message = "The length of the RDS config's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The RDS config's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @ApiModelProperty(value = RDSConfig.NAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.NAME, required = true)
     private String name;
 
     @Size(max = 1000)
@@ -31,14 +31,14 @@ public abstract class RDSConfigJson implements JsonEntity {
     private String description;
 
     @NotNull
-    @ApiModelProperty(value = RDSConfig.CONNECTION_URL, required = true)
+    @ApiModelProperty(value = Database.CONNECTION_URL, required = true)
     private String connectionURL;
 
     @NotNull
-    @ApiModelProperty(value = RDSConfig.RDSTYPE, required = true)
+    @ApiModelProperty(value = ModelDescriptions.Database.RDSTYPE, required = true)
     private String type;
 
-    @ApiModelProperty(RDSConfig.CONNECTOR_JAR_URL)
+    @ApiModelProperty(ModelDescriptions.Database.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
 
     @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
