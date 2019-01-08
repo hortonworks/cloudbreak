@@ -83,8 +83,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+                AwsKerberos.USERNAME,
+                getTestParameter().get(AwsKerberos.AD_PASSWORD)),
                 "check ambari is running and components available");
     }
 
