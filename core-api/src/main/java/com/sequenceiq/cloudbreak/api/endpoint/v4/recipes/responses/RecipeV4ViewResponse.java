@@ -14,7 +14,7 @@ public class RecipeV4ViewResponse extends CompactViewResponse {
     @ApiModelProperty(ModelDescriptions.RecipeModelDescription.TYPE)
     private RecipeV4Type type;
 
-    public RecipeV4Type Type() {
+    public RecipeV4Type getType() {
         return type;
     }
 

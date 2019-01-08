@@ -498,19 +498,6 @@ public class ModelDescriptions {
         public static final String PROTOCOL = "protocol of the rule";
         public static final String MODIFIABLE = "flag for making the rule modifiable";
     }
-
-    public static class AccountPreferencesModelDescription {
-        public static final String MAX_NO_CLUSTERS = "max number of clusters in the account (0 when unlimited)";
-        public static final String MAX_NO_NODES_PER_CLUSTER = "max number of vms in a cluster of account (0 when unlimited)";
-        public static final String MAX_NO_CLUSTERS_PER_USER = "max number of clusters for user within the account (0 when unlimited)";
-        public static final String ALLOWED_INSTANCE_TYPES = "allowed instance types in the account (empty list for no restriction)";
-        public static final String CLUSTER_TIME_TO_LIVE = "lifecycle of the cluster in hours (0 for immortal clusters)";
-        public static final String ACCOUNT_TIME_TO_LIVE = "lifecycle of the account and its clusters in hours (0 for immortal account)";
-        public static final String PLATFORMS = "list of the cloudplatforms visible on the UI";
-        public static final String SMARTSENSE_ENABLED = "smartsense enabled on the UI";
-        public static final String DEFAULT_TAGS = "default tags for the resources created";
-    }
-
     public static class LdapConfigModelDescription {
         public static final String SERVER_HOST = "public host or IP address of LDAP server";
         public static final String SERVER_PORT = "port of LDAP server (typically: 389 or 636 for LDAPS)";
@@ -617,6 +604,9 @@ public class ModelDescriptions {
     }
 
     public static class ProxyConfigModelDescription {
+        public static final String DESCRIPTION = "Cloudbreak allows you to save your existing proxy configuration "
+                + "information as an external source so that you can provide the proxy information to multiple "
+                + "clusters that you create with Cloudbreak";
         public static final String SERVER_HOST = "host or IP address of proxy server";
         public static final String SERVER_PORT = "port of proxy server (typically: 3128 or 8080)";
         public static final String PROTOCOL = "determines the protocol (http or https)";

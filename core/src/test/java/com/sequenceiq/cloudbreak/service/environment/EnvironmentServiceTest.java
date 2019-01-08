@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentReques
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
@@ -59,7 +59,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCr
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.converter.KerberosConfigToKerberosResponseConverter;
 import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
-import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
@@ -171,7 +171,7 @@ public class EnvironmentServiceTest {
     private LdapConfigToLdapConfigResponseConverter ldapConfigResponseConverter;
 
     @InjectMocks
-    private ProxyConfigToProxyConfigResponseConverter proxyConfigResponseConverter;
+    private ProxyConfigToProxyV4ResponseConverter proxyConfigResponseConverter;
 
     @InjectMocks
     private RDSConfigToRDSConfigResponseConverter rdsConfigResponseConverter;
@@ -656,8 +656,8 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
         when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class)))
                 .thenAnswer((Answer<LdapConfigResponse>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyConfigResponse.class)))
-                .thenAnswer((Answer<ProxyConfigResponse>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyV4Response.class)))
+                .thenAnswer((Answer<ProxyV4Response>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
         when(conversionService.convert(any(RDSConfig.class), eq(RDSConfigResponse.class)))
                 .thenAnswer((Answer<RDSConfigResponse>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
         when(conversionService.convert(any(KerberosConfig.class), eq(KerberosResponse.class)))
