@@ -18,7 +18,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.controller.audit.AuditController;
 import com.sequenceiq.cloudbreak.controller.audit.AuditV3Controller;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
@@ -62,7 +62,7 @@ public class EndpointConfig extends ResourceConfig {
             LdapV3Controller.class,
             ManagementPackController.class,
             ManagementPackV3Controller.class,
-            KubernetesConfigV3Endpoint.class,
+            KubernetesV4Endpoint.class,
             WorkspaceV3Controller.class,
             PlatformParameterV1Controller.class,
             PlatformParameterV2Controller.class,

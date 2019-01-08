@@ -59,7 +59,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KerberosConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
@@ -101,7 +101,7 @@ public class CloudbreakIdentityClient {
             LdapConfigV3Endpoint.class,
             ManagementPackEndpoint.class,
             ManagementPackV3Endpoint.class,
-            KubernetesConfigV3Endpoint.class,
+            KubernetesV4Endpoint.class,
             WorkspaceV3Endpoint.class,
             ConnectorV1Endpoint.class,
             ConnectorV2Endpoint.class,
@@ -254,8 +254,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(ManagementPackV3Endpoint.class);
     }
 
-    public KubernetesConfigV3Endpoint kiubernetesConfigV3Endpoint() {
-        return getEndpoint(KubernetesConfigV3Endpoint.class);
+    public KubernetesV4Endpoint kiubernetesConfigV3Endpoint() {
+        return getEndpoint(KubernetesV4Endpoint.class);
     }
 
     public WorkspaceV3Endpoint workspaceV3Endpoint() {

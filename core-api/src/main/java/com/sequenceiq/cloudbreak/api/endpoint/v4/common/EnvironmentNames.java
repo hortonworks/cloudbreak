@@ -1,11 +1,17 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.Set;
 
+import javax.validation.constraints.NotEmpty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
 public class EnvironmentNames {
 
     @NotEmpty
+    @ApiModelProperty(required = true)
     private Set<String> environmentNames;
 
     public Set<String> getEnvironmentNames() {
