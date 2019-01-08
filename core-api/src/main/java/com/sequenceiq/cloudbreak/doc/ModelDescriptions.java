@@ -507,7 +507,7 @@ public class ModelDescriptions {
         public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
         public static final String USER_NAME_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).";
         public static final String DOMAIN = "domain in LDAP server (e.g. ad.seq.com).";
-        public static final String DIRECTORY_TYPE = "directory type of server LDAP or AD";
+        public static final String DIRECTORY_TYPE = "directory type of server LDAP or ACTIVE_DIRECTORY and the default is ACTIVE_DIRECTORY ";
         public static final String USER_OBJECT_CLASS = "User Object Class (defaults to person)";
         public static final String GROUP_OBJECT_CLASS = "Group Object Class (defaults to groupOfNames)";
         public static final String GROUP_ID_ATTRIBUTE = "Group Id Attribute (defaults to cn)";

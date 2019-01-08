@@ -1,34 +1,29 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.ldaps;
 
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionServiceAwareConverter<LdapConfig, LdapConfigResponse> {
-
-    @Inject
-    private ConversionService conversionService;
+public class LdapConfigToLdapV4ResponseConverter extends AbstractConversionServiceAwareConverter<LdapConfig, LdapV4Response> {
 
     @Override
-    public LdapConfigResponse convert(LdapConfig config) {
-        LdapConfigResponse json = new LdapConfigResponse();
+    public LdapV4Response convert(LdapConfig config) {
+        LdapV4Response json = new LdapV4Response();
         json.setName(config.getName());
         json.setDescription(config.getDescription());
         json.setId(config.getId());
-        json.setServerHost(config.getServerHost());
-        json.setServerPort(config.getServerPort());
+        json.setHost(config.getServerHost());
+        json.setPort(config.getServerPort());
         json.setProtocol(config.getProtocol());
-        json.setBindDn(conversionService.convert(config.getBindDnSecret(), SecretResponse.class));
-        json.setBindPassword(conversionService.convert(config.getBindPasswordSecret(), SecretResponse.class));
+        json.setBindDn(getConversionService().convert(config.getBindDnSecret(), SecretResponse.class));
+        json.setBindPassword(getConversionService().convert(config.getBindPasswordSecret(), SecretResponse.class));
         json.setGroupSearchBase(config.getGroupSearchBase());
         json.setUserSearchBase(config.getUserSearchBase());
         json.setUserDnPattern(config.getUserDnPattern());

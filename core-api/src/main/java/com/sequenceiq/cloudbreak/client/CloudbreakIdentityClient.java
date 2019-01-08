@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
@@ -57,7 +56,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ImageCatalogV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
@@ -96,8 +95,7 @@ public class CloudbreakIdentityClient {
             ImageCatalogV3Endpoint.class,
             KerberosConfigV4Endpoint.class,
             KnoxServicesV3Endpoint.class,
-            LdapConfigEndpoint.class,
-            LdapConfigV3Endpoint.class,
+            LdapConfigV4Endpoint.class,
             ManagementPackEndpoint.class,
             ManagementPackV3Endpoint.class,
             KubernetesV4Endpoint.class,
@@ -233,12 +231,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(KnoxServicesV3Endpoint.class);
     }
 
-    public LdapConfigEndpoint ldapConfigEndpoint() {
-        return getEndpoint(LdapConfigEndpoint.class);
-    }
-
-    public LdapConfigV3Endpoint ldapConfigV3Endpoint() {
-        return getEndpoint(LdapConfigV3Endpoint.class);
+    public LdapConfigV4Endpoint ldapConfigV3Endpoint() {
+        return getEndpoint(LdapConfigV4Endpoint.class);
     }
 
     public ManagementPackEndpoint managementPackEndpoint() {

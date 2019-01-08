@@ -73,7 +73,7 @@ public interface KubernetesV4Endpoint {
     @ApiOperation(value = KubernetesConfigOpDescription.ATTACH_TO_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "attachKubernetesResourceToEnvironments")
     KubernetesV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-         @Valid @NotNull EnvironmentNames environmentNames);
+        @Valid @NotNull EnvironmentNames environmentNames);
 
     @PUT
     @Path("{name}/detach")

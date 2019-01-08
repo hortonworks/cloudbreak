@@ -17,7 +17,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -327,8 +327,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoLdap(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
-        if (!ldapConfigResponseSet.isEmpty()) {
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdapConfigs();
+        if (!ldapV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached ldap");
         }
         return environment;

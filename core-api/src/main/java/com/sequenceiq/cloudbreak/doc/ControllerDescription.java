@@ -36,7 +36,6 @@ public class ControllerDescription {
 
     public static final String AUTOSCALE_DESCRIPTION = "Operations by Autoscale";
 
-    public static final String LDAP_V3_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by workspace";
     public static final String CLUSTERTEMPLATE_V3_DESCRIPTION = "Operations on ClusterTemplates by workspace";
     public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by workspace";
@@ -57,9 +56,10 @@ public class ControllerDescription {
     public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
-    public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source " +
-            "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
+    public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source "
+            + "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
     public static final String KUBERNETESCONFIGS_V4_DESCRIPTION = "Operations on Kubernetes configs by workspace";
+    public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
 
     private ControllerDescription() {
     }

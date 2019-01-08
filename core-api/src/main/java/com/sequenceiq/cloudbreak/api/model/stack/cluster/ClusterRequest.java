@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
@@ -87,7 +87,7 @@ public class ClusterRequest implements JsonEntity {
     private String ldapConfigName;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
-    private LdapConfigRequest ldapConfig;
+    private LdapV4Request ldapConfig;
 
     @TransformGetterType
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
@@ -328,11 +328,11 @@ public class ClusterRequest implements JsonEntity {
         this.kerberosConfigName = kerberosConfigName;
     }
 
-    public LdapConfigRequest getLdapConfig() {
+    public LdapV4Request getLdapConfig() {
         return ldapConfig;
     }
 
-    public void setLdapConfig(LdapConfigRequest ldapConfig) {
+    public void setLdapConfig(LdapV4Request ldapConfig) {
         this.ldapConfig = ldapConfig;
     }
 

@@ -1,20 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Responses;
-import com.sequenceiq.cloudbreak.doc.ContentType;
-import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ProxyConfigOpDescription;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
@@ -26,7 +12,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.Set;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Responses;
+import com.sequenceiq.cloudbreak.doc.ContentType;
+import com.sequenceiq.cloudbreak.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ProxyConfigOpDescription;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/{workspaceId}/proxies")
 @Consumes(MediaType.APPLICATION_JSON)

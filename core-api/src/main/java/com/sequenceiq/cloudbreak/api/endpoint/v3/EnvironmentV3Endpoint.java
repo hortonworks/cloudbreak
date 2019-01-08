@@ -76,7 +76,7 @@ public interface EnvironmentV3Endpoint {
             @Valid EnvironmentDetachRequest request);
 
     @PUT
-    @Path("/{name}/changeCredential")
+    @Path("/{name}/core/src/test/java/com/sequenceiq/cloudbreak/service/environment/EnvironmentServiceTest.java")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironment")

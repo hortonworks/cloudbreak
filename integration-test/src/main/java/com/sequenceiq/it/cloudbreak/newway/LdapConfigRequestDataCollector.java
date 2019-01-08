@@ -1,12 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-
-import javax.annotation.Nonnull;
-import javax.validation.constraints.NotEmpty;
-import java.util.Optional;
-
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.ADMIN_GROUP;
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.BIND_DN;
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.BIND_PASSWORD;
@@ -25,19 +18,27 @@ import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ld
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.USER_OBJECT_CLASS;
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.USER_SEARCH_BASE;
 
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.validation.constraints.NotEmpty;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+
 public class LdapConfigRequestDataCollector {
 
     private LdapConfigRequestDataCollector() {
     }
 
-    public static LdapConfigRequest createLdapRequestWithProperties(TestParameter testParameter) {
+    public static LdapV4Request createLdapRequestWithProperties(TestParameter testParameter) {
         return createLdapRequestWithPropertiesAndName(testParameter, getParam(LDAP_CONFIG_NAME, testParameter));
     }
 
-    public static LdapConfigRequest createLdapRequestWithPropertiesAndName(TestParameter testParameter, @Nonnull @NotEmpty String name) {
-        LdapConfigRequest request = new LdapConfigRequest();
-        request.setServerHost(getParam(SERVER_HOST, testParameter));
-        request.setServerPort(Integer.parseInt(getParam(SERVER_PORT, testParameter)));
+    public static LdapV4Request createLdapRequestWithPropertiesAndName(TestParameter testParameter, @Nonnull @NotEmpty String name) {
+        LdapV4Request request = new LdapV4Request();
+        request.setHost(getParam(SERVER_HOST, testParameter));
+        request.setPort(Integer.parseInt(getParam(SERVER_PORT, testParameter)));
         request.setBindDn(getParam(BIND_DN, testParameter));
         request.setBindPassword(getParam(BIND_PASSWORD, testParameter));
         request.setUserSearchBase(getParam(USER_SEARCH_BASE, testParameter));

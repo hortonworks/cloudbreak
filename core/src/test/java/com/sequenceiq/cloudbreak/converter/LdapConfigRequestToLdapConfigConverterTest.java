@@ -5,16 +5,17 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapV4RequestToLdapConfigConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
-public class LdapConfigRequestToLdapConfigConverterTest extends AbstractJsonConverterTest<LdapConfigRequest> {
+public class LdapConfigRequestToLdapConfigConverterTest extends AbstractJsonConverterTest<LdapV4Request> {
 
-    private LdapConfigRequestToLdapConfigConverter underTest;
+    private LdapV4RequestToLdapConfigConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new LdapConfigRequestToLdapConfigConverter();
+        underTest = new LdapV4RequestToLdapConfigConverter();
     }
 
     @Test
@@ -27,7 +28,7 @@ public class LdapConfigRequestToLdapConfigConverterTest extends AbstractJsonConv
     }
 
     @Override
-    public Class<LdapConfigRequest> getRequestClass() {
-        return LdapConfigRequest.class;
+    public Class<LdapV4Request> getRequestClass() {
+        return LdapV4Request.class;
     }
 }
