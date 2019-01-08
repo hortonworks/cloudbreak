@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.LdapV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
@@ -56,8 +57,7 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentV3Controller.class,
             FlexSubscriptionController.class,
             FlexSubscriptionV3Controller.class,
-            ImageCatalogV1Controller.class,
-            ImageCatalogV3Controller.class,
+            ImageCatalogV4Controller.class,
             KerberosConfigV4Controller.class,
             KnoxServicesV3Controller.class,
             LdapV4Controller.class,

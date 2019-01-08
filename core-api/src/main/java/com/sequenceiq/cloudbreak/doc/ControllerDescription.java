@@ -43,7 +43,6 @@ public class ControllerDescription {
     public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by workspace";
     public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
-    public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
     public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by workspace";
     public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by workspace";
     public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by workspace and blueprint";
@@ -60,6 +59,7 @@ public class ControllerDescription {
     public static final String KUBERNETESCONFIGS_V4_DESCRIPTION = "Operations on Kubernetes configs by workspace";
     public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String CLUSTER_TEMPLATE_V4_DESCRIPTION = "Operations on ClusterTemplates by workspace";
+    public static final String IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Image Catalog by workspace";
 
     private ControllerDescription() {
     }

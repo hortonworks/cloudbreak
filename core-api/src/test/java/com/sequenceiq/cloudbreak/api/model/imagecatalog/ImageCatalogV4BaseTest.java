@@ -38,10 +38,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.util.ReflectionUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
 import com.sequenceiq.cloudbreak.validation.ImageCatalogValidator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ImageCatalogBaseTest {
+public class ImageCatalogV4BaseTest {
 
     private static final String VALID_CATALOG = "{\"images\": null, \"versions\": null}";
 
@@ -83,7 +84,7 @@ public class ImageCatalogBaseTest {
 
     @Test
     public void testUrlWrongProtocol() {
-        ImageCatalogBase i = new ImageCatalogBase();
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("ftp://protocol.com");
         validateAndAssertInvalidCatalog(i);
@@ -91,7 +92,7 @@ public class ImageCatalogBaseTest {
 
     @Test
     public void testUrlWithoutProtocol() {
-        ImageCatalogBase i = new ImageCatalogBase();
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("without.protocol.com");
         validateAndAssertInvalidCatalog(i);
@@ -101,7 +102,7 @@ public class ImageCatalogBaseTest {
     public void testContentNotAvailable() {
         when(statusType.getFamily()).thenReturn(Family.OTHER);
 
-        ImageCatalogBase i = new ImageCatalogBase();
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
         validateAndAssertInvalidCatalog(i);
@@ -116,7 +117,7 @@ public class ImageCatalogBaseTest {
             }
         });
 
-        ImageCatalogBase i = new ImageCatalogBase();
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
         validateAndAssertInvalidCatalog(i);
@@ -124,7 +125,7 @@ public class ImageCatalogBaseTest {
 
     @Test
     public void testUrlHttp() {
-        ImageCatalogBase i = new ImageCatalogBase();
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
         validateAndAssertValidCatalog(i);
@@ -132,21 +133,21 @@ public class ImageCatalogBaseTest {
 
     @Test
     public void testUrlHttps() {
-        ImageCatalogBase i = new ImageCatalogBase();
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
         validateAndAssertValidCatalog(i);
     }
 
-    private void validateAndAssertInvalidCatalog(ImageCatalogBase i) {
-        Set<ConstraintViolation<ImageCatalogBase>> violations = validator.validate(i);
+    private void validateAndAssertInvalidCatalog(ImageCatalogV4Base i) {
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
         assertEquals(1L, violations.size());
-        ConstraintViolation<ImageCatalogBase> v = violations.toArray(new ConstraintViolation[1])[0];
+        ConstraintViolation<ImageCatalogV4Base> v = violations.toArray(new ConstraintViolation[1])[0];
         assertEquals(INVALID_MESSAGE, v.getMessage());
     }
 
-    private void validateAndAssertValidCatalog(ImageCatalogBase i) {
-        Set<ConstraintViolation<ImageCatalogBase>> violations = validator.validate(i);
+    private void validateAndAssertValidCatalog(ImageCatalogV4Base i) {
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
         assertEquals(0L, violations.size());
     }
 

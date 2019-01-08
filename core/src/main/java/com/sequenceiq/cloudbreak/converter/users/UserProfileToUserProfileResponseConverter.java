@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogShortResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4ShortResponse;
 import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
@@ -47,10 +47,10 @@ public class UserProfileToUserProfileResponseConverter extends AbstractConversio
         }
         if (entity.getImageCatalog() != null) {
             userProfileResponse.setImageCatalog(getConversionService()
-                    .convert(entity.getImageCatalog(), ImageCatalogShortResponse.class));
+                    .convert(entity.getImageCatalog(), ImageCatalogV4ShortResponse.class));
         } else {
             userProfileResponse.setImageCatalog(getConversionService()
-                    .convert(imageCatalogService.getCloudbreakDefaultImageCatalog(), ImageCatalogShortResponse.class));
+                    .convert(imageCatalogService.getCloudbreakDefaultImageCatalog(), ImageCatalogV4ShortResponse.class));
         }
         Json propertiesFromVault = new Json(entity.getUiProperties());
         Map<String, Object> map = propertiesFromVault.getMap();

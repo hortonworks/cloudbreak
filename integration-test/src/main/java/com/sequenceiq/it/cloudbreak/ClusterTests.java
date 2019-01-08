@@ -11,8 +11,9 @@ import org.springframework.util.StringUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -289,8 +290,10 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(CloudbreakClient.created());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImagesResponse imagesByProvider = client.imageCatalogEndpoint().getImagesByProvider(provider);
-        List<? extends ImageResponse> images;
+        ImageCatalogGetImagesV4Filter filter = new ImageCatalogGetImagesV4Filter();
+        filter.setPlatform(provider);
+        ImagesV4Response imagesByProvider = client.imageCatalogV4Endpoint().getImages(clientContext.getWorkspaceId(), filter);
+        List<? extends ImageV4Response> images;
         switch (imageDescription) {
             case "hdf":
                 images = imagesByProvider.getHdfImages();
@@ -304,21 +307,21 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         }
 
         return images.stream().filter(imageResponse -> imageResponse.getPackageVersions() != null)
-                .max(Comparator.comparing(ImageResponse::getDate)).orElseThrow().getUuid();
+                .max(Comparator.comparing(ImageV4Response::getDate)).orElseThrow().getUuid();
     }
 
-    private String getLastUuid(List<? extends ImageResponse> images, String stackVersion) {
-        List<? extends ImageResponse> result = images.stream()
-                .filter(ImageResponse::isDefaultImage)
+    private String getLastUuid(List<? extends ImageV4Response> images, String stackVersion) {
+        List<? extends ImageV4Response> result = images.stream()
+                .filter(ImageV4Response::isDefaultImage)
                 .filter(image -> {
-                    ImageResponse imageResponse = (ImageResponse) image;
-                    if (!StringUtils.isEmpty(imageResponse.getVersion())) {
-                        return imageResponse.getVersion().startsWith(stackVersion);
+                    ImageV4Response imageV4Response = (ImageV4Response) image;
+                    if (!StringUtils.isEmpty(imageV4Response.getVersion())) {
+                        return imageV4Response.getVersion().startsWith(stackVersion);
                     }
-                    if (imageResponse.getStackDetails() == null) {
+                    if (imageV4Response.getStackDetails() == null) {
                         return true;
                     }
-                    if (imageResponse.getStackDetails().getVersion() == null) {
+                    if (imageV4Response.getStackDetails().getVersion() == null) {
                         return true;
                     }
                     return image.getStackDetails().getVersion().startsWith(stackVersion);
@@ -327,7 +330,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         if (result.isEmpty()) {
             result = images;
         }
-        result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
+        result = result.stream().sorted(Comparator.comparing(ImageV4Response::getDate)).collect(Collectors.toList());
         return result.get(result.size() - 1).getUuid();
     }
 }

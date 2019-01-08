@@ -1,7 +1,10 @@
-package com.sequenceiq.cloudbreak.api.model.imagecatalog;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageCatalogDescription;
@@ -11,19 +14,17 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonInclude(Include.NON_NULL)
-public class ImageCatalogResponse extends ImageCatalogBase {
+@NotNull
+public class ImageCatalogV4Response extends ImageCatalogV4Base {
 
     @ApiModelProperty(value = ModelDescriptions.ID, required = true)
     private Long id;
-
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
-    private boolean publicInAccount = true;
 
     @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
 
     @ApiModelProperty(ImageCatalogDescription.IMAGE_RESPONSES)
-    private ImagesResponse imagesResponse;
+    private ImagesV4Response images;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceResponse workspace;
@@ -36,14 +37,6 @@ public class ImageCatalogResponse extends ImageCatalogBase {
         this.id = id;
     }
 
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
-
     public boolean isUsedAsDefault() {
         return usedAsDefault;
     }
@@ -52,12 +45,12 @@ public class ImageCatalogResponse extends ImageCatalogBase {
         this.usedAsDefault = usedAsDefault;
     }
 
-    public ImagesResponse getImagesResponse() {
-        return imagesResponse;
+    public ImagesV4Response getImages() {
+        return images;
     }
 
-    public void setImagesResponse(ImagesResponse imagesResponse) {
-        this.imagesResponse = imagesResponse;
+    public void setImages(ImagesV4Response images) {
+        this.images = images;
     }
 
     public WorkspaceResourceResponse getWorkspace() {

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("DatabaseV4BuildResponse")
+@ApiModel
 public class DatabaseV4BuildResponse implements JsonEntity {
 
     @ApiModelProperty(value = ClusterModelDescription.RESULT_DBS, required = true)

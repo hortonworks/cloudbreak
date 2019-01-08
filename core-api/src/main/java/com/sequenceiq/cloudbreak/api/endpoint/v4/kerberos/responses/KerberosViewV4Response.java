@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("KerberosViewV4Response")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class KerberosViewV4Response extends CompactViewResponse {
