@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("DatabaseV4BuildRequest")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4BuildRequest implements JsonEntity {
 

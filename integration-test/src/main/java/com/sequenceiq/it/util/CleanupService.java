@@ -74,8 +74,4 @@ public class CleanupService {
         }
         return result;
     }
-
-    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
-        cloudbreakClient.imageCatalogEndpoint().deletePublic(name);
-    }
 }

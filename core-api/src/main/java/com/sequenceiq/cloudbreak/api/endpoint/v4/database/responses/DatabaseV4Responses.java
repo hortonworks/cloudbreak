@@ -23,5 +23,4 @@ public class DatabaseV4Responses {
         databaseV4Responses.setDatabases(databases);
         return databaseV4Responses;
     }
-
 }

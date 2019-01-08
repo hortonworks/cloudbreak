@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogShortResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4ShortResponse;
 
 import io.swagger.annotations.ApiModel;
 
@@ -13,7 +13,7 @@ public class UserProfileResponse {
 
     private CredentialResponse credential;
 
-    private ImageCatalogShortResponse imageCatalog;
+    private ImageCatalogV4ShortResponse imageCatalog;
 
     private String username;
 
@@ -39,11 +39,11 @@ public class UserProfileResponse {
         this.uiProperties = uiProperties;
     }
 
-    public ImageCatalogShortResponse getImageCatalog() {
+    public ImageCatalogV4ShortResponse getImageCatalog() {
         return imageCatalog;
     }
 
-    public void setImageCatalog(ImageCatalogShortResponse imageCatalog) {
+    public void setImageCatalog(ImageCatalogV4ShortResponse imageCatalog) {
         this.imageCatalog = imageCatalog;
     }
 
