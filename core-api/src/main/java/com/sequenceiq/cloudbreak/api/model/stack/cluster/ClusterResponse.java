@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -142,7 +142,7 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CREATION_FINISHED)
     private Long creationFinished;
 
-    private KerberosResponse kerberosResponse;
+    private KerberosV4Response kerberosV4Response;
 
     @ApiModelProperty(ClusterModelDescription.UPTIME)
     private Long uptime;
@@ -419,12 +419,12 @@ public class ClusterResponse implements JsonEntity {
         this.creationFinished = creationFinished;
     }
 
-    public KerberosResponse getKerberosResponse() {
-        return kerberosResponse;
+    public KerberosV4Response getKerberosV4Response() {
+        return kerberosV4Response;
     }
 
-    public void setKerberosResponse(KerberosResponse kerberosResponse) {
-        this.kerberosResponse = kerberosResponse;
+    public void setKerberosV4Response(KerberosV4Response kerberosV4Response) {
+        this.kerberosV4Response = kerberosV4Response;
     }
 
     public Long getUptime() {

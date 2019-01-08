@@ -11,7 +11,7 @@ import org.mapstruct.factory.Mappers;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -42,7 +42,7 @@ public class AmbariDatabaseMapperTest {
         assertEquals(mapper.mapName(null, cluster), rdsConfig.getName());
         assertEquals(mapper.mapConnectionUrl(json), rdsConfig.getConnectionURL());
         assertEquals(ResourceStatus.USER_MANAGED, rdsConfig.getStatus());
-        assertEquals(RdsType.AMBARI.name(), rdsConfig.getType());
+        assertEquals(DatabaseType.AMBARI.name(), rdsConfig.getType());
         assertEquals("org.postgresql.Driver", rdsConfig.getConnectionDriver());
         assertNull(rdsConfig.getId());
         assertNull(rdsConfig.getClusters());
@@ -60,7 +60,7 @@ public class AmbariDatabaseMapperTest {
     @Test
     public void testMapName() {
         String name = mapper.mapName(null, cluster);
-        assertEquals(RdsType.AMBARI.name() + "_CLUSTER_" + cluster.getId(), name);
+        assertEquals(DatabaseType.AMBARI.name() + "_CLUSTER_" + cluster.getId(), name);
     }
 
     @Test

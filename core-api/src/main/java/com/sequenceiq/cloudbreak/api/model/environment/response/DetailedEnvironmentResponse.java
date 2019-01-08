@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.api.model.environment.response;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
 
@@ -29,7 +29,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     private Set<KubernetesV4Response> kubernetesConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.KERBEROS_CONFIGS)
-    private Set<KerberosResponse> kerberosConfigs = new HashSet<>();
+    private Set<KerberosV4Response> kerberosConfigs = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES)
     private DatalakeResourcesResponse datalakeResourcesResponse;
@@ -96,11 +96,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         this.datalakeClusters = datalakeClusters;
     }
 
-    public Set<KerberosResponse> getKerberosConfigs() {
+    public Set<KerberosV4Response> getKerberosConfigs() {
         return kerberosConfigs;
     }
 
-    public void setKerberosConfigs(Set<KerberosResponse> kerberosConfigs) {
+    public void setKerberosConfigs(Set<KerberosV4Response> kerberosConfigs) {
         this.kerberosConfigs = kerberosConfigs;
     }
 }

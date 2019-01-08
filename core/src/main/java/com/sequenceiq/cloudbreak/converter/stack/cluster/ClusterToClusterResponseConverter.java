@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
@@ -288,7 +288,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private void convertKerberosConfig(Cluster source, ClusterResponse clusterResponse) {
         KerberosConfig kerberosConfig = source.getKerberosConfig();
         if (kerberosConfig != null) {
-            clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
+            clusterResponse.setKerberosV4Response(getConversionService().convert(source.getKerberosConfig(), KerberosV4Response.class));
         }
     }
 

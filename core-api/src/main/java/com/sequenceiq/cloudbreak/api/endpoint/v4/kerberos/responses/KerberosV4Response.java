@@ -1,8 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -11,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class KerberosResponse extends KerberosResponseBase {
+public class KerberosV4Response extends KerberosV4ResponseBase {
 
     @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
     private SecretResponse admin;

@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.api.model.datalake;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,36 +21,36 @@ public class DatalakePrerequisiteRequest extends ParametersQueryRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.REQUEST, required = true)
-    private LdapConfigRequest ldapConfig;
+    private LdapConfigRequest ldap;
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.REQUEST, required = true)
-    private Set<RDSConfigRequest> rdsConfigs = new HashSet<>();
+    private Set<DatabaseV4Request> databases = new HashSet<>();
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.KerberosConfigModelDescription.REQUEST, required = true)
-    private KerberosRequest kerberosConfig;
+    private KerberosV4Request kerberos;
 
-    public LdapConfigRequest getLdapConfig() {
-        return ldapConfig;
+    public LdapConfigRequest getLdap() {
+        return ldap;
     }
 
-    public void setLdapConfig(LdapConfigRequest ldapConfig) {
-        this.ldapConfig = ldapConfig;
+    public void setLdap(LdapConfigRequest ldap) {
+        this.ldap = ldap;
     }
 
-    public Set<RDSConfigRequest> getRdsConfigs() {
-        return rdsConfigs;
+    public Set<DatabaseV4Request> getDatabases() {
+        return databases;
     }
 
-    public void setRdsConfigs(Set<RDSConfigRequest> rdsConfigs) {
-        this.rdsConfigs = rdsConfigs;
+    public void setDatabases(Set<DatabaseV4Request> databases) {
+        this.databases = databases;
     }
 
-    public KerberosRequest getKerberosConfig() {
-        return kerberosConfig;
+    public KerberosV4Request getKerberos() {
+        return kerberos;
     }
 
-    public void setKerberosConfig(KerberosRequest kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
+    public void setKerberos(KerberosV4Request kerberos) {
+        this.kerberos = kerberos;
     }
 }

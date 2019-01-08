@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.MITKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 

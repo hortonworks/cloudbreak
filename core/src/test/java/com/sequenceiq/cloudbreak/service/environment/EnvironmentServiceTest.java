@@ -41,7 +41,7 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
@@ -57,7 +57,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
-import com.sequenceiq.cloudbreak.converter.KerberosConfigToKerberosResponseConverter;
+import com.sequenceiq.cloudbreak.converter.KerberosConfigToKerberosV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
@@ -177,7 +177,7 @@ public class EnvironmentServiceTest {
     private RDSConfigToDatabaseV4ResponseConverter rdsConfigResponseConverter;
 
     @InjectMocks
-    private KerberosConfigToKerberosResponseConverter kerberosConfigResponseConverter;
+    private KerberosConfigToKerberosV4ResponseConverter kerberosConfigResponseConverter;
 
     @InjectMocks
     private StackApiViewToStackViewResponseConverter stackApiViewToStackViewResponseConverter;
@@ -660,7 +660,7 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<ProxyV4Response>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
         when(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Response.class)))
                 .thenAnswer((Answer<DatabaseV4Response>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosResponse.class)))
-                .thenAnswer((Answer<KerberosResponse>) invocation -> kerberosConfigResponseConverter.convert((KerberosConfig) invocation.getArgument(0)));
+        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosV4Response.class)))
+                .thenAnswer((Answer<KerberosV4Response>) invocation -> kerberosConfigResponseConverter.convert((KerberosConfig) invocation.getArgument(0)));
     }
 }

@@ -26,14 +26,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @RunWith(Parameterized.class)
-public class KerberosConfigToKerberosResponseConverterTest {
+public class KerberosConfigToKerberosV4ResponseConverterTest {
 
     private static final String URL = "http://someurl.com";
 
@@ -75,7 +75,7 @@ public class KerberosConfigToKerberosResponseConverterTest {
     private ConversionService conversionService;
 
     @InjectMocks
-    private KerberosConfigToKerberosResponseConverter underTest;
+    private KerberosConfigToKerberosV4ResponseConverter underTest;
 
     @Mock
     private KerberosConfig source;
@@ -97,7 +97,7 @@ public class KerberosConfigToKerberosResponseConverterTest {
 
     private KerberosType kerberosType;
 
-    public KerberosConfigToKerberosResponseConverterTest(KerberosType kerberosType) {
+    public KerberosConfigToKerberosV4ResponseConverterTest(KerberosType kerberosType) {
         this.kerberosType = kerberosType;
     }
 
@@ -137,7 +137,7 @@ public class KerberosConfigToKerberosResponseConverterTest {
 
     @Test
     public void testConvertAgainstDifferentKindOfKerberosTypes() {
-        KerberosResponse result = underTest.convert(source);
+        KerberosV4Response result = underTest.convert(source);
 
         assertNotNull(result);
         assertEquals(URL, result.getUrl());

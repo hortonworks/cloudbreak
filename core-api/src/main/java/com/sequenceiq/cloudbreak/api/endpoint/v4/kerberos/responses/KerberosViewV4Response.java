@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.kerberos;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("KerberosViewResponse")
+@ApiModel("KerberosViewV4Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class KerberosViewResponse extends CompactViewResponse {
+public class KerberosViewV4Response extends CompactViewResponse {
 
     private Set<String> environments = new HashSet<>();
 

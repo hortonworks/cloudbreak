@@ -1,23 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-<<<<<<< HEAD
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_MANAGER_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_CLUSTER_MANAGER_START;
-import static com.sequenceiq.cloudbreak.api.model.RecipeType.PRE_TERMINATION;
-=======
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLUSTER_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
->>>>>>> recipes
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock.SALT_RUN;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -27,6 +19,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;

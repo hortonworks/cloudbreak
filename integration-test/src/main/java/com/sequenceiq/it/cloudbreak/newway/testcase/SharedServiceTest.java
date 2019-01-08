@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
@@ -90,8 +90,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String rangerRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        DatabaseV4Request hiveRds = rdsRequest(RdsType.HIVE, hiveRdsName);
-        DatabaseV4Request rangerRds = rdsRequest(RdsType.RANGER, rangerRdsName);
+        DatabaseV4Request hiveRds = rdsRequest(DatabaseType.HIVE, hiveRdsName);
+        DatabaseV4Request rangerRds = rdsRequest(DatabaseType.RANGER, rangerRdsName);
         testContext
                 .given(HIVE, RdsConfigEntity.class).withRequest(hiveRds)
                 .when(RdsConfig.postV2())
@@ -126,9 +126,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String blueprintName = creator.getRandomNameForMock();
         CloudStorageRequest cloudStorage = cloudStorage();
         testContext
-                .given(HIVE, RdsConfigEntity.class).valid().withType(RdsType.HIVE.name()).withName(hiveRdsName)
+                .given(HIVE, RdsConfigEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(RdsConfig.postV2())
-                .given(RANGER, RdsConfigEntity.class).valid().withType(RdsType.RANGER.name()).withName(rangerRdsName)
+                .given(RANGER, RdsConfigEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(RdsConfig.postV2())
                 .given(LdapConfigEntity.class).withName(ldapName)
                 .when(LdapConfig.postV2())
@@ -148,9 +148,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String blueprintName = creator.getRandomNameForMock();
         CloudStorageRequest cloudStorage = cloudStorage();
         testContext
-                .given(HIVE, RdsConfigEntity.class).valid().withType(RdsType.HIVE.name()).withName(hiveRdsName)
+                .given(HIVE, RdsConfigEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(RdsConfig.postV2())
-                .given(RANGER, RdsConfigEntity.class).valid().withType(RdsType.RANGER.name()).withName(rangerRdsName)
+                .given(RANGER, RdsConfigEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(RdsConfig.postV2())
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV2())
@@ -170,7 +170,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String blueprintName = creator.getRandomNameForMock();
         CloudStorageRequest cloudStorage = cloudStorage();
         testContext
-                .given(HIVE, RdsConfigEntity.class).valid().withType(RdsType.HIVE.name()).withName(hiveRdsName)
+                .given(HIVE, RdsConfigEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(RdsConfig.postV2())
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV2())
@@ -192,7 +192,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String blueprintName = creator.getRandomNameForMock();
         CloudStorageRequest cloudStorage = cloudStorage();
         testContext
-                .given(RANGER, RdsConfigEntity.class).valid().withType(RdsType.RANGER.name()).withName(rangerRdsName)
+                .given(RANGER, RdsConfigEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(RdsConfig.postV2())
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV2())
@@ -351,7 +351,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return request;
     }
 
-    private DatabaseV4Request rdsRequest(RdsType type, String name) {
+    private DatabaseV4Request rdsRequest(DatabaseType type, String name) {
         DatabaseV4Request request = new DatabaseV4Request();
         request.setConnectionURL(format("jdbc:postgresql://somedb.com:5432/%s-mydb", type.name().toLowerCase()));
         request.setConnectionPassword("password");

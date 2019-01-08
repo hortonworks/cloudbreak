@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -20,7 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public abstract class KerberosResponseBase implements JsonEntity {
+public abstract class KerberosV4ResponseBase implements JsonEntity {
 
     private Long id;
 

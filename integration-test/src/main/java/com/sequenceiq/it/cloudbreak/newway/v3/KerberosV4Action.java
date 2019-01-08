@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -16,10 +17,10 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class KerberosV3Action {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosV3Action.class);
+public class KerberosV4Action {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosV4Action.class);
 
-    private KerberosV3Action() {
+    private KerberosV4Action() {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -32,8 +33,8 @@ public class KerberosV3Action {
                 .concat(" kerberos. "));
         kerberosEntity.setResponse(
                 client.getCloudbreakClient()
-                        .kerberosConfigV3Endpoint()
-                        .createInWorkspace(workspaceId, kerberosEntity.getRequest()));
+                        .kerberosConfigV4Endpoint()
+                        .create(workspaceId, kerberosEntity.getRequest()));
 
         integrationTestContext.putCleanUpParam(kerberosEntity.getName(), kerberosEntity.getResponse().getId());
     }
@@ -49,8 +50,8 @@ public class KerberosV3Action {
                 .concat(" private blueprint by Name. "));
         kerberosEntity.setResponse(
                 client.getCloudbreakClient()
-                        .kerberosConfigV3Endpoint()
-                        .getByNameInWorkspace(workspaceId, kerberosEntity.getName()));
+                        .kerberosConfigV4Endpoint()
+                        .get(workspaceId, kerberosEntity.getName()));
         Log.logJSON(" get "
                 .concat(kerberosEntity.getName())
                 .concat(" blueprint response: "),
@@ -64,9 +65,11 @@ public class KerberosV3Action {
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private blueprints. ");
-        Set<KerberosViewResponse> kerberoses = client.getCloudbreakClient().kerberosConfigV3Endpoint().listByWorkspace(workspaceId, null, true);
-        Set<KerberosResponse> detailedKerberoses = kerberoses.stream().map(krv ->
-                client.getCloudbreakClient().kerberosConfigV3Endpoint().getByNameInWorkspace(workspaceId, krv.getName())).collect(Collectors.toSet());
+        ListV4Filter listV4Filter = new ListV4Filter();
+        listV4Filter.setAttachGlobal(false);
+        KerberosViewV4Responses kerberoses = client.getCloudbreakClient().kerberosConfigV4Endpoint().list(workspaceId, listV4Filter);
+        Set<KerberosV4Response> detailedKerberoses = kerberoses.getKerberosConfigs().stream().map(krv ->
+                client.getCloudbreakClient().kerberosConfigV4Endpoint().get(workspaceId, krv.getName())).collect(Collectors.toSet());
         kerberosEntity.setResponses(detailedKerberoses);
     }
 
@@ -79,7 +82,7 @@ public class KerberosV3Action {
         Log.log(" delete "
                 .concat(kerberosEntity.getName())
                 .concat(" private blueprint with Name. "));
-        client.getCloudbreakClient().kerberosConfigV3Endpoint().deleteInWorkspace(workspaceId, kerberosEntity.getName());
+        client.getCloudbreakClient().kerberosConfigV4Endpoint().delete(workspaceId, kerberosEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

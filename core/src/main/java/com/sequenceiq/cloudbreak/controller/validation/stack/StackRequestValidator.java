@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
@@ -192,13 +192,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 .getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
         boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
-            Set<String> rdsTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
+            Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getClusterRequest());
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "
                     + "rds/database configuration to the Cluster request";
-            if (!rdsTypes.contains(RdsType.HIVE.name())) {
+            if (!databaseTypes.contains(DatabaseType.HIVE.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
             }
-            if (!rdsTypes.contains(RdsType.RANGER.name())) {
+            if (!databaseTypes.contains(DatabaseType.RANGER.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
             }
             if (isLdapNotProvided(stackRequest.getClusterRequest())) {

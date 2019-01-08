@@ -14,19 +14,19 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.kerberos.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.AmbariKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosTypeBase;
-import com.sequenceiq.cloudbreak.api.model.kerberos.MITKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.model.kerberos.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.v2.KerberosRequestToKerberosConfigConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosTypeResolver;
 
 @RunWith(Parameterized.class)
-public class KerberosRequestToKerberosConfigConverterTest extends AbstractConverterTest {
+public class KerberosRequestToKerberosV4ConfigConverterTest extends AbstractConverterTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -42,7 +42,7 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
     private KerberosData testData;
 
-    public KerberosRequestToKerberosConfigConverterTest(KerberosData testData) {
+    public KerberosRequestToKerberosV4ConfigConverterTest(KerberosData testData) {
         this.testData = testData;
     }
 
@@ -63,7 +63,7 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
     @Test
     public void testConverterWhenKerberosTypeResolverReturnsASpecificKerberosTypeThenThatShouldBeConvertIntoAKerberosConfig() {
-        KerberosRequest request = testData.getRequest();
+        KerberosV4Request request = testData.getRequest();
         KerberosTypeBase actualType = testData.getActualType();
         KerberosConfig expected = testData.getExpected();
         when(kerberosTypeResolver.propagateKerberosConfiguration(request)).thenReturn(actualType);
@@ -77,7 +77,7 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
     @Test
     public void testConvertWhenConversionComponentDoesNotWorkProperlyAndReturnsNullThenBadRequestExceptionComes() {
-        KerberosRequest request = testData.getRequest();
+        KerberosV4Request request = testData.getRequest();
         KerberosTypeBase actualType = testData.getActualType();
         when(kerberosTypeResolver.propagateKerberosConfiguration(testData.getRequest())).thenReturn(actualType);
         when(conversionService.convert(actualType, KerberosConfig.class)).thenReturn(null);
@@ -93,8 +93,8 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
         FREEIPA {
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 request.setFreeIpa(new FreeIPAKerberosDescriptor());
                 return request;
             }
@@ -112,8 +112,8 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
         MIT {
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 request.setMit(new MITKerberosDescriptor());
                 return request;
             }
@@ -131,8 +131,8 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
         ACTIVE_DIRECTORY {
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
                 request.setActiveDirectory(new ActiveDirectoryKerberosDescriptor());
                 return request;
             }
@@ -150,9 +150,9 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
 
         CUSTOM {
             @Override
-            public KerberosRequest getRequest() {
-                KerberosRequest request = new KerberosRequest();
-                request.setAmbariKerberosDescriptor(new AmbariKerberosDescriptor());
+            public KerberosV4Request getRequest() {
+                KerberosV4Request request = new KerberosV4Request();
+                request.setAmbariDescriptor(new AmbariKerberosDescriptor());
                 return request;
             }
 
@@ -167,7 +167,7 @@ public class KerberosRequestToKerberosConfigConverterTest extends AbstractConver
             }
         };
 
-        public abstract KerberosRequest getRequest();
+        public abstract KerberosV4Request getRequest();
 
         public abstract KerberosConfig getExpected();
 

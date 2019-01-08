@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.api.model.datalake;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
-import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,11 +24,11 @@ public class DatalakePrerequisiteResponse extends ParametersQueryRequest {
     private LdapConfigResponse ldapConfig;
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.RESPONSE)
-    private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
+    private Set<DatabaseV4Response> databases = new HashSet<>();
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.KerberosConfigModelDescription.RESPONSE)
-    private KerberosResponse kerberosConfig;
+    private KerberosV4Response kerberos;
 
     public LdapConfigResponse getLdapConfig() {
         return ldapConfig;
@@ -36,19 +38,19 @@ public class DatalakePrerequisiteResponse extends ParametersQueryRequest {
         this.ldapConfig = ldapConfig;
     }
 
-    public Set<RDSConfigResponse> getRdsConfigs() {
-        return rdsConfigs;
+    public Set<DatabaseV4Response> getDatabases() {
+        return databases;
     }
 
-    public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
-        this.rdsConfigs = rdsConfigs;
+    public void setDatabases(Set<DatabaseV4Response> databases) {
+        this.databases = databases;
     }
 
-    public KerberosResponse getKerberosConfig() {
-        return kerberosConfig;
+    public KerberosV4Response getKerberos() {
+        return kerberos;
     }
 
-    public void setKerberosConfig(KerberosResponse kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
+    public void setKerberos(KerberosV4Response kerberos) {
+        this.kerberos = kerberos;
     }
 }
