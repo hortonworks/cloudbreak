@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.ldap;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public abstract class LdapConfigBase implements JsonEntity {
+public abstract class LdapV4Base implements JsonEntity {
 
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -36,13 +36,13 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)
-    private String serverHost;
+    private String host;
 
     @NotNull
     @Max(65535)
     @Min(1)
     @ApiModelProperty(value = LdapConfigModelDescription.SERVER_PORT, required = true)
-    private Integer serverPort;
+    private Integer port;
 
     @ApiModelProperty(LdapConfigModelDescription.PROTOCOL)
     private String protocol = "ldap";
@@ -64,8 +64,8 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(LdapConfigModelDescription.DOMAIN)
     private String domain;
 
-    @ApiModelProperty(LdapConfigModelDescription.DIRECTORY_TYPE)
-    private DirectoryType directoryType;
+    @ApiModelProperty(value = LdapConfigModelDescription.DIRECTORY_TYPE, allowableValues = "LDAP,ACTIVE_DIRECTORY")
+    private DirectoryType directoryType = DirectoryType.ACTIVE_DIRECTORY;
 
     @ApiModelProperty(LdapConfigModelDescription.USER_OBJECT_CLASS)
     private String userObjectClass;
@@ -106,20 +106,20 @@ public abstract class LdapConfigBase implements JsonEntity {
         this.description = description;
     }
 
-    public String getServerHost() {
-        return serverHost;
+    public String getHost() {
+        return host;
     }
 
-    public void setServerHost(String serverHost) {
-        this.serverHost = serverHost;
+    public void setHost(String host) {
+        this.host = host;
     }
 
-    public Integer getServerPort() {
-        return serverPort;
+    public Integer getPort() {
+        return port;
     }
 
-    public void setServerPort(Integer serverPort) {
-        this.serverPort = serverPort;
+    public void setPort(Integer port) {
+        this.port = port;
     }
 
     public String getProtocol() {

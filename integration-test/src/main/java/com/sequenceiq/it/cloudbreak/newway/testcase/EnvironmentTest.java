@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -575,9 +575,9 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     protected static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> ldapConfigs = new HashSet<>();
-        Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
-        for (LdapConfigResponse ldapConfigResponse : ldapConfigResponseSet) {
-            ldapConfigs.add(ldapConfigResponse.getName());
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdapConfigs();
+        for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
+            ldapConfigs.add(ldapV4Response.getName());
         }
         if (!ldapConfigs.contains(testContext.get(LdapConfigEntity.class).getName())) {
             throw new TestFailException("Ldap is not attached to environment");

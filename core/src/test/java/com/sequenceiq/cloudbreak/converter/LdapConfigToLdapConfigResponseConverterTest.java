@@ -15,13 +15,14 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapConfigToLdapConfigResponseConverterTest extends AbstractEntityConverterTest<LdapConfig> {
 
     @InjectMocks
-    private LdapConfigToLdapConfigResponseConverter underTest;
+    private LdapConfigToLdapV4ResponseConverter underTest;
 
     @Mock
     private ConversionService conversionService;
@@ -36,7 +37,7 @@ public class LdapConfigToLdapConfigResponseConverterTest extends AbstractEntityC
     public void testConvert() {
         // GIVEN
         // WHEN
-        LdapConfigResponse result = underTest.convert(getSource());
+        LdapV4Response result = underTest.convert(getSource());
         // THEN
         assertAllFieldsNotNull(result, Collections.singletonList("id"));
     }

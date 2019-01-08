@@ -2,16 +2,16 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4TestResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4ValidationRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-public class LdapTestEntity extends AbstractCloudbreakEntity<LdapValidationRequest, LdapTestResult, LdapTestEntity> {
+public class LdapTestEntity extends AbstractCloudbreakEntity<LdapV4ValidationRequest, LdapV4TestResponse, LdapTestEntity> {
     private static final String LDAP_TEST = "LDAP_TEST";
 
     LdapTestEntity(String newId) {
         super(newId);
-        setRequest(new LdapValidationRequest());
+        setRequest(new LdapV4ValidationRequest());
     }
 
     LdapTestEntity() {
