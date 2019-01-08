@@ -1,13 +1,16 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.SuiteContext;
+import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
+import com.sequenceiq.it.config.IntegrationTestConfiguration;
+import com.sequenceiq.it.util.CleanupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,17 +25,11 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.SuiteContext;
-import com.sequenceiq.it.cloudbreak.config.ITProps;
-import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
-import com.sequenceiq.it.config.IntegrationTestConfiguration;
-import com.sequenceiq.it.util.CleanupService;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {

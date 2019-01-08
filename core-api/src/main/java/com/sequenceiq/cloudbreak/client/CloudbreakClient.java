@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
@@ -68,7 +67,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.KubernetesConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.LdapConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ProxyConfigV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.RdsConfigV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
@@ -115,8 +114,7 @@ public class CloudbreakClient {
             ConnectorV1Endpoint.class,
             ConnectorV2Endpoint.class,
             ConnectorV3Endpoint.class,
-            ProxyConfigEndpoint.class,
-            ProxyConfigV3Endpoint.class,
+            ProxyV4Endpoint.class,
             RdsConfigEndpoint.class,
             RdsConfigV3Endpoint.class,
             RecipeV4Endpoint.class,
@@ -269,12 +267,8 @@ public class CloudbreakClient {
         return getEndpoint(ConnectorV3Endpoint.class);
     }
 
-    public ProxyConfigEndpoint proxyConfigEndpoint() {
-        return getEndpoint(ProxyConfigEndpoint.class);
-    }
-
-    public ProxyConfigV3Endpoint proxyConfigV3Endpoint() {
-        return getEndpoint(ProxyConfigV3Endpoint.class);
+    public ProxyV4Endpoint proxyConfigV4Endpoint() {
+        return getEndpoint(ProxyV4Endpoint.class);
     }
 
     public RdsConfigEndpoint rdsConfigEndpoint() {
@@ -284,7 +278,6 @@ public class CloudbreakClient {
     public RdsConfigV3Endpoint rdsConfigV3Endpoint() {
         return getEndpoint(RdsConfigV3Endpoint.class);
     }
-
 
     public RecipeV4Endpoint recipeV4Endpoint() {
         return getEndpoint(RecipeV4Endpoint.class);

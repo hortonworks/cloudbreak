@@ -3,17 +3,17 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.ProxyConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.ProxyConfigV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.ProxyV4Action;
 
 public class ProxyConfig extends ProxyConfigEntity {
     private static final String PROXYCONFIG = "PROXYCONFIG";
 
-    private final ProxyConfigRequest proxyConfigRequest = new ProxyConfigRequest();
+    private final ProxyV4Request proxyV4Request = new ProxyV4Request();
 
     private ProxyConfig() {
         super(PROXYCONFIG);
@@ -31,31 +31,31 @@ public class ProxyConfig extends ProxyConfigEntity {
         return new ProxyConfig();
     }
 
-    public ProxyConfigRequest getRequest() {
-        return proxyConfigRequest;
+    public ProxyV4Request getRequest() {
+        return proxyV4Request;
     }
 
     public static ProxyConfig isCreated() {
         ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setCreationStrategy(ProxyConfigV3Action::createInGiven);
+        proxyConfig.setCreationStrategy(ProxyV4Action::createInGiven);
         return proxyConfig;
     }
 
     public static ProxyConfig isCreatedDeleted() {
         ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setCreationStrategy(ProxyConfigV3Action::createDeleteInGiven);
+        proxyConfig.setCreationStrategy(ProxyV4Action::createDeleteInGiven);
         return proxyConfig;
     }
 
     public static ProxyConfigEntity post(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+                cloudbreakClient.getCloudbreakClient().proxyConfigV4Endpoint().post(cloudbreakClient.getWorkspaceId(), entity.getRequest())
         );
         return entity;
     }
 
     public static Action<ProxyConfig> post(String key) {
-        return new Action<>(getTestContext(key), ProxyConfigV3Action::post);
+        return new Action<>(getTestContext(key), ProxyV4Action::post);
     }
 
     public static Action<ProxyConfig> post() {
@@ -63,7 +63,7 @@ public class ProxyConfig extends ProxyConfigEntity {
     }
 
     public static Action<ProxyConfig> get(String key) {
-        return new Action<>(getTestContext(key), ProxyConfigV3Action::get);
+        return new Action<>(getTestContext(key), ProxyV4Action::get);
     }
 
     public static Action<ProxyConfig> get() {
@@ -71,11 +71,11 @@ public class ProxyConfig extends ProxyConfigEntity {
     }
 
     public static Action<ProxyConfig> getAll() {
-        return new Action<>(getNew(), ProxyConfigV3Action::getAll);
+        return new Action<>(getNew(), ProxyV4Action::getAll);
     }
 
     public static Action<ProxyConfig> delete(String key) {
-        return new Action<>(getTestContext(key), ProxyConfigV3Action::delete);
+        return new Action<>(getTestContext(key), ProxyV4Action::delete);
     }
 
     public static Action<ProxyConfig> delete() {
@@ -84,7 +84,7 @@ public class ProxyConfig extends ProxyConfigEntity {
 
     public static ProxyConfigEntity delete(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().proxyConfigV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }
@@ -95,7 +95,7 @@ public class ProxyConfig extends ProxyConfigEntity {
 
     public static ProxyConfigEntity getByName(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().proxyConfigV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().proxyConfigV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }
