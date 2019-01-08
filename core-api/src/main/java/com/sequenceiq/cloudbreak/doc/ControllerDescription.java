@@ -47,7 +47,6 @@ public class ControllerDescription {
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
     public static final String IMAGE_CATALOG_V3_DESCRIPTION = "Operations on Image Catalog by O";
     public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by workspace";
-    public static final String KUBERNETESCONFIGS_V3_DESCRIPTION = "Operations on Kubernetes configs by workspace";
     public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by workspace";
     public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by workspace and blueprint";
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
@@ -60,6 +59,7 @@ public class ControllerDescription {
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
     public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source " +
             "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
+    public static final String KUBERNETESCONFIGS_V4_DESCRIPTION = "Operations on Kubernetes configs by workspace";
 
     private ControllerDescription() {
     }
