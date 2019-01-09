@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
+import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -98,8 +99,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
             ApiClusterTemplate apiClusterTemplate = conversionService.convert(clusterTemplate, ApiClusterTemplate.class);
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
-            clouderaManagerResourceApi.importClusterTemplate(true, apiClusterTemplate);
+            ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(true, apiClusterTemplate);
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+
+            clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
 
             ambariClusterCreationSuccessHandler.handleClusterCreationSuccess(stack, cluster);
         } catch (CancellationException cancellationException) {
