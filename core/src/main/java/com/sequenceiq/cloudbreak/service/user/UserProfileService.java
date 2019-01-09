@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -97,7 +96,7 @@ public class UserProfileService {
         }
     }
 
-    public void put(UserProfileRequest request, User user, Workspace workspace) {
+    public UserProfile put(UserProfileV4Request request, User user, Workspace workspace) {
         UserProfile userProfile = getOrCreate(user);
         if (request.getCredentialId() != null) {
             Credential credential = credentialService.get(request.getCredentialId(), workspace);
@@ -114,16 +113,14 @@ public class UserProfileService {
         String oldVaultSecret = userProfile.getUiPropertiesSecret();
         String uiPropertiesFromVault = userProfile.getUiProperties();
         Map<String, Object> map = new Json(uiPropertiesFromVault).getMap();
-        for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
-            map.put(uiStringObjectEntry.getKey(), uiStringObjectEntry.getValue());
-        }
         try {
             userProfile.setUiProperties(new Json(map).getValue());
         } catch (JsonProcessingException ignored) {
             throw new BadRequestException("The modification of the ui properties was unsuccesfull.");
         }
-        userProfileRepository.save(userProfile);
+        UserProfile newUserProfile = userProfileRepository.save(userProfile);
         secretService.delete(oldVaultSecret);
+        return newUserProfile;
     }
 
     private void storeDefaultCredential(UserProfile userProfile, Credential credential, Workspace workspace) {

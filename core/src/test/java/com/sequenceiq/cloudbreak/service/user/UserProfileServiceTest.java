@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.model.users.UserProfileRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -99,28 +99,28 @@ public class UserProfileServiceTest {
         UserProfile userProfile = new UserProfile();
         userProfile.setUser(new User());
         Workspace workspace = createWorkspace(1L);
-        UserProfileRequest userProfileRequest = createUserProfileRequest(null, 1L);
+        UserProfileV4Request userProfileV4Request = createUserProfileRequest(null, 1L);
 
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
         when(credentialService.get(anyLong(), any())).thenReturn(createCredential(1L, null, workspace));
 
-        userProfileService.put(userProfileRequest, user, workspace);
+        userProfileService.put(userProfileV4Request, user, workspace);
         assertEquals(1, userProfile.getDefaultCredentials().size());
 
-        userProfileService.put(userProfileRequest, user, workspace);
+        userProfileService.put(userProfileV4Request, user, workspace);
         assertEquals(1, userProfile.getDefaultCredentials().size());
 
         workspace = createWorkspace(2L);
-        userProfileRequest = createUserProfileRequest("cred", null);
+        userProfileV4Request = createUserProfileRequest("cred", null);
 
         when(credentialService.getByNameForWorkspace(anyString(), any())).thenReturn(createCredential(2L, "cred", workspace));
 
-        userProfileService.put(userProfileRequest, user, workspace);
+        userProfileService.put(userProfileV4Request, user, workspace);
         assertEquals(2, userProfile.getDefaultCredentials().size());
     }
 
-    private UserProfileRequest createUserProfileRequest(String credentialName, Long credentialId) {
-        UserProfileRequest request = new UserProfileRequest();
+    private UserProfileV4Request createUserProfileRequest(String credentialName, Long credentialId) {
+        UserProfileV4Request request = new UserProfileV4Request();
         request.setCredentialId(credentialId);
         request.setCredentialName(credentialName);
         return request;
