@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -443,11 +443,11 @@ public class CredentialServiceTest {
 
     @Test
     public void testGetPrerequisitesBothCredentialValidatorAndCredentialPrerequisiteServiceIsCalled() {
-        CredentialPrerequisites expected = mock(CredentialPrerequisites.class);
+        CredentialPrerequisitesV4Response expected = mock(CredentialPrerequisitesV4Response.class);
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialPrerequisiteService.getPrerequisites(user, workspace, PLATFORM, "")).thenReturn(expected);
 
-        CredentialPrerequisites result = underTest.getPrerequisites(user, workspace, PLATFORM, "");
+        CredentialPrerequisitesV4Response result = underTest.getPrerequisites(user, workspace, PLATFORM, "");
 
         assertEquals("The result CredentialPrerequisites object is not the expected one!", expected, result);
         verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
@@ -457,12 +457,12 @@ public class CredentialServiceTest {
 
     @Test
     public void testGetPrerequisitesBothCredentialValidatorAndCredentialPrerequisiteServiceIsCalledAndDeploymentAddressIsNotEmpty() {
-        CredentialPrerequisites expected = mock(CredentialPrerequisites.class);
+        CredentialPrerequisitesV4Response expected = mock(CredentialPrerequisitesV4Response.class);
         String deploymentAddress = "https://MYDEPLOYMENT_ADDRESS";
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialPrerequisiteService.getPrerequisites(user, workspace, PLATFORM, deploymentAddress)).thenReturn(expected);
 
-        CredentialPrerequisites result = underTest.getPrerequisites(user, workspace, PLATFORM, deploymentAddress);
+        CredentialPrerequisitesV4Response result = underTest.getPrerequisites(user, workspace, PLATFORM, deploymentAddress);
 
         assertEquals("The result CredentialPrerequisites object is not the expected one!", expected, result);
         verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());

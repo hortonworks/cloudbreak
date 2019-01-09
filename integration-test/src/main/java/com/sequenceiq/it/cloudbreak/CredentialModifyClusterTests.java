@@ -66,12 +66,12 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
                 .withName(credentialName), "a credential is created.");
         given(Credential.request()
                 .withName(credentialName)
-                .withParameters(provider.awsCredentialDetailsKey())
+                .withAwsParameters(provider.awsCredentialDetailsKey())
                 .withCloudPlatform(provider.getPlatform()), " credential Key Based modification is requested.");
         when(Credential.put(), " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
+                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getAws().asMap().entrySet()) {
                         LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
                         LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
                         if ("selector".equalsIgnoreCase(parameterMapping.getKey())) {

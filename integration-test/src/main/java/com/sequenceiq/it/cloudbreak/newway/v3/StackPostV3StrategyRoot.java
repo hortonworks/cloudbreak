@@ -115,6 +115,6 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
 
     private void setGcsCloudStorageForCluster(Cluster cluster, Credential credential) {
         cluster.getRequest().getCloudStorage().getGcs()
-                .setServiceAccountEmail(credential.getResponse().getParameters().get("serviceAccountId").toString());
+                .setServiceAccountEmail(credential.getResponse().getGcp().getP12().getServiceAccountId());
     }
 }

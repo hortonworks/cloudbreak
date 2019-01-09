@@ -5,6 +5,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV2Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV3Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.OpenstackCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.ProjectKeystoneV3Parameters;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -65,7 +69,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
-                .withParameters(openstackCredentialDetailsKilo());
+                .withOpenstackParameters(openstackCredentialDetailsKilo());
     }
 
     @Override
@@ -228,58 +232,60 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         throw new NotImplementedException("not implemented!");
     }
 
-    public Map<String, Object> openstackCredentialDetailsKilo() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackcredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsKilo() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackcredential.userName"));
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackcredential.endpoint"));
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackcredential.tenantName"));
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsKiloAdmin() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackAdmincredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackAdmincredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackAdmincredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackAdmincredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsEngineering() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackEngcredential.userName"));
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackEngcredential.endpoint"));
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackEngcredential.password"));
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackEngcredential.tenantName"));
+        credentialParameters.setKeystoneV2Parameters(keystoneV2Parameters);
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsEngineering() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackEngcredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackEngcredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackEngcredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackEngcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsField() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackFieldcredential.password"));
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackFieldcredential.userName"));
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackFieldcredential.endpoint"));
+        credentialParameters.setFacing("internal");
+        KeystoneV3Parameters keystoneV3Parameters = new KeystoneV3Parameters();
+        ProjectKeystoneV3Parameters projectKeystoneV3Parameters = new ProjectKeystoneV3Parameters();
+        projectKeystoneV3Parameters.setUserDomain(getTestParameter().get("integrationtest.openstackFieldcredential.userDomain"));
+        projectKeystoneV3Parameters.setProjectDomainName(getTestParameter().get("integrationtest.openstackFieldcredential.projectDomainName"));
+        projectKeystoneV3Parameters.setProjectName(getTestParameter().get("integrationtest.openstackFieldcredential.projectName"));
+        keystoneV3Parameters.setProject(projectKeystoneV3Parameters);
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsField() {
-        Map<String, Object> map = Map.ofEntries(
-                Map.entry("tenantName", getTestParameter().get("integrationtest.openstackFieldcredential.tenantName")),
-                Map.entry("userDomain", getTestParameter().get("integrationtest.openstackFieldcredential.userDomain")),
-                Map.entry("userName", getTestParameter().get("integrationtest.openstackFieldcredential.userName")),
-                Map.entry("password", getTestParameter().get("integrationtest.openstackFieldcredential.password")),
-                Map.entry("endpoint", getTestParameter().get("integrationtest.openstackFieldcredential.endpoint")),
-                Map.entry("projectDomainName", getTestParameter().get("integrationtest.openstackFieldcredential.projectDomainName")),
-                Map.entry("projectName", getTestParameter().get("integrationtest.openstackFieldcredential.projectName")),
-                Map.entry("keystoneAuthScope", "cb-keystone-v3-project-scope"),
-                Map.entry("keystoneVersion", "cb-keystone-v3"),
-                Map.entry("apiFacing", "internal"),
-                Map.entry("selector", "cb-keystone-v3-project-scope"));
-
-        return map;
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsInvalidUser() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setUserName("kisnyul");
+        credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackcredential.endpoint"));
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackcredential.tenantName"));
+        credentialParameters.setKeystoneV2Parameters(keystoneV2Parameters);
+        return credentialParameters;
     }
 
-    public Map<String, Object> openstackCredentialDetailsInvalidUser() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName", "kisnyul",
-                "password", getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
-                getTestParameter().get("integrationtest.openstackcredential.endpoint"), "keystoneVersion", "cb-keystone-v2",
-                "selector", "cb-keystone-v2");
-    }
-
-    public Map<String, Object> openstackCredentialDetailsInvalidEndpoint() {
-        return Map.of("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"), "userName",
-                getTestParameter().get("integrationtest.openstackcredential.userName"), "password",
-                getTestParameter().get("integrationtest.openstackcredential.password"), "endpoint",
-                "https://index.hu/", "keystoneVersion", "cb-keystone-v2", "selector", "cb-keystone-v2");
+    public OpenstackCredentialV4Parameters openstackCredentialDetailsInvalidEndpoint() {
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackcredential.userName"));
+        credentialParameters.setEndpoint("https://index.hu/");
+        credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackcredential.tenantName"));
+        return credentialParameters;
     }
 }

@@ -1,20 +1,19 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class CredentialResponse extends CredentialBase {
+public class CredentialV4Response extends CredentialV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
-
-    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount = true;
 
     @ApiModelProperty(ModelDescriptions.ATTRIBUTES)
     private SecretResponse attributes;
@@ -25,11 +24,6 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty(value = ModelDescriptions.GOV_CLOUD_FLAG)
     private Boolean govCloud;
 
-    @JsonProperty("public")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
     @JsonProperty("id")
     public Long getId() {
         return id;
@@ -37,10 +31,6 @@ public class CredentialResponse extends CredentialBase {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public SecretResponse getAttributes() {

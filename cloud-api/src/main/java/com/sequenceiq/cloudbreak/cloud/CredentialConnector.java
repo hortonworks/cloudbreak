@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
@@ -60,7 +60,7 @@ public interface CredentialConnector {
      * @param externalId that should be added as prerequisites
      * @return the necessary prerequisites for credential creation
      */
-    default CredentialPrerequisites getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    default CredentialPrerequisitesV4Response getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         String message = String.format("There is no prerequisites for '%s' cloud platform!", cloudContext.getPlatform().value());
         throw new UnsupportedOperationException(message);
     }

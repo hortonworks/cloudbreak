@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
@@ -208,7 +208,7 @@ public class EnvironmentServiceTest {
         environmentV4Request.setName(ENVIRONMENT_NAME);
 
         environmentV4Request.setCredentialName(CREDENTIAL_NAME);
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("IgnoredCredRequestName");
         environmentV4Request.setCredential(credentialRequest);
         LocationV4Request locationV4Request = new LocationV4Request();
@@ -236,7 +236,7 @@ public class EnvironmentServiceTest {
         EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
         environmentV4Request.setName(ENVIRONMENT_NAME);
 
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("CredRequestName");
         environmentV4Request.setCredential(credentialRequest);
         LocationV4Request locationV4Request = new LocationV4Request();
@@ -266,7 +266,7 @@ public class EnvironmentServiceTest {
         environmentV4Request.setName(ENVIRONMENT_NAME);
 
         environmentV4Request.setCredentialName(CREDENTIAL_NAME);
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName("IgnoredCredRequestName");
         environmentV4Request.setCredential(credentialRequest);
         environmentV4Request.setRegions(Set.of("region1", "region2"));

@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -10,7 +7,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV2Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.OpenstackCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 
 public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -40,21 +39,22 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         password = StringUtils.hasLength(password) ? password : defaultPassword;
         endpoint = StringUtils.hasLength(endpoint) ? endpoint : defaultEndpoint;
 
-        CredentialRequest credentialRequest = new CredentialRequest();
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Aws Rm credential for integartiontest");
-        Map<String, Object> map = new HashMap<>();
-        map.put("tenantName", tenantName);
-        map.put("userName", userName);
-        map.put("password", password);
-        map.put("endpoint", endpoint);
-        map.put("keystoneVersion", "cb-keystone-v2");
-        map.put("selector", "cb-keystone-v2");
 
-        credentialRequest.setParameters(map);
+        OpenstackCredentialV4Parameters credentialParameters = new OpenstackCredentialV4Parameters();
+        credentialParameters.setEndpoint(endpoint);
+        credentialParameters.setUserName(userName);
+        credentialParameters.setPassword(password);
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(tenantName);
+        credentialParameters.setKeystoneV2Parameters(keystoneV2Parameters);
+
+        credentialRequest.setOpenstack(credentialParameters);
         credentialRequest.setCloudPlatform("OPENSTACK");
         // WHEN
-        String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
+        String id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

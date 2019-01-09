@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 
 public interface CredentialAwareEnvV4Request {
 
@@ -8,7 +8,7 @@ public interface CredentialAwareEnvV4Request {
 
     void setCredentialName(String credentialName);
 
-    CredentialRequest getCredential();
+    CredentialV4Request getCredential();
 
-    void setCredential(CredentialRequest credential);
+    void setCredential(CredentialV4Request credential);
 }

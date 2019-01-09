@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4ShortResponse;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
 public class UserProfileV4Response {
 
-    private CredentialResponse credential;
+    private CredentialV4Response credential;
 
     private ImageCatalogV4ShortResponse imageCatalog;
 
@@ -18,11 +18,11 @@ public class UserProfileV4Response {
 
     private String tenant;
 
-    public CredentialResponse getCredential() {
+    public CredentialV4Response getCredential() {
         return credential;
     }
 
-    public void setCredential(CredentialResponse credential) {
+    public void setCredential(CredentialV4Response credential) {
         this.credential = credential;
     }
 

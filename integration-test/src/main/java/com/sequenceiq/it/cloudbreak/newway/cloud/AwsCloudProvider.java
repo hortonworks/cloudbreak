@@ -1,6 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import static java.util.Set.of;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
@@ -16,14 +28,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-
-import static java.util.Set.of;
 
 public class AwsCloudProvider extends CloudProviderHelper {
 
@@ -63,37 +67,61 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential(boolean create) {
         String credentialType = getTestParameter().get("awsCredentialType");
-        Map<String, Object> credentialParameters;
-        credentialParameters = KEY_BASED_CREDENTIAL.equals(credentialType) ? awsCredentialDetailsKey() : awsCredentialDetailsArn();
+        AwsCredentialV4Parameters parameters;
+        if (KEY_BASED_CREDENTIAL.equals(credentialType)) {
+            parameters = awsCredentialDetailsKey();
+        } else {
+            parameters = awsCredentialDetailsArn();
+        }
         CredentialEntity credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AWS_CAPITAL)
-                .withParameters(credentialParameters);
+                .withAwsParameters(parameters);
     }
 
-    public Map<String, Object> awsCredentialDetailsArn() {
-        return Map.of("selector", "role-based", "roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
+    public AwsCredentialV4Parameters awsCredentialDetailsArn() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
+        roleBasedCredentialParameters.setRoleArn(getTestParameter().get("integrationtest.awscredential.roleArn"));
+        parameters.setRoleBasedCredentialParameters(roleBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsInvalidArn() {
-        return Map.of("selector", "role-based", "roleArn", "arn:aws:iam::123456789012:role/fake");
+    public AwsCredentialV4Parameters awsCredentialDetailsInvalidArn() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
+        roleBasedCredentialParameters.setRoleArn("arn:aws:iam::123456789012:role/fake");
+        parameters.setRoleBasedCredentialParameters(roleBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsKey() {
-        return Map.of("selector", "key-based", "accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"), "secretKey",
-                getTestParameter().get("integrationtest.awscredential.secretKey"));
+    public AwsCredentialV4Parameters awsCredentialDetailsKey() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+        keyBasedCredentialParameters.setAccessKey(getTestParameter().get("integrationtest.awscredential.accessKey"));
+        keyBasedCredentialParameters.setSecretKey(getTestParameter().get("integrationtest.awscredential.secretKey"));
+        parameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
-        return Map.of("selector", "key-based", "accessKey", "ABCDEFGHIJKLMNOPQRST", "secretKey",
-                getTestParameter().get("integrationtest.awscredential.secretKey"));
+    public AwsCredentialV4Parameters awsCredentialDetailsInvalidAccessKey() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+        keyBasedCredentialParameters.setAccessKey("ABCDEFGHIJKLMNOPQRST");
+        keyBasedCredentialParameters.setSecretKey(getTestParameter().get("integrationtest.awscredential.secretKey"));
+        parameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+        return parameters;
     }
 
-    public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
-        return Map.of("selector", "key-based", "accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"), "secretKey",
-                "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
+    public AwsCredentialV4Parameters awsCredentialDetailsInvalidSecretKey() {
+        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
+        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
+        keyBasedCredentialParameters.setSecretKey("123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
+        keyBasedCredentialParameters.setAccessKey(getTestParameter().get("integrationtest.awscredential.accessKey"));
+        parameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+        return parameters;
     }
 
     @Override

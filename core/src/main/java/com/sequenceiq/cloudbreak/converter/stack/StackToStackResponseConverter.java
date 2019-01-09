@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
@@ -80,7 +80,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         } else {
             stackJson.setCloudPlatform(source.cloudPlatform());
             stackJson.setCredentialId(source.getCredential().getId());
-            stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
+            stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialV4Response.class));
         }
         stackJson.setStatus(source.getStatus());
         stackJson.setTerminated(source.getTerminated());

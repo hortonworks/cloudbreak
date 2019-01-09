@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
@@ -56,7 +56,7 @@ public class StackValidationRequest implements JsonEntity {
     private String credentialName;
 
     @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialRequest credential;
+    private CredentialV4Request credential;
 
     @ApiModelProperty(StackModelDescription.FILESYSTEM)
     private FileSystemRequest fileSystem;
@@ -149,11 +149,11 @@ public class StackValidationRequest implements JsonEntity {
         this.credentialId = credentialId;
     }
 
-    public CredentialRequest getCredential() {
+    public CredentialV4Request getCredential() {
         return credential;
     }
 
-    public void setCredential(CredentialRequest credential) {
+    public void setCredential(CredentialV4Request credential) {
         this.credential = credential;
     }
 
