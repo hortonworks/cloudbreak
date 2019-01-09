@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.clouderamanager;
 
+import java.math.BigDecimal;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -24,10 +26,16 @@ public class ClouderaManagerPollingServiceProvider {
     private PollingService<ClouderaManagerPollerObject> clouderaManagerPollerService;
 
     @Inject
+    private PollingService<ClouderaManagerTemplateInstallPollerObject> clouderaManagerTemplateInstallPollerService;
+
+    @Inject
     private ClouderaManagerStartupListenerTask clouderaManagerStartupListenerTask;
 
     @Inject
     private ClouderaManagerHostStatusChecker clouderaManagerHostStatusChecker;
+
+    @Inject
+    private ClouderaManagerTemplateInstallChecker clouderaManagerTemplateInstallChecker;
 
     PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getAmbariIp());
@@ -45,6 +53,17 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerPollerService.pollWithTimeoutSingleFailure(
                 clouderaManagerHostStatusChecker,
                 clouderaManagerPollerObject,
+                POLL_INTERVAL,
+                MAX_ATTEMPT);
+    }
+
+    public PollingResult templateInstallCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getAmbariIp());
+        ClouderaManagerTemplateInstallPollerObject clouderaManagerTemplateInstallPollerObject =
+                new ClouderaManagerTemplateInstallPollerObject(stack, apiClient, commandId);
+        return clouderaManagerTemplateInstallPollerService.pollWithTimeoutSingleFailure(
+                clouderaManagerTemplateInstallChecker,
+                clouderaManagerTemplateInstallPollerObject,
                 POLL_INTERVAL,
                 MAX_ATTEMPT);
     }
