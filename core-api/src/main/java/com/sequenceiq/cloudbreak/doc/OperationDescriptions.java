@@ -165,14 +165,9 @@ public class OperationDescriptions {
         public static final String GET_EVENTS_ZIP_BY_NAME = "retrieve events in zip by name";
     }
 
-    public static class UserOpDescription {
-        public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
-        public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
-        public static final String USER_GET_PROFILE = "user related profile";
-        public static final String USER_PUT_PROFILE = "modify user related profile";
-        public static final String GET_TENANT_USERS = "retrieve all users in the tenant";
-        public static final String USER_GET_PROFILE_IN_WORKSPACE = "user related profile in workspace";
-        public static final String USER_PUT_PROFILE_IN_WORKSPACE = "modify user related profile in workspace";
+    public static class UserProfileOpDescription {
+        public static final String GET_USER_PROFILE_IN_WORKSPACE = "user related profile in workspace";
+        public static final String MODIFT_USER_PROFILE_IN_WORKSPACE = "modify user related profile in workspace";
     }
 
     public static class AccountPreferencesDescription {

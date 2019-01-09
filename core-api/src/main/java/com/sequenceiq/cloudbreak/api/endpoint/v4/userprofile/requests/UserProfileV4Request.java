@@ -1,17 +1,20 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests;
 
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.base.UIPropertiesV4Base;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserProfileRequest implements JsonEntity {
+@NotNull
+public class UserProfileV4Request implements JsonEntity {
 
     private String credentialName;
 
@@ -19,7 +22,7 @@ public class UserProfileRequest implements JsonEntity {
 
     private String imageCatalogName;
 
-    private Map<String, Object> uiProperties = new HashMap<>();
+    private Set<UIPropertiesV4Base> uiProperties;
 
     public String getCredentialName() {
         return credentialName;
@@ -45,11 +48,11 @@ public class UserProfileRequest implements JsonEntity {
         this.imageCatalogName = imageCatalogName;
     }
 
-    public Map<String, Object> getUiProperties() {
+    public Set<UIPropertiesV4Base> getUiProperties() {
         return uiProperties;
     }
 
-    public void setUiProperties(Map<String, Object> uiProperties) {
+    public void setUiProperties(Set<UIPropertiesV4Base> uiProperties) {
         this.uiProperties = uiProperties;
     }
 }

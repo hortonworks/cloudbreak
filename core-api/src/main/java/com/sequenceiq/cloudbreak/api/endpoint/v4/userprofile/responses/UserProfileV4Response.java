@@ -1,15 +1,15 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.base.UIPropertiesV4Base;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4ShortResponse;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class UserProfileResponse {
+public class UserProfileV4Response {
 
     private CredentialResponse credential;
 
@@ -21,7 +21,7 @@ public class UserProfileResponse {
 
     private String tenant;
 
-    private Map<String, Object> uiProperties = new HashMap<>();
+    private Set<UIPropertiesV4Base> uiProperties;
 
     public CredentialResponse getCredential() {
         return credential;
@@ -31,11 +31,11 @@ public class UserProfileResponse {
         this.credential = credential;
     }
 
-    public Map<String, Object> getUiProperties() {
+    public Set<UIPropertiesV4Base> getUiProperties() {
         return uiProperties;
     }
 
-    public void setUiProperties(Map<String, Object> uiProperties) {
+    public void setUiProperties(Set<UIPropertiesV4Base> uiProperties) {
         this.uiProperties = uiProperties;
     }
 
