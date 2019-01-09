@@ -21,7 +21,7 @@ public class ClusterTemplateV4ListAction implements ActionV2<ClusterTemplateEnti
         logJSON(LOGGER, " ClusterTemplateEntity get request:\n", entity.getRequest());
         Set<ClusterTemplateV4Response> responses = client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .list(client.getWorkspaceId());
+                .list(client.getWorkspaceId()).getClusterTemplates();
         entity.setResponses(responses);
         logJSON(LOGGER, " ClusterTemplateEntity list successfully:\n", responses);
         return entity;
