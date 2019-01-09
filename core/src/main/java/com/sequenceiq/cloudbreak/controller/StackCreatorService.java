@@ -195,7 +195,7 @@ public class StackCreatorService {
                 try {
                     imgFromCatalog = imageService.determineImageFromCatalog(workspace.getId(),
                             stackRequest.getImageId(), platformString, stackRequest.getImageCatalog(), blueprint,
-                            shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs(), cloudbreakUser, user);
+                            shouldUseBaseImage(stackRequest.getClusterRequest(), blueprint), stackRequest.getOs(), cloudbreakUser, user);
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -274,8 +274,10 @@ public class StackCreatorService {
         }
     }
 
-    private boolean shouldUseBaseImage(ClusterRequest clusterRequest) {
-        return clusterRequest.getAmbariRepoDetailsJson() != null || clusterRequest.getAmbariStackDetails() != null;
+    private boolean shouldUseBaseImage(ClusterRequest clusterRequest, Blueprint blueprint) {
+        return clusterRequest.getAmbariRepoDetailsJson() != null
+                || clusterRequest.getAmbariStackDetails() != null
+                || blueprintService.isClouderaManagerBlueprint(blueprint);
     }
 
     private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack) {

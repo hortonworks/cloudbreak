@@ -41,9 +41,9 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -106,32 +106,31 @@ public class ImageService {
     }
 
     //CHECKSTYLE:OFF
-    public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName,
-        Blueprint blueprint, boolean useBaseImage, String os, CloudbreakUser cloudbreakUser, User user) throws CloudbreakImageNotFoundException,
-            CloudbreakImageCatalogException {
+    public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName, Blueprint blueprint,
+            boolean useBaseImage, String os, CloudbreakUser cbUser, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
             statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, catalogName);
         } else {
-            String clusterType = ImageCatalogService.UNDEFINED;
-            String clusterVersion = ImageCatalogService.UNDEFINED;
-            if (blueprint != null) {
-                String blueprintText = blueprint.getBlueprintText();
-                try {
-                    JsonNode root = JsonUtil.readTree(blueprintText);
-                    clusterType = blueprintUtils.getBlueprintStackName(root);
-                    clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
-                } catch (IOException ex) {
-                    LOGGER.warn("Can not initiate default hdp info: ", ex);
-                }
-            }
             if (useBaseImage) {
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, cloudbreakUser, user);
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, cbUser, user);
             } else {
+                String clusterType = ImageCatalogService.UNDEFINED;
+                String clusterVersion = ImageCatalogService.UNDEFINED;
+                if (blueprint != null) {
+                    String blueprintText = blueprint.getBlueprintText();
+                    try {
+                        JsonNode root = JsonUtil.readTree(blueprintText);
+                        clusterType = blueprintUtils.getBlueprintStackName(root);
+                        clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
+                    } catch (IOException ex) {
+                        LOGGER.warn("Can not initiate default hdp info: ", ex);
+                    }
+                }
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
-                    + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, cloudbreakUser, user);
+                        + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, cbUser, user);
             }
         }
         return statedImage;
