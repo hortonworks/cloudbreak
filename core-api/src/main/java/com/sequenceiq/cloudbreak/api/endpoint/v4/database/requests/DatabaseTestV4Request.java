@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("RdsTestRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DatabaseV4TestRequest implements JsonEntity {
+public class DatabaseTestV4Request implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.Database.NAME)
     private String name;

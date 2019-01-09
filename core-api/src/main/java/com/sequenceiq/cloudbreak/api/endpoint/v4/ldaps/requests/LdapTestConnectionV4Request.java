@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LdapV4ValidationRequest implements JsonEntity {
+public class LdapTestConnectionV4Request implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)

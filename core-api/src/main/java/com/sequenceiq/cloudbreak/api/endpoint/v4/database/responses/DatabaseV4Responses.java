@@ -6,7 +6,7 @@ import java.util.Set;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class DatabaseV4ListResponse {
+public class DatabaseV4Responses {
 
     private Set<DatabaseV4Response> databases = new HashSet<>();
 
@@ -18,10 +18,10 @@ public class DatabaseV4ListResponse {
         this.databases = databases;
     }
 
-    public static final DatabaseV4ListResponse databaseListResponse(Set<DatabaseV4Response> databases) {
-        DatabaseV4ListResponse databaseV4ListResponse = new DatabaseV4ListResponse();
-        databaseV4ListResponse.setDatabases(databases);
-        return databaseV4ListResponse;
+    public static final DatabaseV4Responses databaseListResponse(Set<DatabaseV4Response> databases) {
+        DatabaseV4Responses databaseV4Responses = new DatabaseV4Responses();
+        databaseV4Responses.setDatabases(databases);
+        return databaseV4Responses;
     }
 
 }

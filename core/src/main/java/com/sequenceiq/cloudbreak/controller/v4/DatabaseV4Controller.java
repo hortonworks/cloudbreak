@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4ListResponse.databaseListResponse;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses.databaseListResponse;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4TestRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4ListResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4TestResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.NotificationController;
@@ -51,7 +51,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
     private ConversionService conversionService;
 
     @Override
-    public DatabaseV4ListResponse list(Long workspaceId, DatabaseV4ListFilter databaseV4ListFilter) {
+    public DatabaseV4Responses list(Long workspaceId, DatabaseV4ListFilter databaseV4ListFilter) {
         Set<DatabaseV4Response> databaseV4Respons = databaseService.findAllInWorkspaceAndEnvironment(workspaceId,
                 databaseV4ListFilter.getEnvironment(), databaseV4ListFilter.getAttachGlobal()).stream()
                 .map(database -> conversionService.convert(database, DatabaseV4Response.class))
@@ -81,11 +81,11 @@ public class DatabaseV4Controller extends NotificationController implements Data
     }
 
     @Override
-    public DatabaseV4TestResponse test(Long workspaceId, DatabaseV4TestRequest databaseV4TestRequest) {
+    public DatabaseV4TestResponse test(Long workspaceId, DatabaseTestV4Request databaseTestV4Request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = databaseService.getWorkspaceService().get(workspaceId, user);
-        String existingRDSConfigName = databaseV4TestRequest.getName();
-        DatabaseV4Request configRequest = databaseV4TestRequest.getRdsConfig();
+        String existingRDSConfigName = databaseTestV4Request.getName();
+        DatabaseV4Request configRequest = databaseTestV4Request.getRdsConfig();
         if (existingRDSConfigName != null) {
             return new DatabaseV4TestResponse(databaseService.testRdsConnection(existingRDSConfigName, workspace));
         } else if (configRequest != null) {
@@ -103,11 +103,13 @@ public class DatabaseV4Controller extends NotificationController implements Data
 
     @Override
     public DatabaseV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return databaseService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, DatabaseV4Response.class);
+        return databaseService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(),
+                workspaceId, DatabaseV4Response.class);
     }
 
     @Override
     public DatabaseV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return databaseService.detachFromEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, DatabaseV4Response.class);
+        return databaseService.detachFromEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(),
+                workspaceId, DatabaseV4Response.class);
     }
 }

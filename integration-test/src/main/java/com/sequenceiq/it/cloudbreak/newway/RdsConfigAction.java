@@ -5,7 +5,7 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import java.io.IOException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4TestRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RdsConfigAction {
@@ -65,8 +65,8 @@ public class RdsConfigAction {
 
         RdsConfigEntity rdsConfigEntity = (RdsConfigEntity) entity;
 
-        DatabaseV4TestRequest databaseV4TestRequest = new DatabaseV4TestRequest();
-        databaseV4TestRequest.setRdsConfig(rdsConfigEntity.getRequest());
+        DatabaseTestV4Request databaseTestV4Request = new DatabaseTestV4Request();
+        databaseTestV4Request.setRdsConfig(rdsConfigEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -74,7 +74,7 @@ public class RdsConfigAction {
         rdsConfigEntity.setResponseTestResult(
                 client.getCloudbreakClient()
                         .databaseV4Endpoint()
-                        .test(client.getWorkspaceId(), databaseV4TestRequest));
+                        .test(client.getWorkspaceId(), databaseTestV4Request));
         logJSON("Rds test post request: ", rdsConfigEntity.getRequest());
     }
 
