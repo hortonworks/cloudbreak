@@ -208,19 +208,18 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @Test(dataProvider = "providername", priority = 40)
     public void testStartCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
-        given(CloudbreakClient.created());
-        given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackCreated()
-                .withName(clusterName), "a stack is created");
-        given(StackOperationEntity.request());
-        when(StackOperationEntity.start());
-        when(Stack.get());
-        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
-        then(Stack.checkClusterHasAmbariRunning(
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+        startClusterWithAmbariCredential(cloudProvider,
+                clusterName,
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
-                "ambari check");
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD));
+    }
+
+    @Test(dataProvider = "providername", priority = 40)
+    public void testStartKerberizedCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
+        startClusterWithAmbariCredential(cloudProvider,
+                clusterName,
+                AwsKerberos.USERNAME,
+                getTestParameter().get(AwsKerberos.AD_PASSWORD));
     }
 
     @Test(alwaysRun = true, dataProvider = "providername", priority = 50)
@@ -234,7 +233,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(alwaysRun = true, dataProvider = "providername", priority = 50)
-    public void testTerminateKerberosCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
+    public void testTerminateKerberizedCluster(CloudProvider cloudProvider, String clusterName) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
@@ -378,5 +377,21 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         }
         result = result.stream().sorted(Comparator.comparing(ImageResponse::getDate)).collect(Collectors.toList());
         return result.get(result.size() - 1).getUuid();
+    }
+
+    private void startClusterWithAmbariCredential(CloudProvider cloudProvider, String clusterName, String ambariUser, String ambariPassword) throws Exception {
+        given(CloudbreakClient.created());
+        given(cloudProvider.aValidCredential());
+        given(cloudProvider.aValidStackCreated()
+                .withName(clusterName), "a stack is created");
+        given(StackOperationEntity.request());
+        when(StackOperationEntity.start());
+        when(Stack.get());
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                ambariUser,
+                ambariPassword),
+                "ambari check");
     }
 }

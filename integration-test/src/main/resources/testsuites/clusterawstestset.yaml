@@ -6,7 +6,7 @@ parameters:
   awsAvailabilityZone: eu-west-1a
   awsCredentialName: autotesting-clusters-aws
 listeners:
-  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreakCredent.newway.listener.FirstLastTestExecutionBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
@@ -57,8 +57,8 @@ tests:
         includedMethods:
           - testCreateHdfCluster
           - testStopCluster
-          - testStartCluster
-          - testTerminateKerberosCluster
+          - testStartKerberizedCluster
+          - testTerminateKerberizedCluster
   - name: "aws prewarm image datascience"
     preserveOrder: true
     parameters:
@@ -105,5 +105,5 @@ tests:
         includedMethods:
           - testCreateHdfCluster
           - testStopCluster
-          - testStartCluster
-          - testTerminateKerberosCluster
+          - testStartKerberizedCluster
+          - testTerminateKerberizedCluster
