@@ -11,14 +11,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LdapV4TestRequest implements JsonEntity {
+public class LdapTestV4Request implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
 
     @Valid
     @ApiModelProperty(ModelDescriptions.LdapConfigModelDescription.VALIDATION_REQUEST)
-    private LdapV4ValidationRequest validationRequest;
+    private LdapTestConnectionV4Request validationRequest;
 
     public String getName() {
         return name;
@@ -28,11 +28,11 @@ public class LdapV4TestRequest implements JsonEntity {
         this.name = name;
     }
 
-    public LdapV4ValidationRequest getValidationRequest() {
+    public LdapTestConnectionV4Request getValidationRequest() {
         return validationRequest;
     }
 
-    public void setValidationRequest(LdapV4ValidationRequest validationRequest) {
+    public void setValidationRequest(LdapTestConnectionV4Request validationRequest) {
         this.validationRequest = validationRequest;
     }
 }

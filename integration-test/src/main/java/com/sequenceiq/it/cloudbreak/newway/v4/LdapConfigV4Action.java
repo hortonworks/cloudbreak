@@ -5,7 +5,7 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import java.io.IOException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4TestRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -67,8 +67,8 @@ public class LdapConfigV4Action {
 
         LdapTestEntity ldapTestEntity = (LdapTestEntity) entity;
 
-        LdapV4TestRequest ldapV4TestRequest = new LdapV4TestRequest();
-        ldapV4TestRequest.setValidationRequest(ldapTestEntity.getRequest());
+        LdapTestV4Request ldapTestV4Request = new LdapTestV4Request();
+        ldapTestV4Request.setValidationRequest(ldapTestEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
@@ -76,7 +76,7 @@ public class LdapConfigV4Action {
         ldapTestEntity.setResponse(
                 client.getCloudbreakClient()
                         .ldapConfigV4Endpoint()
-                        .test(workspaceId, ldapV4TestRequest));
+                        .test(workspaceId, ldapTestV4Request));
         logJSON("Ldap test post request: ", ldapTestEntity.getRequest());
     }
 
