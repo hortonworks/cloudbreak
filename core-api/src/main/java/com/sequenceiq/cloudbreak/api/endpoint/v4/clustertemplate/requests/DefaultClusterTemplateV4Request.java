@@ -1,8 +1,8 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v4.cluster_template;
+package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import javax.inject.Inject;
 
@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests.ClusterTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.ClusterTemplateV4Type;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
