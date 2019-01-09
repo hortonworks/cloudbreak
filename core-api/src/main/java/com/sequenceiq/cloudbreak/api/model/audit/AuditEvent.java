@@ -2,7 +2,12 @@ package com.sequenceiq.cloudbreak.api.model.audit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
+import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 
 @Immutable
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -10,12 +15,13 @@ public class AuditEvent {
 
     private Long auditId;
 
-    private StructuredEventResponse structuredEvent;
+    @TransformGetterType
+    private StructuredEvent structuredEvent;
 
     public AuditEvent() {
     }
 
-    public AuditEvent(Long auditId, StructuredEventResponse structuredEvent) {
+    public AuditEvent(Long auditId, StructuredEvent structuredEvent) {
         this.auditId = auditId;
         this.structuredEvent = structuredEvent;
     }
@@ -36,7 +42,19 @@ public class AuditEvent {
         return structuredEvent.getDuration();
     }
 
-    public StructuredEventResponse getStructuredEvent() {
+    public StructuredEvent getStructuredEvent() {
         return structuredEvent;
+    }
+
+    public StructuredFlowEvent getRawFlowEvent() {
+        return structuredEvent instanceof StructuredFlowEvent ? (StructuredFlowEvent) structuredEvent : null;
+    }
+
+    public StructuredRestCallEvent getRawRestEvent() {
+        return structuredEvent instanceof StructuredRestCallEvent ? (StructuredRestCallEvent) structuredEvent : null;
+    }
+
+    public StructuredNotificationEvent getRawNotification() {
+        return structuredEvent instanceof StructuredNotificationEvent ? (StructuredNotificationEvent) structuredEvent : null;
     }
 }
