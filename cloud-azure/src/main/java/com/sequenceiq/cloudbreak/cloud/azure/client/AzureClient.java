@@ -63,8 +63,6 @@ import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.BlobContainerPermissions;
-import com.microsoft.azure.storage.blob.BlobContainerPublicAccessType;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
@@ -327,19 +325,6 @@ public class AzureClient {
             LOGGER.debug("Container created: " + created);
         } catch (StorageException e) {
             throw new CloudConnectorException("can't create container in storage, storage service error occurred", e);
-        }
-        setPublicPermissionOnContainer(resourceGroup, storageName, containerName);
-    }
-
-    public void setPublicPermissionOnContainer(String resourceGroup, String storageName, String containerName) {
-        LOGGER.debug("set public permission on container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        BlobContainerPermissions containerPermissions = new BlobContainerPermissions();
-        containerPermissions.setPublicAccess(BlobContainerPublicAccessType.CONTAINER);
-        try {
-            container.uploadPermissions(containerPermissions);
-        } catch (StorageException e) {
-            throw new CloudConnectorException("can't set public permission on container, storage service error occurred", e);
         }
     }
 
