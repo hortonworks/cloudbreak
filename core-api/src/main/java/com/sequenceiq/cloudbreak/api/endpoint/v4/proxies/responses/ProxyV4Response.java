@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses;
 
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ProxyConfigModelDescription;
@@ -23,7 +23,7 @@ public class ProxyV4Response extends ProxyV4Base {
     private SecretResponse password;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     public Long getId() {
         return id;
@@ -49,11 +49,11 @@ public class ProxyV4Response extends ProxyV4Base {
         this.password = password;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 }

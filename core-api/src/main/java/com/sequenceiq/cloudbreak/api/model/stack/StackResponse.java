@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -93,7 +93,7 @@ public class StackResponse extends StackBase {
     private List<CloudbreakEventsJson> cloudbreakEvents = new ArrayList<>();
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     public ClusterResponse getCluster() {
         return cluster;
@@ -248,11 +248,11 @@ public class StackResponse extends StackBase {
         this.stackAuthentication = stackAuthentication;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 

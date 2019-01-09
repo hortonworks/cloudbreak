@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model.mpack;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -17,7 +17,7 @@ public class ManagementPackResponse extends ManagementPackBase {
     private boolean publicInAccount = true;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     @JsonProperty("id")
     public Long getId() {
@@ -37,11 +37,11 @@ public class ManagementPackResponse extends ManagementPackBase {
         this.publicInAccount = publicInAccount;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 }

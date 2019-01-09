@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
@@ -127,8 +127,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(rdsConfigService.findByClusterId(anyLong())).willReturn(new HashSet<>());
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
-        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
-                .willReturn(new WorkspaceResourceResponse());
+        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
+                .willReturn(new WorkspaceResourceV4Response());
         given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
     }
 

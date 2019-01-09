@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -159,7 +159,7 @@ public class ClusterResponse implements JsonEntity {
     private FileSystemResponse fileSystemResponse;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     public String getDescription() {
         return description;
@@ -467,11 +467,11 @@ public class ClusterResponse implements JsonEntity {
         this.fileSystemResponse = fileSystemResponse;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 }

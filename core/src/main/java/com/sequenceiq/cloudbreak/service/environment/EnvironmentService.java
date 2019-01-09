@@ -27,9 +27,9 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
@@ -179,7 +179,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return conversionService.convert(environment, SimpleEnvironmentV4Response.class);
     }
 
-    public DetailedEnvironmentV4Response createForLoggedInUser(EnvironmentRequest request, @Nonnull Long workspaceId) {
+    public DetailedEnvironmentV4Response createForLoggedInUser(EnvironmentV4Request request, @Nonnull Long workspaceId) {
         Environment environment = conversionService.convert(request, Environment.class);
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdaps(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
@@ -199,7 +199,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
     }
 
-    private void setRegions(Environment environment, EnvironmentRequest environmentRequest, boolean regionsSupported) {
+    private void setRegions(Environment environment, EnvironmentV4Request environmentV4Request, boolean regionsSupported) {
         try {
             PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
             platformResourceRequest.setCredential(environment.getCredential());
@@ -209,7 +209,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                 Set<Region> regionSet = new HashSet<>();
                 Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
                 for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
-                    if (environmentRequest.getRegions().contains(r.getRegionName())) {
+                    if (environmentV4Request.getRegions().contains(r.getRegionName())) {
                         Region region = new Region();
                         region.setName(r.getRegionName());
                         String displayName = displayNames.get(r);
@@ -221,16 +221,16 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             } else {
                 environment.setRegions(new Json(new HashSet<>()));
             }
-            setLocation(environment, environmentRequest, cloudRegions);
+            setLocation(environment, environmentV4Request, cloudRegions);
 
         } catch (JsonProcessingException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
-    private void setLocation(Environment environment, EnvironmentRequest environmentRequest, CloudRegions cloudRegions) {
-        Coordinate coordinate = cloudRegions.getCoordinates().get(region(environmentRequest.getLocation().getLocationName()));
-        LocationV4Request location = environmentRequest.getLocation();
+    private void setLocation(Environment environment, EnvironmentV4Request environmentV4Request, CloudRegions cloudRegions) {
+        Coordinate coordinate = cloudRegions.getCoordinates().get(region(environmentV4Request.getLocation().getLocationName()));
+        LocationV4Request location = environmentV4Request.getLocation();
         if (coordinate != null) {
             environment.setLocation(coordinate.getDisplayName());
             environment.setLatitude(coordinate.getLatitude());
@@ -241,7 +241,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             environment.setLongitude(location.getLongitude());
         } else {
             throw new BadRequestException(String.format("No location found with name %s in the location list. The supported locations are: [%s]",
-                    environmentRequest.getLocation(), cloudRegions.locationNames()));
+                    environmentV4Request.getLocation(), cloudRegions.locationNames()));
         }
     }
 
@@ -282,7 +282,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return environment;
     }
 
-    public DetailedEnvironmentV4Response detachResources(String environmentName, EnvironmentDetachRequest request, Long workspaceId) {
+    public DetailedEnvironmentV4Response detachResources(String environmentName, EnvironmentDetachV4Request request, Long workspaceId) {
         try {
             return transactionService.required(() -> {
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
@@ -302,7 +302,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         }
     }
 
-    private ValidationResult validateAndDetachLdaps(EnvironmentDetachRequest request, Environment environment) {
+    private ValidationResult validateAndDetachLdaps(EnvironmentDetachV4Request request, Environment environment) {
         Set<LdapConfig> ldapsToDetach = environment.getLdapConfigs().stream()
                 .filter(ldap -> request.getLdaps().contains(ldap.getName())).collect(Collectors.toSet());
         Map<LdapConfig, Set<Cluster>> ldapsToClusters = ldapsToDetach.stream()
@@ -312,7 +312,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return validationResult;
     }
 
-    private ValidationResult validateAndDetachProxies(EnvironmentDetachRequest request, Environment environment, ValidationResult validationResult) {
+    private ValidationResult validateAndDetachProxies(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
         Set<ProxyConfig> proxiesToDetach = environment.getProxyConfigs().stream()
                 .filter(proxy -> request.getProxies().contains(proxy.getName())).collect(Collectors.toSet());
         Map<ProxyConfig, Set<Cluster>> proxiesToClusters = proxiesToDetach.stream()
@@ -322,7 +322,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return validationResult;
     }
 
-    private ValidationResult validateAndDetachRdss(EnvironmentDetachRequest request, Environment environment, ValidationResult validationResult) {
+    private ValidationResult validateAndDetachRdss(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
         Set<RDSConfig> rdssToDetach = environment.getRdsConfigs().stream()
                 .filter(rds -> request.getDatabases().contains(rds.getName())).collect(Collectors.toSet());
         Map<RDSConfig, Set<Cluster>> rdssToClusters = rdssToDetach.stream()
@@ -332,13 +332,13 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return validationResult;
     }
 
-    private void detachKubes(EnvironmentDetachRequest request, Environment environment) {
+    private void detachKubes(EnvironmentDetachV4Request request, Environment environment) {
         Set<KubernetesConfig> kubesToDetach = environment.getKubernetesConfigs().stream()
                 .filter(config -> request.getKubernetes().contains(config.getName())).collect(Collectors.toSet());
         environment.getKubernetesConfigs().removeAll(kubesToDetach);
     }
 
-    private ValidationResult validateAndDetachKerberosConfigs(EnvironmentDetachRequest request, Environment environment, ValidationResult validationResult) {
+    private ValidationResult validateAndDetachKerberosConfigs(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
         Set<KerberosConfig> kerberosConfigsToDetach = environment.getKerberosConfigs().stream()
                 .filter(kerberosConfig -> request.getKerberoses().contains(kerberosConfig.getName())).collect(Collectors.toSet());
         Map<KerberosConfig, Set<Cluster>> kerberosConfigsToClusters = kerberosConfigsToDetach.stream()
@@ -349,7 +349,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return validationResult;
     }
 
-    public DetailedEnvironmentV4Response changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialRequest request) {
+    public DetailedEnvironmentV4Response changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialV4Request request) {
         try {
             return transactionService.required(() -> {
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);

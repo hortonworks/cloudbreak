@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
@@ -40,7 +40,7 @@ public class DatabaseV4Response extends DatabaseV4Base {
     private SecretResponse connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     public Long getId() {
         return id;
@@ -106,11 +106,11 @@ public class DatabaseV4Response extends DatabaseV4Base {
         this.connectionPassword = connectionPassword;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 }

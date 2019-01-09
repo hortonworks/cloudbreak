@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.CompactRegionResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
 
@@ -33,7 +33,7 @@ public abstract class EnvironmentV4BaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.LOCATION)
     private LocationV4Response location;
 
-    private WorkspaceResourceResponse workspace;
+    private WorkspaceResourceV4Response workspace;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES_NAME)
     private String datalakeResourcesName;
@@ -100,11 +100,11 @@ public abstract class EnvironmentV4BaseResponse {
         this.regions = regions;
     }
 
-    public WorkspaceResourceResponse getWorkspace() {
+    public WorkspaceResourceV4Response getWorkspace() {
         return workspace;
     }
 
-    public void setWorkspace(WorkspaceResourceResponse workspace) {
+    public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
 

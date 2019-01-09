@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
@@ -19,7 +19,7 @@ public class RecipeToRecipeV4ResponseConverter extends AbstractConversionService
         json.setType(RecipeV4Type.valueOf(recipe.getRecipeType().name()));
         json.setContent(recipe.getContent());
         json.setId(recipe.getId());
-        WorkspaceResourceResponse workspace = getConversionService().convert(recipe.getWorkspace(), WorkspaceResourceResponse.class);
+        WorkspaceResourceV4Response workspace = getConversionService().convert(recipe.getWorkspace(), WorkspaceResourceV4Response.class);
         json.setWorkspace(workspace);
         return json;
     }

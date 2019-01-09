@@ -10,7 +10,7 @@ import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentRequest, DetailedEnvironmentV4Response, EnvironmentEntity>
+public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Request, DetailedEnvironmentV4Response, EnvironmentEntity>
         implements Purgable<SimpleEnvironmentV4Response> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
@@ -32,15 +32,15 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
     private SimpleEnvironmentV4Response simpleResponse;
 
     public EnvironmentEntity(TestContext testContext) {
-        super(new EnvironmentRequest(), testContext);
+        super(new EnvironmentV4Request(), testContext);
     }
 
     public EnvironmentEntity() {
         super(ENVIRONMENT);
     }
 
-    public EnvironmentEntity(EnvironmentRequest environmentRequest, TestContext testContext) {
-        super(environmentRequest, testContext);
+    public EnvironmentEntity(EnvironmentV4Request environmentV4Request, TestContext testContext) {
+        super(environmentV4Request, testContext);
     }
 
     @Override

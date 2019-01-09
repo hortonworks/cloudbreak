@@ -6,7 +6,7 @@ import java.util.Set;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class SimpleEnvironmentResponses {
+public class SimpleEnvironmentV4Responses {
 
     private Set<SimpleEnvironmentV4Response> environments = new HashSet<>();
 
@@ -18,9 +18,9 @@ public class SimpleEnvironmentResponses {
         this.environments = environments;
     }
 
-    public static final SimpleEnvironmentResponses simpleEnvironmentResponses(Set<SimpleEnvironmentV4Response> environments) {
-        SimpleEnvironmentResponses simpleEnvironmentResponses = new SimpleEnvironmentResponses();
-        simpleEnvironmentResponses.setEnvironments(environments);
-        return simpleEnvironmentResponses;
+    public static final SimpleEnvironmentV4Responses simpleEnvironmentResponses(Set<SimpleEnvironmentV4Response> environments) {
+        SimpleEnvironmentV4Responses simpleEnvironmentv4Responses = new SimpleEnvironmentV4Responses();
+        simpleEnvironmentv4Responses.setEnvironments(environments);
+        return simpleEnvironmentv4Responses;
     }
 }

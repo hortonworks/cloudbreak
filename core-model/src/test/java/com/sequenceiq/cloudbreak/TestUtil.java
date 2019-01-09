@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -225,8 +225,8 @@ public class TestUtil {
         return userWorkspacePermissions;
     }
 
-    public static ChangeWorkspaceUsersJson changeWorkspaceUsersJson(String userId, String... permissions) {
-        ChangeWorkspaceUsersJson json1 = new ChangeWorkspaceUsersJson();
+    public static ChangeWorkspaceUsersV4Request changeWorkspaceUsersJson(String userId, String... permissions) {
+        ChangeWorkspaceUsersV4Request json1 = new ChangeWorkspaceUsersV4Request();
         json1.setUserId(userId);
         json1.setPermissions(Set.of(permissions));
         return json1;

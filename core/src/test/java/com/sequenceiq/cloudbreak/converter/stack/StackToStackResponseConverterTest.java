@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -92,7 +92,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
                 .willReturn(new FailurePolicyResponse())
                 .willReturn(new NetworkResponse())
                 .willReturn(new OrchestratorResponse())
-                .willReturn(new WorkspaceResourceResponse())
+                .willReturn(new WorkspaceResourceV4Response())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupRequest>());
@@ -113,7 +113,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
                 .willReturn(new FailurePolicyResponse())
                 .willReturn(new NetworkResponse())
                 .willReturn(new OrchestratorResponse())
-                .willReturn(new WorkspaceResourceResponse())
+                .willReturn(new WorkspaceResourceV4Response())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupRequest>());
@@ -135,7 +135,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
                 .willReturn(new FailurePolicyResponse())
                 .willReturn(new NetworkResponse())
                 .willReturn(new OrchestratorResponse())
-                .willReturn(new WorkspaceResourceResponse())
+                .willReturn(new WorkspaceResourceV4Response())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupRequest>());
@@ -158,7 +158,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
                 .willReturn(new ClusterResponse())
                 .willReturn(new NetworkResponse())
                 .willReturn(new OrchestratorResponse())
-                .willReturn(new WorkspaceResourceResponse())
+                .willReturn(new WorkspaceResourceV4Response())
                 .willReturn(new CloudbreakDetailsJson())
                 .willReturn(new CredentialResponse())
                 .willReturn(new NetworkResponse());
@@ -182,7 +182,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
                 .willReturn(new ClusterResponse())
                 .willReturn(new FailurePolicyResponse())
                 .willReturn(new OrchestratorResponse())
-                .willReturn(new WorkspaceResourceResponse())
+                .willReturn(new WorkspaceResourceV4Response())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupRequest>());

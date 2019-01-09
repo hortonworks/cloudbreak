@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UserV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.WorkspaceV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
@@ -104,7 +104,7 @@ public class CloudbreakClient {
             ManagementPackEndpoint.class,
             ManagementPackV3Endpoint.class,
             KubernetesV4Endpoint.class,
-            WorkspaceV3Endpoint.class,
+            WorkspaceV4Endpoint.class,
             ConnectorV1Endpoint.class,
             ConnectorV2Endpoint.class,
             ConnectorV3Endpoint.class,
@@ -231,8 +231,8 @@ public class CloudbreakClient {
         return getEndpoint(KubernetesV4Endpoint.class);
     }
 
-    public WorkspaceV3Endpoint workspaceV3Endpoint() {
-        return getEndpoint(WorkspaceV3Endpoint.class);
+    public WorkspaceV4Endpoint workspaceV3Endpoint() {
+        return getEndpoint(WorkspaceV4Endpoint.class);
     }
 
     public ConnectorV1Endpoint connectorV1Endpoint() {

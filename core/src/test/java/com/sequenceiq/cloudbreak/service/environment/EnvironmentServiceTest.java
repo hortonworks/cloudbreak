@@ -45,9 +45,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
@@ -204,19 +204,19 @@ public class EnvironmentServiceTest {
 
     @Test
     public void testCreateWithCredentialName() {
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setName(ENVIRONMENT_NAME);
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
 
-        environmentRequest.setCredentialName(CREDENTIAL_NAME);
+        environmentV4Request.setCredentialName(CREDENTIAL_NAME);
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName("IgnoredCredRequestName");
-        environmentRequest.setCredential(credentialRequest);
+        environmentV4Request.setCredential(credentialRequest);
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
 
         when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
-        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
         CloudRegions cloudRegions = new CloudRegions();
@@ -226,25 +226,25 @@ public class EnvironmentServiceTest {
                 region("region1"), coordinate("1", "2", "region1"),
                 region("region2"), coordinate("1", "2", "region2")));
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
-        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
 
         assertNotNull(response);
     }
 
     @Test
     public void testCreateWithCredential() {
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setName(ENVIRONMENT_NAME);
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
 
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName("CredRequestName");
-        environmentRequest.setCredential(credentialRequest);
+        environmentV4Request.setCredential(credentialRequest);
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
 
         when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
-        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
         CloudRegions cloudRegions = new CloudRegions();
@@ -254,7 +254,7 @@ public class EnvironmentServiceTest {
                 region("region1"), coordinate("1", "2", "region1"),
                 region("region2"), coordinate("1", "2", "region2")));
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
-        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
 
         assertNotNull(response);
     }
@@ -262,19 +262,19 @@ public class EnvironmentServiceTest {
     @Test
     public void testCreateWithRegions() {
         // GIVEN
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setName(ENVIRONMENT_NAME);
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
 
-        environmentRequest.setCredentialName(CREDENTIAL_NAME);
+        environmentV4Request.setCredentialName(CREDENTIAL_NAME);
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName("IgnoredCredRequestName");
-        environmentRequest.setCredential(credentialRequest);
-        environmentRequest.setRegions(Set.of("region1", "region2"));
+        environmentV4Request.setCredential(credentialRequest);
+        environmentV4Request.setRegions(Set.of("region1", "region2"));
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
 
-        when(conversionService.convert(any(EnvironmentRequest.class), eq(Environment.class))).thenReturn(new Environment());
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         ArgumentCaptor<Environment> envCaptor = ArgumentCaptor.forClass(Environment.class);
         when(environmentRepository.save(envCaptor.capture())).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
@@ -288,7 +288,7 @@ public class EnvironmentServiceTest {
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         when(cloudParameterCache.areRegionsSupported(any())).thenReturn(true);
         // WHEN
-        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
         // THEN
         assertNotNull(response);
         Set<com.sequenceiq.cloudbreak.domain.environment.Region> regions = envCaptor.getValue().getRegionSet();
@@ -352,7 +352,7 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         mockConverters();
 
-        EnvironmentDetachRequest detachRequest = new EnvironmentDetachRequest();
+        EnvironmentDetachV4Request detachRequest = new EnvironmentDetachV4Request();
         detachRequest.getLdaps().add(ldapName1);
         detachRequest.getLdaps().add(notAttachedLdap);
         detachRequest.getProxies().add(proxyName1);
@@ -402,7 +402,7 @@ public class EnvironmentServiceTest {
         when(conversionService.convert(any(StackApiView.class), eq(StackViewResponse.class)))
                 .thenAnswer(invocation -> stackApiViewToStackViewResponseConverter.convert((StackApiView) invocation.getArgument(0)));
 
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(credentialName2);
 
         DetailedEnvironmentV4Response response = environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
@@ -435,7 +435,7 @@ public class EnvironmentServiceTest {
         when(stackApiViewService.canChangeCredential(stackApiView1)).thenReturn(true);
         when(stackApiViewService.canChangeCredential(stackApiView2)).thenReturn(false);
 
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(credentialName2);
 
         environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
@@ -460,7 +460,7 @@ public class EnvironmentServiceTest {
         when(environmentCredentialOperationService.validatePlatformAndGetCredential(any(), any(), anyLong()))
                 .thenThrow(new BadRequestException(""));
 
-        EnvironmentChangeCredentialRequest request = new EnvironmentChangeCredentialRequest();
+        EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName("credential2");
 
         environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
@@ -524,7 +524,7 @@ public class EnvironmentServiceTest {
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
         environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
-        EnvironmentDetachRequest request = new EnvironmentDetachRequest();
+        EnvironmentDetachV4Request request = new EnvironmentDetachV4Request();
         request.setLdaps(Sets.newHashSet(ldapName1, ldapName2));
         request.setProxies(Sets.newHashSet(proxyName1));
         request.setDatabases(Sets.newHashSet(rdsName1));
@@ -616,7 +616,7 @@ public class EnvironmentServiceTest {
         environment.setRdsConfigs(Sets.newHashSet(rds1, rds2));
         environment.setKerberosConfigs(Sets.newHashSet(kdc1, kdc2));
 
-        EnvironmentDetachRequest request = new EnvironmentDetachRequest();
+        EnvironmentDetachV4Request request = new EnvironmentDetachV4Request();
         request.setLdaps(Sets.newHashSet(ldapName1, ldapName2));
         request.setProxies(Sets.newHashSet(proxyName1));
         request.setDatabases(Sets.newHashSet(rdsName1));

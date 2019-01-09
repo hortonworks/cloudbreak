@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -54,7 +54,7 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
         if (source.getTopology() != null) {
             credentialJson.setTopologyId(source.getTopology().getId());
         }
-        credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         coverSensitiveData(credentialJson);
         credentialJson.setGovCloud(source.getGovCloud());
         return credentialJson;
