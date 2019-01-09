@@ -1,8 +1,8 @@
-package com.sequenceiq.cloudbreak.converter.v4.cluster_template;
+package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests.DefaultClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -25,11 +25,11 @@ public abstract class ClusterTemplateV4Base implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.TEMPLATE)
+    @ApiModelProperty(value = ModelDescriptions.ClusterTemplateModelDescription.TEMPLATE, required = true)
     @NotNull
     private StackV2Request stackTemplate;
 
-    @ApiModelProperty(allowableValues = "SPARK,HIVE,DATASCIENCE,EDW,ETL,OTHER")
+    @ApiModelProperty(required = true, allowableValues = "SPARK,HIVE,DATASCIENCE,EDW,ETL,OTHER")
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.CLOUD_PLATFORM)

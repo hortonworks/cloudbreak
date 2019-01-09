@@ -9,7 +9,7 @@ public class Notes {
             + "running on different instance types. This will give you the option to group your "
             + "Hadoop services based on resource needs (e.g. high I/O, CPU or memory) "
             + "and create an infrastructure which fits your workload best.";
-    public static final String TEMPLATE_NOTES = "A template gives developers and systems administrators "
+    public static final String CLUSTER_TEMPLATE_NOTES = "A template gives developers and systems administrators "
             + "an easy way to create and manage a collection of cloud infrastructure related resources, "
             + "maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific "
             + "- and on top of the infrastructural setup they collect the information such as the used machine images, "
@@ -33,7 +33,6 @@ public class Notes {
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
     public static final String GATEWAY_NOTES = "Gateway is an Apache Knox Gateway, which is an Application Gateway for interacting with REST APIs and"
             + "UIs of Apache Hadoop deployments. Provides Authentication and other services.";
-    public static final String CLUSTER_TEMPLATE_NOTES = "Cluster templates are stored cluster configurations, which configurations are reusable any time";
     public static final String RECIPE_NOTES = "Recipes are basically script extensions to a cluster that run on a set of nodes"
             + " before or after the Ambari cluster installation.";
     public static final String USAGE_NOTES = "Cloudbreak gives you an up to date overview of cluster usage based "
