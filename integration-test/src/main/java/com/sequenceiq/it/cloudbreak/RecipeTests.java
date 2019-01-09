@@ -40,7 +40,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-post-ambari")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -55,7 +55,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-pre-ambari")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.PRE_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.PRE_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -101,7 +101,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-from-file")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
         );
         when(Recipe.post());
@@ -116,7 +116,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(SPECIAL_RECIPE_NAME)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
         );
         when(Recipe.post());
@@ -130,7 +130,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-again")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -145,7 +145,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(INVALID_RECIPE_NAME_SHORT)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -160,7 +160,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(createLongString("a", 101))
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -175,7 +175,7 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME)
                 .withDescription(createLongString("a", 1001))
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());
@@ -191,14 +191,14 @@ public class RecipeTests extends CloudbreakTest {
         given(Recipe.isCreatedDeleted()
                 .withName(VALID_RECIPE_NAME + "-delete-create")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
 
         given(Recipe.request()
                 .withName(VALID_RECIPE_NAME + "-delete-create")
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeType.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeType.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String(VALID_RECIPE_SCRIPT.getBytes()))
         );
         when(Recipe.post());

@@ -1,4 +1,4 @@
--- // CLOUD-91647 refactor the recipe types
+-- // rename recipe types
 -- Migration SQL that makes the change goes here.
 
 UPDATE recipe SET recipetype='PRE_CLUSTER_MANAGER_START' WHERE recipetype='PRE_AMBARI_START';
