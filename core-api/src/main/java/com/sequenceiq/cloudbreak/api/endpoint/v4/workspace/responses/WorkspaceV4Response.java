@@ -1,8 +1,10 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.UserWorkspacePermissionsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Base;
 import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -10,12 +12,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class WorkspaceResponse extends WorkspaceBase {
+public class WorkspaceV4Response extends WorkspaceV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    private Set<UserWorkspacePermissionsJson> users;
+    private Set<UserWorkspacePermissionsV4Request> users;
 
     private WorkspaceStatus status;
 
@@ -28,11 +30,11 @@ public class WorkspaceResponse extends WorkspaceBase {
         this.id = id;
     }
 
-    public Set<UserWorkspacePermissionsJson> getUsers() {
+    public Set<UserWorkspacePermissionsV4Request> getUsers() {
         return users;
     }
 
-    public void setUsers(Set<UserWorkspacePermissionsJson> users) {
+    public void setUsers(Set<UserWorkspacePermissionsV4Request> users) {
         this.users = users;
     }
 

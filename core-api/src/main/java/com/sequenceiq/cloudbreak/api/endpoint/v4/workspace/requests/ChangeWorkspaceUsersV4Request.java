@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests;
 
 import java.util.Set;
 
@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 @ValidChangeWorkspaceUsersJson
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChangeWorkspaceUsersJson {
+public class ChangeWorkspaceUsersV4Request {
 
     private String userId;
 

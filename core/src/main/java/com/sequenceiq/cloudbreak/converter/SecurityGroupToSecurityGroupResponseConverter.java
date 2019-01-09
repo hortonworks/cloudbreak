@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
@@ -21,7 +21,7 @@ public class SecurityGroupToSecurityGroupResponseConverter extends AbstractConve
         json.setId(source.getId());
         json.setName(source.getName());
         json.setDescription(source.getDescription());
-        WorkspaceResourceResponse workspace = getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class);
+        WorkspaceResourceV4Response workspace = getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class);
         json.setWorkspace(workspace);
         json.setSecurityRules(convertSecurityRules(source.getSecurityRules()));
         json.setSecurityGroupId(source.getFirstSecurityGroupId());

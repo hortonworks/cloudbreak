@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.environment.Region;
 @Component
 public class EnvironmentCreationValidator {
 
-    public ValidationResult validate(Environment environment, EnvironmentRequest request, boolean regionsSupported) {
+    public ValidationResult validate(Environment environment, EnvironmentV4Request request, boolean regionsSupported) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateLdapConfigs(environment, request, resultBuilder);
         validateProxyConfigs(environment, request, resultBuilder);
@@ -35,7 +35,7 @@ public class EnvironmentCreationValidator {
         return resultBuilder.build();
     }
 
-    private void validateKerberosConfigs(Environment environment, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {
+    private void validateKerberosConfigs(Environment environment, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
         if (environment.getKerberosConfigs().size() < request.getKerberoses().size()) {
             Set<String> foundKerberosConfigs = environment.getKerberosConfigs().stream()
                     .map(KerberosConfig::getName).collect(Collectors.toSet());
@@ -46,7 +46,7 @@ public class EnvironmentCreationValidator {
         }
     }
 
-    private void validateLdapConfigs(Environment subject, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {
+    private void validateLdapConfigs(Environment subject, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
         if (subject.getLdapConfigs().size() < request.getLdaps().size()) {
             Set<String> foundLdaps = subject.getLdapConfigs().stream().map(LdapConfig::getName).collect(Collectors.toSet());
             Set<String> requestedLdaps = new HashSet<>(request.getLdaps());
@@ -56,7 +56,7 @@ public class EnvironmentCreationValidator {
         }
     }
 
-    private void validateProxyConfigs(Environment subject, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {
+    private void validateProxyConfigs(Environment subject, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
         if (subject.getProxyConfigs().size() < request.getProxies().size()) {
             Set<String> foundProxyConfigs = subject.getProxyConfigs().stream().map(ProxyConfig::getName).collect(Collectors.toSet());
             Set<String> requestedProxyConfigs = new HashSet<>(request.getProxies());
@@ -66,7 +66,7 @@ public class EnvironmentCreationValidator {
         }
     }
 
-    private void validateRdsConfigs(Environment subject, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {
+    private void validateRdsConfigs(Environment subject, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
         if (subject.getRdsConfigs().size() < request.getDatabases().size()) {
             Set<String> foundRdsConfigs = subject.getRdsConfigs().stream().map(RDSConfig::getName).collect(Collectors.toSet());
             Set<String> requestedRdsConfigs = new HashSet<>(request.getDatabases());
@@ -76,7 +76,7 @@ public class EnvironmentCreationValidator {
         }
     }
 
-    private void validateKubernetesConfigs(Environment subject, EnvironmentRequest request, ValidationResultBuilder resultBuilder) {
+    private void validateKubernetesConfigs(Environment subject, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
         if (subject.getKubernetesConfigs().size() < request.getKubernetes().size()) {
             Set<String> foundKubernetesConfigs = subject.getKubernetesConfigs().stream().map(KubernetesConfig::getName).collect(Collectors.toSet());
             Set<String> requestedKubernetesConfigs = new HashSet<>(request.getKubernetes());

@@ -32,7 +32,7 @@ public class ControllerDescription {
     public static final String FLEX_SUBSCRIPTION_DESCRIPTION = "Operations on Flex subscriptions";
     public static final String IMAGE_CATALOG_DESCRIPTION = "Operations on Image catalogs";
     public static final String REPOSITORY_CONFIGS_VALIDATION_DESCRIPTION = "Operations to validate repository configs";
-    public static final String WORKSPACE_DESCRIPTION = "Operations on organiztions";
+    public static final String WORKSPACE_V4_DESCRIPTION = "Operations on organiztions";
 
     public static final String AUTOSCALE_DESCRIPTION = "Operations by Autoscale";
 
@@ -48,7 +48,7 @@ public class ControllerDescription {
     public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by workspace and blueprint";
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
     public static final String USER_V3_DESCRIPTION = "Operations on users in workspace";
-    public static final String ENVIRONMENT_V3_DESCRIPTION = "Operations on environments.";
+    public static final String ENVIRONMENT_V4_DESCRIPTION = "Operations on environments.";
 
     public static final String KERBEROS_CONFIG_V4_DESCRIPTION = "Operations on kerberos configs.";
     public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentResponses.simpleEnvironmentResponses;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses.simpleEnvironmentResponses;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -11,12 +11,12 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentResponses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 
@@ -28,12 +28,12 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
     private EnvironmentService environmentService;
 
     @Override
-    public DetailedEnvironmentV4Response create(Long workspaceId, @Valid EnvironmentRequest request) {
+    public DetailedEnvironmentV4Response post(Long workspaceId, @Valid EnvironmentV4Request request) {
         return environmentService.createForLoggedInUser(request, workspaceId);
     }
 
     @Override
-    public SimpleEnvironmentResponses list(Long workspaceId) {
+    public SimpleEnvironmentV4Responses list(Long workspaceId) {
         return simpleEnvironmentResponses(environmentService.listByWorkspaceId(workspaceId));
     }
 
@@ -53,12 +53,12 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
     }
 
     @Override
-    public DetailedEnvironmentV4Response detach(Long workspaceId, String environmentName, @Valid EnvironmentDetachRequest request) {
+    public DetailedEnvironmentV4Response detach(Long workspaceId, String environmentName, @Valid EnvironmentDetachV4Request request) {
         return environmentService.detachResources(environmentName, request, workspaceId);
     }
 
     @Override
-    public DetailedEnvironmentV4Response changeCredential(Long workspaceId, String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
+    public DetailedEnvironmentV4Response changeCredential(Long workspaceId, String environmentName, @Valid EnvironmentChangeCredentialV4Request request) {
         return environmentService.changeCredential(environmentName, workspaceId, request);
     }
 

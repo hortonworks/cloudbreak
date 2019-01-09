@@ -1,5 +1,6 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -7,9 +8,9 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class UserWorkspacePermissionsJson implements JsonEntity {
+public class UserWorkspacePermissionsV4Response implements JsonEntity {
 
-    private Set<String> permissions;
+    private Set<String> permissions = new HashSet<>();
 
     private String userName;
 

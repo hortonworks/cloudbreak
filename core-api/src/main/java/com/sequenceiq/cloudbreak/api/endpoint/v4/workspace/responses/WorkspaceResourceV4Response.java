@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class WorkspaceResourceResponse implements JsonEntity {
+public class WorkspaceResourceV4Response implements JsonEntity {
 
     @ApiModelProperty(RecipeModelDescription.WORKSPACE_ID)
     private Long id;

@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Re
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.model.v2.AttachedClusterInfoResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -137,7 +137,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         decorateResponseWithProxyConfig(source, clusterResponse);
         addFilesystem(source, clusterResponse);
         addSharedServiceResponse(source, clusterResponse);
-        clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         return clusterResponse;
     }
 

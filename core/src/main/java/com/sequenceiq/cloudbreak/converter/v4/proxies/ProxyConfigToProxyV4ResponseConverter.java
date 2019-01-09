@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
@@ -25,7 +25,7 @@ public class ProxyConfigToProxyV4ResponseConverter extends AbstractConversionSer
         ProxyV4Response response = new ProxyV4Response();
         response.setId(source.getId());
         response.setName(source.getName());
-        response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
+        response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         response.setDescription(source.getDescription());
         response.setProtocol(source.getProtocol());
         response.setUserName(conversionService.convert(source.getUserNameSecret(), SecretResponse.class));

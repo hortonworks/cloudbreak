@@ -12,12 +12,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentResponses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -29,14 +29,14 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/{workspaceId}/environments")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/environments", description = ControllerDescription.ENVIRONMENT_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/environments", description = ControllerDescription.ENVIRONMENT_V4_DESCRIPTION, protocols = "http,https")
 public interface EnvironmentV4Endpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "createEnvironment")
-    DetailedEnvironmentV4Response create(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentRequest request);
+    DetailedEnvironmentV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentV4Request request);
 
     @GET
     @Path("/{name}")
@@ -56,7 +56,7 @@ public interface EnvironmentV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "listEnvironment")
-    SimpleEnvironmentResponses list(@PathParam("workspaceId") Long workspaceId);
+    SimpleEnvironmentV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
     @Path("/{name}/attach")
@@ -72,18 +72,18 @@ public interface EnvironmentV4Endpoint {
     @ApiOperation(value = EnvironmentOpDescription.DETACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "detachResourcesFromEnvironment")
     DetailedEnvironmentV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-                                                  @Valid EnvironmentDetachRequest request);
+                                                  @Valid EnvironmentDetachV4Request request);
 
     @PUT
-    @Path("/{name}/core/src/test/java/com/sequenceiq/cloudbreak/service/environment/EnvironmentServiceTest.java")
+    @Path("/{name}/change_credential")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironment")
     DetailedEnvironmentV4Response changeCredential(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-        @Valid EnvironmentChangeCredentialRequest request);
+        @Valid EnvironmentChangeCredentialV4Request request);
 
     @PUT
-    @Path("/{name}/registerDatalake")
+    @Path("/{name}/register_datalake")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.REGISTER_EXTERNAL_DATALAKE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "registerExternalDatalake")

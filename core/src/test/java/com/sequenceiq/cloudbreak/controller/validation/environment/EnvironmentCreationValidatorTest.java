@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -66,17 +66,17 @@ public class EnvironmentCreationValidatorTest {
         Region region2 = new Region();
         region2.setName("region2");
         environment.setRegions(new Json(Set.of(region1, region2)));
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setLdaps(Set.of("ldap1", "ldap2"));
-        environmentRequest.setProxies(Set.of("proxy1", "proxy2"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2", "rds3"));
-        environmentRequest.setKerberoses(Set.of("kdc1", "kdc2"));
-        environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setLdaps(Set.of("ldap1", "ldap2"));
+        environmentV4Request.setProxies(Set.of("proxy1", "proxy2"));
+        environmentV4Request.setDatabases(Set.of("rds1", "rds2", "rds3"));
+        environmentV4Request.setKerberoses(Set.of("kdc1", "kdc2"));
+        environmentV4Request.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
 
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentV4Request, true);
 
         assertEquals(ERROR, result.getState());
         assertEquals(5L, result.getErrors().size());
@@ -96,16 +96,16 @@ public class EnvironmentCreationValidatorTest {
         environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
         environment.setRdsConfigs(Collections.emptySet());
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setLdaps(Collections.emptySet());
-        environmentRequest.setProxies(Collections.emptySet());
-        environmentRequest.setDatabases(Collections.emptySet());
-        environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setLdaps(Collections.emptySet());
+        environmentV4Request.setProxies(Collections.emptySet());
+        environmentV4Request.setDatabases(Collections.emptySet());
+        environmentV4Request.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, false);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentV4Request, false);
         // THEN
         assertEquals(ERROR, result.getState());
         assertEquals(1L, result.getErrors().size());
@@ -122,19 +122,19 @@ public class EnvironmentCreationValidatorTest {
         environment.setProxyConfigs(Collections.emptySet());
         environment.setRdsConfigs(Collections.emptySet());
         environment.setRegions(new Json(Set.of()));
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setLdaps(Collections.emptySet());
-        environmentRequest.setProxies(Collections.emptySet());
-        environmentRequest.setDatabases(Collections.emptySet());
-        environmentRequest.setRegions(Collections.emptySet());
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setLdaps(Collections.emptySet());
+        environmentV4Request.setProxies(Collections.emptySet());
+        environmentV4Request.setDatabases(Collections.emptySet());
+        environmentV4Request.setRegions(Collections.emptySet());
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
         locationV4Request.setLatitude(1.1);
         locationV4Request.setLongitude(-1.1);
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
 
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentV4Request, true);
         // THEN
         assertEquals(ERROR, result.getState());
         assertEquals(1L, result.getErrors().size());
@@ -175,16 +175,16 @@ public class EnvironmentCreationValidatorTest {
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
 
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setLdaps(Set.of("ldap1"));
-        environmentRequest.setProxies(Set.of("proxy1"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2"));
-        environmentRequest.setRegions(Set.of("region1", "region2"));
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setLdaps(Set.of("ldap1"));
+        environmentV4Request.setProxies(Set.of("proxy1"));
+        environmentV4Request.setDatabases(Set.of("rds1", "rds2"));
+        environmentV4Request.setRegions(Set.of("region1", "region2"));
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentV4Request, true);
         // THEN
         assertEquals(VALID, result.getState());
     }
@@ -218,19 +218,19 @@ public class EnvironmentCreationValidatorTest {
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
 
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setLdaps(Set.of("ldap1"));
-        environmentRequest.setProxies(Set.of("proxy1"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2"));
-        environmentRequest.setRegions(Collections.emptySet());
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setLdaps(Set.of("ldap1"));
+        environmentV4Request.setProxies(Set.of("proxy1"));
+        environmentV4Request.setDatabases(Set.of("rds1", "rds2"));
+        environmentV4Request.setRegions(Collections.emptySet());
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setLocationName("region1");
         locationV4Request.setLatitude(1.1);
         locationV4Request.setLongitude(-1.1);
-        environmentRequest.setLocation(locationV4Request);
+        environmentV4Request.setLocation(locationV4Request);
 
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, false);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentV4Request, false);
         // THEN
         assertEquals(VALID, result.getState());
     }

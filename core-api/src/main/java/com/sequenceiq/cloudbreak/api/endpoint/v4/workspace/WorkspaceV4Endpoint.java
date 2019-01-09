@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v3;
-
-import java.util.Set;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -13,10 +11,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.users.ChangeWorkspaceUsersJson;
-import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceRequest;
-import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Requests;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.UserIds;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.WorkspaceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserResponses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -25,63 +25,63 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescriptio
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v3/workspaces")
+@Path("/v4/workspaces")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v3/workspaces", description = ControllerDescription.WORKSPACE_DESCRIPTION, protocols = "http,https")
-public interface WorkspaceV3Endpoint {
+@Api(value = "/v4/workspaces", description = ControllerDescription.WORKSPACE_V4_DESCRIPTION, protocols = "http,https")
+public interface WorkspaceV4Endpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.POST, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "createWorkspace")
-    WorkspaceResponse create(@Valid WorkspaceRequest workspaceRequest);
+    WorkspaceV4Response post(@Valid WorkspaceV4Request workspaceV4Request);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.GET, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "getWorkspaces")
-    Set<WorkspaceResponse> getAll();
+    WorkspaceV4Responses list();
 
     @GET
-    @Path("name/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.GET_BY_NAME, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "getWorkspaceByName")
-    WorkspaceResponse getByName(@PathParam("name") String name);
+    WorkspaceV4Response get(@PathParam("name") String name);
 
     @DELETE
-    @Path("name/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.DELETE_BY_NAME, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "deleteWorkspaceByName")
-    WorkspaceResponse deleteByName(@PathParam("name") String name);
+    WorkspaceV4Response delete(@PathParam("name") String name);
 
     @PUT
-    @Path("name/{name}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.CHANGE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "changeWorkspaceUsers")
-    Set<UserResponseJson> changeUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> changeWorkspaceUsersJson);
+    UserResponses changeUsers(@PathParam("name") String workspaceName, @Valid ChangeWorkspaceUsersV4Requests changeWorkspaceUsersV4Requests);
 
     @PUT
-    @Path("name/{name}/removeUsers")
+    @Path("{name}/remove_users")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.REMOVE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "removeWorkspaceUsers")
-    Set<UserResponseJson> removeUsers(@PathParam("name") String workspaceName, @Valid Set<String> userIds);
+    UserResponses removeUsers(@PathParam("name") String workspaceName, @Valid UserIds userIds);
 
     @PUT
-    @Path("name/{name}/addUsers")
+    @Path("{name}/add_users")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.ADD_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "addWorkspaceUsers")
-    Set<UserResponseJson> addUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> addWorkspaceUsersJson);
+    UserResponses addUsers(@PathParam("name") String workspaceName, @Valid ChangeWorkspaceUsersV4Requests addWorkspaceUsers);
 
     @PUT
-    @Path("name/{name}/updateUsers")
+    @Path("{name}/update_users")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = WorkspaceOpDescription.UPDATE_USERS, produces = ContentType.JSON, notes = Notes.WORKSPACE_NOTES,
             nickname = "updateWorkspaceUsers")
-    Set<UserResponseJson> updateUsers(@PathParam("name") String workspaceName, @Valid Set<ChangeWorkspaceUsersJson> updateWorkspaceUsersJson);
+    UserResponses updateUsers(@PathParam("name") String workspaceName, @Valid ChangeWorkspaceUsersV4Requests updateWorkspaceUsers);
 
 }

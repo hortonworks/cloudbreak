@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class EnvironmentRequest extends EnvironmentV4BaseRequest implements CredentialAwareEnvV4Request {
+public class EnvironmentV4Request extends EnvironmentV4BaseRequest implements CredentialAwareEnvV4Request {
 
     @Size(max = 100, min = 5, message = "The length of the environments's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",

@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentRequestModelDe
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class EnvironmentChangeCredentialRequest implements CredentialAwareEnvV4Request {
+public class EnvironmentChangeCredentialV4Request implements CredentialAwareEnvV4Request {
 
     @ApiModelProperty(EnvironmentRequestModelDescription.CREDENTIAL_NAME)
     private String credentialName;
