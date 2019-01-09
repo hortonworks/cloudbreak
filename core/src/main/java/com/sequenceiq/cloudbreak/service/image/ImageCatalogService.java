@@ -132,15 +132,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getLatestImageDefaultPreferred(baseImages);
     }
 
-    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, String os, CloudbreakUser cloudbreakUser,
-            User user)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion,
+            String os, CloudbreakUser cloudbreakUser, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImages statedImages = getImagesOsFiltered(platform, os, user);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
-            List<Image> matchingVersionImages = images.stream().filter(i -> {
-                String[] repoIdParts = i.getStackDetails().getRepo().getStack().get("repoid").split("-");
+            List<Image> matchingVersionImages = images.stream().filter(img -> {
+                String[] repoIdParts = img.getStackDetails().getRepo().getStack().get("repoid").split("-");
                 return repoIdParts.length > 1 && repoIdParts[1].equals(clusterVersion);
             }).collect(Collectors.toList());
             selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
