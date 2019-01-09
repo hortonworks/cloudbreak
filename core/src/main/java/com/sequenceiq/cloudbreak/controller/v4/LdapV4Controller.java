@@ -17,8 +17,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4TestRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4ValidationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestConnectionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4TestResponse;
@@ -77,9 +77,9 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     }
 
     @Override
-    public LdapV4TestResponse test(Long workspaceId, LdapV4TestRequest ldapValidationRequest) {
+    public LdapV4TestResponse test(Long workspaceId, LdapTestV4Request ldapValidationRequest) {
         String existingLDAPConfigName = ldapValidationRequest.getName();
-        LdapV4ValidationRequest validationRequest = ldapValidationRequest.getValidationRequest();
+        LdapTestConnectionV4Request validationRequest = ldapValidationRequest.getValidationRequest();
         if (existingLDAPConfigName == null && validationRequest == null) {
             throw new BadRequestException("Either an existing resource 'name' or an LDAP 'validationRequest' needs to be specified in the request. ");
         }

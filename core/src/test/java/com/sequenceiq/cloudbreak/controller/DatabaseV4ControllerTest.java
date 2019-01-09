@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4TestRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4TestResponse;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -66,7 +66,7 @@ public class DatabaseV4ControllerTest {
         mockWorkspaceService();
         thrown.expect(BadRequestException.class);
 
-        underTest.test(1L, new DatabaseV4TestRequest());
+        underTest.test(1L, new DatabaseTestV4Request());
 
         verifyZeroInteractions(rdsConfigService);
         verifyZeroInteractions(conversionService);
@@ -79,9 +79,9 @@ public class DatabaseV4ControllerTest {
         String expectedConnectionResult = "connected";
         when(rdsConfigService.testRdsConnection(anyString(), any())).thenReturn(expectedConnectionResult);
 
-        DatabaseV4TestRequest databaseV4TestRequest = new DatabaseV4TestRequest();
-        databaseV4TestRequest.setName("TestRdsConfig");
-        DatabaseV4TestResponse result = underTest.test(1L, databaseV4TestRequest);
+        DatabaseTestV4Request databaseTestV4Request = new DatabaseTestV4Request();
+        databaseTestV4Request.setName("TestRdsConfig");
+        DatabaseV4TestResponse result = underTest.test(1L, databaseTestV4Request);
 
         verify(rdsConfigService, times(1)).testRdsConnection(anyString(), any());
         verifyZeroInteractions(conversionService);
@@ -96,9 +96,9 @@ public class DatabaseV4ControllerTest {
         when(rdsConfigService.testRdsConnection(any(RDSConfig.class))).thenReturn(expectedConnectionResult);
         when(conversionService.convert(any(DatabaseV4Request.class), eq(RDSConfig.class))).thenReturn(new RDSConfig());
 
-        DatabaseV4TestRequest databaseV4TestRequest = new DatabaseV4TestRequest();
-        databaseV4TestRequest.setRdsConfig(new DatabaseV4Request());
-        DatabaseV4TestResponse result = underTest.test(1L, databaseV4TestRequest);
+        DatabaseTestV4Request databaseTestV4Request = new DatabaseTestV4Request();
+        databaseTestV4Request.setRdsConfig(new DatabaseV4Request());
+        DatabaseV4TestResponse result = underTest.test(1L, databaseTestV4Request);
 
         verify(rdsConfigService, times(1)).testRdsConnection(any(RDSConfig.class));
         verify(conversionService, times(1)).convert(any(DatabaseV4Request.class), eq(RDSConfig.class));
