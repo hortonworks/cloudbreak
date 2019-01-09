@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ public class DatalakePrerequisiteResponse extends ParametersQueryRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.RESPONSE)
-    private LdapConfigResponse ldapConfig;
+    private LdapV4Response ldap;
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.RESPONSE)
     private Set<DatabaseV4Response> databases = new HashSet<>();
@@ -30,12 +30,12 @@ public class DatalakePrerequisiteResponse extends ParametersQueryRequest {
     @ApiModelProperty(value = ModelDescriptions.KerberosConfigModelDescription.RESPONSE)
     private KerberosV4Response kerberos;
 
-    public LdapConfigResponse getLdapConfig() {
-        return ldapConfig;
+    public LdapV4Response getLdap() {
+        return ldap;
     }
 
-    public void setLdapConfig(LdapConfigResponse ldapConfig) {
-        this.ldapConfig = ldapConfig;
+    public void setLdap(LdapV4Response ldap) {
+        this.ldap = ldap;
     }
 
     public Set<DatabaseV4Response> getDatabases() {

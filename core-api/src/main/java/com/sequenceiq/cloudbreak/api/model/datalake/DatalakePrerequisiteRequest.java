@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ public class DatalakePrerequisiteRequest extends ParametersQueryRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.REQUEST, required = true)
-    private LdapConfigRequest ldap;
+    private LdapV4Request ldap;
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.REQUEST, required = true)
     private Set<DatabaseV4Request> databases = new HashSet<>();
@@ -30,11 +30,11 @@ public class DatalakePrerequisiteRequest extends ParametersQueryRequest {
     @ApiModelProperty(value = ModelDescriptions.KerberosConfigModelDescription.REQUEST, required = true)
     private KerberosV4Request kerberos;
 
-    public LdapConfigRequest getLdap() {
+    public LdapV4Request getLdap() {
         return ldap;
     }
 
-    public void setLdap(LdapConfigRequest ldap) {
+    public void setLdap(LdapV4Request ldap) {
         this.ldap = ldap;
     }
 

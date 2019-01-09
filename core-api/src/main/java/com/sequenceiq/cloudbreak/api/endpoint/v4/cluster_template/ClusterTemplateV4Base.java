@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.template;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public abstract class ClusterTemplateBase implements JsonEntity {
+public abstract class ClusterTemplateV4Base implements JsonEntity {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
     @Pattern(regexp = "^[^;\\/%]*$",
@@ -29,7 +29,8 @@ public abstract class ClusterTemplateBase implements JsonEntity {
     @NotNull
     private StackV2Request stackTemplate;
 
-    private ClusterTemplateType type;
+    @ApiModelProperty(allowableValues = "SPARK,HIVE,DATASCIENCE,EDW,ETL,OTHER")
+    private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
@@ -66,11 +67,11 @@ public abstract class ClusterTemplateBase implements JsonEntity {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public ClusterTemplateType getType() {
+    public ClusterTemplateV4Type getType() {
         return type;
     }
 
-    public void setType(ClusterTemplateType type) {
+    public void setType(ClusterTemplateV4Type type) {
         this.type = type;
     }
 }

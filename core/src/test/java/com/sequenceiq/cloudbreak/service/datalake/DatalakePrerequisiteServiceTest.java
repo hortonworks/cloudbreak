@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -82,9 +82,9 @@ public class DatalakePrerequisiteServiceTest {
 
     @Before
     public void before() {
-        when(conversionService.convert(any(LdapConfigRequest.class), eq(LdapConfig.class))).thenReturn(ldapConfig());
+        when(conversionService.convert(any(LdapV4Request.class), eq(LdapConfig.class))).thenReturn(ldapConfig());
         when(conversionService.convert(any(LdapConfig.class), eq(LdapDetails.class))).thenReturn(ldapDetails());
-        when(conversionService.convert(any(LdapConfig.class), eq(LdapConfigResponse.class))).thenReturn(ldapConfigResponse());
+        when(conversionService.convert(any(LdapConfig.class), eq(LdapV4Response.class))).thenReturn(ldapConfigResponse());
 
         when(conversionService.convert(any(DatabaseV4Request.class), eq(RDSConfig.class))).thenReturn(rdsConfig());
         when(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Response.class))).thenReturn(rdsConfigResponse());
@@ -158,8 +158,8 @@ public class DatalakePrerequisiteServiceTest {
         return rdsConfigRequest;
     }
 
-    private LdapConfigRequest ldapConfigRequest() {
-        LdapConfigRequest ldapConfigRequest = new LdapConfigRequest();
+    private LdapV4Request ldapConfigRequest() {
+        LdapV4Request ldapConfigRequest = new LdapV4Request();
         ldapConfigRequest.setName("demo-ldap");
         ldapConfigRequest.setDescription("ldap description");
         return ldapConfigRequest;
@@ -172,8 +172,8 @@ public class DatalakePrerequisiteServiceTest {
         return ldapConfigRequest;
     }
 
-    private LdapConfigResponse ldapConfigResponse() {
-        LdapConfigResponse ldapConfigResponse = new LdapConfigResponse();
+    private LdapV4Response ldapConfigResponse() {
+        LdapV4Response ldapConfigResponse = new LdapV4Response();
         ldapConfigResponse.setName("demo-ldap");
         ldapConfigResponse.setDescription("ldap description");
         return ldapConfigResponse;

@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
 import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteResponse;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
@@ -106,7 +106,7 @@ public class DatalakePrerequisiteService {
 
         DatalakePrerequisiteResponse datalakePrerequisiteResponse = new DatalakePrerequisiteResponse();
         datalakePrerequisiteResponse.setKerberos(prepareKerberosResponse(kerberosConfig));
-        datalakePrerequisiteResponse.setLdapConfig(prepareLdapResponse(ldapConfig));
+        datalakePrerequisiteResponse.setLdap(prepareLdapResponse(ldapConfig));
         datalakePrerequisiteResponse.setDatabases(prepareRdsResponse(rdsConfigs));
         return datalakePrerequisiteResponse;
     }
@@ -134,14 +134,14 @@ public class DatalakePrerequisiteService {
         return conversionService.convert(ldapConfig, LdapDetails.class);
     }
 
-    private LdapConfig prepareLdapConfig(String environment, LdapConfigRequest ldapConfigRequest) {
+    private LdapConfig prepareLdapConfig(String environment, LdapV4Request ldapConfigRequest) {
         LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
         ldapConfig.setName(String.format("%s-%s-%s", environment, ldapConfigRequest.getName(), getHash()));
         return ldapConfig;
     }
 
-    private LdapConfigResponse prepareLdapResponse(LdapConfig ldapConfig) {
-        return conversionService.convert(ldapConfig, LdapConfigResponse.class);
+    private LdapV4Response prepareLdapResponse(LdapConfig ldapConfig) {
+        return conversionService.convert(ldapConfig, LdapV4Response.class);
     }
 
     private void fireLdapEvent(LdapConfig ldapConfig, ResourceEvent event, String message, boolean notifyWorkspace) {

@@ -6,9 +6,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.ClusterTemplateV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType;
-import com.sequenceiq.cloudbreak.api.model.template.DatalakeRequired;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -26,7 +26,7 @@ public class ClusterTemplateView extends CompactView {
     private DatalakeRequired datalakeRequired;
 
     @Enumerated(EnumType.STRING)
-    private ClusterTemplateType type;
+    private ClusterTemplateV4Type type;
 
     @OneToOne
     private StackApiView stackTemplate;
@@ -60,11 +60,11 @@ public class ClusterTemplateView extends CompactView {
         this.datalakeRequired = datalakeRequired;
     }
 
-    public ClusterTemplateType getType() {
+    public ClusterTemplateV4Type getType() {
         return type;
     }
 
-    public void setType(ClusterTemplateType type) {
+    public void setType(ClusterTemplateV4Type type) {
         this.type = type;
     }
 

@@ -1,7 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model.template;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.ClusterTemplateV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.model.CompactViewResponse;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -20,7 +22,7 @@ public class ClusterTemplateViewResponse extends CompactViewResponse {
     private DatalakeRequired datalakeRequired;
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.TYPE)
-    private ClusterTemplateType type;
+    private ClusterTemplateV4Type type;
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
@@ -50,11 +52,11 @@ public class ClusterTemplateViewResponse extends CompactViewResponse {
         this.datalakeRequired = datalakeRequired;
     }
 
-    public ClusterTemplateType getType() {
+    public ClusterTemplateV4Type getType() {
         return type;
     }
 
-    public void setType(ClusterTemplateType type) {
+    public void setType(ClusterTemplateV4Type type) {
         this.type = type;
     }
 

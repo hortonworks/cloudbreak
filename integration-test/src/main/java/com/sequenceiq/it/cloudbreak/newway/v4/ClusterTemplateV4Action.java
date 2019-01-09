@@ -1,69 +1,70 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.v4;
 
 import java.io.IOException;
-import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateV4Entity;
+import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-class ClusterTemplateAction {
+public class ClusterTemplateV4Action {
 
-    private ClusterTemplateAction() {
+    private ClusterTemplateV4Action() {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterTemplateEntity clusterTemplateEntity = (ClusterTemplateEntity) entity;
+        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(String.format(" post %s cluster template. ", clusterTemplateEntity.getName()));
-        clusterTemplateEntity.setResponse(
+        Log.log(String.format(" post %s cluster template. ", clusterTemplateV4Entity.getName()));
+        clusterTemplateV4Entity.setResponse(
                 client.getCloudbreakClient()
-                        .clusterTemplateV3EndPoint()
-                        .createInWorkspace(workspaceId, clusterTemplateEntity.getRequest()));
+                        .clusterTemplateV4EndPoint()
+                        .post(workspaceId, clusterTemplateV4Entity.getRequest()));
 
-        integrationTestContext.putCleanUpParam(clusterTemplateEntity.getName(), clusterTemplateEntity.getResponse().getId());
+        integrationTestContext.putCleanUpParam(clusterTemplateV4Entity.getName(), clusterTemplateV4Entity.getResponse().getId());
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        ClusterTemplateEntity clusterTemplateEntity = (ClusterTemplateEntity) entity;
+        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(String.format(" get %s cluster template by Name. ", clusterTemplateEntity.getName()));
-        clusterTemplateEntity.setResponse(
+        Log.log(String.format(" get %s cluster template by Name. ", clusterTemplateV4Entity.getName()));
+        clusterTemplateV4Entity.setResponse(
                 client.getCloudbreakClient()
-                        .clusterTemplateV3EndPoint()
-                        .getByNameInWorkspace(workspaceId, clusterTemplateEntity.getName()));
-        Log.logJSON(String.format(" get %s cluster template response: ", clusterTemplateEntity.getName()), new Object[]{clusterTemplateEntity.getResponse()});
+                        .clusterTemplateV4EndPoint()
+                        .get(workspaceId, clusterTemplateV4Entity.getName()));
+        Log.logJSON(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()), new Object[]{clusterTemplateV4Entity.getResponse()});
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterTemplateEntity clusterTemplateEntity = (ClusterTemplateEntity) entity;
+        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all cluster templates. ");
-        Set<ClusterTemplateResponse> clusterTemplateResponses = ClusterTemplateUtil.getResponseFromViews(
+        clusterTemplateV4Entity.setResponses(
                 client.getCloudbreakClient()
-                    .clusterTemplateV3EndPoint()
-                    .listByWorkspace(workspaceId));
-        clusterTemplateEntity.setResponses(clusterTemplateResponses);
+                        .clusterTemplateV4EndPoint()
+                        .list(workspaceId));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterTemplateEntity clusterTemplateEntity = (ClusterTemplateEntity) entity;
+        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(String.format(" delete %s cluster template with Name. ", clusterTemplateEntity.getName()));
+        Log.log(String.format(" delete %s cluster template with Name. ", clusterTemplateV4Entity.getName()));
 
-        client.getCloudbreakClient().clusterTemplateV3EndPoint().deleteInWorkspace(workspaceId, clusterTemplateEntity.getName());
+        client.getCloudbreakClient().clusterTemplateV4EndPoint().delete(workspaceId, clusterTemplateV4Entity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
