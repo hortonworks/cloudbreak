@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentRequestModelDescription;
 
@@ -31,7 +31,7 @@ public class EnvironmentV4Request extends EnvironmentV4BaseRequest implements Cr
     private String credentialName;
 
     @ApiModelProperty(EnvironmentRequestModelDescription.CREDENTIAL)
-    private CredentialRequest credential;
+    private CredentialV4Request credential;
 
     @ApiModelProperty(EnvironmentRequestModelDescription.REGIONS)
     private Set<String> regions = new HashSet<>();
@@ -67,12 +67,12 @@ public class EnvironmentV4Request extends EnvironmentV4BaseRequest implements Cr
     }
 
     @Override
-    public CredentialRequest getCredential() {
+    public CredentialV4Request getCredential() {
         return credential;
     }
 
     @Override
-    public void setCredential(CredentialRequest credential) {
+    public void setCredential(CredentialV4Request credential) {
         this.credential = credential;
     }
 

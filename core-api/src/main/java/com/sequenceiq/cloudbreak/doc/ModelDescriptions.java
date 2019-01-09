@@ -38,7 +38,12 @@ public class ModelDescriptions {
     }
 
     public static class CredentialModelDescription {
-        public static final String PARAMETERS = "cloud specific parameters for credential";
+        public static final String AWS_PARAMETERS = "custom parameters for AWS credential";
+        public static final String GCP_PARAMETERS = "custom parameters for GCP credential";
+        public static final String AZURE_PARAMETERS = "custom parameters for Azure credential";
+        public static final String OPENSTACK_PARAMETERS = "custom parameters for Openstack credential";
+        public static final String CUMULUS_YARN_PARAMETERS = "custom parameters for Cumulus Yarn credential";
+        public static final String YARN_PARAMETERS = "custom parameters for Yarn credential";
         public static final String ACCOUNT_IDENTIFIER = "provider specific identifier of the account/subscription/project that is used by Cloudbreak";
         public static final String AWS_CREDENTIAL_PREREQUISITES = "AWS specific credential prerequisites.";
         public static final String AZURE_CREDENTIAL_PREREQUISITES = "Azure specific credential prerequisites.";
@@ -638,6 +643,9 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_NAME = "Name of the credential of the environment. If the name is given, "
                 + "the detailed credential is ignored in the request.";
         public static final String CREDENTIAL = "If credentialName is not specified, the credential is used to create the new credential for the environment.";
+        public static final String INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL = "The url provided by Azure where the user have to use the given user code "
+                + "to sign in";
+        public static final String INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE = "The user code what has to be used for the sign-in process on the Azure portal";
         public static final String PROXY_CONFIGS = "Name of the proxy configurations to be attached to the environment.";
         public static final String RDS_CONFIGS = "Name of the RDS configurations to be attached to the environment.";
         public static final String KUBERNETES_CONFIGS = "Name of the Kubernetes configurations to be attached to the environment.";

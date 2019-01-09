@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
@@ -47,7 +47,7 @@ public class StackResponse extends StackBase {
     private String statusReason;
 
     @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialResponse credential;
+    private CredentialV4Response credential;
 
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkResponse network;
@@ -192,11 +192,11 @@ public class StackResponse extends StackBase {
         this.failurePolicy = failurePolicy;
     }
 
-    public CredentialResponse getCredential() {
+    public CredentialV4Response getCredential() {
         return credential;
     }
 
-    public void setCredential(CredentialResponse credential) {
+    public void setCredential(CredentialV4Response credential) {
         this.credential = credential;
     }
 

@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.JsonParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.P12Parameters;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -11,12 +20,6 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class GcpCloudProvider extends CloudProviderHelper {
 
@@ -56,7 +59,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(GCP_CAPITAL)
-                .withParameters(gcpCredentialDetails());
+                .withGcpParameters(gcpCredentialDetails());
     }
 
     @Override
@@ -226,38 +229,62 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .withLdapConfigName(resourceHelper.getLdapConfigName());
     }
 
-    public Map<String, Object> gcpCredentialDetails() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetails() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsJson() {
-        return Map.of("selector", "credential-json", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "credentialJson",
-                getTestParameter().get("integrationtest.gcpcredential.jsonFile").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsJson() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        JsonParameters jsonParameters = new JsonParameters();
+        jsonParameters.setCredentialJson(getTestParameter().get("integrationtest.gcpcredential.jsonFile").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setJson(jsonParameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsNewServiceAccount() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.newServiceAccountId"), "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.newP12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsNewServiceAccount() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.newServiceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.newP12File")
+                .substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsEmptyP12File() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "serviceAccountPrivateKey", "");
+    public GcpCredentialV4Parameters gcpCredentialDetailsEmptyP12File() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey("");
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsEmptyProjectId() {
-        return Map.of("selector", "credential-p12", "projectId", "", "serviceAccountId",
-                getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"), "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsEmptyProjectId() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId("");
+        p12Parameters.setServiceAccountId(getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 
-    public Map<String, Object> gcpCredentialDetailsEmptyServiceAccount() {
-        return Map.of("selector", "credential-p12", "projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"),
-                "serviceAccountId", "", "serviceAccountPrivateKey",
-                getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+    public GcpCredentialV4Parameters gcpCredentialDetailsEmptyServiceAccount() {
+        GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
+        P12Parameters p12Parameters = new P12Parameters();
+        p12Parameters.setProjectId(getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        p12Parameters.setServiceAccountId("");
+        p12Parameters.setServiceAccountPrivateKey(getTestParameter().get("integrationtest.gcpcredential.p12File").substring(CloudProviderHelper.BEGIN_INDEX));
+        parameters.setP12(p12Parameters);
+        return parameters;
     }
 }

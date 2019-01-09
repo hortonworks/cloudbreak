@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
@@ -63,7 +63,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
         return this;
     }
 
-    public EnvironmentEntity withCredential(CredentialRequest credential) {
+    public EnvironmentEntity withCredential(CredentialV4Request credential) {
         getRequest().setCredential(credential);
         return this;
     }

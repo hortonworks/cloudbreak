@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.credentials;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static java.lang.Boolean.FALSE;
@@ -13,16 +13,18 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.credential.CredentialParameterSetterUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 
 @Component
-public class CredentialToCredentialResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {
+public class CredentialToCredentialResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialV4Response> {
     private static final List<String> FIELDS_TO_COVER = Arrays.asList("password", "secretKey", "serviceAccountPrivateKey");
 
     private static final String PLACEHOLDER = "********";
@@ -36,9 +38,12 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
     @Inject
     private ConversionService conversionService;
 
+    @Inject
+    private CredentialParameterSetterUtil credentialParameterSetterUtil;
+
     @Override
-    public CredentialResponse convert(Credential source) {
-        CredentialResponse credentialJson = new CredentialResponse();
+    public CredentialV4Response convert(Credential source) {
+        CredentialV4Response credentialJson = new CredentialV4Response();
         credentialJson.setId(source.getId());
         credentialValidator.validateCredentialCloudPlatform(source.cloudPlatform());
         credentialJson.setCloudPlatform(source.cloudPlatform());
@@ -47,23 +52,20 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
             Json secretAttributes = new Json(source.getAttributes());
             Map<String, Object> parameters = credentialDefinitionService.removeSensitives(platform(source.cloudPlatform()), secretAttributes.getMap());
             convertValuesToBooleanIfNecessary(parameters);
-            credentialJson.setParameters(parameters);
+            coverSensitiveData(parameters);
+            credentialParameterSetterUtil.setProperParameters(source.cloudPlatform(), credentialJson, parameters);
             credentialJson.setAttributes(conversionService.convert(source.getAttributesSecret(), SecretResponse.class));
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        if (source.getTopology() != null) {
-            credentialJson.setTopologyId(source.getTopology().getId());
-        }
         credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        coverSensitiveData(credentialJson);
         credentialJson.setGovCloud(source.getGovCloud());
         return credentialJson;
     }
 
-    private void coverSensitiveData(CredentialResponse response) {
+    private void coverSensitiveData(Map<String, Object> params) {
         for (String field : FIELDS_TO_COVER) {
-            if (response.getParameters().get(field) != null) {
-                response.getParameters().put(field, PLACEHOLDER);
+            if (params.get(field) != null) {
+                params.put(field, PLACEHOLDER);
             }
         }
     }

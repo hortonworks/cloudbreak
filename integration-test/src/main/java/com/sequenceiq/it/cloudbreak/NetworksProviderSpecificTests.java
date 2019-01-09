@@ -13,7 +13,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -139,8 +139,8 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
         when(Credential.getAll());
         then(Credential.assertThis(
                 (credential, t) -> {
-                    Set<CredentialResponse> credentialResponses = credential.getResponses();
-                    for (CredentialResponse response : credentialResponses) {
+                    Set<CredentialV4Response> credentialResponses = credential.getResponses();
+                    for (CredentialV4Response response : credentialResponses) {
                         if (response.getName().equals(credentialName)) {
                             credentialIdMap.put(provider, response.getName());
                         }

@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4ShortResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -37,7 +37,7 @@ public class UserProfileToUserProfileV4ResponseConverter extends AbstractConvers
                             equals(restRequestThreadLocalService.getRequestedWorkspaceId()))
                     .limit(1)
                     .forEach(credential -> {
-                        CredentialResponse credentialResponse = getConversionService().convert(credential, CredentialResponse.class);
+                        CredentialV4Response credentialResponse = getConversionService().convert(credential, CredentialV4Response.class);
                         userProfileV4Response.setCredential(credentialResponse);
                     });
         }

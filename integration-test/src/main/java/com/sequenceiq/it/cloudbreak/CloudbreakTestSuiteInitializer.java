@@ -22,7 +22,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -132,7 +132,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
         }
            putCredentialToContext(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialV4Endpoint(), cloudProvider,
                 credentialName);
         putStackToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint(), stackName);
@@ -175,7 +175,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putCredentialToContext(CredentialEndpoint endpoint, String cloudProvider, String credentialName) {
+    private void putCredentialToContext(CredentialV4Endpoint endpoint, String cloudProvider, String credentialName) {
         if (StringUtils.isEmpty(credentialName)) {
             String defaultCredentialName = itProps.getCredentialName(cloudProvider);
             if (!"__ignored__".equals(defaultCredentialName)) {
@@ -183,7 +183,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             }
         }
         if (StringUtils.hasLength(credentialName)) {
-            Long resourceId = endpoint.getPublic(credentialName).getId();
+            Long resourceId = endpoint.get(1L, credentialName).getId();
             itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId.toString());
         }
     }

@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,7 +23,7 @@ public class CredentialSourceRequest implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.ID, required = true)
     private Long sourceId;
 
-    @ApiModelProperty(CredentialModelDescription.PARAMETERS)
+    @ApiModelProperty
     private Map<String, Object> parameters = new HashMap<>();
 
     public String getSourceName() {

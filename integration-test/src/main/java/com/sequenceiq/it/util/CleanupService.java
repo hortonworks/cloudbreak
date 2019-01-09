@@ -37,16 +37,17 @@ public class CleanupService {
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
 
-        cloudbreakClient.credentialEndpoint()
-                .getPrivates()
+        cloudbreakClient.credentialV4Endpoint()
+                .list(1L)
+                .getCredentials()
                 .stream()
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
-                .forEach(credential -> deleteCredential(cloudbreakClient, String.valueOf(credential.getId())));
+                .forEach(credential -> deleteCredential(cloudbreakClient, credential.getName()));
     }
 
     public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
         if (credentialId != null) {
-            cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
+            cloudbreakClient.credentialV4Endpoint().delete(1L, credentialId);
         }
     }
 

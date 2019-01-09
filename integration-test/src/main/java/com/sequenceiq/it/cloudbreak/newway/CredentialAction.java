@@ -20,8 +20,8 @@ class CredentialAction {
                 .concat(" private credential. "));
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
-                        .credentialEndpoint()
-                        .postPrivate(credentialEntity.getRequest()));
+                        .credentialV4Endpoint()
+                        .post(1L, credentialEntity.getRequest()));
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -34,8 +34,8 @@ class CredentialAction {
                 .concat(" private credential. "));
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
-                        .credentialEndpoint()
-                        .getPrivate(credentialEntity.getName()));
+                        .credentialV4Endpoint()
+                        .get(1L, credentialEntity.getName()));
         Log.logJSON(" get credential response: ", credentialEntity.getResponse());
     }
 
@@ -46,7 +46,7 @@ class CredentialAction {
                 CloudbreakClient.class);
         Log.log(" get all private credential. ");
         credentialEntity.setResponses(
-                client.getCloudbreakClient().credentialEndpoint().getPrivates());
+                client.getCloudbreakClient().credentialV4Endpoint().list(1L).getCredentials());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -57,8 +57,8 @@ class CredentialAction {
         Log.log(" delete "
                 .concat(credentialEntity.getName())
                 .concat(" private credential. "));
-        client.getCloudbreakClient().credentialEndpoint()
-                .deletePrivate(credentialEntity.getName());
+        client.getCloudbreakClient().credentialV4Endpoint()
+                .delete(1L, credentialEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

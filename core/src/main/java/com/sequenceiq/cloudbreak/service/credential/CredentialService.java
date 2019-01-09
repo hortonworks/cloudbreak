@@ -27,9 +27,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -168,19 +168,19 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return delete(credential, workspace);
     }
 
-    public Set<CredentialResponse> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
-        Set<CredentialResponse> jsonSet = new LinkedHashSet<>();
+    public Set<CredentialV4Response> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
+        Set<CredentialV4Response> jsonSet = new LinkedHashSet<>();
         for (Credential credential : credentials) {
             jsonSet.add(convertToResponse(credential));
         }
         return jsonSet;
     }
 
-    public CredentialResponse convertToResponse(Credential credential) {
-        return conversionService.convert(credential, CredentialResponse.class);
+    public CredentialV4Response convertToResponse(Credential credential) {
+        return conversionService.convert(credential, CredentialV4Response.class);
     }
 
-    public Credential convertToCredential(CredentialRequest request) {
+    public Credential convertToCredential(CredentialV4Request request) {
         return conversionService.convert(request, Credential.class);
     }
 
@@ -231,7 +231,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return credentialRepository.save(credential);
     }
 
-    public CredentialPrerequisites getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesV4Response getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased);
         return credentialPrerequisiteService.getPrerequisites(user, workspace, cloudPlatformUppercased, deploymentAddress);

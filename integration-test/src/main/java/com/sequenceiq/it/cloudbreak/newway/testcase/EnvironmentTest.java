@@ -3,10 +3,8 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,10 +15,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -474,7 +472,6 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "testContext")
     public void testCreateEnvironmentChangeCredWithCredRequest(TestContext testContext) {
-        Map<String, Object> parameters = new HashMap<>();
         testContext
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
@@ -484,7 +481,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
                 .given(EnvironmentEntity.class)
                 .withCredentialName(null)
-                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred", parameters))
+                .withCredential(createCredentialRequest("MOCK", "Change credential", "int-change-cred"))
                 .then(Environment::changeCredential)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .validate();
@@ -608,12 +605,11 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    private CredentialRequest createCredentialRequest(String cloudPlatform, String description, String name, Map<String, Object> parameters) {
-        CredentialRequest credentialRequest = new CredentialRequest();
+    private CredentialV4Request createCredentialRequest(String cloudPlatform, String description, String name) {
+        CredentialV4Request credentialRequest = new CredentialV4Request();
         credentialRequest.setCloudPlatform(cloudPlatform);
         credentialRequest.setDescription(description);
         credentialRequest.setName(name);
-        credentialRequest.setParameters(parameters);
         return credentialRequest;
     }
 }

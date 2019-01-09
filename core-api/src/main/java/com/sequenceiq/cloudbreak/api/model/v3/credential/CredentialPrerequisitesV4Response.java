@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Immutable
 @ApiModel
-public class CredentialPrerequisites implements JsonEntity {
+public class CredentialPrerequisitesV4Response implements JsonEntity {
 
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
@@ -27,18 +27,18 @@ public class CredentialPrerequisites implements JsonEntity {
     @ApiModelProperty(value = CredentialModelDescription.GCP_CREDENTIAL_PREREQUISITES)
     private GcpCredentialPrerequisites gcp;
 
-    public CredentialPrerequisites(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {
+    public CredentialPrerequisitesV4Response(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {
         this.cloudPlatform = cloudPlatform;
         this.accountId = accountId;
         this.aws = aws;
     }
 
-    public CredentialPrerequisites(String cloudPlatform, AzureCredentialPrerequisites azure) {
+    public CredentialPrerequisitesV4Response(String cloudPlatform, AzureCredentialPrerequisites azure) {
         this.cloudPlatform = cloudPlatform;
         this.azure = azure;
     }
 
-    public CredentialPrerequisites(String cloudPlatform, GcpCredentialPrerequisites gcp) {
+    public CredentialPrerequisitesV4Response(String cloudPlatform, GcpCredentialPrerequisites gcp) {
         this.cloudPlatform = cloudPlatform;
         this.gcp = gcp;
     }

@@ -104,7 +104,7 @@ public class Credential extends CredentialEntity {
 
     public static CredentialEntity delete(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().credentialV3Endpoint().deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().credentialV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }
@@ -119,7 +119,7 @@ public class Credential extends CredentialEntity {
 
     public static CredentialEntity getByName(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().credentialV3Endpoint().getByNameInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName())
+                cloudbreakClient.getCloudbreakClient().credentialV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
         return entity;
     }

@@ -7,7 +7,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,9 +16,10 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
+import com.sequenceiq.cloudbreak.converter.v4.credentials.CredentialRequestToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 
@@ -63,19 +63,19 @@ public class CredentialRequestToCredentialConverterTest {
 
     @Test
     public void testGovCloudFlagConversion() {
-        CredentialRequest request = new CredentialRequest();
-        request.setParameters(createParametersWithGovCloud(govCloud));
+        CredentialV4Request request = new CredentialV4Request();
+        request.setAws(createParametersWithGovCloud(govCloud));
 
         Credential credential = underTest.convert(request);
 
         assertEquals(expectedGovCloudFlag, credential.getGovCloud());
     }
 
-    private Map<String, Object> createParametersWithGovCloud(Object govCloud) {
-        Map<String, Object> parameters = Maps.newHashMap();
+    private AwsCredentialV4Parameters createParametersWithGovCloud(Object govCloud) {
+        AwsCredentialV4Parameters awsCredentialV4Parameters = new AwsCredentialV4Parameters();
         if (govCloud != null) {
-            parameters.put("govCloud", govCloud);
+            awsCredentialV4Parameters.setGovCloud((Boolean) govCloud);
         }
-        return parameters;
+        return awsCredentialV4Parameters;
     }
 }
