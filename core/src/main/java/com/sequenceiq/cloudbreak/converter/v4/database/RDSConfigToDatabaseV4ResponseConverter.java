@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.database;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;

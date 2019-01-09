@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EnvironmentV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
@@ -81,7 +82,7 @@ public class EndpointConfig extends ResourceConfig {
             UserProfileV4Controller.class,
             UtilController.class,
             UtilV3Controller.class,
-            FileSystemV3Controller.class,
+            FileSystemV4Controller.class,
             AutoscaleController.class
     );
 

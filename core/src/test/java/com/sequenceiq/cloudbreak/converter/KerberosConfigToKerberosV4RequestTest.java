@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.cloudbreak.converter.v4.kerberos.KerberosConfigToKerberosV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.type.KerberosType;

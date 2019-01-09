@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 
 public class ClusterTemplateUtil {
@@ -13,7 +13,7 @@ public class ClusterTemplateUtil {
 
     }
 
-    public static Set<ClusterTemplateV4Response> getResponseFromViews(Collection<ClusterTemplateViewResponse> views) {
+    public static Set<ClusterTemplateV4Response> getResponseFromViews(Collection<ClusterTemplateViewV4Response> views) {
         return views.stream()
                 .map(view -> {
                     ClusterTemplateV4Response response = new ClusterTemplateV4Response();

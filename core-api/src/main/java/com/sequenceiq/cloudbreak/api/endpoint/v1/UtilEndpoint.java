@@ -13,17 +13,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4BuildResponse;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -80,10 +78,4 @@ public interface UtilEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = ContentType.JSON, nickname = "getCustomParameters")
     ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest);
-
-    @POST
-    @Path("filesystem-parameters")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParameters")
-    StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest);
 }
