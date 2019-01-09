@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4TestResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapTestV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -66,7 +66,7 @@ public interface LdapConfigV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON,
             nickname = "postLdapConnectionTestInWorkspace")
-    LdapV4TestResponse test(@PathParam("workspaceId") Long workspaceId, @Valid LdapTestV4Request ldapValidationRequest);
+    LdapTestV4Response test(@PathParam("workspaceId") Long workspaceId, @Valid LdapTestV4Request ldapValidationRequest);
 
     @GET
     @Path("{name}/request")

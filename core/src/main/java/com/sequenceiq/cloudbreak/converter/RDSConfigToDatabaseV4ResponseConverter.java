@@ -44,7 +44,6 @@ public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionSe
         } else {
             json.setClusterNames(new HashSet<>());
         }
-        json.setStackVersion(source.getStackVersion());
         json.setType(source.getType());
         json.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
         json.setEnvironments(source.getEnvironments().stream()

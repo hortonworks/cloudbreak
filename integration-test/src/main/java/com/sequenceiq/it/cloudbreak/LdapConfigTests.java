@@ -312,7 +312,7 @@ public class LdapConfigTests extends CloudbreakTest {
         );
         when(LdapTest.testConnect(), "post the request");
         then(LdapTest.assertThis(
-                (ldapconfig, t) -> Assert.assertTrue(ldapconfig.getResponse().getConnectionResult().contains("connected"),
+                (ldapconfig, t) -> Assert.assertTrue(ldapconfig.getResponse().getResult().contains("connected"),
                         "ldap should be connected"))
         );
     }
@@ -329,7 +329,7 @@ public class LdapConfigTests extends CloudbreakTest {
         );
         when(LdapTest.testConnect(), "post the request");
         then(LdapTest.assertThis(
-                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getConnectionResult().contains("connected"),
+                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getResult().contains("connected"),
                         "ldap should not be connected"))
         );
     }
@@ -346,7 +346,7 @@ public class LdapConfigTests extends CloudbreakTest {
         );
         when(LdapTest.testConnect(), "post the request");
         then(LdapTest.assertThis(
-                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getConnectionResult().contains("connected"),
+                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getResult().contains("connected"),
                         "ldap should not be connected"))
         );
     }
@@ -363,7 +363,7 @@ public class LdapConfigTests extends CloudbreakTest {
         );
         when(LdapTest.testConnect(), "post the request");
         then(LdapTest.assertThis(
-                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getConnectionResult().contains("connected"),
+                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getResult().contains("connected"),
                         "ldap should not be connected"))
         );
     }
@@ -380,7 +380,7 @@ public class LdapConfigTests extends CloudbreakTest {
         );
         when(LdapTest.testConnect(), "post the request");
         then(LdapTest.assertThis(
-                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getConnectionResult().contains("connected"),
+                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getResult().contains("connected"),
                         "ldap should not be connected"))
         );
     }
@@ -397,7 +397,7 @@ public class LdapConfigTests extends CloudbreakTest {
         );
         when(LdapTest.testConnect(), "post the request");
         then(LdapTest.assertThis(
-                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getConnectionResult().contains("connected"),
+                (ldapconfig, t) -> Assert.assertFalse(ldapconfig.getResponse().getResult().contains("connected"),
                         "ldap should not be connected"))
         );
     }

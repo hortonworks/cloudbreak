@@ -234,7 +234,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
+                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponseTestResult().getResult().contains("connected"),
                         "rds connection test should be OK"))
         );
     }
@@ -250,7 +250,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
+                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponseTestResult().getResult().contains("connected"),
                         "rds connection test should be OK"))
         );
     }
@@ -266,7 +266,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }
@@ -282,7 +282,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }
@@ -298,7 +298,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }
@@ -314,7 +314,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }

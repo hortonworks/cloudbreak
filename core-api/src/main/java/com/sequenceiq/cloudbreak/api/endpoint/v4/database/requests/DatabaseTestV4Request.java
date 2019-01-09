@@ -9,30 +9,30 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RdsTestRequest")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseTestV4Request implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.Database.NAME)
-    private String name;
+    private String existingDatabaseName;
 
     @Valid
     @ApiModelProperty(ModelDescriptions.Database.DATABASE_REQUEST)
-    private DatabaseV4Request rdsConfig;
+    private DatabaseV4Request database;
 
-    public String getName() {
-        return name;
+    public String getExistingDatabaseName() {
+        return existingDatabaseName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setExistingDatabaseName(String existingDatabaseName) {
+        this.existingDatabaseName = existingDatabaseName;
     }
 
-    public DatabaseV4Request getRdsConfig() {
-        return rdsConfig;
+    public DatabaseV4Request getDatabase() {
+        return database;
     }
 
-    public void setRdsConfig(DatabaseV4Request rdsConfig) {
-        this.rdsConfig = rdsConfig;
+    public void setDatabase(DatabaseV4Request database) {
+        this.database = database;
     }
 }

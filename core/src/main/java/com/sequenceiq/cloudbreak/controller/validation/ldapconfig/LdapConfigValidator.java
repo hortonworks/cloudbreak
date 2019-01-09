@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestConnectionV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
@@ -29,11 +29,11 @@ public class LdapConfigValidator {
         }
     }
 
-    public void validateLdapConnection(LdapTestConnectionV4Request request) {
+    public void validateLdapConnection(LdapMinimalV4Request request) {
         if (request != null) {
             validateLdapConnection(request.getProtocol(),
-                    request.getServerHost(),
-                    request.getServerPort(),
+                    request.getHost(),
+                    request.getPort(),
                     request.getBindDn(),
                     request.getBindPassword());
         }

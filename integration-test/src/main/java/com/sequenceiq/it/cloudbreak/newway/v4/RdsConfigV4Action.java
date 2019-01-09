@@ -70,7 +70,7 @@ public class RdsConfigV4Action {
         RdsConfigEntity rdsConfigEntity = (RdsConfigEntity) entity;
 
         DatabaseTestV4Request databaseTestV4Request = new DatabaseTestV4Request();
-        databaseTestV4Request.setRdsConfig(rdsConfigEntity.getRequest());
+        databaseTestV4Request.setDatabase(rdsConfigEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
