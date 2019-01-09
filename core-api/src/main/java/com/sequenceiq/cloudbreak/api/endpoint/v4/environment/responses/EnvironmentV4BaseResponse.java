@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.environment.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 
 import java.util.Set;
 
@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public abstract class EnvironmentBaseResponse {
+public abstract class EnvironmentV4BaseResponse {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
@@ -31,7 +31,7 @@ public abstract class EnvironmentBaseResponse {
     private String credentialName;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.LOCATION)
-    private LocationResponse location;
+    private LocationV4Response location;
 
     private WorkspaceResourceResponse workspace;
 
@@ -124,11 +124,11 @@ public abstract class EnvironmentBaseResponse {
         this.credentialName = credentialName;
     }
 
-    public LocationResponse getLocation() {
+    public LocationV4Response getLocation() {
         return location;
     }
 
-    public void setLocation(LocationResponse location) {
+    public void setLocation(LocationV4Response location) {
         this.location = location;
     }
 }

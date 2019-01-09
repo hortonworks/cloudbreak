@@ -8,18 +8,18 @@ import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentEntity>
-        implements Purgable<SimpleEnvironmentResponse> {
+public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentRequest, DetailedEnvironmentV4Response, EnvironmentEntity>
+        implements Purgable<SimpleEnvironmentV4Response> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
@@ -27,9 +27,9 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
 
     private static final String VALID_LOCATION = "London";
 
-    private Set<SimpleEnvironmentResponse> response;
+    private Set<SimpleEnvironmentV4Response> response;
 
-    private SimpleEnvironmentResponse simpleResponse;
+    private SimpleEnvironmentV4Response simpleResponse;
 
     public EnvironmentEntity(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -79,12 +79,12 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
     }
 
     public EnvironmentEntity withLdapConfigs(Set<String> ldap) {
-        getRequest().setLdapConfigs(ldap);
+        getRequest().setLdaps(ldap);
         return this;
     }
 
     public EnvironmentEntity withProxyConfigs(Set<String> proxy) {
-        getRequest().setProxyConfigs(proxy);
+        getRequest().setProxies(proxy);
         return this;
     }
 
@@ -94,14 +94,14 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
     }
 
     public EnvironmentEntity withLocation(String location) {
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setLocationName(location);
-        getRequest().setLocation(locationRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setLocationName(location);
+        getRequest().setLocation(locationV4Request);
         return this;
     }
 
     public EnvironmentEntity withRdsConfigs(Set<String> rds) {
-        getRequest().setRdsConfigs(rds);
+        getRequest().setDatabases(rds);
         return this;
     }
 
@@ -109,7 +109,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            SimpleEnvironmentResponse entity = new SimpleEnvironmentResponse();
+            SimpleEnvironmentV4Response entity = new SimpleEnvironmentV4Response();
             entity.setName(getName());
             delete(entity, cloudbreakClient);
         } catch (WebApplicationException ignore) {
@@ -117,35 +117,35 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentReque
         }
     }
 
-    public Set<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
+    public Set<SimpleEnvironmentV4Response> getResponseSimpleEnvSet() {
         return response;
     }
 
-    public void setResponseSimpleEnvSet(Set<SimpleEnvironmentResponse> response) {
+    public void setResponseSimpleEnvSet(Set<SimpleEnvironmentV4Response> response) {
         this.response = response;
     }
 
-    public SimpleEnvironmentResponse getResponseSimpleEnv() {
+    public SimpleEnvironmentV4Response getResponseSimpleEnv() {
         return simpleResponse;
     }
 
-    public void setResponseSimpleEnv(SimpleEnvironmentResponse simpleResponse) {
+    public void setResponseSimpleEnv(SimpleEnvironmentV4Response simpleResponse) {
         this.simpleResponse = simpleResponse;
     }
 
     @Override
-    public List<SimpleEnvironmentResponse> getAll(CloudbreakClient client) {
-        EnvironmentV3Endpoint environmentV3Endpoint = client.getCloudbreakClient().environmentV3Endpoint();
-        return new ArrayList<>(environmentV3Endpoint.list(client.getWorkspaceId()));
+    public List<SimpleEnvironmentV4Response> getAll(CloudbreakClient client) {
+        EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV3Endpoint();
+        return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getEnvironments());
     }
 
     @Override
-    public boolean deletable(SimpleEnvironmentResponse entity) {
+    public boolean deletable(SimpleEnvironmentV4Response entity) {
         return entity.getName().startsWith("mock-");
     }
 
     @Override
-    public void delete(SimpleEnvironmentResponse entity, CloudbreakClient client) {
+    public void delete(SimpleEnvironmentV4Response entity, CloudbreakClient client) {
         try {
             client.getCloudbreakClient().environmentV3Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {

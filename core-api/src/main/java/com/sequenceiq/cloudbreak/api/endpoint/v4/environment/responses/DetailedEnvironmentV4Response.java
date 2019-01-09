@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.environment.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,24 +15,24 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
+public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIGS)
-    private Set<ProxyV4Response> proxyConfigs = new HashSet<>();
+    private Set<ProxyV4Response> proxies = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS)
-    private Set<LdapV4Response> ldapConfigs = new HashSet<>();
+    private Set<LdapV4Response> ldaps = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIGS)
-    private Set<DatabaseV4Response> rdsConfigs = new HashSet<>();
+    private Set<DatabaseV4Response> databases = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.KUBERNETES_CONFIGS)
-    private Set<KubernetesV4Response> kubernetesConfigs = new HashSet<>();
+    private Set<KubernetesV4Response> kubernetes = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.KERBEROS_CONFIGS)
-    private Set<KerberosV4Response> kerberosConfigs = new HashSet<>();
+    private Set<KerberosV4Response> kerberoses = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES)
-    private DatalakeResourcesResponse datalakeResourcesResponse;
+    private DatalakeResourcesV4Response datalakeResources;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTERS)
     private Set<StackViewResponse> workloadClusters = new HashSet<>();
@@ -40,44 +40,44 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_CLUSTERS)
     private Set<StackViewResponse> datalakeClusters = new HashSet<>();
 
-    public Set<ProxyV4Response> getProxyConfigs() {
-        return proxyConfigs;
+    public Set<ProxyV4Response> getProxies() {
+        return proxies;
     }
 
-    public void setProxyConfigs(Set<ProxyV4Response> proxyConfigs) {
-        this.proxyConfigs = proxyConfigs;
+    public void setProxies(Set<ProxyV4Response> proxies) {
+        this.proxies = proxies;
     }
 
-    public Set<LdapV4Response> getLdapConfigs() {
-        return ldapConfigs;
+    public Set<LdapV4Response> getLdaps() {
+        return ldaps;
     }
 
-    public void setLdapConfigs(Set<LdapV4Response> ldapConfigs) {
-        this.ldapConfigs = ldapConfigs;
+    public void setLdaps(Set<LdapV4Response> ldaps) {
+        this.ldaps = ldaps;
     }
 
-    public Set<DatabaseV4Response> getRdsConfigs() {
-        return rdsConfigs;
+    public Set<DatabaseV4Response> getDatabases() {
+        return databases;
     }
 
-    public void setRdsConfigs(Set<DatabaseV4Response> rdsConfigs) {
-        this.rdsConfigs = rdsConfigs;
+    public void setDatabases(Set<DatabaseV4Response> databases) {
+        this.databases = databases;
     }
 
-    public Set<KubernetesV4Response> getKubernetesConfigs() {
-        return kubernetesConfigs;
+    public Set<KubernetesV4Response> getKubernetes() {
+        return kubernetes;
     }
 
-    public void setKubernetesConfigs(Set<KubernetesV4Response> kubernetesConfigs) {
-        this.kubernetesConfigs = kubernetesConfigs;
+    public void setKubernetes(Set<KubernetesV4Response> kubernetes) {
+        this.kubernetes = kubernetes;
     }
 
-    public DatalakeResourcesResponse getDatalakeResourcesResponse() {
-        return datalakeResourcesResponse;
+    public DatalakeResourcesV4Response getDatalakeResources() {
+        return datalakeResources;
     }
 
-    public void setDatalakeResourcesResponse(DatalakeResourcesResponse datalakeResourcesResponse) {
-        this.datalakeResourcesResponse = datalakeResourcesResponse;
+    public void setDatalakeResources(DatalakeResourcesV4Response datalakeResources) {
+        this.datalakeResources = datalakeResources;
     }
 
     public Set<StackViewResponse> getWorkloadClusters() {
@@ -96,11 +96,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         this.datalakeClusters = datalakeClusters;
     }
 
-    public Set<KerberosV4Response> getKerberosConfigs() {
-        return kerberosConfigs;
+    public Set<KerberosV4Response> getKerberoses() {
+        return kerberoses;
     }
 
-    public void setKerberosConfigs(Set<KerberosV4Response> kerberosConfigs) {
-        this.kerberosConfigs = kerberosConfigs;
+    public void setKerberoses(Set<KerberosV4Response> kerberoses) {
+        this.kerberoses = kerberoses;
     }
 }

@@ -319,7 +319,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoRds(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
+        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
         if (!rdsConfigResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached rds");
         }
@@ -327,7 +327,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoLdap(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdapConfigs();
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
         if (!ldapV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached ldap");
         }
@@ -335,7 +335,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvHasNoProxy(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxyConfigs();
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
         if (!proxyV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached proxy");
         }

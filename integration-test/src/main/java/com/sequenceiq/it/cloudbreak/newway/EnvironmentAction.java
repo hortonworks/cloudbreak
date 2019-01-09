@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class EnvironmentAction {
@@ -46,24 +46,24 @@ public class EnvironmentAction {
         environmentEntity.setResponseSimpleEnvSet(
                 client.getCloudbreakClient()
                         .environmentV3Endpoint()
-                        .list(client.getWorkspaceId()));
+                        .list(client.getWorkspaceId()).getEnvironments());
         logJSON("Environment list response: ", environmentEntity.getResponse());
     }
 
     public static void putAttachResources(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
         EnvironmentEntity environmentEntity = (EnvironmentEntity) entity;
         CloudbreakClient client;
-        EnvironmentAttachRequest environmentAttachRequest = new EnvironmentAttachRequest();
-        environmentAttachRequest.setLdapConfigs(environmentEntity.getRequest().getLdapConfigs());
-        environmentAttachRequest.setProxyConfigs(environmentEntity.getRequest().getProxyConfigs());
-        environmentAttachRequest.setRdsConfigs(environmentEntity.getRequest().getRdsConfigs());
+        EnvironmentAttachV4Request environmentAttachV4Request = new EnvironmentAttachV4Request();
+        environmentAttachV4Request.setLdaps(environmentEntity.getRequest().getLdaps());
+        environmentAttachV4Request.setProxies(environmentEntity.getRequest().getProxies());
+        environmentAttachV4Request.setDatabases(environmentEntity.getRequest().getDatabases());
 
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         environmentEntity.setResponse(
                 client.getCloudbreakClient()
                         .environmentV3Endpoint()
-                        .attachResources(client.getWorkspaceId(), environmentEntity.getName(), environmentAttachRequest));
+                        .attach(client.getWorkspaceId(), environmentEntity.getName(), environmentAttachV4Request));
         logJSON("Environment put attach response: ", environmentEntity.getResponse());
     }
 
@@ -71,16 +71,16 @@ public class EnvironmentAction {
         EnvironmentEntity environmentEntity = (EnvironmentEntity) entity;
         CloudbreakClient client;
         EnvironmentDetachRequest environmentDetachRequest = new EnvironmentDetachRequest();
-        environmentDetachRequest.setLdapConfigs(environmentEntity.getRequest().getLdapConfigs());
-        environmentDetachRequest.setProxyConfigs(environmentEntity.getRequest().getProxyConfigs());
-        environmentDetachRequest.setRdsConfigs(environmentEntity.getRequest().getRdsConfigs());
+        environmentDetachRequest.setLdaps(environmentEntity.getRequest().getLdaps());
+        environmentDetachRequest.setProxies(environmentEntity.getRequest().getProxies());
+        environmentDetachRequest.setDatabases(environmentEntity.getRequest().getDatabases());
 
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         environmentEntity.setResponse(
                 client.getCloudbreakClient()
                         .environmentV3Endpoint()
-                        .detachResources(client.getWorkspaceId(), environmentEntity.getName(), environmentDetachRequest));
+                        .detach(client.getWorkspaceId(), environmentEntity.getName(), environmentDetachRequest));
         logJSON("Environment put detach response: ", environmentEntity.getResponse());
     }
 

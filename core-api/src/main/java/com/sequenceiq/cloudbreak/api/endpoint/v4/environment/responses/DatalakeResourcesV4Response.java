@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.environment.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class DatalakeResourcesResponse {
+public class DatalakeResourcesV4Response {
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_URL)
     private String ambariUrl;
 
@@ -17,13 +17,13 @@ public class DatalakeResourcesResponse {
     private String ldapName;
 
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.RDSCONFIG_NAMES)
-    private Set<String> rdsNames;
+    private Set<String> databaseNames;
 
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.KERBEROSCONFIG_NAME)
     private String kerberosName;
 
     @ApiModelProperty(ModelDescriptions.DatalakeResourcesDescription.SERVICE_DESCRIPTORS)
-    private Map<String, ServiceDescriptorResponse> serviceDescriptorMap;
+    private Map<String, ServiceDescriptorV4Response> serviceDescriptorMap;
 
     public String getAmbariUrl() {
         return ambariUrl;
@@ -41,12 +41,12 @@ public class DatalakeResourcesResponse {
         this.ldapName = ldapName;
     }
 
-    public Set<String> getRdsNames() {
-        return rdsNames;
+    public Set<String> getDatabaseNames() {
+        return databaseNames;
     }
 
-    public void setRdsNames(Set<String> rdsNames) {
-        this.rdsNames = rdsNames;
+    public void setDatabaseNames(Set<String> databaseNames) {
+        this.databaseNames = databaseNames;
     }
 
     public String getKerberosName() {
@@ -57,11 +57,11 @@ public class DatalakeResourcesResponse {
         this.kerberosName = kerberosName;
     }
 
-    public Map<String, ServiceDescriptorResponse> getServiceDescriptorMap() {
+    public Map<String, ServiceDescriptorV4Response> getServiceDescriptorMap() {
         return serviceDescriptorMap;
     }
 
-    public void setServiceDescriptorMap(Map<String, ServiceDescriptorResponse> serviceDescriptorMap) {
+    public void setServiceDescriptorMap(Map<String, ServiceDescriptorV4Response> serviceDescriptorMap) {
         this.serviceDescriptorMap = serviceDescriptorMap;
     }
 }

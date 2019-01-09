@@ -1,17 +1,17 @@
-package com.sequenceiq.cloudbreak.converter.environment;
+package com.sequenceiq.cloudbreak.converter.v4.environment;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
-public class EnvironmentRequestToEnvironmentConverter extends AbstractConversionServiceAwareConverter<EnvironmentRequest, Environment> {
+public class EnvironmentV4RequestToEnvironmentConverter extends AbstractConversionServiceAwareConverter<EnvironmentRequest, Environment> {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;

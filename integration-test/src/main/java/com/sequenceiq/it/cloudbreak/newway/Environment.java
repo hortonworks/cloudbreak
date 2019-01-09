@@ -2,9 +2,9 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -74,7 +74,8 @@ public class Environment extends EnvironmentEntity {
 
     public static EnvironmentEntity getAll(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponseSimpleEnvSet(
-                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().list(cloudbreakClient.getWorkspaceId())
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint()
+                        .list(cloudbreakClient.getWorkspaceId()).getEnvironments()
         );
         return entity;
     }
@@ -88,13 +89,13 @@ public class Environment extends EnvironmentEntity {
     }
 
     public static EnvironmentEntity putAttachResources(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
-        EnvironmentAttachRequest environmentAttachRequest = new EnvironmentAttachRequest();
-        environmentAttachRequest.setLdapConfigs(entity.getRequest().getLdapConfigs());
-        environmentAttachRequest.setProxyConfigs(entity.getRequest().getProxyConfigs());
-        environmentAttachRequest.setRdsConfigs(entity.getRequest().getRdsConfigs());
+        EnvironmentAttachV4Request environmentAttachV4Request = new EnvironmentAttachV4Request();
+        environmentAttachV4Request.setLdaps(entity.getRequest().getLdaps());
+        environmentAttachV4Request.setProxies(entity.getRequest().getProxies());
+        environmentAttachV4Request.setDatabases(entity.getRequest().getDatabases());
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().attachResources(cloudbreakClient.getWorkspaceId(), entity.getName(),
-                        environmentAttachRequest)
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint()
+                        .attach(cloudbreakClient.getWorkspaceId(), entity.getName(), environmentAttachV4Request)
         );
         return entity;
     }
@@ -105,12 +106,12 @@ public class Environment extends EnvironmentEntity {
 
     public static EnvironmentEntity putDetachResources(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
         EnvironmentDetachRequest environmentDetachRequest = new EnvironmentDetachRequest();
-        environmentDetachRequest.setLdapConfigs(entity.getRequest().getLdapConfigs());
-        environmentDetachRequest.setProxyConfigs(entity.getRequest().getProxyConfigs());
-        environmentDetachRequest.setRdsConfigs(entity.getRequest().getRdsConfigs());
+        environmentDetachRequest.setLdaps(entity.getRequest().getLdaps());
+        environmentDetachRequest.setProxies(entity.getRequest().getProxies());
+        environmentDetachRequest.setDatabases(entity.getRequest().getDatabases());
         entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint().detachResources(cloudbreakClient.getWorkspaceId(), entity.getName(),
-                        environmentDetachRequest)
+                cloudbreakClient.getCloudbreakClient().environmentV3Endpoint()
+                        .detach(cloudbreakClient.getWorkspaceId(), entity.getName(), environmentDetachRequest)
         );
         return entity;
     }
