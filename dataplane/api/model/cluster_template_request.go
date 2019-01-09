@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -18,8 +20,7 @@ import (
 type ClusterTemplateRequest struct {
 
 	// cloudplatform which this template is compatible with
-	// Required: true
-	CloudPlatform *string `json:"cloudPlatform"`
+	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
 	// description of the resource
 	// Max Length: 1000
@@ -30,21 +31,21 @@ type ClusterTemplateRequest struct {
 	// Required: true
 	// Max Length: 40
 	// Min Length: 5
-	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
+	// Pattern: ^[^;\/%]*$
 	Name *string `json:"name"`
 
 	// stringified template JSON
 	// Required: true
-	Template *StackV2Request `json:"template"`
+	StackTemplate *StackV2Request `json:"stackTemplate"`
+
+	// type
+	// Enum: [SPARK HIVE DATASCIENCE EDW ETL OTHER]
+	Type string `json:"type,omitempty"`
 }
 
 // Validate validates this cluster template request
 func (m *ClusterTemplateRequest) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateCloudPlatform(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
@@ -54,22 +55,17 @@ func (m *ClusterTemplateRequest) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateTemplate(formats); err != nil {
+	if err := m.validateStackTemplate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *ClusterTemplateRequest) validateCloudPlatform(formats strfmt.Registry) error {
-
-	if err := validate.Required("cloudPlatform", "body", m.CloudPlatform); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -104,26 +100,81 @@ func (m *ClusterTemplateRequest) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;\/%]*$`); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *ClusterTemplateRequest) validateTemplate(formats strfmt.Registry) error {
+func (m *ClusterTemplateRequest) validateStackTemplate(formats strfmt.Registry) error {
 
-	if err := validate.Required("template", "body", m.Template); err != nil {
+	if err := validate.Required("stackTemplate", "body", m.StackTemplate); err != nil {
 		return err
 	}
 
-	if m.Template != nil {
-		if err := m.Template.Validate(formats); err != nil {
+	if m.StackTemplate != nil {
+		if err := m.StackTemplate.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("template")
+				return ve.ValidateName("stackTemplate")
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+var clusterTemplateRequestTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","DATASCIENCE","EDW","ETL","OTHER"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		clusterTemplateRequestTypeTypePropEnum = append(clusterTemplateRequestTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// ClusterTemplateRequestTypeSPARK captures enum value "SPARK"
+	ClusterTemplateRequestTypeSPARK string = "SPARK"
+
+	// ClusterTemplateRequestTypeHIVE captures enum value "HIVE"
+	ClusterTemplateRequestTypeHIVE string = "HIVE"
+
+	// ClusterTemplateRequestTypeDATASCIENCE captures enum value "DATASCIENCE"
+	ClusterTemplateRequestTypeDATASCIENCE string = "DATASCIENCE"
+
+	// ClusterTemplateRequestTypeEDW captures enum value "EDW"
+	ClusterTemplateRequestTypeEDW string = "EDW"
+
+	// ClusterTemplateRequestTypeETL captures enum value "ETL"
+	ClusterTemplateRequestTypeETL string = "ETL"
+
+	// ClusterTemplateRequestTypeOTHER captures enum value "OTHER"
+	ClusterTemplateRequestTypeOTHER string = "OTHER"
+)
+
+// prop value enum
+func (m *ClusterTemplateRequest) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, clusterTemplateRequestTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ClusterTemplateRequest) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	return nil

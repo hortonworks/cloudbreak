@@ -47,7 +47,7 @@ func NewListClusterTemplatesByWorkspaceOK() *ListClusterTemplatesByWorkspaceOK {
 successful operation
 */
 type ListClusterTemplatesByWorkspaceOK struct {
-	Payload []*model.ClusterTemplateResponse
+	Payload []*model.ClusterTemplateViewResponse
 }
 
 func (o *ListClusterTemplatesByWorkspaceOK) Error() string {

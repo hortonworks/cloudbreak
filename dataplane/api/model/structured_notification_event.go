@@ -19,11 +19,17 @@ type StructuredNotificationEvent struct {
 	// duration
 	Duration int64 `json:"duration,omitempty"`
 
+	// ldap notification details
+	LdapNotificationDetails *LdapNotificationDetails `json:"ldapNotificationDetails,omitempty"`
+
 	// notification details
 	NotificationDetails *NotificationDetails `json:"notificationDetails,omitempty"`
 
 	// operation
 	Operation *OperationDetails `json:"operation,omitempty"`
+
+	// rds notification details
+	RdsNotificationDetails *RdsNotificationDetails `json:"rdsNotificationDetails,omitempty"`
 
 	// status
 	Status string `json:"status,omitempty"`
@@ -36,6 +42,10 @@ type StructuredNotificationEvent struct {
 func (m *StructuredNotificationEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateLdapNotificationDetails(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateNotificationDetails(formats); err != nil {
 		res = append(res, err)
 	}
@@ -44,9 +54,31 @@ func (m *StructuredNotificationEvent) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateRdsNotificationDetails(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *StructuredNotificationEvent) validateLdapNotificationDetails(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.LdapNotificationDetails) { // not required
+		return nil
+	}
+
+	if m.LdapNotificationDetails != nil {
+		if err := m.LdapNotificationDetails.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ldapNotificationDetails")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -78,6 +110,24 @@ func (m *StructuredNotificationEvent) validateOperation(formats strfmt.Registry)
 		if err := m.Operation.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("operation")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StructuredNotificationEvent) validateRdsNotificationDetails(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsNotificationDetails) { // not required
+		return nil
+	}
+
+	if m.RdsNotificationDetails != nil {
+		if err := m.RdsNotificationDetails.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("rdsNotificationDetails")
 			}
 			return err
 		}

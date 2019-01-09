@@ -17,6 +17,9 @@ import (
 // swagger:model DatalakeResourcesResponse
 type DatalakeResourcesResponse struct {
 
+	// Ambari url
+	AmbariURL string `json:"ambariUrl,omitempty"`
+
 	// Kerberos config name for the cluster
 	KerberosName string `json:"kerberosName,omitempty"`
 
@@ -26,6 +29,9 @@ type DatalakeResourcesResponse struct {
 	// RDS configuration names for the cluster
 	// Unique: true
 	RdsNames []string `json:"rdsNames"`
+
+	// Descriptors of the datalake services
+	ServiceDescriptorMap map[string]ServiceDescriptorResponse `json:"serviceDescriptorMap,omitempty"`
 }
 
 // Validate validates this datalake resources response
@@ -33,6 +39,10 @@ func (m *DatalakeResourcesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRdsNames(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateServiceDescriptorMap(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -50,6 +60,28 @@ func (m *DatalakeResourcesResponse) validateRdsNames(formats strfmt.Registry) er
 
 	if err := validate.UniqueItems("rdsNames", "body", m.RdsNames); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *DatalakeResourcesResponse) validateServiceDescriptorMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ServiceDescriptorMap) { // not required
+		return nil
+	}
+
+	for k := range m.ServiceDescriptorMap {
+
+		if err := validate.Required("serviceDescriptorMap"+"."+k, "body", m.ServiceDescriptorMap[k]); err != nil {
+			return err
+		}
+		if val, ok := m.ServiceDescriptorMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

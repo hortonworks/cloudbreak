@@ -36,6 +36,9 @@ type AuditEvent struct {
 
 	// status
 	Status string `json:"status,omitempty"`
+
+	// structured event
+	StructuredEvent *StructuredEvent `json:"structuredEvent,omitempty"`
 }
 
 // Validate validates this audit event
@@ -55,6 +58,10 @@ func (m *AuditEvent) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRawRestEvent(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStructuredEvent(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -128,6 +135,24 @@ func (m *AuditEvent) validateRawRestEvent(formats strfmt.Registry) error {
 		if err := m.RawRestEvent.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rawRestEvent")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *AuditEvent) validateStructuredEvent(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.StructuredEvent) { // not required
+		return nil
+	}
+
+	if m.StructuredEvent != nil {
+		if err := m.StructuredEvent.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("structuredEvent")
 			}
 			return err
 		}

@@ -360,7 +360,7 @@ func convertAwsPrerequistiesToJSON(prerequisites *model.CredentialPrerequisites)
 		utils.LogErrorMessageAndExit("Could not parse AWS cb-policy.json from the response.")
 	}
 	return &awsPrerequisiteOutput{
-		AccountId:     utils.SafeStringConvert(prerequisites.AccountID),
+		AccountId:     prerequisites.AccountID,
 		CloudPlatform: utils.SafeStringConvert(prerequisites.CloudPlatform),
 		ExternalId:    utils.SafeStringConvert(prerequisites.Aws.ExternalID),
 		PolicyJSON:    string(policyJson),

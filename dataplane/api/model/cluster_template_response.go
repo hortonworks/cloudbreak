@@ -20,8 +20,11 @@ import (
 type ClusterTemplateResponse struct {
 
 	// cloudplatform which this template is compatible with
-	// Required: true
-	CloudPlatform *string `json:"cloudPlatform"`
+	CloudPlatform string `json:"cloudPlatform,omitempty"`
+
+	// datalake required which this template is compatible with
+	// Enum: [NONE OPTIONAL REQUIRED]
+	DatalakeRequired string `json:"datalakeRequired,omitempty"`
 
 	// description of the resource
 	// Max Length: 1000
@@ -35,23 +38,27 @@ type ClusterTemplateResponse struct {
 	// Required: true
 	// Max Length: 40
 	// Min Length: 5
-	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
+	// Pattern: ^[^;\/%]*$
 	Name *string `json:"name"`
-
-	// status
-	// Enum: [DEFAULT DEFAULT_DELETED USER_MANAGED]
-	Status string `json:"status,omitempty"`
 
 	// stringified template JSON
 	// Required: true
-	Template *StackV2Request `json:"template"`
+	StackTemplate *StackV2Request `json:"stackTemplate"`
+
+	// status
+	// Enum: [DEFAULT DEFAULT_DELETED USER_MANAGED OUTDATED]
+	Status string `json:"status,omitempty"`
+
+	// type
+	// Enum: [SPARK HIVE DATASCIENCE EDW ETL OTHER]
+	Type string `json:"type,omitempty"`
 }
 
 // Validate validates this cluster template response
 func (m *ClusterTemplateResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCloudPlatform(formats); err != nil {
+	if err := m.validateDatalakeRequired(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -63,11 +70,15 @@ func (m *ClusterTemplateResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateStackTemplate(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateStatus(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateTemplate(formats); err != nil {
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -77,9 +88,46 @@ func (m *ClusterTemplateResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterTemplateResponse) validateCloudPlatform(formats strfmt.Registry) error {
+var clusterTemplateResponseTypeDatalakeRequiredPropEnum []interface{}
 
-	if err := validate.Required("cloudPlatform", "body", m.CloudPlatform); err != nil {
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["NONE","OPTIONAL","REQUIRED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		clusterTemplateResponseTypeDatalakeRequiredPropEnum = append(clusterTemplateResponseTypeDatalakeRequiredPropEnum, v)
+	}
+}
+
+const (
+
+	// ClusterTemplateResponseDatalakeRequiredNONE captures enum value "NONE"
+	ClusterTemplateResponseDatalakeRequiredNONE string = "NONE"
+
+	// ClusterTemplateResponseDatalakeRequiredOPTIONAL captures enum value "OPTIONAL"
+	ClusterTemplateResponseDatalakeRequiredOPTIONAL string = "OPTIONAL"
+
+	// ClusterTemplateResponseDatalakeRequiredREQUIRED captures enum value "REQUIRED"
+	ClusterTemplateResponseDatalakeRequiredREQUIRED string = "REQUIRED"
+)
+
+// prop value enum
+func (m *ClusterTemplateResponse) validateDatalakeRequiredEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, clusterTemplateResponseTypeDatalakeRequiredPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ClusterTemplateResponse) validateDatalakeRequired(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeRequired) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateDatalakeRequiredEnum("datalakeRequired", "body", m.DatalakeRequired); err != nil {
 		return err
 	}
 
@@ -117,8 +165,26 @@ func (m *ClusterTemplateResponse) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;\/%]*$`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterTemplateResponse) validateStackTemplate(formats strfmt.Registry) error {
+
+	if err := validate.Required("stackTemplate", "body", m.StackTemplate); err != nil {
+		return err
+	}
+
+	if m.StackTemplate != nil {
+		if err := m.StackTemplate.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("stackTemplate")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -128,7 +194,7 @@ var clusterTemplateResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["DEFAULT","DEFAULT_DELETED","USER_MANAGED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["DEFAULT","DEFAULT_DELETED","USER_MANAGED","OUTDATED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -146,6 +212,9 @@ const (
 
 	// ClusterTemplateResponseStatusUSERMANAGED captures enum value "USER_MANAGED"
 	ClusterTemplateResponseStatusUSERMANAGED string = "USER_MANAGED"
+
+	// ClusterTemplateResponseStatusOUTDATED captures enum value "OUTDATED"
+	ClusterTemplateResponseStatusOUTDATED string = "OUTDATED"
 )
 
 // prop value enum
@@ -170,19 +239,56 @@ func (m *ClusterTemplateResponse) validateStatus(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *ClusterTemplateResponse) validateTemplate(formats strfmt.Registry) error {
+var clusterTemplateResponseTypeTypePropEnum []interface{}
 
-	if err := validate.Required("template", "body", m.Template); err != nil {
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","DATASCIENCE","EDW","ETL","OTHER"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		clusterTemplateResponseTypeTypePropEnum = append(clusterTemplateResponseTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// ClusterTemplateResponseTypeSPARK captures enum value "SPARK"
+	ClusterTemplateResponseTypeSPARK string = "SPARK"
+
+	// ClusterTemplateResponseTypeHIVE captures enum value "HIVE"
+	ClusterTemplateResponseTypeHIVE string = "HIVE"
+
+	// ClusterTemplateResponseTypeDATASCIENCE captures enum value "DATASCIENCE"
+	ClusterTemplateResponseTypeDATASCIENCE string = "DATASCIENCE"
+
+	// ClusterTemplateResponseTypeEDW captures enum value "EDW"
+	ClusterTemplateResponseTypeEDW string = "EDW"
+
+	// ClusterTemplateResponseTypeETL captures enum value "ETL"
+	ClusterTemplateResponseTypeETL string = "ETL"
+
+	// ClusterTemplateResponseTypeOTHER captures enum value "OTHER"
+	ClusterTemplateResponseTypeOTHER string = "OTHER"
+)
+
+// prop value enum
+func (m *ClusterTemplateResponse) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, clusterTemplateResponseTypeTypePropEnum); err != nil {
 		return err
 	}
+	return nil
+}
 
-	if m.Template != nil {
-		if err := m.Template.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("template")
-			}
-			return err
-		}
+func (m *ClusterTemplateResponse) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	return nil

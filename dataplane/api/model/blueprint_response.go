@@ -41,7 +41,7 @@ type BlueprintResponse struct {
 	Public *bool `json:"public,omitempty"`
 
 	// status of the blueprint
-	// Enum: [DEFAULT DEFAULT_DELETED USER_MANAGED]
+	// Enum: [DEFAULT DEFAULT_DELETED USER_MANAGED OUTDATED]
 	Status string `json:"status,omitempty"`
 
 	// user defined tags for blueprint
@@ -100,7 +100,7 @@ var blueprintResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["DEFAULT","DEFAULT_DELETED","USER_MANAGED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["DEFAULT","DEFAULT_DELETED","USER_MANAGED","OUTDATED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -118,6 +118,9 @@ const (
 
 	// BlueprintResponseStatusUSERMANAGED captures enum value "USER_MANAGED"
 	BlueprintResponseStatusUSERMANAGED string = "USER_MANAGED"
+
+	// BlueprintResponseStatusOUTDATED captures enum value "OUTDATED"
+	BlueprintResponseStatusOUTDATED string = "OUTDATED"
 )
 
 // prop value enum

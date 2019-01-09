@@ -53,8 +53,14 @@ type CloudbreakEvent struct {
 	// name of the instance group
 	InstanceGroup string `json:"instanceGroup,omitempty"`
 
+	// ldap details
+	LdapDetails *LdapDetails `json:"ldapDetails,omitempty"`
+
 	// number of nodes
 	NodeCount int32 `json:"nodeCount,omitempty"`
+
+	// rds details
+	RdsDetails *RdsDetails `json:"rdsDetails,omitempty"`
 
 	// region of the stack
 	Region string `json:"region,omitempty"`
@@ -81,6 +87,14 @@ func (m *CloudbreakEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClusterStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateLdapDetails(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRdsDetails(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -189,6 +203,42 @@ func (m *CloudbreakEvent) validateClusterStatus(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateClusterStatusEnum("clusterStatus", "body", m.ClusterStatus); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *CloudbreakEvent) validateLdapDetails(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.LdapDetails) { // not required
+		return nil
+	}
+
+	if m.LdapDetails != nil {
+		if err := m.LdapDetails.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ldapDetails")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *CloudbreakEvent) validateRdsDetails(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsDetails) { // not required
+		return nil
+	}
+
+	if m.RdsDetails != nil {
+		if err := m.RdsDetails.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("rdsDetails")
+			}
+			return err
+		}
 	}
 
 	return nil

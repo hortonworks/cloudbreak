@@ -29,6 +29,9 @@ type CredentialResponse struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// Flag indicating if the credential type is AWS Gov Cloud
+	GovCloud *bool `json:"govCloud,omitempty"`
+
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 

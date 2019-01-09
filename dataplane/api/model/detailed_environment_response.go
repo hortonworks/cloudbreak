@@ -25,9 +25,16 @@ type DetailedEnvironmentResponse struct {
 	// Name of the credential of the environment.
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// Names of the datalake clusters created in the environment.
+	// Unique: true
+	DatalakeClusterNames []string `json:"datalakeClusterNames"`
+
 	// Datalake clusters created in the environment.
 	// Unique: true
 	DatalakeClusters []*StackViewResponse `json:"datalakeClusters"`
+
+	// Datalake cluster resources registered to the environment.
+	DatalakeResourcesName string `json:"datalakeResourcesName,omitempty"`
 
 	// Datalake cluster resources registered to the environment.
 	DatalakeResourcesResponse *DatalakeResourcesResponse `json:"datalakeResourcesResponse,omitempty"`
@@ -67,6 +74,10 @@ type DetailedEnvironmentResponse struct {
 	// Regions of the environment.
 	Regions *CompactRegionResponse `json:"regions,omitempty"`
 
+	// Names of the workload clusters created in the environment.
+	// Unique: true
+	WorkloadClusterNames []string `json:"workloadClusterNames"`
+
 	// Workload clusters created in the environment.
 	// Unique: true
 	WorkloadClusters []*StackViewResponse `json:"workloadClusters"`
@@ -78,6 +89,10 @@ type DetailedEnvironmentResponse struct {
 // Validate validates this detailed environment response
 func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDatalakeClusterNames(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateDatalakeClusters(formats); err != nil {
 		res = append(res, err)
@@ -115,6 +130,10 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateWorkloadClusterNames(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateWorkloadClusters(formats); err != nil {
 		res = append(res, err)
 	}
@@ -126,6 +145,19 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateDatalakeClusterNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeClusterNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("datalakeClusterNames", "body", m.DatalakeClusterNames); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -352,6 +384,19 @@ func (m *DetailedEnvironmentResponse) validateRegions(formats strfmt.Registry) e
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateWorkloadClusterNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.WorkloadClusterNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("workloadClusterNames", "body", m.WorkloadClusterNames); err != nil {
+		return err
 	}
 
 	return nil

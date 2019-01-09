@@ -39,6 +39,9 @@ type StackDetails struct {
 	// datalake Id
 	DatalakeID int64 `json:"datalakeId,omitempty"`
 
+	// datalake resource Id
+	DatalakeResourceID int64 `json:"datalakeResourceId,omitempty"`
+
 	// description
 	Description string `json:"description,omitempty"`
 

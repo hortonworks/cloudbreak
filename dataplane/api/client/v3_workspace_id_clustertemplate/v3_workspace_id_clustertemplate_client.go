@@ -55,36 +55,6 @@ func (a *Client) CreateClusterTemplateInWorkspace(params *CreateClusterTemplateI
 }
 
 /*
-CreateInWorkspaceFromTemplate creates stack in workspace from template
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) CreateInWorkspaceFromTemplate(params *CreateInWorkspaceFromTemplateParams) (*CreateInWorkspaceFromTemplateOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewCreateInWorkspaceFromTemplateParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "createInWorkspaceFromTemplate",
-		Method:             "POST",
-		PathPattern:        "/v3/{workspaceId}/clustertemplate/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &CreateInWorkspaceFromTemplateReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*CreateInWorkspaceFromTemplateOK), nil
-
-}
-
-/*
 DeleteClusterTemplateInWorkspace deletes cluster template by name in workspace
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.

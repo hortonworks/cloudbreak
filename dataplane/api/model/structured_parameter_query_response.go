@@ -8,7 +8,9 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // StructuredParameterQueryResponse structured parameter query response
@@ -33,12 +35,35 @@ type StructuredParameterQueryResponse struct {
 	// protocol
 	Protocol string `json:"protocol,omitempty"`
 
-	// related service
-	RelatedService string `json:"relatedService,omitempty"`
+	// related services
+	// Unique: true
+	RelatedServices []string `json:"relatedServices"`
 }
 
 // Validate validates this structured parameter query response
 func (m *StructuredParameterQueryResponse) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateRelatedServices(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *StructuredParameterQueryResponse) validateRelatedServices(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RelatedServices) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("relatedServices", "body", m.RelatedServices); err != nil {
+		return err
+	}
+
 	return nil
 }
 

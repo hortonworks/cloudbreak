@@ -25,6 +25,34 @@ type Client struct {
 }
 
 /*
+BuildPrerequisites returns datalake prerequisites
+*/
+func (a *Client) BuildPrerequisites(params *BuildPrerequisitesParams) (*BuildPrerequisitesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewBuildPrerequisitesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "buildPrerequisites",
+		Method:             "POST",
+		PathPattern:        "/v3/utils/{workspaceId}/datalake-prerequisites",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &BuildPrerequisitesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*BuildPrerequisitesOK), nil
+
+}
+
+/*
 CheckClientVersionV3 checks the client version
 */
 func (a *Client) CheckClientVersionV3(params *CheckClientVersionV3Params) (*CheckClientVersionV3OK, error) {

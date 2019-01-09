@@ -18,29 +18,25 @@ import (
 type CredentialPrerequisites struct {
 
 	// provider specific identifier of the account/subscription/project that is used by Cloudbreak
-	// Required: true
-	AccountID *string `json:"accountId"`
+	AccountID string `json:"accountId,omitempty"`
 
 	// AWS specific credential prerequisites.
-	// Required: true
-	Aws *AwsCredentialPrerequisites `json:"aws"`
+	Aws *AwsCredentialPrerequisites `json:"aws,omitempty"`
 
 	// Azure specific credential prerequisites.
-	// Required: true
-	Azure *AzureCredentialPrerequisites `json:"azure"`
+	Azure *AzureCredentialPrerequisites `json:"azure,omitempty"`
 
 	// type of cloud provider
 	// Required: true
 	CloudPlatform *string `json:"cloudPlatform"`
+
+	// GCP specific credential prerequisites.
+	Gcp *GcpCredentialPrerequisites `json:"gcp,omitempty"`
 }
 
 // Validate validates this credential prerequisites
 func (m *CredentialPrerequisites) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateAccountID(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := m.validateAws(formats); err != nil {
 		res = append(res, err)
@@ -54,25 +50,20 @@ func (m *CredentialPrerequisites) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateGcp(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
 }
 
-func (m *CredentialPrerequisites) validateAccountID(formats strfmt.Registry) error {
-
-	if err := validate.Required("accountId", "body", m.AccountID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *CredentialPrerequisites) validateAws(formats strfmt.Registry) error {
 
-	if err := validate.Required("aws", "body", m.Aws); err != nil {
-		return err
+	if swag.IsZero(m.Aws) { // not required
+		return nil
 	}
 
 	if m.Aws != nil {
@@ -89,8 +80,8 @@ func (m *CredentialPrerequisites) validateAws(formats strfmt.Registry) error {
 
 func (m *CredentialPrerequisites) validateAzure(formats strfmt.Registry) error {
 
-	if err := validate.Required("azure", "body", m.Azure); err != nil {
-		return err
+	if swag.IsZero(m.Azure) { // not required
+		return nil
 	}
 
 	if m.Azure != nil {
@@ -109,6 +100,24 @@ func (m *CredentialPrerequisites) validateCloudPlatform(formats strfmt.Registry)
 
 	if err := validate.Required("cloudPlatform", "body", m.CloudPlatform); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *CredentialPrerequisites) validateGcp(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Gcp) { // not required
+		return nil
+	}
+
+	if m.Gcp != nil {
+		if err := m.Gcp.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("gcp")
+			}
+			return err
+		}
 	}
 
 	return nil
