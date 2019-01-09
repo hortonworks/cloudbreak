@@ -62,7 +62,7 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
 
     @Override
     public Collection<ClusterTemplateV4Response> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId());
+        return client.getCloudbreakClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId()).getClusterTemplates();
     }
 
     @Override
@@ -84,6 +84,6 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
         CloudbreakClient client = getTestContext().getCloudbreakClient();
         return (long) client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .list(client.getWorkspaceId()).size();
+                .list(client.getWorkspaceId()).getClusterTemplates().size();
     }
 }

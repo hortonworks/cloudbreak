@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate;
 import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
 import static com.sequenceiq.cloudbreak.doc.Notes.CLUSTER_TEMPLATE_NOTES;
 
-import java.util.Set;
-
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -17,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Responses;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 
@@ -39,7 +38,7 @@ public interface ClusterTemplateV4EndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.LIST_BY_WORKSPACE, produces = JSON, notes = CLUSTER_TEMPLATE_NOTES,
             nickname = "listClusterTemplatesByWorkspace")
-    Set<ClusterTemplateV4Response> list(@PathParam("workspaceId") Long workspaceId);
+    ClusterTemplateV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
