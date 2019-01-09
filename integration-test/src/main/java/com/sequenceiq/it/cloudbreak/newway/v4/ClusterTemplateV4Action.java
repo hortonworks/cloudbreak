@@ -53,7 +53,7 @@ public class ClusterTemplateV4Action {
         clusterTemplateV4Entity.setResponses(
                 client.getCloudbreakClient()
                         .clusterTemplateV4EndPoint()
-                        .list(workspaceId));
+                        .list(workspaceId).getClusterTemplates());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
