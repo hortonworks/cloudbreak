@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.ClusterTemplateV4Type.SPARK;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.SPARK;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.force;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
