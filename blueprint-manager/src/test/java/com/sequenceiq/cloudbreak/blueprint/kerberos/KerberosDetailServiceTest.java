@@ -99,4 +99,21 @@ public class KerberosDetailServiceTest {
         config.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
         Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(config));
     }
+
+    @Test
+    public void testAmbariManagedKrb5ConfMissing() throws IOException {
+        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(config));
+    }
+
+    @Test
+    public void testAmbariManagedKrb5ConfTrue() throws IOException {
+        config.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":true}}}");
+        Assert.assertTrue(underTest.isAmbariManagedKrb5Conf(config));
+    }
+
+    @Test
+    public void testAmbariManagedKrb5ConfFalse() throws IOException {
+        config.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":false}}}");
+        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(config));
+    }
 }
