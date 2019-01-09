@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4TestResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -73,7 +73,7 @@ public interface DatabaseV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "testDatabaseConnectionInWorkspace")
-    DatabaseV4TestResponse test(@PathParam("workspaceId") Long workspaceId, @Valid DatabaseTestV4Request databaseTestV4Request);
+    DatabaseTestV4Response test(@PathParam("workspaceId") Long workspaceId, @Valid DatabaseTestV4Request databaseTestV4Request);
 
     @PUT
     @Path("{name}/attach")

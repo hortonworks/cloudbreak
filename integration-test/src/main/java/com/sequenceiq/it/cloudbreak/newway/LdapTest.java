@@ -3,14 +3,14 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestConnectionV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.LdapConfigV4Action;
 
 public class LdapTest extends LdapTestEntity {
     private static final String LDAPTEST = "LDAPTEST";
 
-    private final LdapTestConnectionV4Request ldapTestConnectionV4Request = new LdapTestConnectionV4Request();
+    private final LdapMinimalV4Request ldapTestConnectionV4Request = new LdapMinimalV4Request();
 
     private LdapTest() {
         super(LDAPTEST);
@@ -28,7 +28,7 @@ public class LdapTest extends LdapTestEntity {
         return new LdapTest();
     }
 
-    public LdapTestConnectionV4Request getRequest() {
+    public LdapMinimalV4Request getRequest() {
         return ldapTestConnectionV4Request;
     }
 

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4TestResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -17,7 +17,7 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<DatabaseV4Request,
 
     public static final String RDS_CONFIG = "RDS_CONFIG";
 
-    private DatabaseV4TestResponse response;
+    private DatabaseTestV4Response response;
 
     RdsConfigEntity(String newId) {
         super(newId);
@@ -81,11 +81,11 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<DatabaseV4Request,
         return this;
     }
 
-    public DatabaseV4TestResponse getResponseTestResult() {
+    public DatabaseTestV4Response getResponseTestResult() {
         return response;
     }
 
-    public void setResponseTestResult(DatabaseV4TestResponse response) {
+    public void setResponseTestResult(DatabaseTestV4Response response) {
         this.response = response;
     }
 

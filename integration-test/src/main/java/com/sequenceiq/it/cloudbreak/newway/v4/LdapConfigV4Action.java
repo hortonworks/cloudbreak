@@ -68,7 +68,7 @@ public class LdapConfigV4Action {
         LdapTestEntity ldapTestEntity = (LdapTestEntity) entity;
 
         LdapTestV4Request ldapTestV4Request = new LdapTestV4Request();
-        ldapTestV4Request.setValidationRequest(ldapTestEntity.getRequest());
+        ldapTestV4Request.setLdap(ldapTestEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);

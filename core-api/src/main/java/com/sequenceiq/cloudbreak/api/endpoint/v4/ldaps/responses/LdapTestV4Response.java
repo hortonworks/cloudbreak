@@ -9,24 +9,24 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LdapV4TestResponse implements JsonEntity {
+public class LdapTestV4Response implements JsonEntity {
 
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONNECTION_RESULT, required = true)
-    private String connectionResult;
+    private String result;
 
-    public LdapV4TestResponse() {
+    public LdapTestV4Response() {
 
     }
 
-    public LdapV4TestResponse(String connectionResult) {
-        this.connectionResult = connectionResult;
+    public LdapTestV4Response(String result) {
+        this.result = result;
     }
 
-    public String getConnectionResult() {
-        return connectionResult;
+    public String getResult() {
+        return result;
     }
 
-    public void setConnectionResult(String connectionResult) {
-        this.connectionResult = connectionResult;
+    public void setResult(String result) {
+        this.result = result;
     }
 }

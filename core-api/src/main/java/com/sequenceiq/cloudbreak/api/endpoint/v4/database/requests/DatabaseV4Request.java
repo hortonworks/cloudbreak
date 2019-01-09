@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ValidRds
-@ApiModel("RdsConfig")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4Request extends DatabaseV4Base {
 
