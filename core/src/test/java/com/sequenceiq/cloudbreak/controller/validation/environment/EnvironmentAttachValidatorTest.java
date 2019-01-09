@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -20,7 +20,7 @@ public class EnvironmentAttachValidatorTest {
 
     @Test
     public void testValidation() {
-        EnvironmentAttachRequest request = getEnvironmentAttachRequest();
+        EnvironmentAttachV4Request request = getEnvironmentAttachRequest();
         Set<LdapConfig> ldapsToAttach = getLdapConfigs();
         Set<ProxyConfig> proxiesToAttach = getProxyConfigs();
         Set<RDSConfig> rdssToAttach = getRdsConfigs();
@@ -31,15 +31,15 @@ public class EnvironmentAttachValidatorTest {
         assertTrue(validationResult.getErrors().get(1).contains("proxy-nonexistent2"));
     }
 
-    private EnvironmentAttachRequest getEnvironmentAttachRequest() {
-        EnvironmentAttachRequest request = new EnvironmentAttachRequest();
-        request.getLdapConfigs().add("ldap1");
-        request.getLdapConfigs().add("ldap2");
-        request.getLdapConfigs().add("ldap-nonexsistent");
-        request.getProxyConfigs().add("proxy1");
-        request.getProxyConfigs().add("proxy-nonexistent1");
-        request.getProxyConfigs().add("proxy-nonexistent2");
-        request.getRdsConfigs().add("rds1");
+    private EnvironmentAttachV4Request getEnvironmentAttachRequest() {
+        EnvironmentAttachV4Request request = new EnvironmentAttachV4Request();
+        request.getLdaps().add("ldap1");
+        request.getLdaps().add("ldap2");
+        request.getLdaps().add("ldap-nonexsistent");
+        request.getProxies().add("proxy1");
+        request.getProxies().add("proxy-nonexistent1");
+        request.getProxies().add("proxy-nonexistent2");
+        request.getDatabases().add("rds1");
         return request;
     }
 

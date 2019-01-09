@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.response.SimpleEnvironmentResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
@@ -563,7 +563,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     protected static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> rdsConfigs = new HashSet<>();
-        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
+        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
         for (DatabaseV4Response rdsConfigResponse : rdsConfigResponseSet) {
             rdsConfigs.add(rdsConfigResponse.getName());
         }
@@ -575,7 +575,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     protected static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> ldapConfigs = new HashSet<>();
-        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdapConfigs();
+        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
         for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
             ldapConfigs.add(ldapV4Response.getName());
         }
@@ -587,7 +587,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     protected static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> proxyConfigs = new HashSet<>();
-        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxyConfigs();
+        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
         for (ProxyV4Response proxyV4Response : proxyV4ResponseSet) {
             proxyConfigs.add(proxyV4Response.getName());
         }
@@ -598,8 +598,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentEntity checkEnvIsListed(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
-        Set<SimpleEnvironmentResponse> simpleEnvironmentResponses = testContext.get(EnvironmentEntity.class).getResponseSimpleEnvSet();
-        List<SimpleEnvironmentResponse> result = simpleEnvironmentResponses.stream()
+        Set<SimpleEnvironmentV4Response> simpleEnvironmentV4Respons = testContext.get(EnvironmentEntity.class).getResponseSimpleEnvSet();
+        List<SimpleEnvironmentV4Response> result = simpleEnvironmentV4Respons.stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {

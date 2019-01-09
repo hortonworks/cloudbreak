@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.environment.request;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest {
+public class EnvironmentRequest extends EnvironmentV4BaseRequest implements CredentialAwareEnvV4Request {
 
     @Size(max = 100, min = 5, message = "The length of the environments's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
@@ -38,7 +38,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION)
     @NotNull
-    private LocationRequest location;
+    private LocationV4Request location;
 
     public String getName() {
         return name;
@@ -84,11 +84,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.regions = regions == null ? new HashSet<>() : regions;
     }
 
-    public LocationRequest getLocation() {
+    public LocationV4Request getLocation() {
         return location;
     }
 
-    public void setLocation(LocationRequest location) {
+    public void setLocation(LocationV4Request location) {
         this.location = location;
     }
 }

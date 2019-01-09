@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.environment;
+package com.sequenceiq.cloudbreak.converter.v4.environment;
 
 import java.util.HashMap;
 import java.util.HashSet;

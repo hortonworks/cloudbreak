@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

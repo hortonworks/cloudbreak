@@ -1,4 +1,6 @@
-package com.sequenceiq.cloudbreak.api.model.environment.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests;
+
+import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -6,9 +8,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class LocationResponse {
+public class LocationV4Request {
 
     @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LOCATION)
+    @NotNull
     private String locationName;
 
     @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LATITUDE)

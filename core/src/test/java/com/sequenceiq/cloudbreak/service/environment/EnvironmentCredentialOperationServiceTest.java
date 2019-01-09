@@ -16,7 +16,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;

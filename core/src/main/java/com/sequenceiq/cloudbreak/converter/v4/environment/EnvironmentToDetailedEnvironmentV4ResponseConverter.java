@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.environment;
+package com.sequenceiq.cloudbreak.converter.v4.environment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,10 +14,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.environment.response.DatalakeResourcesResponse;
-import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
-import com.sequenceiq.cloudbreak.api.model.environment.response.LocationResponse;
-import com.sequenceiq.cloudbreak.api.model.environment.response.ServiceDescriptorResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakeResourcesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.ServiceDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -27,14 +27,14 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 
 @Component
-public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
+public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentV4Response> {
 
     @Inject
     private RegionConverter regionConverter;
 
     @Override
-    public DetailedEnvironmentResponse convert(Environment source) {
-        DetailedEnvironmentResponse response = new DetailedEnvironmentResponse();
+    public DetailedEnvironmentV4Response convert(Environment source) {
+        DetailedEnvironmentV4Response response = new DetailedEnvironmentV4Response();
         response.setId(source.getId());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
@@ -42,27 +42,27 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceResponse.class));
-        response.setLdapConfigs(
+        response.setLdaps(
                 source.getLdapConfigs()
                         .stream()
                         .map(ldapConfig -> getConversionService().convert(ldapConfig, LdapV4Response.class))
                         .collect(Collectors.toSet()));
-        response.setProxyConfigs(
+        response.setProxies(
                 source.getProxyConfigs()
                         .stream()
                         .map(proxyConfig -> getConversionService().convert(proxyConfig, ProxyV4Response.class))
                         .collect(Collectors.toSet()));
-        response.setRdsConfigs(
+        response.setDatabases(
                 source.getRdsConfigs()
                         .stream()
                         .map(rdsConfig -> getConversionService().convert(rdsConfig, DatabaseV4Response.class))
                         .collect(Collectors.toSet()));
-        response.setKubernetesConfigs(
+        response.setKubernetes(
                 source.getKubernetesConfigs()
                         .stream()
                         .map(kubeConfig -> getConversionService().convert(kubeConfig, KubernetesV4Response.class))
                         .collect(Collectors.toSet()));
-        response.setKerberosConfigs(
+        response.setKerberoses(
                 source.getKerberosConfigs()
                         .stream()
                         .map(kerberosConfig -> getConversionService().convert(kerberosConfig, KerberosV4Response.class))
@@ -79,7 +79,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
                         .filter(stack -> stack.getType() == StackType.DATALAKE)
                         .map(stack -> getConversionService().convert(stack, StackViewResponse.class))
                         .collect(Collectors.toSet()));
-        response.setLocation(getConversionService().convert(source, LocationResponse.class));
+        response.setLocation(getConversionService().convert(source, LocationV4Response.class));
         response.setWorkloadClusterNames(
                 response.getWorkloadClusters()
                         .stream()
@@ -93,27 +93,27 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         if (source.getDatalakeResources() != null) {
             DatalakeResources datalakeResources = source.getDatalakeResources();
             response.setDatalakeResourcesName(datalakeResources.getName());
-            DatalakeResourcesResponse datalakeResourcesResponse = new DatalakeResourcesResponse();
-            datalakeResourcesResponse.setAmbariUrl(datalakeResources.getDatalakeAmbariUrl());
+            DatalakeResourcesV4Response datalakeResourcesV4Response = new DatalakeResourcesV4Response();
+            datalakeResourcesV4Response.setAmbariUrl(datalakeResources.getDatalakeAmbariUrl());
             if (datalakeResources.getLdapConfig() != null) {
-                datalakeResourcesResponse.setLdapName(datalakeResources.getLdapConfig().getName());
+                datalakeResourcesV4Response.setLdapName(datalakeResources.getLdapConfig().getName());
             }
             if (datalakeResources.getKerberosConfig() != null) {
-                datalakeResourcesResponse.setKerberosName(datalakeResources.getKerberosConfig().getName());
+                datalakeResourcesV4Response.setKerberosName(datalakeResources.getKerberosConfig().getName());
             }
             if (!CollectionUtils.isEmpty(datalakeResources.getRdsConfigs())) {
-                datalakeResourcesResponse.setRdsNames(datalakeResources.getRdsConfigs().stream().map(rds -> rds.getName()).collect(Collectors.toSet()));
+                datalakeResourcesV4Response.setDatabaseNames(datalakeResources.getRdsConfigs().stream().map(rds -> rds.getName()).collect(Collectors.toSet()));
             }
-            Map<String, ServiceDescriptorResponse> serviceDescriptorResponses = new HashMap<>();
+            Map<String, ServiceDescriptorV4Response> serviceDescriptorResponses = new HashMap<>();
             for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {
-                ServiceDescriptorResponse serviceDescriptorResponse = new ServiceDescriptorResponse();
-                serviceDescriptorResponse.setServiceName(serviceDescriptor.getServiceName());
-                serviceDescriptorResponse.setBlueprintParams((Map) serviceDescriptor.getBlueprintParams().getMap());
-                serviceDescriptorResponse.setComponentHosts((Map) serviceDescriptor.getComponentsHosts().getMap());
-                serviceDescriptorResponses.put(serviceDescriptor.getServiceName(), serviceDescriptorResponse);
+                ServiceDescriptorV4Response serviceDescriptorV4Response = new ServiceDescriptorV4Response();
+                serviceDescriptorV4Response.setServiceName(serviceDescriptor.getServiceName());
+                serviceDescriptorV4Response.setBlueprintParams((Map) serviceDescriptor.getBlueprintParams().getMap());
+                serviceDescriptorV4Response.setComponentHosts((Map) serviceDescriptor.getComponentsHosts().getMap());
+                serviceDescriptorResponses.put(serviceDescriptor.getServiceName(), serviceDescriptorV4Response);
             }
-            datalakeResourcesResponse.setServiceDescriptorMap(serviceDescriptorResponses);
-            response.setDatalakeResourcesResponse(datalakeResourcesResponse);
+            datalakeResourcesV4Response.setServiceDescriptorMap(serviceDescriptorResponses);
+            response.setDatalakeResources(datalakeResourcesV4Response);
         }
         return response;
     }

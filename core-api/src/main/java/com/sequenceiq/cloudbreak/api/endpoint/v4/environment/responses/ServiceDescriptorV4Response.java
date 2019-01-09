@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.environment.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 
 import java.util.Map;
 
@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class ServiceDescriptorResponse {
+public class ServiceDescriptorV4Response {
     @ApiModelProperty(ModelDescriptions.DatalakeResourcesDescription.SERVICE_NAME)
     private String serviceName;
 
