@@ -10,9 +10,9 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 
-public class ClusterTemplateCreateAction implements ActionV2<ClusterTemplateEntity> {
+public class ClusterTemplateV4CreateAction implements ActionV2<ClusterTemplateEntity> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateCreateAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4CreateAction.class);
 
     @Override
     public ClusterTemplateEntity action(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
@@ -20,8 +20,8 @@ public class ClusterTemplateCreateAction implements ActionV2<ClusterTemplateEnti
         logJSON(LOGGER, " ClusterTemplateEntity post request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
-                        .clusterTemplateV3EndPoint()
-                        .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
+                        .clusterTemplateV4EndPoint()
+                        .post(client.getWorkspaceId(), entity.getRequest()));
         logJSON(LOGGER, " ClusterTemplateEntity created  successfully:\n", entity.getResponse());
         log(LOGGER, "ClusterTemplateEntity ID: " + entity.getResponse().getId());
 

@@ -1,4 +1,6 @@
-package com.sequenceiq.cloudbreak.converter.clustertemplate;
+package com.sequenceiq.cloudbreak.converter.v4.cluster_template;
+
+import java.util.Base64;
 
 import javax.inject.Inject;
 
@@ -7,9 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType;
-import com.sequenceiq.cloudbreak.api.model.template.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.ClusterTemplateV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -20,11 +21,13 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class ClusterTemplateRequestToClusterTemplateConverter extends AbstractConversionServiceAwareConverter<ClusterTemplateRequest, ClusterTemplate> {
+public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
+        extends AbstractConversionServiceAwareConverter<DefaultClusterTemplateV4Request, ClusterTemplate> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateRequestToClusterTemplateConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClusterTemplateV4RequestToClusterTemplateConverter.class);
 
     @Inject
     private ConverterUtil converterUtil;
@@ -39,7 +42,7 @@ public class ClusterTemplateRequestToClusterTemplateConverter extends AbstractCo
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public ClusterTemplate convert(ClusterTemplateRequest source) {
+    public ClusterTemplate convert(DefaultClusterTemplateV4Request source) {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
@@ -50,17 +53,18 @@ public class ClusterTemplateRequestToClusterTemplateConverter extends AbstractCo
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
         clusterTemplate.setName(source.getName());
         clusterTemplate.setDescription(source.getDescription());
-        clusterTemplate.setDatalakeRequired(DatalakeRequired.OPTIONAL);
-        clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
+        clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         if (source.getType() == null) {
-            clusterTemplate.setType(ClusterTemplateType.OTHER);
+            clusterTemplate.setType(ClusterTemplateV4Type.OTHER);
         } else {
             clusterTemplate.setType(source.getType());
         }
+        clusterTemplate.setDatalakeRequired(source.getDatalakeRequired());
+        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(JsonUtil.writeValueAsStringSilent(source).getBytes()));
         return clusterTemplate;
     }
 
-    private String getCloudPlatform(ClusterTemplateRequest source, Stack stack) {
+    private String getCloudPlatform(DefaultClusterTemplateV4Request source, Stack stack) {
         return source.getCloudPlatform() != null ? source.getCloudPlatform() : stack.getEnvironment().getCloudPlatform();
 
     }

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.util.ConverterUtil;
@@ -31,7 +31,7 @@ public class DefaultClusterTemplateCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClusterTemplateCache.class);
 
-    private final Map<String, DefaultClusterTemplateRequest> defaultClusterTemplates = new HashMap<>();
+    private final Map<String, DefaultClusterTemplateV4Request> defaultClusterTemplates = new HashMap<>();
 
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
@@ -89,15 +89,15 @@ public class DefaultClusterTemplateCache {
     }
 
     private void convertToClusterTemplate(String templateAsString) throws IOException {
-        DefaultClusterTemplateRequest clusterTemplateRequest = new Json(templateAsString).get(DefaultClusterTemplateRequest.class);
+        DefaultClusterTemplateV4Request clusterTemplateRequest = new Json(templateAsString).get(DefaultClusterTemplateV4Request.class);
         if (defaultClusterTemplates.get(clusterTemplateRequest.getName()) != null) {
             LOGGER.warn("Default cluster template exists and it will be override: {}", clusterTemplateRequest.getName());
         }
         defaultClusterTemplates.put(clusterTemplateRequest.getName(), clusterTemplateRequest);
     }
 
-    public Map<String, DefaultClusterTemplateRequest> defaultClusterTemplateRequests() {
-        Map<String, DefaultClusterTemplateRequest> ret = new HashMap<>();
+    public Map<String, DefaultClusterTemplateV4Request> defaultClusterTemplateRequests() {
+        Map<String, DefaultClusterTemplateV4Request> ret = new HashMap<>();
         defaultClusterTemplates.forEach((key, value) -> ret.put(key, SerializationUtils.clone(value)));
         return ret;
     }

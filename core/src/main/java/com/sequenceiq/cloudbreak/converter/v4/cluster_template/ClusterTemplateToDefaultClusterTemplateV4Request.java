@@ -1,18 +1,18 @@
-package com.sequenceiq.cloudbreak.converter.clustertemplate;
+package com.sequenceiq.cloudbreak.converter.v4.cluster_template;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.template.DefaultClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 
 @Component
-public class ClusterTemplateToDefaultClusterTemplateRequest extends AbstractConversionServiceAwareConverter<ClusterTemplate, DefaultClusterTemplateRequest> {
+public class ClusterTemplateToDefaultClusterTemplateV4Request extends AbstractConversionServiceAwareConverter<ClusterTemplate, DefaultClusterTemplateV4Request> {
 
     @Override
-    public DefaultClusterTemplateRequest convert(ClusterTemplate source) {
-        DefaultClusterTemplateRequest ret = new DefaultClusterTemplateRequest();
+    public DefaultClusterTemplateV4Request convert(ClusterTemplate source) {
+        DefaultClusterTemplateV4Request ret = new DefaultClusterTemplateV4Request();
         ret.setCloudPlatform(source.getCloudPlatform());
         ret.setDatalakeRequired(source.getDatalakeRequired());
         ret.setDescription(source.getDescription());

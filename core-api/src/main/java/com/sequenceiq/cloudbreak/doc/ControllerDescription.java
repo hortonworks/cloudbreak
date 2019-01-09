@@ -37,7 +37,6 @@ public class ControllerDescription {
     public static final String AUTOSCALE_DESCRIPTION = "Operations by Autoscale";
 
     public static final String BLUEPRINT_V3_DESCRIPTION = "Operations on blueprints by workspace";
-    public static final String CLUSTERTEMPLATE_V3_DESCRIPTION = "Operations on ClusterTemplates by workspace";
     public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by workspace";
     public static final String FLEX_SUBSCRIPTION_V3_DESCRIPTION = "Operations on Flex subscriptions by workspace";
     public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Workspace";
@@ -60,6 +59,7 @@ public class ControllerDescription {
             + "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
     public static final String KUBERNETESCONFIGS_V4_DESCRIPTION = "Operations on Kubernetes configs by workspace";
     public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
+    public static final String CLUSTER_TEMPLATE_V4_DESCRIPTION = "Operations on ClusterTemplates by workspace";
 
     private ControllerDescription() {
     }

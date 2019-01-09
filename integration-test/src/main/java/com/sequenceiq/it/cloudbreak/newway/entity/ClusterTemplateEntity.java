@@ -2,9 +2,9 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import java.util.Collection;
 
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.requests.ClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.responses.ClusterTemplateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cluster_template.ClusterTemplateV4Type;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -12,11 +12,11 @@ import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTemplateRequest, ClusterTemplateResponse, ClusterTemplateEntity>
-        implements Purgable<ClusterTemplateResponse> {
+public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTemplateV4Request, ClusterTemplateV4Response, ClusterTemplateEntity>
+        implements Purgable<ClusterTemplateV4Response> {
 
     public ClusterTemplateEntity(TestContext testContext) {
-        super(new ClusterTemplateRequest(), testContext);
+        super(new ClusterTemplateV4Request(), testContext);
     }
 
     public ClusterTemplateEntity() {
@@ -55,24 +55,24 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
         return this;
     }
 
-    public ClusterTemplateEntity withType(ClusterTemplateType type) {
+    public ClusterTemplateEntity withType(ClusterTemplateV4Type type) {
         getRequest().setType(type);
         return this;
     }
 
     @Override
-    public Collection<ClusterTemplateResponse> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().clusterTemplateV3EndPoint().listByWorkspace(client.getWorkspaceId());
+    public Collection<ClusterTemplateV4Response> getAll(CloudbreakClient client) {
+        return client.getCloudbreakClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId());
     }
 
     @Override
-    public boolean deletable(ClusterTemplateResponse entity) {
+    public boolean deletable(ClusterTemplateV4Response entity) {
         return entity.getName().startsWith("mock-");
     }
 
     @Override
-    public void delete(ClusterTemplateResponse entity, CloudbreakClient client) {
-        client.getCloudbreakClient().clusterTemplateV3EndPoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName());
+    public void delete(ClusterTemplateV4Response entity, CloudbreakClient client) {
+        client.getCloudbreakClient().clusterTemplateV4EndPoint().delete(client.getWorkspaceId(), entity.getName());
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
     public Long count() {
         CloudbreakClient client = getTestContext().getCloudbreakClient();
         return (long) client.getCloudbreakClient()
-                .clusterTemplateV3EndPoint()
-                .listByWorkspace(client.getWorkspaceId()).size();
+                .clusterTemplateV4EndPoint()
+                .list(client.getWorkspaceId()).size();
     }
 }
