@@ -16,12 +16,12 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestConnectionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4TestResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapTestV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.NotificationController;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -77,14 +77,14 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     }
 
     @Override
-    public LdapV4TestResponse test(Long workspaceId, LdapTestV4Request ldapValidationRequest) {
-        String existingLDAPConfigName = ldapValidationRequest.getName();
-        LdapTestConnectionV4Request validationRequest = ldapValidationRequest.getValidationRequest();
+    public LdapTestV4Response test(Long workspaceId, LdapTestV4Request ldapValidationRequest) {
+        String existingLDAPConfigName = ldapValidationRequest.getExistingLdapName();
+        LdapMinimalV4Request validationRequest = ldapValidationRequest.getLdap();
         if (existingLDAPConfigName == null && validationRequest == null) {
             throw new BadRequestException("Either an existing resource 'name' or an LDAP 'validationRequest' needs to be specified in the request. ");
         }
 
-        LdapV4TestResponse ldapV4TestResponse = new LdapV4TestResponse();
+        LdapTestV4Response ldapTestV4Response = new LdapTestV4Response();
         try {
             if (existingLDAPConfigName != null) {
                 LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(existingLDAPConfigName, workspaceId);
@@ -92,11 +92,11 @@ public class LdapV4Controller extends NotificationController implements LdapConf
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);
             }
-            ldapV4TestResponse.setConnectionResult("connected");
+            ldapTestV4Response.setResult("connected");
         } catch (BadRequestException e) {
-            ldapV4TestResponse.setConnectionResult(e.getMessage());
+            ldapTestV4Response.setResult(e.getMessage());
         }
-        return ldapV4TestResponse;
+        return ldapTestV4Response;
     }
 
     @Override

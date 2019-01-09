@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4TestResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.NotificationController;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -81,16 +81,16 @@ public class DatabaseV4Controller extends NotificationController implements Data
     }
 
     @Override
-    public DatabaseV4TestResponse test(Long workspaceId, DatabaseTestV4Request databaseTestV4Request) {
+    public DatabaseTestV4Response test(Long workspaceId, DatabaseTestV4Request databaseTestV4Request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = databaseService.getWorkspaceService().get(workspaceId, user);
-        String existingRDSConfigName = databaseTestV4Request.getName();
-        DatabaseV4Request configRequest = databaseTestV4Request.getRdsConfig();
+        String existingRDSConfigName = databaseTestV4Request.getExistingDatabaseName();
+        DatabaseV4Request configRequest = databaseTestV4Request.getDatabase();
         if (existingRDSConfigName != null) {
-            return new DatabaseV4TestResponse(databaseService.testRdsConnection(existingRDSConfigName, workspace));
+            return new DatabaseTestV4Response(databaseService.testRdsConnection(existingRDSConfigName, workspace));
         } else if (configRequest != null) {
             RDSConfig rdsConfig = conversionService.convert(configRequest, RDSConfig.class);
-            return new DatabaseV4TestResponse(databaseService.testRdsConnection(rdsConfig));
+            return new DatabaseTestV4Response(databaseService.testRdsConnection(rdsConfig));
         }
         throw new BadRequestException("Either an Database id, name or an Database request needs to be specified in the request. ");
     }

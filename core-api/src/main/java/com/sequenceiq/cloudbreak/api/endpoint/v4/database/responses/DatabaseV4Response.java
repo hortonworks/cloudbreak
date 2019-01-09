@@ -21,14 +21,8 @@ public class DatabaseV4Response extends DatabaseV4Base {
     @ApiModelProperty(ModelDescriptions.CREATED)
     private Long creationDate;
 
-    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount = true;
-
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
-
-    @ApiModelProperty(value = Database.STACK_VERSION)
-    private String stackVersion;
 
     @ApiModelProperty(value = ModelDescriptions.Database.DB_ENGINE, required = true)
     private String databaseEngine;
@@ -64,28 +58,12 @@ public class DatabaseV4Response extends DatabaseV4Base {
         this.creationDate = creationDate;
     }
 
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
-
     public Set<String> getClusterNames() {
         return clusterNames;
     }
 
     public void setClusterNames(Set<String> clusterNames) {
         this.clusterNames = clusterNames;
-    }
-
-    public String getStackVersion() {
-        return stackVersion;
-    }
-
-    public void setStackVersion(String stackVersion) {
-        this.stackVersion = stackVersion;
     }
 
     public String getDatabaseEngine() {

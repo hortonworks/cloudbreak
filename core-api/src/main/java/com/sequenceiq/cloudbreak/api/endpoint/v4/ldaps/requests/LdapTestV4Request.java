@@ -14,25 +14,25 @@ import io.swagger.annotations.ApiModelProperty;
 public class LdapTestV4Request implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.NAME)
-    private String name;
+    private String existingLdapName;
 
     @Valid
     @ApiModelProperty(ModelDescriptions.LdapConfigModelDescription.VALIDATION_REQUEST)
-    private LdapTestConnectionV4Request validationRequest;
+    private LdapMinimalV4Request ldap;
 
-    public String getName() {
-        return name;
+    public String getExistingLdapName() {
+        return existingLdapName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setExistingLdapName(String existingLdapName) {
+        this.existingLdapName = existingLdapName;
     }
 
-    public LdapTestConnectionV4Request getValidationRequest() {
-        return validationRequest;
+    public LdapMinimalV4Request getLdap() {
+        return ldap;
     }
 
-    public void setValidationRequest(LdapTestConnectionV4Request validationRequest) {
-        this.validationRequest = validationRequest;
+    public void setLdap(LdapMinimalV4Request ldap) {
+        this.ldap = ldap;
     }
 }
