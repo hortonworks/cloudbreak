@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.AuditEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4EndPoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
@@ -83,8 +81,6 @@ public class CloudbreakClient {
 
     private static final List<Class<?>> ENDPOINTS = Arrays.asList(
             AccountPreferencesEndpoint.class,
-            AuditEndpoint.class,
-            AuditV3Endpoint.class,
             AuditEventV4Endpoint.class,
             AutoscaleEndpoint.class,
             BlueprintV4Endpoint.class,
@@ -153,14 +149,6 @@ public class CloudbreakClient {
 
     public AccountPreferencesEndpoint accountPreferencesEndpoint() {
         return getEndpoint(AccountPreferencesEndpoint.class);
-    }
-
-    public AuditEndpoint auditEndpoint() {
-        return getEndpoint(AuditEndpoint.class);
-    }
-
-    public AuditV3Endpoint auditV3Endpoint() {
-        return getEndpoint(AuditV3Endpoint.class);
     }
 
     public AuditEventV4Endpoint auditV4Endpoint() {
