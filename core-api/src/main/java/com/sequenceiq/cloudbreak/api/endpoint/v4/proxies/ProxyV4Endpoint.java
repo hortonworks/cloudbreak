@@ -83,6 +83,6 @@ public interface ProxyV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ProxyConfigOpDescription.GET_REQUEST_BY_NAME,
             produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "getRecipeRequestFromNameInWorkspace")
+            nickname = "getProxyRequestFromNameInWorkspace")
     ProxyV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }
