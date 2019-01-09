@@ -3,34 +3,48 @@ package aws
 import (
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
-	"github.com/hortonworks/dp-cli-common/utils"
 )
 
-func (p *AwsProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
+func (p *AwsProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.NetworkV4Request {
 	switch mode {
 	case cloud.EXISTING_NETWORK_NEW_SUBNET:
-		return map[string]interface{}{"vpcId": "____", "internetGatewayId": "____"}
+		return &model.NetworkV4Request{
+			SubnetCIDR: cloud.DEFAULT_SUBNET_CIDR,
+			Aws: &model.AwsNetworkV4Parameters{
+				VpcID:             "____",
+				InternetGatewayID: "____",
+			},
+		}
 	case cloud.EXISTING_NETWORK_EXISTING_SUBNET:
-		return map[string]interface{}{"vpcId": "____", "subnetId": "____"}
+		return &model.NetworkV4Request{
+			Aws: &model.AwsNetworkV4Parameters{
+				VpcID:    "____",
+				SubnetID: "____",
+			},
+		}
 	default:
-		return nil
+		return &model.NetworkV4Request{
+			SubnetCIDR: cloud.DEFAULT_SUBNET_CIDR,
+		}
 	}
 }
 
-func (p *AwsProvider) GetParamatersTemplate() map[string]interface{} {
-	return nil
+func (p *AwsProvider) SetParametersTemplate(request *model.StackV4Request) {
 }
 
-func (p *AwsProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
-	return nil
+func (p *AwsProvider) SetInstanceGroupParametersTemplate(request *model.InstanceGroupV4Request, node cloud.Node) {
 }
 
-func (p *AwsProvider) GenerateNetworkRequestFromNetworkResponse(response *model.NetworkResponse) *model.NetworkV2Request {
-	parameters := utils.CopyToByTargets(response.Parameters, "subnetId")
-	parameters["vpcId"] = response.Parameters["networkId"]
+func (p *AwsProvider) GenerateNetworkRequestFromNetworkResponse(response *model.NetworkV4Response) *model.NetworkV4Request {
+	if response.Aws == nil {
+		return &model.NetworkV4Request{}
+	}
 
-	request := &model.NetworkV2Request{
-		Parameters: parameters,
+	request := &model.NetworkV4Request{
+		Aws: &model.AwsNetworkV4Parameters{
+			VpcID:    response.Aws.VpcID,
+			SubnetID: response.Aws.SubnetID,
+		},
 	}
 	return request
 }

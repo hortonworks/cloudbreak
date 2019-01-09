@@ -66,7 +66,7 @@ for the put stack for autoscale operation typically these are written to a http.
 type PutStackForAutoscaleParams struct {
 
 	/*Body*/
-	Body *model.UpdateStack
+	Body *model.UpdateStackV4Request
 	/*ID*/
 	ID int64
 	/*UserID*/
@@ -111,13 +111,13 @@ func (o *PutStackForAutoscaleParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the put stack for autoscale params
-func (o *PutStackForAutoscaleParams) WithBody(body *model.UpdateStack) *PutStackForAutoscaleParams {
+func (o *PutStackForAutoscaleParams) WithBody(body *model.UpdateStackV4Request) *PutStackForAutoscaleParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the put stack for autoscale params
-func (o *PutStackForAutoscaleParams) SetBody(body *model.UpdateStack) {
+func (o *PutStackForAutoscaleParams) SetBody(body *model.UpdateStackV4Request) {
 	o.Body = body
 }
 

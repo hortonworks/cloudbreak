@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_imagecatalogs"
+	v4img "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_imagecatalogs"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	_ "github.com/hortonworks/cb-cli/dataplane/cloud/aws"
@@ -15,8 +15,8 @@ import (
 type mockListImageCatalogsByWorkspaceClient struct {
 }
 
-func (*mockListImageCatalogsByWorkspaceClient) ListImageCatalogsByWorkspace(params *v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceParams) (*v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceOK, error) {
-	resp := []*model.ImageCatalogResponse{
+func (*mockListImageCatalogsByWorkspaceClient) ListImageCatalogsByWorkspace(params *v4img.ListImageCatalogsByWorkspaceParams) (*v4img.ListImageCatalogsByWorkspaceOK, error) {
+	resp := []*model.ImageCatalogV4Response{
 		{
 			Name:          &(&types.S{S: "test"}).S,
 			Description:   &(&types.S{S: "description"}).S,
@@ -24,7 +24,7 @@ func (*mockListImageCatalogsByWorkspaceClient) ListImageCatalogsByWorkspace(para
 			URL:           &(&types.S{S: "testurl"}).S,
 		},
 	}
-	return &v3_workspace_id_imagecatalogs.ListImageCatalogsByWorkspaceOK{Payload: resp}, nil
+	return &v4img.ListImageCatalogsByWorkspaceOK{Payload: &model.ImageCatalogV4Responses{Responses: resp}}, nil
 }
 
 func TestListImagecatalogsImpl(t *testing.T) {
@@ -46,9 +46,9 @@ func TestListImagecatalogsImpl(t *testing.T) {
 type mockGetPublicImagesClient struct {
 }
 
-func (*mockGetPublicImagesClient) GetImagesByProviderAndCustomImageCatalogInWorkspace(params *v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceParams) (*v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceOK, error) {
-	resp := &model.ImagesResponse{
-		BaseImages: []*model.BaseImageResponse{
+func (*mockGetPublicImagesClient) GetImagesByNameInWorkspace(params *v4img.GetImagesByNameInWorkspaceParams) (*v4img.GetImagesByNameInWorkspaceOK, error) {
+	resp := &model.ImagesV4Response{
+		BaseImages: []*model.BaseImageV4Response{
 			{
 				Date:        "1111-11-11",
 				Version:     "1.1.1",
@@ -57,7 +57,7 @@ func (*mockGetPublicImagesClient) GetImagesByProviderAndCustomImageCatalogInWork
 			},
 		},
 	}
-	return &v3_workspace_id_imagecatalogs.GetImagesByProviderAndCustomImageCatalogInWorkspaceOK{Payload: resp}, nil
+	return &v4img.GetImagesByNameInWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListImagesImpl(t *testing.T) {
@@ -76,7 +76,7 @@ func TestListImagesImpl(t *testing.T) {
 }
 
 func TestFindBaseImageByUUID(t *testing.T) {
-	baseImages := []*model.BaseImageResponse{
+	baseImages := []*model.BaseImageV4Response{
 		{
 			Date:        "1111-11-11",
 			Version:     "1.1.1",
@@ -97,7 +97,7 @@ func TestFindBaseImageByUUID(t *testing.T) {
 		},
 	}
 
-	imageResponse := &model.ImagesResponse{
+	imageResponse := &model.ImagesV4Response{
 		BaseImages: baseImages,
 	}
 	expectedUUID := "uuid3"
@@ -109,7 +109,7 @@ func TestFindBaseImageByUUID(t *testing.T) {
 	}
 }
 
-var detailedImage = &model.ImageResponse{
+var detailedImage = &model.ImageV4Response{
 	Date:        "1111-11-11",
 	Version:     "1.1.1",
 	Description: "images",

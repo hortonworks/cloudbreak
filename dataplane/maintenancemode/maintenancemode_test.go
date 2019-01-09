@@ -1,7 +1,7 @@
 package maintenancemode
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
+	v4maint "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/flags"
 	"testing"
 
@@ -55,10 +55,10 @@ func Test_resolveWorkspaceIDAndStackName(t *testing.T) {
 type mockMaintenanceModeClient struct {
 	t                     *testing.T
 	maintenanceModeStatus string
-	wantStackDetails      *model.AmbariStackDetails
+	wantStackDetails      *model.StackRepositoryV4Request
 }
 
-func (mockClient mockMaintenanceModeClient) SetClusterMaintenanceMode(params *v3_workspace_id_stacks.SetClusterMaintenanceModeParams) error {
+func (mockClient mockMaintenanceModeClient) SetClusterMaintenanceMode(params *v4maint.SetClusterMaintenanceModeParams) error {
 	if params.WorkspaceID != 1 {
 		mockClient.t.Errorf("SetClusterMaintenanceMode() got = %v, want %v", params.WorkspaceID, 1)
 	}
@@ -74,7 +74,7 @@ func (mockClient mockMaintenanceModeClient) SetClusterMaintenanceMode(params *v3
 	return nil
 }
 
-func (mockClient mockMaintenanceModeClient) PutClusterV3(params *v3_workspace_id_stacks.PutClusterV3Params) error {
+func (mockClient mockMaintenanceModeClient) PutClusterV4(params *v4maint.PutClusterV4Params) error {
 	if params.WorkspaceID != 1 {
 		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.WorkspaceID, 1)
 	}
@@ -83,20 +83,20 @@ func (mockClient mockMaintenanceModeClient) PutClusterV3(params *v3_workspace_id
 		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Name, "test_stack")
 	}
 
-	if params.Body.AmbariStackDetails.Stack != mockClient.wantStackDetails.Stack {
-		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.AmbariStackDetails.Stack, mockClient.wantStackDetails.Stack)
+	if params.Body.StackRepository.Stack != mockClient.wantStackDetails.Stack {
+		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.StackRepository.Stack, mockClient.wantStackDetails.Stack)
 	}
 
-	if params.Body.AmbariStackDetails.Version != mockClient.wantStackDetails.Version {
-		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.AmbariStackDetails.Version, mockClient.wantStackDetails.Version)
+	if params.Body.StackRepository.Version != mockClient.wantStackDetails.Version {
+		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.StackRepository.Version, mockClient.wantStackDetails.Version)
 	}
 
-	if params.Body.AmbariStackDetails.StackBaseURL != mockClient.wantStackDetails.StackBaseURL {
-		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.AmbariStackDetails.StackBaseURL, mockClient.wantStackDetails.StackBaseURL)
+	if params.Body.StackRepository.Repository.BaseURL != mockClient.wantStackDetails.Repository.BaseURL {
+		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.StackRepository.Repository.BaseURL, mockClient.wantStackDetails.Repository.BaseURL)
 	}
 
-	if params.Body.AmbariStackDetails.GpgKeyURL != mockClient.wantStackDetails.GpgKeyURL {
-		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.AmbariStackDetails.GpgKeyURL, mockClient.wantStackDetails.GpgKeyURL)
+	if params.Body.StackRepository.Repository.GpgKeyURL != mockClient.wantStackDetails.Repository.GpgKeyURL {
+		mockClient.t.Errorf("PutClusterV3() got = %v, want %v", params.Body.StackRepository.Repository.GpgKeyURL, mockClient.wantStackDetails.Repository.GpgKeyURL)
 	}
 
 	return nil
@@ -118,11 +118,11 @@ func Test_toggleMaintenanceMode(t *testing.T) {
 			args: args{
 				client: mockMaintenanceModeClient{
 					t:                     t,
-					maintenanceModeStatus: model.MaintenanceModeJSONStatusENABLED,
+					maintenanceModeStatus: model.MaintenanceModeV4RequestStatusENABLED,
 				},
 				workspaceId:       1,
 				name:              "test_stack",
-				maintenanceModeOn: model.MaintenanceModeJSONStatusENABLED,
+				maintenanceModeOn: model.MaintenanceModeV4RequestStatusENABLED,
 			},
 		},
 		{
@@ -130,23 +130,23 @@ func Test_toggleMaintenanceMode(t *testing.T) {
 			args: args{
 				client: mockMaintenanceModeClient{
 					t:                     t,
-					maintenanceModeStatus: model.MaintenanceModeJSONStatusDISABLED,
+					maintenanceModeStatus: model.MaintenanceModeV4RequestStatusDISABLED,
 				},
 				workspaceId:       1,
 				name:              "test_stack",
-				maintenanceModeOn: model.MaintenanceModeJSONStatusDISABLED,
+				maintenanceModeOn: model.MaintenanceModeV4RequestStatusDISABLED,
 			},
 		},
 		{
-			name: "Test valideate stack in maintenance mode",
+			name: "Test validate stack in maintenance mode",
 			args: args{
 				client: mockMaintenanceModeClient{
 					t:                     t,
-					maintenanceModeStatus: model.MaintenanceModeJSONStatusVALIDATIONREQUESTED,
+					maintenanceModeStatus: model.MaintenanceModeV4RequestStatusVALIDATIONREQUESTED,
 				},
 				workspaceId:       1,
 				name:              "test_stack",
-				maintenanceModeOn: model.MaintenanceModeJSONStatusVALIDATIONREQUESTED,
+				maintenanceModeOn: model.MaintenanceModeV4RequestStatusVALIDATIONREQUESTED,
 			},
 		},
 	}
@@ -158,16 +158,16 @@ func Test_toggleMaintenanceMode(t *testing.T) {
 }
 
 func Test_unmarshallCliInput(t *testing.T) {
-	gotStackDetails := model.AmbariStackDetails{}
+	gotStackDetails := model.StackRepositoryV4Request{}
 
 	type args struct {
 		stringFinder func(string) string
-		stackDetails *model.AmbariStackDetails
+		stackDetails *model.StackRepositoryV4Request
 	}
 	tests := []struct {
 		name             string
 		args             args
-		wantStackDetails model.AmbariStackDetails
+		wantStackDetails model.StackRepositoryV4Request
 	}{
 		{
 			name: "Test unmarshall Ambari repo config",
@@ -180,11 +180,13 @@ func Test_unmarshallCliInput(t *testing.T) {
 				},
 				stackDetails: &gotStackDetails,
 			},
-			wantStackDetails: model.AmbariStackDetails{
-				Stack:        "AMBARI",
-				Version:      "2.7.0.0",
-				StackBaseURL: "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
-				GpgKeyURL:    "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins",
+			wantStackDetails: model.StackRepositoryV4Request{
+				Stack:   "AMBARI",
+				Version: "2.7.0.0",
+				Repository: &model.RepositoryV4Request{
+					BaseURL:   "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
+					GpgKeyURL: "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins",
+				},
 			},
 		},
 		{
@@ -198,7 +200,7 @@ func Test_unmarshallCliInput(t *testing.T) {
 				},
 				stackDetails: &gotStackDetails,
 			},
-			wantStackDetails: model.AmbariStackDetails{
+			wantStackDetails: model.StackRepositoryV4Request{
 				Stack:                    "HDP",
 				Version:                  "2.6.5.0",
 				VersionDefinitionFileURL: "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml",
@@ -215,7 +217,7 @@ func Test_unmarshallCliInput(t *testing.T) {
 				},
 				stackDetails: &gotStackDetails,
 			},
-			wantStackDetails: model.AmbariStackDetails{
+			wantStackDetails: model.StackRepositoryV4Request{
 				Stack:                    "HDF",
 				Version:                  "3.2.0.6-2",
 				VersionDefinitionFileURL: "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.6-2/HDF-3.2.0.6-2.xml",
@@ -230,11 +232,11 @@ func Test_unmarshallCliInput(t *testing.T) {
 				if gotStackDetails.Version != tt.wantStackDetails.Version {
 					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Version)
 				}
-				if gotStackDetails.StackBaseURL != tt.wantStackDetails.StackBaseURL {
-					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.StackBaseURL)
+				if gotStackDetails.Repository.BaseURL != tt.wantStackDetails.Repository.BaseURL {
+					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Repository.BaseURL)
 				}
-				if gotStackDetails.GpgKeyURL != tt.wantStackDetails.GpgKeyURL {
-					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.GpgKeyURL)
+				if gotStackDetails.Repository.GpgKeyURL != tt.wantStackDetails.Repository.GpgKeyURL {
+					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Repository.GpgKeyURL)
 				}
 			}
 			if "HDP" == tt.wantStackDetails.Stack {
@@ -265,13 +267,15 @@ func Test_updateStackRepoDetails(t *testing.T) {
 		client       maintenanceModeClient
 		workspaceID  int64
 		name         string
-		stackDetails *model.AmbariStackDetails
+		stackDetails *model.StackRepositoryV4Request
 	}
-	stackDetails := model.AmbariStackDetails{
-		Stack:        "AMBARI",
-		Version:      "2.7.0.0",
-		StackBaseURL: "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
-		GpgKeyURL:    "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins",
+	stackDetails := model.StackRepositoryV4Request{
+		Stack:   "AMBARI",
+		Version: "2.7.0.0",
+		Repository: &model.RepositoryV4Request{
+			BaseURL:   "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
+			GpgKeyURL: "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins",
+		},
 	}
 	tests := []struct {
 		name string

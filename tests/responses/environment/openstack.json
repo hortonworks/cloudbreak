@@ -21,8 +21,8 @@
     "id": 34,
     "name": "cloudbreak-cli@hortonworks.com"
   },
-  "proxyConfigs": [],
-  "ldapConfigs": [],
-  "rdsConfigs": [],
+  "proxies": [],
+  "ldaps": [],
+  "databases": [],
   "workloadClusters": []
 }

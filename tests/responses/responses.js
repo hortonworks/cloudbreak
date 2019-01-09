@@ -94,7 +94,7 @@ responses.getRegions= responseObject(regions, OK);
 responses.getPlatformSShKeys= responseObject(sshkeys, OK);
 responses.getCredentialInWorkspace = responseObject(credentialopenstack, OK);
 responses.createCredentialInWorkspace = responseObject(credentialopenstack, OK);
-responses.listCredentialsByWorkspace = responseObject([credentialopenstack, credentialgcp, credentialazure, credentialaws], OK);
+responses.listCredentialsByWorkspace = responseObject({ "responses": [credentialopenstack, credentialgcp, credentialazure, credentialaws] }, OK);
 responses.getPublicCredential= responseObject(credentialopenstack, OK);
 responses.getPrivatesCredential= responseObject([credentialopenstack,credentialgcp,credentialazure,credentialaws], OK);
 responses.getPrivateCredential= responseObject(credentialopenstack, OK);
@@ -121,10 +121,10 @@ responses.getPrivatesProxyConfig= responseObject(proxy, OK);
 responses.postPrivateProxyConfig= responseObject(proxy, OK);
 responses.getPrivateProxyConfig= responseObject(proxy, OK);
 responses.getProxyConfig= responseObject(proxy, OK);
-responses.listRdsConfigsByWorkspace = responseObject(rds, OK);
-responses.createRdsConfigInWorkspace = responseObject(rdsSingle, OK);
-responses.getRdsConfigInWorkspace = responseObject(rds, OK);
-responses.testRdsConnectionInWorkspace = responseObject({ "connectionResult":"Failed to connect to RDS: The connection attempt failed." }, OK);
+responses.listDatabasesByWorkspace = responseObject(rds, OK);
+responses.createDatabaseInWorkspace = responseObject(rdsSingle, OK);
+responses.getDatabaseInWorkspace = responseObject(rds, OK);
+responses.testDatabaseConnectionInWorkspace = responseObject({ "result":"Failed to connect to RDS: The connection attempt failed." }, OK);
 responses.getPrivatesRds= responseObject(rds, OK);
 responses.postPrivateRds= responseObject(rds, OK);
 responses.getPrivateRds= responseObject(rds, OK);
@@ -136,18 +136,15 @@ responses.getRecipeRequestFromName = responseObject(recipes, OK);
 responses.getPublicsSecurityGroup = responseObject(secgr, OK);
 responses.getRecipeInWorkspace = responseObject(recipe, OK);
 responses.getDefaultSecurityRules= responseObject(secrules, OK);
-responses.getPublicsStack= responseObject([openstack,aws,azure,gcp], OK);
+responses.listStackInWorkspaceV4= responseObject({ "responses" :[openstack,aws,azure,gcp]}, OK);
 responses.getPublicStack= stackResponses;
 responses.getPublicsTemplate= responseObject(templates, OK);
 responses.getUserProfile= responseObject(profile, OK);
 responses.getRegionsByCredentialId= responseObject(regions, OK);
-responses.listStacksByWorkspace = responseObject(stacks, OK);
-responses.createStackInWorkspace = responseObject(openstack, OK);
-responses.getStackInWorkspace = responseObject(openstack, OK);
-responses.getPublicStackV2= responseObject(stackResponses, OK);
-responses.postPrivateStackV2= responseObject(openstack, OK);
-responses.getPrivateStackV2= responseObject(openstack, OK);
-responses.getStackV2= responseObject(openstack, OK);
+responses.listStackInWorkspaceV4 = responseObject(stacks, OK);
+responses.postStackInWorkspaceV4 = responseObject(openstack, OK);
+responses.getStackInWorkspaceV4 = stackResponses;
+responses.postStackInWorkspaceV4= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInWorkspace = responseObject(mpacksSingle, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
@@ -172,7 +169,7 @@ responses.getDefaultSmartSenseSubscriptionInWorkspace= responseObject({
   "account" : "account"
 }, OK);
 responses.getTagSpecifications = responseObject({ "specifications" : { "key" : { "key" : "{}" } } }, OK);
-responses.listManagementPacksByWorkspace = responseObject([ {
+responses.listManagementPacksByWorkspace = responseObject({ "responses": [ {
   "public" : false,
   "name" : "name",
   "description" : "description",
@@ -190,8 +187,8 @@ responses.listManagementPacksByWorkspace = responseObject([ {
   "id" : 0,
   "mpackUrl" : "mpackUrl",
   "purgeList" : [ "purgeList", "purgeList" ]
-} ],OK);
-responses.listFlexSubscriptionsByWorkspace = responseObject([ {
+} ] },OK);
+responses.listFlexSubscriptionsByWorkspace = responseObject({ "responses": [ {
   "owner" : "owner",
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
@@ -227,7 +224,7 @@ responses.listFlexSubscriptionsByWorkspace = responseObject([ {
   "subscriptionId" : "subscriptionId",
   "account" : "account",
   "usedAsDefault" : false
-} ], OK);
+} ] }, OK);
 
 responses.putstartStackV2 = stackOperationResponses;
 responses.putscalingStackV2 = stackOperationResponses;
@@ -236,7 +233,7 @@ responses.putrepairStackV2 = stackOperationResponses;
 responses.putsyncStackV2 = stackOperationResponses;
 responses.putreinstallStackV2 = stackReinstallResponses;
 
-responses.checkClientVersion = responseObject({ "versionCheckOk" : true, "message" : "message" }, OK);
+responses.checkClientVersionV4 = responseObject({ "versionCheckOk" : true, "message" : "message" }, OK);
  
 module.exports= {
   responses:responses

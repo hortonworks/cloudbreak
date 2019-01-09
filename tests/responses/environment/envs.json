@@ -1,50 +1,52 @@
-[
-  {
-    "id": 15,
-    "name": "test1",
-    "description": "",
-    "regions": {
-      "displayNames": {
-        "RegionOne": "RegionOne"
+{
+  "responses": [
+    {
+      "id": 15,
+      "name": "test1",
+      "description": "",
+      "regions": {
+        "displayNames": {
+          "RegionOne": "RegionOne"
+        },
+        "values": [
+          "RegionOne"
+        ]
       },
-      "values": [
-        "RegionOne"
-      ]
-    },
-    "cloudPlatform": "OPENSTACK",
-    "credentialName": "testcred",
-    "location": {
-      "locationName": "Ireland (North Europe)",
-      "latitude": 53.33306114,
-      "longitude": -6.248905682
-    },
-    "workspace": {
-      "id": 34,
-      "name": "cloudbreak-cli@hortonworks.com"
-    }
-  },
-  {
-    "id": 16,
-    "name": "test2",
-    "description": "",
-    "regions": {
-      "displayNames": {
-        "RegionOne": "RegionOne"
+      "cloudPlatform": "OPENSTACK",
+      "credentialName": "testcred",
+      "location": {
+        "locationName": "Ireland (North Europe)",
+        "latitude": 53.33306114,
+        "longitude": -6.248905682
       },
-      "values": [
-        "RegionOne"
-      ]
+      "workspace": {
+        "id": 34,
+        "name": "cloudbreak-cli@hortonworks.com"
+      }
     },
-    "cloudPlatform": "OPENSTACK",
-    "credentialName": "testcred",
-    "location": {
-      "locationName": "Ireland (North Europe)",
-      "latitude": 53.33306114,
-      "longitude": -6.248905682
-    },
-    "workspace": {
-      "id": 34,
-      "name": "cloudbreak-cli@hortonworks.com"
+    {
+      "id": 16,
+      "name": "test2",
+      "description": "",
+      "regions": {
+        "displayNames": {
+          "RegionOne": "RegionOne"
+        },
+        "values": [
+          "RegionOne"
+        ]
+      },
+      "cloudPlatform": "OPENSTACK",
+      "credentialName": "testcred",
+      "location": {
+        "locationName": "Ireland (North Europe)",
+        "latitude": 53.33306114,
+        "longitude": -6.248905682
+      },
+      "workspace": {
+        "id": 34,
+        "name": "cloudbreak-cli@hortonworks.com"
+      }
     }
-  }  
-]
+  ]
+}

@@ -4,60 +4,62 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_mpacks"
+	v4mpack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
 
 type mockMpackClient struct {
-	postPublicCapture  *model.ManagementPackRequest
-	postPrivateCapture *model.ManagementPackRequest
+	postPublicCapture  *model.ManagementPackV4Request
+	postPrivateCapture *model.ManagementPackV4Request
 }
 
-func (m *mockMpackClient) CreateManagementPackInWorkspace(params *v3_workspace_id_mpacks.CreateManagementPackInWorkspaceParams) (*v3_workspace_id_mpacks.CreateManagementPackInWorkspaceOK, error) {
+func (m *mockMpackClient) CreateManagementPackInWorkspace(params *v4mpack.CreateManagementPackInWorkspaceParams) (*v4mpack.CreateManagementPackInWorkspaceOK, error) {
 	m.postPublicCapture = params.Body
-	return &v3_workspace_id_mpacks.CreateManagementPackInWorkspaceOK{
-		Payload: &model.ManagementPackResponse{
+	return &v4mpack.CreateManagementPackInWorkspaceOK{
+		Payload: &model.ManagementPackV4Response{
 			ID:   1,
 			Name: &(&types.S{S: "mpack"}).S,
 		},
 	}, nil
 }
 
-func (m *mockMpackClient) ListManagementPacksByWorkspace(params *v3_workspace_id_mpacks.ListManagementPacksByWorkspaceParams) (*v3_workspace_id_mpacks.ListManagementPacksByWorkspaceOK, error) {
+func (m *mockMpackClient) ListManagementPacksByWorkspace(params *v4mpack.ListManagementPacksByWorkspaceParams) (*v4mpack.ListManagementPacksByWorkspaceOK, error) {
 	yes := true
-	resp := v3_workspace_id_mpacks.ListManagementPacksByWorkspaceOK{
-		Payload: []*model.ManagementPackResponse{
-			{
-				Name:     &(&types.S{S: "mpack"}).S,
-				MpackURL: &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
-			},
-			{
-				Name:        &(&types.S{S: "mpack"}).S,
-				MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
-				Description: &(&types.S{S: "my test mpack"}).S,
-			},
-			{
-				Name:        &(&types.S{S: "mpack"}).S,
-				MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
-				Description: &(&types.S{S: "my test mpack"}).S,
-				Purge:       &yes,
-			},
-			{
-				Name:        &(&types.S{S: "mpack"}).S,
-				MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
-				Description: &(&types.S{S: "my test mpack"}).S,
-				Purge:       &yes,
-				PurgeList:   []string{"stack-definitions", "service-definitions", "mpacks"},
-			},
-			{
-				Name:        &(&types.S{S: "mpack"}).S,
-				MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
-				Description: &(&types.S{S: "my test mpack"}).S,
-				Purge:       &yes,
-				PurgeList:   []string{"stack-definitions", "service-definitions", "mpacks"},
-				Force:       &yes,
+	resp := v4mpack.ListManagementPacksByWorkspaceOK{
+		Payload: &model.ManagementPackV4Responses{
+			Responses: []*model.ManagementPackV4Response{
+				{
+					Name:     &(&types.S{S: "mpack"}).S,
+					MpackURL: &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
+				},
+				{
+					Name:        &(&types.S{S: "mpack"}).S,
+					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
+					Description: &(&types.S{S: "my test mpack"}).S,
+				},
+				{
+					Name:        &(&types.S{S: "mpack"}).S,
+					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
+					Description: &(&types.S{S: "my test mpack"}).S,
+					Purge:       &yes,
+				},
+				{
+					Name:        &(&types.S{S: "mpack"}).S,
+					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
+					Description: &(&types.S{S: "my test mpack"}).S,
+					Purge:       &yes,
+					PurgeList:   []string{"stack-definitions", "service-definitions", "mpacks"},
+				},
+				{
+					Name:        &(&types.S{S: "mpack"}).S,
+					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
+					Description: &(&types.S{S: "my test mpack"}).S,
+					Purge:       &yes,
+					PurgeList:   []string{"stack-definitions", "service-definitions", "mpacks"},
+					Force:       &yes,
+				},
 			},
 		},
 	}
@@ -69,9 +71,11 @@ func TestListMpacksImpl(t *testing.T) {
 
 	var mpackRows []utils.Row
 	client := new(mockMpackClient)
-	listMpacksImpl(client, func(header []string, rows []utils.Row) {
+	if err := listMpacksImpl(client, func(header []string, rows []utils.Row) {
 		mpackRows = rows
-	}, int64(2))
+	}, int64(2)); err != nil {
+		t.Errorf("error during list mpacks: %s", err.Error())
+	}
 
 	if len(mpackRows) != 5 {
 		t.Errorf("invalid number of mpack rows returned %d == %d", len(mpackRows), 5)
@@ -143,7 +147,7 @@ func TestCreateMpackForEmptyPurgeList(t *testing.T) {
 	checkReqParams(req, "", t)
 }
 
-func checkReqParams(req *model.ManagementPackRequest, purgeList string, t *testing.T) {
+func checkReqParams(req *model.ManagementPackV4Request, purgeList string, t *testing.T) {
 	if *req.Name != "mpack" {
 		t.Errorf("mpack name does not match %s == %s", *req.Name, "mpack")
 	}

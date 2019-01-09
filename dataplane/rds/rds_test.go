@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_rdsconfigs"
+	v4db "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_databases"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	_ "github.com/hortonworks/cb-cli/dataplane/cloud/aws"
 	"github.com/hortonworks/cb-cli/dataplane/types"
@@ -14,8 +14,8 @@ import (
 type mockRdsClient struct {
 }
 
-func (*mockRdsClient) ListRdsConfigsByWorkspace(params *v3_workspace_id_rdsconfigs.ListRdsConfigsByWorkspaceParams) (*v3_workspace_id_rdsconfigs.ListRdsConfigsByWorkspaceOK, error) {
-	resp := []*model.RDSConfigResponse{
+func (*mockRdsClient) ListDatabasesByWorkspace(params *v4db.ListDatabasesByWorkspaceParams) (*v4db.ListDatabasesByWorkspaceOK, error) {
+	resp := []*model.DatabaseV4Response{
 		{
 			Name:             &(&types.S{S: "test"}).S,
 			Description:      &(&types.S{S: "description"}).S,
@@ -25,14 +25,14 @@ func (*mockRdsClient) ListRdsConfigsByWorkspace(params *v3_workspace_id_rdsconfi
 			ConnectionDriver: nil,
 		},
 	}
-	return &v3_workspace_id_rdsconfigs.ListRdsConfigsByWorkspaceOK{Payload: resp}, nil
+	return &v4db.ListDatabasesByWorkspaceOK{Payload: &model.DatabaseV4Responses{Responses: resp}}, nil
 }
 
-func (*mockRdsClient) CreateRdsConfigInWorkspace(params *v3_workspace_id_rdsconfigs.CreateRdsConfigInWorkspaceParams) (*v3_workspace_id_rdsconfigs.CreateRdsConfigInWorkspaceOK, error) {
+func (*mockRdsClient) CreateDatabaseInWorkspace(params *v4db.CreateDatabaseInWorkspaceParams) (*v4db.CreateDatabaseInWorkspaceOK, error) {
 	return nil, nil
 }
 
-func (*mockRdsClient) TestRdsConnectionInWorkspace(params *v3_workspace_id_rdsconfigs.TestRdsConnectionInWorkspaceParams) (*v3_workspace_id_rdsconfigs.TestRdsConnectionInWorkspaceOK, error) {
+func (*mockRdsClient) TestDatabaseConnectionInWorkspace(params *v4db.TestDatabaseConnectionInWorkspaceParams) (*v4db.TestDatabaseConnectionInWorkspaceOK, error) {
 	return nil, nil
 }
 

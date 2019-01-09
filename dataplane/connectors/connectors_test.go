@@ -5,8 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1connectors"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v2connectors"
+	v4con "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_connectors"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	_ "github.com/hortonworks/cb-cli/dataplane/cloud/aws"
@@ -20,8 +19,8 @@ import (
 type mockConnectorsClient struct {
 }
 
-func (*mockConnectorsClient) GetRegionsByCredentialID(params *v2connectors.GetRegionsByCredentialIDParams) (*v2connectors.GetRegionsByCredentialIDOK, error) {
-	resp := &model.RegionResponse{
+func (*mockConnectorsClient) GetRegionsByCredentialAndWorkspace(params *v4con.GetRegionsByCredentialAndWorkspaceParams) (*v4con.GetRegionsByCredentialAndWorkspaceOK, error) {
+	resp := &model.RegionV4Response{
 		DisplayNames: map[string]string{
 			"region": "region-name",
 		},
@@ -29,14 +28,14 @@ func (*mockConnectorsClient) GetRegionsByCredentialID(params *v2connectors.GetRe
 			"region": {"av0", "av1"},
 		},
 	}
-	return &v2connectors.GetRegionsByCredentialIDOK{Payload: resp}, nil
+	return &v4con.GetRegionsByCredentialAndWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListRegionsImpl(t *testing.T) {
 	t.Parallel()
 
 	var rows []utils.Row
-	listRegionsImpl(new(mockConnectorsClient), func(h []string, r []utils.Row) { rows = r }, "credentialName")
+	listRegionsImpl(new(mockConnectorsClient), func(h []string, r []utils.Row) { rows = r }, "credentialName", 123)
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
@@ -52,7 +51,7 @@ func TestListAvailabilityZonesImpl(t *testing.T) {
 	t.Parallel()
 
 	var rows []utils.Row
-	listAvailabilityZonesImpl(new(mockConnectorsClient), func(h []string, r []utils.Row) { rows = r }, "credentialName", "region")
+	listAvailabilityZonesImpl(new(mockConnectorsClient), func(h []string, r []utils.Row) { rows = r }, "credentialName", "region", 123)
 	if len(rows) != 2 {
 		t.Fatalf("row number doesn't match 2 == %d", len(rows))
 	}
@@ -67,21 +66,21 @@ func TestListAvailabilityZonesImpl(t *testing.T) {
 type mockDiskTypesClient struct {
 }
 
-func (*mockDiskTypesClient) GetDisktypes(params *v1connectors.GetDisktypesParams) (*v1connectors.GetDisktypesOK, error) {
-	resp := &model.PlatformDisksJSON{
+func (*mockDiskTypesClient) GetDisktypesForWorkspace(params *v4con.GetDisktypesForWorkspaceParams) (*v4con.GetDisktypesForWorkspaceOK, error) {
+	resp := &model.PlatformDisksV4Response{
 		DisplayNames: map[string]map[string]string{
 			"AWS": {
 				"disk": "disk-name",
 			},
 		},
 	}
-	return &v1connectors.GetDisktypesOK{Payload: resp}, nil
+	return &v4con.GetDisktypesForWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListVolumeTypesImpl(t *testing.T) {
 	var rows []utils.Row
 	cloud.SetProviderType(cloud.AWS)
-	listVolumeTypesImpl(new(mockDiskTypesClient), func(h []string, r []utils.Row) { rows = r })
+	listVolumeTypesImpl(new(mockDiskTypesClient), func(h []string, r []utils.Row) { rows = r }, 123)
 
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
@@ -97,11 +96,11 @@ func TestListVolumeTypesImpl(t *testing.T) {
 type mockInstanceTypesClient struct {
 }
 
-func (*mockInstanceTypesClient) GetVMTypesByCredentialID(*v2connectors.GetVMTypesByCredentialIDParams) (*v2connectors.GetVMTypesByCredentialIDOK, error) {
-	resp := &model.PlatformVmtypesResponse{
-		VMTypes: map[string]model.VirtualMachinesResponse{
+func (*mockInstanceTypesClient) GetVMTypesByCredentialAndWorkspace(*v4con.GetVMTypesByCredentialAndWorkspaceParams) (*v4con.GetVMTypesByCredentialAndWorkspaceOK, error) {
+	resp := &model.PlatformVmtypesV4Response{
+		VMTypes: map[string]model.VirtualMachinesV4Response{
 			"region-a": {
-				VirtualMachines: []*model.VMTypeJSON{
+				VirtualMachines: []*model.VMTypeV4Response{
 					{
 						Value: "machine",
 						VMTypeMetaJSON: &model.VMTypeMetaJSON{
@@ -115,7 +114,7 @@ func (*mockInstanceTypesClient) GetVMTypesByCredentialID(*v2connectors.GetVMType
 			},
 		},
 	}
-	return &v2connectors.GetVMTypesByCredentialIDOK{Payload: resp}, nil
+	return &v4con.GetVMTypesByCredentialAndWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListInstanceTypesImpl(t *testing.T) {
@@ -133,14 +132,14 @@ func TestListInstanceTypesImpl(t *testing.T) {
 	}
 	var rows []utils.Row
 	for _, s := range inputs {
-		listInstanceTypesImpl(new(mockInstanceTypesClient), func(h []string, r []utils.Row) { rows = r }, "credential", s.Region, s.Avzone)
+		listInstanceTypesImpl(new(mockInstanceTypesClient), func(h []string, r []utils.Row) { rows = r }, "credential", s.Region, s.Avzone, 123)
 
 		if len(rows) != s.Count {
 			t.Fatalf("row number doesn't match %d == %d", s.Count, len(rows))
 		}
 	}
 
-	listInstanceTypesImpl(new(mockInstanceTypesClient), func(h []string, r []utils.Row) { rows = r }, "credential", "region", "region-a")
+	listInstanceTypesImpl(new(mockInstanceTypesClient), func(h []string, r []utils.Row) { rows = r }, "credential", "region", "region-a", 123)
 	for _, r := range rows {
 		expected := "machine 1 1 region-a"
 		if strings.Join(r.DataAsStringArray(), " ") != expected {

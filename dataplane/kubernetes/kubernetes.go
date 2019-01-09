@@ -8,7 +8,7 @@ import (
 	"encoding/base64"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kubernetesconfigs"
+	v4kube "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kubernetes"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -38,16 +38,16 @@ func (k *kubernetesOutDescribe) DataAsStringArray() []string {
 }
 
 type kubernetesClient interface {
-	ListKubernetesConfigsByWorkspace(params *v3_workspace_id_kubernetesconfigs.ListKubernetesConfigsByWorkspaceParams) (*v3_workspace_id_kubernetesconfigs.ListKubernetesConfigsByWorkspaceOK, error)
-	CreateKubernetesConfigInWorkspace(params *v3_workspace_id_kubernetesconfigs.CreateKubernetesConfigInWorkspaceParams) (*v3_workspace_id_kubernetesconfigs.CreateKubernetesConfigInWorkspaceOK, error)
-	PutKubernetesConfigInWorkspace(params *v3_workspace_id_kubernetesconfigs.PutKubernetesConfigInWorkspaceParams) (*v3_workspace_id_kubernetesconfigs.PutKubernetesConfigInWorkspaceOK, error)
+	ListKubernetesConfigsByWorkspace(params *v4kube.ListKubernetesConfigsByWorkspaceParams) (*v4kube.ListKubernetesConfigsByWorkspaceOK, error)
+	CreateKubernetesConfigInWorkspace(params *v4kube.CreateKubernetesConfigInWorkspaceParams) (*v4kube.CreateKubernetesConfigInWorkspaceOK, error)
+	PutKubernetesConfigInWorkspace(params *v4kube.PutKubernetesConfigInWorkspaceParams) (*v4kube.PutKubernetesConfigInWorkspaceOK, error)
 }
 
 func CreateKubernetes(c *cli.Context) {
 	log.Infof("[CreateKubernetes] creating a kubernetes config configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	createKubernetesImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs,
+		cbClient.Cloudbreak.V4WorkspaceIDKubernetes,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
@@ -58,15 +58,15 @@ func CreateKubernetes(c *cli.Context) {
 func createKubernetesImpl(client kubernetesClient, workspaceID int64, name string, description string, configuration string, environments []string) {
 	defer utils.TimeTrack(time.Now(), "create kubernetes config")
 	config := string(configuration)
-	kubernetesRequest := &model.KubernetesConfigRequest{
+	kubernetesRequest := &model.KubernetesV4Request{
 		Name:         &name,
 		Description:  &description,
-		Config:       &config,
+		Content:      &config,
 		Environments: environments,
 	}
-	var kubernetesResponse *model.KubernetesConfigResponse
+	var kubernetesResponse *model.KubernetesV4Response
 	log.Infof("[createKubernetesImpl] sending create kubernetes config request")
-	resp, err := client.CreateKubernetesConfigInWorkspace(v3_workspace_id_kubernetesconfigs.NewCreateKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(kubernetesRequest))
+	resp, err := client.CreateKubernetesConfigInWorkspace(v4kube.NewCreateKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(kubernetesRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -79,7 +79,7 @@ func EditKubernetes(c *cli.Context) {
 	log.Infof("[EditKubernetes] edit a kubernetes config configuration")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	editKubernetesImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs,
+		cbClient.Cloudbreak.V4WorkspaceIDKubernetes,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
@@ -89,14 +89,14 @@ func EditKubernetes(c *cli.Context) {
 func editKubernetesImpl(client kubernetesClient, workspaceID int64, name string, description string, configuration string) {
 	defer utils.TimeTrack(time.Now(), "edit kubernetes config")
 	config := string(configuration)
-	kubernetesRequest := &model.KubernetesConfigRequest{
+	kubernetesRequest := &model.KubernetesV4Request{
 		Name:        &name,
 		Description: &description,
-		Config:      &config,
+		Content:     &config,
 	}
-	var kubernetesResponse *model.KubernetesConfigResponse
+	var kubernetesResponse *model.KubernetesV4Response
 	log.Infof("[editKubernetesImpl] sending edit kubernetes config request")
-	resp, err := client.PutKubernetesConfigInWorkspace(v3_workspace_id_kubernetesconfigs.NewPutKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(kubernetesRequest))
+	resp, err := client.PutKubernetesConfigInWorkspace(v4kube.NewPutKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(kubernetesRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -113,7 +113,7 @@ func DeleteKubernetes(c *cli.Context) error {
 	log.Infof("[DeleteKubernetes] delete kubernetes config configuration by name: %s", kubernetesName)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs.DeleteKubernetesConfigInWorkspace(v3_workspace_id_kubernetesconfigs.NewDeleteKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kubernetesName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V4WorkspaceIDKubernetes.DeleteKubernetesConfigInWorkspace(v4kube.NewDeleteKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kubernetesName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteKubernetes] kubernetes config configuration deleted: %s", kubernetesName)
@@ -129,7 +129,7 @@ func DescribeKubernetes(c *cli.Context) {
 	kubernetesName := c.String(fl.FlName.Name)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs.GetKubernetesConfigInWorkspace(v3_workspace_id_kubernetesconfigs.NewGetKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kubernetesName))
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDKubernetes.GetKubernetesConfigInWorkspace(v4kube.NewGetKubernetesConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kubernetesName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -153,8 +153,8 @@ func AttachKubernetesToEnvs(c *cli.Context) {
 	log.Infof("[AttachKubernetesToEnvs] attach kubernetes config '%s' to environments: %s", kubernetesName, environments)
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	attachRequest := v3_workspace_id_kubernetesconfigs.NewAttachKubernetesResourceToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kubernetesName).WithBody(environments)
-	response, err := cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs.AttachKubernetesResourceToEnvironments(attachRequest)
+	attachRequest := v4kube.NewAttachKubernetesResourceToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kubernetesName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
+	response, err := cbClient.Cloudbreak.V4WorkspaceIDKubernetes.AttachKubernetesResourceToEnvironments(attachRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -171,8 +171,8 @@ func DetachKubernetesFromEnvs(c *cli.Context) {
 	log.Infof("[DetachKubernetesFromEnvs] detach kubernetes config '%s' from environments: %s", kubernetesName, environments)
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	detachRequest := v3_workspace_id_kubernetesconfigs.NewDetachKubernetesResourceFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kubernetesName).WithBody(environments)
-	response, err := cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs.DetachKubernetesResourceFromEnvironments(detachRequest)
+	detachRequest := v4kube.NewDetachKubernetesResourceFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kubernetesName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
+	response, err := cbClient.Cloudbreak.V4WorkspaceIDKubernetes.DetachKubernetesResourceFromEnvironments(detachRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -187,17 +187,17 @@ func ListAllKubernetes(c *cli.Context) error {
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	return listAllKubernetesImpl(cbClient.Cloudbreak.V3WorkspaceIDKubernetesconfigs, output.WriteList, workspaceID)
+	return listAllKubernetesImpl(cbClient.Cloudbreak.V4WorkspaceIDKubernetes, output.WriteList, workspaceID)
 }
 
 func listAllKubernetesImpl(kubernetesClient kubernetesClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := kubernetesClient.ListKubernetesConfigsByWorkspace(v3_workspace_id_kubernetesconfigs.NewListKubernetesConfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
+	resp, err := kubernetesClient.ListKubernetesConfigsByWorkspace(v4kube.NewListKubernetesConfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
 	var tableRows []utils.Row
-	for _, r := range resp.Payload {
+	for _, r := range resp.Payload.Responses {
 		row := &kubernetes{
 			Name:         *r.Name,
 			Description:  utils.SafeStringConvert(r.Description),

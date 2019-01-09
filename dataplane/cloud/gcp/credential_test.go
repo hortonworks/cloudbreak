@@ -9,6 +9,10 @@ import (
 
 var provider cloud.CloudProvider = new(GcpProvider)
 
+func init() {
+	cloud.SetProviderType(cloud.GCP)
+}
+
 func TestCreateCredentialParameters(t *testing.T) {
 	t.Parallel()
 
@@ -21,15 +25,16 @@ func TestCreateCredentialParameters(t *testing.T) {
 		}
 	}
 
-	actualMap, _ := provider.GetCredentialParameters(stringFinder)
+	request, _ := provider.GetCredentialRequest(stringFinder, false)
+	p12Parameters := request.Gcp.P12
 
-	if actualMap["projectId"] != "project-id" {
-		t.Errorf("projectId not match project-id == %s", actualMap["projectId"])
+	if *p12Parameters.ProjectID != "project-id" {
+		t.Errorf("projectId not match project-id == %s", *p12Parameters.ProjectID)
 	}
-	if actualMap["serviceAccountId"] != "service-account-id" {
-		t.Errorf("serviceAccountId not match service-account-id == %s", actualMap["serviceAccountId"])
+	if *p12Parameters.ServiceAccountID != "service-account-id" {
+		t.Errorf("serviceAccountId not match service-account-id == %s", *p12Parameters.ServiceAccountID)
 	}
-	if actualMap["serviceAccountPrivateKey"] != base64.StdEncoding.EncodeToString([]byte("p12\n")) {
-		t.Errorf("serviceAccountPrivateKey not match %s == %s", base64.StdEncoding.EncodeToString([]byte("p12\n")), actualMap["serviceAccountPrivateKey"])
+	if *p12Parameters.ServiceAccountPrivateKey != base64.StdEncoding.EncodeToString([]byte("p12\n")) {
+		t.Errorf("serviceAccountPrivateKey not match %s == %s", base64.StdEncoding.EncodeToString([]byte("p12\n")), *p12Parameters.ServiceAccountPrivateKey)
 	}
 }

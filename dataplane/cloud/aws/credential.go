@@ -1,14 +1,30 @@
 package aws
 
-func (p *AwsProvider) GetCredentialParameters(stringFinder func(string) string) (map[string]interface{}, error) {
-	var credentialMap = make(map[string]interface{})
-	if len(stringFinder("role-arn")) != 0 {
-		credentialMap["selector"] = "role-based"
-		credentialMap["roleArn"] = stringFinder("role-arn")
+import (
+	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/cloud"
+	"github.com/hortonworks/cb-cli/dataplane/types"
+)
+
+func (p *AwsProvider) GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV4Request, error) {
+	var parameters *model.AwsCredentialV4Parameters
+	if len(stringFinder("role-arn")) == 0 {
+		parameters = &model.AwsCredentialV4Parameters{
+			KeyBased: &model.KeyBasedCredentialParameters{
+				AccessKey: &(&types.S{S: stringFinder("access-key")}).S,
+				SecretKey: &(&types.S{S: stringFinder("secret-key")}).S,
+			},
+			GovCloud: govCloud,
+		}
 	} else {
-		credentialMap["selector"] = "key-based"
-		credentialMap["accessKey"] = stringFinder("access-key")
-		credentialMap["secretKey"] = stringFinder("secret-key")
+		parameters = &model.AwsCredentialV4Parameters{
+			RoleBased: &model.RoleBasedCredentialParameters{
+				RoleArn: &(&types.S{S: stringFinder("role-arn")}).S,
+			},
+			GovCloud: govCloud,
+		}
 	}
-	return credentialMap, nil
+	credReq := cloud.CreateBaseCredentialRequest(stringFinder)
+	credReq.Aws = parameters
+	return credReq, nil
 }

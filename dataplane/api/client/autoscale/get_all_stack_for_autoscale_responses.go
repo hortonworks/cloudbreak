@@ -47,7 +47,7 @@ func NewGetAllStackForAutoscaleOK() *GetAllStackForAutoscaleOK {
 successful operation
 */
 type GetAllStackForAutoscaleOK struct {
-	Payload []*model.AutoscaleStackResponse
+	Payload *model.AutoscaleStackV4Responses
 }
 
 func (o *GetAllStackForAutoscaleOK) Error() string {
@@ -56,8 +56,10 @@ func (o *GetAllStackForAutoscaleOK) Error() string {
 
 func (o *GetAllStackForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(model.AutoscaleStackV4Responses)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

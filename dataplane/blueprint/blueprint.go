@@ -12,7 +12,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_blueprints"
+	v4bp "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_blueprints"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -59,7 +59,7 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	urlLocation := c.String(fl.FlURL.Name)
 	createBlueprintImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDBlueprints,
+		cbClient.Cloudbreak.V4WorkspaceIDBlueprints,
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
 		c.Bool(fl.FlDlOptional.Name),
@@ -73,7 +73,7 @@ func CreateBlueprintFromFile(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(fl.FlFile.Name)
 	createBlueprintImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDBlueprints,
+		cbClient.Cloudbreak.V4WorkspaceIDBlueprints,
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
 		c.Bool(fl.FlDlOptional.Name),
@@ -81,18 +81,18 @@ func CreateBlueprintFromFile(c *cli.Context) {
 		c.Int64(fl.FlWorkspaceOptional.Name))
 }
 
-func createBlueprintImpl(client blueprintClient, name string, description string, dl bool, ambariBlueprint []byte, workspace int64) *model.BlueprintResponse {
+func createBlueprintImpl(client blueprintClient, name string, description string, dl bool, ambariBlueprint []byte, workspace int64) *model.BlueprintV4Response {
 	defer utils.TimeTrack(time.Now(), "create blueprint")
 	tags := map[string]interface{}{"shared_services_ready": dl}
-	bpRequest := &model.BlueprintRequest{
+	bpRequest := &model.BlueprintV4Request{
 		Name:            &name,
 		Description:     &description,
 		AmbariBlueprint: base64.StdEncoding.EncodeToString(ambariBlueprint),
 		Tags:            tags,
 	}
-	var blueprint *model.BlueprintResponse
+	var blueprint *model.BlueprintV4Response
 	log.Infof("[createBlueprintImpl] sending create blueprint request")
-	resp, err := client.CreateBlueprintInWorkspace(v3_workspace_id_blueprints.NewCreateBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithBody(bpRequest))
+	resp, err := client.CreateBlueprintInWorkspace(v4bp.NewCreateBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithBody(bpRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -107,7 +107,7 @@ func DescribeBlueprint(c *cli.Context) {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	bp := FetchBlueprint(c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name), cbClient.Cloudbreak.V3WorkspaceIDBlueprints)
+	bp := FetchBlueprint(c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name), cbClient.Cloudbreak.V4WorkspaceIDBlueprints)
 	if output.Format != "table" {
 		output.Write(append(blueprintHeader, "Content", "ID"), convertResponseWithContentAndIDToBlueprint(bp))
 	} else {
@@ -116,11 +116,11 @@ func DescribeBlueprint(c *cli.Context) {
 }
 
 type GetBlueprintInWorkspace interface {
-	GetBlueprintInWorkspace(*v3_workspace_id_blueprints.GetBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.GetBlueprintInWorkspaceOK, error)
+	GetBlueprintInWorkspace(*v4bp.GetBlueprintInWorkspaceParams) (*v4bp.GetBlueprintInWorkspaceOK, error)
 }
 
-func FetchBlueprint(workspace int64, name string, client GetBlueprintInWorkspace) *model.BlueprintResponse {
-	resp, err := client.GetBlueprintInWorkspace(v3_workspace_id_blueprints.NewGetBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
+func FetchBlueprint(workspace int64, name string, client GetBlueprintInWorkspace) *model.BlueprintV4Response {
+	resp, err := client.GetBlueprintInWorkspace(v4bp.NewGetBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -131,12 +131,12 @@ func DeleteBlueprint(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete blueprint")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	deleteBlueprintsImpl(cbClient.Cloudbreak.V3WorkspaceIDBlueprints, c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name))
+	deleteBlueprintsImpl(cbClient.Cloudbreak.V4WorkspaceIDBlueprints, c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name))
 }
 
 func deleteBlueprintsImpl(client blueprintClient, workspace int64, name string) {
 	log.Infof("[deleteBlueprintsImpl] sending delete blueprint request with name: %s", name)
-	_, err := client.DeleteBlueprintInWorkspace(v3_workspace_id_blueprints.NewDeleteBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
+	_, err := client.DeleteBlueprintInWorkspace(v4bp.NewDeleteBlueprintInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -149,30 +149,30 @@ func ListBlueprints(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspace := fl.FlWorkspaceOptional.Name
-	listBlueprintsImpl(c.Int64(workspace), cbClient.Cloudbreak.V3WorkspaceIDBlueprints, output.WriteList)
+	listBlueprintsImpl(c.Int64(workspace), cbClient.Cloudbreak.V4WorkspaceIDBlueprints, output.WriteList)
 }
 
 type blueprintClient interface {
-	CreateBlueprintInWorkspace(params *v3_workspace_id_blueprints.CreateBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.CreateBlueprintInWorkspaceOK, error)
-	ListBlueprintsByWorkspace(params *v3_workspace_id_blueprints.ListBlueprintsByWorkspaceParams) (*v3_workspace_id_blueprints.ListBlueprintsByWorkspaceOK, error)
-	DeleteBlueprintInWorkspace(params *v3_workspace_id_blueprints.DeleteBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.DeleteBlueprintInWorkspaceOK, error)
+	CreateBlueprintInWorkspace(params *v4bp.CreateBlueprintInWorkspaceParams) (*v4bp.CreateBlueprintInWorkspaceOK, error)
+	ListBlueprintsByWorkspace(params *v4bp.ListBlueprintsByWorkspaceParams) (*v4bp.ListBlueprintsByWorkspaceOK, error)
+	DeleteBlueprintInWorkspace(params *v4bp.DeleteBlueprintInWorkspaceParams) (*v4bp.DeleteBlueprintInWorkspaceOK, error)
 }
 
 func listBlueprintsImpl(workspace int64, client blueprintClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listBlueprintsImpl] sending blueprint list request")
-	resp, err := client.ListBlueprintsByWorkspace(v3_workspace_id_blueprints.NewListBlueprintsByWorkspaceParams().WithWorkspaceID(workspace))
+	resp, err := client.ListBlueprintsByWorkspace(v4bp.NewListBlueprintsByWorkspaceParams().WithWorkspaceID(workspace))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
-	for _, bp := range resp.Payload {
+	var tableRows []utils.Row
+	for _, bp := range resp.Payload.Responses {
 		tableRows = append(tableRows, convertResponseToBlueprint(bp))
 	}
 
 	writer(blueprintHeader, tableRows)
 }
 
-func convertResponseToBlueprint(bp *model.BlueprintViewResponse) *blueprintOut {
+func convertResponseToBlueprint(bp *model.BlueprintV4ViewResponse) *blueprintOut {
 	return &blueprintOut{
 		Name:           *bp.Name,
 		Description:    utils.SafeStringConvert(bp.Description),
@@ -183,7 +183,7 @@ func convertResponseToBlueprint(bp *model.BlueprintViewResponse) *blueprintOut {
 	}
 }
 
-func convertResponseWithContentAndIDToBlueprint(bp *model.BlueprintResponse) *blueprintOutJsonDescribe {
+func convertResponseWithContentAndIDToBlueprint(bp *model.BlueprintV4Response) *blueprintOutJsonDescribe {
 	jsonRoot := decodeAndParseToJson(bp.AmbariBlueprint)
 	blueprintsNode := jsonRoot["Blueprints"].(map[string]interface{})
 	return &blueprintOutJsonDescribe{
@@ -200,7 +200,7 @@ func convertResponseWithContentAndIDToBlueprint(bp *model.BlueprintResponse) *bl
 	}
 }
 
-func convertResponseWithIDToBlueprint(bp *model.BlueprintResponse) *blueprintOutTableDescribe {
+func convertResponseWithIDToBlueprint(bp *model.BlueprintV4Response) *blueprintOutTableDescribe {
 	jsonRoot := decodeAndParseToJson(bp.AmbariBlueprint)
 	blueprintsNode := jsonRoot["Blueprints"].(map[string]interface{})
 	return &blueprintOutTableDescribe{

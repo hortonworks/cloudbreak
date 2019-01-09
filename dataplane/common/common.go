@@ -1,6 +1,6 @@
 package common
 
-var CloudResourceHeader []string = []string{"Name", "Description", "CloudPlatform"}
+var CloudResourceHeader = []string{"Name", "Description", "CloudPlatform"}
 
 type CloudResourceOut struct {
 	Name          string `json:"Name" yaml:"Name"`

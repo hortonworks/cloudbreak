@@ -3,7 +3,9 @@ package stack
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/hortonworks/cb-cli/dataplane/utils"
 	"strconv"
 	"strings"
 
@@ -14,14 +16,14 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/types"
-	"github.com/hortonworks/dp-cli-common/utils"
+	commonUtils "github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
 )
 
 var defaultNodes = []cloud.Node{
-	{Name: "master", GroupType: model.InstanceGroupResponseTypeGATEWAY, Count: 1},
-	{Name: "worker", GroupType: model.InstanceGroupResponseTypeCORE, Count: 3},
-	{Name: "compute", GroupType: model.InstanceGroupResponseTypeCORE, Count: 0},
+	{Name: "master", GroupType: model.InstanceGroupV4ResponseTypeGATEWAY, Count: 1},
+	{Name: "worker", GroupType: model.InstanceGroupV4ResponseTypeCORE, Count: 3},
+	{Name: "compute", GroupType: model.InstanceGroupV4ResponseTypeCORE, Count: 0},
 }
 
 var maxCardinality = map[string]int{
@@ -35,12 +37,12 @@ var maxCardinality = map[string]int{
 
 var getBlueprintClient = func(server, refreshToken string) blueprint.GetBlueprintInWorkspace {
 	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
-	return cbClient.Cloudbreak.V3WorkspaceIDBlueprints
+	return cbClient.Cloudbreak.V4WorkspaceIDBlueprints
 }
 
 var stackClient = func(server, refreshToken string) getStackInWorkspace {
 	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
-	return cbClient.Cloudbreak.V3WorkspaceIDStacks
+	return cbClient.Cloudbreak.V4WorkspaceIDStacks
 }
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
@@ -121,30 +123,32 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string) blueprint.GetBlueprintInWorkspace, storageType cloud.CloudStorageType) *model.StackV2Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string) blueprint.GetBlueprintInWorkspace, storageType cloud.CloudStorageType) *model.StackV4Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
-	template := model.StackV2Request{
-		Cluster: &model.ClusterV2Request{
-			Ambari: &model.AmbariV2Request{
+	template := model.StackV4Request{
+		Cluster: &model.ClusterV4Request{
+			Ambari: &model.AmbariV4Request{
 				BlueprintName:     "____",
 				UserName:          &(&types.S{S: "____"}).S,
 				Password:          &(&types.S{S: ""}).S,
 				ValidateBlueprint: &(&types.B{B: false}).B,
 			},
 		},
-		General: &model.GeneralSettings{
-			Name:           &(&types.S{S: ""}).S,
+		Name: &(&types.S{S: ""}).S,
+		Environment: &model.EnvironmentSettingsV4Request{
 			CredentialName: "____",
 		},
-		Placement: &model.PlacementSettings{
+		Placement: &model.PlacementSettingsV4Request{
 			Region:           getStringPointer(skippedFields, cloud.REGION_FIELD, "____"),
 			AvailabilityZone: getString(skippedFields, cloud.AVAILABILITY_ZONE_FIELD, "____"),
 		},
-		InstanceGroups:      []*model.InstanceGroupsV2{},
-		Network:             provider.GenerateDefaultNetwork(provider.GetNetworkParamatersTemplate(mode), mode),
-		StackAuthentication: &model.StackAuthentication{PublicKey: "____"},
+		InstanceGroups: []*model.InstanceGroupV4Request{},
+		Network:        provider.GenerateDefaultNetwork(mode),
+		Authentication: &model.StackAuthenticationV4Request{
+			PublicKey: "____",
+		},
 	}
 	preExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 	nodes := defaultNodes
@@ -153,48 +157,53 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 		bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
-			utils.LogErrorAndExit(err)
+			commonUtils.LogErrorAndExit(err)
 		}
 		nodes = getNodesByBlueprint(bp)
 		template.Cluster.Ambari.BlueprintName = bpName
 	} else if bpFile := stringFinder(fl.FlBlueprintFileOptional.Name); len(bpFile) != 0 {
-		bp := utils.ReadFile(bpFile)
+		bp := commonUtils.ReadFile(bpFile)
 		nodes = getNodesByBlueprint(bp)
 	}
 	for _, node := range nodes {
 		template.InstanceGroups = append(template.InstanceGroups, convertNodeToInstanceGroup(provider, node))
 	}
-
-	if params := provider.GetParamatersTemplate(); params != nil {
-		template.Parameters = params
-	}
+	provider.SetParametersTemplate(&template)
 	postExtendTemplateWithOptionalBlocks(&template, boolFinder)
 	return &template
 }
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
 	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
-	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
+	isSharedServiceReady, _ := datalake.Cluster.Ambari.Blueprint.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
-		utils.LogErrorMessageAndExit("The source cluster must be a datalake")
+		commonUtils.LogErrorMessageAndExit("The source cluster must be a datalake")
 	} else if datalake.Status != "AVAILABLE" || datalake.Cluster.Status != "AVAILABLE" {
-		utils.LogErrorMessageAndExit("Datalake must be in available state")
+		commonUtils.LogErrorMessageAndExit("Datalake must be in available state")
 	} else {
-		cloud.SetProviderType(cloud.CloudType(datalake.CloudPlatform))
+		env := datalake.Environment
+		if env == nil {
+			commonUtils.LogErrorAndExit(errors.New("the datalake does not belong to any environment"))
+		}
+		if len(env.CloudPlatform) == 0 {
+			commonUtils.LogErrorAndExit(errors.New("the cloud platform is not specified for the source cluster"))
+		}
+		cloud.SetProviderType(cloud.CloudType(env.CloudPlatform))
 		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getBlueprintClient, storageType)
-		attachedClusterTemplate.Placement.Region = &datalake.Region
-		attachedClusterTemplate.Placement.AvailabilityZone = datalake.AvailabilityZone
-		attachedClusterTemplate.General.CredentialName = *datalake.Credential.Name
+		attachedClusterTemplate.Placement.Region = datalake.Placement.Region
+		attachedClusterTemplate.Placement.AvailabilityZone = datalake.Placement.AvailabilityZone
+		attachedClusterTemplate.Environment.CredentialName = *env.Credential.Name
 		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
-		attachedClusterTemplate.Cluster.LdapConfigName = *datalake.Cluster.LdapConfig.Name
-		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.FileSystemResponse)
-		for _, rds := range datalake.Cluster.RdsConfigs {
+		attachedClusterTemplate.Cluster.LdapName = *datalake.Cluster.Ldap.Name
+		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.CloudStorage)
+		for _, rds := range datalake.Cluster.Databases {
 			if *rds.Type == "RANGER" || *rds.Type == "HIVE" {
-				attachedClusterTemplate.Cluster.RdsConfigNames = append(attachedClusterTemplate.Cluster.RdsConfigNames, *rds.Name)
+				attachedClusterTemplate.Cluster.Databases = append(attachedClusterTemplate.Cluster.Databases, *rds.Name)
 			}
 		}
-		attachedClusterTemplate.Cluster.SharedService = &model.SharedService{
-			SharedCluster: stringFinder(fl.FlWithSourceCluster.Name),
+		sourceCluster := stringFinder(fl.FlWithSourceCluster.Name)
+		attachedClusterTemplate.SharedService = &model.SharedServiceV4Request{
+			DatalakeName: &sourceCluster,
 		}
 
 		return printTemplate(*attachedClusterTemplate)
@@ -202,9 +211,9 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 	return nil
 }
 
-func generateCloudStorage(fileSystem *model.FileSystemResponse) *model.CloudStorageRequest {
+func generateCloudStorage(fileSystem *model.CloudStorageV4Response) *model.CloudStorageV4Request {
 	if fileSystem != nil {
-		return &model.CloudStorageRequest{
+		return &model.CloudStorageV4Request{
 			S3:        fileSystem.S3,
 			Adls:      fileSystem.Adls,
 			Gcs:       fileSystem.Gcs,
@@ -216,10 +225,10 @@ func generateCloudStorage(fileSystem *model.FileSystemResponse) *model.CloudStor
 	return nil
 }
 
-func generateLocations(datalake []*model.StorageLocationResponse) []*model.StorageLocationRequest {
-	result := make([]*model.StorageLocationRequest, len(datalake))
+func generateLocations(datalake []*model.StorageLocationV4Response) []*model.StorageLocationV4Request {
+	result := make([]*model.StorageLocationV4Request, len(datalake))
 	for i, loc := range datalake {
-		result[i] = &model.StorageLocationRequest{
+		result[i] = &model.StorageLocationV4Request{
 			PropertyFile: loc.PropertyFile,
 			PropertyName: loc.PropertyName,
 			Value:        loc.Value,
@@ -228,10 +237,10 @@ func generateLocations(datalake []*model.StorageLocationResponse) []*model.Stora
 	return result
 }
 
-func printTemplate(template model.StackV2Request) error {
+func printTemplate(template model.StackV4Request) error {
 	resp, err := json.MarshalIndent(template, "", "\t")
 	if err != nil {
-		utils.LogErrorAndExit(err)
+		commonUtils.LogErrorAndExit(err)
 	}
 	fmt.Printf("%s\n", string(resp))
 	return nil
@@ -240,11 +249,11 @@ func printTemplate(template model.StackV2Request) error {
 func getNodesByBlueprint(bp []byte) []cloud.Node {
 	var bpJson map[string]interface{}
 	if err := json.Unmarshal(bp, &bpJson); err != nil {
-		utils.LogErrorAndExit(err)
+		commonUtils.LogErrorAndExit(err)
 	}
 	var nodes []*cloud.Node
 	if bpJson["host_groups"] == nil {
-		utils.LogErrorMessageAndExit("host_groups not found in blueprint")
+		commonUtils.LogErrorMessageAndExit("host_groups not found in blueprint")
 	}
 	var gateway *cloud.Node
 	for _, e := range bpJson["host_groups"].([]interface{}) {
@@ -257,20 +266,20 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 				var err error
 				count, err = strconv.Atoi(cardinality)
 				if err != nil {
-					utils.LogErrorMessageAndExit("Unable to parse as number: " + cardinality)
+					commonUtils.LogErrorMessageAndExit("Unable to parse as number: " + cardinality)
 				}
 			}
 		}
 		if hg["name"] == nil {
-			utils.LogErrorMessageAndExit("host group name not found in blueprint")
+			commonUtils.LogErrorMessageAndExit("host group name not found in blueprint")
 		}
-		node := cloud.Node{Name: hg["name"].(string), GroupType: model.InstanceGroupResponseTypeCORE, Count: int32(count)}
+		node := cloud.Node{Name: hg["name"].(string), GroupType: model.InstanceGroupV4ResponseTypeCORE, Count: int32(count)}
 		nodes = append(nodes, &node)
 		if gateway == nil || gateway.Count > node.Count {
 			gateway = &node
 		}
 	}
-	gateway.GroupType = model.InstanceGroupResponseTypeGATEWAY
+	gateway.GroupType = model.InstanceGroupV4ResponseTypeGATEWAY
 	var resp []cloud.Node
 	for _, n := range nodes {
 		resp = append(resp, *n)
@@ -278,26 +287,26 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 	return resp
 }
 
-func preExtendTemplateWithOptionalBlocks(template *model.StackV2Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
+func preExtendTemplateWithOptionalBlocks(template *model.StackV4Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
 	if withCustomDomain := boolFinder(fl.FlWithCustomDomainOptional.Name); withCustomDomain {
-		template.CustomDomain = &model.CustomDomainSettings{
-			CustomDomain:            "____",
-			CustomHostname:          "____",
+		template.CustomDomain = &model.CustomDomainSettingsV4Request{
+			DomainName:              "____",
+			Hostname:                "____",
 			ClusterNameAsSubdomain:  &(&types.B{B: false}).B,
 			HostgroupNameAsHostname: &(&types.B{B: false}).B,
 		}
 	}
 	if withTags := boolFinder(fl.FlWithTagsOptional.Name); withTags {
-		template.Tags = &model.Tags{
-			UserDefinedTags: map[string]string{
+		template.Tags = &model.TagsV4Request{
+			UserDefined: map[string]string{
 				"____": "____",
 			},
 		}
 	}
 	if withImage := boolFinder(fl.FlWithImageOptional.Name); withImage {
-		template.ImageSettings = &model.ImageSettings{
-			ImageCatalog: "____",
-			ImageID:      "____",
+		template.Image = &model.ImageSettingsV4Request{
+			Catalog: "____",
+			ID:      "____",
 		}
 	}
 	if withBlueprintValidation := boolFinder(fl.FlWithBlueprintValidation.Name); withBlueprintValidation {
@@ -306,16 +315,15 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV2Request, boolFin
 	extendTemplateWithStorageType(template, storageType)
 }
 
-func postExtendTemplateWithOptionalBlocks(template *model.StackV2Request, boolFinder func(string) bool) {
+func postExtendTemplateWithOptionalBlocks(template *model.StackV4Request, boolFinder func(string) bool) {
 	extendTemplateWithEncryptionType(template, boolFinder)
 }
 
-func extendTemplateWithEncryptionType(template *model.StackV2Request, boolFinder func(string) bool) {
+func extendTemplateWithEncryptionType(template *model.StackV4Request, boolFinder func(string) bool) {
 	if withCustomEncryption := boolFinder(fl.FlCustomEncryptionOptional.Name); withCustomEncryption {
 		for _, group := range template.InstanceGroups {
-			group.Template.AwsParameters = &model.AwsParameters{
-				Encrypted: &(&types.B{B: true}).B,
-				Encryption: &model.AwsEncryption{
+			group.Template.Aws = &model.AwsInstanceTemplateV4Parameters{
+				Encryption: &model.AwsEncryptionV4Parameters{
 					Type: "CUSTOM",
 					Key:  "____",
 				},
@@ -323,17 +331,16 @@ func extendTemplateWithEncryptionType(template *model.StackV2Request, boolFinder
 		}
 	} else if withDefaultEncryption := boolFinder(fl.FlDefaultEncryptionOptional.Name); withDefaultEncryption {
 		for _, group := range template.InstanceGroups {
-			group.Template.AwsParameters = &model.AwsParameters{
-				Encrypted: &(&types.B{B: true}).B,
-				Encryption: &model.AwsEncryption{
+			group.Template.Aws = &model.AwsInstanceTemplateV4Parameters{
+				Encryption: &model.AwsEncryptionV4Parameters{
 					Type: "DEFAULT",
 				},
 			}
 		}
 	} else if withRawEncryption := boolFinder(fl.FlRawEncryptionOptional.Name); withRawEncryption {
 		for _, group := range template.InstanceGroups {
-			group.Template.GcpParameters = &model.GcpParameters{
-				Encryption: &model.GcpEncryption{
+			group.Template.Gcp = &model.GcpInstanceTemplateV4Parameters{
+				Encryption: &model.GcpEncryptionV4Parameters{
 					Type:                "CUSTOM",
 					KeyEncryptionMethod: "RAW",
 					Key:                 "____",
@@ -342,8 +349,8 @@ func extendTemplateWithEncryptionType(template *model.StackV2Request, boolFinder
 		}
 	} else if withRsaEncryption := boolFinder(fl.FlRsaEncryptionOptional.Name); withRsaEncryption {
 		for _, group := range template.InstanceGroups {
-			group.Template.GcpParameters = &model.GcpParameters{
-				Encryption: &model.GcpEncryption{
+			group.Template.Gcp = &model.GcpInstanceTemplateV4Parameters{
+				Encryption: &model.GcpEncryptionV4Parameters{
 					Type:                "CUSTOM",
 					KeyEncryptionMethod: "RSA",
 					Key:                 "____",
@@ -352,8 +359,8 @@ func extendTemplateWithEncryptionType(template *model.StackV2Request, boolFinder
 		}
 	} else if withKmsEncryption := boolFinder(fl.FlKmsEncryptionOptional.Name); withKmsEncryption {
 		for _, group := range template.InstanceGroups {
-			group.Template.GcpParameters = &model.GcpParameters{
-				Encryption: &model.GcpEncryption{
+			group.Template.Gcp = &model.GcpInstanceTemplateV4Parameters{
+				Encryption: &model.GcpEncryptionV4Parameters{
 					Type:                "CUSTOM",
 					KeyEncryptionMethod: "KMS",
 					Key:                 "____",
@@ -363,76 +370,76 @@ func extendTemplateWithEncryptionType(template *model.StackV2Request, boolFinder
 	}
 }
 
-func extendTemplateWithStorageType(template *model.StackV2Request, storageType cloud.CloudStorageType) {
+func extendTemplateWithStorageType(template *model.StackV4Request, storageType cloud.CloudStorageType) {
 	if storageType == cloud.WASB {
-		template.Cluster.CloudStorage = &model.CloudStorageRequest{
-			Wasb: &model.WasbCloudStorageParameters{
+		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
+			Wasb: &model.WasbCloudStorageV4Parameters{
 				AccountKey:  &(&types.S{S: "____"}).S,
 				AccountName: &(&types.S{S: "____"}).S,
 				Secure:      &(&types.B{B: false}).B,
 			},
-			Locations: []*model.StorageLocationRequest{},
+			Locations: []*model.StorageLocationV4Request{},
 		}
 	} else if storageType == cloud.ADLS_GEN1 {
-		template.Cluster.CloudStorage = &model.CloudStorageRequest{
-			Adls: &model.AdlsCloudStorageParameters{
+		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
+			Adls: &model.AdlsCloudStorageV4Parameters{
 				AccountName: &(&types.S{S: "____"}).S,
 				ClientID:    &(&types.S{S: "____"}).S,
 				Credential:  &(&types.S{S: "____"}).S,
 			},
-			Locations: []*model.StorageLocationRequest{},
+			Locations: []*model.StorageLocationV4Request{},
 		}
 	} else if storageType == cloud.S3 {
-		template.Cluster.CloudStorage = &model.CloudStorageRequest{
-			S3: &model.S3CloudStorageParameters{
+		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
+			S3: &model.S3CloudStorageV4Parameters{
 				InstanceProfile: &(&types.S{S: "____"}).S,
 			},
-			Locations: []*model.StorageLocationRequest{},
+			Locations: []*model.StorageLocationV4Request{},
 		}
 	} else if storageType == cloud.GCS {
-		template.Cluster.CloudStorage = &model.CloudStorageRequest{
-			Gcs: &model.GcsCloudStorageParameters{
+		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
+			Gcs: &model.GcsCloudStorageV4Parameters{
 				ServiceAccountEmail: &(&types.S{S: "____"}).S,
 			},
-			Locations: []*model.StorageLocationRequest{},
+			Locations: []*model.StorageLocationV4Request{},
 		}
 	} else if storageType == cloud.ADLS_GEN2 {
-		template.Cluster.CloudStorage = &model.CloudStorageRequest{
-			AdlsGen2: &model.AdlsGen2CloudStorageParameters{
+		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
+			AdlsGen2: &model.AdlsGen2CloudStorageV4Parameters{
 				AccountKey:  &(&types.S{S: "____"}).S,
 				AccountName: &(&types.S{S: "____"}).S,
 			},
-			Locations: []*model.StorageLocationRequest{},
+			Locations: []*model.StorageLocationV4Request{},
 		}
 	}
 }
 
-func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *model.InstanceGroupsV2 {
-	ig := &model.InstanceGroupsV2{
+func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *model.InstanceGroupV4Request {
+	ig := &model.InstanceGroupV4Request{
+		Name:          &node.Name,
 		Template:      provider.GenerateDefaultTemplate(),
-		Group:         &node.Name,
 		NodeCount:     &node.Count,
 		Type:          node.GroupType,
 		SecurityGroup: provider.GenerateDefaultSecurityGroup(node),
-		Parameters:    provider.GetInstanceGroupParamatersTemplate(node),
 		RecipeNames:   []string{},
 	}
+	provider.SetInstanceGroupParametersTemplate(ig, node)
 	return ig
 }
 
 func GenerateReinstallTemplate(c *cli.Context) {
-
-	template := &model.ReinstallRequestV2{
+	template := &model.ReinstallV4Request{
 		BlueprintName:  &(&types.S{S: c.String(fl.FlBlueprintName.Name)}).S,
-		InstanceGroups: []*model.InstanceGroupsV2{},
+		InstanceGroups: []*model.InstanceGroupV4Request{},
 	}
 
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	stackName := c.String(fl.FlName.Name)
 	stackResp := fetchStack(workspaceID, stackName, stackClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlRefreshTokenOptional.Name)))
-	provider, ok := cloud.CloudProviders[cloud.CloudType(stackResp.CloudPlatform)]
+	cloudPlatform := utils.SafeCloudPlatformConvert(stackResp.Environment)
+	provider, ok := cloud.CloudProviders[cloud.CloudType(cloudPlatform)]
 	if !ok {
-		utils.LogErrorMessageAndExit("Not supported CloudProvider: " + stackResp.CloudPlatform)
+		commonUtils.LogErrorMessageAndExit("not supported cloud provider")
 	}
 
 	bpName := c.String(fl.FlBlueprintNameOptional.Name)
@@ -440,12 +447,12 @@ func GenerateReinstallTemplate(c *cli.Context) {
 	bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlRefreshTokenOptional.Name)))
 	bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 	if err != nil {
-		utils.LogErrorAndExit(err)
+		commonUtils.LogErrorAndExit(err)
 	}
 
 	for _, node := range getNodesByBlueprint(bp) {
-		ig := &model.InstanceGroupsV2{
-			Group:         &(&types.S{S: node.Name}).S,
+		ig := &model.InstanceGroupV4Request{
+			Name:          &(&types.S{S: node.Name}).S,
 			NodeCount:     &(&types.I32{I: node.Count}).I,
 			RecoveryMode:  "AUTO",
 			SecurityGroup: provider.GenerateDefaultSecurityGroup(node),
@@ -457,7 +464,7 @@ func GenerateReinstallTemplate(c *cli.Context) {
 
 	resp, err := json.MarshalIndent(template, "", "\t")
 	if err != nil {
-		utils.LogErrorAndExit(err)
+		commonUtils.LogErrorAndExit(err)
 	}
 	fmt.Printf("%s\n", string(resp))
 }

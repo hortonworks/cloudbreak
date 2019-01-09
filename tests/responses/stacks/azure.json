@@ -146,17 +146,14 @@
   "credential": {
     "name": "azure",
     "cloudPlatform": "AZURE",
-    "parameters": {
+    "azure": {
       "tenantId": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
-      "spDisplayName": null,
       "subscriptionId": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
-      "roleType": null,
-      "accessKey": "a12b1234-1234-12aa-3bcc-4d5e6f78900g"
+      "accessKey": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
+      "cloudPlatform": "AZURE"
     },
     "description": "",
-    "topologyId": null,
-    "id": 2,
-    "public": false
+    "id": 2
   },
   "network": {
     "description": null,
@@ -212,28 +209,28 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "443",
+            "ports": ["443"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4211
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4210
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "9443",
+            "ports": ["9443"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4208
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4209
@@ -279,7 +276,7 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4212
@@ -325,7 +322,7 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4212

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_environments"
+	v4env "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_environments"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -42,8 +42,8 @@ type environmentOutJsonDescribe struct {
 }
 
 type environmentClient interface {
-	CreateEnvironment(params *v3_workspace_id_environments.CreateEnvironmentParams) (*v3_workspace_id_environments.CreateEnvironmentOK, error)
-	ListEnvironment(params *v3_workspace_id_environments.ListEnvironmentParams) (*v3_workspace_id_environments.ListEnvironmentOK, error)
+	CreateEnvironment(params *v4env.CreateEnvironmentParams) (*v4env.CreateEnvironmentOK, error)
+	ListEnvironment(params *v4env.ListEnvironmentParams) (*v4env.ListEnvironmentOK, error)
 }
 
 func (e *environment) DataAsStringArray() []string {
@@ -74,37 +74,37 @@ func CreateEnvironment(c *cli.Context) {
 	longitude := c.Float64(fl.FlEnvironmentLongitudeOptional.Name)
 	latitude := c.Float64(fl.FlEnvironmentLatitudeOptional.Name)
 
-	environmentRequest := &model.EnvironmentRequest{
-		Name:            &name,
-		Description:     &description,
-		CredentialName:  credentialName,
-		Regions:         regions,
-		LdapConfigs:     ldapConfigs,
-		ProxyConfigs:    proxyConfigs,
-		KerberosConfigs: kerberosConfigs,
-		RdsConfigs:      rdsConfigs,
-		Location: &model.LocationRequest{
-			LocationName: &locationName,
-			Longitude:    longitude,
-			Latitude:     latitude,
+	EnvironmentV4Request := &model.EnvironmentV4Request{
+		Name:           &name,
+		Description:    &description,
+		CredentialName: credentialName,
+		Regions:        regions,
+		Ldaps:          ldapConfigs,
+		Proxies:        proxyConfigs,
+		Kerberoses:     kerberosConfigs,
+		Databases:      rdsConfigs,
+		Location: &model.LocationV4Request{
+			Name:      &locationName,
+			Longitude: longitude,
+			Latitude:  latitude,
 		},
 	}
 
-	createEnvironmentImpl(c, workspaceID, environmentRequest)
+	createEnvironmentImpl(c, workspaceID, EnvironmentV4Request)
 }
 
-func createEnvironmentImpl(c *cli.Context, workspaceId int64, environmentRequest *model.EnvironmentRequest) {
-	log.Infof("[createEnvironmentImpl] create environment with name: %s", *environmentRequest.Name)
+func createEnvironmentImpl(c *cli.Context, workspaceId int64, EnvironmentV4Request *model.EnvironmentV4Request) {
+	log.Infof("[createEnvironmentImpl] create environment with name: %s", *EnvironmentV4Request.Name)
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	envClient := cbClient.Cloudbreak.V3WorkspaceIDEnvironments
-	resp, err := envClient.CreateEnvironment(v3_workspace_id_environments.NewCreateEnvironmentParams().WithWorkspaceID(workspaceId).WithBody(environmentRequest))
+	envClient := cbClient.Cloudbreak.V4WorkspaceIDEnvironments
+	resp, err := envClient.CreateEnvironment(v4env.NewCreateEnvironmentParams().WithWorkspaceID(workspaceId).WithBody(EnvironmentV4Request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	environment := resp.Payload
 
-	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %d", *environmentRequest.Name, environment.ID)
+	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %d", *EnvironmentV4Request.Name, environment.ID)
 }
 
 func RegisterCumulusDatalake(c *cli.Context) {
@@ -117,23 +117,23 @@ func RegisterCumulusDatalake(c *cli.Context) {
 	rangerPassword := c.String(fl.FlRangerAdminPasswordOptional.Name)
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 
-	registerRequest := model.RegisterDatalakeRequest{
+	registerRequest := model.RegisterDatalakeV4Request{
 		KerberosName:        kerberosConfig,
 		LdapName:            ldapConfig,
-		RdsNames:            rdsConfigs,
+		DatabaseNames:       rdsConfigs,
 		RangerAdminPassword: rangerPassword,
 	}
 
 	registerCumulusDatalake(c, workspaceID, envName, &registerRequest)
 }
 
-func registerCumulusDatalake(c *cli.Context, workspaceId int64, envName string, registerRequest *model.RegisterDatalakeRequest) {
+func registerCumulusDatalake(c *cli.Context, workspaceId int64, envName string, registerRequest *model.RegisterDatalakeV4Request) {
 	log.Infof("[registerCumulusDatalake] register cumulus datalake for env: %s", envName)
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	envClient := cbClient.Cloudbreak.V3WorkspaceIDEnvironments
+	envClient := cbClient.Cloudbreak.V4WorkspaceIDEnvironments
 
-	resp, err := envClient.RegisterExternalDatalake(v3_workspace_id_environments.NewRegisterExternalDatalakeParams().
+	resp, err := envClient.RegisterExternalDatalake(v4env.NewRegisterExternalDatalakeParams().
 		WithWorkspaceID(workspaceId).
 		WithName(envName).
 		WithBody(registerRequest))
@@ -151,24 +151,24 @@ func ListEnvironments(c *cli.Context) error {
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	return listEnvironmentsImpl(cbClient.Cloudbreak.V3WorkspaceIDEnvironments, output.WriteList, workspaceID)
+	return listEnvironmentsImpl(cbClient.Cloudbreak.V4WorkspaceIDEnvironments, output.WriteList, workspaceID)
 }
 
 func listEnvironmentsImpl(envClient environmentClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := envClient.ListEnvironment(v3_workspace_id_environments.NewListEnvironmentParams().WithWorkspaceID(workspaceID))
+	resp, err := envClient.ListEnvironment(v4env.NewListEnvironmentParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
 	var tableRows []utils.Row
-	for _, e := range resp.Payload {
+	for _, e := range resp.Payload.Responses {
 		row := &environment{
 			Name:          e.Name,
 			Description:   e.Description,
 			CloudPlatform: e.CloudPlatform,
 			Credential:    e.CredentialName,
 			Regions:       getRegionNames(e.Regions),
-			LocationName:  e.Location.LocationName,
+			LocationName:  e.Location.Name,
 			Longitude:     e.Location.Longitude,
 			Latitude:      e.Location.Latitude,
 		}
@@ -188,13 +188,13 @@ func DescribeEnvironment(c *cli.Context) {
 	log.Infof("[DescribeEnvironment] describe environment by name: %s", envName)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.GetEnvironment(v3_workspace_id_environments.NewGetEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName))
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.GetEnvironment(v4env.NewGetEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	env := resp.Payload
 	if output.Format != "table" {
-		output.Write(append(EnvironmentHeader, "Ldaps", "Proxies", "Rds", "ID"), convertResponseToJsonOutput(env))
+		output.Write(append(EnvironmentHeader, "Ldaps", "Proxies", "Databases", "ID"), convertResponseToJsonOutput(env))
 	} else {
 		output.Write(append(EnvironmentHeader, "ID"), convertResponseToTableOutput(env))
 	}
@@ -206,7 +206,7 @@ func DeleteEnvironment(c *cli.Context) {
 	envName := c.String(fl.FlName.Name)
 	log.Infof("[DeleteEnvironment] delete environment by name: %s", envName)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	_, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.DeleteEnvironment(v3_workspace_id_environments.NewDeleteEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName))
+	_, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.DeleteEnvironment(v4env.NewDeleteEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -218,7 +218,7 @@ func AttachResources(c *cli.Context) {
 	sendAttachRequest(c, attachRequest)
 }
 
-func createAttachRequest(c *cli.Context) *v3_workspace_id_environments.AttachResourcesToEnvironmentParams {
+func createAttachRequest(c *cli.Context) *v4env.AttachResourcesToEnvironmentParams {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
@@ -227,20 +227,20 @@ func createAttachRequest(c *cli.Context) *v3_workspace_id_environments.AttachRes
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
-	attachBody := &model.EnvironmentAttachRequest{
-		LdapConfigs:     ldapConfigs,
-		ProxyConfigs:    proxyConfigs,
-		KerberosConfigs: kerberosConfigs,
-		RdsConfigs:      rdsConfigs,
+	attachBody := &model.EnvironmentAttachV4Request{
+		Ldaps:      ldapConfigs,
+		Proxies:    proxyConfigs,
+		Kerberoses: kerberosConfigs,
+		Databases:  rdsConfigs,
 	}
-	attachRequest := v3_workspace_id_environments.NewAttachResourcesToEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(attachBody)
+	attachRequest := v4env.NewAttachResourcesToEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(attachBody)
 	return attachRequest
 }
 
-func sendAttachRequest(c *cli.Context, attachRequest *v3_workspace_id_environments.AttachResourcesToEnvironmentParams) {
+func sendAttachRequest(c *cli.Context, attachRequest *v4env.AttachResourcesToEnvironmentParams) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	var environment *model.DetailedEnvironmentResponse
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.AttachResourcesToEnvironment(attachRequest)
+	var environment *model.DetailedEnvironmentV4Response
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.AttachResourcesToEnvironment(attachRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -254,7 +254,7 @@ func DetachResources(c *cli.Context) {
 	sendDetachRequest(c, detachRequest)
 }
 
-func createDetachRequest(c *cli.Context) *v3_workspace_id_environments.DetachResourcesFromEnvironmentParams {
+func createDetachRequest(c *cli.Context) *v4env.DetachResourcesFromEnvironmentParams {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	envName := c.String(fl.FlName.Name)
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
@@ -263,19 +263,19 @@ func createDetachRequest(c *cli.Context) *v3_workspace_id_environments.DetachRes
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
-	detachBody := &model.EnvironmentDetachRequest{
-		LdapConfigs:     ldapConfigs,
-		ProxyConfigs:    proxyConfigs,
-		KerberosConfigs: kerberosConfigs,
-		RdsConfigs:      rdsConfigs,
+	detachBody := &model.EnvironmentDetachV4Request{
+		Ldaps:      ldapConfigs,
+		Proxies:    proxyConfigs,
+		Kerberoses: kerberosConfigs,
+		Databases:  rdsConfigs,
 	}
-	attachRequest := v3_workspace_id_environments.NewDetachResourcesFromEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(detachBody)
+	attachRequest := v4env.NewDetachResourcesFromEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(detachBody)
 	return attachRequest
 }
 
-func sendDetachRequest(c *cli.Context, detachRequest *v3_workspace_id_environments.DetachResourcesFromEnvironmentParams) {
+func sendDetachRequest(c *cli.Context, detachRequest *v4env.DetachResourcesFromEnvironmentParams) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.DetachResourcesFromEnvironment(detachRequest)
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.DetachResourcesFromEnvironment(detachRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -289,12 +289,12 @@ func ChangeCredential(c *cli.Context) {
 	envName := c.String(fl.FlName.Name)
 	credential := c.String(fl.FlCredential.Name)
 
-	requestBody := &model.EnvironmentChangeCredentialRequest{
+	requestBody := &model.EnvironmentChangeCredentialV4Request{
 		CredentialName: credential,
 	}
-	request := v3_workspace_id_environments.NewChangeCredentialInEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(requestBody)
+	request := v4env.NewChangeCredentialInEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(requestBody)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.ChangeCredentialInEnvironment(request)
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.ChangeCredentialInEnvironment(request)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -312,18 +312,18 @@ func EditEnvironment(c *cli.Context) {
 	longitude := c.Float64(fl.FlEnvironmentLongitudeOptional.Name)
 	latitude := c.Float64(fl.FlEnvironmentLatitudeOptional.Name)
 
-	requestBody := &model.EnvironmentEditRequest{
+	requestBody := &model.EnvironmentEditV4Request{
 		Description: &description,
 		Regions:     regions,
-		Location: &model.LocationRequest{
-			LocationName: &locationName,
-			Longitude:    longitude,
-			Latitude:     latitude,
+		Location: &model.LocationV4Request{
+			Name:      &locationName,
+			Longitude: longitude,
+			Latitude:  latitude,
 		},
 	}
-	request := v3_workspace_id_environments.NewEditEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(requestBody)
+	request := v4env.NewEditEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(requestBody)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.EditEnvironment(request)
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.EditEnvironment(request)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -331,7 +331,7 @@ func EditEnvironment(c *cli.Context) {
 	log.Infof("[Edit] Environment %s was edited.", environment.Name)
 }
 
-func convertResponseToTableOutput(env *model.DetailedEnvironmentResponse) *environmentOutTableDescribe {
+func convertResponseToTableOutput(env *model.DetailedEnvironmentV4Response) *environmentOutTableDescribe {
 	return &environmentOutTableDescribe{
 		environment: &environment{
 			Name:          env.Name,
@@ -339,7 +339,7 @@ func convertResponseToTableOutput(env *model.DetailedEnvironmentResponse) *envir
 			CloudPlatform: env.CloudPlatform,
 			Credential:    env.CredentialName,
 			Regions:       getRegionNames(env.Regions),
-			LocationName:  env.Location.LocationName,
+			LocationName:  env.Location.Name,
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
 		},
@@ -347,7 +347,7 @@ func convertResponseToTableOutput(env *model.DetailedEnvironmentResponse) *envir
 	}
 }
 
-func convertResponseToJsonOutput(env *model.DetailedEnvironmentResponse) *environmentOutJsonDescribe {
+func convertResponseToJsonOutput(env *model.DetailedEnvironmentV4Response) *environmentOutJsonDescribe {
 	return &environmentOutJsonDescribe{
 		environment: &environment{
 			Name:          env.Name,
@@ -355,19 +355,19 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentResponse) *enviro
 			CloudPlatform: env.CloudPlatform,
 			Credential:    env.CredentialName,
 			Regions:       getRegionNames(env.Regions),
-			LocationName:  env.Location.LocationName,
+			LocationName:  env.Location.Name,
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
 		},
-		LdapConfigs:     getLdapConfigNames(env.LdapConfigs),
-		ProxyConfigs:    getProxyConfigNames(env.ProxyConfigs),
-		KerberosConfigs: getKerberosConfigs(env.KerberosConfigs),
-		RdsConfigs:      getRdsConfigNames(env.RdsConfigs),
+		LdapConfigs:     getLdapConfigNames(env.Ldaps),
+		ProxyConfigs:    getProxyConfigNames(env.Proxies),
+		KerberosConfigs: getKerberosConfigs(env.Kerberoses),
+		RdsConfigs:      getRdsConfigNames(env.Databases),
 		ID:              strconv.FormatInt(env.ID, 10),
 	}
 }
 
-func getRegionNames(region *model.CompactRegionResponse) []string {
+func getRegionNames(region *model.CompactRegionV4Response) []string {
 	var regions []string
 	for _, v := range region.Values {
 		regions = append(regions, v)
@@ -375,7 +375,7 @@ func getRegionNames(region *model.CompactRegionResponse) []string {
 	return regions
 }
 
-func getLdapConfigNames(configs []*model.LdapConfigResponse) []string {
+func getLdapConfigNames(configs []*model.LdapV4Response) []string {
 	var names []string
 	for _, l := range configs {
 		names = append(names, *l.Name)
@@ -383,7 +383,7 @@ func getLdapConfigNames(configs []*model.LdapConfigResponse) []string {
 	return names
 }
 
-func getProxyConfigNames(configs []*model.ProxyConfigResponse) []string {
+func getProxyConfigNames(configs []*model.ProxyV4Response) []string {
 	var names []string
 	for _, c := range configs {
 		names = append(names, *c.Name)
@@ -391,7 +391,7 @@ func getProxyConfigNames(configs []*model.ProxyConfigResponse) []string {
 	return names
 }
 
-func getRdsConfigNames(configs []*model.RDSConfigResponse) []string {
+func getRdsConfigNames(configs []*model.DatabaseV4Response) []string {
 	var names []string
 	for _, c := range configs {
 		names = append(names, *c.Name)
@@ -399,7 +399,7 @@ func getRdsConfigNames(configs []*model.RDSConfigResponse) []string {
 	return names
 }
 
-func getKerberosConfigs(configs []*model.KerberosResponse) []string {
+func getKerberosConfigs(configs []*model.KerberosV4Response) []string {
 	var names []string
 	for _, c := range configs {
 		names = append(names, c.Name)

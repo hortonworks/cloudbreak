@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_audits"
+	v4audit "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
@@ -13,8 +13,8 @@ import (
 type mockAuditClient struct {
 }
 
-func (*mockAuditClient) GetAuditEventsInWorkspace(params *v3_workspace_id_audits.GetAuditEventsInWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventsInWorkspaceOK, error) {
-	resp := []*model.AuditEvent{
+func (*mockAuditClient) GetAuditEventsInWorkspace(params *v4audit.GetAuditEventsInWorkspaceParams) (*v4audit.GetAuditEventsInWorkspaceOK, error) {
+	resp := []*model.AuditEventV4Response{
 		{
 			AuditID:  1,
 			Duration: 2,
@@ -30,11 +30,11 @@ func (*mockAuditClient) GetAuditEventsInWorkspace(params *v3_workspace_id_audits
 			Status: "OK - 200",
 		},
 	}
-	return &v3_workspace_id_audits.GetAuditEventsInWorkspaceOK{Payload: resp}, nil
+	return &v4audit.GetAuditEventsInWorkspaceOK{Payload: &model.AuditEventV4Responses{Responses: resp}}, nil
 }
 
-func (*mockAuditClient) GetAuditEventByWorkspace(params *v3_workspace_id_audits.GetAuditEventByWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventByWorkspaceOK, error) {
-	resp := &model.AuditEvent{
+func (*mockAuditClient) GetAuditEventByWorkspace(params *v4audit.GetAuditEventByWorkspaceParams) (*v4audit.GetAuditEventByWorkspaceOK, error) {
+	resp := &model.AuditEventV4Response{
 		AuditID:  1,
 		Duration: 2,
 		Operation: &model.OperationDetails{
@@ -53,7 +53,7 @@ func (*mockAuditClient) GetAuditEventByWorkspace(params *v3_workspace_id_audits.
 		},
 		Status: "OK - 200",
 	}
-	return &v3_workspace_id_audits.GetAuditEventByWorkspaceOK{Payload: resp}, nil
+	return &v4audit.GetAuditEventByWorkspaceOK{Payload: resp}, nil
 }
 
 func TestListAuditsImpl(t *testing.T) {

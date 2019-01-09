@@ -7,7 +7,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
+	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
@@ -31,16 +31,16 @@ func (c *CloudbreakStack) waitForOperationToFinish(workspaceID int64, name strin
 	defer utils.TimeTrack(time.Now(), "wait for operation to finish")
 
 	log.Infof("[waitForOperationToFinish] start waiting")
-	waitForOperationToFinishImpl(workspaceID, name, stackStatus, clusterStatus, c.Cloudbreak.V3WorkspaceIDStacks)
+	waitForOperationToFinishImpl(workspaceID, name, stackStatus, clusterStatus, c.Cloudbreak.V4WorkspaceIDStacks)
 }
 
 type getStackClient interface {
-	GetStackInWorkspace(*v3_workspace_id_stacks.GetStackInWorkspaceParams) (*v3_workspace_id_stacks.GetStackInWorkspaceOK, error)
+	GetStackInWorkspaceV4(params *v4stack.GetStackInWorkspaceV4Params) (*v4stack.GetStackInWorkspaceV4OK, error)
 }
 
 func waitForOperationToFinishImpl(workspaceID int64, name string, desiredStackStatus, desiredClusterStatus status, client getStackClient) {
 	for {
-		resp, err := client.GetStackInWorkspace(v3_workspace_id_stacks.NewGetStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name))
+		resp, err := client.GetStackInWorkspaceV4(v4stack.NewGetStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
@@ -62,21 +62,21 @@ func waitForOperationToFinishImpl(workspaceID int64, name string, desiredStackSt
 	}
 }
 
-func (c *CloudbreakStack) getStackByName(workspaceID int64, name string) *model.StackResponse {
+func (c *CloudbreakStack) getStackByName(workspaceID int64, name string) *model.StackV4Response {
 	defer utils.TimeTrack(time.Now(), "get stack by name")
 
 	log.Infof("[getStackByName] fetch stack, name: %s", name)
-	stack, err := c.Cloudbreak.V3WorkspaceIDStacks.GetStackInWorkspace(v3_workspace_id_stacks.NewGetStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name))
+	stack, err := c.Cloudbreak.V4WorkspaceIDStacks.GetStackInWorkspaceV4(v4stack.NewGetStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	return stack.Payload
 }
 
-func (c *CloudbreakStack) createStack(workspaceID int64, req *model.StackV2Request) *model.StackResponse {
-	var stack *model.StackResponse
+func (c *CloudbreakStack) createStack(workspaceID int64, req *model.StackV4Request) *model.StackV4Response {
+	var stack *model.StackV4Response
 	log.Infof("[createStack] sending create stack request")
-	resp, err := c.Cloudbreak.V3WorkspaceIDStacks.CreateStackInWorkspace(v3_workspace_id_stacks.NewCreateStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(req))
+	resp, err := c.Cloudbreak.V4WorkspaceIDStacks.PostStackInWorkspaceV4(v4stack.NewPostStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -90,7 +90,7 @@ func (c *CloudbreakStack) deleteStack(workspaceID int64, name string, forced boo
 	defer utils.TimeTrack(time.Now(), "delete stack by name")
 
 	log.Infof("[deleteStack] deleting stack, name: %s", name)
-	err := c.Cloudbreak.V3WorkspaceIDStacks.DeleteStackInWorkspace(v3_workspace_id_stacks.NewDeleteStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name).WithForced(&forced))
+	err := c.Cloudbreak.V4WorkspaceIDStacks.DeleteStackInWorkspaceV4(v4stack.NewDeleteStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name).WithForced(&forced))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

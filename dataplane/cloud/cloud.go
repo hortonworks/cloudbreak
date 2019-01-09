@@ -2,6 +2,7 @@ package cloud
 
 import (
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
@@ -40,14 +41,9 @@ const (
 type EncryptionType int
 
 const (
-	DEFAULT_ENCRYPTION EncryptionType = iota
-	NONE_ENCRYPTION
-	CUSTOM_ENCRYPTION
-)
-
-const (
 	REGION_FIELD            = "region"
 	AVAILABILITY_ZONE_FIELD = "availabilityZone"
+	DEFAULT_SUBNET_CIDR     = "10.0.0.0/16"
 )
 
 var currentCloud CloudType
@@ -60,15 +56,14 @@ var CloudProviders = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {
 	GetName() *string
-	GetCredentialParameters(func(string) string) (map[string]interface{}, error)
-	GetNetworkParamatersTemplate(NetworkMode) map[string]interface{}
-	GetInstanceGroupParamatersTemplate(node Node) map[string]interface{}
-	GetParamatersTemplate() map[string]interface{}
+	GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV4Request, error)
 	SkippedFields() map[string]bool
-	GenerateDefaultTemplate() *model.TemplateV2Request
-	GenerateDefaultNetwork(networkParameters map[string]interface{}, mode NetworkMode) *model.NetworkV2Request
-	GenerateNetworkRequestFromNetworkResponse(response *model.NetworkResponse) *model.NetworkV2Request
-	GenerateDefaultSecurityGroup(node Node) *model.SecurityGroupV2Request
+	GenerateDefaultTemplate() *model.InstanceTemplateV4Request
+	GenerateDefaultNetwork(mode NetworkMode) *model.NetworkV4Request
+	GenerateNetworkRequestFromNetworkResponse(response *model.NetworkV4Response) *model.NetworkV4Request
+	GenerateDefaultSecurityGroup(node Node) *model.SecurityGroupV4Request
+	SetParametersTemplate(request *model.StackV4Request)
+	SetInstanceGroupParametersTemplate(request *model.InstanceGroupV4Request, node Node)
 }
 
 func GetProvider() CloudProvider {
@@ -92,51 +87,48 @@ func (p *DefaultCloudProvider) GetCredentialParameters(func(string) string) (map
 	return make(map[string]interface{}), nil
 }
 
-func (p *DefaultCloudProvider) GenerateDefaultTemplate() *model.TemplateV2Request {
-	return &model.TemplateV2Request{
+func (p *DefaultCloudProvider) GenerateDefaultTemplate() *model.InstanceTemplateV4Request {
+	return &model.InstanceTemplateV4Request{
 		InstanceType: "____",
-		VolumeType:   "____",
-		VolumeCount:  1,
-		VolumeSize:   10,
+		AttachedVolumes: []*model.VolumeV4Request{
+			{
+				Type:  "____",
+				Count: 1,
+				Size:  &(&types.I32{I: 10}).I,
+			},
+		},
 	}
 }
 
-func (p *DefaultCloudProvider) GenerateDefaultNetwork(networkParameters map[string]interface{}, mode NetworkMode) *model.NetworkV2Request {
-	network := &model.NetworkV2Request{
-		Parameters: networkParameters,
-	}
-	if mode != EXISTING_NETWORK_EXISTING_SUBNET && mode != LEGACY_NETWORK {
-		network.SubnetCIDR = "10.0.0.0/16"
-	}
-	return network
-}
-
-func (p *DefaultCloudProvider) GenerateDefaultSecurityGroup(node Node) *model.SecurityGroupV2Request {
-	return &model.SecurityGroupV2Request{
+func (p *DefaultCloudProvider) GenerateDefaultSecurityGroup(node Node) *model.SecurityGroupV4Request {
+	return &model.SecurityGroupV4Request{
 		SecurityRules: getDefaultSecurityRules(node),
 	}
 }
 
-func (p *DefaultCloudProvider) GenerateNetworkRequestFromNetworkResponse(response *model.NetworkResponse) *model.NetworkV2Request {
-	return &model.NetworkV2Request{
-		Parameters: response.Parameters,
-	}
-}
-
-func getDefaultSecurityRules(node Node) []*model.SecurityRuleRequest {
-	ruleGen := func(port string) *model.SecurityRuleRequest {
-		return &model.SecurityRuleRequest{
+func getDefaultSecurityRules(node Node) []*model.SecurityRuleV4Request {
+	ruleGen := func(port string) *model.SecurityRuleV4Request {
+		return &model.SecurityRuleV4Request{
 			Subnet:   &(&types.S{S: "0.0.0.0/0"}).S,
 			Protocol: &(&types.S{S: "tcp"}).S,
-			Ports:    &port,
+			Ports:    []string{port},
 		}
 	}
-	rules := []*model.SecurityRuleRequest{
+	rules := []*model.SecurityRuleV4Request{
 		ruleGen("22"),
 	}
-	if node.GroupType == model.InstanceGroupResponseTypeGATEWAY {
+	if node.GroupType == model.InstanceGroupV4ResponseTypeGATEWAY {
 		rules = append(rules, ruleGen("443"))
 		rules = append(rules, ruleGen("9443"))
 	}
 	return rules
+}
+
+func CreateBaseCredentialRequest(stringFinder func(string) string) *model.CredentialV4Request {
+	name := stringFinder(fl.FlName.Name)
+	return &model.CredentialV4Request{
+		Name:          &name,
+		Description:   &(&types.S{S: stringFinder(fl.FlDescriptionOptional.Name)}).S,
+		CloudPlatform: GetProvider().GetName(),
+	}
 }

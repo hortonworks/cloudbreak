@@ -7,7 +7,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_audits"
+	v4audit "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -18,7 +18,7 @@ import (
 var auditListHeader = []string{"AuditID", "EventType", "TimeStamp", "ResourceId", "ResourceName", "ResourceType", "UserName", "Status", "Duration"}
 
 type auditListOut struct {
-	Audit *model.AuditEvent `json:"Audit" yaml:"Audit"`
+	Audit *model.AuditEventV4Response `json:"Audit" yaml:"Audit"`
 }
 
 func (a *auditListOut) DataAsStringArray() []string {
@@ -33,12 +33,12 @@ func convertToDateTimeString(t int64) string {
 var auditHeader = []string{"Audit"}
 
 type auditOut struct {
-	Audit *model.AuditEvent `json:"Audit" yaml:"Audit"`
+	Audit *model.AuditEventV4Response `json:"Audit" yaml:"Audit"`
 }
 
 type auditClient interface {
-	GetAuditEventsInWorkspace(params *v3_workspace_id_audits.GetAuditEventsInWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventsInWorkspaceOK, error)
-	GetAuditEventByWorkspace(params *v3_workspace_id_audits.GetAuditEventByWorkspaceParams) (*v3_workspace_id_audits.GetAuditEventByWorkspaceOK, error)
+	GetAuditEventsInWorkspace(params *v4audit.GetAuditEventsInWorkspaceParams) (*v4audit.GetAuditEventsInWorkspaceOK, error)
+	GetAuditEventByWorkspace(params *v4audit.GetAuditEventByWorkspaceParams) (*v4audit.GetAuditEventByWorkspaceOK, error)
 }
 
 func (a *auditOut) DataAsStringArray() []string {
@@ -87,7 +87,7 @@ func listAudits(resourceType string, c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	resourceID := c.String(fl.FlResourceID.Name)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	listAuditsImpl(cbClient.Cloudbreak.V3WorkspaceIDAudits, workspaceID, resourceType, resourceID, output.WriteList)
+	listAuditsImpl(cbClient.Cloudbreak.V4WorkspaceIDAudits, workspaceID, resourceType, resourceID, output.WriteList)
 }
 
 func listAuditsImpl(client auditClient, workspaceID int64, resourceType string, resourceIDString string, writer func([]string, []utils.Row)) {
@@ -95,12 +95,12 @@ func listAuditsImpl(client auditClient, workspaceID int64, resourceType string, 
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + resourceIDString)
 	}
-	resp, err := client.GetAuditEventsInWorkspace(v3_workspace_id_audits.NewGetAuditEventsInWorkspaceParams().WithWorkspaceID(workspaceID).WithResourceType(resourceType).WithResourceID(resourceID))
+	resp, err := client.GetAuditEventsInWorkspace(v4audit.NewGetAuditEventsInWorkspaceParams().WithWorkspaceID(workspaceID).WithResourceType(&resourceType).WithResourceID(&resourceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
-	for _, audit := range resp.Payload {
+	var tableRows []utils.Row
+	for _, audit := range resp.Payload.Responses {
 		tableRows = append(tableRows, &auditListOut{audit})
 	}
 	writer(auditListHeader, tableRows)
@@ -113,7 +113,7 @@ func DescribeAudit(c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	auditID := c.String(fl.FlAuditID.Name)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	describeAuditImpl(cbClient.Cloudbreak.V3WorkspaceIDAudits, workspaceID, auditID, output.WriteList)
+	describeAuditImpl(cbClient.Cloudbreak.V4WorkspaceIDAudits, workspaceID, auditID, output.WriteList)
 }
 
 func describeAuditImpl(client auditClient, workspaceID int64, auditIDString string, writer func([]string, []utils.Row)) {
@@ -121,11 +121,11 @@ func describeAuditImpl(client auditClient, workspaceID int64, auditIDString stri
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + auditIDString)
 	}
-	resp, err := client.GetAuditEventByWorkspace(v3_workspace_id_audits.NewGetAuditEventByWorkspaceParams().WithWorkspaceID(workspaceID).WithAuditID(auditID))
+	resp, err := client.GetAuditEventByWorkspace(v4audit.NewGetAuditEventByWorkspaceParams().WithWorkspaceID(workspaceID).WithAuditID(auditID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	tableRows = append(tableRows, &auditOut{resp.Payload})
 	writer(auditHeader, tableRows)
 }

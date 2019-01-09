@@ -5,7 +5,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3workspaces"
+	v4ws "github.com/hortonworks/cb-cli/dataplane/api/client/v4workspaces"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -17,7 +17,7 @@ import (
 var workspaceListHeader = []string{"Name", "Description", "Permissions"}
 
 type workspaceListOut struct {
-	Workspace *model.WorkspaceResponse `json:"Workspace" yaml:"Workspace"`
+	Workspace *model.WorkspaceV4Response `json:"Workspace" yaml:"Workspace"`
 }
 
 type workspaceListOutDescribe struct {
@@ -33,7 +33,7 @@ func (o *workspaceListOut) DataAsStringArray() []string {
 	} else {
 		permissionString = string(permissionYAML)
 	}
-	return []string{o.Workspace.Name, utils.SafeStringConvert(o.Workspace.Description), permissionString}
+	return []string{utils.SafeStringConvert(o.Workspace.Name), utils.SafeStringConvert(o.Workspace.Description), permissionString}
 }
 
 func (o *workspaceListOutDescribe) DataAsStringArray() []string {
@@ -41,9 +41,9 @@ func (o *workspaceListOutDescribe) DataAsStringArray() []string {
 }
 
 type workspaceClient interface {
-	CreateWorkspace(params *v3workspaces.CreateWorkspaceParams) (*v3workspaces.CreateWorkspaceOK, error)
-	GetWorkspaces(params *v3workspaces.GetWorkspacesParams) (*v3workspaces.GetWorkspacesOK, error)
-	GetWorkspaceByName(params *v3workspaces.GetWorkspaceByNameParams) (*v3workspaces.GetWorkspaceByNameOK, error)
+	CreateWorkspace(params *v4ws.CreateWorkspaceParams) (*v4ws.CreateWorkspaceOK, error)
+	GetWorkspaces(params *v4ws.GetWorkspacesParams) (*v4ws.GetWorkspacesOK, error)
+	GetWorkspaceByName(params *v4ws.GetWorkspaceByNameParams) (*v4ws.GetWorkspaceByNameOK, error)
 }
 
 func CreateWorkspace(c *cli.Context) {
@@ -51,16 +51,16 @@ func CreateWorkspace(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceName := c.String(fl.FlName.Name)
 	workspaceDesc := c.String(fl.FlDescriptionOptional.Name)
-	createWorkspaceImpl(cbClient.Cloudbreak.V3workspaces, workspaceName, workspaceDesc)
+	createWorkspaceImpl(cbClient.Cloudbreak.V4workspaces, workspaceName, workspaceDesc)
 }
 
-func createWorkspaceImpl(client workspaceClient, name string, description string) *model.WorkspaceResponse {
+func createWorkspaceImpl(client workspaceClient, name string, description string) *model.WorkspaceV4Response {
 	log.Infof("[CreateWorkspace] Create a workspace into a tenant")
-	req := model.WorkspaceRequest{
-		Name:        name,
+	req := model.WorkspaceV4Request{
+		Name:        &name,
 		Description: &description,
 	}
-	resp, err := client.CreateWorkspace(v3workspaces.NewCreateWorkspaceParams().WithBody(&req))
+	resp, err := client.CreateWorkspace(v4ws.NewCreateWorkspaceParams().WithBody(&req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -75,7 +75,7 @@ func DeleteWorkspace(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
 	workspaceName := c.String(fl.FlName.Name)
-	_, err := cbClient.Cloudbreak.V3workspaces.DeleteWorkspaceByName(v3workspaces.NewDeleteWorkspaceByNameParams().WithName(workspaceName))
+	_, err := cbClient.Cloudbreak.V4workspaces.DeleteWorkspaceByName(v4ws.NewDeleteWorkspaceByNameParams().WithName(workspaceName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -89,15 +89,15 @@ func DescribeWorkspace(c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceName := c.String(fl.FlName.Name)
-	describeWorkspaceImpl(cbClient.Cloudbreak.V3workspaces, output.WriteList, workspaceName)
+	describeWorkspaceImpl(cbClient.Cloudbreak.V4workspaces, output.WriteList, workspaceName)
 }
 
 func describeWorkspaceImpl(client workspaceClient, writer func([]string, []utils.Row), workspaceName string) {
-	resp, err := client.GetWorkspaceByName(v3workspaces.NewGetWorkspaceByNameParams().WithName(workspaceName))
+	resp, err := client.GetWorkspaceByName(v4ws.NewGetWorkspaceByNameParams().WithName(workspaceName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	tableRows = append(tableRows, &workspaceListOutDescribe{&workspaceListOut{resp.Payload}, strconv.FormatInt(resp.Payload.ID, 10)})
 	writer(append(workspaceListHeader, "ID"), tableRows)
 }
@@ -107,11 +107,11 @@ func ListWorkspaces(c *cli.Context) {
 	log.Infof("[ListWorkspaces] List all workspaces in a tenant")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	listWorkspacesImpl(cbClient.Cloudbreak.V3workspaces, output.WriteList)
+	listWorkspacesImpl(cbClient.Cloudbreak.V4workspaces, output.WriteList)
 }
 
 func listWorkspacesImpl(client workspaceClient, writer func([]string, []utils.Row)) {
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	for _, workspace := range getWorkspaceListImpl(client) {
 		tableRows = append(tableRows, &workspaceListOut{workspace})
 	}
@@ -121,7 +121,7 @@ func listWorkspacesImpl(client workspaceClient, writer func([]string, []utils.Ro
 func GetWorkspaceIdByName(c *cli.Context, workspaceName string) int64 {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	resp, err := cbClient.Cloudbreak.V3workspaces.GetWorkspaceByName(v3workspaces.NewGetWorkspaceByNameParams().WithName(workspaceName))
+	resp, err := cbClient.Cloudbreak.V4workspaces.GetWorkspaceByName(v4ws.NewGetWorkspaceByNameParams().WithName(workspaceName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -129,17 +129,12 @@ func GetWorkspaceIdByName(c *cli.Context, workspaceName string) int64 {
 	return resp.Payload.ID
 }
 
-func GetWorkspaceList(c *cli.Context) []*model.WorkspaceResponse {
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	return getWorkspaceListImpl(cbClient.Cloudbreak.V3workspaces)
-}
-
-func getWorkspaceListImpl(client workspaceClient) []*model.WorkspaceResponse {
-	resp, err := client.GetWorkspaces(v3workspaces.NewGetWorkspacesParams())
+func getWorkspaceListImpl(client workspaceClient) []*model.WorkspaceV4Response {
+	resp, err := client.GetWorkspaces(v4ws.NewGetWorkspacesParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	return resp.Payload
+	return resp.Payload.Responses
 }
 
 func RemoveUser(c *cli.Context) {
@@ -150,7 +145,7 @@ func RemoveUser(c *cli.Context) {
 
 	userID := c.String(fl.FlUserID.Name)
 	workspaceName := c.String(fl.FlName.Name)
-	_, err := cbClient.Cloudbreak.V3workspaces.RemoveWorkspaceUsers(v3workspaces.NewRemoveWorkspaceUsersParams().WithName(workspaceName).WithBody([]string{userID}))
+	_, err := cbClient.Cloudbreak.V4workspaces.RemoveWorkspaceUsers(v4ws.NewRemoveWorkspaceUsersParams().WithName(workspaceName).WithBody(&model.UserIds{UserIds: []string{userID}}))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -183,12 +178,14 @@ func addUser(c *cli.Context, permissions []string) {
 	userID := c.String(fl.FlUserID.Name)
 	workspaceName := c.String(fl.FlName.Name)
 
-	changeUsersJSON := &model.ChangeWorkspaceUsersJSON{
-		UserID:      userID,
-		Permissions: permissions,
+	changeUsersJSON := []*model.ChangeWorkspaceUsersV4Request{
+		{
+			UserID:      userID,
+			Permissions: permissions,
+		},
 	}
 
-	_, err := cbClient.Cloudbreak.V3workspaces.AddWorkspaceUsers(v3workspaces.NewAddWorkspaceUsersParams().WithName(workspaceName).WithBody([]*model.ChangeWorkspaceUsersJSON{changeUsersJSON}))
+	_, err := cbClient.Cloudbreak.V4workspaces.AddWorkspaceUsers(v4ws.NewAddWorkspaceUsersParams().WithName(workspaceName).WithBody(&model.ChangeWorkspaceUsersV4Requests{Users: changeUsersJSON}))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

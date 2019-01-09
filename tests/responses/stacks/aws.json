@@ -67,7 +67,7 @@
           {
             "name": "pre-start",
             "description": "",
-            "recipeType": "PRE_AMBARI_START",
+            "recipeType": "PRE_CLUSTER_MANAGER_START",
             "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
             "id": 1,
             "public": true
@@ -91,7 +91,7 @@
           {
             "name": "pre-start",
             "description": "",
-            "recipeType": "PRE_AMBARI_START",
+            "recipeType": "PRE_CLUSTER_MANAGER_START",
             "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
             "id": 1,
             "public": true
@@ -115,7 +115,7 @@
           {
             "name": "pre-start",
             "description": "",
-            "recipeType": "PRE_AMBARI_START",
+            "recipeType": "PRE_CLUSTER_MANAGER_START",
             "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
             "id": 1,
             "public": true
@@ -190,14 +190,16 @@
   "credential": {
     "name": "amazon",
     "cloudPlatform": "AWS",
-    "parameters": {
-      "smartSenseId": "null",
-      "selector": "role-based"
+    "aws": {
+      "selector": "role-based",
+      "roleBased": {
+        "roleArn": "arn:aws:iam::755047402263:role/aws-cluster-3938-S3AccessRole-1WONDIIEGB2GR"
+      },
+      "govCloud": false,
+      "cloudPlatform": "AWS"
     },
     "description": "",
-    "topologyId": null,
-    "id": 4,
-    "public": false
+    "id": 4
   },
   "network": {
     "description": null,
@@ -250,7 +252,7 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4206
@@ -295,28 +297,28 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "9443",
+            "ports": ["9443"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4202
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4203
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "443",
+            "ports": ["443"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4205
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4204
@@ -373,7 +375,7 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 4207

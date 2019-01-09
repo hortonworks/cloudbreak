@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_blueprints"
+	v4bp "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_blueprints"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -14,11 +14,11 @@ import (
 type mockBlueprintsClient struct {
 }
 
-func (*mockBlueprintsClient) ListBlueprintsByWorkspace(params *v3_workspace_id_blueprints.ListBlueprintsByWorkspaceParams) (*v3_workspace_id_blueprints.ListBlueprintsByWorkspaceOK, error) {
-	resp := make([]*model.BlueprintViewResponse, 0)
+func (*mockBlueprintsClient) ListBlueprintsByWorkspace(params *v4bp.ListBlueprintsByWorkspaceParams) (*v4bp.ListBlueprintsByWorkspaceOK, error) {
+	resp := make([]*model.BlueprintV4ViewResponse, 0)
 	for i := 0; i < 2; i++ {
 		id := int64(i)
-		resp = append(resp, &model.BlueprintViewResponse{
+		resp = append(resp, &model.BlueprintV4ViewResponse{
 			ID:             id,
 			Name:           &(&types.S{S: "name" + strconv.Itoa(i)}).S,
 			Description:    &(&types.S{S: "desc" + strconv.Itoa(i)}).S,
@@ -28,14 +28,14 @@ func (*mockBlueprintsClient) ListBlueprintsByWorkspace(params *v3_workspace_id_b
 			StackVersion:   "2.6",
 		})
 	}
-	return &v3_workspace_id_blueprints.ListBlueprintsByWorkspaceOK{Payload: resp}, nil
+	return &v4bp.ListBlueprintsByWorkspaceOK{Payload: &model.BlueprintV4ViewResponses{Responses: resp}}, nil
 }
 
-func (*mockBlueprintsClient) CreateBlueprintInWorkspace(params *v3_workspace_id_blueprints.CreateBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.CreateBlueprintInWorkspaceOK, error) {
-	return &v3_workspace_id_blueprints.CreateBlueprintInWorkspaceOK{Payload: &model.BlueprintResponse{ID: int64(1)}}, nil
+func (*mockBlueprintsClient) CreateBlueprintInWorkspace(params *v4bp.CreateBlueprintInWorkspaceParams) (*v4bp.CreateBlueprintInWorkspaceOK, error) {
+	return &v4bp.CreateBlueprintInWorkspaceOK{Payload: &model.BlueprintV4Response{ID: int64(1)}}, nil
 }
 
-func (*mockBlueprintsClient) DeleteBlueprintInWorkspace(params *v3_workspace_id_blueprints.DeleteBlueprintInWorkspaceParams) (*v3_workspace_id_blueprints.DeleteBlueprintInWorkspaceOK, error) {
+func (*mockBlueprintsClient) DeleteBlueprintInWorkspace(params *v4bp.DeleteBlueprintInWorkspaceParams) (*v4bp.DeleteBlueprintInWorkspaceOK, error) {
 	return nil, nil
 }
 

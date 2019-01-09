@@ -3,7 +3,7 @@ package kerberos
 import (
 	"encoding/base64"
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kerberos"
+	v4krb "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kerberos"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var KerberosHeader = []string{"Name", "Description", "Type", "Environments", "ID"}
+var Header = []string{"Name", "Description", "Type", "Environments", "ID"}
 
 type kerberos struct {
 	Name         string `json:"Name" yaml:"Name"`
@@ -29,12 +29,12 @@ type kerberosOutDescribe struct {
 }
 
 type kerberosClient interface {
-	ListKerberosConfigByWorkspace(params *v3_workspace_id_kerberos.ListKerberosConfigByWorkspaceParams) (*v3_workspace_id_kerberos.ListKerberosConfigByWorkspaceOK, error)
-	GetKerberosConfigInWorkspace(params *v3_workspace_id_kerberos.GetKerberosConfigInWorkspaceParams) (*v3_workspace_id_kerberos.GetKerberosConfigInWorkspaceOK, error)
-	CreateKerberosConfigInWorkspace(params *v3_workspace_id_kerberos.CreateKerberosConfigInWorkspaceParams) (*v3_workspace_id_kerberos.CreateKerberosConfigInWorkspaceOK, error)
-	AttachKerberosConfigToEnvironments(params *v3_workspace_id_kerberos.AttachKerberosConfigToEnvironmentsParams) (*v3_workspace_id_kerberos.AttachKerberosConfigToEnvironmentsOK, error)
-	DetachKerberosConfigFromEnvironments(params *v3_workspace_id_kerberos.DetachKerberosConfigFromEnvironmentsParams) (*v3_workspace_id_kerberos.DetachKerberosConfigFromEnvironmentsOK, error)
-	DeleteKerberosConfigInWorkspace(params *v3_workspace_id_kerberos.DeleteKerberosConfigInWorkspaceParams) (*v3_workspace_id_kerberos.DeleteKerberosConfigInWorkspaceOK, error)
+	ListKerberosConfigByWorkspace(params *v4krb.ListKerberosConfigByWorkspaceParams) (*v4krb.ListKerberosConfigByWorkspaceOK, error)
+	GetKerberosConfigInWorkspace(params *v4krb.GetKerberosConfigInWorkspaceParams) (*v4krb.GetKerberosConfigInWorkspaceOK, error)
+	CreateKerberosConfigInWorkspace(params *v4krb.CreateKerberosConfigInWorkspaceParams) (*v4krb.CreateKerberosConfigInWorkspaceOK, error)
+	AttachKerberosConfigToEnvironments(params *v4krb.AttachKerberosConfigToEnvironmentsParams) (*v4krb.AttachKerberosConfigToEnvironmentsOK, error)
+	DetachKerberosConfigFromEnvironments(params *v4krb.DetachKerberosConfigFromEnvironmentsParams) (*v4krb.DetachKerberosConfigFromEnvironmentsOK, error)
+	DeleteKerberosConfigInWorkspace(params *v4krb.DeleteKerberosConfigInWorkspaceParams) (*v4krb.DeleteKerberosConfigInWorkspaceOK, error)
 }
 
 func (k *kerberos) DataAsStringArray() []string {
@@ -107,7 +107,7 @@ func CreateCustomKerberos(c *cli.Context) error {
 	}
 
 	kerberosRequest := CreateKerberosRequest(c)
-	kerberosRequest.AmbariKerberosDescriptor = &customRequest
+	kerberosRequest.AmbariDescriptor = &customRequest
 	return SendCreateKerberosRequest(c, &kerberosRequest)
 }
 
@@ -141,12 +141,12 @@ func CreateFreeIpaKerberos(c *cli.Context) error {
 	return SendCreateKerberosRequest(c, &kerberosRequest)
 }
 
-func CreateKerberosRequest(c *cli.Context) model.KerberosRequest {
+func CreateKerberosRequest(c *cli.Context) model.KerberosV4Request {
 	kerberosName := c.String(fl.FlName.Name)
 	description := c.String(fl.FlDescriptionOptional.Name)
 	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
 
-	kerberosRequest := &model.KerberosRequest{
+	kerberosRequest := &model.KerberosV4Request{
 		Name:         &kerberosName,
 		Description:  &description,
 		Environments: environments,
@@ -155,16 +155,16 @@ func CreateKerberosRequest(c *cli.Context) model.KerberosRequest {
 	return *kerberosRequest
 }
 
-func SendCreateKerberosRequest(c *cli.Context, request *model.KerberosRequest) error {
+func SendCreateKerberosRequest(c *cli.Context, request *model.KerberosV4Request) error {
 	defer utils.TimeTrack(time.Now(), "create kerberos")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	return SendCreateKerberosRequestImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, request, output.Write)
+	return SendCreateKerberosRequestImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, request, output.Write)
 }
 
-func SendCreateKerberosRequestImpl(kerberosClient kerberosClient, workspaceID int64, request *model.KerberosRequest, writer func([]string, utils.Row)) error {
-	resp, err := kerberosClient.CreateKerberosConfigInWorkspace(v3_workspace_id_kerberos.NewCreateKerberosConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(request))
+func SendCreateKerberosRequestImpl(kerberosClient kerberosClient, workspaceID int64, request *model.KerberosV4Request, writer func([]string, utils.Row)) error {
+	resp, err := kerberosClient.CreateKerberosConfigInWorkspace(v4krb.NewCreateKerberosConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -179,17 +179,17 @@ func ListKerberos(c *cli.Context) error {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	return ListKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, output.WriteList)
+	return ListKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, output.WriteList)
 }
 
 func ListKerberosImpl(kerberosClient kerberosClient, workspaceID int64, writer func([]string, []utils.Row)) error {
-	listRequest := v3_workspace_id_kerberos.NewListKerberosConfigByWorkspaceParams().WithWorkspaceID(workspaceID)
+	listRequest := v4krb.NewListKerberosConfigByWorkspaceParams().WithWorkspaceID(workspaceID)
 	resp, err := kerberosClient.ListKerberosConfigByWorkspace(listRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	var tableRows []utils.Row
-	for _, k := range resp.Payload {
+	for _, k := range resp.Payload.Responses {
 		row := &kerberosOutDescribe{
 			&kerberos{
 				Name:         *k.Name,
@@ -200,7 +200,7 @@ func ListKerberosImpl(kerberosClient kerberosClient, workspaceID int64, writer f
 			strconv.FormatInt(k.ID, 10)}
 		tableRows = append(tableRows, row)
 	}
-	writer(KerberosHeader, tableRows)
+	writer(Header, tableRows)
 	return nil
 }
 
@@ -210,12 +210,12 @@ func GetKerberos(c *cli.Context) error {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	kerberosName := c.String(fl.FlName.Name)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	return GetKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, kerberosName, output.Write)
+	return GetKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, kerberosName, output.Write)
 }
 
 func GetKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosName string, writer func([]string, utils.Row)) error {
 	log.Infof("[GetKerberos] describe kerberos config by name: %s", kerberosName)
-	resp, err := kerberosClient.GetKerberosConfigInWorkspace(v3_workspace_id_kerberos.NewGetKerberosConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kerberosName))
+	resp, err := kerberosClient.GetKerberosConfigInWorkspace(v4krb.NewGetKerberosConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kerberosName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -232,12 +232,12 @@ func AttachKerberos(c *cli.Context) error {
 	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	return AttachKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, kerberosName, environments, output.Write)
+	return AttachKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, kerberosName, environments, output.Write)
 }
 
 func AttachKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosName string, environments []string, writer func([]string, utils.Row)) error {
 	log.Infof("[AttachKerberosImpl] attach kerberos config '%s' to environments: %s", kerberosName, environments)
-	attachRequest := v3_workspace_id_kerberos.NewAttachKerberosConfigToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kerberosName).WithBody(environments)
+	attachRequest := v4krb.NewAttachKerberosConfigToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kerberosName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
 	response, err := kerberosClient.AttachKerberosConfigToEnvironments(attachRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -255,12 +255,12 @@ func DetachKerberos(c *cli.Context) error {
 	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	return DetachKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, kerberosName, environments, output.Write)
+	return DetachKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, kerberosName, environments, output.Write)
 }
 
 func DetachKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosName string, environments []string, writer func([]string, utils.Row)) error {
 	log.Infof("[DetachKerberosImpl] detach kerberos config '%s' from environments: %s", kerberosName, environments)
-	detachRequest := v3_workspace_id_kerberos.NewDetachKerberosConfigFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kerberosName).WithBody(environments)
+	detachRequest := v4krb.NewDetachKerberosConfigFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kerberosName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
 	response, err := kerberosClient.DetachKerberosConfigFromEnvironments(detachRequest)
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -277,12 +277,12 @@ func DeleteKerberos(c *cli.Context) error {
 	kerberosName := c.String(fl.FlName.Name)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	return DeleteKerberosImpl(cbClient.Cloudbreak.V3WorkspaceIDKerberos, workspaceID, kerberosName, output.Write)
+	return DeleteKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, kerberosName, output.Write)
 }
 
 func DeleteKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosName string, writer func([]string, utils.Row)) error {
 	log.Infof("[DeleteKerberosImpl] delete kerberos config by name: %s", kerberosName)
-	response, err := kerberosClient.DeleteKerberosConfigInWorkspace(v3_workspace_id_kerberos.NewDeleteKerberosConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kerberosName))
+	response, err := kerberosClient.DeleteKerberosConfigInWorkspace(v4krb.NewDeleteKerberosConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(kerberosName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -292,8 +292,8 @@ func DeleteKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerber
 	return nil
 }
 
-func writeResponse(writer func([]string, utils.Row), kerberosResponse *model.KerberosResponse) {
-	writer(append(KerberosHeader), &kerberosOutDescribe{
+func writeResponse(writer func([]string, utils.Row), kerberosResponse *model.KerberosV4Response) {
+	writer(append(Header), &kerberosOutDescribe{
 		&kerberos{
 			Name:         kerberosResponse.Name,
 			Description:  utils.SafeStringConvert(kerberosResponse.Description),

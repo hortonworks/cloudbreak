@@ -5,7 +5,6 @@
   "connectorJarUrl": "",
   "id": 1,
   "creationDate": 1523625110797,
-  "publicInAccount": true,
   "clusterNames": [],
   "stackVersion": "",
   "databaseEngine": "POSTGRES",

@@ -1,108 +1,110 @@
-[
-  {
-    "id": 5,
-    "name": "Data Science: Apache Spark 2, Apache Zeppelin",
-    "description": "Useful for data science with Spark and Zeppelin",
-    "stackType": "HDP",
-    "stackVersion": "2.6",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 17,
-    "name": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
-    "description": "Useful for data science with Spark and Zeppelin",
-    "stackType": "HDP",
-    "stackVersion": "3.0",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 3,
-    "name": "Flow Management: Apache NiFi, Apache NiFi Registry",
-    "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
-    "stackType": "HDF",
-    "stackVersion": "3.2",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 9,
-    "name": "Messaging Management: Apache Kafka",
-    "description": "Useful for messaging management with Apache Kafka",
-    "stackType": "HDF",
-    "stackVersion": "3.2",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 1,
-    "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-    "description": "Useful for EDW analytics using Hive LLAP",
-    "stackType": "HDP",
-    "stackVersion": "2.6",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 13,
-    "name": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-    "description": "Useful for EDW analytics using Hive LLAP",
-    "stackType": "HDP",
-    "stackVersion": "3.0",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 7,
-    "name": "EDW-ETL: Apache Hive, Apache Spark 2",
-    "description": "Useful for ETL data processing with Hive and Spark",
-    "stackType": "HDP",
-    "stackVersion": "2.6",
-    "hostGroupCount": 3,
-    "status": "DEFAULT",
-    "tags": {}
-  },
-  {
-    "id": 11,
-    "name": "Data Lake: Apache Ranger, Apache Hive Metastore HA",
-    "description": "Data Lake: Apache Ranger, Apache Hive Metastore HA",
-    "stackType": "HDP",
-    "stackVersion": "2.6",
-    "hostGroupCount": 2,
-    "status": "DEFAULT",
-    "tags": {
-      "shared_services_ready": true
+{
+  "responses": [
+    {
+      "id": 5,
+      "name": "Data Science: Apache Spark 2, Apache Zeppelin",
+      "description": "Useful for data science with Spark and Zeppelin",
+      "stackType": "HDP",
+      "stackVersion": "2.6",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 17,
+      "name": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
+      "description": "Useful for data science with Spark and Zeppelin",
+      "stackType": "HDP",
+      "stackVersion": "3.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 3,
+      "name": "Flow Management: Apache NiFi, Apache NiFi Registry",
+      "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
+      "stackType": "HDF",
+      "stackVersion": "3.2",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 9,
+      "name": "Messaging Management: Apache Kafka",
+      "description": "Useful for messaging management with Apache Kafka",
+      "stackType": "HDF",
+      "stackVersion": "3.2",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 1,
+      "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
+      "description": "Useful for EDW analytics using Hive LLAP",
+      "stackType": "HDP",
+      "stackVersion": "2.6",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 13,
+      "name": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
+      "description": "Useful for EDW analytics using Hive LLAP",
+      "stackType": "HDP",
+      "stackVersion": "3.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 7,
+      "name": "EDW-ETL: Apache Hive, Apache Spark 2",
+      "description": "Useful for ETL data processing with Hive and Spark",
+      "stackType": "HDP",
+      "stackVersion": "2.6",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 11,
+      "name": "Data Lake: Apache Ranger, Apache Hive Metastore HA",
+      "description": "Data Lake: Apache Ranger, Apache Hive Metastore HA",
+      "stackType": "HDP",
+      "stackVersion": "2.6",
+      "hostGroupCount": 2,
+      "status": "DEFAULT",
+      "tags": {
+        "shared_services_ready": true
+      }
+    },
+    {
+      "id": 15,
+      "name": "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore",
+      "description": "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore",
+      "stackType": "HDP",
+      "stackVersion": "3.0",
+      "hostGroupCount": 1,
+      "status": "DEFAULT",
+      "tags": {
+        "shared_services_ready": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
+      "description": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
+      "stackType": "HDP",
+      "stackVersion": "2.6",
+      "hostGroupCount": 1,
+      "status": "DEFAULT",
+      "tags": {
+        "shared_services_ready": true
+      }
     }
-  },
-  {
-    "id": 15,
-    "name": "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore",
-    "description": "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore",
-    "stackType": "HDP",
-    "stackVersion": "3.0",
-    "hostGroupCount": 1,
-    "status": "DEFAULT",
-    "tags": {
-      "shared_services_ready": true
-    }
-  },
-  {
-    "id": 2,
-    "name": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
-    "description": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
-    "stackType": "HDP",
-    "stackVersion": "2.6",
-    "hostGroupCount": 1,
-    "status": "DEFAULT",
-    "tags": {
-      "shared_services_ready": true
-    }
-  }
-]
+  ]
+}

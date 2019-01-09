@@ -6,7 +6,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
+	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/types"
@@ -21,12 +21,12 @@ func ChangeAmbariPassword(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[ChangeAmbariPassword] updating ambari password, name: %s", name)
-	req := &model.UserNamePassword{
+	req := &model.UserNamePasswordV4Request{
 		OldPassword: &(&types.S{S: c.String(fl.FlOldPassword.Name)}).S,
 		Password:    &(&types.S{S: c.String(fl.FlNewPassword.Name)}).S,
 		UserName:    &(&types.S{S: c.String(fl.FlAmbariUser.Name)}).S,
 	}
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutpasswordStackV3(v3_workspace_id_stacks.NewPutpasswordStackV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.PutpasswordStackV4(v4stack.NewPutpasswordStackV4Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

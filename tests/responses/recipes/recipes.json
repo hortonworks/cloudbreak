@@ -1,8 +1,10 @@
-[
-  {
-    "name":"pre-start-recipe",
-    "description":"mock test recipe",
-    "recipeType":"PRE_AMBARI_START",
-    "id":1
-  }
-]
+{
+  "responses": [
+    {
+      "name": "pre-start-recipe",
+      "description": "mock test recipe",
+      "type": "PRE_AMBARI_START",
+      "id": 1
+    }
+  ]
+}

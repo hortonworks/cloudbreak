@@ -6,7 +6,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_mpacks"
+	v4mpack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -14,8 +14,8 @@ import (
 )
 
 type mpackClient interface {
-	CreateManagementPackInWorkspace(params *v3_workspace_id_mpacks.CreateManagementPackInWorkspaceParams) (*v3_workspace_id_mpacks.CreateManagementPackInWorkspaceOK, error)
-	ListManagementPacksByWorkspace(params *v3_workspace_id_mpacks.ListManagementPacksByWorkspaceParams) (*v3_workspace_id_mpacks.ListManagementPacksByWorkspaceOK, error)
+	CreateManagementPackInWorkspace(params *v4mpack.CreateManagementPackInWorkspaceParams) (*v4mpack.CreateManagementPackInWorkspaceOK, error)
+	ListManagementPacksByWorkspace(params *v4mpack.ListManagementPacksByWorkspaceParams) (*v4mpack.ListManagementPacksByWorkspaceOK, error)
 }
 
 var mpackHeader = []string{"Name", "Description", "URL", "Purge", "PurgeList", "Force"}
@@ -36,7 +36,7 @@ func (m *mpack) DataAsStringArray() []string {
 func CreateMpack(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	createMpackImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDMpacks,
+		cbClient.Cloudbreak.V4WorkspaceIDMpacks,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
@@ -53,7 +53,7 @@ func createMpackImpl(client mpackClient, workspaceID int64, name, description, u
 		pList = strings.Split(purgeList, ",")
 	}
 
-	req := &model.ManagementPackRequest{
+	req := &model.ManagementPackV4Request{
 		Name:        &name,
 		Description: &description,
 		MpackURL:    &url,
@@ -62,9 +62,9 @@ func createMpackImpl(client mpackClient, workspaceID int64, name, description, u
 		Force:       &force,
 	}
 
-	var mpackResponse *model.ManagementPackResponse
+	var mpackResponse *model.ManagementPackV4Response
 	log.Infof("[createMpackImpl] sending create public management pack request with name: %s", name)
-	resp, err := client.CreateManagementPackInWorkspace(v3_workspace_id_mpacks.NewCreateManagementPackInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(req))
+	resp, err := client.CreateManagementPackInWorkspace(v4mpack.NewCreateManagementPackInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -80,7 +80,7 @@ func DeleteMpack(c *cli.Context) error {
 	log.Infof("[DeleteMpack] delete management pack by name: %s", mpackName)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V3WorkspaceIDMpacks.DeleteManagementPackInWorkspace(v3_workspace_id_mpacks.NewDeleteManagementPackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(mpackName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V4WorkspaceIDMpacks.DeleteManagementPackInWorkspace(v4mpack.NewDeleteManagementPackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(mpackName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteMpack] management pack deleted: %s", mpackName)
@@ -94,17 +94,17 @@ func ListMpacks(c *cli.Context) error {
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	return listMpacksImpl(cbClient.Cloudbreak.V3WorkspaceIDMpacks, output.WriteList, workspaceID)
+	return listMpacksImpl(cbClient.Cloudbreak.V4WorkspaceIDMpacks, output.WriteList, workspaceID)
 }
 
 func listMpacksImpl(mpackClient mpackClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := mpackClient.ListManagementPacksByWorkspace(v3_workspace_id_mpacks.NewListManagementPacksByWorkspaceParams().WithWorkspaceID(workspaceID))
+	resp, err := mpackClient.ListManagementPacksByWorkspace(v4mpack.NewListManagementPacksByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
 	var tableRows []utils.Row
-	for _, m := range resp.Payload {
+	for _, m := range resp.Payload.Responses {
 		purgeString := "false"
 		forceString := "false"
 		desc := ""

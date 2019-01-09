@@ -1,8 +1,8 @@
 {
   "name": "proxy",
   "description": "test proxy",
-  "serverHost": "qa-cloud.eng.hortonworks.com",
-  "serverPort": 31000,
+  "host": "qa-cloud.eng.hortonworks.com",
+  "port": 31000,
   "protocol": "https",
   "userName": {
     "enginePath": "secret",

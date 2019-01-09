@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3workspaces"
+	v4ws "github.com/hortonworks/cb-cli/dataplane/api/client/v4workspaces"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -15,30 +15,30 @@ import (
 type mockWorkspaceClient struct {
 }
 
-func (*mockWorkspaceClient) GetWorkspaceByName(params *v3workspaces.GetWorkspaceByNameParams) (*v3workspaces.GetWorkspaceByNameOK, error) {
-	resp := &model.WorkspaceResponse{
+func (*mockWorkspaceClient) GetWorkspaceByName(params *v4ws.GetWorkspaceByNameParams) (*v4ws.GetWorkspaceByNameOK, error) {
+	resp := &model.WorkspaceV4Response{
 		ID:          1,
-		Name:        "test",
+		Name:        &(&types.S{S: "test"}).S,
 		Description: &(&types.S{S: "desc"}).S,
 	}
-	return &v3workspaces.GetWorkspaceByNameOK{Payload: resp}, nil
+	return &v4ws.GetWorkspaceByNameOK{Payload: resp}, nil
 }
 
-func (*mockWorkspaceClient) GetWorkspaces(params *v3workspaces.GetWorkspacesParams) (*v3workspaces.GetWorkspacesOK, error) {
-	resp := []*model.WorkspaceResponse{
+func (*mockWorkspaceClient) GetWorkspaces(params *v4ws.GetWorkspacesParams) (*v4ws.GetWorkspacesOK, error) {
+	resp := []*model.WorkspaceV4Response{
 		{
-			Name:        "test1",
+			Name:        &(&types.S{S: "test1"}).S,
 			Description: &(&types.S{S: "desc1"}).S,
 		},
 		{
-			Name:        "test2",
+			Name:        &(&types.S{S: "test2"}).S,
 			Description: &(&types.S{S: "desc2"}).S,
 		},
 	}
-	return &v3workspaces.GetWorkspacesOK{Payload: resp}, nil
+	return &v4ws.GetWorkspacesOK{Payload: &model.WorkspaceV4Responses{Responses: resp}}, nil
 }
 
-func (*mockWorkspaceClient) CreateWorkspace(params *v3workspaces.CreateWorkspaceParams) (*v3workspaces.CreateWorkspaceOK, error) {
+func (*mockWorkspaceClient) CreateWorkspace(params *v4ws.CreateWorkspaceParams) (*v4ws.CreateWorkspaceOK, error) {
 	return nil, nil
 }
 

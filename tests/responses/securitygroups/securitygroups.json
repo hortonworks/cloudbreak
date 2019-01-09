@@ -15,8 +15,7 @@
         "modifiable": false,
         "id": 1
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -55,8 +54,7 @@
         "modifiable": false,
         "id": 4197
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -74,8 +72,7 @@
         "modifiable": false,
         "id": 4206
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -114,8 +111,7 @@
         "modifiable": false,
         "id": 4204
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -154,8 +150,7 @@
         "modifiable": false,
         "id": 4209
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -173,8 +168,7 @@
         "modifiable": false,
         "id": 4212
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -213,8 +207,7 @@
         "modifiable": false,
         "id": 4806
       }
-    ],
-    "publicInAccount": false
+    ]
   },
   {
     "description": null,
@@ -232,7 +225,6 @@
         "modifiable": false,
         "id": 4810
       }
-    ],
-    "publicInAccount": false
+    ]
   }
 ]

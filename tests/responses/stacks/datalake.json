@@ -1,4 +1,14 @@
 {
+  "environment": {
+    "cloudPlatform": "OPENSTACK",
+    "credential": {
+      "name": "openstack"
+    }
+  },
+  "placement": {
+    "region": "RegionOne",
+    "availabilityZone": "nova"
+  },
   "name": "datalake",
   "availabilityZone": "nova",
   "region": "RegionOne",
@@ -28,6 +38,23 @@
   "account": "seq1234567",
   "status": "AVAILABLE",
   "cluster": {
+    "ambari": {
+      "blueprint": {
+        "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtc2hhcmVkLXNlcnZpY2VzIiwic3RhY2tfbmFtZSI6IkhEUCIsInN0YWNrX3ZlcnNpb24iOiIyLjYifSwic2V0dGluZ3MiOlt7InJlY292ZXJ5X3NldHRpbmdzIjpbXX0seyJzZXJ2aWNlX3NldHRpbmdzIjpbeyJuYW1lIjoiSElWRSIsImNyZWRlbnRpYWxfc3RvcmVfZW5hYmxlZCI6ImZhbHNlIn1dfSx7ImNvbXBvbmVudF9zZXR0aW5ncyI6W119XSwiY29uZmlndXJhdGlvbnMiOltdLCJob3N0X2dyb3VwcyI6W3sibmFtZSI6Im1hc3RlciIsImNvbmZpZ3VyYXRpb25zIjpbXSwiY29tcG9uZW50cyI6W3sibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiWk9PS0VFUEVSX0NMSUVOVCJ9LHsibmFtZSI6IkhJU1RPUllTRVJWRVIifSx7Im5hbWUiOiJaT09LRUVQRVJfU0VSVkVSIn0seyJuYW1lIjoiSU5GUkFfU09MUl9DTElFTlQifSx7Im5hbWUiOiJSQU5HRVJfVEFHU1lOQyJ9LHsibmFtZSI6IlJBTkdFUl9VU0VSU1lOQyJ9LHsibmFtZSI6IlJBTkdFUl9BRE1JTiJ9LHsibmFtZSI6IkFQUF9USU1FTElORV9TRVJWRVIifSx7Im5hbWUiOiJKT1VSTkFMTk9ERSJ9LHsibmFtZSI6IktBRktBX0JST0tFUiJ9LHsibmFtZSI6IlRFWl9DTElFTlQifSx7Im5hbWUiOiJZQVJOX0NMSUVOVCJ9LHsibmFtZSI6Ik5BTUVOT0RFIn0seyJuYW1lIjoiUkVTT1VSQ0VNQU5BR0VSIn0seyJuYW1lIjoiU0VDT05EQVJZX05BTUVOT0RFIn0seyJuYW1lIjoiSU5GUkFfU09MUiJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9DTElFTlQifSx7Im5hbWUiOiJBVExBU19TRVJWRVIifSx7Im5hbWUiOiJBVExBU19DTElFTlQifSx7Im5hbWUiOiJIQkFTRV9SRUdJT05TRVJWRVIifSx7Im5hbWUiOiJIQkFTRV9NQVNURVIifSx7Im5hbWUiOiJIQkFTRV9DTElFTlQifSx7Im5hbWUiOiJEQVRBTk9ERSJ9XSwiY2FyZGluYWxpdHkiOiIxIn1dfQ==",
+        "description": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
+        "inputs": [],
+        "tags": {
+          "shared_services_ready": true
+        },
+        "name": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
+        "id": 110,
+        "hostGroupCount": 1,
+        "status": "DEFAULT",
+        "public": true
+      },
+      "serverIp": "172.21.250.172",
+      "serverUrl": "https://172.21.250.172/ambari/"
+    },
     "id": 250,
     "name": "hm-cl",
     "status": "AVAILABLE",
@@ -35,23 +62,8 @@
     "minutesUp": 0,
     "cluster": null,
     "blueprintId": 110,
-    "blueprint": {
-      "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtc2hhcmVkLXNlcnZpY2VzIiwic3RhY2tfbmFtZSI6IkhEUCIsInN0YWNrX3ZlcnNpb24iOiIyLjYifSwic2V0dGluZ3MiOlt7InJlY292ZXJ5X3NldHRpbmdzIjpbXX0seyJzZXJ2aWNlX3NldHRpbmdzIjpbeyJuYW1lIjoiSElWRSIsImNyZWRlbnRpYWxfc3RvcmVfZW5hYmxlZCI6ImZhbHNlIn1dfSx7ImNvbXBvbmVudF9zZXR0aW5ncyI6W119XSwiY29uZmlndXJhdGlvbnMiOltdLCJob3N0X2dyb3VwcyI6W3sibmFtZSI6Im1hc3RlciIsImNvbmZpZ3VyYXRpb25zIjpbXSwiY29tcG9uZW50cyI6W3sibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiWk9PS0VFUEVSX0NMSUVOVCJ9LHsibmFtZSI6IkhJU1RPUllTRVJWRVIifSx7Im5hbWUiOiJaT09LRUVQRVJfU0VSVkVSIn0seyJuYW1lIjoiSU5GUkFfU09MUl9DTElFTlQifSx7Im5hbWUiOiJSQU5HRVJfVEFHU1lOQyJ9LHsibmFtZSI6IlJBTkdFUl9VU0VSU1lOQyJ9LHsibmFtZSI6IlJBTkdFUl9BRE1JTiJ9LHsibmFtZSI6IkFQUF9USU1FTElORV9TRVJWRVIifSx7Im5hbWUiOiJKT1VSTkFMTk9ERSJ9LHsibmFtZSI6IktBRktBX0JST0tFUiJ9LHsibmFtZSI6IlRFWl9DTElFTlQifSx7Im5hbWUiOiJZQVJOX0NMSUVOVCJ9LHsibmFtZSI6Ik5BTUVOT0RFIn0seyJuYW1lIjoiUkVTT1VSQ0VNQU5BR0VSIn0seyJuYW1lIjoiU0VDT05EQVJZX05BTUVOT0RFIn0seyJuYW1lIjoiSU5GUkFfU09MUiJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9DTElFTlQifSx7Im5hbWUiOiJBVExBU19TRVJWRVIifSx7Im5hbWUiOiJBVExBU19DTElFTlQifSx7Im5hbWUiOiJIQkFTRV9SRUdJT05TRVJWRVIifSx7Im5hbWUiOiJIQkFTRV9NQVNURVIifSx7Im5hbWUiOiJIQkFTRV9DTElFTlQifSx7Im5hbWUiOiJEQVRBTk9ERSJ9XSwiY2FyZGluYWxpdHkiOiIxIn1dfQ==",
-      "description": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
-      "inputs": [],
-      "tags": {
-        "shared_services_ready": true
-      },
-      "name": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
-      "id": 110,
-      "hostGroupCount": 1,
-      "status": "DEFAULT",
-      "public": true
-    },
     "description": "",
     "statusReason": "",
-    "ambariServerIp": "172.21.250.172",
-    "ambariServerUrl": "https://172.21.250.172/ambari/",
     "secure": false,
     "hostGroups": [
       {
@@ -72,7 +84,7 @@
       792,
       776
     ],
-    "rdsConfigs": [
+    "databases": [
       {
         "name": "db-postgres",
         "connectionURL": "jdbc:postgresql://e2etest.cdn4ilznrlxv.eu-west-1.rds.amazonaws.com:5432/e2etest",
@@ -118,7 +130,7 @@
     "clusterExposedServicesForTopologies": {},
     "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
     "ldapConfigId": 1,
-    "ldapConfig": {
+    "ldap": {
       "description": null,
       "serverHost": "hwxad-7f9ecb4d75206b09.elb.eu-west-1.amazonaws.com",
       "serverPort": 389,
@@ -189,22 +201,18 @@
   "credential": {
     "name": "openstack",
     "cloudPlatform": "OPENSTACK",
-    "parameters": {
-      "facing": "public",
-      "endpoint": "http://172.18.0.85:5000/v2.0",
-      "selector": "cb-keystone-v2",
-      "keystoneVersion": "cb-keystone-v2",
-      "userName": "demo",
-      "tenantName": "demo"
+    "openstack": {
+      "endpoint": "http://openstack.eng.com:3000/v2.0",
+      "facing": "internal",
+      "password": "GezcN4Mcj4f0Yfnw/Sz0UCHtCql3YERk",
+      "userName": "HIpti2qS7tkVD67MNqmwB2RzV3+vEAvn",
+      "keystoneV2Parameters": {
+        "tenantName": "cloudbreak"
+      },
+      "cloudPlatform": "OPENSTACK"
     },
     "description": "",
-    "topologyId": null,
-    "workspace": {
-      "id": 2,
-      "name": "admin@example.com"
-    },
-    "id": 652,
-    "public": true
+    "id": 1
   },
   "network": {
     "description": null,
@@ -266,21 +274,21 @@
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "443",
+            "ports": ["443"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 1508
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "9443",
+            "ports": ["9443"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 1506
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "modifiable": false,
             "id": 1507
@@ -338,6 +346,5 @@
     "id": 2,
     "name": "admin@example.com"
   },
-  "cloudPlatform": "OPENSTACK",
-  "public": true
+  "cloudPlatform": "OPENSTACK"
 }

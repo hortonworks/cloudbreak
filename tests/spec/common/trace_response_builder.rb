@@ -7,13 +7,13 @@ class TraceResponseBuilder
 
     @@cloudbreak_base = "cb"
     @@api_base = "#{@@cloudbreak_base}/api"
-    @@blueprint_base = "#{@@api_base}/v3/#{@@default_workspace}/blueprints"
+    @@blueprint_base = "#{@@api_base}/v4/#{@@default_workspace}/blueprints"
     @@create_blueprint_endpoint = "#{@@blueprint_base}"
-    @@cluster_base = "#{@@api_base}/v3/#{@@default_workspace}/stack"
+    @@cluster_base = "#{@@api_base}/v4/#{@@default_workspace}/stack"
     @@create_cluster_endpoint = "#{@@cluster_base}"
-    @@create_workspace_endpoint = "#{@@api_base}/v3/workspaces"
-    @@get_workspace_endpoint = "#{@@api_base}/v3/workspaces"
-    @@get_users_endpoint = "#{@@api_base}/v1/users"
+    @@create_workspace_endpoint = "#{@@api_base}/v4/workspaces"
+    @@get_workspace_endpoint = "#{@@api_base}/v4/workspaces"
+    @@get_users_endpoint = "#{@@api_base}/v4/users"
 
     def self.createWorkspaceRequestFactory(requestBody)
         return {

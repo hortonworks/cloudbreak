@@ -65,7 +65,7 @@ for the get stack for ambari for autoscale operation typically these are written
 type GetStackForAmbariForAutoscaleParams struct {
 
 	/*Body*/
-	Body *model.AmbariAddress
+	Body *model.AmbariAddressV4Request
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *GetStackForAmbariForAutoscaleParams) SetHTTPClient(client *http.Client)
 }
 
 // WithBody adds the body to the get stack for ambari for autoscale params
-func (o *GetStackForAmbariForAutoscaleParams) WithBody(body *model.AmbariAddress) *GetStackForAmbariForAutoscaleParams {
+func (o *GetStackForAmbariForAutoscaleParams) WithBody(body *model.AmbariAddressV4Request) *GetStackForAmbariForAutoscaleParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the get stack for ambari for autoscale params
-func (o *GetStackForAmbariForAutoscaleParams) SetBody(body *model.AmbariAddress) {
+func (o *GetStackForAmbariForAutoscaleParams) SetBody(body *model.AmbariAddressV4Request) {
 	o.Body = body
 }
 

@@ -12,52 +12,30 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/hortonworks/cb-cli/dataplane/api/client/autoscale"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1accountpreferences"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1audits"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1blueprints"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1connectors"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1credentials"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1events"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1flexsubscriptions"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1imagecatalogs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1ldap"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1mpacks"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1proxyconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1rdsconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1recipes"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1repositoryconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1securityrules"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1settings"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1smartsensesubscriptions"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1stacks"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1subscriptions"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1users"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1util"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v2connectors"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v2stacks"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_audits"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_blueprints"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_clustertemplate"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_connectors"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_credentials"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_environments"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_events"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_filesystems"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_flexsubscriptions"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_imagecatalogs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kerberos"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_knoxservices"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_kubernetesconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_ldapconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_mpacks"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_proxyconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_rdsconfigs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_recipes"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_smartsensesubscriptions"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_users"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3utils"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3workspaces"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_audits"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_blueprints"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_clustertemplates"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_connectors"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_credentials"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_databases"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_environments"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_events"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_file_systems"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_flex_subscriptions"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_imagecatalogs"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kerberos"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kubernetes"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_ldaps"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_mpacks"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_proxies"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_recipes"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_smartsense_subscriptions"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4user_profiles"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4users"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4utils"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v4workspaces"
 )
 
 // Default cloudbreak HTTP client.
@@ -105,97 +83,53 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.Autoscale = autoscale.New(transport, formats)
 
-	cli.V1accountpreferences = v1accountpreferences.New(transport, formats)
+	cli.V4WorkspaceID = v4_workspace_id.New(transport, formats)
 
-	cli.V1audits = v1audits.New(transport, formats)
+	cli.V4WorkspaceIDAudits = v4_workspace_id_audits.New(transport, formats)
 
-	cli.V1blueprints = v1blueprints.New(transport, formats)
+	cli.V4WorkspaceIDBlueprints = v4_workspace_id_blueprints.New(transport, formats)
 
-	cli.V1connectors = v1connectors.New(transport, formats)
+	cli.V4WorkspaceIDClustertemplates = v4_workspace_id_clustertemplates.New(transport, formats)
 
-	cli.V1credentials = v1credentials.New(transport, formats)
+	cli.V4WorkspaceIDConnectors = v4_workspace_id_connectors.New(transport, formats)
 
-	cli.V1events = v1events.New(transport, formats)
+	cli.V4WorkspaceIDCredentials = v4_workspace_id_credentials.New(transport, formats)
 
-	cli.V1flexsubscriptions = v1flexsubscriptions.New(transport, formats)
+	cli.V4WorkspaceIDDatabases = v4_workspace_id_databases.New(transport, formats)
 
-	cli.V1imagecatalogs = v1imagecatalogs.New(transport, formats)
+	cli.V4WorkspaceIDEnvironments = v4_workspace_id_environments.New(transport, formats)
 
-	cli.V1ldap = v1ldap.New(transport, formats)
+	cli.V4WorkspaceIDEvents = v4_workspace_id_events.New(transport, formats)
 
-	cli.V1mpacks = v1mpacks.New(transport, formats)
+	cli.V4WorkspaceIDFileSystems = v4_workspace_id_file_systems.New(transport, formats)
 
-	cli.V1proxyconfigs = v1proxyconfigs.New(transport, formats)
+	cli.V4WorkspaceIDFlexSubscriptions = v4_workspace_id_flex_subscriptions.New(transport, formats)
 
-	cli.V1rdsconfigs = v1rdsconfigs.New(transport, formats)
+	cli.V4WorkspaceIDImagecatalogs = v4_workspace_id_imagecatalogs.New(transport, formats)
 
-	cli.V1recipes = v1recipes.New(transport, formats)
+	cli.V4WorkspaceIDKerberos = v4_workspace_id_kerberos.New(transport, formats)
 
-	cli.V1repositoryconfigs = v1repositoryconfigs.New(transport, formats)
+	cli.V4WorkspaceIDKubernetes = v4_workspace_id_kubernetes.New(transport, formats)
 
-	cli.V1securityrules = v1securityrules.New(transport, formats)
+	cli.V4WorkspaceIDLdaps = v4_workspace_id_ldaps.New(transport, formats)
 
-	cli.V1settings = v1settings.New(transport, formats)
+	cli.V4WorkspaceIDMpacks = v4_workspace_id_mpacks.New(transport, formats)
 
-	cli.V1smartsensesubscriptions = v1smartsensesubscriptions.New(transport, formats)
+	cli.V4WorkspaceIDProxies = v4_workspace_id_proxies.New(transport, formats)
 
-	cli.V1stacks = v1stacks.New(transport, formats)
+	cli.V4WorkspaceIDRecipes = v4_workspace_id_recipes.New(transport, formats)
 
-	cli.V1subscriptions = v1subscriptions.New(transport, formats)
+	cli.V4WorkspaceIDSmartsenseSubscriptions = v4_workspace_id_smartsense_subscriptions.New(transport, formats)
 
-	cli.V1users = v1users.New(transport, formats)
+	cli.V4WorkspaceIDStacks = v4_workspace_id_stacks.New(transport, formats)
 
-	cli.V1util = v1util.New(transport, formats)
+	cli.V4userProfiles = v4user_profiles.New(transport, formats)
 
-	cli.V2connectors = v2connectors.New(transport, formats)
+	cli.V4users = v4users.New(transport, formats)
 
-	cli.V2stacks = v2stacks.New(transport, formats)
+	cli.V4utils = v4utils.New(transport, formats)
 
-	cli.V3WorkspaceIDAudits = v3_workspace_id_audits.New(transport, formats)
-
-	cli.V3WorkspaceIDBlueprints = v3_workspace_id_blueprints.New(transport, formats)
-
-	cli.V3WorkspaceIDClustertemplate = v3_workspace_id_clustertemplate.New(transport, formats)
-
-	cli.V3WorkspaceIDConnectors = v3_workspace_id_connectors.New(transport, formats)
-
-	cli.V3WorkspaceIDCredentials = v3_workspace_id_credentials.New(transport, formats)
-
-	cli.V3WorkspaceIDEnvironments = v3_workspace_id_environments.New(transport, formats)
-
-	cli.V3WorkspaceIDEvents = v3_workspace_id_events.New(transport, formats)
-
-	cli.V3WorkspaceIDFilesystems = v3_workspace_id_filesystems.New(transport, formats)
-
-	cli.V3WorkspaceIDFlexsubscriptions = v3_workspace_id_flexsubscriptions.New(transport, formats)
-
-	cli.V3WorkspaceIDImagecatalogs = v3_workspace_id_imagecatalogs.New(transport, formats)
-
-	cli.V3WorkspaceIDKerberos = v3_workspace_id_kerberos.New(transport, formats)
-
-	cli.V3WorkspaceIDKnoxservices = v3_workspace_id_knoxservices.New(transport, formats)
-
-	cli.V3WorkspaceIDKubernetesconfigs = v3_workspace_id_kubernetesconfigs.New(transport, formats)
-
-	cli.V3WorkspaceIDLdapconfigs = v3_workspace_id_ldapconfigs.New(transport, formats)
-
-	cli.V3WorkspaceIDMpacks = v3_workspace_id_mpacks.New(transport, formats)
-
-	cli.V3WorkspaceIDProxyconfigs = v3_workspace_id_proxyconfigs.New(transport, formats)
-
-	cli.V3WorkspaceIDRdsconfigs = v3_workspace_id_rdsconfigs.New(transport, formats)
-
-	cli.V3WorkspaceIDRecipes = v3_workspace_id_recipes.New(transport, formats)
-
-	cli.V3WorkspaceIDSmartsensesubscriptions = v3_workspace_id_smartsensesubscriptions.New(transport, formats)
-
-	cli.V3WorkspaceIDStacks = v3_workspace_id_stacks.New(transport, formats)
-
-	cli.V3WorkspaceIDUsers = v3_workspace_id_users.New(transport, formats)
-
-	cli.V3utils = v3utils.New(transport, formats)
-
-	cli.V3workspaces = v3workspaces.New(transport, formats)
+	cli.V4workspaces = v4workspaces.New(transport, formats)
 
 	return cli
 }
@@ -243,97 +177,53 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type Cloudbreak struct {
 	Autoscale *autoscale.Client
 
-	V1accountpreferences *v1accountpreferences.Client
+	V4WorkspaceID *v4_workspace_id.Client
 
-	V1audits *v1audits.Client
+	V4WorkspaceIDAudits *v4_workspace_id_audits.Client
 
-	V1blueprints *v1blueprints.Client
+	V4WorkspaceIDBlueprints *v4_workspace_id_blueprints.Client
 
-	V1connectors *v1connectors.Client
+	V4WorkspaceIDClustertemplates *v4_workspace_id_clustertemplates.Client
 
-	V1credentials *v1credentials.Client
+	V4WorkspaceIDConnectors *v4_workspace_id_connectors.Client
 
-	V1events *v1events.Client
+	V4WorkspaceIDCredentials *v4_workspace_id_credentials.Client
 
-	V1flexsubscriptions *v1flexsubscriptions.Client
+	V4WorkspaceIDDatabases *v4_workspace_id_databases.Client
 
-	V1imagecatalogs *v1imagecatalogs.Client
+	V4WorkspaceIDEnvironments *v4_workspace_id_environments.Client
 
-	V1ldap *v1ldap.Client
+	V4WorkspaceIDEvents *v4_workspace_id_events.Client
 
-	V1mpacks *v1mpacks.Client
+	V4WorkspaceIDFileSystems *v4_workspace_id_file_systems.Client
 
-	V1proxyconfigs *v1proxyconfigs.Client
+	V4WorkspaceIDFlexSubscriptions *v4_workspace_id_flex_subscriptions.Client
 
-	V1rdsconfigs *v1rdsconfigs.Client
+	V4WorkspaceIDImagecatalogs *v4_workspace_id_imagecatalogs.Client
 
-	V1recipes *v1recipes.Client
+	V4WorkspaceIDKerberos *v4_workspace_id_kerberos.Client
 
-	V1repositoryconfigs *v1repositoryconfigs.Client
+	V4WorkspaceIDKubernetes *v4_workspace_id_kubernetes.Client
 
-	V1securityrules *v1securityrules.Client
+	V4WorkspaceIDLdaps *v4_workspace_id_ldaps.Client
 
-	V1settings *v1settings.Client
+	V4WorkspaceIDMpacks *v4_workspace_id_mpacks.Client
 
-	V1smartsensesubscriptions *v1smartsensesubscriptions.Client
+	V4WorkspaceIDProxies *v4_workspace_id_proxies.Client
 
-	V1stacks *v1stacks.Client
+	V4WorkspaceIDRecipes *v4_workspace_id_recipes.Client
 
-	V1subscriptions *v1subscriptions.Client
+	V4WorkspaceIDSmartsenseSubscriptions *v4_workspace_id_smartsense_subscriptions.Client
 
-	V1users *v1users.Client
+	V4WorkspaceIDStacks *v4_workspace_id_stacks.Client
 
-	V1util *v1util.Client
+	V4userProfiles *v4user_profiles.Client
 
-	V2connectors *v2connectors.Client
+	V4users *v4users.Client
 
-	V2stacks *v2stacks.Client
+	V4utils *v4utils.Client
 
-	V3WorkspaceIDAudits *v3_workspace_id_audits.Client
-
-	V3WorkspaceIDBlueprints *v3_workspace_id_blueprints.Client
-
-	V3WorkspaceIDClustertemplate *v3_workspace_id_clustertemplate.Client
-
-	V3WorkspaceIDConnectors *v3_workspace_id_connectors.Client
-
-	V3WorkspaceIDCredentials *v3_workspace_id_credentials.Client
-
-	V3WorkspaceIDEnvironments *v3_workspace_id_environments.Client
-
-	V3WorkspaceIDEvents *v3_workspace_id_events.Client
-
-	V3WorkspaceIDFilesystems *v3_workspace_id_filesystems.Client
-
-	V3WorkspaceIDFlexsubscriptions *v3_workspace_id_flexsubscriptions.Client
-
-	V3WorkspaceIDImagecatalogs *v3_workspace_id_imagecatalogs.Client
-
-	V3WorkspaceIDKerberos *v3_workspace_id_kerberos.Client
-
-	V3WorkspaceIDKnoxservices *v3_workspace_id_knoxservices.Client
-
-	V3WorkspaceIDKubernetesconfigs *v3_workspace_id_kubernetesconfigs.Client
-
-	V3WorkspaceIDLdapconfigs *v3_workspace_id_ldapconfigs.Client
-
-	V3WorkspaceIDMpacks *v3_workspace_id_mpacks.Client
-
-	V3WorkspaceIDProxyconfigs *v3_workspace_id_proxyconfigs.Client
-
-	V3WorkspaceIDRdsconfigs *v3_workspace_id_rdsconfigs.Client
-
-	V3WorkspaceIDRecipes *v3_workspace_id_recipes.Client
-
-	V3WorkspaceIDSmartsensesubscriptions *v3_workspace_id_smartsensesubscriptions.Client
-
-	V3WorkspaceIDStacks *v3_workspace_id_stacks.Client
-
-	V3WorkspaceIDUsers *v3_workspace_id_users.Client
-
-	V3utils *v3utils.Client
-
-	V3workspaces *v3workspaces.Client
+	V4workspaces *v4workspaces.Client
 
 	Transport runtime.ClientTransport
 }
@@ -344,96 +234,52 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.Autoscale.SetTransport(transport)
 
-	c.V1accountpreferences.SetTransport(transport)
+	c.V4WorkspaceID.SetTransport(transport)
 
-	c.V1audits.SetTransport(transport)
+	c.V4WorkspaceIDAudits.SetTransport(transport)
 
-	c.V1blueprints.SetTransport(transport)
+	c.V4WorkspaceIDBlueprints.SetTransport(transport)
 
-	c.V1connectors.SetTransport(transport)
+	c.V4WorkspaceIDClustertemplates.SetTransport(transport)
 
-	c.V1credentials.SetTransport(transport)
+	c.V4WorkspaceIDConnectors.SetTransport(transport)
 
-	c.V1events.SetTransport(transport)
+	c.V4WorkspaceIDCredentials.SetTransport(transport)
 
-	c.V1flexsubscriptions.SetTransport(transport)
+	c.V4WorkspaceIDDatabases.SetTransport(transport)
 
-	c.V1imagecatalogs.SetTransport(transport)
+	c.V4WorkspaceIDEnvironments.SetTransport(transport)
 
-	c.V1ldap.SetTransport(transport)
+	c.V4WorkspaceIDEvents.SetTransport(transport)
 
-	c.V1mpacks.SetTransport(transport)
+	c.V4WorkspaceIDFileSystems.SetTransport(transport)
 
-	c.V1proxyconfigs.SetTransport(transport)
+	c.V4WorkspaceIDFlexSubscriptions.SetTransport(transport)
 
-	c.V1rdsconfigs.SetTransport(transport)
+	c.V4WorkspaceIDImagecatalogs.SetTransport(transport)
 
-	c.V1recipes.SetTransport(transport)
+	c.V4WorkspaceIDKerberos.SetTransport(transport)
 
-	c.V1repositoryconfigs.SetTransport(transport)
+	c.V4WorkspaceIDKubernetes.SetTransport(transport)
 
-	c.V1securityrules.SetTransport(transport)
+	c.V4WorkspaceIDLdaps.SetTransport(transport)
 
-	c.V1settings.SetTransport(transport)
+	c.V4WorkspaceIDMpacks.SetTransport(transport)
 
-	c.V1smartsensesubscriptions.SetTransport(transport)
+	c.V4WorkspaceIDProxies.SetTransport(transport)
 
-	c.V1stacks.SetTransport(transport)
+	c.V4WorkspaceIDRecipes.SetTransport(transport)
 
-	c.V1subscriptions.SetTransport(transport)
+	c.V4WorkspaceIDSmartsenseSubscriptions.SetTransport(transport)
 
-	c.V1users.SetTransport(transport)
+	c.V4WorkspaceIDStacks.SetTransport(transport)
 
-	c.V1util.SetTransport(transport)
+	c.V4userProfiles.SetTransport(transport)
 
-	c.V2connectors.SetTransport(transport)
+	c.V4users.SetTransport(transport)
 
-	c.V2stacks.SetTransport(transport)
+	c.V4utils.SetTransport(transport)
 
-	c.V3WorkspaceIDAudits.SetTransport(transport)
-
-	c.V3WorkspaceIDBlueprints.SetTransport(transport)
-
-	c.V3WorkspaceIDClustertemplate.SetTransport(transport)
-
-	c.V3WorkspaceIDConnectors.SetTransport(transport)
-
-	c.V3WorkspaceIDCredentials.SetTransport(transport)
-
-	c.V3WorkspaceIDEnvironments.SetTransport(transport)
-
-	c.V3WorkspaceIDEvents.SetTransport(transport)
-
-	c.V3WorkspaceIDFilesystems.SetTransport(transport)
-
-	c.V3WorkspaceIDFlexsubscriptions.SetTransport(transport)
-
-	c.V3WorkspaceIDImagecatalogs.SetTransport(transport)
-
-	c.V3WorkspaceIDKerberos.SetTransport(transport)
-
-	c.V3WorkspaceIDKnoxservices.SetTransport(transport)
-
-	c.V3WorkspaceIDKubernetesconfigs.SetTransport(transport)
-
-	c.V3WorkspaceIDLdapconfigs.SetTransport(transport)
-
-	c.V3WorkspaceIDMpacks.SetTransport(transport)
-
-	c.V3WorkspaceIDProxyconfigs.SetTransport(transport)
-
-	c.V3WorkspaceIDRdsconfigs.SetTransport(transport)
-
-	c.V3WorkspaceIDRecipes.SetTransport(transport)
-
-	c.V3WorkspaceIDSmartsensesubscriptions.SetTransport(transport)
-
-	c.V3WorkspaceIDStacks.SetTransport(transport)
-
-	c.V3WorkspaceIDUsers.SetTransport(transport)
-
-	c.V3utils.SetTransport(transport)
-
-	c.V3workspaces.SetTransport(transport)
+	c.V4workspaces.SetTransport(transport)
 
 }

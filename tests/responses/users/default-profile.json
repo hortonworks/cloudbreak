@@ -2,20 +2,18 @@
   "credential": {
     "name": "openstack",
     "cloudPlatform": "OPENSTACK",
-    "parameters": {
+    "openstack": {
       "facing": "internal",
       "endpoint": "http://openstack.eng.com:3000/v2.0",
-      "selector": "cb-keystone-v2",
-      "keystoneVersion": "cb-keystone-v2",
       "userName": "cloudbreak",
-      "tenantName": "cloudbreak"
+      "keystoneV2Parameters" : {
+        "tenantName": "cloudbreak"
+      }
     },
     "description": "",
-    "topologyId": null,
-    "id": 1,
-    "public": false
+    "id": 1
   },
-  "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
-  "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
-  "uiProperties": {}
+  "userName": "user",
+  "userId": "mock@hortonworks.com",
+  "tenant": "hortonworks"
 }

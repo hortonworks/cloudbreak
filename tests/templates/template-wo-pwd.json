@@ -22,17 +22,17 @@
       "securityGroup": {
         "securityRules": [
           {
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           },
           {
-            "ports": "443",
+            "ports": ["443"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           },
           {
-            "ports": "9443",
+            "ports": ["9443"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           }
@@ -52,17 +52,17 @@
       "securityGroup": {
         "securityRules": [
           {
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           },
           {
-            "ports": "443",
+            "ports": ["443"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           },
           {
-            "ports": "9443",
+            "ports": ["9443"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           }
@@ -82,17 +82,17 @@
       "securityGroup": {
         "securityRules": [
           {
-            "ports": "22",
+            "ports": ["22"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           },
           {
-            "ports": "443",
+            "ports": ["443"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           },
           {
-            "ports": "9443",
+            "ports": ["9443"],
             "protocol": "tcp",
             "subnet": "0.0.0.0/0"
           }

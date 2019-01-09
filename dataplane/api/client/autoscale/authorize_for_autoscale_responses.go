@@ -12,6 +12,8 @@ import (
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 // AuthorizeForAutoscaleReader is a Reader for the AuthorizeForAutoscale structure.
@@ -45,7 +47,7 @@ func NewAuthorizeForAutoscaleOK() *AuthorizeForAutoscaleOK {
 successful operation
 */
 type AuthorizeForAutoscaleOK struct {
-	Payload bool
+	Payload *model.AuthorizeForAutoscaleV4Response
 }
 
 func (o *AuthorizeForAutoscaleOK) Error() string {
@@ -54,8 +56,10 @@ func (o *AuthorizeForAutoscaleOK) Error() string {
 
 func (o *AuthorizeForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(model.AuthorizeForAutoscaleV4Response)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

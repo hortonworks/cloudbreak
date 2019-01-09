@@ -8,6 +8,10 @@ import (
 
 var provider cloud.CloudProvider = new(OpenstackProvider)
 
+func init() {
+	cloud.SetProviderType(cloud.OPENSTACK)
+}
+
 func TestKeystoneV2(t *testing.T) {
 	t.Parallel()
 
@@ -22,16 +26,14 @@ func TestKeystoneV2(t *testing.T) {
 		}
 	}
 
-	actualMap, _ := provider.GetCredentialParameters(stringFinder)
+	request, _ := provider.GetCredentialRequest(stringFinder, false)
+	keyStonev2Params := request.Openstack.KeystoneV2
 
-	if actualMap["selector"] != KEYSTONE_V2 {
-		t.Errorf("selector not match %s == %s", KEYSTONE_V2, actualMap["selector"])
+	if keyStonev2Params == nil {
+		t.Error("keystone version 2 should have been selected")
 	}
-	if actualMap["keystoneVersion"] != KEYSTONE_V2 {
-		t.Errorf("keystoneVersion not match %s == %s", KEYSTONE_V2, actualMap["keystoneVersion"])
-	}
-	if actualMap["tenantName"] != "tenant-name" {
-		t.Errorf("tenantName not match tenant-name == %s", actualMap["tenantName"])
+	if *keyStonev2Params.TenantName != "tenant-name" {
+		t.Errorf("tenantName not match tenant-name == %s", *keyStonev2Params.TenantName)
 	}
 }
 
@@ -49,16 +51,11 @@ func TestKeystoneV3(t *testing.T) {
 		}
 	}
 
-	actualMap, _ := provider.GetCredentialParameters(stringFinder)
+	request, _ := provider.GetCredentialRequest(stringFinder, false)
+	projectParams := request.Openstack.KeystoneV3.Project
 
-	if actualMap["selector"] != "cb-keystone-v3-project-scope" {
-		t.Errorf("selector not match cb-keystone-v3-project-scope == %s", actualMap["selector"])
-	}
-	if actualMap["keystoneVersion"] != KEYSTONE_V3 {
-		t.Errorf("keystoneVersion not match %s == %s", KEYSTONE_V3, actualMap["keystoneVersion"])
-	}
-	if actualMap["keystoneAuthScope"] != "cb-keystone-v3-project-scope" {
-		t.Errorf("keystoneAuthScope not match cb-keystone-v3-project-scope == %s", actualMap["keystoneAuthScope"])
+	if projectParams == nil {
+		t.Errorf("project params should have been selected")
 	}
 }
 

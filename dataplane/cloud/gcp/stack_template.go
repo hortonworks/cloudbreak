@@ -3,41 +3,69 @@ package gcp
 import (
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
-	"github.com/hortonworks/dp-cli-common/utils"
+	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
-func (p *GcpProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
+func (p *GcpProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.NetworkV4Request {
 	switch mode {
 	case cloud.EXISTING_NETWORK_NEW_SUBNET:
-		return map[string]interface{}{"networkId": "____"}
+		return &model.NetworkV4Request{
+			SubnetCIDR: cloud.DEFAULT_SUBNET_CIDR,
+			Gcp: &model.GcpNetworkV4Parameters{
+				NetworkID: "____",
+			},
+		}
 	case cloud.EXISTING_NETWORK_EXISTING_SUBNET:
-		return map[string]interface{}{"networkId": "____", "subnetId": "____", "noPublicIp": false, "noFirewallRules": false}
+		return &model.NetworkV4Request{
+			Gcp: &model.GcpNetworkV4Parameters{
+				NetworkID:       "____",
+				SubnetID:        "____",
+				NoPublicIP:      &(&types.B{B: false}).B,
+				NoFirewallRules: &(&types.B{B: false}).B,
+			},
+		}
 	case cloud.LEGACY_NETWORK:
-		return map[string]interface{}{"networkId": ""}
+		return &model.NetworkV4Request{
+			Gcp: &model.GcpNetworkV4Parameters{
+				NetworkID: "____",
+			},
+		}
 	case cloud.SHARED_NETWORK:
-		return map[string]interface{}{"sharedProjectId": "____", "networkId": "____", "subnetId": "____", "noFirewallRules": true}
+		return &model.NetworkV4Request{
+			SubnetCIDR: cloud.DEFAULT_SUBNET_CIDR,
+			Gcp: &model.GcpNetworkV4Parameters{
+				NetworkID:       "____",
+				SubnetID:        "____",
+				NoFirewallRules: &(&types.B{B: true}).B,
+				SharedProjectID: "____",
+			},
+		}
 	default:
-		return nil
+		return &model.NetworkV4Request{
+			SubnetCIDR: cloud.DEFAULT_SUBNET_CIDR,
+		}
 	}
 }
 
-func (p *GcpProvider) GetParamatersTemplate() map[string]interface{} {
-	return nil
+func (p *GcpProvider) SetParametersTemplate(request *model.StackV4Request) {
 }
 
-func (p *GcpProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
-	return nil
+func (p *GcpProvider) SetInstanceGroupParametersTemplate(request *model.InstanceGroupV4Request, node cloud.Node) {
 }
 
-func (p *GcpProvider) GenerateNetworkRequestFromNetworkResponse(response *model.NetworkResponse) *model.NetworkV2Request {
-	var parameters = make(map[string]interface{})
-	parameters["networkId"] = response.Parameters["networkId"]
-	parameters["subnetId"] = response.Parameters["subnetId"]
-	parameters["noPublicIp"] = false
-	parameters["noFirewallRules"] = false
+func (p *GcpProvider) GenerateNetworkRequestFromNetworkResponse(response *model.NetworkV4Response) *model.NetworkV4Request {
+	gcpParams := response.Gcp
+	if gcpParams == nil {
+		return &model.NetworkV4Request{}
+	}
 
-	request := &model.NetworkV2Request{
-		Parameters: utils.CopyToByTargets(response.Parameters, "networkId", "subnetId", "noPublicIp", "noFirewallRules"),
+	request := &model.NetworkV4Request{
+		Gcp: &model.GcpNetworkV4Parameters{
+			NetworkID:       gcpParams.NetworkID,
+			SubnetID:        gcpParams.SubnetID,
+			NoPublicIP:      gcpParams.NoPublicIP,
+			NoFirewallRules: gcpParams.NoFirewallRules,
+		},
 	}
 	return request
 }

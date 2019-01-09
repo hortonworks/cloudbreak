@@ -66,7 +66,7 @@ for the put cluster for autoscale operation typically these are written to a htt
 type PutClusterForAutoscaleParams struct {
 
 	/*Body*/
-	Body *model.UpdateCluster
+	Body *model.UpdateClusterV4Request
 	/*ID*/
 	ID int64
 	/*UserID*/
@@ -111,13 +111,13 @@ func (o *PutClusterForAutoscaleParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the put cluster for autoscale params
-func (o *PutClusterForAutoscaleParams) WithBody(body *model.UpdateCluster) *PutClusterForAutoscaleParams {
+func (o *PutClusterForAutoscaleParams) WithBody(body *model.UpdateClusterV4Request) *PutClusterForAutoscaleParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the put cluster for autoscale params
-func (o *PutClusterForAutoscaleParams) SetBody(body *model.UpdateCluster) {
+func (o *PutClusterForAutoscaleParams) SetBody(body *model.UpdateClusterV4Request) {
 	o.Body = body
 }
 

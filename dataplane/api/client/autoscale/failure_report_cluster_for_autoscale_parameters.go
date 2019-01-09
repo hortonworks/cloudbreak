@@ -66,7 +66,7 @@ for the failure report cluster for autoscale operation typically these are writt
 type FailureReportClusterForAutoscaleParams struct {
 
 	/*Body*/
-	Body *model.FailureReport
+	Body *model.FailureReportV4Request
 	/*ID*/
 	ID int64
 
@@ -109,13 +109,13 @@ func (o *FailureReportClusterForAutoscaleParams) SetHTTPClient(client *http.Clie
 }
 
 // WithBody adds the body to the failure report cluster for autoscale params
-func (o *FailureReportClusterForAutoscaleParams) WithBody(body *model.FailureReport) *FailureReportClusterForAutoscaleParams {
+func (o *FailureReportClusterForAutoscaleParams) WithBody(body *model.FailureReportV4Request) *FailureReportClusterForAutoscaleParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the failure report cluster for autoscale params
-func (o *FailureReportClusterForAutoscaleParams) SetBody(body *model.FailureReport) {
+func (o *FailureReportClusterForAutoscaleParams) SetBody(body *model.FailureReportV4Request) {
 	o.Body = body
 }
 

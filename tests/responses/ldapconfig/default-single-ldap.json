@@ -1,7 +1,7 @@
 {
   "description": null,
-  "serverHost": "hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com",
-  "serverPort": 123,
+  "host": "hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com",
+  "port": 123,
   "protocol": "LDAP",
   "bindDn": {
     "enginePath": "secret",

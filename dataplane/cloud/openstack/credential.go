@@ -3,45 +3,57 @@ package openstack
 import (
 	"errors"
 	"fmt"
-)
-
-const (
-	KEYSTONE_V2    = "cb-keystone-v2"
-	KEYSTONE_V3    = "cb-keystone-v3"
-	SCOPE_TEMPLATE = "cb-keystone-v3-%s-scope"
+	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/cloud"
+	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
 var FACINGS = []string{"public", "admin", "internal"}
 var SCOPES = []string{"project", "domain"}
 
-func (p *OpenstackProvider) GetCredentialParameters(stringFinder func(string) string) (map[string]interface{}, error) {
+func (p *OpenstackProvider) GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV4Request, error) {
 	facing, err := validateAndGet(stringFinder("facing"), FACINGS)
 	if err != nil {
 		return nil, err
 	}
-	var credentialMap = make(map[string]interface{})
-	credentialMap["facing"] = facing
-	credentialMap["userName"] = stringFinder("tenant-user")
-	credentialMap["password"] = stringFinder("tenant-password")
-	credentialMap["endpoint"] = stringFinder("endpoint")
+
+	parameters := &model.OpenstackCredentialV4Parameters{
+		Facing:   &facing,
+		UserName: &(&types.S{S: stringFinder("tenant-user")}).S,
+		Password: &(&types.S{S: stringFinder("tenant-password")}).S,
+		Endpoint: &(&types.S{S: stringFinder("endpoint")}).S,
+	}
+
 	if len(stringFinder("user-domain")) != 0 {
-		credentialMap["keystoneVersion"] = KEYSTONE_V3
 		scope, err := validateAndGet(stringFinder("keystone-scope"), SCOPES)
 		if err != nil {
 			return nil, err
 		}
-		credentialMap["keystoneAuthScope"] = fmt.Sprintf(SCOPE_TEMPLATE, scope)
-		credentialMap["selector"] = credentialMap["keystoneAuthScope"]
-		credentialMap["userDomain"] = stringFinder("user-domain")
-		setIfSpecified(stringFinder, "project-domain-name", "projectDomainName", credentialMap)
-		setIfSpecified(stringFinder, "domain-name", "domainName", credentialMap)
-		setIfSpecified(stringFinder, "project-name", "projectName", credentialMap)
+		if "project" == scope {
+			parameters.KeystoneV3 = &model.KeystoneV3Parameters{
+				Project: &model.ProjectKeystoneV3Parameters{
+					UserDomain:        &(&types.S{S: stringFinder("user-domain")}).S,
+					ProjectDomainName: &(&types.S{S: stringFinder("project-domain-name")}).S,
+					ProjectName:       &(&types.S{S: stringFinder("project-name")}).S,
+				},
+			}
+		} else {
+			parameters.KeystoneV3 = &model.KeystoneV3Parameters{
+				Domain: &model.DomainKeystoneV3Parameters{
+					UserDomain: &(&types.S{S: stringFinder("user-domain")}).S,
+					DomainName: &(&types.S{S: stringFinder("domain-name")}).S,
+				},
+			}
+		}
 	} else {
-		credentialMap["keystoneVersion"] = KEYSTONE_V2
-		credentialMap["selector"] = KEYSTONE_V2
-		credentialMap["tenantName"] = stringFinder("tenant-name")
+		parameters.KeystoneV2 = &model.KeystoneV2Parameters{
+			TenantName: &(&types.S{S: stringFinder("tenant-name")}).S,
+		}
 	}
-	return credentialMap, nil
+
+	credReq := cloud.CreateBaseCredentialRequest(stringFinder)
+	credReq.Openstack = parameters
+	return credReq, nil
 }
 
 func validateAndGet(value string, values []string) (string, error) {
@@ -55,11 +67,4 @@ func validateAndGet(value string, values []string) (string, error) {
 		}
 	}
 	return "", errors.New(fmt.Sprintf("%s not allowed", value))
-}
-
-func setIfSpecified(stringFinder func(string) string, flagName, propertyName string, credentialMap map[string]interface{}) {
-	property := stringFinder(flagName)
-	if len(property) > 0 {
-		credentialMap[propertyName] = property
-	}
 }

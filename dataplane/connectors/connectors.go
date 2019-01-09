@@ -7,9 +7,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v1connectors"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v2connectors"
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	v4con "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_connectors"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -83,7 +81,7 @@ func ListRegions(c *cli.Context) {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	listRegionsImpl(cbClient.Cloudbreak.V2connectors, output.WriteList, c.String(fl.FlCredential.Name))
+	listRegionsImpl(cbClient.Cloudbreak.V4WorkspaceIDConnectors, output.WriteList, c.String(fl.FlCredential.Name), c.Int64(fl.FlWorkspaceOptional.Name))
 }
 
 func ListAvailabilityZones(c *cli.Context) {
@@ -91,7 +89,7 @@ func ListAvailabilityZones(c *cli.Context) {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	listAvailabilityZonesImpl(cbClient.Cloudbreak.V2connectors, output.WriteList, c.String(fl.FlCredential.Name), c.String(fl.FlRegion.Name))
+	listAvailabilityZonesImpl(cbClient.Cloudbreak.V4WorkspaceIDConnectors, output.WriteList, c.String(fl.FlCredential.Name), c.String(fl.FlRegion.Name), c.Int64(fl.FlWorkspaceOptional.Name))
 }
 
 func ListAwsVolumeTypes(c *cli.Context) {
@@ -114,7 +112,7 @@ func listVolumeTypes(c *cli.Context) {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	listVolumeTypesImpl(cbClient.Cloudbreak.V1connectors, output.WriteList)
+	listVolumeTypesImpl(cbClient.Cloudbreak.V4WorkspaceIDConnectors, output.WriteList, c.Int64(fl.FlWorkspaceOptional.Name))
 }
 
 func ListInstanceTypes(c *cli.Context) {
@@ -122,32 +120,29 @@ func ListInstanceTypes(c *cli.Context) {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	listInstanceTypesImpl(cbClient.Cloudbreak.V2connectors, output.WriteList, c.String(fl.FlCredential.Name), c.String(fl.FlRegion.Name), c.String(fl.FlAvailabilityZoneOptional.Name))
+	listInstanceTypesImpl(cbClient.Cloudbreak.V4WorkspaceIDConnectors, output.WriteList, c.String(fl.FlCredential.Name), c.String(fl.FlRegion.Name), c.String(fl.FlAvailabilityZoneOptional.Name), c.Int64(fl.FlWorkspaceOptional.Name))
 }
 
 type getConnectorsClient interface {
-	GetRegionsByCredentialID(*v2connectors.GetRegionsByCredentialIDParams) (*v2connectors.GetRegionsByCredentialIDOK, error)
+	GetRegionsByCredentialAndWorkspace(*v4con.GetRegionsByCredentialAndWorkspaceParams) (*v4con.GetRegionsByCredentialAndWorkspaceOK, error)
 }
 
 type getDiskTypesClient interface {
-	GetDisktypes(*v1connectors.GetDisktypesParams) (*v1connectors.GetDisktypesOK, error)
+	GetDisktypesForWorkspace(*v4con.GetDisktypesForWorkspaceParams) (*v4con.GetDisktypesForWorkspaceOK, error)
 }
 
 type getInstanceTypesClient interface {
-	GetVMTypesByCredentialID(*v2connectors.GetVMTypesByCredentialIDParams) (*v2connectors.GetVMTypesByCredentialIDOK, error)
+	GetVMTypesByCredentialAndWorkspace(*v4con.GetVMTypesByCredentialAndWorkspaceParams) (*v4con.GetVMTypesByCredentialAndWorkspaceOK, error)
 }
 
-func listRegionsImpl(client getConnectorsClient, writer func([]string, []utils.Row), credentialName string) {
+func listRegionsImpl(client getConnectorsClient, writer func([]string, []utils.Row), credentialName string, workspaceId int64) {
 	log.Infof("[listRegionsImpl] sending regions list request")
-	req := &model.PlatformResourceRequestJSON{
-		CredentialName: credentialName,
-	}
-	regionsResp, err := client.GetRegionsByCredentialID(v2connectors.NewGetRegionsByCredentialIDParams().WithBody(req))
+	regionsResp, err := client.GetRegionsByCredentialAndWorkspace(v4con.NewGetRegionsByCredentialAndWorkspaceParams().WithWorkspaceID(workspaceId).WithCredentialName(&credentialName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	for name, dispname := range regionsResp.Payload.DisplayNames {
 		tableRows = append(tableRows, &regionsOut{name, dispname})
 	}
@@ -155,17 +150,14 @@ func listRegionsImpl(client getConnectorsClient, writer func([]string, []utils.R
 	writer(regionsHeader, tableRows)
 }
 
-func listAvailabilityZonesImpl(client getConnectorsClient, writer func([]string, []utils.Row), credentialName string, region string) {
+func listAvailabilityZonesImpl(client getConnectorsClient, writer func([]string, []utils.Row), credentialName string, region string, workspaceId int64) {
 	log.Infof("[listAvailabilityZonesImpl] sending availability zones list request")
-	req := &model.PlatformResourceRequestJSON{
-		CredentialName: credentialName,
-	}
-	regionsResp, err := client.GetRegionsByCredentialID(v2connectors.NewGetRegionsByCredentialIDParams().WithBody(req))
+	regionsResp, err := client.GetRegionsByCredentialAndWorkspace(v4con.NewGetRegionsByCredentialAndWorkspaceParams().WithWorkspaceID(workspaceId).WithCredentialName(&credentialName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	for _, zone := range regionsResp.Payload.AvailabilityZones[region] {
 		tableRows = append(tableRows, &availabilityZonesOut{zone})
 	}
@@ -173,14 +165,14 @@ func listAvailabilityZonesImpl(client getConnectorsClient, writer func([]string,
 	writer(availabilityZonesHeader, tableRows)
 }
 
-func listVolumeTypesImpl(client getDiskTypesClient, writer func([]string, []utils.Row)) {
+func listVolumeTypesImpl(client getDiskTypesClient, writer func([]string, []utils.Row), workspaceId int64) {
 	log.Infof("[listVolumeTypesImpl] sending volume type list request")
 	provider := cloud.GetProvider().GetName()
-	volumeResp, err := client.GetDisktypes(v1connectors.NewGetDisktypesParams())
+	volumeResp, err := client.GetDisktypesForWorkspace(v4con.NewGetDisktypesForWorkspaceParams().WithWorkspaceID(workspaceId))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	for t, desc := range volumeResp.Payload.DisplayNames[*provider] {
 		tableRows = append(tableRows, &diskOut{t, desc})
 	}
@@ -188,13 +180,9 @@ func listVolumeTypesImpl(client getDiskTypesClient, writer func([]string, []util
 	writer(diskHeader, tableRows)
 }
 
-func listInstanceTypesImpl(client getInstanceTypesClient, writer func([]string, []utils.Row), credentialName string, region string, avzone string) {
+func listInstanceTypesImpl(client getInstanceTypesClient, writer func([]string, []utils.Row), credentialName string, region string, avzone string, workspaceId int64) {
 	log.Infof("[listInstanceTypesImpl] sending instance type list request")
-	req := &model.PlatformResourceRequestJSON{
-		CredentialName: credentialName,
-		Region:         region,
-	}
-	instanceResp, err := client.GetVMTypesByCredentialID(v2connectors.NewGetVMTypesByCredentialIDParams().WithBody(req))
+	instanceResp, err := client.GetVMTypesByCredentialAndWorkspace(v4con.NewGetVMTypesByCredentialAndWorkspaceParams().WithWorkspaceID(workspaceId).WithCredentialName(&credentialName).WithRegion(&region))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -212,7 +200,7 @@ func listInstanceTypesImpl(client getInstanceTypesClient, writer func([]string, 
 		}
 	}
 
-	tableRows := []utils.Row{}
+	var tableRows []utils.Row
 	for _, instance := range machines.VirtualMachines {
 		tableRows = append(tableRows, &instanceOut{instance.Value, utils.SafeStringTypeAssert(instance.VMTypeMetaJSON.Properties["Cpu"]), utils.SafeStringTypeAssert(instance.VMTypeMetaJSON.Properties["Memory"]), avzone})
 	}

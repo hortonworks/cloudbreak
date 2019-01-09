@@ -3,6 +3,7 @@ package yarn
 import (
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
+	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
 var name string
@@ -29,23 +30,31 @@ func (p *YarnProvider) SkippedFields() map[string]bool {
 	return skippedFields
 }
 
-func (p *YarnProvider) GenerateDefaultTemplate() *model.TemplateV2Request {
-	return &model.TemplateV2Request{
-		CustomInstanceType: &model.CustomInstanceType{
+func (p *YarnProvider) GenerateDefaultTemplate() *model.InstanceTemplateV4Request {
+	return &model.InstanceTemplateV4Request{
+		Yarn: &model.YarnInstanceTemplateV4Parameters{
 			Cpus:   4,
 			Memory: 8192,
 		},
 		InstanceType: "",
-		VolumeType:   "",
-		VolumeCount:  0,
-		VolumeSize:   0,
+		AttachedVolumes: []*model.VolumeV4Request{
+			{
+				Type:  "",
+				Count: 0,
+				Size:  &(&types.I32{I: 10}).I,
+			},
+		},
 	}
 }
 
-func (p *YarnProvider) GenerateDefaultNetwork(networkParameters map[string]interface{}, mode cloud.NetworkMode) *model.NetworkV2Request {
+func (p *YarnProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.NetworkV4Request {
 	return nil
 }
 
-func (p *YarnProvider) GenerateDefaultSecurityGroup(node cloud.Node) *model.SecurityGroupV2Request {
+func (p *YarnProvider) GenerateDefaultSecurityGroup(node cloud.Node) *model.SecurityGroupV4Request {
+	return nil
+}
+
+func (p *YarnProvider) GenerateNetworkRequestFromNetworkResponse(response *model.NetworkV4Response) *model.NetworkV4Request {
 	return nil
 }

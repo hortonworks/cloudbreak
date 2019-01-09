@@ -47,7 +47,7 @@ func NewGetCertificateStackForAutoscaleOK() *GetCertificateStackForAutoscaleOK {
 successful operation
 */
 type GetCertificateStackForAutoscaleOK struct {
-	Payload *model.CertificateResponse
+	Payload *model.CertificateV4Response
 }
 
 func (o *GetCertificateStackForAutoscaleOK) Error() string {
@@ -56,7 +56,7 @@ func (o *GetCertificateStackForAutoscaleOK) Error() string {
 
 func (o *GetCertificateStackForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.CertificateResponse)
+	o.Payload = new(model.CertificateV4Response)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

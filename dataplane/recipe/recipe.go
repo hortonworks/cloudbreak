@@ -9,7 +9,7 @@ import (
 	"encoding/base64"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_recipes"
+	v4recipe "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_recipes"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -53,7 +53,7 @@ func CreateRecipeFromFile(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(fl.FlFile.Name)
 	createRecipeImpl(
-		cbClient.Cloudbreak.V3WorkspaceIDRecipes,
+		cbClient.Cloudbreak.V4WorkspaceIDRecipes,
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
@@ -64,7 +64,7 @@ func CreateRecipeFromFile(c *cli.Context) {
 func getExecutionType(executionType string) string {
 	switch strings.ToLower(executionType) {
 	case "pre-ambari-start":
-		return "PRE_AMBARI_START"
+		return "PRE_CLUSTER_MANAGER_START"
 	case "post-ambari-start":
 		return "POST_AMBARI_START"
 	case "post-cluster-install":
@@ -78,20 +78,20 @@ func getExecutionType(executionType string) string {
 }
 
 type recipeClient interface {
-	CreateRecipeInWorkspace(params *v3_workspace_id_recipes.CreateRecipeInWorkspaceParams) (*v3_workspace_id_recipes.CreateRecipeInWorkspaceOK, error)
+	CreateRecipeInWorkspace(params *v4recipe.CreateRecipeInWorkspaceParams) (*v4recipe.CreateRecipeInWorkspaceOK, error)
 }
 
-func createRecipeImpl(client recipeClient, workspaceID int64, name string, description string, executionType string, recipeContent string) *model.RecipeResponse {
+func createRecipeImpl(client recipeClient, workspaceID int64, name string, description string, executionType string, recipeContent string) *model.RecipeV4Response {
 	defer utils.TimeTrack(time.Now(), "create recipe")
-	recipeRequest := &model.RecipeRequest{
+	recipeRequest := &model.RecipeV4Request{
 		Name:        name,
 		Description: &description,
 		Content:     recipeContent,
-		RecipeType:  &executionType,
+		Type:        &executionType,
 	}
-	var recipe *model.RecipeResponse
+	var recipe *model.RecipeV4Response
 	log.Infof("[createRecipeImpl] sending create public recipe request")
-	resp, err := client.CreateRecipeInWorkspace(v3_workspace_id_recipes.NewCreateRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(recipeRequest))
+	resp, err := client.CreateRecipeInWorkspace(v4recipe.NewCreateRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(recipeRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -107,15 +107,15 @@ func DescribeRecipe(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDRecipes.GetRecipeInWorkspace(v3_workspace_id_recipes.NewGetRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(fl.FlName.Name)))
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDRecipes.GetRecipeInWorkspace(v4recipe.NewGetRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(fl.FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	recipe := resp.Payload
 	if output.Format != "table" {
-		output.Write(append(recipeHeader, "ContentAsBase64", "ID"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType}, recipe.Content, strconv.FormatInt(recipe.ID, 10)})
+		output.Write(append(recipeHeader, "ContentAsBase64", "ID"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, recipe.Content, strconv.FormatInt(recipe.ID, 10)})
 	} else {
-		output.Write(append(recipeHeader, "ID"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.RecipeType}, strconv.FormatInt(recipe.ID, 10)})
+		output.Write(append(recipeHeader, "ID"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, strconv.FormatInt(recipe.ID, 10)})
 	}
 }
 
@@ -126,7 +126,7 @@ func DeleteRecipe(c *cli.Context) {
 	name := c.String(fl.FlName.Name)
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	log.Infof("[DeleteRecipe] sending delete recipe request with name: %s", name)
-	if _, err := cbClient.Cloudbreak.V3WorkspaceIDRecipes.DeleteRecipeInWorkspace(v3_workspace_id_recipes.NewDeleteRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
+	if _, err := cbClient.Cloudbreak.V4WorkspaceIDRecipes.DeleteRecipeInWorkspace(v4recipe.NewDeleteRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteRecipe] recipe deleted, name: %s", name)
@@ -138,23 +138,23 @@ func ListRecipes(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	listRecipesImpl(cbClient.Cloudbreak.V3WorkspaceIDRecipes, output.WriteList, workspaceID)
+	listRecipesImpl(cbClient.Cloudbreak.V4WorkspaceIDRecipes, output.WriteList, workspaceID)
 }
 
 type getPublicsRecipeClient interface {
-	ListRecipesByWorkspace(*v3_workspace_id_recipes.ListRecipesByWorkspaceParams) (*v3_workspace_id_recipes.ListRecipesByWorkspaceOK, error)
+	ListRecipesByWorkspace(*v4recipe.ListRecipesByWorkspaceParams) (*v4recipe.ListRecipesByWorkspaceOK, error)
 }
 
 func listRecipesImpl(client getPublicsRecipeClient, writer func([]string, []utils.Row), workspaceID int64) {
 	log.Infof("[listRecipesImpl] sending recipe list request")
-	recipesResp, err := client.ListRecipesByWorkspace(v3_workspace_id_recipes.NewListRecipesByWorkspaceParams().WithWorkspaceID(workspaceID))
+	recipesResp, err := client.ListRecipesByWorkspace(v4recipe.NewListRecipesByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
-	tableRows := []utils.Row{}
-	for _, recipe := range recipesResp.Payload {
-		tableRows = append(tableRows, &recipeOut{*recipe.Name, utils.SafeStringConvert(recipe.Description), *recipe.RecipeType})
+	var tableRows []utils.Row
+	for _, recipe := range recipesResp.Payload.Responses {
+		tableRows = append(tableRows, &recipeOut{*recipe.Name, utils.SafeStringConvert(recipe.Description), *recipe.Type})
 	}
 
 	writer(recipeHeader, tableRows)

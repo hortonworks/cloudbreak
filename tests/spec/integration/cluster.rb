@@ -120,7 +120,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
   end
 
   it "Cluster - Describe Failure" do
-    requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', '{"message":"Stack \'az404\' not found"}', '404')
+    requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', '{"message":"Stack \'az404\' not found"}', '404')
     url = ENV['BASE_URL'] + @mock_endpoint_setup
     MockResponse.post(requestBody, url)
     result = cb.cluster.describe.name("az404").build(false)
@@ -131,7 +131,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    it "Cluster - Stop - Failure" do 
     with_environment 'DEBUG' => '1' do
-    requestBody = MockResponse.requestBodyCreate('putstopStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+    requestBody = MockResponse.requestBodyCreate('stopStackInWorkspaceV4', '{"message":"Stack \'azstatus\' not found"}', '404')
     url = ENV['BASE_URL'] + @mock_endpoint_setup
     MockResponse.post(requestBody, url)
     result = cb.cluster.stop.name("azstatus").build(false)
@@ -142,7 +142,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    it "Cluster - Start - Failure" do 
      with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('putstartStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      requestBody = MockResponse.requestBodyCreate('startStackInWorkspaceV4', '{"message":"Stack \'azstatus\' not found"}', '404')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.start.name("azstatus").build(false)
@@ -161,7 +161,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    it "Cluster - Sync - Failure" do 
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('putsyncStackV3','{"message":"Stack \'azstatus\' not found"}', '404')
+      requestBody = MockResponse.requestBodyCreate('syncStackInWorkspaceV4','{"message":"Stack \'azstatus\' not found"}', '404')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.sync.name("azstatus").build(false)
@@ -172,7 +172,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    it "Cluster - Repair - Failure" do
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('repairClusterV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      requestBody = MockResponse.requestBodyCreate('repairStackInWorkspaceV4', '{"message":"Stack \'azstatus\' not found"}', '404')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.start.name("azstatus").build(false)
@@ -183,7 +183,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    it "Cluster - Scale - Failure" do 
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('putscalingStackV3', '{"message":"Stack \'azstatus\' not found"}', '404')
+      requestBody = MockResponse.requestBodyCreate('putScalingStackInWorkspaceV4', '{"message":"Stack \'azstatus\' not found"}', '404')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.scale.name("azstatus").group_name("hgroup").desired_node_count(3).build(false)
@@ -291,7 +291,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
     it "Cluster - Generate attached cluster template " do
     with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', JSON.parse(load_json(@dl_stack_json)), '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', JSON.parse(load_json(@dl_stack_json)), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
@@ -305,7 +305,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       temp_json = JSON.parse(load_json(@dl_stack_json))
       temp_json["status"] = "UPDATE_IN_PROGRESS"
       temp_json["cluster"]["status"] = "UPDATE_IN_PROGRESS"
-      requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', temp_json, '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', temp_json, '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
@@ -319,7 +319,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       temp_json = JSON.parse(load_json(@dl_stack_json))
       temp_json["status"] = "FAILED"
       temp_json["cluster"]["status"] = "FAILED"
-      requestBody = MockResponse.requestBodyCreate('getStackInWorkspace', temp_json, '200')
+      requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', temp_json, '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
       result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)

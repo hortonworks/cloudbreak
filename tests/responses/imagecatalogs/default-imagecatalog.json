@@ -1,8 +1,10 @@
-[
-  {
-    "name": "cloudbreak-default",
-    "url": "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json",
-    "publicInAccount": true,
-    "default": true
-  }
-]
+{
+  "responses": [
+    {
+      "name": "cloudbreak-default",
+      "url": "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json",
+      "publicInAccount": true,
+      "default": true
+    }
+  ]
+}

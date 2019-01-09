@@ -19,7 +19,7 @@ import (
 type VMTypeMetaJSON struct {
 
 	// configs
-	Configs []*VolumeParameterConfigJSON `json:"configs"`
+	Configs []*VolumeParameterConfigV4Response `json:"configs"`
 
 	// properties
 	Properties map[string]interface{} `json:"properties,omitempty"`

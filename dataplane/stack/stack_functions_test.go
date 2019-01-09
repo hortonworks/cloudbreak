@@ -3,18 +3,18 @@ package stack
 import (
 	"testing"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
+	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
 type getStackAvailableClient struct {
 }
 
-func (c getStackAvailableClient) GetStackInWorkspace(*v3_workspace_id_stacks.GetStackInWorkspaceParams) (*v3_workspace_id_stacks.GetStackInWorkspaceOK, error) {
-	return &v3_workspace_id_stacks.GetStackInWorkspaceOK{
-		Payload: &model.StackResponse{
+func (c getStackAvailableClient) GetStackInWorkspaceV4(params *v4stack.GetStackInWorkspaceV4Params) (*v4stack.GetStackInWorkspaceV4OK, error) {
+	return &v4stack.GetStackInWorkspaceV4OK{
+		Payload: &model.StackV4Response{
 			Status: "AVAILABLE",
-			Cluster: &model.ClusterResponse{
+			Cluster: &model.ClusterV4Response{
 				Status: "AVAILABLE",
 			},
 		},
@@ -39,11 +39,11 @@ func TestWaitForOperationToFinishImplSkip(t *testing.T) {
 type getStackFailedClient struct {
 }
 
-func (c getStackFailedClient) GetStackInWorkspace(*v3_workspace_id_stacks.GetStackInWorkspaceParams) (*v3_workspace_id_stacks.GetStackInWorkspaceOK, error) {
-	return &v3_workspace_id_stacks.GetStackInWorkspaceOK{
-		Payload: &model.StackResponse{
+func (c getStackFailedClient) GetStackInWorkspaceV4(*v4stack.GetStackInWorkspaceV4Params) (*v4stack.GetStackInWorkspaceV4OK, error) {
+	return &v4stack.GetStackInWorkspaceV4OK{
+		Payload: &model.StackV4Response{
 			Status: "STOP_FAILED",
-			Cluster: &model.ClusterResponse{
+			Cluster: &model.ClusterV4Response{
 				Status: "STOP_FAILED",
 			},
 		},

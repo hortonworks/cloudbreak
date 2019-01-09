@@ -47,7 +47,7 @@ func NewGetStackForAmbariForAutoscaleOK() *GetStackForAmbariForAutoscaleOK {
 successful operation
 */
 type GetStackForAmbariForAutoscaleOK struct {
-	Payload *model.StackResponse
+	Payload *model.StackV4Response
 }
 
 func (o *GetStackForAmbariForAutoscaleOK) Error() string {
@@ -56,7 +56,7 @@ func (o *GetStackForAmbariForAutoscaleOK) Error() string {
 
 func (o *GetStackForAmbariForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.StackResponse)
+	o.Payload = new(model.StackV4Response)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

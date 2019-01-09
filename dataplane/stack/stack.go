@@ -15,16 +15,14 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
+	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/urfave/cli"
 )
 
-const availabilitySet = "availabilitySet"
-
-var stackHeader []string = []string{"Name", "Description", "CloudPlatform", "Environment", "StackStatus", "ClusterStatus"}
+var stackHeader = []string{"Name", "Description", "CloudPlatform", "Environment", "StackStatus", "ClusterStatus"}
 
 type stackOut struct {
 	common.CloudResourceOut
@@ -34,7 +32,7 @@ type stackOut struct {
 }
 
 type stackOutDescribe struct {
-	*model.StackResponse
+	*model.StackV4Response
 }
 
 func (s *stackOut) DataAsStringArray() []string {
@@ -46,7 +44,7 @@ func (s *stackOut) DataAsStringArray() []string {
 }
 
 func (s *stackOutDescribe) DataAsStringArray() []string {
-	stack := convertResponseToStack(s.StackResponse)
+	stack := convertResponseToStack(s.StackV4Response)
 	return append(stack.DataAsStringArray(), strconv.FormatInt(s.ID, 10))
 }
 
@@ -56,10 +54,10 @@ func CreateStack(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	req := assembleStackRequest(c)
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
-	utils.CheckClientVersion(cbClient.Cloudbreak.V1util, common.Version)
+	utils.CheckClientVersion(cbClient.Cloudbreak.V4utils, common.Version)
 	cbClient.createStack(workspaceID, req)
 	if c.Bool(fl.FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(workspaceID, *req.General.Name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(workspaceID, *req.Name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -71,14 +69,14 @@ func ChangeImage(c *cli.Context) {
 	imageCatalogName := c.String(fl.FlImageCatalog.Name)
 	clusterName := c.String(fl.FlName.Name)
 	log.Infof("[ChangeImage] changing image for stack stack, name: %s, imageid: %s, imageCatalog: %s", clusterName, imageId, imageCatalogName)
-	req := model.StackImageChangeRequest{ImageCatalogName: imageCatalogName, ImageID: &imageId}
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.ChangeImageV3(v3_workspace_id_stacks.NewChangeImageV3Params().WithWorkspaceID(workspaceID).WithName(clusterName).WithBody(&req))
+	req := model.StackImageChangeV4Request{ImageCatalogName: imageCatalogName, ImageID: &imageId}
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.ChangeImageStackInWorkspaceV4(v4stack.NewChangeImageStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(clusterName).WithBody(&req))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
 }
 
-func assembleStackRequest(c *cli.Context) *model.StackV2Request {
+func assembleStackRequest(c *cli.Context) *model.StackV4Request {
 	path := c.String(fl.FlInputJson.Name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		commonutils.LogErrorAndExit(err)
@@ -87,7 +85,7 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 	log.Infof("[assembleStackTemplate] read cluster create json from file: %s", path)
 	content := commonutils.ReadFile(path)
 
-	var req model.StackV2Request
+	var req model.StackV4Request
 	err := json.Unmarshal(content, &req)
 	if err != nil {
 		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
@@ -96,21 +94,17 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 
 	name := c.String(fl.FlName.Name)
 	if len(name) != 0 {
-		if req.General == nil {
-			req.General = &model.GeneralSettings{}
-		}
-		req.General.Name = &name
+		req.Name = &name
 		if req.InstanceGroups != nil {
 			for _, ig := range req.InstanceGroups {
-				if _, ok := ig.Parameters[availabilitySet]; ok {
-					as := ig.Parameters[availabilitySet].(map[string]interface{})
-					as["name"] = *req.General.Name + "-" + *ig.Group + "-as"
-					ig.Parameters[availabilitySet] = as
+				if ig.Azure != nil && ig.Azure.AvailabilitySet != nil {
+					as := ig.Azure.AvailabilitySet
+					as.Name = *req.Name + "-" + *ig.Name + "-as"
 				}
 			}
 		}
 	}
-	if req.General == nil || req.General.Name == nil || len(*req.General.Name) == 0 {
+	if req.Name == nil || len(*req.Name) == 0 {
 		commonutils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
 	}
 
@@ -131,21 +125,29 @@ func assembleStackRequest(c *cli.Context) *model.StackV2Request {
 	return &req
 }
 
-func convertViewResponseToStack(s *model.StackViewResponse) *stackOut {
+func convertViewResponseToStack(s *model.StackViewV4Response) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, utils.SafeClusterViewDescriptionConvert(s), utils.SafeCredentialViewCloudPlatformConvert(s)},
-		s.Environment,
-		s.Status,
-		utils.SafeClusterViewStatusConvert(s),
+		CloudResourceOut: common.CloudResourceOut{
+			Name:          *s.Name,
+			Description:   utils.SafeClusterViewDescriptionConvert(s),
+			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
+		},
+		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),
+		StackStatus:   s.Status,
+		ClusterStatus: utils.SafeClusterViewStatusConvert(s),
 	}
 }
 
-func convertResponseToStack(s *model.StackResponse) *stackOut {
+func convertResponseToStack(s *model.StackV4Response) *stackOut {
 	return &stackOut{
-		common.CloudResourceOut{*s.Name, utils.SafeClusterDescriptionConvert(s), utils.SafeCredentialCloudPlatformConvert(s)},
-		s.Environment,
-		s.Status,
-		utils.SafeClusterStatusConvert(s),
+		CloudResourceOut: common.CloudResourceOut{
+			Name:          *s.Name,
+			Description:   utils.SafeClusterDescriptionConvert(s),
+			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
+		},
+		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),
+		StackStatus:   s.Status,
+		ClusterStatus: utils.SafeClusterStatusConvert(s),
 	}
 }
 
@@ -155,7 +157,7 @@ func DescribeStack(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	resp, err := cbClient.Cloudbreak.V3WorkspaceIDStacks.GetStackInWorkspace(v3_workspace_id_stacks.NewGetStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(fl.FlName.Name)))
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDStacks.GetStackInWorkspaceV4(v4stack.NewGetStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(c.String(fl.FlName.Name)))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -164,11 +166,11 @@ func DescribeStack(c *cli.Context) {
 }
 
 type getStackInWorkspace interface {
-	GetStackInWorkspace(client *v3_workspace_id_stacks.GetStackInWorkspaceParams) (*v3_workspace_id_stacks.GetStackInWorkspaceOK, error)
+	GetStackInWorkspaceV4(client *v4stack.GetStackInWorkspaceV4Params) (*v4stack.GetStackInWorkspaceV4OK, error)
 }
 
-func fetchStack(workspaceID int64, name string, client getStackInWorkspace) *model.StackResponse {
-	resp, err := client.GetStackInWorkspace(v3_workspace_id_stacks.NewGetStackInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name))
+func fetchStack(workspaceID int64, name string, client getStackInWorkspace) *model.StackV4Response {
+	resp, err := client.GetStackInWorkspaceV4(v4stack.NewGetStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -183,14 +185,14 @@ func ScaleStack(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "scale stack")
 
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
-	req := &model.StackScaleRequestV2{
+	req := &model.StackScaleV4Request{
 		DesiredCount: &(&types.I32{I: int32(desiredCount)}).I,
 		Group:        &(&types.S{S: c.String(fl.FlGroupName.Name)}).S,
 	}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[ScaleStack] scaling stack, name: %s", name)
-	err = cbClient.Cloudbreak.V3WorkspaceIDStacks.PutscalingStackV3(v3_workspace_id_stacks.NewPutscalingStackV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
+	err = cbClient.Cloudbreak.V4WorkspaceIDStacks.PutScalingStackInWorkspaceV4(v4stack.NewPutScalingStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -208,7 +210,7 @@ func StartStack(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[StartStack] starting stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutstartStackV3(v3_workspace_id_stacks.NewPutstartStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.StartStackInWorkspaceV4(v4stack.NewStartStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -226,7 +228,7 @@ func StopStack(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[StopStack] stopping stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutstopStackV3(v3_workspace_id_stacks.NewPutstopStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.StopStackInWorkspaceV4(v4stack.NewStopStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -244,7 +246,7 @@ func SyncStack(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[SyncStack] syncing stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutsyncStackV3(v3_workspace_id_stacks.NewPutsyncStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.SyncStackInWorkspaceV4(v4stack.NewSyncStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -254,7 +256,7 @@ func SyncStack(c *cli.Context) {
 func RepairStackHostGroups(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "repair stack")
 
-	var request model.ClusterRepairRequest
+	var request model.ClusterRepairV4Request
 	hostGroups := strings.Split(c.String(fl.FlHostGroups.Name), ",")
 	request.HostGroups = hostGroups
 	log.Infof("[RepairStack] repairing stack hostgroups: %s", hostGroups)
@@ -264,17 +266,17 @@ func RepairStackHostGroups(c *cli.Context) {
 func RepairStackNodes(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "repair stack")
 
-	var request model.ClusterRepairRequest
+	var request model.ClusterRepairV4Request
 	deleteVolumes := c.Bool(fl.FlDeleteVolumes.Name)
 	nodes := strings.Split(c.String(fl.FlNodes.Name), ",")
-	request.Nodes = &model.ClusterRepairNodesRequest{DeleteVolumes: &deleteVolumes, Ids: nodes}
+	request.Nodes = &model.ClusterRepairNodesV4Request{DeleteVolumes: &deleteVolumes, Ids: nodes}
 
 	log.Infof("[RepairStackNodes] repairing stack nodes, deleteVolumes: %t, ids: %s", deleteVolumes, nodes)
 
 	repairStackCommon(c, request)
 }
 
-func repairStackCommon(c *cli.Context, request model.ClusterRepairRequest) {
+func repairStackCommon(c *cli.Context, request model.ClusterRepairV4Request) {
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	removeOnly := c.Bool(fl.FlRemoveOnly.Name)
 	request.RemoveOnly = &removeOnly
@@ -282,7 +284,7 @@ func repairStackCommon(c *cli.Context, request model.ClusterRepairRequest) {
 	name := c.String(fl.FlName.Name)
 	log.Infof("[RepairStack] repairing stack, id: %s, removeOnly: %t, workspaceId: %d", name, removeOnly, workspaceID)
 
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.RepairClusterV3(v3_workspace_id_stacks.NewRepairClusterV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(&request))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.RepairStackInWorkspaceV4(v4stack.NewRepairStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(&request))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -300,7 +302,7 @@ func RetryCluster(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[RetryCluster] retrying cluster creation, name: %s", name)
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.RetryStackV3(v3_workspace_id_stacks.NewRetryStackV3Params().WithWorkspaceID(workspaceID).WithName(name))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.RetryStackInWorkspaceV4(v4stack.NewRetryStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -319,7 +321,7 @@ func ReinstallStack(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[RepairStack] reinstalling stack, name: %s", name)
-	err := cbClient.Cloudbreak.V3WorkspaceIDStacks.PutreinstallStackV3(v3_workspace_id_stacks.NewPutreinstallStackV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
+	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.PutReinstallStackV4(v4stack.NewPutReinstallStackV4Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -330,7 +332,7 @@ func ReinstallStack(c *cli.Context) {
 	}
 }
 
-func assembleReinstallRequest(c *cli.Context) *model.ReinstallRequestV2 {
+func assembleReinstallRequest(c *cli.Context) *model.ReinstallV4Request {
 	path := c.String(fl.FlInputJson.Name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		commonutils.LogErrorAndExit(err)
@@ -339,7 +341,7 @@ func assembleReinstallRequest(c *cli.Context) *model.ReinstallRequestV2 {
 	log.Infof("[assembleReinstallRequest] read cluster reinstall json from file: %s", path)
 	content := commonutils.ReadFile(path)
 
-	var req model.ReinstallRequestV2
+	var req model.ReinstallV4Request
 	err := json.Unmarshal(content, &req)
 	if err != nil {
 		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
@@ -380,22 +382,22 @@ func ListStacks(c *cli.Context) {
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	listStacksImpl(cbClient.Cloudbreak.V3WorkspaceIDStacks, output.WriteList, workspaceID)
+	listStacksImpl(cbClient.Cloudbreak.V4WorkspaceIDStacks, output.WriteList, workspaceID)
 }
 
 type listStacksByWorkspaceClient interface {
-	ListStacksByWorkspace(*v3_workspace_id_stacks.ListStacksByWorkspaceParams) (*v3_workspace_id_stacks.ListStacksByWorkspaceOK, error)
+	ListStackInWorkspaceV4(params *v4stack.ListStackInWorkspaceV4Params) (*v4stack.ListStackInWorkspaceV4OK, error)
 }
 
 func listStacksImpl(client listStacksByWorkspaceClient, writer func([]string, []commonutils.Row), workspaceID int64) {
 	log.Infof("[listStacksImpl] sending stack list request")
-	stacksResp, err := client.ListStacksByWorkspace(v3_workspace_id_stacks.NewListStacksByWorkspaceParams().WithWorkspaceID(workspaceID))
+	stacksResp, err := client.ListStackInWorkspaceV4(v4stack.NewListStackInWorkspaceV4Params().WithWorkspaceID(workspaceID))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
 
-	tableRows := []commonutils.Row{}
-	for _, stack := range stacksResp.Payload {
+	var tableRows []commonutils.Row
+	for _, stack := range stacksResp.Payload.Responses {
 		tableRows = append(tableRows, convertViewResponseToStack(stack))
 	}
 

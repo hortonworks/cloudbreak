@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v3_workspace_id_stacks"
+	v4maint "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -14,15 +14,15 @@ import (
 )
 
 type maintenanceModeClient interface {
-	SetClusterMaintenanceMode(params *v3_workspace_id_stacks.SetClusterMaintenanceModeParams) error
-	PutClusterV3(params *v3_workspace_id_stacks.PutClusterV3Params) error
+	SetClusterMaintenanceMode(params *v4maint.SetClusterMaintenanceModeParams) error
+	PutClusterV4(params *v4maint.PutClusterV4Params) error
 }
 
 func EnableMaintenanceMode(c *cli.Context) {
 	logrus.Infof("[EnableMaintenanceMode] enable maintenance mode")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
-	toggleMaintenanceMode(cbClient.Cloudbreak.V3WorkspaceIDStacks, workspaceID, name, model.MaintenanceModeJSONStatusENABLED)
+	toggleMaintenanceMode(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, model.MaintenanceModeV4RequestStatusENABLED)
 }
 
 func resolveWorkspaceIDAndStackName(int64Finder func(string) int64, stringFinder func(string) string) (int64, string) {
@@ -30,8 +30,8 @@ func resolveWorkspaceIDAndStackName(int64Finder func(string) int64, stringFinder
 }
 
 func toggleMaintenanceMode(client maintenanceModeClient, workspaceId int64, name string, status string) {
-	request := &model.MaintenanceModeJSON{Status: status}
-	err := client.SetClusterMaintenanceMode(v3_workspace_id_stacks.NewSetClusterMaintenanceModeParams().WithWorkspaceID(workspaceId).WithName(name).WithBody(request))
+	request := &model.MaintenanceModeV4Request{Status: status}
+	err := client.SetClusterMaintenanceMode(v4maint.NewSetClusterMaintenanceModeParams().WithWorkspaceID(workspaceId).WithName(name).WithBody(request))
 	if err == nil {
 		logrus.Infof("[toggleMaintenanceMode] maintenance mode successfully set to: %s", status)
 	} else {
@@ -43,14 +43,14 @@ func DisableMaintenanceMode(c *cli.Context) {
 	logrus.Infof("[DisableMaintenanceMode] disable maintenance mode")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
-	toggleMaintenanceMode(cbClient.Cloudbreak.V3WorkspaceIDStacks, workspaceID, name, model.MaintenanceModeJSONStatusDISABLED)
+	toggleMaintenanceMode(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, model.MaintenanceModeV4RequestStatusDISABLED)
 }
 
 func ValidateRepositoryConfigurations(c *cli.Context) {
 	logrus.Infof("[ValidateRepositoryConfigurations] validate repository configurations")
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
-	toggleMaintenanceMode(cbClient.Cloudbreak.V3WorkspaceIDStacks, workspaceID, name, model.MaintenanceModeJSONStatusVALIDATIONREQUESTED)
+	toggleMaintenanceMode(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, model.MaintenanceModeV4RequestStatusVALIDATIONREQUESTED)
 }
 
 func ChangeHdpRepo(c *cli.Context) {
@@ -58,17 +58,17 @@ func ChangeHdpRepo(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
 
-	stackDetails := &model.AmbariStackDetails{
+	stackDetails := &model.StackRepositoryV4Request{
 		Version:                  c.String(flags.FlVersion.Name),
 		VersionDefinitionFileURL: c.String(flags.FlVdfUrl.Name),
 	}
 
 	unmarshallCliInput(c.String, stackDetails)
 	stackDetails.Stack = "HDP"
-	updateStackRepoDetails(cbClient.Cloudbreak.V3WorkspaceIDStacks, workspaceID, name, stackDetails)
+	updateStackRepoDetails(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, stackDetails)
 }
 
-func unmarshallCliInput(stringFinder func(string) string, stackDetails *model.AmbariStackDetails) {
+func unmarshallCliInput(stringFinder func(string) string, stackDetails *model.StackRepositoryV4Request) {
 	jsonPath := stringFinder(flags.FlInputJson.Name)
 	if len(jsonPath) != 0 {
 		repoConfigPath := utils.ReadFile(jsonPath)
@@ -83,7 +83,7 @@ func ChangeHdfRepo(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
 
-	stackDetails := &model.AmbariStackDetails{
+	stackDetails := &model.StackRepositoryV4Request{
 		Version:                  c.String(flags.FlVersion.Name),
 		VersionDefinitionFileURL: c.String(flags.FlVdfUrl.Name),
 		MpackURL:                 c.String(flags.FlMPackUrl.Name),
@@ -91,7 +91,7 @@ func ChangeHdfRepo(c *cli.Context) {
 
 	unmarshallCliInput(c.String, stackDetails)
 	stackDetails.Stack = "HDF"
-	updateStackRepoDetails(cbClient.Cloudbreak.V3WorkspaceIDStacks, workspaceID, name, stackDetails)
+	updateStackRepoDetails(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, stackDetails)
 
 }
 func ChangeAmbariRepo(c *cli.Context) {
@@ -99,38 +99,42 @@ func ChangeAmbariRepo(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
 
-	stackDetails := &model.AmbariStackDetails{
-		Version:      c.String(flags.FlVersion.Name),
-		StackBaseURL: c.String(flags.FlRepoUrl.Name),
-		GpgKeyURL:    c.String(flags.FlRepoGpgUrl.Name),
+	stackDetails := &model.StackRepositoryV4Request{
+		Version: c.String(flags.FlVersion.Name),
+		Repository: &model.RepositoryV4Request{
+			BaseURL:   c.String(flags.FlRepoUrl.Name),
+			GpgKeyURL: c.String(flags.FlRepoGpgUrl.Name),
+		},
 	}
 
 	unmarshallCliInput(c.String, stackDetails)
 	stackDetails.Stack = "AMBARI"
-	updateStackRepoDetails(cbClient.Cloudbreak.V3WorkspaceIDStacks, workspaceID, name, stackDetails)
+	updateStackRepoDetails(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, stackDetails)
 }
 
-func updateStackRepoDetails(client maintenanceModeClient, workspaceID int64, name string, stackDetails *model.AmbariStackDetails) {
-	request := &model.UpdateCluster{
-		AmbariStackDetails: stackDetails,
+func updateStackRepoDetails(client maintenanceModeClient, workspaceID int64, name string, stackDetails *model.StackRepositoryV4Request) {
+	request := &model.UpdateClusterV4Request{
+		StackRepository: stackDetails,
 	}
-	err := client.PutClusterV3(v3_workspace_id_stacks.NewPutClusterV3Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(request))
+	err := client.PutClusterV4(v4maint.NewPutClusterV4Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 }
 
-func GenerateHdpRepoJson(c *cli.Context) {
-	stackDetails := &model.AmbariStackDetails{
-		StackRepoID:              "____",
-		OsType:                   "____",
-		StackBaseURL:             "____",
-		RepositoryVersion:        "____",
+func GenerateHdpRepoJson(_ *cli.Context) {
+	stackDetails := &model.StackRepositoryV4Request{
+		RepoID: "____",
+		OsType: "____",
+		Repository: &model.RepositoryV4Request{
+			BaseURL: "____",
+			Version: &(&types.S{S: "____"}).S,
+		},
 		VersionDefinitionFileURL: "____",
 		UtilsRepoID:              "____",
 		UtilsBaseURL:             "____",
 		EnableGplRepo:            &(&types.B{B: true}).B,
-		Mpacks:                   []*model.ManagementPackDetails{},
+		Mpacks:                   []*model.ManagementPackDetailsV4Request{},
 		Version:                  "____",
 	}
 
@@ -141,18 +145,20 @@ func GenerateHdpRepoJson(c *cli.Context) {
 	fmt.Printf("%s\n", string(jsonBytes))
 }
 
-func GenerateHdfRepoJson(c *cli.Context) {
-	stackDetails := &model.AmbariStackDetails{
-		StackRepoID:              "____",
-		OsType:                   "____",
-		StackBaseURL:             "____",
-		RepositoryVersion:        "____",
+func GenerateHdfRepoJson(_ *cli.Context) {
+	stackDetails := &model.StackRepositoryV4Request{
+		RepoID: "____",
+		OsType: "____",
+		Repository: &model.RepositoryV4Request{
+			BaseURL: "____",
+			Version: &(&types.S{S: "____"}).S,
+		},
 		VersionDefinitionFileURL: "____",
 		UtilsRepoID:              "____",
 		UtilsBaseURL:             "____",
 		EnableGplRepo:            &(&types.B{B: true}).B,
 		MpackURL:                 "____",
-		Mpacks: []*model.ManagementPackDetails{
+		Mpacks: []*model.ManagementPackDetailsV4Request{
 			{
 				Name:         &(&types.S{S: "____"}).S,
 				PreInstalled: &(&types.B{B: false}).B,
@@ -168,7 +174,7 @@ func GenerateHdfRepoJson(c *cli.Context) {
 	fmt.Printf("%s\n", string(jsonBytes))
 }
 
-func GenerateAmbariRepoJson(c *cli.Context) {
+func GenerateAmbariRepoJson(_ *cli.Context) {
 	type AmbariRepoConfig struct {
 		Version string `json:"version,omitempty"`
 
