@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ import javax.inject.Named;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.FileSystemV3Endpoint;
-import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParametersV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemParametersV4Filter;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @WorkspaceEntityType(FileSystem.class)
-public class FileSystemV3Controller implements FileSystemV3Endpoint {
+public class FileSystemV4Controller implements FileSystemV4Endpoint {
 
     @Inject
     private UserService userService;
@@ -46,21 +46,21 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
     private ConversionService conversionService;
 
     @Override
-    public StructuredParameterQueriesResponse getFileSystemParameters(Long workspaceId, StructuredParametersQueryRequest structuredParametersQueryRequest) {
+    public FileSystemParametersV4Response getFileSystemParameters(Long workspaceId, FileSystemParametersV4Filter fileSystemParametersV4Filter) {
         Workspace workspace = getWorkspace(workspaceId);
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
-                structuredParametersQueryRequest.getBlueprintName(),
-                structuredParametersQueryRequest.getClusterName(),
-                structuredParametersQueryRequest.getStorageName(),
-                structuredParametersQueryRequest.getFileSystemType(),
-                structuredParametersQueryRequest.getAccountName(),
-                structuredParametersQueryRequest.isAttachedCluster(),
+                fileSystemParametersV4Filter.getBlueprintName(),
+                fileSystemParametersV4Filter.getClusterName(),
+                fileSystemParametersV4Filter.getStorageName(),
+                fileSystemParametersV4Filter.getFileSystemType(),
+                fileSystemParametersV4Filter.getAccountName(),
+                fileSystemParametersV4Filter.isAttachedCluster(),
                 workspace);
-        List<StructuredParameterQueryResponse> result = new ArrayList<>();
+        List<FileSystemParameterV4Response> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {
-            result.add(conversionService.convert(configQueryEntry, StructuredParameterQueryResponse.class));
+            result.add(conversionService.convert(configQueryEntry, FileSystemParameterV4Response.class));
         }
-        StructuredParameterQueriesResponse parametersQueryResponse = new StructuredParameterQueriesResponse();
+        FileSystemParametersV4Response parametersQueryResponse = new FileSystemParametersV4Response();
         parametersQueryResponse.setEntries(result);
         return parametersQueryResponse;
     }

@@ -1,15 +1,16 @@
-package com.sequenceiq.cloudbreak.api.model;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses;
 
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class StructuredParameterQueryResponse implements JsonEntity {
+public class FileSystemParameterV4Response implements JsonEntity {
 
     private String propertyName;
 
@@ -86,10 +87,10 @@ public class StructuredParameterQueryResponse implements JsonEntity {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof StructuredParameterQueryResponse)) {
+        if (!(o instanceof FileSystemParameterV4Response)) {
             return false;
         }
-        StructuredParameterQueryResponse that = (StructuredParameterQueryResponse) o;
+        FileSystemParameterV4Response that = (FileSystemParameterV4Response) o;
         return Objects.equals(getPropertyName(), that.getPropertyName())
                 && Objects.equals(getDescription(), that.getDescription())
                 && Objects.equals(getDefaultPath(), that.getDefaultPath())

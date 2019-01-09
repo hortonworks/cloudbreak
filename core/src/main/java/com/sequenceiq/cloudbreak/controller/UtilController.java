@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,18 +15,15 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4BuildResponse;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
-import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
@@ -41,7 +36,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Controller
@@ -140,27 +134,6 @@ public class UtilController implements UtilEndpoint {
         }
         ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
         parametersQueryResponse.setCustom(result);
-        return parametersQueryResponse;
-    }
-
-    @Override
-    public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
-                structuredParametersQueryRequest.getBlueprintName(),
-                structuredParametersQueryRequest.getClusterName(),
-                structuredParametersQueryRequest.getStorageName(),
-                structuredParametersQueryRequest.getFileSystemType(),
-                structuredParametersQueryRequest.getAccountName(),
-                structuredParametersQueryRequest.isAttachedCluster(),
-                workspace);
-        List<StructuredParameterQueryResponse> result = new ArrayList<>();
-        for (ConfigQueryEntry configQueryEntry : entries) {
-            result.add(conversionService.convert(configQueryEntry, StructuredParameterQueryResponse.class));
-        }
-        StructuredParameterQueriesResponse parametersQueryResponse = new StructuredParameterQueriesResponse();
-        parametersQueryResponse.setEntries(result);
         return parametersQueryResponse;
     }
 }

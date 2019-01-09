@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ClusterTemplateViewResponse extends CompactViewResponse {
+public class ClusterTemplateViewV4Response extends CompactViewResponse {
 
     private ResourceStatus status;
 

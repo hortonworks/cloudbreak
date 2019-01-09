@@ -199,6 +199,10 @@ public class OperationDescriptions {
         public static final String DETACH_FROM_ENVIRONMENTS = "detach ldap resource from environemnts";
     }
 
+    public static class FileSystemOpDescription {
+        public static final String FILE_SYSTEM_PARAMETERS = "returns filesystem parameters";
+    }
+
     public static class UtilityOpDescription {
         public static final String TEST_DATABASE = "tests a database connection parameters";
         public static final String CREATE_DATABASE = "create a database for the service in the RDS if the connection could be created";
@@ -206,7 +210,6 @@ public class OperationDescriptions {
         public static final String KNOX_SERVICES = "returns supported knox services";
         public static final String CLOUD_STORAGE_MATRIX = "returns supported cloud storage for stack version";
         public static final String CUSTOM_PARAMETERS = "returns custom parameters";
-        public static final String FILE_SYSTEM_PARAMETERS = "returns filesystem parameters";
         public static final String DATALAKE_PREREQUISITES = "returns datalake prerequisites";
         public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
