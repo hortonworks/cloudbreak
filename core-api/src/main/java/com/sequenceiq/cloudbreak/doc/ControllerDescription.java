@@ -20,7 +20,7 @@ public class ControllerDescription {
     public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Workspace";
     public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by workspace";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
-    public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace ";
+    public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String FLEX_SUBSCRIPTION_V4_DESCRIPTION = "Operations on Flex subscriptions by workspace";
     public static final String CONNECTOR_V4_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
     public static final String ENVIRONMENT_V4_DESCRIPTION = "Operations on environments.";
