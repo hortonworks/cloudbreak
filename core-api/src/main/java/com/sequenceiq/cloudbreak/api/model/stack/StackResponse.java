@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
@@ -78,7 +78,7 @@ public class StackResponse extends StackBase {
     private CloudbreakDetailsJson cloudbreakDetails;
 
     @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
-    private FlexSubscriptionResponse flexSubscription;
+    private FlexSubscriptionV4Response flexSubscription;
 
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationResponse stackAuthentication;
@@ -208,11 +208,11 @@ public class StackResponse extends StackBase {
         this.network = network;
     }
 
-    public FlexSubscriptionResponse getFlexSubscription() {
+    public FlexSubscriptionV4Response getFlexSubscription() {
         return flexSubscription;
     }
 
-    public void setFlexSubscription(FlexSubscriptionResponse flexSubscription) {
+    public void setFlexSubscription(FlexSubscriptionV4Response flexSubscription) {
         this.flexSubscription = flexSubscription;
     }
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.felxsubscriptions;
 
 
 import javax.inject.Inject;
@@ -6,21 +6,22 @@ import javax.inject.Inject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests.FlexSubscriptionV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
-public class FlexSubscriptionRequestToFlexSubscriptionConverter extends AbstractConversionServiceAwareConverter<FlexSubscriptionRequest, FlexSubscription> {
+public class FlexSubscriptionV4RequestToFlexSubscriptionConverter extends AbstractConversionServiceAwareConverter<FlexSubscriptionV4Request, FlexSubscription> {
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
     @Override
-    public FlexSubscription convert(FlexSubscriptionRequest source) {
+    public FlexSubscription convert(FlexSubscriptionV4Request source) {
         FlexSubscription subscription = new FlexSubscription();
         subscription.setName(source.getName());
         subscription.setSubscriptionId(source.getSubscriptionId());

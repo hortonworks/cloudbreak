@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
@@ -43,8 +42,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.FlexSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
@@ -52,6 +49,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4EndPoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.FlexSubscriptionV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
@@ -79,8 +78,7 @@ public class CloudbreakIdentityClient {
             CredentialEndpoint.class,
             CredentialV3Endpoint.class,
             DatabaseV4Endpoint.class,
-            FlexSubscriptionEndpoint.class,
-            FlexSubscriptionV3Endpoint.class,
+            FlexSubscriptionV4Endpoint.class,
             ImageCatalogV4Endpoint.class,
             KerberosConfigV4Endpoint.class,
             LdapConfigV4Endpoint.class,
@@ -185,12 +183,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(CredentialV3Endpoint.class);
     }
 
-    public FlexSubscriptionEndpoint flexSubscriptionEndpoint() {
-        return getEndpoint(FlexSubscriptionEndpoint.class);
-    }
-
-    public FlexSubscriptionV3Endpoint flexSubscriptionV3Endpoint() {
-        return getEndpoint(FlexSubscriptionV3Endpoint.class);
+    public FlexSubscriptionV4Endpoint flexSubscriptionV4Endpoint() {
+        return getEndpoint(FlexSubscriptionV4Endpoint.class);
     }
 
     public ImageCatalogV4Endpoint imageCatalogV4Endpoint() {

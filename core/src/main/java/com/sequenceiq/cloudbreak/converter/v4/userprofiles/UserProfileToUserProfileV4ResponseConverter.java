@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.users;
+package com.sequenceiq.cloudbreak.converter.v4.userprofiles;
 
 import javax.inject.Inject;
 

@@ -19,7 +19,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
@@ -238,7 +238,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
     private void addFlexSubscription(StackResponse stackJson, Stack source) {
         if (source.getFlexSubscription() != null) {
             try {
-                FlexSubscriptionResponse flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionResponse.class);
+                FlexSubscriptionV4Response flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionV4Response.class);
                 stackJson.setFlexSubscription(flexSubscription);
             } catch (Exception ex) {
                 LOGGER.warn("Flex subscription could not be added to stack response.", ex);

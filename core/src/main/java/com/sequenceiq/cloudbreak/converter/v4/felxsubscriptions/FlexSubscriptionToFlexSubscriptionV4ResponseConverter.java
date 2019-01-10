@@ -1,22 +1,24 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.felxsubscriptions;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 
 @Component
-public class FlexSubscriptionToJsonConverter extends AbstractConversionServiceAwareConverter<FlexSubscription, FlexSubscriptionResponse> {
+public class FlexSubscriptionToFlexSubscriptionV4ResponseConverter extends AbstractConversionServiceAwareConverter<FlexSubscription, FlexSubscriptionV4Response> {
 
     @Inject
     private SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter smartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 
     @Override
-    public FlexSubscriptionResponse convert(FlexSubscription source) {
-        FlexSubscriptionResponse json = new FlexSubscriptionResponse();
+    public FlexSubscriptionV4Response convert(FlexSubscription source) {
+        FlexSubscriptionV4Response json = new FlexSubscriptionV4Response();
         json.setId(source.getId());
         json.setName(source.getName());
         json.setSubscriptionId(source.getSubscriptionId());
