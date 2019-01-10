@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.flex;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -114,14 +115,14 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
         return flexSubscriptionRepository.findAllByWorkspaceId(workspaceId);
     }
 
-    public void setDefaultFlexSubscription(String name, User user, Workspace workspace) {
+    public Optional<FlexSubscription> setDefaultFlexSubscription(String name, User user, Workspace workspace) {
         LOGGER.debug("Set Flex subscription '{}' as default in workspace '{}'", name, workspace.getName());
-        setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setDefault);
+        return setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setDefault);
     }
 
-    public void setUsedForControllerFlexSubscription(String name, User user, Workspace workspace) {
+    public Optional<FlexSubscription> setUsedForControllerFlexSubscription(String name, User user, Workspace workspace) {
         LOGGER.debug("Set Flex subscription '{}' as used for controller in workspace '{}'", name, workspace.getName());
-        setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setUsedForController);
+        return setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setUsedForController);
     }
 
     public FlexSubscription get(Long id) {
@@ -148,19 +149,23 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
         }
     }
 
-    private void setFlexSubscriptionFlag(String name, User user, Workspace workspace, BiConsumer<FlexSubscription, Boolean> setter) {
+    private Optional<FlexSubscription> setFlexSubscriptionFlag(String name, User user, Workspace workspace, BiConsumer<FlexSubscription, Boolean> setter) {
         Set<FlexSubscription> allInAccount = flexSubscriptionRepository.findAllByWorkspace(workspace);
-        setFlagOnFlexSubscriptionCollection(name, setter, allInAccount);
+        Optional<FlexSubscription> flexSubscription = setFlagOnFlexSubscriptionCollection(name, setter, allInAccount);
         flexSubscriptionRepository.saveAll(allInAccount);
+        return flexSubscription;
     }
 
-    private void setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter, Collection<FlexSubscription> allInAccount) {
+    private Optional<FlexSubscription> setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter, Collection<FlexSubscription> allInAccount) {
         if (allInAccount.stream().noneMatch(f -> name.equals(f.getName()))) {
             throw new BadRequestException("Given subscription not found with name: " + name);
         }
         for (FlexSubscription flex : allInAccount) {
             setter.accept(flex, name.equals(flex.getName()));
         }
+        return allInAccount.stream()
+                .filter(flex -> name.equals(flex.getName()))
+                .findFirst();
     }
 
     public FlexSubscription findFirstByUsedForController(boolean usedForController) {

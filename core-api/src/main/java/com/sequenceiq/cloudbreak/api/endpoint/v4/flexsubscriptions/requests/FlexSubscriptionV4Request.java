@@ -1,9 +1,10 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FlexSubscriptionModelDescription;
 
@@ -12,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FlexSubscriptionRequest implements JsonEntity {
+public class FlexSubscriptionV4Request implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
