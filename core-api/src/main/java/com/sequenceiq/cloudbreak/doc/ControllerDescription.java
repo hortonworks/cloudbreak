@@ -14,16 +14,12 @@ public class ControllerDescription {
     public static final String CONNECTOR_DESCRIPTION = "Returns cloud provider specific resource types";
     public static final String SETTINGS_DESCRIPTION = "Returns Cloudbreak specific resource settings";
     public static final String SUBSCRIPTION_DESCRIPTION = "Client subscription for event notifications";
-    public static final String SMARTSENSE_SUBSCRIPTION_DESCRIPTION = "Operations on SmartSense subscriptions";
-    public static final String FLEX_SUBSCRIPTION_DESCRIPTION = "Operations on Flex subscriptions";
-    public static final String WORKSPACE_V4_DESCRIPTION = "Operations on organiztions";
 
     public static final String AUTOSCALE_DESCRIPTION = "Operations by Autoscale";
 
     public static final String CREDENTIAL_V3_DESCRIPTION = "Operations on credentials by workspace";
     public static final String MANAGEMENT_PACK_V3_DESCRIPTION = "Operations on Management pack by Workspace";
     public static final String PROXY_CONFIG_V3_DESCRIPTION = "Operations on proxy config by workspace";
-    public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
 
@@ -41,6 +37,8 @@ public class ControllerDescription {
     public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String CLUSTER_TEMPLATE_V4_DESCRIPTION = "Operations on ClusterTemplates by workspace";
     public static final String IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Image Catalog by workspace";
+    public static final String SMARTSENSE_SUBSCRIPTION_V4_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
+    public static final String WORKSPACE_V4_DESCRIPTION = "Operations on workspaces";
 
     private ControllerDescription() {
     }
