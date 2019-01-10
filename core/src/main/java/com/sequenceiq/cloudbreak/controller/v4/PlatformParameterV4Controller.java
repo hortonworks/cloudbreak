@@ -9,18 +9,16 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformAccessConfigsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformGatewaysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworksV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSecurityGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.RecommendationV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
@@ -92,11 +90,6 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(encryptionKeys, PlatformEncryptionKeysV4Response.class);
-    }
-
-    @Override
-    public RecommendationV4Response createRecommendation(Long workspaceId, RecommendationV4Filter recommendationV4Filter) {
-        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, recommendationV4Filter), RecommendationV4Response.class);
     }
 
     @Override
