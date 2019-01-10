@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.filesystem;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -6,7 +6,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CloudStorageSupportedResponse {
+public class CloudStorageSupportedV4Response {
     private String provider;
 
     private Set<String> fileSystemType = new HashSet<>();

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.datalake;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,14 +10,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DatalakePrerequisiteRequest extends ParametersQueryRequest {
+public class DatalakePrerequisiteV4Request extends ParametersQueryV4Request {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.REQUEST, required = true)

@@ -21,7 +21,7 @@ public class ControllerDescription {
     public static final String USER_DESCRIPTION = "Operations on users";
     public static final String SECURITY_GROUPS_DESCRIPTION = "Operations on security group resources";
     public static final String LDAP_CONFIG_DESCRIPTION = "Operations on LDAP server configurations";
-    public static final String UTIL_DESCRIPTION = "Miscellaneous utility operations";
+    public static final String UTIL_V4_DESCRIPTION = "Miscellaneous utility operations";
     public static final String RDSCONFIG_DESCRIPTION = "Operations on RDS configs";
     public static final String PROXYCONFIG_DESCRIPTION = "Operations on proxy configs";
     public static final String MANAGEMENT_PACK_DESCRIPTION = "Operations on management packs";

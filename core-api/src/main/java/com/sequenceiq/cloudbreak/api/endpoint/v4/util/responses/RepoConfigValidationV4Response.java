@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.repositoryconfig;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("RepoConfigValidationResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class RepoConfigValidationResponse {
+public class RepoConfigValidationV4Response {
 
     @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
     private Boolean ambariBaseUrl;

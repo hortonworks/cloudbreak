@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.DatalakePrerequisiteV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -133,12 +133,12 @@ public class DatalakePrerequisiteServiceTest {
 
     }
 
-    private DatalakePrerequisiteRequest datalakePrerequisiteRequest() {
-        DatalakePrerequisiteRequest datalakePrerequisiteRequest = new DatalakePrerequisiteRequest();
-        datalakePrerequisiteRequest.setKerberos(kerberosRequest());
-        datalakePrerequisiteRequest.setLdap(ldapConfigRequest());
-        datalakePrerequisiteRequest.setDatabases(rdsConfigRequests());
-        return datalakePrerequisiteRequest;
+    private DatalakePrerequisiteV4Request datalakePrerequisiteRequest() {
+        DatalakePrerequisiteV4Request datalakePrerequisiteV4Request = new DatalakePrerequisiteV4Request();
+        datalakePrerequisiteV4Request.setKerberos(kerberosRequest());
+        datalakePrerequisiteV4Request.setLdap(ldapConfigRequest());
+        datalakePrerequisiteV4Request.setDatabases(rdsConfigRequests());
+        return datalakePrerequisiteV4Request;
     }
 
     private Set<DatabaseV4Request> rdsConfigRequests() {

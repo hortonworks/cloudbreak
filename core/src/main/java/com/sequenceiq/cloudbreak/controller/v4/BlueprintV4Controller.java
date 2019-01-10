@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
-import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.NotificationController;
@@ -93,15 +93,15 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    public ParametersQueryResponse getParameters(Long workspaceId, String name) {
+    public ParametersQueryV4Response getParameters(Long workspaceId, String name) {
         Set<String> customParameters = blueprintService.queryCustomParameters(name, getWorkspace(workspaceId));
         Map<String, String> result = new HashMap<>();
         for (String customParameter : customParameters) {
             result.put(customParameter, "");
         }
-        ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
-        parametersQueryResponse.setCustom(result);
-        return parametersQueryResponse;
+        ParametersQueryV4Response parametersQueryV4Response = new ParametersQueryV4Response();
+        parametersQueryV4Response.setCustom(result);
+        return parametersQueryV4Response;
     }
 
     private Workspace getWorkspace(Long workspaceId) {

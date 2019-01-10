@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
@@ -53,7 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.KnoxServicesV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.UtilV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
@@ -105,7 +104,6 @@ public class CloudbreakClient {
             ConnectorV3Endpoint.class,
             ProxyV4Endpoint.class,
             RecipeV4Endpoint.class,
-            RepositoryConfigValidationEndpoint.class,
             SecurityRuleEndpoint.class,
             SettingsEndpoint.class,
             SmartSenseSubscriptionEndpoint.class,
@@ -115,7 +113,7 @@ public class CloudbreakClient {
             StackV3Endpoint.class,
             SubscriptionEndpoint.class,
             UserProfileV4Endpoint.class,
-            UtilEndpoint.class,
+            UtilV4Endpoint.class,
             KerberosConfigV4Endpoint.class
     );
 
@@ -245,10 +243,6 @@ public class CloudbreakClient {
         return getEndpoint(RecipeV4Endpoint.class);
     }
 
-    public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {
-        return getEndpoint(RepositoryConfigValidationEndpoint.class);
-    }
-
     public SecurityRuleEndpoint securityRuleEndpoint() {
         return getEndpoint(SecurityRuleEndpoint.class);
     }
@@ -285,16 +279,12 @@ public class CloudbreakClient {
         return getEndpoint(UserProfileV4Endpoint.class);
     }
 
-    public UtilEndpoint utilEndpoint() {
-        return getEndpoint(UtilEndpoint.class);
-    }
-
     public FileSystemV4Endpoint filesystemV4Endpoint() {
         return getEndpoint(FileSystemV4Endpoint.class);
     }
 
-    public UtilV3Endpoint utilV3Endpoint() {
-        return getEndpoint(UtilV3Endpoint.class);
+    public UtilV4Endpoint utilV4Endpoint() {
+        return getEndpoint(UtilV4Endpoint.class);
     }
 
     public ClusterTemplateV4EndPoint clusterTemplateV4EndPoint() {

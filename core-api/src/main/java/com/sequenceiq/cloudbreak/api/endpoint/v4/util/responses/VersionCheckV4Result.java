@@ -1,21 +1,21 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class VersionCheckResult {
+public class VersionCheckV4Result {
     private boolean versionCheckOk;
 
     private String message;
 
-    public VersionCheckResult() {
+    public VersionCheckV4Result() {
     }
 
-    public VersionCheckResult(boolean versionCheckOk) {
+    public VersionCheckV4Result(boolean versionCheckOk) {
         this.versionCheckOk = versionCheckOk;
     }
 
-    public VersionCheckResult(boolean versionCheckOk, String message) {
+    public VersionCheckV4Result(boolean versionCheckOk, String message) {
         this.versionCheckOk = versionCheckOk;
         this.message = message;
     }

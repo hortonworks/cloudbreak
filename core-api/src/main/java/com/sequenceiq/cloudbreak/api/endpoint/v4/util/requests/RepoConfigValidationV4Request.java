@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.repositoryconfig;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("RepoConfigValidationRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class RepoConfigValidationRequest {
+public class RepoConfigValidationV4Request {
 
     @ApiModelProperty(AmbariRepoDetailsDescription.AMBARI_BASE_URL)
     private String ambariBaseUrl;

@@ -23,7 +23,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
@@ -134,9 +134,9 @@ public class ClusterCreationSetupServiceTest {
         defaultHDPInfo.setVersion(version);
         when(defaultHDPEntries.getEntries()).thenReturn(Collections.singletonMap(version, defaultHDPInfo));
         when(componentConfigProvider.getImage(anyLong())).thenReturn(image);
-        StackMatrix stackMatrix = new StackMatrix();
-        stackMatrix.setHdp(Collections.singletonMap(version, null));
-        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrix);
+        StackMatrixV4 stackMatrixV4 = new StackMatrixV4();
+        stackMatrixV4.setHdp(Collections.singletonMap(version, null));
+        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(false);
         when(clusterService.save(any(Cluster.class))).thenReturn(cluster);
     }
