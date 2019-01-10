@@ -12,8 +12,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityRuleServiceTest {
@@ -31,7 +31,7 @@ public class SecurityRuleServiceTest {
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsEnabled() {
-        SecurityRulesResponse defaultSecurityRules = underTest.getDefaultSecurityRules(true);
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(true);
 
         Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
@@ -44,7 +44,7 @@ public class SecurityRuleServiceTest {
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsDisabled() {
-        SecurityRulesResponse defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
         Assert.assertEquals(2, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
@@ -54,7 +54,7 @@ public class SecurityRuleServiceTest {
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
     }
 
-    private boolean containsServicePort(List<SecurityRuleResponse> securityRulesResponses, String servicePort) {
+    private boolean containsServicePort(List<SecurityRuleV4Response> securityRulesResponses, String servicePort) {
         return securityRulesResponses.stream().anyMatch(securityRulesResponse -> securityRulesResponse.getPorts().contains(servicePort));
     }
 }

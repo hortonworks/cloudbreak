@@ -70,7 +70,6 @@ public class EndpointConfig extends ResourceConfig {
             PlatformParameterV3Controller.class,
             ProxyV4Controller.class,
             RecipesV4Controller.class,
-            SecurityRuleController.class,
             SettingsController.class,
             SmartSenseSubscriptionV4Controller.class,
             StackV1Controller.class,

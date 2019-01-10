@@ -10,7 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRules;
@@ -31,17 +31,17 @@ public class SecurityRulesTests extends CloudbreakTest {
         return new String(StreamUtils.copyToByteArray(applicationContext.getResource("classpath:/templates/gatewayResponses.json").getInputStream()));
     }
 
-    private List<SecurityRuleResponse> getCustomGatewaysResponses() throws IOException {
+    private List<SecurityRuleV4Response> getCustomGatewaysResponses() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(List.class, SecurityRuleResponse.class));
+        return mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(List.class, SecurityRuleV4Response.class));
     }
 
     private String setCustomGatewaysResponses(SecurityRules securityrules) {
         String expectedPort = "";
 
         try {
-            List<SecurityRuleResponse> customGatewaySet = getCustomGatewaysResponses();
+            List<SecurityRuleV4Response> customGatewaySet = getCustomGatewaysResponses();
             expectedPort = getCustomGatewaysResponses().iterator().next().getPorts();
 
             securityrules.getResponse().setGateway(customGatewaySet);
@@ -59,7 +59,7 @@ public class SecurityRulesTests extends CloudbreakTest {
         when(SecurityRules.getDefaultSecurityRules(), " disk types are requested.");
         then(SecurityRules.assertThis(
                 (securityrules, t) -> {
-                    List<SecurityRuleResponse> getewaysList = securityrules.getResponse().getGateway();
+                    List<SecurityRuleV4Response> getewaysList = securityrules.getResponse().getGateway();
 
                     getewaysList.forEach(gateway -> LOGGER.debug(" Security Rule gateway is ::: {}", gateway.getPorts()));
                     Assert.assertFalse(getewaysList.isEmpty(), "Security Rule Gateways should be present in response!");
@@ -74,7 +74,7 @@ public class SecurityRulesTests extends CloudbreakTest {
         when(SecurityRules.getDefaultSecurityRules(), " disk types are requested.");
         then(SecurityRules.assertThis(
                 (securityrules, t) -> {
-                    List<SecurityRuleResponse> coresList = securityrules.getResponse().getCore();
+                    List<SecurityRuleV4Response> coresList = securityrules.getResponse().getCore();
 
                     coresList.forEach(core -> LOGGER.debug(" Security Rule core is ::: {}", core.getId()));
                     Assert.assertFalse(coresList.isEmpty(), "Security Rule Cores should be present in response!");
@@ -92,7 +92,7 @@ public class SecurityRulesTests extends CloudbreakTest {
         then(SecurityRules.assertThis(
                 (securityrules, t) -> {
                     String expectedPort = setCustomGatewaysResponses(securityrules);
-                    List<SecurityRuleResponse> gatewaysList = securityrules.getResponse().getGateway();
+                    List<SecurityRuleV4Response> gatewaysList = securityrules.getResponse().getGateway();
 
                     gatewaysList.forEach(gateway -> {
                         LOGGER.debug(" Security Rule custom gateway is ::: {}", gateway.getPorts());

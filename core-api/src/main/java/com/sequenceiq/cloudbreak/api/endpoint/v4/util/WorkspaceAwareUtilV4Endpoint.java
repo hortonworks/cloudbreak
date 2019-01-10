@@ -27,5 +27,4 @@ public interface WorkspaceAwareUtilV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.KNOX_SERVICES, produces = ContentType.JSON, nickname = "getKnoxServices")
     ExposedServiceV4Responses getKnoxServices(@PathParam("workspaceId") Long workspaceId, @BeanParam BlueprintNameV4Filter blueprintNameV4Filter);
-
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,27 +11,27 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SecurityRulesResponse {
+public class SecurityRulesV4Response {
 
     @ApiModelProperty(SecurityRulesModelDescription.CORE)
-    private List<SecurityRuleResponse> core = new ArrayList<>();
+    private List<SecurityRuleV4Response> core = new ArrayList<>();
 
     @ApiModelProperty(SecurityRulesModelDescription.GATEWAY)
-    private List<SecurityRuleResponse> gateway = new ArrayList<>();
+    private List<SecurityRuleV4Response> gateway = new ArrayList<>();
 
-    public List<SecurityRuleResponse> getCore() {
+    public List<SecurityRuleV4Response> getCore() {
         return core;
     }
 
-    public void setCore(List<SecurityRuleResponse> core) {
+    public void setCore(List<SecurityRuleV4Response> core) {
         this.core = core;
     }
 
-    public List<SecurityRuleResponse> getGateway() {
+    public List<SecurityRuleV4Response> getGateway() {
         return gateway;
     }
 
-    public void setGateway(List<SecurityRuleResponse> gateway) {
+    public void setGateway(List<SecurityRuleV4Response> gateway) {
         this.gateway = gateway;
     }
 }
