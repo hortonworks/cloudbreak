@@ -2,18 +2,7 @@ package com.sequenceiq.cloudbreak.doc;
 
 public class OperationDescriptions {
     public static class BlueprintOpDescription {
-        public static final String POST_PRIVATE = "create blueprint as private resource";
-        public static final String POST_PUBLIC = "create blueprint as public resource";
-        public static final String GET_PRIVATE = "retrieve private blueprints";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) blueprints";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private blueprint by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) blueprint by name";
-        public static final String GET_BY_ID = "retrieve blueprint by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private blueprint by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private blueprint by name";
-        public static final String DELETE_BY_ID = "delete blueprint by id";
         public static final String GET_BY_BLUEPRINT_NAME = "retrieve validation request by blueprint name";
-        public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint id";
         public static final String LIST_BY_WORKSPACE = "list blueprints for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get blueprint by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create blueprint in workspace";
@@ -109,16 +98,6 @@ public class OperationDescriptions {
     }
 
     public static class ClusterTemplateOpDescription {
-        public static final String POST_PRIVATE = "create cluster template as private resource";
-        public static final String POST_PUBLIC = "create cluster template as public resource";
-        public static final String GET_PRIVATE = "retrieve private cluster templates";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) cluster template";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private cluster template by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) cluster template by name";
-        public static final String GET_BY_ID = "retrieve cluster template by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private cluster template by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private cluster template by name";
-        public static final String DELETE_BY_ID = "delete cluster template by id";
         public static final String LIST_BY_WORKSPACE = "list cluster templates for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get cluster template by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create cluster template in workspace";
@@ -126,16 +105,6 @@ public class OperationDescriptions {
     }
 
     public static class RecipeOpDescription {
-        public static final String POST_PRIVATE = "create recipe as private resource";
-        public static final String POST_PUBLIC = "create recipe as public resource";
-        public static final String GET_PRIVATE = "retrieve private recipes";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) recipes";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private recipe by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) recipe by name";
-        public static final String GET_BY_ID = "retrieve recipe by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private recipe by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private recipe by name";
-        public static final String DELETE_BY_ID = "delete recipe by id";
         public static final String GET_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
         public static final String LIST_BY_WORKSPACE = "list recipes for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get recipe by name in workspace";
@@ -147,10 +116,7 @@ public class OperationDescriptions {
         public static final String POST = "create an workspace";
         public static final String GET = "retrieve workspaces";
         public static final String GET_BY_NAME = "retrieve an workspace by name";
-        public static final String GET_BY_ID = "retrieve an workspace by id";
-        public static final String DELETE_BY_ID = "delete an workspace by id";
         public static final String DELETE_BY_NAME = "delete an workspace by name";
-        public static final String GET_REQUEST_BY_NAME = "retrieve workspace request by workspace name";
         public static final String CHANGE_USERS = "change users and their permissions in the workspace";
         public static final String REMOVE_USERS = "removes users from the given workspace by their userIds";
         public static final String ADD_USERS = "adds users to the given workspace";
@@ -179,16 +145,6 @@ public class OperationDescriptions {
     }
 
     public static class LdapConfigOpDescription {
-        public static final String POST_PRIVATE = "create LDAP config as private resource";
-        public static final String POST_PUBLIC = "create LDAP config as public resource";
-        public static final String GET_PRIVATE = "retrieve private LDAP configs";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) LDAP configs";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private LDAP config by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) LDAP config by name";
-        public static final String GET_BY_ID = "retrieve LDAP config by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private LDAP config by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private LDAP config by name";
-        public static final String DELETE_BY_ID = "delete LDAP config by id";
         public static final String POST_CONNECTION_TEST = "test that the connection could be established of an existing or new LDAP config";
         public static final String GET_REQUEST = "get request";
         public static final String LIST_BY_WORKSPACE = "list LDAP configs for the given workspace";
@@ -204,8 +160,6 @@ public class OperationDescriptions {
     }
 
     public static class UtilityOpDescription {
-        public static final String TEST_DATABASE = "tests a database connection parameters";
-        public static final String CREATE_DATABASE = "create a database for the service in the RDS if the connection could be created";
         public static final String STACK_MATRIX = "returns default ambari details for distinct HDP and HDF";
         public static final String KNOX_SERVICES = "returns supported knox services";
         public static final String CLOUD_STORAGE_MATRIX = "returns supported cloud storage for stack version";
@@ -215,7 +169,6 @@ public class OperationDescriptions {
     }
 
     public static class DatabaseOpDescription {
-        public static final String GET_BY_ID = "retrieve RDS configuration by id";
         public static final String POST_CONNECTION_TEST = "test RDS connectivity";
         public static final String LIST_BY_WORKSPACE = "list RDS configs for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get RDS config by name in workspace";
@@ -227,16 +180,6 @@ public class OperationDescriptions {
     }
 
     public static class ProxyConfigOpDescription {
-        public static final String POST_PRIVATE = "create proxy configuration as private resource";
-        public static final String POST_PUBLIC = "create proxy configuration as public resource";
-        public static final String GET_PRIVATE = "retrieve private proxy configurations";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) proxy configurations";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private proxy configuration by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) proxy configuration by name";
-        public static final String GET_BY_ID = "retrieve proxy configuration by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private proxy configuration by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private proxy configuration by name";
-        public static final String DELETE_BY_ID = "delete proxy configuration by id";
         public static final String LIST_BY_WORKSPACE = "list proxy configurations for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get proxy configuration by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create proxy configuration in workspace";

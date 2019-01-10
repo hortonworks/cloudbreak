@@ -25,7 +25,7 @@ public interface FileSystemV4Endpoint {
     @GET
     @Path("parameters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParametersV4")
+    @ApiOperation(value = OperationDescriptions.FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParameters")
     FileSystemParametersV4Response getFileSystemParameters(@PathParam("workspaceId") Long workspaceId,
             @BeanParam FileSystemParametersV4Filter fileSystemParametersV4Filter);
 }

@@ -1,19 +1,16 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Generated;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor"
