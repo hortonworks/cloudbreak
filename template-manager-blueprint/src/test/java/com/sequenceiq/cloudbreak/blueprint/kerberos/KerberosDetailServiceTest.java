@@ -99,6 +99,22 @@ public class KerberosDetailServiceTest {
         Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(config));
     }
 
+    public void testAmbariManagedKrb5ConfMissing() throws IOException {
+        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(config));
+    }
+
+    @Test
+    public void testAmbariManagedKrb5ConfTrue() throws IOException {
+        config.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":true}}}");
+        Assert.assertTrue(underTest.isAmbariManagedKrb5Conf(config));
+    }
+
+    @Test
+    public void testAmbariManagedKrb5ConfFalse() throws IOException {
+        config.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":false}}}");
+        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(config));
+    }
+
     @Test
     public void testResolveTypeForKerberos() {
         config.setType(KerberosType.FREEIPA);

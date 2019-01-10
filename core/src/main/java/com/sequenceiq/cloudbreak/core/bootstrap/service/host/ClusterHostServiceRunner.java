@@ -192,7 +192,9 @@ public class ClusterHostServiceRunner {
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveCustomNameservers(stack, cluster.getKerberosConfig(), servicePillar);
-        if (cluster.getKerberosConfig() != null && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
+        if (cluster.getKerberosConfig() != null
+                && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())
+                && !kerberosDetailService.isAmbariManagedKrb5Conf(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {

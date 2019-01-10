@@ -66,21 +66,35 @@ public class KerberosDetailService {
     }
 
     public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
-        if (isEmpty(kerberosConfig.getDescriptor())) {
-            return true;
+        return getBooleanConfigValue(kerberosConfig.getDescriptor(), new String[] { "kerberos-env", "properties", "install_packages" }, true);
+    }
+
+    public boolean isAmbariManagedKrb5Conf(@Nonnull KerberosConfig kerberosConfig) throws IOException {
+        return getBooleanConfigValue(kerberosConfig.getKrb5Conf(), new String[] { "krb5-conf", "properties", "manage_krb5_conf" }, false);
+    }
+
+    private boolean getBooleanConfigValue(String configJson, String[] path, boolean defaultValue) throws IOException {
+        if (isEmpty(configJson)) {
+            return defaultValue;
         }
-        try {
-            JsonNode node = JsonUtil.readTree(kerberosConfig.getDescriptor())
-                    .get("kerberos-env").get("properties").get("install_packages");
-            return node.asBoolean();
-        } catch (NullPointerException ignored) {
-            return true;
+        JsonNode node = JsonUtil.readTree(configJson);
+        for (String p : path) {
+            node = node.get(p);
+            if (node == null) {
+                return defaultValue;
+            }
         }
+        return node.asBoolean();
     }
 
     public Map<String, Object> getKerberosEnvProperties(@Nonnull KerberosConfig kerberosConfig) {
         Map<String, Object> kerberosEnv = (Map<String, Object>) gson
                 .fromJson(kerberosConfig.getDescriptor(), Map.class).get("kerberos-env");
         return (Map<String, Object>) kerberosEnv.get("properties");
+    }
+
+    public Map<String, Object> getKrb5ConfProperties(@Nonnull KerberosConfig kerberosConfig) {
+        Map<String, Object> krb5Conf = (Map<String, Object>) gson.fromJson(kerberosConfig.getKrb5Conf(), Map.class).get("krb5-conf");
+        return (Map<String, Object>) krb5Conf.get("properties");
     }
 }
