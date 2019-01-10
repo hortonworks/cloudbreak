@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.connector;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -42,7 +41,7 @@ public interface ConnectorV4Endpoint {
             nickname = "getVmTypesByCredentialAndWorkspace")
     PlatformVmtypesV4Response getVmTypesByCredential(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
-    @POST
+    @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
@@ -56,28 +55,28 @@ public interface ConnectorV4Endpoint {
             nickname = "getDisktypesForWorkspace")
     PlatformDisksV4Response getDisktypes(@PathParam("workspaceId") Long workspaceId);
 
-    @POST
+    @GET
     @Path("networks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_NETWORKS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformNetworksForWorkspace")
     PlatformNetworksV4Response getCloudNetworks(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
-    @POST
+    @GET
     @Path("ip_pools")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_IPPOOLS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getIpPoolsCredentialIdForWorkspace")
     PlatformIpPoolsV4Response getIpPoolsCredentialId(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
-    @POST
+    @GET
     @Path("gateways")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_GATEWAYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getGatewaysCredentialIdForWorkspace")
     PlatformGatewaysV4Response getGatewaysCredentialId(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
-    @POST
+    @GET
     @Path("encryption_keys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_ENCRYPTIONKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
@@ -91,21 +90,21 @@ public interface ConnectorV4Endpoint {
             nickname = "createRecommendationForWorkspace")
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId, @BeanParam RecommendationV4Filter recommendationV4Filter);
 
-    @POST
+    @GET
     @Path("security_groups")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SECURITYGROUPS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSecurityGroupsForWorkspace")
     PlatformSecurityGroupsV4Response getSecurityGroups(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
-    @POST
+    @GET
     @Path("ssh_keys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SSHKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSShKeysForWorkspace")
     PlatformSshKeysV4Response getCloudSshKeys(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
-    @POST
+    @GET
     @Path("access_configs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
