@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
@@ -75,7 +74,6 @@ public class CloudbreakIdentityClient {
             AuditEventV4Endpoint.class,
             AutoscaleEndpoint.class,
             BlueprintV4Endpoint.class,
-            EventEndpoint.class,
             EventV3Endpoint.class,
             ClusterV1Endpoint.class,
             ClusterTemplateV4EndPoint.class,
@@ -171,10 +169,6 @@ public class CloudbreakIdentityClient {
 
     public BlueprintV4Endpoint blueprintV4Endpoint() {
         return getEndpoint(BlueprintV4Endpoint.class);
-    }
-
-    public EventEndpoint eventEndpoint() {
-        return getEndpoint(EventEndpoint.class);
     }
 
     public EventV3Endpoint eventV3Endpoint() {
