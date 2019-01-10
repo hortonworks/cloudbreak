@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/{workspaceId}/audits")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/audits", description = ControllerDescription.AUDIT_V3_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/audits", description = ControllerDescription.AUDIT_V4_DESCRIPTION, protocols = "http,https")
 public interface AuditEventV4Endpoint {
 
     @GET

@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
@@ -292,9 +293,14 @@ public class CloudbreakIdentityClient {
         return getEndpoint(FileSystemV4Endpoint.class);
     }
 
-    public UtilV4Endpoint utilV3Endpoint() {
+    public UtilV4Endpoint utilV4Endpoint() {
         return getEndpoint(UtilV4Endpoint.class);
     }
+
+    public WorkspaceAwareUtilV4Endpoint workspaceAwareUtilV4Endpoint() {
+        return getEndpoint(WorkspaceAwareUtilV4Endpoint.class);
+    }
+
 
     public ClusterTemplateV4EndPoint clusterTemplateV3EndPoint() {
         return getEndpoint(ClusterTemplateV4EndPoint.class);
