@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -345,8 +346,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public Images propagateImagesIfRequested(Long workspaceId, String name, boolean withImages) {
-        if (withImages) {
+    public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages) {
+        if (BooleanUtils.isTrue(withImages)) {
             Set<String> platforms = preferencesService.enabledPlatforms();
             try {
                 return getImages(workspaceId, name, platforms).getImages();
