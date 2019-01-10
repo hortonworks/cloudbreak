@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.DatabaseOpDescription
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -38,7 +39,7 @@ public interface DatabaseV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "listDatabasesByWorkspace")
-    DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam DatabaseV4ListFilter databaseV4ListFilter);
+    DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @ApiParam @BeanParam DatabaseV4ListFilter databaseV4ListFilter);
 
     @POST
     @Path("")

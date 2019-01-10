@@ -17,11 +17,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.Environmen
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.DatalakePrerequisiteV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakePrerequisiteV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EnvironmentOpDescription;
 
 import io.swagger.annotations.Api;
@@ -89,4 +92,14 @@ public interface EnvironmentV4Endpoint {
             nickname = "registerExternalDatalake")
     DetailedEnvironmentV4Response registerExternalDatalake(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
         @Valid RegisterDatalakeV4Request request);
+
+    @POST
+    @Path("/{name}/register_datalake_prerequisites")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.DATALAKE_PREREQUISITES, produces = ContentType.JSON,
+            nickname = "registerDatalakePrerequisites")
+    DatalakePrerequisiteV4Response registerDatalakePrerequisite(
+            @PathParam("workspaceId") Long workspaceId,
+            @PathParam("name") String environmentName,
+            @Valid DatalakePrerequisiteV4Request datalakePrerequisiteV4Request);
 }

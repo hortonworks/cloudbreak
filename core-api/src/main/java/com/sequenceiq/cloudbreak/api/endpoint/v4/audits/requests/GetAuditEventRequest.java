@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.audits.requests;
 
 import javax.ws.rs.QueryParam;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
 public class GetAuditEventRequest {
 
     @QueryParam("resourceType")

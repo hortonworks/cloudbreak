@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter;
 
 import javax.ws.rs.QueryParam;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
 public class DatabaseV4ListFilter {
 
     @QueryParam("environment")

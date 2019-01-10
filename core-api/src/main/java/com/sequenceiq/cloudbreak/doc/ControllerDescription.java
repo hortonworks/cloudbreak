@@ -22,6 +22,7 @@ public class ControllerDescription {
     public static final String SECURITY_GROUPS_DESCRIPTION = "Operations on security group resources";
     public static final String LDAP_CONFIG_DESCRIPTION = "Operations on LDAP server configurations";
     public static final String UTIL_V4_DESCRIPTION = "Miscellaneous utility operations";
+    public static final String WORKSPACE_UTIL_V4_DESCRIPTION = "Miscellaneous workspace aware utility operations";
     public static final String RDSCONFIG_DESCRIPTION = "Operations on RDS configs";
     public static final String PROXYCONFIG_DESCRIPTION = "Operations on proxy configs";
     public static final String MANAGEMENT_PACK_DESCRIPTION = "Operations on management packs";
@@ -44,7 +45,7 @@ public class ControllerDescription {
     public static final String SMARTSENSE_SUBSCRIPTION_V3_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
     public static final String STACK_V3_DESCRIPTION = "Operations on stack by workspace";
     public static final String RDSCONFIGS_V3_DESCRIPTION = "Operations on RDS configs by workspace";
-    public static final String AUDIT_V3_DESCRIPTION = "Operations on audit events by workspace";
+    public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String KNOX_SERVICES_V3_DESCRIPTION = "Operations on Knox services by workspace and blueprint";
     public static final String CONNECTOR_V3_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
     public static final String USER_V3_DESCRIPTION = "Operations on users in workspace";
@@ -54,7 +55,6 @@ public class ControllerDescription {
     public static final String USER_PROFILES_V4_DESCRIPTION = "Operations on user profiles in workspace";
     public static final String FILESYSTEMS_V4_DESCRIPTION = "Operations on filesystems";
     public static final String KERBEROS_CONFIG_V4_DESCRIPTION = "Operations on kerberos configs.";
-    public static final String AUDIT_V4_DESCRIPTION = "Operations on audit events by workspace";
     public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
     public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source "
