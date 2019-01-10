@@ -15,9 +15,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.SecurityRulesV4Filt
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.StackVersionV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -66,4 +68,11 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = OperationDescriptions.SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
             notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
     SecurityRulesV4Response getDefaultSecurityRules(@BeanParam SecurityRulesV4Filter securityRulesV4Filter);
+
+    @POST
+    @Path("subscribe")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES,
+            nickname = "subscribeSubscription")
+    SubscriptionV4Response subscribe(@Valid SubscriptionV4Request subscriptionV4Request);
 }

@@ -1,8 +1,8 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses.cloudbreakEventV4Responses;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -15,8 +15,9 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.filters.EventSinceV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -34,7 +35,7 @@ import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(StructuredEventEntity.class)
-public class CloudbreakEventV3Controller implements EventV3Endpoint {
+public class CloudbreakEventV4Controller implements EventV4Endpoint {
 
     @Inject
     private CloudbreakEventsFacade cloudbreakEventsFacade;
@@ -55,24 +56,24 @@ public class CloudbreakEventV3Controller implements EventV3Endpoint {
     private StackService stackService;
 
     @Override
-    public List<CloudbreakEventsJson> getCloudbreakEventsSince(Long workspaceId, Long since) {
+    public CloudbreakEventV4Responses list(Long workspaceId, EventSinceV4Filter since) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return cloudbreakEventsFacade.retrieveEventsForWorkspace(workspace, since);
+        return cloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspace, since.getSince()));
     }
 
     @Override
-    public List<CloudbreakEventsJson> getCloudbreakEventsByStack(Long workspaceId, String name) {
-        return cloudbreakEventsFacade.retrieveEventsByStack(getStackIfAvailable(workspaceId, name).getId());
+    public CloudbreakEventV4Responses get(Long workspaceId, String name) {
+        return cloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsByStack(getStackIfAvailable(workspaceId, name).getId()));
     }
 
     @Override
-    public StructuredEventContainer getStructuredEvents(Long workspaceId, String name) {
+    public StructuredEventContainer structured(Long workspaceId, String name) {
         return getStructuredEventsForStack(name, workspaceId);
     }
 
     @Override
-    public Response getStructuredEventsZip(Long workspaceId, String name) {
+    public Response download(Long workspaceId, String name) {
         StructuredEventContainer events = getStructuredEventsForStack(name, workspaceId);
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {

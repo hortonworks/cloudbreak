@@ -10,7 +10,7 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
@@ -90,7 +90,7 @@ public class StackResponse extends StackBase {
     private Set<HardwareInfoGroupResponse> hardwareInfoGroups = new HashSet<>();
 
     @ApiModelProperty(StackModelDescription.EVENTS)
-    private List<CloudbreakEventsJson> cloudbreakEvents = new ArrayList<>();
+    private List<CloudbreakEventV4Response> cloudbreakEvents = new ArrayList<>();
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -232,11 +232,11 @@ public class StackResponse extends StackBase {
         this.hardwareInfoGroups = hardwareInfoGroups;
     }
 
-    public List<CloudbreakEventsJson> getCloudbreakEvents() {
+    public List<CloudbreakEventV4Response> getCloudbreakEvents() {
         return cloudbreakEvents;
     }
 
-    public void setCloudbreakEvents(List<CloudbreakEventsJson> cloudbreakEvents) {
+    public void setCloudbreakEvents(List<CloudbreakEventV4Response> cloudbreakEvents) {
         this.cloudbreakEvents = cloudbreakEvents;
     }
 

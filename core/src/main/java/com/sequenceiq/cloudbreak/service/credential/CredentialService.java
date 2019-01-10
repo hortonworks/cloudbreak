@@ -26,7 +26,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisites;
@@ -342,7 +342,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));

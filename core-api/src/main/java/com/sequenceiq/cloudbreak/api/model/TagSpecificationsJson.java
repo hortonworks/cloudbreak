@@ -5,8 +5,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TagSpecificationsJson implements JsonEntity {
 

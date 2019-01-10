@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -37,7 +37,7 @@ public abstract class NotificationController {
     protected final void notify(ResourceEvent resourceEvent) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         Long orgId = restRequestThreadLocalService.getRequestedWorkspaceId();
-        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventTimestamp(new Date().getTime());
         notification.setUserId(userService.getOrCreate(cloudbreakUser).getUserId());
         notification.setWorkspaceId(orgId);

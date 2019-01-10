@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.event;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("CloudbreakEvent")
-public class CloudbreakEventsJson implements JsonEntity {
+public class CloudbreakEventV4Response implements JsonEntity {
 
     @ApiModelProperty(EventModelDescription.TYPE)
     private String eventType;

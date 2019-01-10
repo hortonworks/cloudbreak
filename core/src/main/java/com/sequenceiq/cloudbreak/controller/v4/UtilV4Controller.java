@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
@@ -15,12 +16,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.SecurityRulesV4Filt
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.StackVersionV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
+import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
@@ -29,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationServi
 import com.sequenceiq.cloudbreak.service.datalake.DatalakePrerequisiteService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
+import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
@@ -73,6 +78,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Inject
     private SecurityRuleService securityRuleService;
 
+    @Inject
+    private SubscriptionService subscriptionService;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -104,5 +112,12 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Override
     public SecurityRulesV4Response getDefaultSecurityRules(SecurityRulesV4Filter securityRulesV4Filter) {
         return securityRuleService.getDefaultSecurityRules(securityRulesV4Filter.isKnoxEnabled());
+    }
+
+    @Override
+    public SubscriptionV4Response subscribe(SubscriptionV4Request subscriptionV4Request) {
+        Subscription subscription = new Subscription(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(),
+                subscriptionV4Request.getEndpointUrl());
+        return new SubscriptionV4Response(subscriptionService.subscribe(subscription));
     }
 }
