@@ -9,14 +9,14 @@ import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworksV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.NetworksV3Action;
 
 public class Networks extends Entity {
     private static final String NETWORKS = "NETWORKS";
 
-    private final PlatformResourceV4Request platformResourceV4Request = new PlatformResourceV4Request();
+    private final PlatformResourceV4Filter platformResourceV4Filter = new PlatformResourceV4Filter();
 
     private PlatformNetworksV4Response response;
 
@@ -25,32 +25,22 @@ public class Networks extends Entity {
     }
 
     public Networks withAvailabilityZone(String availabilityZone) {
-        platformResourceV4Request.setAvailabilityZone(availabilityZone);
-        return this;
-    }
-
-    public Networks withCredentialId(Long credId) {
-        platformResourceV4Request.setCredentialId(credId);
+        platformResourceV4Filter.setAvailabilityZone(availabilityZone);
         return this;
     }
 
     public Networks withCredentialName(String credName) {
-        platformResourceV4Request.setCredentialName(credName);
+        platformResourceV4Filter.setCredentialName(credName);
         return this;
     }
 
     public Networks withPlatformVariant(String platformVariant) {
-        platformResourceV4Request.setPlatformVariant(platformVariant);
+        platformResourceV4Filter.setPlatformVariant(platformVariant);
         return this;
     }
 
     public Networks withRegion(String region) {
-        platformResourceV4Request.setRegion(region);
-        return this;
-    }
-
-    public Networks withSetFilters(Map<String, String> filter) {
-        platformResourceV4Request.setFilters(filter);
+        platformResourceV4Filter.setRegion(region);
         return this;
     }
 
@@ -70,8 +60,8 @@ public class Networks extends Entity {
         return response.getNetworks();
     }
 
-    public PlatformResourceV4Request getRequest() {
-        return platformResourceV4Request;
+    public PlatformResourceV4Filter getRequest() {
+        return platformResourceV4Filter;
     }
 
     public static Action<Networks> post() {

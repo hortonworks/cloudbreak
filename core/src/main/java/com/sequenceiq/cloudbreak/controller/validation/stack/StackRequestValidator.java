@@ -16,7 +16,7 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
@@ -168,9 +168,8 @@ public class StackRequestValidator implements Validator<StackRequest> {
         }
     }
 
-    private PlatformResourceV4Request getRequestForEncryptionKeys(Long credentialId, String region) {
-        PlatformResourceV4Request request = new PlatformResourceV4Request();
-        request.setCredentialId(credentialId);
+    private PlatformResourceV4Filter getRequestForEncryptionKeys(Long credentialId, String region) {
+        PlatformResourceV4Filter request = new PlatformResourceV4Filter();
         request.setRegion(region);
         return request;
     }

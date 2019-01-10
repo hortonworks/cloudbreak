@@ -1,33 +1,23 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.RecommendationV4Request;
-import com.sequenceiq.cloudbreak.api.model.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.RecommendationV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RecommendationV4Response;
 
-public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationV4Request, RecommendationV4Response, RecommendationEntity> {
+public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationV4Filter, RecommendationV4Response, RecommendationEntity> {
 
     static final String RECOMMENDATION = "RECOMMENDATION";
 
     private RecommendationEntity(String newId) {
         super(newId);
-        setRequest(new RecommendationV4Request());
+        setRequest(new RecommendationV4Filter());
     }
 
     RecommendationEntity() {
         this(RECOMMENDATION);
     }
 
-    public RecommendationEntity withBlueprintId(Long id) {
-        getRequest().setBlueprintId(id);
-        return this;
-    }
-
     public RecommendationEntity withBlueprintName(String name) {
         getRequest().setBlueprintName(name);
-        return this;
-    }
-
-    public RecommendationEntity withCredentialId(Long id) {
-        getRequest().setCredentialId(id);
         return this;
     }
 

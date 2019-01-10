@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.DatabaseOpDescription
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -39,7 +38,7 @@ public interface DatabaseV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "listDatabasesByWorkspace")
-    DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @ApiParam @BeanParam DatabaseV4ListFilter databaseV4ListFilter);
+    DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam DatabaseV4ListFilter databaseV4ListFilter);
 
     @POST
     @Path("")

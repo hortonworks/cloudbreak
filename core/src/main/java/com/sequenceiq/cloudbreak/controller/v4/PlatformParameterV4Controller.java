@@ -15,12 +15,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEnc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformGatewaysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworksV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSecurityGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
-import com.sequenceiq.cloudbreak.api.model.RecommendationV4Request;
-import com.sequenceiq.cloudbreak.api.model.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.RecommendationV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
@@ -47,14 +47,14 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
     private PlatformParameterService platformParameterService;
 
     @Override
-    public PlatformVmtypesV4Response getVmTypesByCredential(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformVmtypesV4Response getVmTypesByCredential(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(cloudVmTypes, PlatformVmtypesV4Response.class);
     }
 
     @Override
-    public RegionV4Response getRegionsByCredential(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public RegionV4Response getRegionsByCredential(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudRegions regions = platformParameterService.getRegionsByCredential(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(regions, RegionV4Response.class);
@@ -67,53 +67,53 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
     }
 
     @Override
-    public PlatformNetworksV4Response getCloudNetworks(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformNetworksV4Response getCloudNetworks(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudNetworks networks = platformParameterService.getCloudNetworks(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(networks, PlatformNetworksV4Response.class);
     }
 
     @Override
-    public PlatformIpPoolsV4Response getIpPoolsCredentialId(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformIpPoolsV4Response getIpPoolsCredentialId(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(ipPools, PlatformIpPoolsV4Response.class);
     }
 
     @Override
-    public PlatformGatewaysV4Response getGatewaysCredentialId(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformGatewaysV4Response getGatewaysCredentialId(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudGateWays gateWays = platformParameterService.getGatewaysCredentialId(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(gateWays, PlatformGatewaysV4Response.class);
     }
 
     @Override
-    public PlatformEncryptionKeysV4Response getEncryptionKeys(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformEncryptionKeysV4Response getEncryptionKeys(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(encryptionKeys, PlatformEncryptionKeysV4Response.class);
     }
 
     @Override
-    public RecommendationV4Response createRecommendation(Long workspaceId, RecommendationV4Request recommendationV4Request) {
-        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, recommendationV4Request), RecommendationV4Response.class);
+    public RecommendationV4Response createRecommendation(Long workspaceId, RecommendationV4Filter recommendationV4Filter) {
+        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, recommendationV4Filter), RecommendationV4Response.class);
     }
 
     @Override
-    public PlatformSecurityGroupsV4Response getSecurityGroups(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformSecurityGroupsV4Response getSecurityGroups(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(securityGroups, PlatformSecurityGroupsV4Response.class);
     }
 
     @Override
-    public PlatformSshKeysV4Response getCloudSshKeys(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformSshKeysV4Response getCloudSshKeys(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(conversionService.convert(resourceRequestJson, PlatformResourceRequest.class));
         return conversionService.convert(sshKeys, PlatformSshKeysV4Response.class);
     }
 
     @Override
-    public PlatformAccessConfigsV4Response getAccessConfigs(Long workspaceId, PlatformResourceV4Request resourceRequestJson) {
+    public PlatformAccessConfigsV4Response getAccessConfigs(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(accessConfigs, PlatformAccessConfigsV4Response.class);

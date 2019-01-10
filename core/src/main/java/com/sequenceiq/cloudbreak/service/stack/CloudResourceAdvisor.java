@@ -52,17 +52,17 @@ public class CloudResourceAdvisor {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, User user,
+    public PlatformRecommendation createForBlueprint(String blueprintName, PlatformResourceRequest resourceRequest, User user,
             Workspace workspace) {
         String cloudPlatform = resourceRequest.getCloudPlatform();
         String region = resourceRequest.getRegion();
         String availabilityZone = resourceRequest.getAvailabilityZone();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
-        LOGGER.debug("Advising resources for blueprintId: {}, blueprintName: {}, provider: {} and region: {}.",
-                blueprintId, blueprintName, cloudPlatform, region);
+        LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
+                blueprintName, cloudPlatform, region);
 
-        Blueprint blueprint = getBlueprint(blueprintName, blueprintId, user, workspace);
+        Blueprint blueprint = getBlueprint(blueprintName, workspace);
         String blueprintText = blueprint.getBlueprintText();
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
         componentsByHostGroup
@@ -103,12 +103,9 @@ public class CloudResourceAdvisor {
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
-    private Blueprint getBlueprint(String blueprintName, Long blueprintId, User user, Workspace workspace) {
-        Blueprint bp;
-        if (blueprintId != null) {
-            LOGGER.debug("Try to get validation by id: {}.", blueprintId);
-            bp = blueprintService.get(blueprintId);
-        } else {
+    private Blueprint getBlueprint(String blueprintName, Workspace workspace) {
+        Blueprint bp = null;
+        if (!Strings.isNullOrEmpty(blueprintName)) {
             LOGGER.debug("Try to get validation by name: {}.", blueprintName);
             bp = blueprintService.getByNameForWorkspace(blueprintName, workspace);
         }

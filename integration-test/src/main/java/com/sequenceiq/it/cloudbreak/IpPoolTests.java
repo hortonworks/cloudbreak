@@ -29,7 +29,7 @@ public class IpPoolTests extends CloudbreakTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IpPoolTests.class);
 
-    private Long credentialId;
+    private String credentialName;
 
     private CloudProvider cloudProvider;
 
@@ -50,13 +50,13 @@ public class IpPoolTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
 
         IntegrationTestContext it = getItContext();
-        credentialId  = Credential.getTestContextCredential().apply(it).getResponse().getId();
+        credentialName  = Credential.getTestContextCredential().apply(it).getResponse().getName();
     }
 
     @Test
     public void testGetIpPoolsWithCredentialId() throws Exception {
         given(IpPool.request()
-                .withCredentialId(credentialId)
+                .withCredentialName(credentialName)
                 .withCredentialName("")
                 .withRegion(cloudProvider.region()), "with credential id"
         );
@@ -67,7 +67,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test
     public void testGetIpPoolsWithCredentialName() throws Exception {
         given(IpPool.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName()), "with credential name"
         );
         when(IpPool.get(), "get the request");
@@ -77,7 +76,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test
     public void testGetIpPoolsWithAvZone() throws Exception {
         given(IpPool.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withAvailabilityZone(cloudProvider.availabilityZone()), "with availability zone "
         );
@@ -88,7 +86,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test
     public void testGetIpPoolsWithInvalidAvZone() throws Exception {
         given(IpPool.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withAvailabilityZone(INVALID_AV_ZONE), "with invalid availability zone "
         );
@@ -99,7 +96,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetIpPoolsCredIsMissing() throws Exception {
         given(IpPool.request()
-                .withCredentialId(null)
                 .withCredentialName(null), "without credential"
         );
         when(IpPool.get(), "get the request");
@@ -109,7 +105,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetIpPoolsInvalidCredId() throws Exception {
         given(IpPool.request()
-                .withCredentialId(INVALID_CRED_ID)
                 .withCredentialName(null), "with invalid credential id"
         );
         when(IpPool.get(), "get the request");
@@ -119,7 +114,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetIpPoolsInvalidCredName() throws Exception {
         given(IpPool.request()
-                .withCredentialId(null)
                 .withCredentialName(INVALID_CRED_NAME), "with invalid credential name"
         );
         when(IpPool.get(), "get the request");
@@ -129,7 +123,6 @@ public class IpPoolTests extends CloudbreakTest {
     @Test
     public void testGetIpPoolsInvalidRegion() throws Exception {
         given(IpPool.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName()), "with invalid region"
         );
         when(IpPool.get(), "get the request");
