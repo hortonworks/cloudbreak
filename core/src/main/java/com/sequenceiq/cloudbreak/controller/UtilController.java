@@ -17,10 +17,10 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4BuildResponse;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4BuildRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
@@ -115,13 +114,6 @@ public class UtilController implements UtilEndpoint {
     @Override
     public StackMatrix getStackMatrix() {
         return stackMatrixService.getStackMatrix();
-    }
-
-    @Override
-    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return serviceEndpointCollector.getKnoxServices(blueprintName, workspace);
     }
 
     @Override
