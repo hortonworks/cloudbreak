@@ -623,7 +623,7 @@ public class AmbariDecommissioner {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to start HDFS/YARN/HBASE services", e);
+            LOGGER.info("Failed to start HDFS/YARN/HBASE services", e);
             throw new BadRequestException("Failed to start the HDFS, YARN and HBASE services, it's possible that some of the nodes are unavailable");
         }
 

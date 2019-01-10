@@ -35,7 +35,7 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
                 }
             }
         } catch (Exception ignored) {
-            LOGGER.info("Did not join all hosts yet, polling");
+            LOGGER.debug("Did not join all hosts yet, polling");
             return false;
         }
         return true;

@@ -75,7 +75,7 @@ public class StackAction {
             get(integrationTestContext, entity);
             // TODO: Exception class is too wide. A narrower exception should be caught (e.g. NotFound or something like that.)
         } catch (Exception e) {
-            LOGGER.info("Failed to get stack. Trying to create it.", e);
+            LOGGER.warn("Failed to get stack. Trying to create it.", e);
             new StackPostStrategy().doAction(integrationTestContext, entity);
         }
     }
