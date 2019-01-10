@@ -6,7 +6,7 @@ parameters:
   awsAvailabilityZone: eu-west-1a
   awsCredentialName: autotesting-clusters-aws
 listeners:
-  - com.sequenceiq.it.cloudbreakCredent.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
