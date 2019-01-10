@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
@@ -51,9 +52,9 @@ public class ClusterTemplateV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all cluster templates. ");
         clusterTemplateV4Entity.setResponses(
-                client.getCloudbreakClient()
+                ClusterTemplateUtil.getResponseFromViews(client.getCloudbreakClient()
                         .clusterTemplateV4EndPoint()
-                        .list(workspaceId).getClusterTemplates());
+                        .list(workspaceId).getResponses()));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

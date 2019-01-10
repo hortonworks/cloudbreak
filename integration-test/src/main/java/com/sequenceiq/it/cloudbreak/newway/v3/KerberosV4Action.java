@@ -8,8 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -67,8 +68,8 @@ public class KerberosV4Action {
         Log.log(" get all private blueprints. ");
         ListV4Filter listV4Filter = new ListV4Filter();
         listV4Filter.setAttachGlobal(false);
-        KerberosViewV4Responses kerberoses = client.getCloudbreakClient().kerberosConfigV4Endpoint().list(workspaceId, listV4Filter);
-        Set<KerberosV4Response> detailedKerberoses = kerberoses.getKerberosConfigs().stream().map(krv ->
+        GeneralSetV4Response<KerberosViewV4Response> kerberoses = client.getCloudbreakClient().kerberosConfigV4Endpoint().list(workspaceId, listV4Filter);
+        Set<KerberosV4Response> detailedKerberoses = kerberoses.getResponses().stream().map(krv ->
                 client.getCloudbreakClient().kerberosConfigV4Endpoint().get(workspaceId, krv.getName())).collect(Collectors.toSet());
         kerberosEntity.setResponses(detailedKerberoses);
     }

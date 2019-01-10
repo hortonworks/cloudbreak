@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses.databaseListResponse;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,13 +12,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -51,12 +49,12 @@ public class DatabaseV4Controller extends NotificationController implements Data
     private ConversionService conversionService;
 
     @Override
-    public DatabaseV4Responses list(Long workspaceId, DatabaseV4ListFilter databaseV4ListFilter) {
+    public GeneralSetV4Response<DatabaseV4Response> list(Long workspaceId, DatabaseV4ListFilter databaseV4ListFilter) {
         Set<DatabaseV4Response> databaseV4Respons = databaseService.findAllInWorkspaceAndEnvironment(workspaceId,
                 databaseV4ListFilter.getEnvironment(), databaseV4ListFilter.getAttachGlobal()).stream()
                 .map(database -> conversionService.convert(database, DatabaseV4Response.class))
                 .collect(Collectors.toSet());
-        return databaseListResponse(databaseV4Respons);
+        return GeneralSetV4Response.propagateResponses(databaseV4Respons);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.audits;
 
-import java.util.List;
-
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -12,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.requests.GetAuditEventRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
 import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -31,7 +30,7 @@ public interface AuditEventV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsInWorkspace")
-    List<AuditEvent> getAuditEvents(@PathParam("workspaceId") Long workspaceId, @BeanParam GetAuditEventRequest getAuditRequest);
+    GeneralListV4Response<AuditEvent> getAuditEvents(@PathParam("workspaceId") Long workspaceId, @BeanParam GetAuditEventRequest getAuditRequest);
 
     @GET
     @Path("zip")

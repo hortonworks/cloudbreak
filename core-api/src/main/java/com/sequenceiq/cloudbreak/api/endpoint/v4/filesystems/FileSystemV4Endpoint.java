@@ -8,8 +8,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemParametersV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParametersV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
@@ -26,6 +27,6 @@ public interface FileSystemV4Endpoint {
     @Path("parameters")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParameters")
-    FileSystemParametersV4Response getFileSystemParameters(@PathParam("workspaceId") Long workspaceId,
+    GeneralListV4Response<FileSystemParameterV4Response> getFileSystemParameters(@PathParam("workspaceId") Long workspaceId,
             @BeanParam FileSystemParametersV4Filter fileSystemParametersV4Filter);
 }

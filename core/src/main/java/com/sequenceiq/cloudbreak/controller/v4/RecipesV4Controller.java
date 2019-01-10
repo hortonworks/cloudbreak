@@ -1,10 +1,21 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Controller;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponses;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -13,17 +24,6 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Controller;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponses.recipeV4ViewResponses;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -44,11 +44,11 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public RecipeV4ViewResponses list(Long workspaceId) {
+    public GeneralSetV4Response<RecipeV4ViewResponse> list(Long workspaceId) {
         Set<RecipeV4ViewResponse> recipes = recipeService.findAllViewByWorkspaceId(workspaceId).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeV4ViewResponse.class))
                 .collect(Collectors.toSet());
-        return recipeV4ViewResponses(recipes);
+        return GeneralSetV4Response.propagateResponses(recipes);
     }
 
     @Override

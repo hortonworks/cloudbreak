@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserResponses.userResponses;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses.workspaceV4Responses;
-
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -17,16 +14,15 @@ import javax.validation.Valid;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.NameComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Requests;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.UserIds;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.WorkspaceV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses;
 import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
-import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -62,10 +58,10 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     }
 
     @Override
-    public WorkspaceV4Responses list() {
+    public GeneralSetV4Response<WorkspaceV4Response> list() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<Workspace> workspaces = workspaceService.retrieveForUser(user);
-        return workspaceV4Responses(workspacesToSortedResponse(workspaces));
+        return GeneralSetV4Response.propagateResponses(workspacesToSortedResponse(workspaces));
     }
 
     @Override
@@ -85,31 +81,31 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     }
 
     @Override
-    public UserResponses addUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests addWorkspaceUsers) {
+    public GeneralSetV4Response<UserV4Response> addUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests addWorkspaceUsers) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.addUsers(workspaceName, addWorkspaceUsers.getUsers(), user);
-        return userResponses(usersToSortedResponse(users));
+        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
     }
 
     @Override
-    public UserResponses changeUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests changeWorkspaceUsers) {
+    public GeneralSetV4Response<UserV4Response> changeUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests changeWorkspaceUsers) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.changeUsers(workspaceName, changeWorkspaceUsers.getUsers(), user);
-        return userResponses(usersToSortedResponse(users));
+        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
     }
 
     @Override
-    public UserResponses removeUsers(String workspaceName, @Valid UserIds userIds) {
+    public GeneralSetV4Response<UserV4Response> removeUsers(String workspaceName, @Valid UserIds userIds) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.removeUsers(workspaceName, userIds.getUserIds(), user);
-        return userResponses(usersToSortedResponse(users));
+        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
     }
 
     @Override
-    public UserResponses updateUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests updateWorkspaceUsers) {
+    public GeneralSetV4Response<UserV4Response> updateUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests updateWorkspaceUsers) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.updateUsers(workspaceName, updateWorkspaceUsers.getUsers(), user);
-        return userResponses(usersToSortedResponse(users));
+        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
     }
 
     private SortedSet<WorkspaceV4Response> workspacesToSortedResponse(Set<Workspace> workspaces) {
@@ -122,12 +118,12 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
         return sortedResponses;
     }
 
-    private SortedSet<UserResponseJson> usersToSortedResponse(Set<User> users) {
-        Set<UserResponseJson> jsons = users.stream()
-                .map(u -> conversionService.convert(u, UserResponseJson.class))
+    private SortedSet<UserV4Response> usersToSortedResponse(Set<User> users) {
+        Set<UserV4Response> jsons = users.stream()
+                .map(u -> conversionService.convert(u, UserV4Response.class))
                 .collect(Collectors.toSet());
 
-        SortedSet<UserResponseJson> sortedResponses = new TreeSet<>(new UserIdComparator());
+        SortedSet<UserV4Response> sortedResponses = new TreeSet<>(new UserIdComparator());
         sortedResponses.addAll(jsons);
         return sortedResponses;
     }

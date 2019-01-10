@@ -42,7 +42,7 @@ public class RecipeV4Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Set<RecipeV4ViewResponse> recipes = client.getCloudbreakClient().recipeV4Endpoint().list(workspaceId).getRecipes();
+        Set<RecipeV4ViewResponse> recipes = client.getCloudbreakClient().recipeV4Endpoint().list(workspaceId).getResponses();
         Set<RecipeV4Response> detailedRecipes = new HashSet<>();
         recipes.stream().forEach(
                 recipe -> detailedRecipes.add(client.getCloudbreakClient().recipeV4Endpoint().get(workspaceId, recipe.getName())));

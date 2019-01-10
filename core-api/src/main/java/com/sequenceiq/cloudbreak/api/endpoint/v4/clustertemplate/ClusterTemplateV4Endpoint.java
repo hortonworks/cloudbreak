@@ -12,9 +12,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 
@@ -24,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v4/{workspaceId}/clustertemplate")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/clustertemplate", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https")
-public interface ClusterTemplateV4EndPoint {
+public interface ClusterTemplateV4Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
@@ -37,7 +39,7 @@ public interface ClusterTemplateV4EndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.LIST_BY_WORKSPACE, produces = JSON, notes = CLUSTER_TEMPLATE_NOTES,
             nickname = "listClusterTemplatesByWorkspace")
-    ClusterTemplateV4Responses list(@PathParam("workspaceId") Long workspaceId);
+    GeneralSetV4Response<ClusterTemplateViewV4Response> list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")

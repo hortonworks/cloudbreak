@@ -159,7 +159,7 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, Ld
     @Override
     public List<LdapV4Response> getAll(CloudbreakClient client) {
         LdapConfigV4Endpoint ldapConfigV4Endpoint = client.getCloudbreakClient().ldapConfigV4Endpoint();
-        return ldapConfigV4Endpoint.list(client.getWorkspaceId(), new ListV4Filter()).getLdaps()
+        return ldapConfigV4Endpoint.list(client.getWorkspaceId(), new ListV4Filter()).getResponses()
                 .stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());

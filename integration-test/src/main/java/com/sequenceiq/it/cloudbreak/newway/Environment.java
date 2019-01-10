@@ -75,7 +75,7 @@ public class Environment extends EnvironmentEntity {
     public static EnvironmentEntity getAll(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
         entity.setResponseSimpleEnvSet(
                 cloudbreakClient.getCloudbreakClient().environmentV3Endpoint()
-                        .list(cloudbreakClient.getWorkspaceId()).getEnvironments()
+                        .list(cloudbreakClient.getWorkspaceId()).getResponses()
         );
         return entity;
     }

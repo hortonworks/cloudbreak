@@ -47,7 +47,7 @@ public class RdsConfigAction {
                 client.getCloudbreakClient()
                         .databaseV4Endpoint()
                         .list(client.getWorkspaceId(), listRequest)
-                        .getDatabases());
+                        .getResponses());
         logJSON(" get all rds config response: ", rdsconfigEntity.getResponse());
     }
 

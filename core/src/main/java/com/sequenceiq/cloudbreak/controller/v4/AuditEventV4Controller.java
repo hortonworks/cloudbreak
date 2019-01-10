@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.requests.GetAuditEventRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
 import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
 import com.sequenceiq.cloudbreak.controller.audit.BaseAuditController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -38,14 +39,15 @@ public class AuditEventV4Controller extends BaseAuditController implements Audit
     }
 
     @Override
-    public List<AuditEvent> getAuditEvents(Long workspaceId, GetAuditEventRequest getAuditRequest) {
+    public GeneralListV4Response<AuditEvent> getAuditEvents(Long workspaceId, GetAuditEventRequest getAuditRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        return auditEventService.getAuditEventsByWorkspaceId(workspaceId, getAuditRequest.getResourceType(), getAuditRequest.getResourceId(), user);
+        List<AuditEvent> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, getAuditRequest.getResourceType(), getAuditRequest.getResourceId(), user);
+        return GeneralListV4Response.propagateResponses(auditEventsByWorkspaceId);
     }
 
     @Override
     public Response getAuditEventsZip(Long workspaceId, GetAuditEventRequest getAuditRequest) {
-        List<AuditEvent> auditEvents = getAuditEvents(workspaceId, getAuditRequest);
+        List<AuditEvent> auditEvents = getAuditEvents(workspaceId, getAuditRequest).getResponses();
         return getAuditEventsZipResponse(auditEvents, getAuditRequest.getResourceType(), getAuditRequest.getResourceId());
     }
 }

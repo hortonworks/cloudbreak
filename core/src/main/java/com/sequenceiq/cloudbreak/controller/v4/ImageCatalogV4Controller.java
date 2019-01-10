@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses.imageCatalogResponses;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,13 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.GetImageCatalogV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -57,11 +55,11 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public ImageCatalogV4Responses list(Long workspaceId) {
+    public GeneralSetV4Response<ImageCatalogV4Response> list(Long workspaceId) {
         Set<ImageCatalogV4Response> responses = imageCatalogService.findAllByWorkspaceId(workspaceId).stream()
                 .map(imageCatalog -> conversionService.convert(imageCatalog, ImageCatalogV4Response.class))
                 .collect(Collectors.toSet());
-        return imageCatalogResponses(responses);
+        return GeneralSetV4Response.propagateResponses(responses);
     }
 
     @Override

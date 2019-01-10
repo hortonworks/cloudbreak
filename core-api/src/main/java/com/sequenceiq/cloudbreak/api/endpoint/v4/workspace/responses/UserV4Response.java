@@ -1,9 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class UserResponseJson {
+public class UserV4Response {
 
     private long id;
 
@@ -11,10 +11,10 @@ public class UserResponseJson {
 
     private String userId;
 
-    public UserResponseJson() {
+    public UserV4Response() {
     }
 
-    public UserResponseJson(long id, String username, String userId) {
+    public UserV4Response(long id, String username, String userId) {
         this.id = id;
         this.username = username;
         this.userId = userId;

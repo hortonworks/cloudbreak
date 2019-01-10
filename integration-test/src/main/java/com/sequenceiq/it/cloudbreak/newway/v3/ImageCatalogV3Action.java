@@ -102,7 +102,7 @@ public class ImageCatalogV3Action {
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         imageCatalogEntity.setResponses(new HashSet<>(
-                client.getCloudbreakClient().imageCatalogV4Endpoint().list(workspaceId).getCatalogs()));
+                client.getCloudbreakClient().imageCatalogV4Endpoint().list(workspaceId).getResponses()));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
 
     }

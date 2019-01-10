@@ -15,16 +15,6 @@ public class BaseImageV4Response extends ImageV4Response {
 
     private List<StackDetailsJson> hdfStacks;
 
-    private String ambariRepoGpgKey;
-
-    public String getAmbariRepoGpgKey() {
-        return ambariRepoGpgKey;
-    }
-
-    public void setAmbariRepoGpgKey(String ambariRepoGpgKey) {
-        this.ambariRepoGpgKey = ambariRepoGpgKey;
-    }
-
     public List<StackDetailsJson> getHdpStacks() {
         return hdpStacks;
     }
