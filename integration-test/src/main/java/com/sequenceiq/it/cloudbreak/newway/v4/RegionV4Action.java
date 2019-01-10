@@ -29,7 +29,7 @@ public class RegionV4Action {
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
-        if (credential != null && regionEntity.getPlatformResourceRequest().getCredentialId() == null) {
+        if (credential != null && regionEntity.getPlatformResourceRequest().getCredentialName() == null) {
             regionEntity.getPlatformResourceRequest().setCredentialName(credential.getName());
         }
 

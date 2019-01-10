@@ -22,7 +22,7 @@ public class VmTypeV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && vmtypeEntity.getRequest().getCredentialId() == null) {
+        if (credential != null && vmtypeEntity.getRequest().getCredentialName() == null) {
             vmtypeEntity.getRequest().setCredentialName(credential.getName());
         }
 

@@ -31,7 +31,7 @@ public class SshKeysTests extends CloudbreakTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshKeysTests.class);
 
-    private Long credentialId;
+    private String credentialName;
 
     private CloudProvider cloudProvider;
 
@@ -52,14 +52,14 @@ public class SshKeysTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
 
         IntegrationTestContext it = getItContext();
-        credentialId  = Credential.getTestContextCredential().apply(it).getResponse().getId();
+        credentialName  = Credential.getTestContextCredential().apply(it).getResponse().getName();
     }
 
     @Test
     public void testGetSshKeysWithCredendtialId() throws Exception {
         given(cloudProvider.aValidCredential());
         given(SshKey.request()
-                .withCredentialId(credentialId)
+                .withCredentialName(credentialName)
                 .withCredentialName("")
                 .withRegion(cloudProvider.region()), "with credential id"
         );
@@ -81,7 +81,6 @@ public class SshKeysTests extends CloudbreakTest {
     @Test
     public void testGetSshKeysWithAvZone() throws Exception {
         given(SshKey.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(cloudProvider.availabilityZone()), "with availability zone "
@@ -93,7 +92,6 @@ public class SshKeysTests extends CloudbreakTest {
     @Test
     public void testGetSshKeysWithInvalidAvZone() throws Exception {
         given(SshKey.request()
-                .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(INVALID_AV_ZONE), "with invalid availability zone "
@@ -105,7 +103,6 @@ public class SshKeysTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetSshKeysInvalidCredName() throws Exception {
         given(SshKey.request()
-                .withCredentialId(null)
                 .withCredentialName(INVALID_CRED_NAME), "with invalid credential name"
         );
         when(SshKey.get(), "get the request");
@@ -115,7 +112,6 @@ public class SshKeysTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetSshKeysWithoutCred() throws Exception {
         given(SshKey.request()
-                .withCredentialId(null)
                 .withCredentialName(null)
                 .withRegion(cloudProvider.region()), "without credential"
         );
@@ -126,7 +122,6 @@ public class SshKeysTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetSshKeysInvalidCredId() throws Exception {
         given(SshKey.request()
-                .withCredentialId(INVALID_CRED_ID)
                 .withCredentialName(null)
                 .withRegion(cloudProvider.region()),  "with invalid credential id"
         );
@@ -137,7 +132,7 @@ public class SshKeysTests extends CloudbreakTest {
     @Test
     public void testSshKeysInvalidRegion() throws Exception {
         given(SshKey.request()
-                .withCredentialId(credentialId)
+                .withCredentialName(credentialName)
                 .withRegion(INVALID_REGION), "with invalid credential id"
         );
         when(SshKey.get(), "get the request");

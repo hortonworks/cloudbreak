@@ -30,12 +30,12 @@ public class RecommendationV4Action {
 
         Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
         if (blueprint != null && blueprint.getResponse() != null) {
-            recommendationEntity.getRequest().setBlueprintId(blueprint.getResponse().getId());
+            recommendationEntity.getRequest().setBlueprintName(blueprint.getResponse().getName());
         }
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && recommendationEntity.getRequest().getCredentialId() == null) {
-            recommendationEntity.getRequest().setCredentialId(credential.getResponse().getId());
+        if (credential != null && recommendationEntity.getRequest().getCredentialName() == null) {
+            recommendationEntity.getRequest().setCredentialName(credential.getResponse().getName());
         }
 
         Region region = Region.getTestContextRegion().apply(integrationTestContext);

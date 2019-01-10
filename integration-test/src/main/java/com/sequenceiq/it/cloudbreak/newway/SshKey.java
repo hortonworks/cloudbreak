@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -20,7 +20,7 @@ public class SshKey extends Entity {
 
     private static final String SSHKEY = "SSHKEY";
 
-    private PlatformResourceV4Request request = new PlatformResourceV4Request();
+    private PlatformResourceV4Filter request = new PlatformResourceV4Filter();
 
     private PlatformSshKeysV4Response response;
 
@@ -32,7 +32,7 @@ public class SshKey extends Entity {
         this(SSHKEY);
     }
 
-    public void setRequest(PlatformResourceV4Request request) {
+    public void setRequest(PlatformResourceV4Filter request) {
         this.request = request;
     }
 
@@ -40,7 +40,7 @@ public class SshKey extends Entity {
         return response.getSshKeys();
     }
 
-    public PlatformResourceV4Request getRequest() {
+    public PlatformResourceV4Filter getRequest() {
         return request;
     }
 
@@ -53,18 +53,8 @@ public class SshKey extends Entity {
         return this;
     }
 
-    public SshKey withCredentialId(Long id) {
-        request.setCredentialId(id);
-        return this;
-    }
-
     public SshKey withCredentialName(String name) {
         request.setCredentialName(name);
-        return this;
-    }
-
-    public SshKey withFilters(Map<String, String> filter) {
-        request.setFilters(filter);
         return this;
     }
 

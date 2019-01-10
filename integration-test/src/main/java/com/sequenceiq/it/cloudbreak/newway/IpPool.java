@@ -11,7 +11,7 @@ import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.IpPoolV4Action;
 
@@ -20,7 +20,7 @@ public class IpPool extends Entity {
 
     private static final String IPPOOL = "IPPOOL";
 
-    private PlatformResourceV4Request request = new PlatformResourceV4Request();
+    private PlatformResourceV4Filter request = new PlatformResourceV4Filter();
 
     private PlatformIpPoolsV4Response response;
 
@@ -32,7 +32,7 @@ public class IpPool extends Entity {
         this(IPPOOL);
     }
 
-    public void setRequest(PlatformResourceV4Request request) {
+    public void setRequest(PlatformResourceV4Filter request) {
         this.request = request;
     }
 
@@ -40,7 +40,7 @@ public class IpPool extends Entity {
         return response.getIppools();
     }
 
-    public PlatformResourceV4Request getRequest() {
+    public PlatformResourceV4Filter getRequest() {
         return request;
     }
 
@@ -53,18 +53,8 @@ public class IpPool extends Entity {
         return this;
     }
 
-    public IpPool withCredentialId(Long id) {
-        request.setCredentialId(id);
-        return this;
-    }
-
     public IpPool withCredentialName(String name) {
         request.setCredentialName(name);
-        return this;
-    }
-
-    public IpPool withFilters(Map<String, String> filter) {
-        request.setFilters(filter);
         return this;
     }
 
