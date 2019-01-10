@@ -71,7 +71,7 @@ public class RecipeEntity extends AbstractCloudbreakEntity<RecipeV4Request, Reci
     @Override
     public List<RecipeV4ViewResponse> getAll(CloudbreakClient client) {
         RecipeV4Endpoint recipeV4Endpoint = client.getCloudbreakClient().recipeV4Endpoint();
-        return recipeV4Endpoint.list(client.getWorkspaceId()).getRecipes().stream()
+        return recipeV4Endpoint.list(client.getWorkspaceId()).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
     }

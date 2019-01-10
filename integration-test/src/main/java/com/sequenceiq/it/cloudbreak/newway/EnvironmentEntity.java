@@ -136,7 +136,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
     @Override
     public List<SimpleEnvironmentV4Response> getAll(CloudbreakClient client) {
         EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV3Endpoint();
-        return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getEnvironments());
+        return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getResponses());
     }
 
     @Override

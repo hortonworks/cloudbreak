@@ -2,9 +2,9 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import java.util.Collection;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
@@ -63,7 +63,7 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
 
     @Override
     public Collection<ClusterTemplateV4Response> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId()).getClusterTemplates();
+        return ClusterTemplateUtil.getResponseFromViews(client.getCloudbreakClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId()).getResponses());
     }
 
     @Override
@@ -85,6 +85,6 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
         CloudbreakClient client = getTestContext().getCloudbreakClient();
         return (long) client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .list(client.getWorkspaceId()).getClusterTemplates().size();
+                .list(client.getWorkspaceId()).getResponses().size();
     }
 }

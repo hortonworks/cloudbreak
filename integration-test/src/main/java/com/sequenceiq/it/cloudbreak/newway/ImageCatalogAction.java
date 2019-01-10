@@ -91,7 +91,7 @@ public class ImageCatalogAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         imageCatalogEntity.setResponses(new HashSet<>(
-                client.getCloudbreakClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getCatalogs()));
+                client.getCloudbreakClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getResponses()));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
 
     }

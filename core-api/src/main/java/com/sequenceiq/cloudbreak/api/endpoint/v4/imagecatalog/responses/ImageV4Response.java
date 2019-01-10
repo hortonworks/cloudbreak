@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-import java.util.Set;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
@@ -37,11 +37,11 @@ public class ImageV4Response implements JsonEntity {
     @JsonProperty("version")
     private String version;
 
-    @JsonProperty("ambariRepoUrl")
-    private String ambariRepoUrl;
+    @JsonProperty("repo")
+    private Map<String, String> repo;
 
-    @JsonProperty("locations")
-    private Set<ImageLocationV4Response> locations;
+    @JsonProperty("images")
+    private Map<String, Map<String, String>> imageSetsByProvider;
 
     @JsonProperty("stackDetails")
     @JsonInclude(NON_EMPTY)
@@ -51,7 +51,7 @@ public class ImageV4Response implements JsonEntity {
     private boolean defaultImage;
 
     @JsonProperty("packageVersions")
-    private Set<PackageVersionV4Response> packageVersions;
+    private Map<String, String> packageVersions;
 
     public String getDate() {
         return date;
@@ -93,22 +93,6 @@ public class ImageV4Response implements JsonEntity {
         this.version = version;
     }
 
-    public String getAmbariRepoUrl() {
-        return ambariRepoUrl;
-    }
-
-    public void setAmbariRepoUrl(String ambariRepoUrl) {
-        this.ambariRepoUrl = ambariRepoUrl;
-    }
-
-    public Set<ImageLocationV4Response> getLocations() {
-        return locations;
-    }
-
-    public void setLocations(Set<ImageLocationV4Response> locations) {
-        this.locations = locations;
-    }
-
     public StackDetailsJson getStackDetails() {
         return stackDetails;
     }
@@ -133,11 +117,27 @@ public class ImageV4Response implements JsonEntity {
         this.defaultImage = defaultImage;
     }
 
-    public Set<PackageVersionV4Response> getPackageVersions() {
+    public Map<String, String> getRepo() {
+        return repo;
+    }
+
+    public void setRepo(Map<String, String> repo) {
+        this.repo = repo;
+    }
+
+    public Map<String, Map<String, String>> getImageSetsByProvider() {
+        return imageSetsByProvider;
+    }
+
+    public void setImageSetsByProvider(Map<String, Map<String, String>> imageSetsByProvider) {
+        this.imageSetsByProvider = imageSetsByProvider;
+    }
+
+    public Map<String, String> getPackageVersions() {
         return packageVersions;
     }
 
-    public void setPackageVersions(Set<PackageVersionV4Response> packageVersions) {
+    public void setPackageVersions(Map<String, String> packageVersions) {
         this.packageVersions = packageVersions;
     }
 }

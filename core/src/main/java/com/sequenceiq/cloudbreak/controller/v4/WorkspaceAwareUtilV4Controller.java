@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Responses.exposedServiceV4Responses;
-
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
+import org.testng.collections.Sets;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.BlueprintNameV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -52,10 +52,10 @@ public class WorkspaceAwareUtilV4Controller extends NotificationController imple
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public ExposedServiceV4Responses getKnoxServices(Long workspaceId, BlueprintNameV4Filter blueprintNameV4Filter) {
+    public GeneralSetV4Response<ExposedServiceV4Response> getKnoxServices(Long workspaceId, BlueprintNameV4Filter blueprintNameV4Filter) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return exposedServiceV4Responses(serviceEndpointCollector.getKnoxServices(blueprintNameV4Filter.getBlueprintName(), workspace));
+        return GeneralSetV4Response.propagateResponses(Sets.newHashSet(serviceEndpointCollector.getKnoxServices(blueprintNameV4Filter.getBlueprintName(), workspace)));
     }
 
 }

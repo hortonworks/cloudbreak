@@ -94,7 +94,7 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<DatabaseV4Request,
         DatabaseV4Endpoint databaseV4Endpoint = client.getCloudbreakClient().databaseV4Endpoint();
         DatabaseV4ListFilter listRequest = new DatabaseV4ListFilter();
         listRequest.setAttachGlobal(false);
-        return databaseV4Endpoint.list(client.getWorkspaceId(), listRequest).getDatabases().stream()
+        return databaseV4Endpoint.list(client.getWorkspaceId(), listRequest).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
     }

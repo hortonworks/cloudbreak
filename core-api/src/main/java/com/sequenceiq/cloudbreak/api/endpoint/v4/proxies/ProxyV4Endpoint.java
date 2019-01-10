@@ -15,9 +15,9 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -37,7 +37,7 @@ public interface ProxyV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "listProxyconfigsByWorkspace")
-    ProxyV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam ListV4Filter listV4Filter);
+    GeneralSetV4Response<ProxyV4Response> list(@PathParam("workspaceId") Long workspaceId, @BeanParam ListV4Filter listV4Filter);
 
     @GET
     @Path("{name}")

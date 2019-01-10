@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses.kerberosViewResponses;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,11 +13,11 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
@@ -38,12 +36,12 @@ public class KerberosConfigV4Controller extends NotificationController implement
     private KerberosService kerberosService;
 
     @Override
-    public KerberosViewV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
+    public GeneralSetV4Response<KerberosViewV4Response> list(Long workspaceId, ListV4Filter listV4Filter) {
         Set<KerberosViewV4Response> kerberosV4ViewRespons = kerberosService.findAllInWorkspaceAndEnvironment(workspaceId,
                     listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal()).stream()
                 .map(kerberosConfig -> conversionService.convert(kerberosConfig, KerberosViewV4Response.class))
                 .collect(Collectors.toSet());
-        return kerberosViewResponses(kerberosV4ViewRespons);
+        return GeneralSetV4Response.propagateResponses(kerberosV4ViewRespons);
     }
 
     @Override

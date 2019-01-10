@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4EndPoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.FlexSubscriptionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
@@ -70,7 +70,7 @@ public class CloudbreakIdentityClient {
             BlueprintV4Endpoint.class,
             EventV3Endpoint.class,
             ClusterV1Endpoint.class,
-            ClusterTemplateV4EndPoint.class,
+            ClusterTemplateV4Endpoint.class,
             CredentialEndpoint.class,
             CredentialV3Endpoint.class,
             DatabaseV4Endpoint.class,
@@ -260,8 +260,8 @@ public class CloudbreakIdentityClient {
     }
 
 
-    public ClusterTemplateV4EndPoint clusterTemplateV3EndPoint() {
-        return getEndpoint(ClusterTemplateV4EndPoint.class);
+    public ClusterTemplateV4Endpoint clusterTemplateV3EndPoint() {
+        return getEndpoint(ClusterTemplateV4Endpoint.class);
     }
 
     public KerberosConfigV4Endpoint kerberosConfigV4Endpoint() {

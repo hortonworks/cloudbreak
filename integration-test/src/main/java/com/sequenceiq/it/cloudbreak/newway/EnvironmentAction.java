@@ -46,7 +46,7 @@ public class EnvironmentAction {
         environmentEntity.setResponseSimpleEnvSet(
                 client.getCloudbreakClient()
                         .environmentV3Endpoint()
-                        .list(client.getWorkspaceId()).getEnvironments());
+                        .list(client.getWorkspaceId()).getResponses());
         logJSON("Environment list response: ", environmentEntity.getResponse());
     }
 

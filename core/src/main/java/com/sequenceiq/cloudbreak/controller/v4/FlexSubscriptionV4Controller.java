@@ -11,10 +11,10 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.FlexSubscriptionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests.FlexSubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Responses;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -46,14 +46,14 @@ public class FlexSubscriptionV4Controller implements FlexSubscriptionV4Endpoint 
     private WorkspaceService workspaceService;
 
     @Override
-    public FlexSubscriptionV4Responses list(Long workspaceId) {
+    public GeneralSetV4Response<FlexSubscriptionV4Response> list(Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndWorkspace(user, workspaceId);
         Set<FlexSubscriptionV4Response> responses = subscriptions
                 .stream()
                 .map(subscription -> conversionService.convert(subscriptions, FlexSubscriptionV4Response.class))
                 .collect(Collectors.toSet());
-        return FlexSubscriptionV4Responses.responses(responses);
+        return GeneralSetV4Response.propagateResponses(responses);
     }
 
     @Override

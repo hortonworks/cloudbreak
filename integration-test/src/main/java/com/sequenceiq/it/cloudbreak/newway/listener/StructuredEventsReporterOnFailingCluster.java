@@ -2,14 +2,13 @@ package com.sequenceiq.it.cloudbreak.newway.listener;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 
-import java.util.List;
-
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.requests.GetAuditEventRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
 import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -29,7 +28,7 @@ public class StructuredEventsReporterOnFailingCluster extends TestListenerAdapte
             GetAuditEventRequest getAuditEventRequest = new GetAuditEventRequest();
             getAuditEventRequest.setResourceId(stack.getResponse().getId());
             getAuditEventRequest.setResourceType(Stack.STACK);
-            List<AuditEvent> events = client.getCloudbreakClient().auditV4Endpoint().getAuditEvents(stack.getResponse().getWorkspace().getId(), getAuditEventRequest);
+            GeneralListV4Response<AuditEvent> events = client.getCloudbreakClient().auditV4Endpoint().getAuditEvents(stack.getResponse().getWorkspace().getId(), getAuditEventRequest);
             String json = null;
             try {
                 json = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(events);

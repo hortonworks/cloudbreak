@@ -78,7 +78,7 @@ public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogV4R
 
     @Override
     public Collection<ImageCatalogV4Response> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getCatalogs();
+        return client.getCloudbreakClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getResponses();
     }
 
     @Override

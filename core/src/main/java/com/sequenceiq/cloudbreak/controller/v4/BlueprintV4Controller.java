@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses.blueprintV4ViewResponses;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,12 +13,12 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -61,13 +59,13 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     private PlatformParameterService platformParameterService;
 
     @Override
-    public BlueprintV4ViewResponses list(Long workspaceId) {
+    public GeneralSetV4Response<BlueprintV4ViewResponse> list(Long workspaceId) {
         Workspace workspace = getWorkspace(workspaceId);
         Set<BlueprintV4ViewResponse> blueprints = blueprintService.getAllAvailableViewInWorkspace(workspace)
                 .stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintV4ViewResponse.class))
                 .collect(Collectors.toSet());
-        return blueprintV4ViewResponses(blueprints);
+        return GeneralSetV4Response.propagateResponses(blueprints);
     }
 
     @Override
