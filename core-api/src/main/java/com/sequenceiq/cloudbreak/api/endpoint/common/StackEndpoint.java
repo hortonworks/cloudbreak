@@ -10,7 +10,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 
@@ -29,8 +28,6 @@ public interface StackEndpoint {
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     Map<String, Object> status(@PathParam("id") Long id);
-
-    PlatformVariantsJson variants();
 
     default Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId) {
         return deleteInstance(stackId, instanceId, false);

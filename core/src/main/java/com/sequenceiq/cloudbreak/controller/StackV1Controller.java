@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -112,11 +112,6 @@ public class StackV1Controller extends NotificationController implements StackV1
     @Override
     public Map<String, Object> status(Long id) {
         return stackCommonService.status(id);
-    }
-
-    @Override
-    public PlatformVariantsJson variants() {
-        return stackCommonService.variants();
     }
 
     @Override

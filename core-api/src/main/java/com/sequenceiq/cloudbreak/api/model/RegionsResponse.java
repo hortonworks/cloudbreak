@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegionsResponse implements JsonEntity {
 
-    private Map<String, RegionResponse> regionsResponse = new HashMap<>();
+    private Map<String, RegionV4Response> regionsResponse = new HashMap<>();
 
-    public Map<String, RegionResponse> getRegionsResponse() {
+    public Map<String, RegionV4Response> getRegionsResponse() {
         return regionsResponse;
     }
 
-    public void setRegionsResponse(Map<String, RegionResponse> regionsResponse) {
+    public void setRegionsResponse(Map<String, RegionV4Response> regionsResponse) {
         this.regionsResponse = regionsResponse;
     }
 }

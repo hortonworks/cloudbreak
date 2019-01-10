@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4
 import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.model.users.UserResponseJson;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.NotificationController;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;

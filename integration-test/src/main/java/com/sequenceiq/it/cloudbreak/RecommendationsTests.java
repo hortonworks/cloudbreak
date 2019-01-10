@@ -1,5 +1,25 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.model.DiskResponse;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
@@ -12,24 +32,6 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StreamUtils;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class RecommendationsTests extends CloudbreakTest {
 
@@ -60,21 +62,6 @@ public class RecommendationsTests extends CloudbreakTest {
         ObjectMapper mapper = new ObjectMapper();
 
         return new HashSet<>(mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(Set.class, DiskResponse.class)));
-    }
-
-    private String setCustomDiskResponses(Recommendation recommendations) {
-        String expectedDisplayName = "";
-
-        try {
-            Set<DiskResponse> customDiskResponseSet = getCustomDiskResponses();
-            expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
-
-            recommendations.getResponse().setDiskResponses(customDiskResponseSet);
-        } catch (IOException e) {
-            LOGGER.info("Set custom Disk Response Exception message ::: {}", e.getMessage());
-        }
-
-        return expectedDisplayName;
     }
 
     private void createBlueprint() throws Exception {
@@ -131,6 +118,21 @@ public class RecommendationsTests extends CloudbreakTest {
             String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
             LOGGER.info("Clean Up Exception message ::: {}", errorMessage);
         }
+    }
+
+    private String setCustomDiskResponses(Recommendation recommendations) {
+        String expectedDisplayName = "";
+
+        try {
+            Set<DiskResponse> customDiskResponseSet = getCustomDiskResponses();
+            expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
+
+            recommendations.getResponse().setDiskResponses(customDiskResponseSet);
+        } catch (IOException e) {
+            LOGGER.info("Set custom Disk Response Exception message ::: {}", e.getMessage());
+        }
+
+        return expectedDisplayName;
     }
 
     @Test(priority = 1, groups = "recommendations")

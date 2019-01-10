@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;

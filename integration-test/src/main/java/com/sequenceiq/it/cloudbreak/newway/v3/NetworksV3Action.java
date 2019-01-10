@@ -19,7 +19,7 @@ public class NetworksV3Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         networkEntity.setResponse(
                 client.getCloudbreakClient()
-                        .connectorV3Endpoint()
+                        .connectorV4Endpoint()
                         .getCloudNetworks(workspaceId, networkEntity.getRequest()));
         logJSON("V3 Connectors networks post request: ", networkEntity.getRequest());
     }

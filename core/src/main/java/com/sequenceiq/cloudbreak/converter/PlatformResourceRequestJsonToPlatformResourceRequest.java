@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class PlatformResourceRequestJsonToPlatformResourceRequest extends
-        AbstractConversionServiceAwareConverter<PlatformResourceRequestJson, PlatformResourceRequest> {
+        AbstractConversionServiceAwareConverter<PlatformResourceV4Request, PlatformResourceRequest> {
 
     @Inject
     private CredentialService credentialService;
@@ -32,7 +32,7 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public PlatformResourceRequest convert(PlatformResourceRequestJson source) {
+    public PlatformResourceRequest convert(PlatformResourceV4Request source) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;

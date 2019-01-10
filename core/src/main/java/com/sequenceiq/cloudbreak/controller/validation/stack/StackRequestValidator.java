@@ -15,8 +15,8 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
-import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
@@ -53,9 +52,6 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     @Inject
     private StackRepository stackRepository;
-
-    @Inject
-    private PlatformParameterV1Controller parameterV1Controller;
 
     @Inject
     private CredentialService credentialService;
@@ -161,7 +157,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
             String region, ValidationResultBuilder validationBuilder) {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         Credential cred = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
-        Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region);
+        Optional<PlatformEncryptionKeysV4Response> keys = Optional.empty();
         if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
             if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
@@ -172,16 +168,8 @@ public class StackRequestValidator implements Validator<StackRequest> {
         }
     }
 
-    private Optional<PlatformEncryptionKeysResponse> getEncryptionKeysWithExceptionHandling(Long id, String region) {
-        try {
-            return Optional.ofNullable(parameterV1Controller.getEncryptionKeys(getRequestForEncryptionKeys(id, region)));
-        } catch (RuntimeException ignore) {
-            return Optional.empty();
-        }
-    }
-
-    private PlatformResourceRequestJson getRequestForEncryptionKeys(Long credentialId, String region) {
-        PlatformResourceRequestJson request = new PlatformResourceRequestJson();
+    private PlatformResourceV4Request getRequestForEncryptionKeys(Long credentialId, String region) {
+        PlatformResourceV4Request request = new PlatformResourceV4Request();
         request.setCredentialId(credentialId);
         request.setRegion(region);
         return request;

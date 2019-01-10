@@ -7,14 +7,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Responses;
-import com.sequenceiq.cloudbreak.controller.NotificationController;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 

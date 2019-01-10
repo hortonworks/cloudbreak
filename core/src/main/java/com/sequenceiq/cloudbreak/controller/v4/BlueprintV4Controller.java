@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.NotificationController;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;

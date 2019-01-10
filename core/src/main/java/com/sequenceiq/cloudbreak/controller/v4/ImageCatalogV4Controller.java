@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.NotificationController;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.workspace.User;

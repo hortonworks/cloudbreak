@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.platform;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
+import com.sequenceiq.cloudbreak.api.model.RecommendationV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -86,7 +86,7 @@ public class PlatformParameterService {
                 request.getPlatformVariant(), request.getFilters());
     }
 
-    public PlatformRecommendation getRecommendation(Long workspaceId, RecommendationRequestJson request) {
+    public PlatformRecommendation getRecommendation(Long workspaceId, RecommendationV4Request request) {
         PlatformResourceRequest resourceRequest = conversionService.convert(request, PlatformResourceRequest.class);
         if (request.getBlueprintId() == null && Strings.isNullOrEmpty(request.getBlueprintName())) {
             checkFieldIsNotEmpty(request.getBlueprintId(), "blueprintId");

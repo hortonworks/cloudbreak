@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.BlueprintNameV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Responses;
-import com.sequenceiq.cloudbreak.controller.NotificationController;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
