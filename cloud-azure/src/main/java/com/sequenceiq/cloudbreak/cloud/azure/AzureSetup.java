@@ -74,7 +74,7 @@ public class AzureSetup implements Setup {
         try {
             copyVhdImageIfNecessary(ac, stack, image, imageResourceGroupName, region, client);
         } catch (Exception ex) {
-            LOGGER.error("Could not create image with the specified parameters", ex);
+            LOGGER.warn("Could not create image with the specified parameters", ex);
             throw new CloudConnectorException("Image creation failed because " + image.getImageName() + " does not exist or Cloudbreak could not reach.", ex);
         }
         LOGGER.debug("prepare image has been executed");

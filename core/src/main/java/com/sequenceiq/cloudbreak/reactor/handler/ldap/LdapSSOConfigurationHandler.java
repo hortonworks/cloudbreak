@@ -68,7 +68,7 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
             }
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (RuntimeException e) {
-            LOGGER.error("Error during LDAP configuration, stackId: " + stackId, e);
+            LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);
             response = new LdapSSOConfigurationFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event<>(ldapConfigurationRequestEvent.getHeaders(), response));

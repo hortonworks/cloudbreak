@@ -61,7 +61,7 @@ public class UnhealthyInstancesDetectionHandler implements ReactorEventHandler<U
             }
         } catch (RuntimeException e) {
             String msg = String.format("Could not get statuses for unhealty instances: %s", e.getMessage());
-            LOG.error(msg, e);
+            LOG.info(msg, e);
             result = new UnhealthyInstancesDetectionResult(msg, e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
