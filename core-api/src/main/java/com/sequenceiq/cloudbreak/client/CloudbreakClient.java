@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.SmartSenseSubscriptionV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
@@ -62,6 +60,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.SmartSenseSubscriptionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 
@@ -100,8 +99,7 @@ public class CloudbreakClient {
             RecipeV4Endpoint.class,
             SecurityRuleEndpoint.class,
             SettingsEndpoint.class,
-            SmartSenseSubscriptionEndpoint.class,
-            SmartSenseSubscriptionV3Endpoint.class,
+            SmartSenseSubscriptionV4Endpoint.class,
             StackV1Endpoint.class,
             StackV2Endpoint.class,
             StackV3Endpoint.class,
@@ -234,12 +232,8 @@ public class CloudbreakClient {
         return getEndpoint(SettingsEndpoint.class);
     }
 
-    public SmartSenseSubscriptionEndpoint smartSenseSubscriptionEndpoint() {
-        return getEndpoint(SmartSenseSubscriptionEndpoint.class);
-    }
-
-    public SmartSenseSubscriptionV3Endpoint smartSenseSubscriptionV3Endpoint() {
-        return getEndpoint(SmartSenseSubscriptionV3Endpoint.class);
+    public SmartSenseSubscriptionV4Endpoint smartSenseSubscriptionV4Endpoint() {
+        return getEndpoint(SmartSenseSubscriptionV4Endpoint.class);
     }
 
     public StackV1Endpoint stackV1Endpoint() {
