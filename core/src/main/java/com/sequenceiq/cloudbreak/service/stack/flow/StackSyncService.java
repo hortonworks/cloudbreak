@@ -291,7 +291,7 @@ public class StackSyncService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info("Host cannot be deleted from cluster: ", e);
+            LOGGER.error("Host cannot be deleted from cluster: ", e);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(),
                             Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));

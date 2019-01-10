@@ -74,7 +74,7 @@ public class ScalingRequest implements Runnable {
                 scaleDown(scalingAdjustment, totalNodes);
             }
         } catch (RuntimeException e) {
-            LOGGER.info("Error while executing ScaleRequest", e);
+            LOGGER.error("Error while executing ScaleRequest", e);
         }
     }
 
@@ -107,7 +107,7 @@ public class ScalingRequest implements Runnable {
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
-            LOGGER.info(statusReason, e);
+            LOGGER.error(statusReason, e);
             metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
             createHistoryAndNotify(totalNodes, statusReason, scalingStatus);

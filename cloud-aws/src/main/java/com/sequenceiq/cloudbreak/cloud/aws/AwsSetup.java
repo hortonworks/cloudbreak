@@ -203,7 +203,7 @@ public class AwsSetup implements Setup {
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to get the key pair [name: '%s'] from EC2 [roleArn:'%s'], detailed message: %s.",
                         keyPairName, credentialView.getRoleArn(), e.getMessage());
-                LOGGER.info(errorMessage, e);
+                LOGGER.error(errorMessage, e);
             }
             if (!keyPairIsPresentOnEC2) {
                 throw new CloudConnectorException(String.format("The key pair '%s' could not be found in the '%s' region of EC2.", keyPairName, region));

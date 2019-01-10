@@ -61,7 +61,7 @@ public final class ConsulUtils {
             LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Status code: {}, Message: {}", key, e.getStatusCode(), e.getStatusMessage());
             return null;
         } catch (RuntimeException e) {
-            LOGGER.error("Failed to get entry '{}' from Consul's key-value store. Error message: {}", key, e.getMessage());
+            LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Error message: {}", key, e.getMessage());
             return null;
         }
     }

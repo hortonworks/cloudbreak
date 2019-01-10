@@ -52,7 +52,7 @@ public class BlueprintLoaderService {
                 return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprints, blueprintsWhichAreMissing, workspace, saveMethod));
             }
         } catch (Exception e) {
-            LOGGER.info("Blueprints {} is not available for {} workspace.", collectNames(blueprintsWhichAreMissing), workspace.getId());
+            LOGGER.error("Blueprints {} is not available for {} workspace.", collectNames(blueprintsWhichAreMissing), workspace.getId());
         }
         return blueprints;
     }

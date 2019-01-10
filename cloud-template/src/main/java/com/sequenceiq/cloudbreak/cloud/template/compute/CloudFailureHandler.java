@@ -138,7 +138,7 @@ public class CloudFailureHandler {
                             futures.clear();
                         }
                     } catch (Exception e) {
-                        LOGGER.debug("Resource can not be deleted. Reason: {} ", e.getMessage());
+                        LOGGER.info("Resource can not be deleted. Reason: {} ", e.getMessage());
                     }
                 }
             }
