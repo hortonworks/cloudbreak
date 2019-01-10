@@ -74,8 +74,8 @@ public class RegionTests extends CloudbreakTest {
                 (region, t) -> {
                     LOGGER.info("{} Default Region is ::: {}",
                             cloudProvider.getPlatform(),
-                            region.getRegionResponse().getDefaultRegion());
-                    Assert.assertTrue(region.getRegionResponse().getDefaultRegion().contains(cloudProvider.region()),
+                            region.getRegionV4Response().getDefaultRegion());
+                    Assert.assertTrue(region.getRegionV4Response().getDefaultRegion().contains(cloudProvider.region()),
                             '[' + cloudProvider.region() + "] region is not the default one!");
                 }), '[' + cloudProvider.region() + "] region should be the default one."
         );
@@ -90,7 +90,7 @@ public class RegionTests extends CloudbreakTest {
                 + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
-                    int regionsCount = region.getRegionResponse().getRegions().size();
+                    int regionsCount = region.getRegionV4Response().getRegions().size();
 
                     LOGGER.info("{} number of Regions ::: {}",
                             cloudProvider.getPlatform(),
@@ -109,7 +109,7 @@ public class RegionTests extends CloudbreakTest {
                 + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
-                    int displayNamesCount = region.getRegionResponse().getDisplayNames().size();
+                    int displayNamesCount = region.getRegionV4Response().getDisplayNames().size();
 
                     LOGGER.info("{} number of Display Names ::: {}",
                             cloudProvider.getPlatform(),
@@ -128,7 +128,7 @@ public class RegionTests extends CloudbreakTest {
                 + cloudProvider.getPlatform() + " credential");
         then(Region.assertThis(
                 (region, t) -> {
-                    int availibilityZonesCount = region.getRegionResponse().getAvailabilityZones().size();
+                    int availibilityZonesCount = region.getRegionV4Response().getAvailabilityZones().size();
 
                     LOGGER.info("{} number of Availibility Zones ::: {}",
                             cloudProvider.getPlatform(),

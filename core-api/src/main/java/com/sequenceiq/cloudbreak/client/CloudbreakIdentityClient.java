@@ -29,16 +29,14 @@ import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
@@ -84,9 +82,7 @@ public class CloudbreakIdentityClient {
             ManagementPackV3Endpoint.class,
             KubernetesV4Endpoint.class,
             WorkspaceV4Endpoint.class,
-            ConnectorV1Endpoint.class,
-            ConnectorV2Endpoint.class,
-            ConnectorV3Endpoint.class,
+            ConnectorV4Endpoint.class,
             ProxyV4Endpoint.class,
             RecipeV4Endpoint.class,
             SettingsEndpoint.class,
@@ -207,16 +203,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(WorkspaceV4Endpoint.class);
     }
 
-    public ConnectorV1Endpoint connectorV1Endpoint() {
-        return getEndpoint(ConnectorV1Endpoint.class);
-    }
-
-    public ConnectorV2Endpoint connectorV2Endpoint() {
-        return getEndpoint(ConnectorV2Endpoint.class);
-    }
-
-    public ConnectorV3Endpoint connectorV3Endpoint() {
-        return getEndpoint(ConnectorV3Endpoint.class);
+    public ConnectorV4Endpoint connectorV3Endpoint() {
+        return getEndpoint(ConnectorV4Endpoint.class);
     }
 
     public ProxyV4Endpoint proxyConfigV3Endpoint() {

@@ -9,20 +9,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeyV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.SshKeyV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.SshKeyV4Action;
 
 public class SshKey extends Entity {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshKey.class);
 
     private static final String SSHKEY = "SSHKEY";
 
-    private PlatformResourceRequestJson request = new PlatformResourceRequestJson();
+    private PlatformResourceV4Request request = new PlatformResourceV4Request();
 
-    private PlatformSshKeysResponse response;
+    private PlatformSshKeysV4Response response;
 
     private SshKey(String id) {
         super(id);
@@ -32,19 +32,19 @@ public class SshKey extends Entity {
         this(SSHKEY);
     }
 
-    public void setRequest(PlatformResourceRequestJson request) {
+    public void setRequest(PlatformResourceV4Request request) {
         this.request = request;
     }
 
-    private Map<String, Set<PlatformSshKeyResponse>>  getResponseWithSshKeys() {
+    private Map<String, Set<PlatformSshKeyV4Response>>  getResponseWithSshKeys() {
         return response.getSshKeys();
     }
 
-    public PlatformResourceRequestJson getRequest() {
+    public PlatformResourceV4Request getRequest() {
         return request;
     }
 
-    public void setResponse(PlatformSshKeysResponse response) {
+    public void setResponse(PlatformSshKeysV4Response response) {
         this.response = response;
     }
 
@@ -91,7 +91,7 @@ public class SshKey extends Entity {
     }
 
     public static Action<SshKey> get(String key) {
-        return new Action<>(getTestContext(key), SshKeyV3Action::post);
+        return new Action<>(getTestContext(key), SshKeyV4Action::post);
     }
 
     public static Action<SshKey> get() {
@@ -107,10 +107,10 @@ public class SshKey extends Entity {
             if (sshKey.getResponseWithSshKeys().isEmpty()) {
                 LOGGER.info("No sshKeys for given provider");
             } else {
-                for (Map.Entry<String, Set<PlatformSshKeyResponse>> elem : sshKey.getResponseWithSshKeys().entrySet()) {
+                for (Map.Entry<String, Set<PlatformSshKeyV4Response>> elem : sshKey.getResponseWithSshKeys().entrySet()) {
                     for (Object response : elem.getValue()) {
-                        PlatformSshKeyResponse platformSshKeyResponse = (PlatformSshKeyResponse) response;
-                        Assert.assertFalse(platformSshKeyResponse.getName().isEmpty());
+                        PlatformSshKeyV4Response platformSshKeyV4Response = (PlatformSshKeyV4Response) response;
+                        Assert.assertFalse(platformSshKeyV4Response.getName().isEmpty());
                     }
                 }
             }

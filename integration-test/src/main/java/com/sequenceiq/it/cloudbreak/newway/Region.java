@@ -3,33 +3,33 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.RegionResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
+import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.RegionV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.RegionV4Action;
 
 public class Region extends Entity {
     public static final String REGION = "REGION";
 
-    private PlatformResourceRequestJson platformResourceRequest;
+    private PlatformResourceV4Request platformResourceRequest;
 
-    private RegionResponse regionResponse;
+    private RegionV4Response regionV4Response;
 
     public Region(String id) {
         super(id);
-        platformResourceRequest = new PlatformResourceRequestJson();
+        platformResourceRequest = new PlatformResourceV4Request();
     }
 
     public Region() {
         this(REGION);
     }
 
-    public void setPlatformResourceRequest(PlatformResourceRequestJson platformResourceRequest) {
+    public void setPlatformResourceRequest(PlatformResourceV4Request platformResourceRequest) {
         this.platformResourceRequest = platformResourceRequest;
     }
 
-    public RegionResponse getRegionResponse() {
-        return regionResponse;
+    public RegionV4Response getRegionV4Response() {
+        return regionV4Response;
     }
 
     public Region withCredential(Long credentialId) {
@@ -54,7 +54,7 @@ public class Region extends Entity {
     }
 
     public static Action<Region> getPlatformRegions(String key) {
-        return new Action<>(getTestContextRegion(key), RegionV3Action::getRegionsByCredentialId);
+        return new Action<>(getTestContextRegion(key), RegionV4Action::getRegionsByCredentialId);
     }
 
     public static Action<Region> getPlatformRegionsWithRetry(int retryQuantity) {
@@ -62,7 +62,7 @@ public class Region extends Entity {
     }
 
     public static Action<Region> getPlatformRegionsWithRetry(String key, int retryQuantity) {
-        return new Action<>(getTestContextRegion(key), (testContext, entity) -> RegionV3Action.getRegionsByCredentialId(testContext, entity, retryQuantity));
+        return new Action<>(getTestContextRegion(key), (testContext, entity) -> RegionV4Action.getRegionsByCredentialId(testContext, entity, retryQuantity));
     }
 
     public static Action<Region> getPlatformRegions() {
@@ -73,11 +73,11 @@ public class Region extends Entity {
         return new Assertion<>(getTestContextRegion(GherkinTest.RESULT), check);
     }
 
-    public PlatformResourceRequestJson getPlatformResourceRequest() {
+    public PlatformResourceV4Request getPlatformResourceRequest() {
         return platformResourceRequest;
     }
 
-    public void setRegionResponse(RegionResponse regionResponse) {
-        this.regionResponse = regionResponse;
+    public void setRegionV4Response(RegionV4Response regionV4Response) {
+        this.regionV4Response = regionV4Response;
     }
 }

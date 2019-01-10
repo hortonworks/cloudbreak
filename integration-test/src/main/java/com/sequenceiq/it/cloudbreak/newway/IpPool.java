@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.requests.PlatformResourceV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.IpPoolV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v3.IpPoolV4Action;
 
 public class IpPool extends Entity {
     private static final Logger LOGGER = LoggerFactory.getLogger(IpPool.class);
 
     private static final String IPPOOL = "IPPOOL";
 
-    private PlatformResourceRequestJson request = new PlatformResourceRequestJson();
+    private PlatformResourceV4Request request = new PlatformResourceV4Request();
 
-    private PlatformIpPoolsResponse response;
+    private PlatformIpPoolsV4Response response;
 
     private IpPool(String id) {
         super(id);
@@ -32,7 +32,7 @@ public class IpPool extends Entity {
         this(IPPOOL);
     }
 
-    public void setRequest(PlatformResourceRequestJson request) {
+    public void setRequest(PlatformResourceV4Request request) {
         this.request = request;
     }
 
@@ -40,11 +40,11 @@ public class IpPool extends Entity {
         return response.getIppools();
     }
 
-    public PlatformResourceRequestJson getRequest() {
+    public PlatformResourceV4Request getRequest() {
         return request;
     }
 
-    public void setResponse(PlatformIpPoolsResponse response) {
+    public void setResponse(PlatformIpPoolsV4Response response) {
         this.response = response;
     }
 
@@ -91,7 +91,7 @@ public class IpPool extends Entity {
     }
 
     private static Action<IpPool> get(String key) {
-        return new Action<>(getTestContext(key), IpPoolV3Action::get);
+        return new Action<>(getTestContext(key), IpPoolV4Action::get);
     }
 
     public static Action<IpPool> get() {

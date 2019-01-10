@@ -2,9 +2,9 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.Collection;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
 
-public class DiskTypesEntity extends AbstractCloudbreakEntity<Integer, PlatformDisksJson, DiskTypesEntity> {
+public class DiskTypesEntity extends AbstractCloudbreakEntity<Integer, PlatformDisksV4Response, DiskTypesEntity> {
     public static final String DISKTYPES = "DISKTYPES";
 
     private String type;

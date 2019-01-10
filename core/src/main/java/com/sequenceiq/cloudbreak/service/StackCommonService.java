@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
@@ -38,7 +37,6 @@ import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
@@ -342,12 +340,6 @@ public class StackCommonService implements StackEndpoint {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         stackService.removeInstances(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceIds, user);
         return Response.status(Status.NO_CONTENT).build();
-    }
-
-    @Override
-    public PlatformVariantsJson variants() {
-        PlatformVariants pv = parameterService.getPlatformVariants();
-        return conversionService.convert(pv, PlatformVariantsJson.class);
     }
 
     public Response changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeRequest stackImageChangeRequest) {
