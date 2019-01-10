@@ -1,10 +1,15 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class ExposedServiceResponse {
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
+
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
+public class ExposedServiceV4Response {
 
     private String serviceName;
 
@@ -46,16 +51,16 @@ public class ExposedServiceResponse {
         this.knoxUrl = knoxUrl;
     }
 
-    public static Collection<ExposedServiceResponse> fromExposedServices(Collection<ExposedService> exposedServices) {
-        List<ExposedServiceResponse> exposedServiceResponseList = new ArrayList<>();
+    public static Collection<ExposedServiceV4Response> fromExposedServices(Collection<ExposedService> exposedServices) {
+        List<ExposedServiceV4Response> exposedServiceV4ResponseList = new ArrayList<>();
         for (ExposedService service : exposedServices) {
-            ExposedServiceResponse exposedServiceResponse = new ExposedServiceResponse();
-            exposedServiceResponse.setDisplayName(service.getPortName());
-            exposedServiceResponse.setServiceName(service.getServiceName());
-            exposedServiceResponse.setKnoxService(service.getKnoxService());
-            exposedServiceResponse.setKnoxUrl(service.getKnoxUrl());
-            exposedServiceResponseList.add(exposedServiceResponse);
+            ExposedServiceV4Response exposedServiceV4Response = new ExposedServiceV4Response();
+            exposedServiceV4Response.setDisplayName(service.getPortName());
+            exposedServiceV4Response.setServiceName(service.getServiceName());
+            exposedServiceV4Response.setKnoxService(service.getKnoxService());
+            exposedServiceV4Response.setKnoxUrl(service.getKnoxUrl());
+            exposedServiceV4ResponseList.add(exposedServiceV4Response);
         }
-        return exposedServiceResponseList;
+        return exposedServiceV4ResponseList;
     }
 }

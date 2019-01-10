@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Response;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
@@ -41,9 +41,9 @@ public class FileSystemSupportMatrixService {
         }
     }
 
-    public Set<CloudStorageSupportedResponse> getCloudStorageMatrix(String stackVersion) {
+    public Set<CloudStorageSupportedV4Response> getCloudStorageMatrix(String stackVersion) {
         VersionComparator versionComparator = new VersionComparator();
-        Set<CloudStorageSupportedResponse> response = new HashSet<>();
+        Set<CloudStorageSupportedV4Response> response = new HashSet<>();
         cloudFileSystemSupportMatrix.getProviders().forEach(supportConfigEntries -> {
             Set<String> supportedFileSystems = supportConfigEntries.getConfigEntries().stream()
                     .filter(supportConfigEntry -> {
@@ -56,10 +56,10 @@ public class FileSystemSupportMatrixService {
                     .map(CloudFileSystemSupportConfigEntry::getSupportedFileSytem)
                     .collect(Collectors.toSet());
             if (!supportedFileSystems.isEmpty()) {
-                CloudStorageSupportedResponse cloudStorageSupportedResponse = new CloudStorageSupportedResponse();
-                cloudStorageSupportedResponse.setProvider(supportConfigEntries.getProvider());
-                cloudStorageSupportedResponse.setFileSystemType(supportedFileSystems);
-                response.add(cloudStorageSupportedResponse);
+                CloudStorageSupportedV4Response cloudStorageSupportedV4Response = new CloudStorageSupportedV4Response();
+                cloudStorageSupportedV4Response.setProvider(supportConfigEntries.getProvider());
+                cloudStorageSupportedV4Response.setFileSystemType(supportedFileSystems);
+                response.add(cloudStorageSupportedV4Response);
             }
         });
         return response;

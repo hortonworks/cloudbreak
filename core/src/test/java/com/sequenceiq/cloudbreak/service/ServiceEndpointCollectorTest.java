@@ -36,7 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
@@ -212,18 +212,18 @@ public class ServiceEndpointCollectorTest {
         when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
-        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
-        assertEquals(0L, exposedServiceResponses.size());
+        Collection<ExposedServiceV4Response> exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        assertEquals(0L, exposedServiceV4Respons.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
-        exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
-        assertEquals(1L, exposedServiceResponses.size());
+        exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        assertEquals(1L, exposedServiceV4Respons.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
-        exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
-        assertEquals(1L, exposedServiceResponses.size());
+        exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        assertEquals(1L, exposedServiceV4Respons.size());
     }
 
     @Test
@@ -236,24 +236,24 @@ public class ServiceEndpointCollectorTest {
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
 
-        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
+        Collection<ExposedServiceV4Response> exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
 
-        assertEquals(3L, exposedServiceResponses.size());
-        assertFalse(createExposedServiceFilteredStream(exposedServiceResponses)
+        assertEquals(3L, exposedServiceV4Respons.size());
+        assertFalse(createExposedServiceFilteredStream(exposedServiceV4Respons)
                 .findFirst()
                 .isPresent());
 
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
 
-        exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
+        exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
 
-        assertEquals(6L, exposedServiceResponses.size());
-        assertTrue(createExposedServiceFilteredStream(exposedServiceResponses)
+        assertEquals(6L, exposedServiceV4Respons.size());
+        assertTrue(createExposedServiceFilteredStream(exposedServiceV4Respons)
                 .count() == 2);
     }
 
-    private Stream<ExposedServiceResponse> createExposedServiceFilteredStream(Collection<ExposedServiceResponse> exposedServiceResponses) {
-        return exposedServiceResponses
+    private Stream<ExposedServiceV4Response> createExposedServiceFilteredStream(Collection<ExposedServiceV4Response> exposedServiceV4Respons) {
+        return exposedServiceV4Respons
                 .stream()
                 .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
                         || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")

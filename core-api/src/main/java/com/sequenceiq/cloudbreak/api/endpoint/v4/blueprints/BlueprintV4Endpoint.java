@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
-import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
@@ -69,6 +69,6 @@ public interface BlueprintV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UtilityOpDescription.CUSTOM_PARAMETERS, produces = ContentType.JSON,
             nickname = "getBlueprintCustomParameters")
-    ParametersQueryResponse getParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    ParametersQueryV4Response getParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }

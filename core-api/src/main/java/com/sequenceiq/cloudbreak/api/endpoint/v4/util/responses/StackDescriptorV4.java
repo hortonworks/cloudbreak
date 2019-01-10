@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.stack;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
 
-public class StackDescriptor {
+public class StackDescriptorV4 {
 
     private String version;
 

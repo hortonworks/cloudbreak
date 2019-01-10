@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.controller.v4.LdapV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -44,7 +45,6 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(
             AuditEventV4Controller.class,
-
             AccountPreferencesController.class,
             BlueprintV4Controller.class,
             CloudbreakEventController.class,
@@ -70,7 +70,6 @@ public class EndpointConfig extends ResourceConfig {
             PlatformParameterV3Controller.class,
             ProxyV4Controller.class,
             RecipesV4Controller.class,
-            RepositoryConfigValidationController.class,
             SecurityRuleController.class,
             SettingsController.class,
             SmartSenseSubscriptionController.class,
@@ -80,8 +79,8 @@ public class EndpointConfig extends ResourceConfig {
             StackV3Controller.class,
             SubscriptionController.class,
             UserProfileV4Controller.class,
-            UtilController.class,
-            UtilV3Controller.class,
+            FileSystemV4Controller.class,
+            UtilV4Controller.class,
             FileSystemV4Controller.class,
             AutoscaleController.class
     );

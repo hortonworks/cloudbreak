@@ -18,8 +18,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
@@ -37,9 +37,9 @@ public class DefaultAmbariRepoServiceTest {
     public void init() {
         Map<String, AmbariInfo> entries = new HashMap<>();
 
-        StackMatrix stackMatrix = new StackMatrix();
-        Map<String, StackDescriptor> hdpMap = new HashMap<>();
-        Map<String, StackDescriptor> hdfMap = new HashMap<>();
+        StackMatrixV4 stackMatrixV4 = new StackMatrixV4();
+        Map<String, StackDescriptorV4> hdpMap = new HashMap<>();
+        Map<String, StackDescriptorV4> hdfMap = new HashMap<>();
 
         AmbariInfoJson ambariInfoJson26 = new AmbariInfoJson();
         ambariInfoJson26.setVersion("2.6");
@@ -49,24 +49,24 @@ public class DefaultAmbariRepoServiceTest {
         ambariInfoJson27.setVersion("2.7");
         ambariInfoJson27.setRepo(getAmbariRepoJson("2.7"));
 
-        StackDescriptor hdpDescriptor26 = new StackDescriptor();
+        StackDescriptorV4 hdpDescriptor26 = new StackDescriptorV4();
         hdpDescriptor26.setAmbari(ambariInfoJson26);
         hdpMap.put("2.7", hdpDescriptor26);
 
-        StackDescriptor hdpDescriptor30 = new StackDescriptor();
+        StackDescriptorV4 hdpDescriptor30 = new StackDescriptorV4();
         hdpDescriptor30.setAmbari(ambariInfoJson27);
         hdpMap.put("3.0", hdpDescriptor30);
 
-        stackMatrix.setHdp(hdpMap);
+        stackMatrixV4.setHdp(hdpMap);
 
-        StackDescriptor hdfDescriptor31 = new StackDescriptor();
+        StackDescriptorV4 hdfDescriptor31 = new StackDescriptorV4();
         hdfDescriptor31.setAmbari(ambariInfoJson27);
         hdfMap.put("3.1", hdfDescriptor31);
 
-        stackMatrix.setHdp(hdpMap);
-        stackMatrix.setHdf(hdfMap);
+        stackMatrixV4.setHdp(hdpMap);
+        stackMatrixV4.setHdf(hdfMap);
 
-        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrix);
+        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4);
 
         AmbariInfo ambariInfo26 = new AmbariInfo();
         ambariInfo26.setVersion("2.6");

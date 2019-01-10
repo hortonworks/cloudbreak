@@ -27,8 +27,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -227,30 +227,30 @@ public class ClusterCreationSetupService {
         AmbariRepo ambariRepo = ambariRepoComponent.getAttributes().get(AmbariRepo.class);
         StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
         Image image = imageComponent.getAttributes().get(Image.class);
-        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
+        StackMatrixV4 stackMatrixV4 = stackMatrixService.getStackMatrix();
         String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
-        Map<String, StackDescriptor> stackDescriptorMap;
+        Map<String, StackDescriptorV4> stackDescriptorMap;
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {
             stackType = stackType.substring(0, stackType.indexOf("-"));
         }
         switch (stackType) {
             case "HDP":
-                stackDescriptorMap = stackMatrix.getHdp();
+                stackDescriptorMap = stackMatrixV4.getHdp();
                 break;
             case "HDF":
-                stackDescriptorMap = stackMatrix.getHdf();
+                stackDescriptorMap = stackMatrixV4.getHdf();
                 break;
             default:
                 LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
-                stackDescriptorMap = stackMatrix.getHdp();
+                stackDescriptorMap = stackMatrixV4.getHdp();
         }
-        StackDescriptor stackDescriptor = stackDescriptorMap.get(stackMajorVersion);
-        if (stackDescriptor != null) {
-            boolean hasDefaultStackRepoUrlForOsType = stackDescriptor.getRepo().getStack().containsKey(image.getOsType());
-            boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptor.getAmbari().getRepo().containsKey(image.getOsType());
-            boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptor.getMinAmbari().length()),
-                    () -> stackDescriptor.getMinAmbari()) >= 0;
+        StackDescriptorV4 stackDescriptorV4 = stackDescriptorMap.get(stackMajorVersion);
+        if (stackDescriptorV4 != null) {
+            boolean hasDefaultStackRepoUrlForOsType = stackDescriptorV4.getRepo().getStack().containsKey(image.getOsType());
+            boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptorV4.getAmbari().getRepo().containsKey(image.getOsType());
+            boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptorV4.getMinAmbari().length()),
+                    () -> stackDescriptorV4.getMinAmbari()) >= 0;
             if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
                 String message = String.format("The given repository information seems to be incompatible."
                                 + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),

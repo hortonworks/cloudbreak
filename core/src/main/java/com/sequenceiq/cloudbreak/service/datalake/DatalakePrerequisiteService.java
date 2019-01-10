@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteRequest;
-import com.sequenceiq.cloudbreak.api.model.datalake.DatalakePrerequisiteResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.DatalakePrerequisiteV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DatalakePrerequisiteV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
@@ -63,18 +63,18 @@ public class DatalakePrerequisiteService {
     @Named("conversionService")
     private ConversionService conversionService;
 
-    public DatalakePrerequisiteResponse prepare(Long workspaceId, String environment, DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
-        boolean successFullyTested = testConnections(datalakePrerequisiteRequest);
+    public DatalakePrerequisiteV4Response prepare(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
+        boolean successFullyTested = testConnections(datalakePrerequisiteV4Request);
         if (successFullyTested) {
-            return prepareResources(workspaceId, environment, datalakePrerequisiteRequest);
+            return prepareResources(workspaceId, environment, datalakePrerequisiteV4Request);
         } else {
             throw new BadRequestException("Some of the resource for datalake prerequistes was not available please make sure that everything "
                     + "is up and running.");
         }
     }
 
-    private boolean testConnections(DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
-        LdapConfig ldapConfig = conversionService.convert(datalakePrerequisiteRequest.getLdap(), LdapConfig.class);
+    private boolean testConnections(DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
+        LdapConfig ldapConfig = conversionService.convert(datalakePrerequisiteV4Request.getLdap(), LdapConfig.class);
         boolean ret = true;
         try {
             ldapConfigValidator.validateLdapConnection(ldapConfig);
@@ -84,7 +84,7 @@ public class DatalakePrerequisiteService {
             ret = false;
         }
 
-        for (DatabaseV4Request rdsConfigRequest : datalakePrerequisiteRequest.getDatabases()) {
+        for (DatabaseV4Request rdsConfigRequest : datalakePrerequisiteV4Request.getDatabases()) {
             RDSConfig rdsConfig = conversionService.convert(rdsConfigRequest, RDSConfig.class);
             try {
                 rdsConnectionValidator.validateRdsConnection(rdsConfig);
@@ -99,34 +99,34 @@ public class DatalakePrerequisiteService {
         return ret;
     }
 
-    private DatalakePrerequisiteResponse prepareResources(Long workspaceId, String environment, DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
-        KerberosConfig kerberosConfig = createKerberosConfig(workspaceId, environment, datalakePrerequisiteRequest);
-        LdapConfig ldapConfig = createLdapConfig(workspaceId, environment, datalakePrerequisiteRequest);
-        Set<RDSConfig> rdsConfigs = createRdsConfig(workspaceId, environment, datalakePrerequisiteRequest);
+    private DatalakePrerequisiteV4Response prepareResources(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
+        KerberosConfig kerberosConfig = createKerberosConfig(workspaceId, environment, datalakePrerequisiteV4Request);
+        LdapConfig ldapConfig = createLdapConfig(workspaceId, environment, datalakePrerequisiteV4Request);
+        Set<RDSConfig> rdsConfigs = createRdsConfig(workspaceId, environment, datalakePrerequisiteV4Request);
 
-        DatalakePrerequisiteResponse datalakePrerequisiteResponse = new DatalakePrerequisiteResponse();
-        datalakePrerequisiteResponse.setKerberos(prepareKerberosResponse(kerberosConfig));
-        datalakePrerequisiteResponse.setLdap(prepareLdapResponse(ldapConfig));
-        datalakePrerequisiteResponse.setDatabases(prepareRdsResponse(rdsConfigs));
-        return datalakePrerequisiteResponse;
+        DatalakePrerequisiteV4Response datalakePrerequisiteV4Response = new DatalakePrerequisiteV4Response();
+        datalakePrerequisiteV4Response.setKerberos(prepareKerberosResponse(kerberosConfig));
+        datalakePrerequisiteV4Response.setLdap(prepareLdapResponse(ldapConfig));
+        datalakePrerequisiteV4Response.setDatabases(prepareRdsResponse(rdsConfigs));
+        return datalakePrerequisiteV4Response;
     }
 
-    private Set<RDSConfig> createRdsConfig(Long workspaceId, String environment, DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
+    private Set<RDSConfig> createRdsConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
         Set<RDSConfig> rdsConfigSet = new HashSet<>();
-        for (DatabaseV4Request rdsConfigRequest : datalakePrerequisiteRequest.getDatabases()) {
+        for (DatabaseV4Request rdsConfigRequest : datalakePrerequisiteV4Request.getDatabases()) {
             RDSConfig rdsConfig = prepareRdsConfig(environment, rdsConfigRequest);
             rdsConfigSet.add(rdsConfigService.createInEnvironment(rdsConfig, Set.of(environment), workspaceId));
         }
         return rdsConfigSet;
     }
 
-    private LdapConfig createLdapConfig(Long workspaceId, String environment, DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
-        LdapConfig ldapConfig = prepareLdapConfig(environment, datalakePrerequisiteRequest.getLdap());
+    private LdapConfig createLdapConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
+        LdapConfig ldapConfig = prepareLdapConfig(environment, datalakePrerequisiteV4Request.getLdap());
         return ldapConfigService.createInEnvironment(ldapConfig, Set.of(environment), workspaceId);
     }
 
-    private KerberosConfig createKerberosConfig(Long workspaceId, String environment, DatalakePrerequisiteRequest datalakePrerequisiteRequest) {
-        KerberosConfig kerberosConfig = prepareKerberosConfig(environment, datalakePrerequisiteRequest.getKerberos());
+    private KerberosConfig createKerberosConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
+        KerberosConfig kerberosConfig = prepareKerberosConfig(environment, datalakePrerequisiteV4Request.getKerberos());
         return kerberosService.createInEnvironment(kerberosConfig, Set.of(environment), workspaceId);
     }
 

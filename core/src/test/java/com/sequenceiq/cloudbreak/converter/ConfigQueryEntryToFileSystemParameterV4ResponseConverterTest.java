@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StructuredParameterQueryV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.util.ConfigQueryEntryToStructuredParameterQueryResponseConverter;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
     @Test
     public void testConvertCheckAllPropertyPassedProperly() {
-        FileSystemParameterV4Response expected = new FileSystemParameterV4Response();
+        StructuredParameterQueryV4Response expected = new StructuredParameterQueryV4Response();
         expected.setDefaultPath(TEST_PATH_VALUE);
         expected.setProtocol(TEST_PROTOCOL);
         expected.setDescription(TEST_DESCRIPTION);
@@ -49,7 +50,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
         expected.setPropertyName(TEST_PROPERTY_NAME);
         expected.setRelatedServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
 
-        FileSystemParameterV4Response result = underTest.convert(createConfigQueryEntry());
+        StructuredParameterQueryV4Response result = underTest.convert(createConfigQueryEntry());
 
         assertEquals(expected, result);
     }

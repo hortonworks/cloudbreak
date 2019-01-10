@@ -11,9 +11,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParametersV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemParametersV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParametersV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -61,7 +61,6 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
             result.add(conversionService.convert(configQueryEntry, FileSystemParameterV4Response.class));
         }
         FileSystemParametersV4Response parametersQueryResponse = new FileSystemParametersV4Response();
-        parametersQueryResponse.setEntries(result);
         return parametersQueryResponse;
     }
 
