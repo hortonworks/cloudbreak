@@ -7,7 +7,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
@@ -30,8 +30,8 @@ public class SecurityGroupToSecurityGroupResponseConverter extends AbstractConve
         return json;
     }
 
-    private List<SecurityRuleResponse> convertSecurityRules(Set<SecurityRule> securityRules) {
-        return (List<SecurityRuleResponse>) getConversionService().convert(securityRules, TypeDescriptor.forObject(securityRules),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleResponse.class)));
+    private List<SecurityRuleV4Response> convertSecurityRules(Set<SecurityRule> securityRules) {
+        return (List<SecurityRuleV4Response>) getConversionService().convert(securityRules, TypeDescriptor.forObject(securityRules),
+                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleV4Response.class)));
     }
 }

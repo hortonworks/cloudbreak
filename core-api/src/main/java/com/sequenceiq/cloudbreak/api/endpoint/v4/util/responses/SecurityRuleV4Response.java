@@ -1,8 +1,9 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleBase;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -11,16 +12,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class SecurityRuleResponse extends SecurityRuleBase {
+public class SecurityRuleV4Response extends SecurityRuleBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    public SecurityRuleResponse() {
+    public SecurityRuleV4Response() {
 
     }
 
-    public SecurityRuleResponse(String subnet) {
+    public SecurityRuleV4Response(String subnet) {
         super(subnet);
     }
 

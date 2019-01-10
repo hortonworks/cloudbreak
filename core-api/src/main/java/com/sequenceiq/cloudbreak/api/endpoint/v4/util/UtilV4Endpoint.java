@@ -10,10 +10,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.ClientVersionV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.SecurityRulesV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.StackVersionV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -56,4 +58,11 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = OperationDescriptions.RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION, produces = ContentType.JSON,
             notes = Notes.REPOSITORY_CONFIGS_VALIDATION_NOTES, nickname = "repositoryConfigsValidationV4")
     RepoConfigValidationV4Response repositoryConfigValidationRequest(@Valid RepoConfigValidationV4Request repoConfigValidationV4Request);
+
+    @GET
+    @Path("default_security_rules")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
+            notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
+    SecurityRulesV4Response getDefaultSecurityRules(@BeanParam SecurityRulesV4Filter securityRulesV4Filter);
 }

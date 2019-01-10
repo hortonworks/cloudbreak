@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
@@ -90,7 +89,6 @@ public class CloudbreakIdentityClient {
             ConnectorV3Endpoint.class,
             ProxyV4Endpoint.class,
             RecipeV4Endpoint.class,
-            SecurityRuleEndpoint.class,
             SettingsEndpoint.class,
             SmartSenseSubscriptionV4Endpoint.class,
             StackV1Endpoint.class,
@@ -231,10 +229,6 @@ public class CloudbreakIdentityClient {
 
     public RecipeV4Endpoint recipeV4Endpoint() {
         return getEndpoint(RecipeV4Endpoint.class);
-    }
-
-    public SecurityRuleEndpoint securityRuleEndpoint() {
-        return getEndpoint(SecurityRuleEndpoint.class);
     }
 
     public SettingsEndpoint settingsEndpoint() {
