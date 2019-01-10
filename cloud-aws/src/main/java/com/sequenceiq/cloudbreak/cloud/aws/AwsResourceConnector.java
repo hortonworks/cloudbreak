@@ -257,7 +257,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             } catch (Exception e) {
                 String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
                         e.getMessage());
-                LOGGER.error(errorMessage, e);
+                LOGGER.warn(errorMessage, e);
                 throw new CloudConnectorException(e.getMessage(), e);
             }
         }

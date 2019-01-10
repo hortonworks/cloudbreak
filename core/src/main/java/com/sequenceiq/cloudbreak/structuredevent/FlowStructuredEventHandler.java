@@ -91,7 +91,7 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
             structuredEventClient.sendStructuredEvent(structuredEvent);
             lastStateChange = currentTime;
         } catch (RuntimeException ex) {
-            LOGGER.warn("Error happened during structured flow event generation! The event won't be stored!", ex);
+            LOGGER.error("Error happened during structured flow event generation! The event won't be stored!", ex);
         }
     }
 

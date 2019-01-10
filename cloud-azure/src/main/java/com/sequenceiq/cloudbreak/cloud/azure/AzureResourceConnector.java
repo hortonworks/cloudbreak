@@ -137,7 +137,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
             }
         } catch (Exception e) {
-            LOGGER.error("Provisioning error:", e);
+            LOGGER.warn("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
         }
 

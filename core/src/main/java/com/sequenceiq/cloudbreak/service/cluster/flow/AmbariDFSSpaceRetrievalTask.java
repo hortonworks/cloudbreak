@@ -25,7 +25,7 @@ public class AmbariDFSSpaceRetrievalTask extends ClusterBasedStatusCheckerTask<A
             dfsSpace = ambariClientPollerObject.getAmbariClient().getDFSSpace();
             return true;
         } catch (Exception ex) {
-            LOGGER.warn("Error during getting dfs space from ambari", ex);
+            LOGGER.info("Error during getting dfs space from ambari", ex);
             return false;
         }
     }
