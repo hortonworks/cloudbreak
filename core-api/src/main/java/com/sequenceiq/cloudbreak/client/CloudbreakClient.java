@@ -32,11 +32,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.CredentialV3Endpoint;
@@ -77,7 +75,7 @@ public class CloudbreakClient {
             BlueprintV4Endpoint.class,
             DatabaseV4Endpoint.class,
             EnvironmentV4Endpoint.class,
-            EventV3Endpoint.class,
+            EventV4Endpoint.class,
             ClusterV1Endpoint.class,
             ClusterTemplateV4Endpoint.class,
             CredentialEndpoint.class,
@@ -92,12 +90,10 @@ public class CloudbreakClient {
             ConnectorV4Endpoint.class,
             ProxyV4Endpoint.class,
             RecipeV4Endpoint.class,
-            SettingsEndpoint.class,
             SmartSenseSubscriptionV4Endpoint.class,
             StackV1Endpoint.class,
             StackV2Endpoint.class,
             StackV3Endpoint.class,
-            SubscriptionEndpoint.class,
             UserProfileV4Endpoint.class,
             UtilV4Endpoint.class,
             WorkspaceAwareUtilV4Endpoint.class,
@@ -150,8 +146,8 @@ public class CloudbreakClient {
         return getEndpoint(EnvironmentV4Endpoint.class);
     }
 
-    public EventV3Endpoint eventV3Endpoint() {
-        return getEndpoint(EventV3Endpoint.class);
+    public EventV4Endpoint eventV3Endpoint() {
+        return getEndpoint(EventV4Endpoint.class);
     }
 
     public ClusterV1Endpoint clusterEndpoint() {
@@ -210,10 +206,6 @@ public class CloudbreakClient {
         return getEndpoint(RecipeV4Endpoint.class);
     }
 
-    public SettingsEndpoint settingsEndpoint() {
-        return getEndpoint(SettingsEndpoint.class);
-    }
-
     public SmartSenseSubscriptionV4Endpoint smartSenseSubscriptionV4Endpoint() {
         return getEndpoint(SmartSenseSubscriptionV4Endpoint.class);
     }
@@ -228,10 +220,6 @@ public class CloudbreakClient {
 
     public StackV3Endpoint stackV3Endpoint() {
         return getEndpoint(StackV3Endpoint.class);
-    }
-
-    public SubscriptionEndpoint subscriptionEndpoint() {
-        return getEndpoint(SubscriptionEndpoint.class);
     }
 
     public UserProfileV4Endpoint userV4Endpoint() {

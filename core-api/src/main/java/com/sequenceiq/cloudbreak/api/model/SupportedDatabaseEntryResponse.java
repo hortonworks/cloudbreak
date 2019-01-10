@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SupportedDatabaseModelDes
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("SupportedDatabaseEntryResponse")
+@ApiModel
 public class SupportedDatabaseEntryResponse implements JsonEntity {
 
     @ApiModelProperty(value = SupportedDatabaseModelDescription.DATABASENAME)
