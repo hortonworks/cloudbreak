@@ -189,7 +189,9 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
-        if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
+        if (cluster.isSecure()
+                && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())
+                && !kerberosDetailService.isAmbariManagedKrb5Conf(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             putIfNotNull(kerberosPillarConf, kerberosConfig.getMasterKey(), "masterKey");
