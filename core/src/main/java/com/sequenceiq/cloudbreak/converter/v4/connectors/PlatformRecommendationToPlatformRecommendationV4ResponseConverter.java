@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DiskResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;

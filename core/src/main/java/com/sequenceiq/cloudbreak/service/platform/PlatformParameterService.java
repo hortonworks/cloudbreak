@@ -7,7 +7,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.RecommendationV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -86,13 +86,13 @@ public class PlatformParameterService {
                 request.getPlatformVariant(), request.getFilters());
     }
 
-    public PlatformRecommendation getRecommendation(Long workspaceId, RecommendationV4Filter request) {
+    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, RecommendationV4Filter request) {
         PlatformResourceRequest resourceRequest = conversionService.convert(request, PlatformResourceRequest.class);
         checkFieldIsNotEmpty(request.getRegion(), "region");
         checkFieldIsNotEmpty(request.getAvailabilityZone(), "availabilityZone");
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return cloudResourceAdvisor.createForBlueprint(request.getBlueprintName(),
+        return cloudResourceAdvisor.createForBlueprint(blueprintName,
                         resourceRequest, user, workspace);
     }
 

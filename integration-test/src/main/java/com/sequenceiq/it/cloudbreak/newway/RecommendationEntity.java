@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.RecommendationV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
 
 public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationV4Filter, RecommendationV4Response, RecommendationEntity> {
 

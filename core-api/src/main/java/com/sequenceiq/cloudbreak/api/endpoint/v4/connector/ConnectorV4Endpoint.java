@@ -9,7 +9,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformAccessConfigsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
@@ -19,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSecurityGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -82,13 +80,6 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_ENCRYPTIONKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getEncryptionKeysForWorkspace")
     PlatformEncryptionKeysV4Response getEncryptionKeys(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
-
-    @GET
-    @Path("recommendation")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createRecommendationForWorkspace")
-    RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId, @BeanParam RecommendationV4Filter recommendationV4Filter);
 
     @GET
     @Path("security_groups")

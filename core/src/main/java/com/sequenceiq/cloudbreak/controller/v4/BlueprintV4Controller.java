@@ -16,10 +16,12 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -53,6 +56,9 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Inject
     private WorkspaceService workspaceService;
+
+    @Inject
+    private PlatformParameterService platformParameterService;
 
     @Override
     public BlueprintV4ViewResponses list(Long workspaceId) {
@@ -104,9 +110,15 @@ public class BlueprintV4Controller extends NotificationController implements Blu
         return parametersQueryV4Response;
     }
 
+    @Override
+    public RecommendationV4Response createRecommendation(Long workspaceId, String name, RecommendationV4Filter recommendationV4Filter) {
+        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, name, recommendationV4Filter), RecommendationV4Response.class);
+    }
+
     private Workspace getWorkspace(Long workspaceId) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         return workspaceService.get(workspaceId, user);
     }
+
 }

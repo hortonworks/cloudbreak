@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses;
 
 import java.util.Map;
 import java.util.Set;
