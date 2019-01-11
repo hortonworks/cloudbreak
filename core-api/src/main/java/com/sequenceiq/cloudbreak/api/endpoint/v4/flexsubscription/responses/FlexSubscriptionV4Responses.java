@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses;
 
 import java.util.Set;
 

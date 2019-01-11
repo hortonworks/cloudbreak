@@ -32,7 +32,7 @@ public class CredentialPropertyCollector {
             propertiesAsMap = Optional.of(cred.getGcp().asMap());
         } else if (params.getCloudPlatform().equals(CloudPlatform.OPENSTACK)) {
             propertiesAsMap = Optional.of(cred.getOpenstack().asMap());
-        } else if ((params.getCloudPlatform().equals(CloudPlatform.YARN))) {
+        } else if (params.getCloudPlatform().equals(CloudPlatform.YARN)) {
             propertiesAsMap = Optional.of(cred.getYarn().asMap());
         }
         return propertiesAsMap.orElseThrow(() -> new InvalidParameterException("Unable to collect credential properties"));

@@ -1,4 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
+
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLUSTER_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_CLUSTER_MANAGER_START;
 import static org.junit.Assert.assertEquals;

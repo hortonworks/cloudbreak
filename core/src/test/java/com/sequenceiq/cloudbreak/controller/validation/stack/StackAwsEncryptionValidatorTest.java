@@ -24,8 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
-import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
@@ -165,7 +163,6 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     @Test
     public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsButDoesNotContainsKeyEntryThenValidationErrorShouldComeBack() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithoutNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
         when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
 
@@ -181,7 +178,6 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsAndContainsKeyEntryButItsValueIsNotInTheListedKeysThenValidationErrorShouldComeBack() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         parameters.put(KEY, "some invalid value which does not exists in the listed encryption keys");
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithoutNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
         when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
 
@@ -197,7 +193,6 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsAndContainsKeyEntryAndItsValueIsInTheListedKeysThenEverythingShouldGoFine() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         parameters.put(KEY, TEST_ENCRYPTION_KEY);
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
         when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
 
@@ -217,21 +212,6 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
 
     private List<InstanceGroupRequest> getInstanceGroupWithRequest(InstanceGroupRequest... requests) {
         return Arrays.asList(requests);
-    }
-
-    private PlatformEncryptionKeysV4Response createPlatformEncryptionKeysResponseWithoutNameValue() {
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = new PlatformEncryptionKeysV4Response();
-        EncryptionKeyConfigJson testInput = new EncryptionKeyConfigJson();
-        encryptionKeysResponse.setEncryptionKeyConfigs(Set.of(testInput));
-        return encryptionKeysResponse;
-    }
-
-    private PlatformEncryptionKeysV4Response createPlatformEncryptionKeysResponseWithNameValue() {
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = new PlatformEncryptionKeysV4Response();
-        EncryptionKeyConfigJson testInput = new EncryptionKeyConfigJson();
-        testInput.setName(TEST_ENCRYPTION_KEY);
-        encryptionKeysResponse.setEncryptionKeyConfigs(Set.of(testInput));
-        return encryptionKeysResponse;
     }
 
 }

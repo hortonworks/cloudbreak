@@ -375,7 +375,8 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         }
     }
 
-    public DetailedEnvironmentV4Response registerExternalDatalake(String environmentName, Long workspaceId, RegisterDatalakeV4Request registerDatalakeV4Request) {
+    public DetailedEnvironmentV4Response registerExternalDatalake(String environmentName, Long workspaceId,
+            RegisterDatalakeV4Request registerDatalakeV4Request) {
         try {
             return transactionService.required(() -> {
                 try {

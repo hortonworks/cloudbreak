@@ -71,7 +71,8 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     @Override
     public LdapTestV4Response test(Long workspaceId, LdapTestV4Request ldapValidationRequest) {
         LdapTestV4Response ldapTestV4Response = new LdapTestV4Response();
-        ldapTestV4Response.setResult(ldapConfigService.testConnection(workspaceId, ldapValidationRequest.getExistingLdapName(), ldapValidationRequest.getLdap()));
+        ldapTestV4Response.setResult(ldapConfigService.testConnection(workspaceId,
+                ldapValidationRequest.getExistingLdapName(), ldapValidationRequest.getLdap()));
         return ldapTestV4Response;
     }
 

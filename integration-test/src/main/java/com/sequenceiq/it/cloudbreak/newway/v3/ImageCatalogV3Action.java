@@ -63,7 +63,7 @@ public class ImageCatalogV3Action {
         filter.setPlatform(provider);
         imageCatalogEntity.setResponseByProvider(
                 client.getCloudbreakClient()
-                        .imageCatalogV4Endpoint().getImagesByName(client.getWorkspaceId(), imageCatalogEntity.getName(), filter));
+                        .imageCatalogV4Endpoint().getImagesByName(workspaceId, imageCatalogEntity.getName(), filter));
         logJSON("get response by provider from image catalog: ", imageCatalogEntity.getResponseByProvider());
     }
 
@@ -78,7 +78,7 @@ public class ImageCatalogV3Action {
         filter.setPlatform(provider);
         imageCatalogEntity.setResponseByProvider(
                 client.getCloudbreakClient()
-                        .imageCatalogV4Endpoint().getImages(client.getWorkspaceId(), filter));
+                        .imageCatalogV4Endpoint().getImages(workspaceId, filter));
         logJSON("Imagecatalog get response by provider: ", imageCatalogEntity.getResponseByProvider());
     }
 

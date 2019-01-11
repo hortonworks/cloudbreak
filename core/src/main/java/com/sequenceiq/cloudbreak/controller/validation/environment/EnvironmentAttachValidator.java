@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 public class EnvironmentAttachValidator {
 
     public ValidationResult validate(EnvironmentAttachV4Request request,
-                                     Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach) {
+            Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateLdaps(request, ldapsToAttach, resultBuilder);
         validateProxies(request, proxiesToAttach, resultBuilder);

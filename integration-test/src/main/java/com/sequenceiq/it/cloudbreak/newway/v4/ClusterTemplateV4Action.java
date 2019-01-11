@@ -41,7 +41,8 @@ public class ClusterTemplateV4Action {
                 client.getCloudbreakClient()
                         .clusterTemplateV4EndPoint()
                         .get(workspaceId, clusterTemplateV4Entity.getName()));
-        Log.logJSON(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()), new Object[]{clusterTemplateV4Entity.getResponse()});
+        Log.logJSON(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()),
+                new Object[]{clusterTemplateV4Entity.getResponse()});
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {

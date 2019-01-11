@@ -67,7 +67,7 @@ public interface EnvironmentV4Endpoint {
     @ApiOperation(value = EnvironmentOpDescription.ATTACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "attachResourcesToEnvironment")
     DetailedEnvironmentV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-                                                  @Valid EnvironmentAttachV4Request request);
+            @Valid EnvironmentAttachV4Request request);
 
     @PUT
     @Path("/{name}/detach")
@@ -75,7 +75,7 @@ public interface EnvironmentV4Endpoint {
     @ApiOperation(value = EnvironmentOpDescription.DETACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "detachResourcesFromEnvironment")
     DetailedEnvironmentV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-                                                  @Valid EnvironmentDetachV4Request request);
+            @Valid EnvironmentDetachV4Request request);
 
     @PUT
     @Path("/{name}/change_credential")

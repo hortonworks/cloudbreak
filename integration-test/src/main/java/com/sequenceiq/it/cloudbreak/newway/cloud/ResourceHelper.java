@@ -1,19 +1,19 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
 
 public abstract class ResourceHelper<T extends CloudStorageParameters> {
 
@@ -53,7 +53,8 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
         return testParameter;
     }
 
-    protected DatabaseV4Request createRdsRequestWithProperties(String configName, String userName, String password, String connectionUrl, DatabaseType databaseType) {
+    protected DatabaseV4Request createRdsRequestWithProperties(String configName, String userName, String password,
+            String connectionUrl, DatabaseType databaseType) {
         var request = new DatabaseV4Request();
         request.setName(getParam(configName));
         request.setConnectionUserName(getParam(userName));

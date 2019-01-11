@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v4.felxsubscriptions;
+package com.sequenceiq.cloudbreak.converter.v4.flexsubscription;
 
 
 import javax.inject.Inject;
@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests.FlexSubscriptionV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.requests.FlexSubscriptionV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;

@@ -262,7 +262,7 @@ public class RdsConfigServiceTest {
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
         thrown.expect(BadRequestException.class);
 
-        String result = underTest.testRdsConnection(1L, null,null);
+        String result = underTest.testRdsConnection(1L, null, null);
 
         assertEquals("access is denied", result);
     }
@@ -271,7 +271,7 @@ public class RdsConfigServiceTest {
     public void testRdsConnectionTestByExistingRdsConfig() {
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
 
-        String result = underTest.testRdsConnection(1L , null, testRdsConfig);
+        String result = underTest.testRdsConnection(1L, null, testRdsConfig);
 
         assertEquals("connected", result);
     }
@@ -281,7 +281,7 @@ public class RdsConfigServiceTest {
         String testErrorString = "Test error";
         doThrow(new BadRequestException(testErrorString)).when(rdsConnectionValidator).validateRdsConnection(any());
 
-        String result = underTest.testRdsConnection(1L , null, testRdsConfig);
+        String result = underTest.testRdsConnection(1L, null, testRdsConfig);
 
         assertEquals(testErrorString, result);
     }

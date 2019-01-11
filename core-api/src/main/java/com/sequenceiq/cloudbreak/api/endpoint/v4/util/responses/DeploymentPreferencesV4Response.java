@@ -14,7 +14,7 @@ public class DeploymentPreferencesV4Response {
 
     private Set<FeatureSwitchV4> featureSwitchV4s = new HashSet<>();
 
-    private boolean isPlatformSelectionDisabled;
+    private boolean platformSelectionDisabled;
 
     private Map<String, Boolean> platformEnablement = new HashMap<>();
 
@@ -35,11 +35,11 @@ public class DeploymentPreferencesV4Response {
     }
 
     public boolean isPlatformSelectionDisabled() {
-        return isPlatformSelectionDisabled;
+        return platformSelectionDisabled;
     }
 
     public void setPlatformSelectionDisabled(boolean platformSelectionDisabled) {
-        isPlatformSelectionDisabled = platformSelectionDisabled;
+        this.platformSelectionDisabled = platformSelectionDisabled;
     }
 
     public Map<String, Boolean> getPlatformEnablement() {

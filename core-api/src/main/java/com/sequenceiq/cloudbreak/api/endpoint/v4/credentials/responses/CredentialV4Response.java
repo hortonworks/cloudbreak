@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(description = EnvironmentResponseModelDescription.CREDENTIAL ,parent = CredentialV4Base.class)
+@ApiModel(description = EnvironmentResponseModelDescription.CREDENTIAL, parent = CredentialV4Base.class)
 public class CredentialV4Response extends CredentialV4Base {
 
     @ApiModelProperty(ID)

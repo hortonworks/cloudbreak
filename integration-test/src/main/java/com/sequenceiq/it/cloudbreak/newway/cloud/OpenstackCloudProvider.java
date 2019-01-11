@@ -6,9 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV2Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV3Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.OpenstackCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.ProjectKeystoneV3Parameters;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -237,8 +235,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
         credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackcredential.userName"));
         credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackcredential.endpoint"));
-        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
-        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         return credentialParameters;
     }
 
@@ -259,12 +255,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackFieldcredential.userName"));
         credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackFieldcredential.endpoint"));
         credentialParameters.setFacing("internal");
-        KeystoneV3Parameters keystoneV3Parameters = new KeystoneV3Parameters();
-        ProjectKeystoneV3Parameters projectKeystoneV3Parameters = new ProjectKeystoneV3Parameters();
-        projectKeystoneV3Parameters.setUserDomain(getTestParameter().get("integrationtest.openstackFieldcredential.userDomain"));
-        projectKeystoneV3Parameters.setProjectDomainName(getTestParameter().get("integrationtest.openstackFieldcredential.projectDomainName"));
-        projectKeystoneV3Parameters.setProjectName(getTestParameter().get("integrationtest.openstackFieldcredential.projectName"));
-        keystoneV3Parameters.setProject(projectKeystoneV3Parameters);
         return credentialParameters;
     }
 
@@ -273,9 +263,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         credentialParameters.setUserName("kisnyul");
         credentialParameters.setEndpoint(getTestParameter().get("integrationtest.openstackcredential.endpoint"));
         credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
-        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
-        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackcredential.tenantName"));
-        credentialParameters.setKeystoneV2Parameters(keystoneV2Parameters);
         return credentialParameters;
     }
 
@@ -284,8 +271,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         credentialParameters.setUserName(getTestParameter().get("integrationtest.openstackcredential.userName"));
         credentialParameters.setEndpoint("https://index.hu/");
         credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackcredential.password"));
-        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
-        keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         return credentialParameters;
     }
 }

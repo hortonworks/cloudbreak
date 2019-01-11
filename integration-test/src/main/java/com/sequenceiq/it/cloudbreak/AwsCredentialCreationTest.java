@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -41,7 +38,6 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Aws credential for integrationtest");
 
-        Map<String, Object> map = new HashMap<>();
         AwsCredentialV4Parameters credentialParameters = new AwsCredentialV4Parameters();
         if (roleArn != null && !roleArn.isEmpty()) {
             RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();

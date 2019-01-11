@@ -1,7 +1,7 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests.FlexSubscriptionV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.requests.FlexSubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FlexSubscriptionModelDescription;
