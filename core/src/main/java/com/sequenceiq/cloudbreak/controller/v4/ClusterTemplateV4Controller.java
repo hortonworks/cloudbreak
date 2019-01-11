@@ -9,11 +9,11 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -58,11 +58,11 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public GeneralSetV4Response<ClusterTemplateViewV4Response> list(Long workspaceId) {
+    public ClusterTemplateViewV4Responses list(Long workspaceId) {
         try {
             Set<ClusterTemplateViewV4Response> clusterTemplateV4Responses = transactionService.required(() ->
                     converterUtil.convertAllAsSet(clusterTemplateService.findAllByWorkspaceId(workspaceId), ClusterTemplateViewV4Response.class));
-            return GeneralSetV4Response.propagateResponses(clusterTemplateV4Responses);
+            return new ClusterTemplateViewV4Responses(clusterTemplateV4Responses);
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

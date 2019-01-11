@@ -13,10 +13,10 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.requests.KubernetesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Responses;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
@@ -45,13 +45,13 @@ public class KubernetesV4Controller extends NotificationController implements Ku
     private UserService userService;
 
     @Override
-    public GeneralSetV4Response<KubernetesV4Response> list(Long workspaceId, ListV4Filter listV4Filter) {
+    public KubernetesV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
         Set<KubernetesV4Response> kubernetesV4Responses = kubernetesConfigService
                 .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal())
                 .stream()
                 .map(kubernetesConfig -> conversionService.convert(kubernetesConfig, KubernetesV4Response.class))
                 .collect(Collectors.toSet());
-        return GeneralSetV4Response.propagateResponses(kubernetesV4Responses);
+        return new KubernetesV4Responses(kubernetesV4Responses);
     }
 
     @Override

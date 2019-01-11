@@ -39,7 +39,7 @@ public class CleanupService {
 
         cloudbreakClient.credentialV4Endpoint()
                 .list(1L)
-                .getCredentials()
+                .getResponses()
                 .stream()
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
                 .forEach(credential -> deleteCredential(cloudbreakClient, credential.getName()));

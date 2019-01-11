@@ -13,13 +13,13 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapTestV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Responses;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -44,13 +44,13 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     private LdapConfigValidator ldapConfigValidator;
 
     @Override
-    public GeneralSetV4Response<LdapV4Response> list(Long workspaceId, ListV4Filter listV4Filter) {
+    public LdapV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
         Set<LdapV4Response> ldaps = ldapConfigService.findAllInWorkspaceAndEnvironment(workspaceId,
                 listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal())
                 .stream()
                 .map(ldapConfig -> conversionService.convert(ldapConfig, LdapV4Response.class))
                 .collect(Collectors.toSet());
-        return GeneralSetV4Response.propagateResponses(ldaps);
+        return new LdapV4Responses(ldaps);
     }
 
     @Override

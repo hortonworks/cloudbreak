@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses;
 
 import java.util.Set;
 
@@ -11,9 +11,9 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class KerberosViewV4Responses extends GeneralSetV4Response<KerberosViewV4Response> {
+public class ClusterTemplateViewV4Responses extends GeneralSetV4Response<ClusterTemplateViewV4Response> {
 
-    public KerberosViewV4Responses(Set<KerberosViewV4Response> responses) {
+    public ClusterTemplateViewV4Responses(Set<ClusterTemplateViewV4Response> responses) {
         super(responses);
     }
 }

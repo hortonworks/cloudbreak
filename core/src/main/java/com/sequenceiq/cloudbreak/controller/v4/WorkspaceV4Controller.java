@@ -14,15 +14,16 @@ import javax.validation.Valid;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.NameComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Requests;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.UserIds;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.WorkspaceV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
-import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses;
+import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -58,10 +59,10 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     }
 
     @Override
-    public GeneralSetV4Response<WorkspaceV4Response> list() {
+    public WorkspaceV4Responses list() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<Workspace> workspaces = workspaceService.retrieveForUser(user);
-        return GeneralSetV4Response.propagateResponses(workspacesToSortedResponse(workspaces));
+        return new WorkspaceV4Responses(workspacesToSortedResponse(workspaces));
     }
 
     @Override
@@ -81,31 +82,31 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     }
 
     @Override
-    public GeneralSetV4Response<UserV4Response> addUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests addWorkspaceUsers) {
+    public UserV4Responses addUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests addWorkspaceUsers) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.addUsers(workspaceName, addWorkspaceUsers.getUsers(), user);
-        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
+        return new UserV4Responses(usersToSortedResponse(users));
     }
 
     @Override
-    public GeneralSetV4Response<UserV4Response> changeUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests changeWorkspaceUsers) {
+    public UserV4Responses changeUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests changeWorkspaceUsers) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.changeUsers(workspaceName, changeWorkspaceUsers.getUsers(), user);
-        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
+        return new UserV4Responses(usersToSortedResponse(users));
     }
 
     @Override
-    public GeneralSetV4Response<UserV4Response> removeUsers(String workspaceName, @Valid UserIds userIds) {
+    public UserV4Responses removeUsers(String workspaceName, @Valid UserIds userIds) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.removeUsers(workspaceName, userIds.getUserIds(), user);
-        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
+        return new UserV4Responses(usersToSortedResponse(users));
     }
 
     @Override
-    public GeneralSetV4Response<UserV4Response> updateUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests updateWorkspaceUsers) {
+    public UserV4Responses updateUsers(String workspaceName, @Valid ChangeWorkspaceUsersV4Requests updateWorkspaceUsers) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Set<User> users = workspaceService.updateUsers(workspaceName, updateWorkspaceUsers.getUsers(), user);
-        return GeneralSetV4Response.propagateResponses(usersToSortedResponse(users));
+        return new UserV4Responses(usersToSortedResponse(users));
     }
 
     private SortedSet<WorkspaceV4Response> workspacesToSortedResponse(Set<Workspace> workspaces) {
