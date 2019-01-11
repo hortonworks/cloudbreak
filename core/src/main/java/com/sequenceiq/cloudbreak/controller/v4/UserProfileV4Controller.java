@@ -63,7 +63,7 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
     }
 
     @Override
-    public UserEvictV4Response evictCurrentUserDetails() {
+    public UserEvictV4Response evictCurrentUserDetails(Long workspaceId) {
         CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
         cachedUserService.evictByIdentityUser(user);
         return new UserEvictV4Response(user.getUsername());
