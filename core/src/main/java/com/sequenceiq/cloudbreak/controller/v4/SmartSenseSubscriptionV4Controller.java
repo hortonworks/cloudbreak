@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.SmartSenseSubscriptionV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.base.SmartSenseSubscriptionListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
 
 @Controller
@@ -14,17 +15,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSense
 public class SmartSenseSubscriptionV4Controller implements SmartSenseSubscriptionV4Endpoint {
 
     @Override
-    public GeneralSetV4Response<SmartSenseSubscriptionV4Response> list(Long workspaceId) {
+    public GeneralSetV4Response<SmartSenseSubscriptionV4Response> list(Long workspaceId, SmartSenseSubscriptionListV4Filter filter) {
         return null;
     }
 
     @Override
     public SmartSenseSubscriptionV4Response get(Long workspaceId, String name) {
-        return null;
-    }
-
-    @Override
-    public SmartSenseSubscriptionV4Response getDefault(Long workspaceId) {
         return null;
     }
 
