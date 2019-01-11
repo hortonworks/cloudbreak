@@ -30,7 +30,7 @@ set_server_address:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
     - pattern: "^hostname[ ]{0,1}=.*"
-    - repl: "hostname=server.{{ metadata.cluster_domain }}"
+    - repl: "hostname=cluster-manager.{{ metadata.cluster_domain }}"
 
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
