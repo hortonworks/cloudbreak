@@ -10,12 +10,14 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserEvictV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.CachedUserService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -36,6 +38,9 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private CachedUserService cachedUserService;
+
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
@@ -55,5 +60,12 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         UserProfile userProfile = userProfileService.put(userProfileV4Request, user, workspace);
         return conversionService.convert(userProfile, UserProfileV4Response.class);
+    }
+
+    @Override
+    public UserEvictV4Response evictCurrentUserDetails() {
+        CloudbreakUser user = restRequestThreadLocalService.getCloudbreakUser();
+        cachedUserService.evictByIdentityUser(user);
+        return new UserEvictV4Response(user.getUsername());
     }
 }

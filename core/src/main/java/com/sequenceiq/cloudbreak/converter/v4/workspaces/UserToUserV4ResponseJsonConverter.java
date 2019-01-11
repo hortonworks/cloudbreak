@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.users;
+package com.sequenceiq.cloudbreak.converter.v4.workspaces;
 
 import org.springframework.stereotype.Component;
 
@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 @Component
-public class UserToUserResponseJsonConverter extends AbstractConversionServiceAwareConverter<User, UserV4Response> {
+public class UserToUserV4ResponseJsonConverter extends AbstractConversionServiceAwareConverter<User, UserV4Response> {
 
     @Override
     public UserV4Response convert(User user) {
