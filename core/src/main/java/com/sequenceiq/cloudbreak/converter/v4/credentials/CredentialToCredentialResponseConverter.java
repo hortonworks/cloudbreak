@@ -54,11 +54,13 @@ public class CredentialToCredentialResponseConverter extends AbstractConversionS
             convertValuesToBooleanIfNecessary(parameters);
             coverSensitiveData(parameters);
             credentialParameterSetterUtil.setProperParameters(source.cloudPlatform(), credentialJson, parameters);
+            if (credentialJson.getAws() != null) {
+                credentialJson.getAws().setGovCloud(source.getGovCloud());
+            }
             credentialJson.setAttributes(conversionService.convert(source.getAttributesSecret(), SecretResponse.class));
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        credentialJson.setGovCloud(source.getGovCloud());
         return credentialJson;
     }
 
