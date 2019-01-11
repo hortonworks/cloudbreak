@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.service.credential;
+package com.sequenceiq.cloudbreak.converter.v4.credentials;
 
-import static com.sequenceiq.cloudbreak.service.credential.ParameterMapToClassConverterUtil.exec;
+import static com.sequenceiq.cloudbreak.converter.v4.credentials.ParameterMapToClassConverterUtil.exec;
 
 import java.util.Map;
 

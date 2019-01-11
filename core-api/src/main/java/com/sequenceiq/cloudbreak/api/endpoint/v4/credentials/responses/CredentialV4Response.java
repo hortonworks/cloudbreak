@@ -1,28 +1,28 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses;
 
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ATTRIBUTES;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ID;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel(description = EnvironmentResponseModelDescription.CREDENTIAL ,parent = CredentialV4Base.class)
 public class CredentialV4Response extends CredentialV4Base {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @ApiModelProperty(ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.ATTRIBUTES)
+    @ApiModelProperty(ATTRIBUTES)
     private SecretResponse attributes;
 
     @ApiModelProperty
     private WorkspaceResourceV4Response workspace;
-
-    @ApiModelProperty(value = ModelDescriptions.GOV_CLOUD_FLAG)
-    private Boolean govCloud;
 
     @JsonProperty("id")
     public Long getId() {
@@ -49,11 +49,4 @@ public class CredentialV4Response extends CredentialV4Base {
         this.workspace = workspace;
     }
 
-    public Boolean getGovCloud() {
-        return govCloud;
-    }
-
-    public void setGovCloud(Boolean govCloud) {
-        this.govCloud = govCloud;
-    }
 }

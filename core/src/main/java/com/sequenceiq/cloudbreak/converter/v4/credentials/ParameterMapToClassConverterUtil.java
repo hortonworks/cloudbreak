@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.service.credential;
+package com.sequenceiq.cloudbreak.converter.v4.credentials;
 
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ParameterMapToClassConverterUtil {
+public class ParameterMapToClassConverterUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterMapToClassConverterUtil.class);
 
@@ -14,7 +14,7 @@ class ParameterMapToClassConverterUtil {
     private ParameterMapToClassConverterUtil() {
     }
 
-    static <R> R exec(Callable<R> method, Class<R> clazz) {
+    public static <R> R exec(Callable<R> method, Class<R> clazz) {
         try {
             return method.call();
         } catch (Exception e) {

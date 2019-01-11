@@ -12,16 +12,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpC
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.OpenstackCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
-import com.sequenceiq.cloudbreak.validation.ValidCredentialV4BaseRequest;
+import com.sequenceiq.cloudbreak.validation.ValidCredentialV4Base;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
-@ValidCredentialV4BaseRequest
+@ApiModel(subTypes = {CredentialV4Request.class, CredentialV4Response.class})
+@ValidCredentialV4Base
 public abstract class CredentialV4Base implements JsonEntity {
 
     @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")

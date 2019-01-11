@@ -30,7 +30,7 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
 
     private KeystoneV2Parameters keystoneV2Parameters;
 
-    private KeystoneV3Parameters v3Parameter;
+    private KeystoneV3Parameters keystoneV3Parameters;
 
     public String getEndpoint() {
         return endpoint;
@@ -72,12 +72,12 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
         this.keystoneV2Parameters = keystoneV2Parameters;
     }
 
-    public KeystoneV3Parameters getV3Parameter() {
-        return v3Parameter;
+    public KeystoneV3Parameters getKeystoneV3Parameters() {
+        return keystoneV3Parameters;
     }
 
     public void setKeystoneV3Parameters(KeystoneV3Parameters v3Parameter) {
-        this.v3Parameter = v3Parameter;
+        this.keystoneV3Parameters = v3Parameter;
     }
 
     @Override
@@ -94,8 +94,8 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
         mapOfFields.put("userName", userName);
         if (keystoneV2Parameters != null) {
             mapOfFields.putAll(keystoneV2Parameters.asMap());
-        } else if (v3Parameter != null) {
-            mapOfFields.putAll(v3Parameter.asMap());
+        } else if (keystoneV3Parameters != null) {
+            mapOfFields.putAll(keystoneV3Parameters.asMap());
         }
         return mapOfFields;
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import static java.util.Arrays.stream;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -13,28 +15,28 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 
-public class CredentialV4RequestValidator implements ConstraintValidator<ValidCredentialV4BaseRequest, CredentialV4Request> {
+public class CredentialV4BaseValidator implements ConstraintValidator<ValidCredentialV4Base, CredentialV4Base> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV4RequestValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV4BaseValidator.class);
 
     @Override
-    public boolean isValid(CredentialV4Request req, ConstraintValidatorContext constraintValidatorContext) {
-        boolean valid = isOnlyOneParameterFieldFilled(req);
+    public boolean isValid(CredentialV4Base base, ConstraintValidatorContext constraintValidatorContext) {
+        boolean valid = isOnlyOneParameterFieldFilled(base);
         if (!valid) {
             ValidatorUtil.addConstraintViolation(constraintValidatorContext, "Only one parameter instance should be filled!", "status");
         }
         return valid;
     }
 
-    private static boolean isOnlyOneParameterFieldFilled(CredentialV4Request request) {
-        Stream<Field> fields = Arrays.stream(request.getClass().getDeclaredFields());
+    private static boolean isOnlyOneParameterFieldFilled(CredentialV4Base base) {
+        Stream<Field> fields = Stream.concat(stream(base.getClass().getDeclaredFields()), stream(base.getClass().getSuperclass().getDeclaredFields()));
         int notEmptyParamTypeQuantity = 0;
         for (Field field : fields.filter(field -> getInterfacesOfField(field).contains(CredentialV4Parameters.class)).collect(Collectors.toList())) {
             try {
-                if (FieldUtils.readField(request, field.getName(), true) != null) {
+                if (FieldUtils.readField(base, field.getName(), true) != null) {
                     notEmptyParamTypeQuantity++;
                 }
             } catch (IllegalAccessException e) {

@@ -12,8 +12,8 @@ import javax.validation.Payload;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = CredentialV4RequestValidator.class)
-public @interface ValidCredentialV4BaseRequest {
+@Constraint(validatedBy = CredentialV4BaseValidator.class)
+public @interface ValidCredentialV4Base {
 
     String message() default "CredentialV4Request contains one or more invalid data.";
 
