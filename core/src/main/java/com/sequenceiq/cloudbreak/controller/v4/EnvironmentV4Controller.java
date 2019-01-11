@@ -73,7 +73,7 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
 
     @Override
     public DatalakePrerequisiteV4Response registerDatalakePrerequisite(Long workspaceId, String environmentName,
-                                                                       @Valid DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
+            @Valid DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
         return datalakePrerequisiteService.prepare(workspaceId, environmentName, datalakePrerequisiteV4Request);
     }
 }

@@ -11,7 +11,8 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 
 @Component
-public class EnvironmentViewToSimpleEnvironmentV4ResponseConverter extends AbstractConversionServiceAwareConverter<EnvironmentView, SimpleEnvironmentV4Response> {
+public class EnvironmentViewToSimpleEnvironmentV4ResponseConverter extends
+        AbstractConversionServiceAwareConverter<EnvironmentView, SimpleEnvironmentV4Response> {
     @Inject
     private RegionConverter regionConverter;
 

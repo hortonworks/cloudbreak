@@ -5,7 +5,7 @@ public enum GcpSelectorType {
     JSON("credential-json"),
     P12("credential-p12");
 
-    String name;
+    private String name;
 
     GcpSelectorType(String name) {
         this.name = name;

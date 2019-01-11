@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.requests;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;

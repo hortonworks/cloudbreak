@@ -162,7 +162,8 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
         return flexSubscription;
     }
 
-    private Optional<FlexSubscription> setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter, Collection<FlexSubscription> allInAccount) {
+    private Optional<FlexSubscription> setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter,
+            Collection<FlexSubscription> allInAccount) {
         if (allInAccount.stream().noneMatch(f -> name.equals(f.getName()))) {
             throw new BadRequestException("Given subscription not found with name: " + name);
         }

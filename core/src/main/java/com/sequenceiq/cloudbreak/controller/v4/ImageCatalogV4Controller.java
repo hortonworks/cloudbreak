@@ -100,5 +100,4 @@ public class ImageCatalogV4Controller extends NotificationController implements 
         return conversionService.convert(images, ImagesV4Response.class);
     }
 
-
 }

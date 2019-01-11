@@ -28,21 +28,21 @@ public interface UserProfileV4Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.GET_USER_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_PROFILE_NOTES,
-            nickname = "getUserProfileInWorkspace")
+    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.GET_USER_PROFILE_IN_WORKSPACE, produces = ContentType.JSON,
+            notes = Notes.USER_PROFILE_NOTES, nickname = "getUserProfileInWorkspace")
     UserProfileV4Response get(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.MODIFT_USER_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_PROFILE_NOTES,
-            nickname = "modifyUserProfileInWorkspace")
+    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.MODIFT_USER_PROFILE_IN_WORKSPACE, produces = ContentType.JSON,
+            notes = Notes.USER_PROFILE_NOTES, nickname = "modifyUserProfileInWorkspace")
     UserProfileV4Response modify(@PathParam("workspaceId") Long workspaceId, UserProfileV4Request userProfileV4Request);
 
     @DELETE
     @Path("evict")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.CURRENT_USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_PROFILE_NOTES,
-            nickname = "evictCurrentUserDetails")
+    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.CURRENT_USER_DETAILS_EVICT, produces = ContentType.JSON,
+            notes = Notes.USER_PROFILE_NOTES, nickname = "evictCurrentUserDetails")
     UserEvictV4Response evictCurrentUserDetails(@PathParam("workspaceId") Long workspaceId);
 }

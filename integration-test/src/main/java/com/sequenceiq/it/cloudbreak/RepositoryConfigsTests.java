@@ -124,7 +124,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
     }
 
     private RepoConfigValidationV4Request createRepoConfigValidationReqest(String ambariBaseUrl, String ambariGpgKeyUrl, String mPackUrl,
-                                                                           String stackBaseUrl, String utilsBaseUrl, String versionDefinitionFileUrl) {
+            String stackBaseUrl, String utilsBaseUrl, String versionDefinitionFileUrl) {
         RepoConfigValidationV4Request repoConfigValidationV4Request = new RepoConfigValidationV4Request();
         repoConfigValidationV4Request.setAmbariBaseUrl(ambariBaseUrl);
         repoConfigValidationV4Request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);

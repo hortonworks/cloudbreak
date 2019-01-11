@@ -19,7 +19,8 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
 @Prototype
-public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Request, CredentialV4Response, CredentialEntity> implements Purgable<CredentialV4Response> {
+public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Request, CredentialV4Response, CredentialEntity>
+        implements Purgable<CredentialV4Response> {
 
     public static final String CREDENTIAL = "CREDENTIAL";
 

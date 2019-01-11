@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 
 public class ImageSelectionTest extends AbstractCloudbreakIntegrationTest {
     @Test
@@ -17,10 +18,10 @@ public class ImageSelectionTest extends AbstractCloudbreakIntegrationTest {
 
         // WHEN
         String provider = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER);
+        Long workspaceId = itContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         ImageCatalogGetImagesV4Filter filter = new ImageCatalogGetImagesV4Filter();
         filter.setPlatform(provider);
-        ImagesV4Response imagesV4Response = getCloudbreakClient().imageCatalogV4Endpoint().getImages(
-                null, filter); // TODO
+        ImagesV4Response imagesV4Response = getCloudbreakClient().imageCatalogV4Endpoint().getImages(workspaceId, filter);
         // THEN
         Assert.assertFalse(imagesV4Response.getBaseImages().isEmpty());
         itContext.putContextParam(CloudbreakV2Constants.IMAGEID, imagesV4Response.getBaseImages().get(0).getUuid());

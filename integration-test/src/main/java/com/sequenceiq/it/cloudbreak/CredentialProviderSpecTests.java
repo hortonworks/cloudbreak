@@ -129,7 +129,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_OSENDPOINT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
-                .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsInvalidEndpoint()), "OpenStack endpoint is not valid credential request.");
+                .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsInvalidEndpoint()),
+                "OpenStack endpoint is not valid credential request.");
         when(Credential.post(), "OpenStack endpoint is not valid credential request has been posted.");
     }
 
@@ -282,7 +283,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withName(INVALID_ARMSUBSCRIPTION_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
-                .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidSubscriptionID()), "Azure credential with not valid Subscription ID request.");
+                .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidSubscriptionID()),
+                "Azure credential with not valid Subscription ID request.");
         when(Credential.post(), "Azure credential with not valid Subscription ID request has been posted.");
     }
 

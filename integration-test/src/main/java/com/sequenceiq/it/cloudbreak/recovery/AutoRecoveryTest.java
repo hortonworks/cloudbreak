@@ -53,10 +53,10 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
 
         // TODO this should be fixed after api refactor
         //WaitResult waitResult = CloudbreakUtil.waitForEvent(getCloudbreakClient(), stackResponse.getName(), "RECOVERY", "autorecovery requested",
-           //     RecoveryUtil.getCurentTimeStamp());
+        // RecoveryUtil.getCurentTimeStamp());
 
         //if (waitResult == WaitResult.TIMEOUT) {
-          //  Assert.fail("Timeout happened when waiting for the desired host state");
+        // Assert.fail("Timeout happened when waiting for the desired host state");
         //}
         //WHEN: Cloudbreak automatically starts the recover
         //THEN

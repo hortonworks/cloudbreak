@@ -27,7 +27,8 @@ public class AuditEventV4Controller extends BaseAuditController implements Audit
 
     @Override
     public AuditEventV4Responses getAuditEvents(Long workspaceId, GetAuditEventRequest getAuditRequest) {
-        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, getAuditRequest.getResourceType(), getAuditRequest.getResourceId());
+        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId,
+                getAuditRequest.getResourceType(), getAuditRequest.getResourceId());
         return new AuditEventV4Responses(auditEventsByWorkspaceId);
 
     }
