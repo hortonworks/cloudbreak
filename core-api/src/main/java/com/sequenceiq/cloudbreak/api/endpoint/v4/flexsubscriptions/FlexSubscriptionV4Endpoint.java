@@ -13,9 +13,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests.FlexSubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -34,7 +34,7 @@ public interface FlexSubscriptionV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
             nickname = "listFlexSubscriptionsByWorkspace")
-    GeneralSetV4Response<FlexSubscriptionV4Response> list(@PathParam("workspaceId") Long workspaceId);
+    FlexSubscriptionV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")

@@ -100,7 +100,7 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
 
     @Override
     public Collection<CredentialV4Response> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().credentialV4Endpoint().list(client.getWorkspaceId()).getCredentials();
+        return client.getCloudbreakClient().credentialV4Endpoint().list(client.getWorkspaceId()).getResponses();
     }
 
     @Override

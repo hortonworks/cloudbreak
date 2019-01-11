@@ -46,7 +46,7 @@ class CredentialAction {
                 CloudbreakClient.class);
         Log.log(" get all private credential. ");
         credentialEntity.setResponses(
-                client.getCloudbreakClient().credentialV4Endpoint().list(1L).getCredentials());
+                client.getCloudbreakClient().credentialV4Endpoint().list(1L).getResponses());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

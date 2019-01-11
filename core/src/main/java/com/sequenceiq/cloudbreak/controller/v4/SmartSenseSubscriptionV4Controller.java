@@ -5,17 +5,17 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.SmartSenseSubscriptionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.base.SmartSenseSubscriptionListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Responses;
 
 @Controller
 @Transactional(TxType.NEVER)
 public class SmartSenseSubscriptionV4Controller implements SmartSenseSubscriptionV4Endpoint {
 
     @Override
-    public GeneralSetV4Response<SmartSenseSubscriptionV4Response> list(Long workspaceId, SmartSenseSubscriptionListV4Filter filter) {
+    public SmartSenseSubscriptionV4Responses list(Long workspaceId, SmartSenseSubscriptionListV4Filter filter) {
         return null;
     }
 

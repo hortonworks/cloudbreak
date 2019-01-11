@@ -10,10 +10,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -32,7 +31,7 @@ public interface RecipeV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "listRecipesByWorkspace")
-    GeneralSetV4Response<RecipeV4ViewResponse> list(@PathParam("workspaceId") Long workspaceId);
+    RecipeV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")

@@ -13,7 +13,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.AuthCodeGrantFlowFilter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
@@ -62,8 +61,8 @@ public class CredentialV4Controller extends NotificationController implements Cr
     private CredentialPropertyCollector credentialPropertyCollector;
 
     @Override
-    public GeneralSetV4Response<CredentialV4Response> list(Long workspaceId) {
-        return CredentialV4Responses.propagateResponses(credentialService.listAvailablesByWorkspaceId(workspaceId).stream()
+    public CredentialV4Responses list(Long workspaceId) {
+        return new CredentialV4Responses(credentialService.listAvailablesByWorkspaceId(workspaceId).stream()
                 .map(credential -> conversionService.convert(credential, CredentialV4Response.class))
                 .collect(Collectors.toSet()));
     }

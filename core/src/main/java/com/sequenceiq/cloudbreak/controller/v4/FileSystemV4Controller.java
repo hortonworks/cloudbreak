@@ -10,10 +10,10 @@ import javax.inject.Named;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemParametersV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -46,7 +46,7 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
     private ConversionService conversionService;
 
     @Override
-    public GeneralListV4Response<FileSystemParameterV4Response> getFileSystemParameters(Long workspaceId, FileSystemParametersV4Filter fileSystemParametersV4Filter) {
+    public FileSystemParameterV4Responses getFileSystemParameters(Long workspaceId, FileSystemParametersV4Filter fileSystemParametersV4Filter) {
         Workspace workspace = getWorkspace(workspaceId);
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 fileSystemParametersV4Filter.getBlueprintName(),
@@ -60,7 +60,7 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
         for (ConfigQueryEntry configQueryEntry : entries) {
             result.add(conversionService.convert(configQueryEntry, FileSystemParameterV4Response.class));
         }
-        return GeneralListV4Response.propagateResponses(result);
+        return new FileSystemParameterV4Responses(result);
     }
 
     private Workspace getWorkspace(Long workspaceId) {

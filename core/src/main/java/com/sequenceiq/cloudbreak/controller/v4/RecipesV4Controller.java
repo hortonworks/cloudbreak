@@ -11,8 +11,8 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
@@ -44,11 +44,11 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    public GeneralSetV4Response<RecipeV4ViewResponse> list(Long workspaceId) {
+    public RecipeV4Responses list(Long workspaceId) {
         Set<RecipeV4ViewResponse> recipes = recipeService.findAllViewByWorkspaceId(workspaceId).stream()
                 .map(recipe -> conversionService.convert(recipe, RecipeV4ViewResponse.class))
                 .collect(Collectors.toSet());
-        return GeneralSetV4Response.propagateResponses(recipes);
+        return new RecipeV4Responses(recipes);
     }
 
     @Override

@@ -8,17 +8,17 @@ import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
-import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Responses;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -36,13 +36,13 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
     private ConversionService conversionService;
 
     @Override
-    public GeneralSetV4Response<ProxyV4Response> list(Long workspaceId, ListV4Filter listV4Filter) {
+    public ProxyV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
         Set<ProxyV4Response> proxies = proxyConfigService
                 .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal())
                 .stream()
                 .map(config -> conversionService.convert(config, ProxyV4Response.class))
                 .collect(Collectors.toSet());
-        return GeneralSetV4Response.propagateResponses(proxies);
+        return new ProxyV4Responses(proxies);
     }
 
     @Override

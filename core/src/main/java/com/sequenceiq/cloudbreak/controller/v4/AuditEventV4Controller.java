@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.requests.GetAuditEventRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.controller.audit.BaseAuditController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -39,10 +39,10 @@ public class AuditEventV4Controller extends BaseAuditController implements Audit
     }
 
     @Override
-    public GeneralListV4Response<AuditEventV4Response> getAuditEvents(Long workspaceId, GetAuditEventRequest getAuditRequest) {
+    public AuditEventV4Responses getAuditEvents(Long workspaceId, GetAuditEventRequest getAuditRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, getAuditRequest.getResourceType(), getAuditRequest.getResourceId(), user);
-        return GeneralListV4Response.propagateResponses(auditEventsByWorkspaceId);
+        return new AuditEventV4Responses(auditEventsByWorkspaceId);
 
     }
 

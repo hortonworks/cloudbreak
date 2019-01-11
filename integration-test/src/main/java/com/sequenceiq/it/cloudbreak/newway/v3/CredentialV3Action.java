@@ -97,7 +97,7 @@ public class CredentialV3Action {
         Log.log(" get all private credential. ");
         credentialEntity.setResponses(retry(() -> client.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .list(workspaceId), retryQuantity).getCredentials());
+                        .list(workspaceId), retryQuantity).getResponses());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity, CloudbreakClient client) {
