@@ -56,7 +56,7 @@ public class AzureCredentialConnector implements CredentialConnector {
             client.getRefreshToken()
                     .ifPresent(refreshToken -> cloudCredential.putParameter("refreshToken", refreshToken));
         } catch (RuntimeException e) {
-            LOGGER.info(e.getMessage(), e);
+            LOGGER.warn(e.getMessage(), e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, e.getMessage());
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);

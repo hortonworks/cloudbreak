@@ -96,7 +96,7 @@ public class AzureInteractiveLogin {
             try {
                 syncPollingScheduler.schedule(interactiveLoginStatusCheckerTask, pollInterval, expiresIn / pollInterval, 1);
             } catch (Exception e) {
-                LOGGER.info("Interactive login schedule failed", e);
+                LOGGER.debug("Interactive login schedule failed", e);
             }
         });
     }

@@ -48,7 +48,7 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Could not verify credential [credential: '%s'], detailed message: %s",
                         request.getCloudContext().getName(), e.getMessage());
-                LOGGER.info(errorMessage, e);
+                LOGGER.warn(errorMessage, e);
                 cloudCredentialStatus = new CloudCredentialStatus(request.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
             }
             CredentialVerificationResult credentialVerificationResult = new CredentialVerificationResult(request, cloudCredentialStatus);

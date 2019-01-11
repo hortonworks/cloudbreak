@@ -329,6 +329,30 @@ cb:
             ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
             sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
             amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
+      3.1:
+        version: 3.1.0.0
+        minAmbari: 2.7
+        repo:
+          stack:
+            repoid: HDP-3.1
+            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/3.x/updates/3.1.0.0
+            debian9: http://public-repo-1.hortonworks.com/HDP/debian9/3.x/updates/3.1.0.0
+            ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/3.x/updates/3.1.0.0
+            sles12: http://public-repo-1.hortonworks.com/HDP/sles12/3.x/updates/3.1.0.0
+            amazonlinux2: http://public-repo-1.hortonworks.com/HDP/amazonlinux2/3.x/updates/3.1.0.0
+            repository-version: 3.1.0.0-78
+            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
+            vdf-debian9: http://public-repo-1.hortonworks.com/HDP/debian9/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
+            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
+            vdf-sles12: http://public-repo-1.hortonworks.com/HDP/sles12/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
+            vdf-amazonlinux2: http://public-repo-1.hortonworks.com/HDP/amazonlinux2/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
+          util:
+            repoid: HDP-UTILS-1.1.0.22
+            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
+            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
+            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
+            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
+            amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
   hdf:
     entries:
       3.1:

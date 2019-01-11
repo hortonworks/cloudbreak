@@ -27,7 +27,7 @@ public class AmbariUserHandler {
             LOGGER.debug("Create user with username: {}", newUserName);
             ambariClient.createUser(newUserName, newPassword, true);
         } catch (Exception e) {
-            LOGGER.info("Can not create ambari user", e);
+            LOGGER.warn("Can not create ambari user", e);
         }
         return checkUser(newUserName, newPassword, stack);
     }
@@ -39,7 +39,7 @@ public class AmbariUserHandler {
             LOGGER.debug("Change passwortd for user: {}", userName);
             ambariClient.changePassword(userName, oldPassword, newPassword, true);
         } catch (Exception e) {
-            LOGGER.info("Ambari password change failed", e);
+            LOGGER.warn("Ambari password change failed", e);
         }
         return checkUser(userName, newPassword, stack);
     }

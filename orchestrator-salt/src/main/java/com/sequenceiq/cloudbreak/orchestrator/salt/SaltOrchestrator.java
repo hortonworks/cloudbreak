@@ -290,7 +290,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new SyncAllRunner(allNodeIP, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during ambari bootstrap", e);
+            LOGGER.warn("Error occurred during ambari bootstrap", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
@@ -406,7 +406,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             // salt '*' state.highstate
             runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during primary gateway change", e);
+            LOGGER.warn("Error occurred during primary gateway change", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
@@ -429,7 +429,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltJobRunBootstrapFuture = parallelOrchestratorComponentRunner.submit(saltJobRunBootstrapRunner);
             saltJobRunBootstrapFuture.get();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during reset", e);
+            LOGGER.warn("Error occurred during reset", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -458,7 +458,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", "ambari_upgrade", CompoundType.IP), exitCriteriaModel);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during ambari upgrade", e);
+            LOGGER.warn("Error occurred during ambari upgrade", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

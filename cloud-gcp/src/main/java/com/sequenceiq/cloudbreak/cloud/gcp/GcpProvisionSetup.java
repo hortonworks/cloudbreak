@@ -82,7 +82,7 @@ public class GcpProvisionSetup implements Setup {
         } catch (Exception e) {
             Long stackId = cloudContext.getId();
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
-            LOGGER.info(msg, e);
+            LOGGER.warn(msg, e);
             throw new CloudConnectorException(msg, e);
         }
     }

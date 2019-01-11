@@ -102,7 +102,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         } catch (CancellationException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.info("", e);
+            LOGGER.warn("", e);
             results.clear();
             for (CloudResource buildableResource : buildableResources) {
                 results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));

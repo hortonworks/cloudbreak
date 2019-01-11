@@ -65,7 +65,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         try {
             return getConsoleOutputResult.getOutput() == null ? "" : getConsoleOutputResult.getDecodedOutput();
         } catch (Exception ex) {
-            LOGGER.debug(ex.getMessage(), ex);
+            LOGGER.warn(ex.getMessage(), ex);
             return "";
         }
     }

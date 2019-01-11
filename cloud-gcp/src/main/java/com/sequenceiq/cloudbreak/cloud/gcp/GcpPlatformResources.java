@@ -305,7 +305,7 @@ public class GcpPlatformResources implements PlatformResources {
         try {
             cloudKMS = GcpStackUtil.buildCloudKMS(cloudCredential);
         } catch (Exception e) {
-            LOGGER.info("Failed to build CloudKMS client.", e);
+            LOGGER.warn("Failed to build CloudKMS client.", e);
             return new CloudEncryptionKeys(new HashSet<>());
         }
 

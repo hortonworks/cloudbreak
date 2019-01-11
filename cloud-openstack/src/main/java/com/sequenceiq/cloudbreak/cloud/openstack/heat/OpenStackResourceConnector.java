@@ -152,7 +152,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 Keypair keyPair = client.compute().keypairs().create(keyPairName, stack.getInstanceAuthentication().getPublicKey());
                 LOGGER.debug("Keypair has been created: {}", keyPair);
             } catch (Exception e) {
-                LOGGER.info("Failed to create keypair", e);
+                LOGGER.warn("Failed to create keypair", e);
                 throw new CloudConnectorException(e.getMessage(), e);
             }
         } else {

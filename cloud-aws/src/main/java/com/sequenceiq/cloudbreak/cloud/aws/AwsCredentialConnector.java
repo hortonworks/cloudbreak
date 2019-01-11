@@ -102,7 +102,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         } catch (RuntimeException e) {
             String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID",
                     awsCredential.getRoleArn());
-            LOGGER.info(errorMessage, e);
+            LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);
