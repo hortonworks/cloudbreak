@@ -44,5 +44,5 @@ public interface UserProfileV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.CURRENT_USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_PROFILE_NOTES,
             nickname = "evictCurrentUserDetails")
-    UserEvictV4Response evictCurrentUserDetails();
+    UserEvictV4Response evictCurrentUserDetails(@PathParam("workspaceId") Long workspaceId);
 }
