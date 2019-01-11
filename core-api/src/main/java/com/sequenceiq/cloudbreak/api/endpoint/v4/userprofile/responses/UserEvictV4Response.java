@@ -1,16 +1,16 @@
-package com.sequenceiq.cloudbreak.api.model.users;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class UserJson {
+public class UserEvictV4Response {
 
     private String username;
 
-    public UserJson() {
+    public UserEvictV4Response() {
     }
 
-    public UserJson(String username) {
+    public UserEvictV4Response(String username) {
         this.username = username;
     }
 
