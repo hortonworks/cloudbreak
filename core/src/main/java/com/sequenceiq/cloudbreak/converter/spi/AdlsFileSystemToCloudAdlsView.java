@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 

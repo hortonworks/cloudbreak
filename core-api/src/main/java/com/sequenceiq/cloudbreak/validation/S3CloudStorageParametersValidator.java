@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
 
 public class S3CloudStorageParametersValidator implements ConstraintValidator<ValidS3CloudStorageParameters, S3CloudStorageParameters> {
 

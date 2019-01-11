@@ -82,7 +82,7 @@ public class SecurityConfig {
 
         private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/stacks/**", API_ROOT_CONTEXT + "/v2/stacks/**"};
 
-        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/clustertemplates/**"};
+        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/cluster_templates/**"};
 
         private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/v1/accountpreferences/**";
 

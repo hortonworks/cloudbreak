@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ReinstallRequestV2")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReinstallRequestV2 implements JsonEntity {
 

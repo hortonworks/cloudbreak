@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("GeneratedBlueprintResponse")
+@ApiModel
 public class GeneratedBlueprintResponse implements JsonEntity {
 
     @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)

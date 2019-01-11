@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 

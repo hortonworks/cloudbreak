@@ -10,7 +10,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
@@ -42,33 +42,33 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
-    public AuditEvent getAuditEvent(Long auditId) {
+    public AuditEventV4Response getAuditEvent(Long auditId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return getAuditEventByWorkspaceId(workspaceService.getDefaultWorkspaceForUser(user).getId(), auditId);
     }
 
-    public AuditEvent getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
+    public AuditEventV4Response getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
         StructuredEventEntity event = Optional.ofNullable(structuredEventRepository.findByWorkspaceIdAndId(workspaceId, auditId))
                 .orElseThrow(notFound("StructuredEvent", auditId));
-        return converterUtil.convert(event, AuditEvent.class);
+        return converterUtil.convert(event, AuditEventV4Response.class);
     }
 
-    public List<AuditEvent> getAuditEventsForWorkspace(String resourceType, Long resourceId, Workspace workspace) {
-        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
-        auditEvents.sort(new AuditEventComparator().reversed());
-        return auditEvents;
+    public List<AuditEventV4Response> getAuditEventsForWorkspace(String resourceType, Long resourceId, Workspace workspace) {
+        List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
+        auditEventV4Responses.sort(new AuditEventComparator().reversed());
+        return auditEventV4Responses;
     }
 
-    public List<AuditEvent> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, User user) {
+    public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, User user) {
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        List<AuditEvent> auditEvents = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
-        auditEvents.sort(new AuditEventComparator().reversed());
-        return auditEvents;
+        List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
+        auditEventV4Responses.sort(new AuditEventComparator().reversed());
+        return auditEventV4Responses;
     }
 
-    private List<AuditEvent> getEventsForUserWithTypeAndResourceIdByWorkspace(Workspace workspace, String resourceType, Long resourceId) {
+    private List<AuditEventV4Response> getEventsForUserWithTypeAndResourceIdByWorkspace(Workspace workspace, String resourceType, Long resourceId) {
         List<StructuredEventEntity> events = structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
-        return events != null ? converterUtil.convertAll(events, AuditEvent.class) : Collections.emptyList();
+        return events != null ? converterUtil.convertAll(events, AuditEventV4Response.class) : Collections.emptyList();
     }
 
     @Override

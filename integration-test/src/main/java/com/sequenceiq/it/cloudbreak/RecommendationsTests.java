@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.model.DiskResponse;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -145,9 +145,9 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Map<String, VmTypeJson> recommendationsForBlueprint = recommendations.getResponse().getRecommendations();
+                    Map<String, VmTypeV4Response> recommendationsForBlueprint = recommendations.getResponse().getRecommendations();
 
-                    for (Entry<String, VmTypeJson> recommendationForBlueprint : recommendationsForBlueprint.entrySet()) {
+                    for (Entry<String, VmTypeV4Response> recommendationForBlueprint : recommendationsForBlueprint.entrySet()) {
                         LOGGER.debug("{} Recommendations are ::: {}", recommendationForBlueprint.getKey(), recommendationForBlueprint.getValue());
                         Assert.assertFalse(recommendationForBlueprint.getValue().getValue().isEmpty(),
                                 "Recommendations should be present in response!");
@@ -186,9 +186,9 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Set<VmTypeJson> virtualMachineSet = recommendations.getResponse().getVirtualMachines();
+                    Set<VmTypeV4Response> virtualMachineSet = recommendations.getResponse().getVirtualMachines();
 
-                    for (VmTypeJson virtualMachine : virtualMachineSet) {
+                    for (VmTypeV4Response virtualMachine : virtualMachineSet) {
                         LOGGER.debug("Virtual Machine is ::: {}", virtualMachine.getValue());
                         Assert.assertFalse(virtualMachine.getValue().isEmpty(), "Virtual Machines should be present in response!");
                     }

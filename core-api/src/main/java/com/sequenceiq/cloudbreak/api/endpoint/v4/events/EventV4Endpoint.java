@@ -46,7 +46,7 @@ public interface EventV4Endpoint {
     StructuredEventContainer structured(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
-    @Path("{name}/download")
+    @Path("{name}/zip")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
             nickname = "getStructuredEventsZipInWorkspace")

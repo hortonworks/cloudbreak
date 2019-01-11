@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("FileSystem")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class FileSystemRequest extends FileSystemBase {

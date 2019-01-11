@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -75,4 +76,11 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = OperationDescriptions.SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES,
             nickname = "subscribeSubscription")
     SubscriptionV4Response subscribe(@Valid SubscriptionV4Request subscriptionV4Request);
+
+    @GET
+    @Path("deployment")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+            nickname = "getDeploymentInfo")
+    DeploymentPreferencesV4Response deployment();
 }

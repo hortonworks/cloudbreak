@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.UserWorkspacePermissionsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Base;
-import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;

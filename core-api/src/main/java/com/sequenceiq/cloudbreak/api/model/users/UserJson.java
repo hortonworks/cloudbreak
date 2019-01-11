@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.users;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("User")
+@ApiModel
 public class UserJson {
 
     private String username;

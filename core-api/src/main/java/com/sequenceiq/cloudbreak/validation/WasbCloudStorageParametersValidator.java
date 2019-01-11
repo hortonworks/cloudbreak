@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
 
 public class WasbCloudStorageParametersValidator implements ConstraintValidator<ValidWasbCloudStorageParameters, WasbCloudStorageParameters> {
 

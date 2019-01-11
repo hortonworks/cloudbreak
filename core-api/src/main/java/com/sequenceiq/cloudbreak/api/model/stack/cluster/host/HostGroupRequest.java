@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("HostGroupRequest")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostGroupRequest extends HostGroupBase {
 

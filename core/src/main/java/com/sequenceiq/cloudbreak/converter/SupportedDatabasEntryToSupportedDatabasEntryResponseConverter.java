@@ -2,20 +2,20 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.SupportedDatabaseEntryResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedDatabaseEntryV4Response;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseEntry;
 
 @Component
 public class SupportedDatabasEntryToSupportedDatabasEntryResponseConverter
-        extends AbstractConversionServiceAwareConverter<SupportedDatabaseEntry, SupportedDatabaseEntryResponse> {
+        extends AbstractConversionServiceAwareConverter<SupportedDatabaseEntry, SupportedDatabaseEntryV4Response> {
 
     @Override
-    public SupportedDatabaseEntryResponse convert(SupportedDatabaseEntry source) {
-        SupportedDatabaseEntryResponse supportedDatabaseEntryResponse = new SupportedDatabaseEntryResponse();
-        supportedDatabaseEntryResponse.setDisplayName(source.getDisplayName());
-        supportedDatabaseEntryResponse.setDatabaseName(source.getDatabaseName());
-        supportedDatabaseEntryResponse.setJdbcPrefix(source.getJdbcPrefix());
-        supportedDatabaseEntryResponse.setVersions(source.getVersions());
-        return supportedDatabaseEntryResponse;
+    public SupportedDatabaseEntryV4Response convert(SupportedDatabaseEntry source) {
+        SupportedDatabaseEntryV4Response supportedDatabaseEntryV4Response = new SupportedDatabaseEntryV4Response();
+        supportedDatabaseEntryV4Response.setDisplayName(source.getDisplayName());
+        supportedDatabaseEntryV4Response.setDatabaseName(source.getDatabaseName());
+        supportedDatabaseEntryV4Response.setJdbcPrefix(source.getJdbcPrefix());
+        supportedDatabaseEntryV4Response.setVersions(source.getVersions());
+        return supportedDatabaseEntryV4Response;
     }
 }

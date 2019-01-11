@@ -18,11 +18,11 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbFileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;

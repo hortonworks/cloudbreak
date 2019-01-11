@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;

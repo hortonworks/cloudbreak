@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("PlatformNetworkResponse")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformNetworkV4Response implements JsonEntity {
 

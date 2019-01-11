@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import java.util.HashMap;
 import java.util.List;
@@ -19,16 +19,16 @@ public class ManagementPackComponentListMapMapperImpl implements ManagementPackC
     private ManagementPackComponentListMapper managementPackComponentListMapper;
 
     @Override
-    public Map<String, List<ManagementPackEntry>> mapManagementPackComponentMap(Map<String, List<ManagementPackComponent>> mpacks) {
+    public Map<String, List<ManagementPackV4Entry>> mapManagementPackComponentMap(Map<String, List<ManagementPackComponent>> mpacks) {
         if ( mpacks == null ) {
             return null;
         }
 
-        Map<String, List<ManagementPackEntry>> map = new HashMap<String, List<ManagementPackEntry>>( Math.max( (int) ( mpacks.size() / .75f ) + 1, 16 ) );
+        Map<String, List<ManagementPackV4Entry>> map = new HashMap<String, List<ManagementPackV4Entry>>( Math.max( (int) ( mpacks.size() / .75f ) + 1, 16 ) );
 
         for ( java.util.Map.Entry<String, List<ManagementPackComponent>> entry : mpacks.entrySet() ) {
             String key = entry.getKey();
-            List<ManagementPackEntry> value = managementPackComponentListMapper.mapManagementPackComponentMap( entry.getValue() );
+            List<ManagementPackV4Entry> value = managementPackComponentListMapper.mapManagementPackComponentMap( entry.getValue() );
             map.put( key, value );
         }
 

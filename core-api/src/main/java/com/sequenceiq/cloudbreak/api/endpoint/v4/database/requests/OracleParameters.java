@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("oracle")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OracleParameters extends DatabaseRequestParameters {
 

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Credential;
 

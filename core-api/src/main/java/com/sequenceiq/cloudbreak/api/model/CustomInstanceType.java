@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("CustomInstanceType")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomInstanceType implements JsonEntity {
     private int memory;

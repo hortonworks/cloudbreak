@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ValidAmbariStack
-@ApiModel("AmbariStackDetails")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AmbariStackDetailsJson implements JsonEntity {

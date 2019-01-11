@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
 
 @Component
 public class GcsCloudStorageParametersToGcsFileSystemConverter

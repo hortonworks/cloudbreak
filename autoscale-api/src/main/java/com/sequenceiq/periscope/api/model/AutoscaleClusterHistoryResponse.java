@@ -8,7 +8,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.HistoryJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("HistoryResponse")
+@ApiModel
 public class AutoscaleClusterHistoryResponse implements Json {
 
     @ApiModelProperty(HistoryJsonProperties.ID)

@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.AttachedClusterInfoResponse;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("SharedServiceResponse")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class SharedServiceResponse implements JsonEntity {

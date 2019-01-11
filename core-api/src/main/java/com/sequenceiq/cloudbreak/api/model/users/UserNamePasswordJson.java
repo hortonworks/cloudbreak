@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UserNamePasswordModelDesc
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("UserNamePassword")
+@ApiModel
 public class UserNamePasswordJson implements JsonEntity {
 
     @NotNull

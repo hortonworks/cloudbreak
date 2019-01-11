@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @deprecated RdsConfig is replacing AmbariDatabaseDetailsJson
  */
-@ApiModel("AmbariDatabaseDetails")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @Deprecated
