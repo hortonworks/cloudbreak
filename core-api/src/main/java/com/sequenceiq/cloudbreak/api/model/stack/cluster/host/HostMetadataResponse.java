@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelDescript
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("HostMetadata")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostMetadataResponse extends HostMetadataBase {
 

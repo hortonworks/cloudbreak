@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("BlueprintViewResponse")
+@ApiModel
 public class BlueprintV4ViewResponse extends CompactViewResponse {
     @ApiModelProperty(BlueprintModelDescription.STACK_TYPE)
     private String stackType;

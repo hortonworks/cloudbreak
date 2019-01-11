@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("InstanceGroupAdjustment")
+@ApiModel
 public class InstanceGroupAdjustmentJson implements JsonEntity {
 
     @NotNull

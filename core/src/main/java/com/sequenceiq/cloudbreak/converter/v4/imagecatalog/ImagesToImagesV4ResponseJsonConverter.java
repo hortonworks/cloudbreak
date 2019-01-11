@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -68,8 +68,8 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
     }
 
     private List<BaseImageV4Response> getBaseImageResponses(Images source) {
-        List<StackDetailsJson> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
-        List<StackDetailsJson> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
+        List<StackDetailsV4Response> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
+        List<StackDetailsV4Response> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
         List<BaseImageV4Response> baseImages = source.getBaseImages().stream()
                 .filter(image -> defaultAmbariRepoService.getDefault(image.getOsType()) != null)
                 .map(image -> {
@@ -89,11 +89,11 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
         return baseImages;
     }
 
-    private List<StackDetailsJson> getDefaultStackInfos(Iterable<? extends StackInfo> defaultStackInfos) {
-        List<StackDetailsJson> result = new ArrayList<>();
+    private List<StackDetailsV4Response> getDefaultStackInfos(Iterable<? extends StackInfo> defaultStackInfos) {
+        List<StackDetailsV4Response> result = new ArrayList<>();
         for (StackInfo info : defaultStackInfos) {
-            StackDetailsJson json = new StackDetailsJson();
-            StackRepoDetailsJson repoJson = new StackRepoDetailsJson();
+            StackDetailsV4Response json = new StackDetailsV4Response();
+            StackRepoDetailsV4Response repoJson = new StackRepoDetailsV4Response();
             Map<String, String> stackRepo = info.getRepo().getStack();
             if (stackRepo != null) {
                 repoJson.setStack(stackRepo);
@@ -104,10 +104,10 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
             }
             json.setRepo(repoJson);
             json.setVersion(info.getVersion());
-            Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
+            Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
             for (Map.Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
                 mpacks.put(mp.getKey(), mp.getValue().stream().map(mpack -> {
-                    ManagementPackEntry mpackEntry = new ManagementPackEntry();
+                    ManagementPackV4Entry mpackEntry = new ManagementPackV4Entry();
                     mpackEntry.setMpackUrl(mpack.getMpackUrl());
                     return mpackEntry;
                 }).collect(Collectors.toList()));
@@ -135,13 +135,13 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
     }
 
-    private StackDetailsJson convertStackDetailsToJson(StackDetails stackDetails, String osType) {
-        StackDetailsJson json = new StackDetailsJson();
+    private StackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType) {
+        StackDetailsV4Response json = new StackDetailsV4Response();
         json.setVersion(stackDetails.getVersion());
         json.setRepo(convertStackRepoDetailsToJson(stackDetails.getRepo()));
-        Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
+        Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
         mpacks.put(osType, stackDetails.getMpackList().stream().map(mp -> {
-            ManagementPackEntry mpackEntry = new ManagementPackEntry();
+            ManagementPackV4Entry mpackEntry = new ManagementPackV4Entry();
             mpackEntry.setMpackUrl(mp.getMpackUrl());
             return mpackEntry;
         }).collect(Collectors.toList()));
@@ -154,8 +154,8 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
         return json;
     }
 
-    private StackRepoDetailsJson convertStackRepoDetailsToJson(StackRepoDetails repo) {
-        StackRepoDetailsJson json = new StackRepoDetailsJson();
+    private StackRepoDetailsV4Response convertStackRepoDetailsToJson(StackRepoDetails repo) {
+        StackRepoDetailsV4Response json = new StackRepoDetailsV4Response();
         json.setStack(new HashMap<>(repo.getStack()));
         json.setUtil(new HashMap<>(repo.getUtil()));
         return json;

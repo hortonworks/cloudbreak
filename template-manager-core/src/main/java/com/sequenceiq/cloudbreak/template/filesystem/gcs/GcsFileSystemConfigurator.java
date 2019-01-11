@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.template.filesystem.gcs;
 
-import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.GCS;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;

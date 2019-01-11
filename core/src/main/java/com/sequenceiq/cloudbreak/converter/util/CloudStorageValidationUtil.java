@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.util;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
 
 @Component
 public class CloudStorageValidationUtil {

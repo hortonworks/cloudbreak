@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("PlatformSshKeyResponse")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformSshKeyV4Response implements JsonEntity {
 

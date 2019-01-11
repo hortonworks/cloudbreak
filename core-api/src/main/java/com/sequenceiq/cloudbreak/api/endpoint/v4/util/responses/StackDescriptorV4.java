@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackRepoDetailsV4Response;
 
 public class StackDescriptorV4 {
 
@@ -13,9 +13,9 @@ public class StackDescriptorV4 {
 
     private String minAmbari;
 
-    private StackRepoDetailsJson repo;
+    private StackRepoDetailsV4Response repo;
 
-    private Map<String, List<ManagementPackEntry>> mpacks;
+    private Map<String, List<ManagementPackV4Entry>> mpacks;
 
     private AmbariInfoJson ambari;
 
@@ -35,11 +35,11 @@ public class StackDescriptorV4 {
         this.minAmbari = minAmbari;
     }
 
-    public StackRepoDetailsJson getRepo() {
+    public StackRepoDetailsV4Response getRepo() {
         return repo;
     }
 
-    public void setRepo(StackRepoDetailsJson repo) {
+    public void setRepo(StackRepoDetailsV4Response repo) {
         this.repo = repo;
     }
 
@@ -51,11 +51,11 @@ public class StackDescriptorV4 {
         this.ambari = ambari;
     }
 
-    public Map<String, List<ManagementPackEntry>> getMpacks() {
+    public Map<String, List<ManagementPackV4Entry>> getMpacks() {
         return mpacks;
     }
 
-    public void setMpacks(Map<String, List<ManagementPackEntry>> mpacks) {
+    public void setMpacks(Map<String, List<ManagementPackV4Entry>> mpacks) {
         this.mpacks = mpacks;
     }
 }

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.validation.ValidUpdateStackRequest;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("UpdateStack")
+@ApiModel
 @ValidUpdateStackRequest
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateStackJson implements JsonEntity {

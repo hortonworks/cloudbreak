@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariStackDetailsDescrip
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RepoConfigValidationRequest")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RepoConfigValidationV4Request {

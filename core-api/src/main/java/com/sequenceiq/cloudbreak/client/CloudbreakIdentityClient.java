@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
@@ -62,7 +61,6 @@ import net.jodah.expiringmap.ExpiringMap;
 public class CloudbreakIdentityClient {
 
     private static final List<Class<?>> ENDPOINTS = Arrays.asList(
-            AccountPreferencesEndpoint.class,
             AuditEventV4Endpoint.class,
             AutoscaleEndpoint.class,
             BlueprintV4Endpoint.class,
@@ -137,10 +135,6 @@ public class CloudbreakIdentityClient {
         tokenCache = configTokenCache();
         logger.info("CloudbreakClient has been created with a secret. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
                 identityServerAddress, clientId, configKey);
-    }
-
-    public AccountPreferencesEndpoint accountPreferencesEndpoint() {
-        return getEndpoint(AccountPreferencesEndpoint.class);
     }
 
     public AuditEventV4Endpoint auditV4Endpoint() {

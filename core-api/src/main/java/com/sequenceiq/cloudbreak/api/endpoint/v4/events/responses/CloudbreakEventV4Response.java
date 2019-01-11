@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("CloudbreakEvent")
+@ApiModel
 public class CloudbreakEventV4Response implements JsonEntity {
 
     @ApiModelProperty(EventModelDescription.TYPE)

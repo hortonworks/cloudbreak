@@ -6,10 +6,10 @@ import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.BaseFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.BaseFileSystem;
 
 @Service
 public class FileSystemResolver {

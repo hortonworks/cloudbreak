@@ -7,16 +7,16 @@ import java.util.zip.ZipOutputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public abstract class BaseAuditController {
 
-    public Response getAuditEventsZipResponse(List<AuditEvent> auditEvents, String resourceType, Long resourceId) {
+    public Response getAuditEventsZipResponse(List<AuditEventV4Response> auditEventV4Responses, String resourceType, Long resourceId) {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-                zipOutputStream.write(JsonUtil.writeValueAsString(auditEvents).getBytes());
+                zipOutputStream.write(JsonUtil.writeValueAsString(auditEventV4Responses).getBytes());
                 zipOutputStream.closeEntry();
             }
         };

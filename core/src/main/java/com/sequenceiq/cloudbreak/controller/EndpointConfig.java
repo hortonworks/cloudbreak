@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.CloudbreakEventV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
@@ -51,9 +51,8 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(
             AuditEventV4Controller.class,
-            AccountPreferencesController.class,
             BlueprintV4Controller.class,
-            CloudbreakEventV4Controller.class,
+            EventV4Controller.class,
             ClusterV1Controller.class,
             ClusterTemplateV4Controller.class,
             CredentialController.class,

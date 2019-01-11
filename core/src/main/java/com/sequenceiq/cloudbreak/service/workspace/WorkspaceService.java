@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.workspace;
 
-import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.DELETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus.DELETED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_READ;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.WORKSPACE_MANAGE;

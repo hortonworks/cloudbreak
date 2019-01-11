@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import static com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus.ACTIVE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus.ACTIVE;
 
 import java.util.Collections;
 import java.util.Map;

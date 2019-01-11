@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AmbariAddress")
+@ApiModel
 public class AmbariAddressJson implements JsonEntity {
 
     @ApiModelProperty(value = ModelDescriptions.AMBARI_SERVER, required = true)

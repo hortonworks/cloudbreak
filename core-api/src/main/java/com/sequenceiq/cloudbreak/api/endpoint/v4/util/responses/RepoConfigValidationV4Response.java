@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepositoryConfigValidatio
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RepoConfigValidationResponse")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RepoConfigValidationV4Response {

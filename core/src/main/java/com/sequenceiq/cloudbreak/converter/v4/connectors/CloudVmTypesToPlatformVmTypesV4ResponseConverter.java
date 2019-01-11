@@ -9,8 +9,8 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
-import com.sequenceiq.cloudbreak.api.model.VirtualMachinesResponse;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VirtualMachinesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -21,18 +21,18 @@ public class CloudVmTypesToPlatformVmTypesV4ResponseConverter
 
     @Override
     public PlatformVmtypesV4Response convert(CloudVmTypes source) {
-        Map<String, VirtualMachinesResponse> result = new HashMap<>();
+        Map<String, VirtualMachinesV4Response> result = new HashMap<>();
         for (Entry<String, Set<VmType>> entry : source.getCloudVmResponses().entrySet()) {
-            Set<VmTypeJson> vmTypeJsons = new HashSet<>();
+            Set<VmTypeV4Response> vmTypeV4Responses = new HashSet<>();
             for (VmType vmType : entry.getValue()) {
-                vmTypeJsons.add(getConversionService().convert(vmType, VmTypeJson.class));
+                vmTypeV4Responses.add(getConversionService().convert(vmType, VmTypeV4Response.class));
             }
-            VmTypeJson defaultVmType = getConversionService().convert(source.getDefaultCloudVmResponses().get(entry.getKey()), VmTypeJson.class);
+            VmTypeV4Response defaultVmType = getConversionService().convert(source.getDefaultCloudVmResponses().get(entry.getKey()), VmTypeV4Response.class);
 
-            VirtualMachinesResponse virtualMachinesResponse = new VirtualMachinesResponse();
-            virtualMachinesResponse.setDefaultVirtualMachine(defaultVmType);
-            virtualMachinesResponse.setVirtualMachines(vmTypeJsons);
-            result.put(entry.getKey(), virtualMachinesResponse);
+            VirtualMachinesV4Response virtualMachinesV4Response = new VirtualMachinesV4Response();
+            virtualMachinesV4Response.setDefaultVirtualMachine(defaultVmType);
+            virtualMachinesV4Response.setVirtualMachines(vmTypeV4Responses);
+            result.put(entry.getKey(), virtualMachinesV4Response);
         }
         return new PlatformVmtypesV4Response(result);
     }

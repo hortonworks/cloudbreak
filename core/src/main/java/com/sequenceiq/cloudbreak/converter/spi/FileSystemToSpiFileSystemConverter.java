@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;

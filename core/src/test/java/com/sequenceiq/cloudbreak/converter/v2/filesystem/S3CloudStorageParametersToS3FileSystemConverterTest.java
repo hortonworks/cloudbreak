@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
 import org.junit.Before;
 import org.junit.Test;
 

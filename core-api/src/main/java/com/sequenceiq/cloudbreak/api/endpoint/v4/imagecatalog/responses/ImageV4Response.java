@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackDetailsJson;
 
 import io.swagger.annotations.ApiModel;
 
@@ -45,7 +44,7 @@ public class ImageV4Response implements JsonEntity {
 
     @JsonProperty("stackDetails")
     @JsonInclude(NON_EMPTY)
-    private StackDetailsJson stackDetails;
+    private StackDetailsV4Response stackDetails;
 
     @JsonProperty("defaultImage")
     private boolean defaultImage;
@@ -93,11 +92,11 @@ public class ImageV4Response implements JsonEntity {
         this.version = version;
     }
 
-    public StackDetailsJson getStackDetails() {
+    public StackDetailsV4Response getStackDetails() {
         return stackDetails;
     }
 
-    public void setStackDetails(StackDetailsJson stackDetails) {
+    public void setStackDetails(StackDetailsV4Response stackDetails) {
         this.stackDetails = stackDetails;
     }
 
