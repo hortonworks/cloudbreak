@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.BlueprintGetListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
@@ -137,6 +138,16 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         testContext
                 .given(RdsConfigEntity.class)
                 .when(new RdsConfigCreateIfNotExistsAction());
+        Set<String> validRds = new HashSet<>();
+        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        return validRds;
+    }
+
+    protected Set<String> createRangerRdsConfig(TestContext testContext) {
+        testContext
+                .given(RdsConfigEntity.class)
+                .withType("Ranger")
+                .when(RdsConfig::post);
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(RdsConfigEntity.class).getName());
         return validRds;
