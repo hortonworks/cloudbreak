@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -24,9 +25,11 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class UserProfileService {
@@ -44,6 +47,30 @@ public class UserProfileService {
 
     @Inject
     private SecretService secretService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private WorkspaceService workspaceService;
+
+    @Inject
+    private CachedUserService cachedUserService;
+
+    public String evictCurrentUserDetailsForLoggedInUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        cachedUserService.evictByIdentityUser(cloudbreakUser);
+        return cloudbreakUser.getUsername();
+    }
+
+    public UserProfile getOrCreateForLoggedInUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        return getOrCreate(user);
+    }
 
     public UserProfile getOrCreate(User user) {
         UserProfile userProfile = getSilently(user);
@@ -94,6 +121,13 @@ public class UserProfileService {
         } catch (JsonProcessingException ignored) {
             userProfile.setUiProperties(null);
         }
+    }
+
+    public UserProfile putForLoggedInUser(UserProfileV4Request request, Long workspaceId) {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Workspace workspace = workspaceService.get(workspaceId, user);
+        return put(request, user, workspace);
     }
 
     public UserProfile put(UserProfileV4Request request, User user, Workspace workspace) {

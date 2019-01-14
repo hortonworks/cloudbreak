@@ -100,7 +100,8 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
         return getFlexSubscription(name, workspace);
     }
 
-    public FlexSubscription findOneByNameAndWorkspace(String name, Long workspaceId, User user) {
+    public FlexSubscription findOneByNameAndWorkspace(String name, Long workspaceId) {
+        User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         return getFlexSubscription(name, workspace);
     }
@@ -110,17 +111,22 @@ public class FlexSubscriptionService extends AbstractWorkspaceAwareResourceServi
         return flexSubscriptionRepository.findByNameAndWorkspace(name, workspace);
     }
 
-    public Set<FlexSubscription> findAllForUserAndWorkspace(User user, Long workspaceId) {
+    public Set<FlexSubscription> findAllForUserAndWorkspace(Long workspaceId) {
+        User user = getLoggedInUser();
         LOGGER.debug("Looking for public Flex subscriptions for user: {}", user.getUserId());
         return flexSubscriptionRepository.findAllByWorkspaceId(workspaceId);
     }
 
-    public Optional<FlexSubscription> setDefaultFlexSubscription(String name, User user, Workspace workspace) {
+    public Optional<FlexSubscription> setDefaultFlexSubscription(String name, Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         LOGGER.debug("Set Flex subscription '{}' as default in workspace '{}'", name, workspace.getName());
         return setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setDefault);
     }
 
-    public Optional<FlexSubscription> setUsedForControllerFlexSubscription(String name, User user, Workspace workspace) {
+    public Optional<FlexSubscription> setUsedForControllerFlexSubscription(String name, Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         LOGGER.debug("Set Flex subscription '{}' as used for controller in workspace '{}'", name, workspace.getName());
         return setFlexSubscriptionFlag(name, user, workspace, FlexSubscription::setUsedForController);
     }

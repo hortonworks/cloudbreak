@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -48,6 +48,9 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private ConverterUtil converterUtil;
 
     @Override
     public WorkspaceV4Response post(@Valid WorkspaceV4Request workspaceV4Request) {
@@ -110,20 +113,14 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     }
 
     private SortedSet<WorkspaceV4Response> workspacesToSortedResponse(Set<Workspace> workspaces) {
-        Set<WorkspaceV4Response> jsons = workspaces.stream()
-                .map(o -> conversionService.convert(o, WorkspaceV4Response.class))
-                .collect(Collectors.toSet());
-
+        Set<WorkspaceV4Response> jsons = converterUtil.convertAllAsSet(workspaces, WorkspaceV4Response.class);
         SortedSet<WorkspaceV4Response> sortedResponses = new TreeSet<>(new NameComparator());
         sortedResponses.addAll(jsons);
         return sortedResponses;
     }
 
     private SortedSet<UserV4Response> usersToSortedResponse(Set<User> users) {
-        Set<UserV4Response> jsons = users.stream()
-                .map(u -> conversionService.convert(u, UserV4Response.class))
-                .collect(Collectors.toSet());
-
+        Set<UserV4Response> jsons = converterUtil.convertAllAsSet(users, UserV4Response.class);
         SortedSet<UserV4Response> sortedResponses = new TreeSet<>(new UserIdComparator());
         sortedResponses.addAll(jsons);
         return sortedResponses;

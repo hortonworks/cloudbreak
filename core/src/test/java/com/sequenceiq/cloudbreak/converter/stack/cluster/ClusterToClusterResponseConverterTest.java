@@ -150,7 +150,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "userName", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
                 "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers", "extendedBlueprintText",
-                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosResponse", "fileSystemResponse"));
+                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosV4Response", "fileSystemResponse"));
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -12,17 +11,16 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4ViewResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -38,17 +36,12 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private ConversionService conversionService;
 
     @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private ConverterUtil converterUtil;
 
     @Override
     public RecipeV4Responses list(Long workspaceId) {
-        Set<RecipeV4ViewResponse> recipes = recipeService.findAllViewByWorkspaceId(workspaceId).stream()
-                .map(recipe -> conversionService.convert(recipe, RecipeV4ViewResponse.class))
-                .collect(Collectors.toSet());
-        return new RecipeV4Responses(recipes);
+        Set<RecipeView> allViewByWorkspaceId = recipeService.findAllViewByWorkspaceId(workspaceId);
+        return new RecipeV4Responses(converterUtil.convertAllAsSet(allViewByWorkspaceId, RecipeV4ViewResponse.class));
     }
 
     @Override
@@ -59,9 +52,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     public RecipeV4Response post(Long workspaceId, RecipeV4Request request) {
-        Recipe recipe = conversionService.convert(request, Recipe.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        recipe = recipeService.create(recipe, workspaceId, user);
+        Recipe recipe = recipeService.createForLoggedInUser(conversionService.convert(request, Recipe.class), workspaceId);
         notify(ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeV4Response.class);
     }

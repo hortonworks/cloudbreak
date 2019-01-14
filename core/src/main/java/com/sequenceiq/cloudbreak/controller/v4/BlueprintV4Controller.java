@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,17 +18,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -47,25 +40,15 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     private ConversionService conversionService;
 
     @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
     private PlatformParameterService platformParameterService;
+
+    @Inject
+    private ConverterUtil converterUtil;
 
     @Override
     public BlueprintV4ViewResponses list(Long workspaceId) {
-        Workspace workspace = getWorkspace(workspaceId);
-        Set<BlueprintV4ViewResponse> blueprints = blueprintService.getAllAvailableViewInWorkspace(workspace)
-                .stream()
-                .map(blueprint -> conversionService.convert(blueprint, BlueprintV4ViewResponse.class))
-                .collect(Collectors.toSet());
-        return new BlueprintV4ViewResponses(blueprints);
+        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspace(workspaceId);
+        return new BlueprintV4ViewResponses(converterUtil.convertAllAsSet(allAvailableViewInWorkspace, BlueprintV4ViewResponse.class));
     }
 
     @Override
@@ -76,9 +59,8 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public BlueprintV4Response post(Long workspaceId, BlueprintV4Request request) {
-        Blueprint blueprint = conversionService.convert(request, Blueprint.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        blueprint = blueprintService.create(blueprint, workspaceId, user);
+        Blueprint blueprint = blueprintService.createForLoggedInUser(
+                conversionService.convert(request, Blueprint.class), workspaceId);
         notify(ResourceEvent.BLUEPRINT_CREATED);
         return conversionService.convert(blueprint, BlueprintV4Response.class);
     }
@@ -98,25 +80,14 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public ParametersQueryV4Response getParameters(Long workspaceId, String name) {
-        Set<String> customParameters = blueprintService.queryCustomParameters(name, getWorkspace(workspaceId));
-        Map<String, String> result = new HashMap<>();
-        for (String customParameter : customParameters) {
-            result.put(customParameter, "");
-        }
         ParametersQueryV4Response parametersQueryV4Response = new ParametersQueryV4Response();
-        parametersQueryV4Response.setCustom(result);
+        parametersQueryV4Response.setCustom(blueprintService.queryCustomParametersMap(name, workspaceId));
         return parametersQueryV4Response;
     }
 
     @Override
     public RecommendationV4Response createRecommendation(Long workspaceId, String name, RecommendationV4Filter recommendationV4Filter) {
         return conversionService.convert(platformParameterService.getRecommendation(workspaceId, name, recommendationV4Filter), RecommendationV4Response.class);
-    }
-
-    private Workspace getWorkspace(Long workspaceId) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        return workspaceService.get(workspaceId, user);
     }
 
 }

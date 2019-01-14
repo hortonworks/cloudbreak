@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -161,7 +161,18 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     protected void prepareCreation(RDSConfig resource) {
     }
 
-    public String testRdsConnection(String existingRDSConfigName, Workspace workspace) {
+    public String testRdsConnection(Long workspaceId, String existingRDSConfigName, RDSConfig existingRds) {
+        if (existingRDSConfigName != null) {
+            return testRdsConnection(existingRDSConfigName, workspaceId);
+        } else if (existingRds != null) {
+            return testRdsConnection(existingRds);
+        }
+        throw new BadRequestException("Either an Database id, name or an Database request needs to be specified in the request. ");
+    }
+
+    private String testRdsConnection(String existingRDSConfigName, Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         try {
             RDSConfig config = getByNameForWorkspace(existingRDSConfigName, workspace);
             return testRdsConnection(resolveVaultValues(config));
@@ -170,15 +181,7 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
         }
     }
 
-    public RDSConfig resolveVaultValues(RDSConfig config) {
-        String username = config.getConnectionUserName();
-        String password = config.getConnectionPassword();
-        config.setConnectionUserName(username);
-        config.setConnectionPassword(password);
-        return config;
-    }
-
-    public String testRdsConnection(RDSConfig rdsConfig) {
+    private String testRdsConnection(RDSConfig rdsConfig) {
         try {
             if (rdsConfig == null) {
                 return "access is denied";
@@ -188,5 +191,13 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
         } catch (RuntimeException e) {
             return e.getMessage();
         }
+    }
+
+    public RDSConfig resolveVaultValues(RDSConfig config) {
+        String username = config.getConnectionUserName();
+        String password = config.getConnectionPassword();
+        config.setConnectionUserName(username);
+        config.setConnectionPassword(password);
+        return config;
     }
 }

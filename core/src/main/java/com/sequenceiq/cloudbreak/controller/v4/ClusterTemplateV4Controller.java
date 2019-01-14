@@ -16,14 +16,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
-import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
@@ -36,24 +32,14 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private ConverterUtil converterUtil;
 
     @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private ClusterTemplateService clusterTemplateService;
-
-    @Inject
-    private ClusterTemplateViewService clusterTemplateViewService;
 
     @Inject
     private TransactionService transactionService;
 
     @Override
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        ClusterTemplate clusterTemplate = clusterTemplateService.create(converterUtil.convert(request, ClusterTemplate.class), workspaceId, user);
+        ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId);
         return get(workspaceId, clusterTemplate.getName());
     }
 

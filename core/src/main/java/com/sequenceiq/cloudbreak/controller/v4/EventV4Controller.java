@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses.cloudbreakEventV4Responses;
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
-
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,14 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.filters.EventSinceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -43,38 +32,24 @@ public class EventV4Controller implements EventV4Endpoint {
     @Inject
     private StructuredEventService structuredEventService;
 
-    @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
-    private StackService stackService;
-
     @Override
     public CloudbreakEventV4Responses list(Long workspaceId, EventSinceV4Filter since) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(workspaceId, user);
-        return cloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspace, since.getSince()));
+        return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspaceId, since.getSince()));
     }
 
     @Override
     public CloudbreakEventV4Responses get(Long workspaceId, String name) {
-        return cloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsByStack(getStackIfAvailable(workspaceId, name).getId()));
+        return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspaceByStack(workspaceId, name));
     }
 
     @Override
     public StructuredEventContainer structured(Long workspaceId, String name) {
-        return getStructuredEventsForStack(name, workspaceId);
+        return structuredEventService.getStructuredEventsForStack(name, workspaceId);
     }
 
     @Override
     public Response download(Long workspaceId, String name) {
-        StructuredEventContainer events = getStructuredEventsForStack(name, workspaceId);
+        StructuredEventContainer events = structuredEventService.getStructuredEventsForStack(name, workspaceId);
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
@@ -83,13 +58,5 @@ public class EventV4Controller implements EventV4Endpoint {
             }
         };
         return Response.ok(streamingOutput).header("content-disposition", "attachment; filename = struct-events.zip").build();
-    }
-
-    private StructuredEventContainer getStructuredEventsForStack(String name, Long workspaceId) {
-        return structuredEventService.getEventsForUserWithResourceId("stacks", getStackIfAvailable(workspaceId, name).getId());
-    }
-
-    private Stack getStackIfAvailable(Long workspaceId, String name) {
-        return Optional.ofNullable(stackService.getByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
     }
 }

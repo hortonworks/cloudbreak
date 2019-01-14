@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -16,12 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.requests.Flex
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscriptions.responses.FlexSubscriptionV4Responses;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -33,41 +28,27 @@ public class FlexSubscriptionV4Controller implements FlexSubscriptionV4Endpoint 
     private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     @Named("conversionService")
     private ConversionService conversionService;
 
     @Inject
-    private WorkspaceService workspaceService;
+    private ConverterUtil converterUtil;
 
     @Override
     public FlexSubscriptionV4Responses list(Long workspaceId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndWorkspace(user, workspaceId);
-        Set<FlexSubscriptionV4Response> responses = subscriptions
-                .stream()
-                .map(subscription -> conversionService.convert(subscriptions, FlexSubscriptionV4Response.class))
-                .collect(Collectors.toSet());
-        return new FlexSubscriptionV4Responses(responses);
+        Set<FlexSubscription> subscriptions = flexSubscriptionService.findAllForUserAndWorkspace(workspaceId);
+        return new FlexSubscriptionV4Responses(converterUtil.convertAllAsSet(subscriptions, FlexSubscriptionV4Response.class));
     }
 
     @Override
     public FlexSubscriptionV4Response get(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        FlexSubscription subscription = flexSubscriptionService.findOneByNameAndWorkspace(name, workspaceId, user);
+        FlexSubscription subscription = flexSubscriptionService.findOneByNameAndWorkspace(name, workspaceId);
         return conversionService.convert(subscription, FlexSubscriptionV4Response.class);
     }
 
     @Override
     public FlexSubscriptionV4Response create(Long workspaceId, FlexSubscriptionV4Request request) {
-        FlexSubscription subscription = conversionService.convert(request, FlexSubscription.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        subscription = flexSubscriptionService.create(subscription, workspaceId, user);
+        FlexSubscription subscription = flexSubscriptionService.createForLoggedInUser(conversionService.convert(request, FlexSubscription.class), workspaceId);
         return conversionService.convert(subscription, FlexSubscriptionV4Response.class);
     }
 
@@ -79,17 +60,13 @@ public class FlexSubscriptionV4Controller implements FlexSubscriptionV4Endpoint 
 
     @Override
     public FlexSubscriptionV4Response setUsedForController(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(workspaceId, user);
-        FlexSubscription flexSubscription = flexSubscriptionService.setUsedForControllerFlexSubscription(name, user, workspace).get();
+        FlexSubscription flexSubscription = flexSubscriptionService.setUsedForControllerFlexSubscription(name, workspaceId).get();
         return conversionService.convert(flexSubscription, FlexSubscriptionV4Response.class);
     }
 
     @Override
     public FlexSubscriptionV4Response setDefault(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(workspaceId, user);
-        FlexSubscription flexSubscription = flexSubscriptionService.setDefaultFlexSubscription(name, user, workspace).get();
+        FlexSubscription flexSubscription = flexSubscriptionService.setDefaultFlexSubscription(name, workspaceId).get();
         return conversionService.convert(flexSubscription, FlexSubscriptionV4Response.class);
     }
 }

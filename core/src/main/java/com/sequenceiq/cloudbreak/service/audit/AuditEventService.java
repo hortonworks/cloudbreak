@@ -53,13 +53,8 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
         return converterUtil.convert(event, AuditEventV4Response.class);
     }
 
-    public List<AuditEventV4Response> getAuditEventsForWorkspace(String resourceType, Long resourceId, Workspace workspace) {
-        List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
-        auditEventV4Responses.sort(new AuditEventComparator().reversed());
-        return auditEventV4Responses;
-    }
-
-    public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, User user) {
+    public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId);
         auditEventV4Responses.sort(new AuditEventComparator().reversed());

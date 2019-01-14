@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -27,9 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.domain.Subscription;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
@@ -39,9 +36,8 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakePrerequisiteService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 
 @Controller
@@ -60,9 +56,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private RepositoryConfigValidationService validationService;
 
     @Inject
-    private RdsConnectionBuilder rdsConnectionBuilder;
-
-    @Inject
     private BlueprintService blueprintService;
 
     @Inject
@@ -76,19 +69,13 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private ConversionService conversionService;
 
     @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
-    private UserService userService;
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private SecurityRuleService securityRuleService;
 
     @Inject
     private SubscriptionService subscriptionService;
+
+    @Inject
+    private ConverterUtil converterUtil;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -98,7 +85,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         boolean compatible = ClientVersionUtil.checkVersion(cbVersion, version.getVersion());
         if (compatible) {
             return new VersionCheckV4Result(true);
-
         }
         return new VersionCheckV4Result(false, String.format("Versions not compatible: [server: '%s', client: '%s']", cbVersion, version.getVersion()));
     }
@@ -134,10 +120,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     public DeploymentPreferencesV4Response deployment() {
         DeploymentPreferencesV4Response response = new DeploymentPreferencesV4Response();
         response.setFeatureSwitchV4s(preferencesService.getFeatureSwitches());
-        Set<SupportedExternalDatabaseServiceEntryV4Response> supportedExternalDatabases = SupportedDatabaseProvider.supportedExternalDatabases()
-                .stream()
-                .map(db -> conversionService.convert(db, SupportedExternalDatabaseServiceEntryV4Response.class))
-                .collect(Collectors.toSet());
+        Set<SupportedExternalDatabaseServiceEntryV4Response> supportedExternalDatabases =
+                converterUtil.convertAllAsSet(SupportedDatabaseProvider.supportedExternalDatabases(), SupportedExternalDatabaseServiceEntryV4Response.class);
         response.setSupportedExternalDatabases(supportedExternalDatabases);
         response.setPlatformSelectionDisabled(preferencesService.isPlatformSelectionDisabled());
         response.setPlatformEnablement(preferencesService.platformEnablement());

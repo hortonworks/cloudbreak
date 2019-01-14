@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,10 +19,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.Kubernetes
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -39,19 +36,13 @@ public class KubernetesV4Controller extends NotificationController implements Ku
     private KubernetesConfigService kubernetesConfigService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private UserService userService;
+    private ConverterUtil converterUtil;
 
     @Override
     public KubernetesV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
-        Set<KubernetesV4Response> kubernetesV4Responses = kubernetesConfigService
-                .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal())
-                .stream()
-                .map(kubernetesConfig -> conversionService.convert(kubernetesConfig, KubernetesV4Response.class))
-                .collect(Collectors.toSet());
-        return new KubernetesV4Responses(kubernetesV4Responses);
+        Set<KubernetesConfig> allInWorkspaceAndEnvironment = kubernetesConfigService
+                .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+        return new KubernetesV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, KubernetesV4Response.class));
     }
 
     @Override
@@ -71,8 +62,7 @@ public class KubernetesV4Controller extends NotificationController implements Ku
     @Override
     public KubernetesV4Response put(Long workspaceId, KubernetesV4Request request) {
         KubernetesConfig kubernetesConfig = conversionService.convert(request, KubernetesConfig.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        kubernetesConfig = kubernetesConfigService.updateByWorkspaceId(workspaceId, kubernetesConfig, user);
+        kubernetesConfig = kubernetesConfigService.updateByWorkspaceId(workspaceId, kubernetesConfig);
         notify(ResourceEvent.KUBERNETES_CONFIG_MODIFIED);
         return conversionService.convert(kubernetesConfig, KubernetesV4Response.class);
     }
