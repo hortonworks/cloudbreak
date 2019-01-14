@@ -12,14 +12,13 @@ import javax.ws.rs.core.Response;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.AuthCodeGrantFlowFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.filter.AuthCodeGrantFlowFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.InteractiveCredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
@@ -63,9 +62,6 @@ public class CredentialV4Controller extends NotificationController implements Cr
 
     @Override
     public CredentialV4Response post(Long workspaceId, CredentialV4Request request) {
-        // TODO
-        credentialValidator.validateCredentialCloudPlatform(request.getCloudPlatform());
-        credentialValidator.validateParameters(Platform.platform(request.getCloudPlatform()), credentialPropertyCollector.propertyMap(request));
         Credential credential = credentialService.createForLoggedInUser(conversionService.convert(request, Credential.class), workspaceId);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return conversionService.convert(credential, CredentialV4Response.class);

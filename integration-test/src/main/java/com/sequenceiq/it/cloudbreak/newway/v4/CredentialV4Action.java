@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.v3;
+package com.sequenceiq.it.cloudbreak.newway.v4;
 
 import static com.sequenceiq.it.cloudbreak.RetryOnGatewayTimeout.retry;
 
@@ -15,11 +15,11 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class CredentialV3Action {
+public class CredentialV4Action {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV3Action.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV4Action.class);
 
-    private CredentialV3Action() {
+    private CredentialV4Action() {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {

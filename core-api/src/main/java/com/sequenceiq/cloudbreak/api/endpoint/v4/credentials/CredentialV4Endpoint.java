@@ -14,7 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.AuthCodeGrantFlowFilter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.filter.AuthCodeGrantFlowFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Responses;

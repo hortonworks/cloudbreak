@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.Credential
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 
 @Prototype
 public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Request, CredentialV4Response, CredentialEntity> implements Purgable<CredentialV4Response> {
@@ -95,7 +95,7 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        CredentialV3Action.deleteV2(context, this, cloudbreakClient);
+        CredentialV4Action.deleteV2(context, this, cloudbreakClient);
     }
 
     @Override
