@@ -318,7 +318,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return stack;
     }
 
-    private static EnvironmentEntity checkEnvHasNoRds(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    static EnvironmentEntity checkEnvHasNoRds(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<RDSConfigResponse> rdsConfigResponseSet = environment.getResponse().getRdsConfigs();
         if (!rdsConfigResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached rds");
@@ -326,7 +326,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    private static EnvironmentEntity checkEnvHasNoLdap(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    static EnvironmentEntity checkEnvHasNoLdap(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<LdapConfigResponse> ldapConfigResponseSet = environment.getResponse().getLdapConfigs();
         if (!ldapConfigResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached ldap");
