@@ -12,26 +12,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.requests.GetAuditEventRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.controller.audit.BaseAuditController;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
 @Controller
 public class AuditEventV4Controller extends BaseAuditController implements AuditEventV4Endpoint {
 
     @Inject
     private AuditEventService auditEventService;
-
-    @Inject
-    private UserService userService;
-
-    @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Override
     public AuditEventV4Response getAuditEventById(Long workspaceId, Long auditId) {
@@ -40,8 +27,7 @@ public class AuditEventV4Controller extends BaseAuditController implements Audit
 
     @Override
     public AuditEventV4Responses getAuditEvents(Long workspaceId, GetAuditEventRequest getAuditRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, getAuditRequest.getResourceType(), getAuditRequest.getResourceId(), user);
+        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, getAuditRequest.getResourceType(), getAuditRequest.getResourceId());
         return new AuditEventV4Responses(auditEventsByWorkspaceId);
 
     }

@@ -1,8 +1,8 @@
 {
   "name" : "config-01",
   "description" : "my first config",
-  "serverHost": "localhost",
-  "serverPort": 389,
+  "host": "localhost",
+  "port": 389,
   "serverSSL": true,
   "bindDn": "cn=admin,dc=example,dc=org",
   "bindPassword": "admin",

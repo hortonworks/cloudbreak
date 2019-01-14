@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosView
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -35,13 +35,14 @@ public class KerberosConfigV4Controller extends NotificationController implement
     @Inject
     private KerberosService kerberosService;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
     @Override
     public KerberosViewV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
-        Set<KerberosViewV4Response> kerberosViewV4Responses = kerberosService.findAllInWorkspaceAndEnvironment(workspaceId,
-                    listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal()).stream()
-                .map(kerberosConfig -> conversionService.convert(kerberosConfig, KerberosViewV4Response.class))
-                .collect(Collectors.toSet());
-        return new KerberosViewV4Responses(kerberosViewV4Responses);
+        Set<KerberosConfig> allInWorkspaceAndEnvironment = kerberosService.findAllInWorkspaceAndEnvironment(workspaceId,
+                listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+        return new KerberosViewV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, KerberosViewV4Response.class));
     }
 
     @Override

@@ -117,13 +117,16 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
                 preferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
     }
 
-    public Map<String, String> interactiveLogin(Long workspaceId, Credential credential, Workspace workspace, User user) {
+    public Map<String, String> interactiveLogin(Long workspaceId, Credential credential) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         validateDeploymentAddress(credential);
         credential.setWorkspace(workspace);
         return credentialAdapter.interactiveLogin(credential, workspaceId, user.getUserId());
     }
 
-    public Credential updateByWorkspaceId(Long workspaceId, Credential credential, User user) {
+    public Credential updateByWorkspaceId(Long workspaceId, Credential credential) {
+        User user = getLoggedInUser();
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = Optional.ofNullable(
                 credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
@@ -231,10 +234,17 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return credentialRepository.save(credential);
     }
 
-    public CredentialPrerequisitesV4Response getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesV4Response getPrerequisites(Long workspaceId, String cloudPlatform, String deploymentAddress) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased);
         return credentialPrerequisiteService.getPrerequisites(user, workspace, cloudPlatformUppercased, deploymentAddress);
+    }
+
+    public String initCodeGrantFlow(Long workspaceId, @Nonnull Credential credential) {
+        User user = getLoggedInUser();
+        return initCodeGrantFlow(workspaceId, credential, user);
     }
 
     public String initCodeGrantFlow(Long workspaceId, @Nonnull Credential credential, @Nonnull User user) {
@@ -248,7 +258,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return getCodeGrantFlowAppLoginUrl(created.getAttributes());
     }
 
-    public String initCodeGrantFlow(Long workspaceId, String name, @Nonnull User user) {
+    public String initCodeGrantFlow(Long workspaceId, String name) {
+        User user = getLoggedInUser();
         Credential original = Optional.ofNullable(credentialRepository
                 .findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspaceId, preferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
@@ -265,7 +276,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return getCodeGrantFlowAppLoginUrl(updated.getAttributes());
     }
 
-    public Credential authorizeCodeGrantFlow(String code, @Nonnull String state, Long workspaceId, @Nonnull User user, @Nonnull String platform) {
+    public Credential authorizeCodeGrantFlow(String code, @Nonnull String state, Long workspaceId, @Nonnull String platform) {
+        User user = getLoggedInUser();
         String cloudPlatformUppercased = platform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased);
         Set<Credential> credentials = credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, List.of(cloudPlatformUppercased));

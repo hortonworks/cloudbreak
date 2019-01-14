@@ -11,13 +11,9 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
-import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class CredentialRequestToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialV4Request, Credential> {
-
-    @Inject
-    private TopologyService topologyService;
 
     @Inject
     private CredentialPropertyCollector credentialPropertyCollector;

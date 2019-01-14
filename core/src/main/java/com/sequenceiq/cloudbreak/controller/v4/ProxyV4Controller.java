@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -35,14 +35,14 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
     @Named("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
     @Override
     public ProxyV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
-        Set<ProxyV4Response> proxies = proxyConfigService
-                .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal())
-                .stream()
-                .map(config -> conversionService.convert(config, ProxyV4Response.class))
-                .collect(Collectors.toSet());
-        return new ProxyV4Responses(proxies);
+        Set<ProxyConfig> allInWorkspaceAndEnvironment = proxyConfigService
+                .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+        return new ProxyV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, ProxyV4Response.class));
     }
 
     @Override

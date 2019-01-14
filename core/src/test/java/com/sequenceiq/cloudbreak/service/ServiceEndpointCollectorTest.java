@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -206,29 +207,29 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetKnoxServices() {
-        when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
+        when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Blueprint());
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
-        Collection<ExposedServiceV4Response> exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        Collection<ExposedServiceV4Response> exposedServiceV4Respons = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(0L, exposedServiceV4Respons.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
-        exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        exposedServiceV4Respons = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(1L, exposedServiceV4Respons.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
-        exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        exposedServiceV4Respons = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(1L, exposedServiceV4Respons.size());
     }
 
     @Test
     public void testGetKnoxServicesWithLivyServerAndResourceManagerV2() {
-        when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
+        when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Blueprint());
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER",
@@ -236,7 +237,7 @@ public class ServiceEndpointCollectorTest {
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
 
-        Collection<ExposedServiceV4Response> exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        Collection<ExposedServiceV4Response> exposedServiceV4Respons = underTest.getKnoxServices(workspace.getId(), "blueprint");
 
         assertEquals(3L, exposedServiceV4Respons.size());
         assertFalse(createExposedServiceFilteredStream(exposedServiceV4Respons)
@@ -245,7 +246,7 @@ public class ServiceEndpointCollectorTest {
 
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
 
-        exposedServiceV4Respons = underTest.getKnoxServices("blueprint", workspace);
+        exposedServiceV4Respons = underTest.getKnoxServices(workspace.getId(), "blueprint");
 
         assertEquals(6L, exposedServiceV4Respons.size());
         assertTrue(createExposedServiceFilteredStream(exposedServiceV4Respons)

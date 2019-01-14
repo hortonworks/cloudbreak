@@ -320,7 +320,7 @@ public class CloudbreakV3Util {
             EventV4Endpoint eventEndpoint = cloudbreakClient.eventV3Endpoint();
             EventSinceV4Filter eventSinceV4Filter = new EventSinceV4Filter();
             eventSinceV4Filter.setSince(sinceTimeStamp);
-            List<CloudbreakEventV4Response> list = eventEndpoint.list(workspaceId, eventSinceV4Filter).getEvents();
+            List<CloudbreakEventV4Response> list = eventEndpoint.list(workspaceId, eventSinceV4Filter).getResponses();
             for (CloudbreakEventV4Response event : list) {
                 if (event.getStackName().equals(stackName) && event.getEventMessage().contains(eventMessage) && event.getEventType().equals(eventType)) {
                     exitCriteria = Boolean.TRUE;

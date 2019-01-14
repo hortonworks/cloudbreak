@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,13 +24,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -46,25 +42,18 @@ public class CredentialV4Controller extends NotificationController implements Cr
     private ConversionService conversionService;
 
     @Inject
-    private UserService userService;
-
-    @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private CredentialValidator credentialValidator;
 
     @Inject
     private CredentialPropertyCollector credentialPropertyCollector;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
     @Override
     public CredentialV4Responses list(Long workspaceId) {
-        return new CredentialV4Responses(credentialService.listAvailablesByWorkspaceId(workspaceId).stream()
-                .map(credential -> conversionService.convert(credential, CredentialV4Response.class))
-                .collect(Collectors.toSet()));
+        Set<Credential> credentials = credentialService.listAvailablesByWorkspaceId(workspaceId);
+        return new CredentialV4Responses(converterUtil.convertAllAsSet(credentials, CredentialV4Response.class));
     }
 
     @Override
@@ -74,10 +63,10 @@ public class CredentialV4Controller extends NotificationController implements Cr
 
     @Override
     public CredentialV4Response post(Long workspaceId, CredentialV4Request request) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        // TODO
         credentialValidator.validateCredentialCloudPlatform(request.getCloudPlatform());
         credentialValidator.validateParameters(Platform.platform(request.getCloudPlatform()), credentialPropertyCollector.propertyMap(request));
-        Credential credential = credentialService.create(conversionService.convert(request, Credential.class), workspaceId, user);
+        Credential credential = credentialService.createForLoggedInUser(conversionService.convert(request, Credential.class), workspaceId);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return conversionService.convert(credential, CredentialV4Response.class);
     }
@@ -91,45 +80,36 @@ public class CredentialV4Controller extends NotificationController implements Cr
 
     @Override
     public CredentialV4Response put(Long workspaceId, CredentialV4Request credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return conversionService.convert(credentialService.updateByWorkspaceId(
-                workspaceId, conversionService.convert(credentialRequest, Credential.class), user), CredentialV4Response.class);
+                workspaceId, conversionService.convert(credentialRequest, Credential.class)), CredentialV4Response.class);
     }
 
     @Override
     public InteractiveCredentialV4Response interactiveLogin(Long workspaceId, CredentialV4Request credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        Map<String, String> result = credentialService.interactiveLogin(workspaceId, conversionService.convert(credentialRequest, Credential.class),
-                workspace, user);
+        Map<String, String> result = credentialService.interactiveLogin(workspaceId, conversionService.convert(credentialRequest, Credential.class));
         return new InteractiveCredentialV4Response(result.get("user_code"), result.get("verification_url"));
     }
 
     @Override
     public CredentialPrerequisitesV4Response getPrerequisitesForCloudPlatform(Long workspaceId, String platform, String deploymentAddress) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return credentialService.getPrerequisites(user, workspace, platform, deploymentAddress);
+        return credentialService.getPrerequisites(workspaceId, platform, deploymentAddress);
     }
 
     @Override
     public Response initCodeGrantFlow(Long workspaceId, CredentialV4Request credentialRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        String loginURL = credentialService.initCodeGrantFlow(workspaceId, conversionService.convert(credentialRequest, Credential.class), user);
+        String loginURL = credentialService.initCodeGrantFlow(workspaceId, conversionService.convert(credentialRequest, Credential.class));
         return Response.status(Response.Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 
     @Override
     public Response initCodeGrantFlowOnExisting(Long workspaceId, String name) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        String loginURL = credentialService.initCodeGrantFlow(workspaceId, name, user);
+        String loginURL = credentialService.initCodeGrantFlow(workspaceId, name);
         return Response.status(Response.Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 
     @Override
     public CredentialV4Response authorizeCodeGrantFlow(Long workspaceId, String platform, AuthCodeGrantFlowFilter filter) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Credential credential = credentialService.authorizeCodeGrantFlow(filter.getCode(), filter.getState(), workspaceId, user, platform);
+        Credential credential = credentialService.authorizeCodeGrantFlow(filter.getCode(), filter.getState(), workspaceId, platform);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return conversionService.convert(credential, CredentialV4Response.class);
     }
