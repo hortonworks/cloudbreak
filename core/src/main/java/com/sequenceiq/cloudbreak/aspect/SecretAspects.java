@@ -81,10 +81,10 @@ public class SecretAspects {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
-                        tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
                         field.setAccessible(true);
                         Secret value = (Secret) field.get(entity);
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
+                            tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
                             String path = String.format("%s/%s/%s/%s-%s", tenant,
                                     entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
                                     UUID.randomUUID().toString(), Long.toHexString(clock.getCurrentTime()));
@@ -94,8 +94,11 @@ public class SecretAspects {
                         }
                     }
                 }
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
+                throw new CloudbreakServiceException(e);
             } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Secret Store. Data is not encrypted!", e);
+                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
                 throw new CloudbreakServiceException(e);
             }
         }
@@ -131,6 +134,9 @@ public class SecretAspects {
                         }
                     }
                 }
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
+                throw new CloudbreakServiceException(e);
             } catch (Exception e) {
                 LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
                 throw new CloudbreakServiceException(e);
@@ -161,7 +167,7 @@ public class SecretAspects {
                 .map(e -> (TenantAwareResource) e)
                 .map(TenantAwareResource::getTenant)
                 .map(Tenant::getName)
-                .orElseThrow(() -> new CloudbreakServiceException(
+                .orElseThrow(() -> new IllegalArgumentException(
                         entity.getClass().getSimpleName() + " must be a subclass of " + TenantAwareResource.class.getSimpleName()));
     }
 }
