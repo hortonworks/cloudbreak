@@ -26,13 +26,13 @@ public class PurgeGarbageService {
     private List<Purgable> purgables;
 
     public <T> void purge() {
-        MDC.put("suite", "purge");
-        LOGGER.info("purge has started");
+        MDC.put("testlabel", "purge");
+        LOGGER.info("purge starts");
         TestContext testContext = applicationContext.getBean(TestContext.class);
         try {
             testContext.as();
             purge(testContext);
-            MDC.put("suite", null);
+            MDC.put("testlabel", null);
         } catch (Exception e) {
             LOGGER.error("Error happended during purging the test data. Some entities might have been left over", e);
         } finally {

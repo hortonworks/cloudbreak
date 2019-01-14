@@ -62,7 +62,12 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
-        MDC.put("suite", "init of " + getClass().getSimpleName());
+        MDC.put("testlabel", "init of " + getClass().getSimpleName());
+    }
+
+    @BeforeMethod
+    public void beforeMethod(Method method) {
+        MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
     }
 
     @BeforeClass
@@ -72,14 +77,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         }
     }
 
-    @BeforeMethod
-    public void beforeMethod(Method method) {
-        MDC.put("suite", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
-    }
-
     @AfterMethod
     public void afterMethod() {
-        MDC.put("suite", null);
+        MDC.put("testlabel", null);
     }
 
     @AfterClass(alwaysRun = true)

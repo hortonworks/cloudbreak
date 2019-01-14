@@ -1,0 +1,5 @@
+name: "mock-cluster-tests"
+tests:
+  - name: "newway mock testcases"
+    packages:
+      - com.sequenceiq.it.cloudbreak.newway.testcase.*
