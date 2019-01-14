@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,16 +26,14 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -106,6 +103,9 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     private EnvironmentViewRepository environmentViewRepository;
 
     @Inject
+    private CredentialPropertyCollector credentialPropertyCollector;
+
+    @Inject
     private SecretService secretService;
 
     public Set<Credential> listAvailablesByWorkspaceId(Long workspaceId) {
@@ -132,7 +132,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
                 credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
                         preferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
-        if (original.cloudPlatform() != null && !Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
+        if (!Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
         credential.setId(original.getId());
@@ -149,9 +149,10 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     @Override
-    public Credential create(Credential credential, Long workspaceId, User user) {
+    public Credential create(Credential credential, @Nonnull Long workspaceId, User user) {
         LOGGER.debug("Creating credential for workspace: {}", getWorkspaceService().get(workspaceId, user).getName());
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
+        credentialValidator.validateParameters(Platform.platform(credential.cloudPlatform()), new Json(credential.getAttributes()).getMap());
         Credential created = super.create(credentialAdapter.verify(credential, workspaceId, user.getUserId()), workspaceId, user);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
@@ -169,34 +170,6 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
                 credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspace.getId(), preferencesService.enabledPlatforms()))
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         return delete(credential, workspace);
-    }
-
-    public Set<CredentialV4Response> convertAllToResponse(@Nonnull Iterable<Credential> credentials) {
-        Set<CredentialV4Response> jsonSet = new LinkedHashSet<>();
-        for (Credential credential : credentials) {
-            jsonSet.add(convertToResponse(credential));
-        }
-        return jsonSet;
-    }
-
-    public CredentialV4Response convertToResponse(Credential credential) {
-        return conversionService.convert(credential, CredentialV4Response.class);
-    }
-
-    public Credential convertToCredential(CredentialV4Request request) {
-        return conversionService.convert(request, Credential.class);
-    }
-
-    public Set<Credential> findAllByCloudPlatform(String cloudPlatform) {
-        return credentialRepository.findAllByCloudPlatform(cloudPlatform);
-    }
-
-    public void saveAllCredential(Iterable<Credential> credentials) {
-        credentialRepository.saveAll(credentials);
-    }
-
-    public Set<Credential> findAllCredentialByTopology(Topology topology) {
-        return credentialRepository.findByTopology(topology);
     }
 
     @Override

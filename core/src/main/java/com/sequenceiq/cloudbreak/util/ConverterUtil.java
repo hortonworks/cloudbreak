@@ -25,12 +25,6 @@ public class ConverterUtil {
                 .collect(Collectors.toList());
     }
 
-    public <T> List<T> convertAll(Collection<?> list, Class<T> clss) {
-        return list.stream()
-                .map(event -> conversionService.convert(event, clss))
-                .collect(Collectors.toList());
-    }
-
     public <T> Set<T> convertAllAsSet(Collection<?> list, Class<T> clss) {
         return list.stream()
                 .map(event -> conversionService.convert(event, clss))

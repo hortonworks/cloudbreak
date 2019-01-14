@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.filter;
 
 import javax.ws.rs.QueryParam;
 
