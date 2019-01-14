@@ -109,7 +109,7 @@ public class GcpProvisionSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             }
         } catch (IOException e) {
-            LOGGER.warn("Failed to retrieve image copy status", e);
+            LOGGER.info("Failed to retrieve image copy status", e);
             return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
         }
         return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);

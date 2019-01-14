@@ -92,7 +92,7 @@ public class StackImageUpdateActions {
                 try {
                     variables.put(ORIGINAL_IMAGE, getImageService().getImage(context.getStack().getId()));
                 } catch (CloudbreakImageNotFoundException e) {
-                    LOGGER.warn("Image not found", e);
+                    LOGGER.debug("Image not found", e);
                     throw new CloudbreakServiceException(e.getMessage(), e);
                 }
                 getStackImageUpdateService().storeNewImageComponent(context.getStack(), payload.getImage());

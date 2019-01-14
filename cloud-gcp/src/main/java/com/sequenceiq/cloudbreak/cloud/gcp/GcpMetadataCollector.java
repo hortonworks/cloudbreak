@@ -75,7 +75,7 @@ public class GcpMetadataCollector implements MetadataCollector {
                 cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, metaData);
 
             } catch (IOException e) {
-                LOGGER.warn(String.format("Instance %s is not reachable", cloudResource.getName()), e);
+                LOGGER.info(String.format("Instance %s is not reachable", cloudResource.getName()), e);
                 CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN);
                 cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
             }

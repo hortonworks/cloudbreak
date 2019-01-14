@@ -319,7 +319,7 @@ public class AppConfig implements ResourceLoaderAware {
                         resources.add(resourceLoader.getResource("file:" + file.getAbsolutePath()));
                     }
                 } catch (RuntimeException ignored) {
-                    LOGGER.warn("Cannot load file into property source: {}", file.getAbsolutePath());
+                    LOGGER.error("Cannot load file into property source: {}", file.getAbsolutePath());
                 }
             }
         }
