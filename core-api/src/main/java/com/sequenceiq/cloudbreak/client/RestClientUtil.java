@@ -83,7 +83,7 @@ public class RestClientUtil {
         client.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, configKey.isIgnorePreValidation());
 
         SSLContext sslContext = client.getSslContext();
-        LOGGER.warn("RestClient has been constructed: {}, client: {}, sslContext: {}", configKey, client, sslContext);
+        LOGGER.debug("RestClient has been constructed: {}, client: {}, sslContext: {}", configKey, client, sslContext);
         return client;
     }
 

@@ -136,7 +136,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                         throw new CloudbreakException("Timeout while stopping Ambari services.");
                     }
                 } else {
-                    LOGGER.warn("Failed to stop Hadoop services.");
+                    LOGGER.debug("Failed to stop Hadoop services.");
                     throw new CloudbreakException("Failed to stop Hadoop services.");
                 }
                 eventService

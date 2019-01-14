@@ -36,7 +36,7 @@ public class FileSystemSupportMatrixService {
         try {
             cloudFileSystemSupportMatrix = JsonUtil.readValue(configDefinitions, CloudFileSystemSupportMatrix.class);
         } catch (IOException e) {
-            LOGGER.warn("Cannot initialize cloudFileSystemSupportMatrix", e);
+            LOGGER.error("Cannot initialize cloudFileSystemSupportMatrix", e);
             cloudFileSystemSupportMatrix = new CloudFileSystemSupportMatrix();
         }
     }

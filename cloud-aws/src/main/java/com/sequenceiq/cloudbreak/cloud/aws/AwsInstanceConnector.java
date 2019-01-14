@@ -149,13 +149,13 @@ public class AwsInstanceConnector implements InstanceConnector {
     }
 
     private void handleEC2Exception(List<CloudInstance> vms, AmazonEC2Exception e) throws AmazonEC2Exception {
-        LOGGER.warn("Exception received from AWS: ", e);
+        LOGGER.debug("Exception received from AWS: ", e);
         if (e.getErrorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
             Pattern pattern = Pattern.compile("i-[a-z0-9]*");
             Matcher matcher = pattern.matcher(e.getErrorMessage());
             if (matcher.find()) {
                 String doesNotExistInstanceId = matcher.group();
-                LOGGER.warn("Remove instance from vms: {}", doesNotExistInstanceId);
+                LOGGER.debug("Remove instance from vms: {}", doesNotExistInstanceId);
                 vms.removeIf(vm -> doesNotExistInstanceId.equals(vm.getInstanceId()));
             }
         }

@@ -78,7 +78,7 @@ public class StackImageFilterService {
         try {
             return componentConfigProvider.getImage(stack.getId()).getImageId();
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.warn("Could not find last used image when preparing upgrade image list for current cluster", e);
+            LOGGER.info("Could not find last used image when preparing upgrade image list for current cluster", e);
             return "";
         }
     }

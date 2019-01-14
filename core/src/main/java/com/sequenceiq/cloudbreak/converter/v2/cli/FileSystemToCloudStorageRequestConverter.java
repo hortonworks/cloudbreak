@@ -48,7 +48,7 @@ public class FileSystemToCloudStorageRequestConverter extends AbstractConversion
                         AdlsGen2CloudStorageParameters.class));
             }
         } catch (IOException ioe) {
-            LOGGER.warn("Something happened while we tried to obtain/convert file system", ioe);
+            LOGGER.info("Something happened while we tried to obtain/convert file system", ioe);
         }
         return request;
     }

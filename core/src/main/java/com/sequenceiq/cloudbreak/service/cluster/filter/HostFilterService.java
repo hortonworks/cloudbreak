@@ -50,7 +50,7 @@ public class HostFilterService {
                 filteredList = hostFilter.filter(cluster.getId(), config, filteredList);
                 LOGGER.debug("Filtered with hostfilter: {}, filteredList: {}", hostFilter.getClass().getSimpleName(), filteredList);
             } catch (HostFilterException e) {
-                LOGGER.warn("Filter didn't succeed, moving to next filter: {}", e.getMessage());
+                LOGGER.debug("Filter didn't succeed, moving to next filter: {}", e.getMessage());
             }
         }
         LOGGER.debug("Returned filtered hosts: {}", filteredList);

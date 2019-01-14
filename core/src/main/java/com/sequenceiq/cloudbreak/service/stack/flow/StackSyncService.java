@@ -111,7 +111,7 @@ public class StackSyncService {
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
-            LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
+            LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
         } else {
             sync(stack, stackStatusUpdateEnabled);
         }

@@ -66,7 +66,7 @@ public class ClusterComponentConfigProvider {
         try {
             return component.getAttributes().get(StackRepoDetails.class);
         } catch (IOException e) {
-            LOGGER.warn("Failed to read repo component for cluster: [{}]", clusterId, e);
+            LOGGER.error("Failed to read repo component for cluster: [{}]", clusterId, e);
             throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
         }
     }

@@ -108,9 +108,9 @@ public class TransactionService {
             }
         } else if (TX_DURATION_OK < duration) {
             if (logTransactionStacktrace) {
-                LOGGER.warn("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
+                LOGGER.info("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
             } else {
-                LOGGER.warn("Transaction duration was high, took {}ms", duration);
+                LOGGER.info("Transaction duration was high, took {}ms", duration);
             }
         }
     }

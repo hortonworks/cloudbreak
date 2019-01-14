@@ -93,7 +93,7 @@ public class ClusterTerminationService {
     public Boolean deleteClusterComponents(Long clusterId) {
         Optional<Cluster> clusterOpt = clusterService.findById(clusterId);
         if (!clusterOpt.isPresent()) {
-            LOGGER.warn("Failed to delete containers of cluster (id:'{}'), because the cluster could not be found in the database.", clusterId);
+            LOGGER.debug("Failed to delete containers of cluster (id:'{}'), because the cluster could not be found in the database.", clusterId);
             return Boolean.TRUE;
         }
         Cluster cluster = clusterOpt.get();

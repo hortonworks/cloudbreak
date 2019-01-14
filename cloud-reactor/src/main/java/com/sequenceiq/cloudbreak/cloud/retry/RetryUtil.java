@@ -90,7 +90,7 @@ public class RetryUtil implements Runnable {
                 errorHandler.run(e);
             }
         } catch (Exception ex) {
-            LOGGER.warn("ErrorHandler failed during retries.", ex);
+            LOGGER.debug("ErrorHandler failed during retries.", ex);
         }
     }
 

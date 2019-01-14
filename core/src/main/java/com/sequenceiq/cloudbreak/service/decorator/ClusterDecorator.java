@@ -154,7 +154,7 @@ public class ClusterDecorator {
                     exposedServicesOfTopology.getServices().removeAll(haKnoxServices);
                     topology.setExposedServices(new Json(exposedServicesOfTopology));
                 } catch (IOException e) {
-                    LOGGER.warn("This exception should never occur.", e);
+                    LOGGER.error("This exception should never occur.", e);
                 }
             });
         }

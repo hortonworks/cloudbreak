@@ -89,7 +89,7 @@ public class ClusterDownscaleService {
 
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
         String errorDetailes = error.getMessage();
-        LOGGER.warn("Error during Cluster downscale flow: ", error);
+        LOGGER.debug("Error during Cluster downscale flow: ", error);
         Status status = UPDATE_FAILED;
         if (error instanceof NotEnoughNodeException) {
             status = AVAILABLE;

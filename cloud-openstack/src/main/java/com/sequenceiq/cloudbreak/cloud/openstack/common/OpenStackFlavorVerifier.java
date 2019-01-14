@@ -42,7 +42,7 @@ public class OpenStackFlavorVerifier {
         }
 
         if (!notFoundFlavors.isEmpty()) {
-            LOGGER.warn("Not found flavors: {}", notFoundFlavors);
+            LOGGER.info("Not found flavors: {}", notFoundFlavors);
             throw new CloudConnectorException(String.format("Not found flavors: %s", notFoundFlavors));
         }
     }

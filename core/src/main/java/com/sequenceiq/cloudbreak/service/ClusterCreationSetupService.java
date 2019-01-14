@@ -242,7 +242,7 @@ public class ClusterCreationSetupService {
                 stackDescriptorMap = stackMatrix.getHdf();
                 break;
             default:
-                LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
+                LOGGER.debug("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
                 stackDescriptorMap = stackMatrix.getHdp();
         }
         StackDescriptor stackDescriptor = stackDescriptorMap.get(stackMajorVersion);
@@ -259,7 +259,7 @@ public class ClusterCreationSetupService {
                     LOGGER.info(message);
                     throw new BadRequestException(message);
                 } else {
-                    LOGGER.warn(message);
+                    LOGGER.debug(message);
                 }
             }
         }

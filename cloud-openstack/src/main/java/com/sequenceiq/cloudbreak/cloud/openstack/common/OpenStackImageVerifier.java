@@ -32,7 +32,7 @@ public class OpenStackImageVerifier {
             List<? extends BasicResource> imagesV2 = osClient.imagesV2().list(Collections.singletonMap("name", name));
             return getStatusFromImages(osClient, imagesV2, name, true);
         } catch (ProcessingException e) {
-            LOGGER.warn("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
+            LOGGER.debug("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
             List<? extends BasicResource> imagesV1 = osClient.images().list(Collections.singletonMap("name", name));
             return getStatusFromImages(osClient, imagesV1, name, false);
         }
@@ -56,7 +56,7 @@ public class OpenStackImageVerifier {
         try {
             allImages = osClient.imagesV2().list();
         } catch (ProcessingException e) {
-            LOGGER.warn("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
+            LOGGER.debug("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
             allImages = osClient.images().list();
         }
         if (allImages != null) {
@@ -64,7 +64,7 @@ public class OpenStackImageVerifier {
                 LOGGER.debug("Available images: {}, entry: {}", image.getName(), image);
             }
         }
-        LOGGER.warn("OpenStack image: {} not found", name);
+        LOGGER.debug("OpenStack image: {} not found", name);
         return Optional.empty();
     }
 

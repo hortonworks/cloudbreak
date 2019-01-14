@@ -37,7 +37,7 @@ public class AmbariViewProvider {
             cluster.setAttributes((new Json(obj)).getValue());
             return clusterService.save(cluster);
         } catch (Exception e) {
-            LOGGER.warn("Failed to provide view definitions.", e);
+            LOGGER.debug("Failed to provide view definitions.", e);
         }
         return cluster;
     }

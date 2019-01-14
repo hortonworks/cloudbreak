@@ -223,7 +223,7 @@ public class AmbariDecommissioner {
     public Map<String, HostMetadata> collectHostsToRemove(Stack stack, String hostGroupName, Set<String> hostNames) {
         Map<String, HostMetadata> hostsToRemove = collectHostMetadata(stack.getCluster(), hostGroupName, hostNames);
         if (hostsToRemove.size() != hostNames.size()) {
-            LOGGER.warn("Not all the hosts found in the given host group.");
+            LOGGER.info("Not all the hosts found in the given host group.");
         }
         AmbariClient ambariClient = getAmbariClient(stack);
         List<String> runningHosts = ambariClient.getClusterHosts();

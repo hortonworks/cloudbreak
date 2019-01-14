@@ -78,13 +78,13 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
                 createCluster(stack, resolvedAmbari);
             }
         } catch (AmbariHealtCheckException ahf) {
-            LOGGER.warn("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getName(), stack.getStackId(),
+            LOGGER.info("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getName(), stack.getStackId(),
                     ahf.getMessage());
         } catch (TlsConfigurationException ex) {
-            LOGGER.warn("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
+            LOGGER.error("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
                     ex.getMessage());
         } catch (Exception ex) {
-            LOGGER.info(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
+            LOGGER.warn(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
         } finally {
             LOGGER.debug("Finished clusterCreationEvaluator in {} ms", System.currentTimeMillis() - start);
         }

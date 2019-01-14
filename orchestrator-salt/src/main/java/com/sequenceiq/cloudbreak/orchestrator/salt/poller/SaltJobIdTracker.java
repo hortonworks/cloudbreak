@@ -99,7 +99,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(saltConnector, jobId, new Compound(saltJobRunner.getTarget()),
                     saltJobRunner.stateType());
             if (!missingNodesWithReason.isEmpty()) {
-                LOGGER.info("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
+                LOGGER.debug("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
                 saltJobRunner.setJobState(JobState.FAILED);
                 saltJobRunner.setNodesWithError(missingNodesWithReason);
                 saltJobRunner.setTarget(missingNodesWithReason.keySet());
@@ -108,7 +108,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
                 saltJobRunner.setJobState(JobState.FINISHED);
             }
         } catch (RuntimeException e) {
-            LOGGER.warn("Fail while checking the result (jid: {}), this usually occurs due to concurrency", jobId, e);
+            LOGGER.debug("Fail while checking the result (jid: {}), this usually occurs due to concurrency", jobId, e);
             saltJobRunner.setJobState(JobState.AMBIGUOUS);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), saltJobRunner.getNodesWithError());
         }

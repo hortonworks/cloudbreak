@@ -106,7 +106,7 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
+            LOGGER.info(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
             eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
         } finally {
             LOGGER.debug("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
