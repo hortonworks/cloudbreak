@@ -5,7 +5,6 @@ import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ThreadLocalRandom;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -34,8 +33,7 @@ public class ImageCatalogMockServerSetup {
     private TestParameter testParameter;
 
     public void configureImgCatalogMock() {
-        int randomPort = ThreadLocalRandom.current().nextInt(9400, 9749 + 1);
-        sparkServer.initSparkService(randomPort);
+        sparkServer.initSparkService(9400, 9749);
         startImageCatalog();
     }
 
@@ -74,8 +72,8 @@ public class ImageCatalogMockServerSetup {
         }
     }
 
-    public void stop() {
-        sparkServer.stop();
+    public void shutdown() {
+        sparkServer.shutdown();
         LOGGER.info("ImageCatalog has stopped");
     }
 }

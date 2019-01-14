@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.config;
 
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,7 +10,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -27,6 +34,12 @@ public class SparkServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkServer.class);
 
+    private static final Set<Integer> ALLOCATED_PORTS = new ConcurrentSkipListSet<>();
+
+    private final Map<Call, Response> requestResponseMap = new HashMap<>();
+
+    private final java.util.Stack<Call> callStack = new java.util.Stack<>();
+
     private boolean initialized;
 
     @Value("${mock.server.address:localhost}")
@@ -35,52 +48,12 @@ public class SparkServer {
     @Value("#{'${integrationtest.cloudbreak.server}' + '${server.contextPath:/cb}'}")
     private String cloudbreakServerRoot;
 
-    @Value("${mock.server.port:#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(9750, 9900 + 1)}}")
     private int port;
 
+    @Value("${mock.server.request.response.print:false}")
+    private boolean printRequestBody;
+
     private Service sparkService;
-
-    private final Map<Call, Response> requestResponseMap = new HashMap<>();
-
-    private final java.util.Stack<Call> callStack = new java.util.Stack<>();
-
-    public Map<Call, Response> getRequestResponseMap() {
-        return requestResponseMap;
-    }
-
-    public Stack<Call> getCallStack() {
-        return callStack;
-    }
-
-    public void initSparkService() {
-        initSparkService(port);
-    }
-
-    public void initSparkService(int sparkPort) {
-        port = sparkPort;
-        if (sparkService == null) {
-            sparkService = Service.ignite();
-        }
-        sparkService.port(port);
-        File keystoreFile = createTempFileFromClasspath("/keystore_server");
-        sparkService.secure(keystoreFile.getPath(), "secret", null, null);
-        sparkService.before((req, res) -> res.type("application/json"));
-        sparkService.after(
-                (request, response) -> requestResponseMap.put(Call.fromRequest(request), response));
-        sparkService.after(
-                (request, response) -> callStack.push(Call.fromRequest(request))
-        );
-
-        callStack.clear();
-        requestResponseMap.clear();
-        initialized = true;
-
-        LOGGER.info("SparkServer has been started on {}", getEndpoint());
-    }
-
-    public String getEndpoint() {
-        return "https://" + mockServerAddress + ":" + port;
-    }
 
     protected static File createTempFileFromClasspath(String file) {
         try {
@@ -95,6 +68,57 @@ public class SparkServer {
         } catch (IOException e) {
             throw new RuntimeException(file + " not found", e);
         }
+    }
+
+    public Map<Call, Response> getRequestResponseMap() {
+        return requestResponseMap;
+    }
+
+    public Stack<Call> getCallStack() {
+        return callStack;
+    }
+
+    private synchronized int generatePort(int min, int max) {
+        int randomPort;
+        do {
+            LOGGER.info("Generate new port between {} and {}", min, max);
+            randomPort = ThreadLocalRandom.current().nextInt(min, max + 1);
+        } while (ALLOCATED_PORTS.contains(randomPort));
+        ALLOCATED_PORTS.add(randomPort);
+        return randomPort;
+    }
+
+    public void initSparkService(int min, int max) {
+        port = generatePort(min, max);
+        if (sparkService == null) {
+            LOGGER.info("Try to ignite with endpoint: {}", getEndpoint());
+            sparkService = Service.ignite();
+        }
+        sparkService.port(port);
+        File keystoreFile = createTempFileFromClasspath("/keystore_server");
+        sparkService.secure(keystoreFile.getPath(), "secret", null, null);
+        sparkService.before((req, res) -> res.type("application/json"));
+        sparkService.after(
+                (request, response) -> {
+                    if (printRequestBody) {
+                        LOGGER.info(format("%s request from %s --> %s", request.requestMethod(), request.url(), request.body()));
+                        LOGGER.info(format("response from [%s] ::: [%d] --> %s", request.url(), response.status(), response.body()));
+                    }
+                    requestResponseMap.put(Call.fromRequest(request), response);
+                });
+        sparkService.after(
+                (request, response) -> callStack.push(Call.fromRequest(request))
+        );
+
+        callStack.clear();
+        requestResponseMap.clear();
+        initialized = true;
+
+        LOGGER.info("SparkServer has been started on {}", getEndpoint());
+    }
+
+    public String getEndpoint() {
+        return "https://" + mockServerAddress + ":" + port;
     }
 
     public Service getSparkService() {
@@ -114,9 +138,26 @@ public class SparkServer {
         sparkService.init();
     }
 
+    @PreDestroy
+    public void autoShutdown() {
+        LOGGER.info("Invoking PreDestroy for Spark bean");
+        shutdown();
+    }
+
+    private synchronized void deallocatePort() {
+        ALLOCATED_PORTS.remove(port);
+        LOGGER.info("Port deallocated: {}", port);
+    }
+
+    public void shutdown() {
+        stop();
+        deallocatePort();
+    }
+
     public void stop() {
         if (sparkService != null) {
             sparkService.stop();
+            sparkService.awaitStop();
             LOGGER.info("spark server has stopped.");
         }
     }

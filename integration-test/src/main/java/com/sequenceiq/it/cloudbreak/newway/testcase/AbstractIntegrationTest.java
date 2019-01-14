@@ -1,11 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,6 +16,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
@@ -50,11 +53,18 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
+        MDC.put("testlabel", "init of " + getClass().getSimpleName());
+    }
 
+    @BeforeMethod
+    public void beforeMethod(Method method) {
+        MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
     }
 
     @BeforeClass
     public void createSharedObjects() {
+        String testClassName = getClass().getSimpleName();
+        MDC.put("testlabel", testClassName);
         if (cleanupBeforeStart) {
             purgeGarbageService.purge();
         }
@@ -71,7 +81,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     }
 
     @DataProvider
-
     public Object[][] testContext() {
         return new Object[][]{{applicationContext.getBean(TestContext.class)}};
     }

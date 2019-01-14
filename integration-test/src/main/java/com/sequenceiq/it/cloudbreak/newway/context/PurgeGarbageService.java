@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,18 @@ public class PurgeGarbageService implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     public <T> void purge() {
+        MDC.put("testlabel", "purge");
         LOGGER.info("purge starts");
         TestContext testContext = applicationContext.getBean(TestContext.class);
-        testContext.as();
-        purge(testContext);
-        testContext.shutdown();
+        try {
+            testContext.as();
+            purge(testContext);
+            MDC.put("testlabel", null);
+        } catch (Exception e) {
+            LOGGER.error("Error happended during purging the test data. Some entities might have been left over", e);
+        } finally {
+            testContext.shutdown();
+        }
     }
 
     private <T> void purge(TestContext testContext) {
