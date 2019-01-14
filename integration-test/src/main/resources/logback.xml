@@ -1,7 +1,7 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{suite:-nosuite}] - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{testlabel:-nolabel}] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -9,15 +9,15 @@
 
     <appender name="SUITE_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>
-            <key>suite</key>
+            <key>testlabel</key>
             <defaultValue>spring</defaultValue>
         </discriminator>
         <sift>
-            <appender name="FILE-${suite}" class="ch.qos.logback.core.FileAppender">
-                <file>${LOG_PATH}/suites_log/${suite}-${date}.log</file>
+            <appender name="FILE-${testlabel}" class="ch.qos.logback.core.FileAppender">
+                <file>${LOG_PATH}/suites_log/${testlabel}-${date}.log</file>
                 <append>true</append>
                 <encoder>
-                    <pattern>%date{ISO8601} [%thread] %-5level %logger{36} [%X{suite:-nosuite}] - %msg%n</pattern>
+                    <pattern>%date{ISO8601} [%thread] %-5level %logger{36} [%X{testlabel:-nolabel}] - %msg%n</pattern>
                 </encoder>
             </appender>
         </sift>

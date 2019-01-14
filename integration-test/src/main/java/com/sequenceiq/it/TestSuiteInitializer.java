@@ -29,7 +29,7 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
     @BeforeSuite
     public void initSuiteMap(ITestContext testContext) throws Exception {
         String suiteName = testContext.getSuite().getName();
-        MDC.put("suite", suiteName);
+        MDC.put("testlabel", suiteName);
 
         // Workaround of https://jira.spring.io/browse/SPR-4072
         springTestContextBeforeTestClass();
