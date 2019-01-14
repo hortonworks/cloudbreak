@@ -380,7 +380,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i));
             }
         } else {
-            LOGGER.warn("The number of elastic ips are not equals with the number of instances. EIP association will be skipped!");
+            LOGGER.debug("The number of elastic ips are not equals with the number of instances. EIP association will be skipped!");
         }
     }
 
@@ -613,7 +613,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 address = describeResult.getAddresses().get(0);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("The allocation ID '" + elasticIpResource.getName() + "' does not exist")) {
-                    LOGGER.warn("Elastic IP with allocation ID '{}' not found. Ignoring IP release.", elasticIpResource.getName());
+                    LOGGER.debug("Elastic IP with allocation ID '{}' not found. Ignoring IP release.", elasticIpResource.getName());
                     return;
                 } else {
                     throw e;
@@ -716,7 +716,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                         .withAutoScalingGroupName(asGroupName)
                         .withMaxSize(getInstanceCount(stack, vms.get(0).getTemplate().getGroupName())));
             } catch (AmazonServiceException e) {
-                LOGGER.warn(e.getErrorMessage());
+                LOGGER.debug(e.getErrorMessage());
             }
         }
         return check(auth, resources);

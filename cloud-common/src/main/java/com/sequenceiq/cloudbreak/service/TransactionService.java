@@ -100,7 +100,7 @@ public class TransactionService {
             LOGGER.error("Transaction duration was critical, took {}ms  at: {}", duration, generateStackTrace());
 
         } else if (TX_DURATION_OK < duration) {
-            LOGGER.warn("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
+            LOGGER.info("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
         }
     }
 

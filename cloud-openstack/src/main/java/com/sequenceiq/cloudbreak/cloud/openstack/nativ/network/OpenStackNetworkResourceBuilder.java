@@ -100,10 +100,10 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
             try {
                 ActionResponse response = osClient.compute().floatingIps().deallocateIP(floatingIpId);
                 if (!response.isSuccess()) {
-                    LOGGER.warn("FloatingIp {} cannot be deallocated: {}", floatingIpId, response.getFault());
+                    LOGGER.debug("FloatingIp {} cannot be deallocated: {}", floatingIpId, response.getFault());
                 }
             } catch (OS4JException ex) {
-                LOGGER.warn("FloatingIp {} cannot be deallocated: {}", floatingIpId, ex.getMessage());
+                LOGGER.debug("FloatingIp {} cannot be deallocated: {}", floatingIpId, ex.getMessage());
             }
         }
     }

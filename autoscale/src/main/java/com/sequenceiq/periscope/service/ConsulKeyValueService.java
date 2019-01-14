@@ -35,7 +35,7 @@ public class ConsulKeyValueService {
                 LOGGER.info("Alert has been added to Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
             }
         } catch (Exception e) {
-            LOGGER.warn("Alert could not be added to Consul KV store: {}", e.getMessage());
+            LOGGER.error("Alert could not be added to Consul KV store: {}", e.getMessage());
         }
         return alert;
     }
@@ -49,7 +49,7 @@ public class ConsulKeyValueService {
             consulClient.deleteKVValue(alertKey);
             LOGGER.info("Alert has been removed from Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
         } catch (Exception e) {
-            LOGGER.warn("Alert could not be deleted from Consul KV store: {}", e.getMessage());
+            LOGGER.error("Alert could not be deleted from Consul KV store: {}", e.getMessage());
         }
     }
 

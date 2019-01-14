@@ -48,7 +48,7 @@ public class FileSystemConfigQueryService {
         try {
             configQueryEntries = JsonUtil.readValue(configDefinitions, ConfigQueryEntries.class);
         } catch (IOException e) {
-            LOGGER.warn("Cannot initialize configQueryEntries", e);
+            LOGGER.error("Cannot initialize configQueryEntries", e);
             configQueryEntries = new ConfigQueryEntries();
         }
     }

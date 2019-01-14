@@ -50,7 +50,7 @@ public final class DateService {
                     alert.getName(), zonedNextTime, zonedCurrentTime, timeZone);
             return interval >= 0L && interval < monitorUpdateRate;
         } catch (ParseException e) {
-            LOGGER.warn("Invalid cron expression, {}", e.getMessage());
+            LOGGER.info("Invalid cron expression, {}", e.getMessage());
             return false;
         }
     }

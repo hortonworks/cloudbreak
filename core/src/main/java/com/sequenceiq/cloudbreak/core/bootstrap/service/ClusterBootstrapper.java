@@ -148,7 +148,7 @@ public class ClusterBootstrapper {
         String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
         for (InstanceMetaData im : stack.getNotDeletedInstanceMetaDataSet()) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
-                LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
+                LOGGER.debug("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
                 String generatedHostName = hostDiscoveryService.generateHostname(stack.getCustomHostname(), im.getInstanceGroupName(),
                         im.getPrivateId(), stack.isHostgroupNameAsHostname());

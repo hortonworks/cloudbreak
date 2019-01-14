@@ -268,7 +268,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 JsonNode idNode = jsonNode.path("id");
                 resourceId = idNode.asText();
             } catch (IOException e) {
-                LOGGER.warn("Parsing of ID from JSON response failed", e);
+                LOGGER.error("Parsing of ID from JSON response failed", e);
             }
             if (StringUtils.isEmpty(resourceId)) {
                 Matcher matcher = extendRestParamsFromResponsePattern.matcher(responseBody);

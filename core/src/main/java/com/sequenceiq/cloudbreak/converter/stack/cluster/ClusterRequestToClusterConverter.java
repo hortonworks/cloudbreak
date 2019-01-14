@@ -98,7 +98,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         try {
             cluster.setAttributes(new Json(attributesMap));
         } catch (JsonProcessingException e) {
-            LOGGER.warn("Could not initiate the attribute map on cluster object: ", e);
+            LOGGER.error("Could not initiate the attribute map on cluster object: ", e);
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
     }
