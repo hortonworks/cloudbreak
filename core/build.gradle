@@ -134,7 +134,9 @@ dependencyManagement {
     dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',      version: springOauthVersion
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
 
-    dependency group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: '6.1.0'
+    dependency (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: '6.1.0') {
+        exclude 'com.squareup.okio:okio'
+    }
     dependency group: 'com.google.code.gson',               name: 'gson',                        version: '2.6.2'
     dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                  version: '2.5.0'
     dependency group: 'org.freemarker',                     name: 'freemarker',                  version: freemarkerVersion
