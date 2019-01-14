@@ -32,7 +32,7 @@ public class AwsTerminateStackStatusCheckerTask extends AbstractAwsStackStatusCh
 
     @Override
     protected boolean handleError(AmazonServiceException e) {
-        LOGGER.warn("Could not get the description of CloudFormation stack: {}", e.getErrorMessage());
+        LOGGER.debug("Could not get the description of CloudFormation stack: {}", e.getErrorMessage());
         return true;
     }
 }

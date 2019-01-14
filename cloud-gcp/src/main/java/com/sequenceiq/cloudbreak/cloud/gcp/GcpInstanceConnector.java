@@ -51,10 +51,10 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
                 if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                     status = InstanceStatus.TERMINATED;
                 } else {
-                    LOGGER.warn(String.format("Instance %s is not reachable", instance), e);
+                    LOGGER.info(String.format("Instance %s is not reachable", instance), e);
                 }
             } catch (IOException e) {
-                LOGGER.warn(String.format("Instance %s is not reachable", instance), e);
+                LOGGER.info(String.format("Instance %s is not reachable", instance), e);
             }
             statuses.add(new CloudVmInstanceStatus(instance, status));
         }

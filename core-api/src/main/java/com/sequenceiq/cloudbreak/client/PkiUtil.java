@@ -188,7 +188,7 @@ public class PkiUtil {
                 dos.close();
                 byteOs.close();
             } catch (IOException e) {
-                LOGGER.warn("Failed to close streams while converting public key", e);
+                LOGGER.debug("Failed to close streams while converting public key", e);
             }
         }
     }

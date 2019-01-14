@@ -39,7 +39,7 @@ public class GetVirtualMachineRecommendationsHandler implements CloudPlatformEve
             request.getResult().onNext(gVMRResponse);
             LOGGER.info("Query platform machine recommendations finished.");
         } catch (RuntimeException e) {
-            LOGGER.warn("Could not get virtual machine recommendations for platform: " + cloudPlatform, e);
+            LOGGER.error("Could not get virtual machine recommendations for platform: " + cloudPlatform, e);
             request.getResult().onNext(new GetVirtualMachineRecommendationResponse(e.getMessage(), e, request));
         }
     }

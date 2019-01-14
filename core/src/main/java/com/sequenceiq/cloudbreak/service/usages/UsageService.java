@@ -114,7 +114,7 @@ public class UsageService {
                 reopenOldUsages();
                 openNewIfNotFound();
             } catch (DataIntegrityViolationException e) {
-                LOGGER.warn("Constraint violation during usage generation (maybe another node is generating..): {}", e.getMessage());
+                LOGGER.info("Constraint violation during usage generation (maybe another node is generating..): {}", e.getMessage());
             }
         }
     }

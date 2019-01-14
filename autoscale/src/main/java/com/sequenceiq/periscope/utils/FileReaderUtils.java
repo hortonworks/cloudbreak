@@ -26,7 +26,7 @@ public final class FileReaderUtils {
         try {
             return readFileFromClasspath(fileName);
         } catch (IOException e) {
-            LOGGER.warn("Failed to load file from classpath. Original message: {}", e.getMessage());
+            LOGGER.error("Failed to load file from classpath. Original message: {}", e.getMessage());
             return null;
         }
     }

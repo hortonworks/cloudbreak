@@ -146,7 +146,7 @@ public class ServiceEndpointCollector {
             try {
                 return gatewayTopology.getExposedServices().get(ExposedServices.class).getServices().stream();
             } catch (IOException e) {
-                LOGGER.warn("Failed to get exposed services from Json.", e);
+                LOGGER.debug("Failed to get exposed services from Json.", e);
             }
         }
         return Stream.empty();

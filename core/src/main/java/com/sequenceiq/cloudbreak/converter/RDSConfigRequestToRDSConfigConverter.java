@@ -46,7 +46,7 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
 
         if (rdsConfig.getDatabaseEngine() != DatabaseVendor.POSTGRES && StringUtils.isEmpty(source.getConnectorJarUrl())) {
             String msg = String.format("The 'connectorJarUrl' field needs to be specified for database engine: '%s'.", rdsConfig.getDatabaseEngine());
-            LOGGER.warn(msg);
+            LOGGER.info(msg);
         }
         rdsConfig.setConnectorJarUrl(source.getConnectorJarUrl());
         return rdsConfig;

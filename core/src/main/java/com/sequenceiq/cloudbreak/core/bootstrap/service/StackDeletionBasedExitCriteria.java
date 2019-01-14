@@ -22,7 +22,7 @@ public class StackDeletionBasedExitCriteria implements ExitCriteria {
         LOGGER.debug("Check isExitNeeded for model: {}", model);
         PollGroup pollGroup = InMemoryStateStore.getStack(model.getStackId());
         if (pollGroup != null && CANCELLED.equals(pollGroup)) {
-            LOGGER.warn("Stack is getting terminated, polling is cancelled.");
+            LOGGER.debug("Stack is getting terminated, polling is cancelled.");
             return true;
         }
         return false;

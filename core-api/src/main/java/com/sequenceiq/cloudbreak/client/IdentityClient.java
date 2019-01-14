@@ -110,7 +110,7 @@ public class IdentityClient {
             response = checkTokenWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                     .headers(headers).post(Entity.form(formData), Map.class);
         } catch (BadRequestException ex) {
-            LOGGER.warn(String.format("Token check failed for access token: '%s'.", accessToken), ex);
+            LOGGER.debug(String.format("Token check failed for access token: '%s'.", accessToken), ex);
             throw new InvalidTokenException(accessToken);
         }
 

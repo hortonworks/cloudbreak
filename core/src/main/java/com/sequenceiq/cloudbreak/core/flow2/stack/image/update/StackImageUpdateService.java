@@ -107,20 +107,20 @@ public class StackImageUpdateService {
             if (!isCloudPlatformMatches(stack, newImage)) {
                 String message = messagesService.getMessage(Msg.CLOUDPLATFORM_DIFFERENT.code(),
                         Lists.newArrayList(String.join(",", newImage.getImage().getImageSetsByProvider().keySet()), stack.cloudPlatform()));
-                LOGGER.warn(message);
+                LOGGER.debug(message);
                 throw new OperationException(message);
             }
 
             if (!isOsVersionsMatch(currentImage, newImage)) {
                 String message = messagesService.getMessage(Msg.OSVERSION_DIFFERENT.code(),
                         Lists.newArrayList(newImage.getImage().getOs(), newImage.getImage().getOsType(), currentImage.getOs(), currentImage.getOsType()));
-                LOGGER.warn(message);
+                LOGGER.debug(message);
                 throw new OperationException(message);
             }
 
             if (!isStackMatchIfPrewarmed(stack, newImage)) {
                 String message = "Stack versions don't match on prewarmed image with cluster's";
-                LOGGER.warn(message);
+                LOGGER.debug(message);
                 throw new OperationException(message);
             }
 
@@ -217,10 +217,10 @@ public class StackImageUpdateService {
                 return isCloudPlatformMatches(stack, newImage) && isOsVersionsMatch(currentImage, newImage) && isStackMatchIfPrewarmed(stack, newImage)
                         && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
             } catch (CloudbreakImageNotFoundException e) {
-                LOGGER.warn("Cloudbreak Image not found", e);
+                LOGGER.debug("Cloudbreak Image not found", e);
                 return false;
             } catch (CloudbreakImageCatalogException e) {
-                LOGGER.warn("Cloudbreak Image Catalog error", e);
+                LOGGER.debug("Cloudbreak Image Catalog error", e);
                 return false;
             }
         }

@@ -55,7 +55,7 @@ public class ClusterSyncActions {
         return new AbstractStackFailureAction<ClusterSyncState, ClusterSyncEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn("Error during executing cluster sync.", payload.getException());
+                LOGGER.debug("Error during executing cluster sync.", payload.getException());
                 sendEvent(context);
             }
 
