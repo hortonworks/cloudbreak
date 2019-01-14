@@ -28,7 +28,7 @@ tests:
     parameters:
       clusterName: encrypted-gcp-prewarm-datasci
       provider: gcp
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:

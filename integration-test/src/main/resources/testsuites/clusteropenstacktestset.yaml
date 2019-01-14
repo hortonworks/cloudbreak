@@ -13,7 +13,7 @@ tests:
     parameters:
       clusterName: os-base-datasci
       provider: openstack
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
       isGatekeeper: true
@@ -30,7 +30,7 @@ tests:
     parameters:
       clusterName: os-base-datasci-knox-gw
       provider: openstack
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
       isGatekeeper: true
@@ -47,7 +47,7 @@ tests:
     parameters:
       clusterName: os-prewarm-datasci
       provider: openstack
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
@@ -80,7 +80,7 @@ tests:
     parameters:
       clusterName: os-prewarm-datasci-changeimage
       provider: openstack
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
+      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
