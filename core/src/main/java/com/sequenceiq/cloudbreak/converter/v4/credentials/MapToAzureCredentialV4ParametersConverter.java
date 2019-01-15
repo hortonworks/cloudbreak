@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.Az
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class MapToAzureCredentialParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, AzureCredentialV4Parameters> {
+public class MapToAzureCredentialV4ParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, AzureCredentialV4Parameters> {
 
     @Override
     public AzureCredentialV4Parameters convert(Map<String, Object> source) {

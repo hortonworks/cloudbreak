@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class MapToAwsCredentialParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, AwsCredentialV4Parameters> {
+public class MapToAwsCredentialV4ParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, AwsCredentialV4Parameters> {
 
     private static final String UNABLE_TO_CHOOSE_MESSAGE = "Unable to decide between Key and Role base credential properties because of missing "
             + "required parameters";

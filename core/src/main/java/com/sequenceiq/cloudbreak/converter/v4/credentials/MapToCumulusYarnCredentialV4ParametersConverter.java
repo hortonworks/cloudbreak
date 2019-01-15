@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus.
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class MapToCumulusYarnCredentialParametersConverter extends
+public class MapToCumulusYarnCredentialV4ParametersConverter extends
         AbstractConversionServiceAwareConverter<Map<String, Object>, CumulusYarnCredentialV4Parameters> {
 
     @Override
