@@ -108,7 +108,7 @@ public class SecretService {
                 .filter(e -> e.isSecret(secret))
                 .forEach(e -> e.delete(secret));
         long duration = System.currentTimeMillis() - start;
-        metricService.submit(MetricType.VAULT_READ, duration);
+        metricService.submit(MetricType.VAULT_WRITE, duration);
         LOGGER.debug("Secret delete took {} ms", duration);
     }
 
