@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
@@ -19,7 +21,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSecurityGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecificationsV4Response;
 import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -29,9 +33,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -43,6 +49,9 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
 
     @Inject
     private PlatformParameterService platformParameterService;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
 
     @Override
     public PlatformVmtypesV4Response getVmTypesByCredential(Long workspaceId, PlatformResourceV4Filter resourceRequestJson) {
@@ -110,5 +119,11 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(conversionService.convert(resourceRequestJson,
                 PlatformResourceRequest.class));
         return conversionService.convert(accessConfigs, PlatformAccessConfigsV4Response.class);
+    }
+
+    @Override
+    public TagSpecificationsV4Response getTagSpecifications(Long workspaceId) {
+        Map<Platform, PlatformParameters> platformParameters = cloudParameterService.getPlatformParameters();
+        return conversionService.convert(platformParameters, TagSpecificationsV4Response.class);
     }
 }
