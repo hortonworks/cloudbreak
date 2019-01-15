@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
-import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -39,7 +38,7 @@ import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @Component
 public class DatalakeConfigProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBuilderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeConfigProvider.class);
 
     private static final String DEFAULT_RANGER_PORT = "6080";
 
