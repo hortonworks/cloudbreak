@@ -1,20 +1,20 @@
-package com.sequenceiq.cloudbreak.converter.v2;
+package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 
 @Component
-public class AmbariKerberosDescriptorToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<AmbariKerberosDescriptor, KerberosConfig> {
+public class MITKerberosDescriptorToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<MITKerberosDescriptor, KerberosConfig> {
 
     @Override
-    public KerberosConfig convert(AmbariKerberosDescriptor source) {
+    public KerberosConfig convert(MITKerberosDescriptor source) {
         KerberosConfig config = new KerberosConfig();
-        config.setDescriptor(new String(Base64.decodeBase64(source.getDescriptor())));
-        config.setKrb5Conf(new String(Base64.decodeBase64(source.getKrb5Conf())));
+        config.setAdminUrl(source.getAdminUrl());
+        config.setRealm(source.getRealm());
+        config.setUrl(source.getUrl());
         config.setPrincipal(source.getPrincipal());
         config.setType(source.getType());
         config.setDomain(source.getDomain());

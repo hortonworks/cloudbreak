@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2;
+package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
 import java.util.stream.Collectors;
 
@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
-public class KerberosConfigToKerberosResponseViewConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosViewV4Response> {
+public class KerberosConfigToKerberosViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosViewV4Response> {
 
     @Override
     public KerberosViewV4Response convert(KerberosConfig source) {

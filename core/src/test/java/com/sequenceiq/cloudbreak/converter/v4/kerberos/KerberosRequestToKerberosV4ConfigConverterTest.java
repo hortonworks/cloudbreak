@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
 import static org.mockito.Mockito.when;
 
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeB
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.converter.v2.KerberosRequestToKerberosConfigConverter;
+import com.sequenceiq.cloudbreak.converter.AbstractConverterTest;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosTypeResolver;
 
@@ -38,7 +38,7 @@ public class KerberosRequestToKerberosV4ConfigConverterTest extends AbstractConv
     private ConversionService conversionService;
 
     @InjectMocks
-    private KerberosRequestToKerberosConfigConverter underTest;
+    private KerberosV4RequestToKerberosConfigConverter underTest;
 
     private KerberosData testData;
 

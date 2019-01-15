@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2.cli;
+package com.sequenceiq.cloudbreak.converter.v4.blueprints;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,17 +9,18 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class BlueprintToBlueprintRequestConverter
+public class BlueprintToBlueprintV4RequestConverter
         extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintV4Request> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintRequestConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintV4RequestConverter.class);
 
     @Override
     public BlueprintV4Request convert(Blueprint source) {
         BlueprintV4Request blueprintV4Request = new BlueprintV4Request();
-        blueprintV4Request.setName("");
+        blueprintV4Request.setName(source.getName());
         blueprintV4Request.setDescription(source.getDescription());
         blueprintV4Request.setAmbariBlueprint(source.getBlueprintText());
+        blueprintV4Request.setDescription(source.getDescription());
         return blueprintV4Request;
     }
 

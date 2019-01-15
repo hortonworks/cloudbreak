@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2;
+package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
 import javax.inject.Inject;
 
@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosTypeResolver;
 
 @Component
-public class KerberosRequestToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<KerberosV4Request, KerberosConfig> {
+public class KerberosV4RequestToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<KerberosV4Request, KerberosConfig> {
 
     @Inject
     private KerberosTypeResolver kerberosTypeResolver;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2;
+package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

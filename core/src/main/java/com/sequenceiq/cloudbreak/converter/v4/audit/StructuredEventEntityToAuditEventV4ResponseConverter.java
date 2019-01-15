@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.audit;
+package com.sequenceiq.cloudbreak.converter.v4.audit;
 
 import javax.inject.Inject;
 
@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.structuredevent.db.converter.StructuredEventEnt
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 @Component
-public class StructuredEventEntityToAuditEventConverter extends AbstractConversionServiceAwareConverter<StructuredEventEntity, AuditEventV4Response> {
+public class StructuredEventEntityToAuditEventV4ResponseConverter extends AbstractConversionServiceAwareConverter<StructuredEventEntity, AuditEventV4Response> {
 
     @Inject
     private StructuredEventEntityToStructuredEventConverter structuredEventEntityToStructuredEventConverter;
