@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.blueprints;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -6,12 +6,12 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.blueprints.BlueprintToBlueprintV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
-public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
+public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
 
     private static final JsonToString JSON_TO_STRING = new JsonToString();
 

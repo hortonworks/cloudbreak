@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.databases;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;

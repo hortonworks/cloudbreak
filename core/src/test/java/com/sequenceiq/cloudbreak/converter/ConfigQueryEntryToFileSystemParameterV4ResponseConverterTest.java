@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StructuredParameterQueryV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.util.ConfigQueryEntryToStructuredParameterQueryResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.util.ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,11 +32,11 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
     private static final String TEST_PROTOCOL = "http";
 
-    private ConfigQueryEntryToStructuredParameterQueryResponseConverter underTest;
+    private ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new ConfigQueryEntryToStructuredParameterQueryResponseConverter();
+        underTest = new ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter();
     }
 
     @Test

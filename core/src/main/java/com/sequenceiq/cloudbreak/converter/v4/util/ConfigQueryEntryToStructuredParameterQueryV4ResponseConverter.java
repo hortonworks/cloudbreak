@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 
 @Component
-public class ConfigQueryEntryToStructuredParameterQueryResponseConverter
+public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<ConfigQueryEntry, StructuredParameterQueryV4Response> {
 
     @Override

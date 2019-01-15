@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2.cli;
+package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,16 +9,17 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 
 @Component
-public class ImageCatalogToImageCatalogRequestConverter
+public class ImageCatalogToImageCatalogV4RequestConverter
         extends AbstractConversionServiceAwareConverter<ImageCatalog, ImageCatalogV4Request> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogToImageCatalogRequestConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogToImageCatalogV4RequestConverter.class);
 
     @Override
     public ImageCatalogV4Request convert(ImageCatalog source) {
         ImageCatalogV4Request imageCatalogRequest = new ImageCatalogV4Request();
         imageCatalogRequest.setName(source.getName());
         imageCatalogRequest.setUrl(source.getImageCatalogUrl());
+        imageCatalogRequest.setDescription(source.getDescription());
         return imageCatalogRequest;
     }
 }

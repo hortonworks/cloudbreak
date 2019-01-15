@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.smartsense;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.smartsense.SmartSenseSubscriptionToSmartSenseSubscriptionV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 
 @RunWith(MockitoJUnitRunner.class)
