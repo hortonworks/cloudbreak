@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class CredentialToCredentialRequestConverter
+public class CredentialToCredentialV4RequestConverter
         extends AbstractConversionServiceAwareConverter<Credential, CredentialV4Request> {
 
     @Inject

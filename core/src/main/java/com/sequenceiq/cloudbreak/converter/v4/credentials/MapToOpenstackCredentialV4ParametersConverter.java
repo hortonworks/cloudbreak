@@ -13,7 +13,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstac
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class MapToOpenstackCredentialParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, OpenstackCredentialV4Parameters> {
+public class MapToOpenstackCredentialV4ParametersConverter extends
+        AbstractConversionServiceAwareConverter<Map<String, Object>, OpenstackCredentialV4Parameters> {
 
     @Override
     public OpenstackCredentialV4Parameters convert(Map<String, Object> source) {

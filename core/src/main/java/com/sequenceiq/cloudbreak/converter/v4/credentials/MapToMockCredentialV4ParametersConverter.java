@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.Moc
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class MapToMockCredentialParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, MockCredentialV4Parameters> {
+public class MapToMockCredentialV4ParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, MockCredentialV4Parameters> {
 
     @Override
     public MockCredentialV4Parameters convert(Map<String, Object> source) {

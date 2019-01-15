@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.Yar
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class MapToYarnCredentialParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, YarnCredentialV4Parameters> {
+public class MapToYarnCredentialV4ParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, YarnCredentialV4Parameters> {
 
     @Override
     public YarnCredentialV4Parameters convert(Map<String, Object> source) {

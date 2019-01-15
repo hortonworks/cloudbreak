@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.P12P
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class MapToGcpCredentialParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, GcpCredentialV4Parameters> {
+public class MapToGcpCredentialV4ParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, GcpCredentialV4Parameters> {
 
     @Override
     public GcpCredentialV4Parameters convert(Map<String, Object> source) {

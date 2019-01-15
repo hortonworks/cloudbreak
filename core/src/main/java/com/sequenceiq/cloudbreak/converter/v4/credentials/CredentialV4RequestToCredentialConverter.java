@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
 
 @Component
-public class CredentialRequestToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialV4Request, Credential> {
+public class CredentialV4RequestToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialV4Request, Credential> {
 
     @Inject
     private CredentialPropertyCollector credentialPropertyCollector;

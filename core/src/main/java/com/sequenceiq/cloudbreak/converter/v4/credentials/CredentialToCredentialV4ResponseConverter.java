@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 
 @Component
-public class CredentialToCredentialResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialV4Response> {
+public class CredentialToCredentialV4ResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialV4Response> {
     private static final List<String> FIELDS_TO_COVER = Arrays.asList("password", "secretKey", "serviceAccountPrivateKey");
 
     private static final String PLACEHOLDER = "********";

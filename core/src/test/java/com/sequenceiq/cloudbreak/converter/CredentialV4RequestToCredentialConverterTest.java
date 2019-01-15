@@ -19,12 +19,12 @@ import org.mockito.Mock;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
-import com.sequenceiq.cloudbreak.converter.v4.credentials.CredentialRequestToCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.credentials.CredentialV4RequestToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 
 @RunWith(Parameterized.class)
-public class CredentialRequestToCredentialConverterTest {
+public class CredentialV4RequestToCredentialConverterTest {
 
     private Object govCloud;
 
@@ -37,9 +37,9 @@ public class CredentialRequestToCredentialConverterTest {
     private CredentialValidator credentialValidator;
 
     @InjectMocks
-    private CredentialRequestToCredentialConverter underTest;
+    private CredentialV4RequestToCredentialConverter underTest;
 
-    public CredentialRequestToCredentialConverterTest(Object govCloud, Boolean expectedGovCloudFlag) {
+    public CredentialV4RequestToCredentialConverterTest(Object govCloud, Boolean expectedGovCloudFlag) {
         this.govCloud = govCloud;
         this.expectedGovCloudFlag = expectedGovCloudFlag;
     }

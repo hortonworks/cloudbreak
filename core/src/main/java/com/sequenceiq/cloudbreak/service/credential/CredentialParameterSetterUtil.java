@@ -23,8 +23,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 @Component
 public class CredentialParameterSetterUtil {
 
-    private static final String CONVERT_EXCEPTION_MESSAGE_FORMAT = "Unable to deserialize %s from parameters";
-
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
