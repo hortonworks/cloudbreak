@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -47,9 +46,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettingsEntity.request()
-                .withImageCatalog("")
-                .withImageId(imageId));
+//        given(ImageSettingsEntity.request()
+//                .withImageCatalog("")
+//                .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");
@@ -360,9 +359,6 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .filter(ImageResponse::isDefaultImage)
                 .filter(image -> {
                     ImageResponse imageResponse = (ImageResponse) image;
-                    if (!StringUtils.isEmpty(imageResponse.getVersion())) {
-                        return imageResponse.getVersion().startsWith(stackVersion);
-                    }
                     if (imageResponse.getStackDetails() == null) {
                         return true;
                     }
