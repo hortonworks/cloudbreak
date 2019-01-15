@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.connectors;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,18 +6,19 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecificationsV4Response;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class TagSpecificationsToTagSpecificationsJsonConverter
-        extends AbstractConversionServiceAwareConverter<Map<Platform, PlatformParameters>, TagSpecificationsJson> {
+public class TagSpecificationsToTagSpecificationsV4ResponseConverter
+        extends AbstractConversionServiceAwareConverter<Map<Platform, PlatformParameters>, TagSpecificationsV4Response> {
 
     @Override
-    public TagSpecificationsJson convert(Map<Platform, PlatformParameters> source) {
-        TagSpecificationsJson json = new TagSpecificationsJson();
+    public TagSpecificationsV4Response convert(Map<Platform, PlatformParameters> source) {
+        TagSpecificationsV4Response json = new TagSpecificationsV4Response();
         Map<String, Map<String, Object>> specifications = new HashMap<>();
         json.setSpecifications(specifications);
 
