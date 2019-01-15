@@ -46,9 +46,9 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-//        given(ImageSettingsEntity.request()
-//                .withImageCatalog("")
-//                .withImageId(imageId));
+        given(ImageSettingsEntity.request()
+                .withImageCatalog("")
+                .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");
