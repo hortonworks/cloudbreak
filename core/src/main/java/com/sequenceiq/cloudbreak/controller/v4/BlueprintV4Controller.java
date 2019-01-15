@@ -86,8 +86,9 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    public RecommendationV4Response createRecommendation(Long workspaceId, String name, RecommendationV4Filter recommendationV4Filter) {
-        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, name, recommendationV4Filter), RecommendationV4Response.class);
+    public RecommendationV4Response createRecommendation(Long workspaceId, RecommendationV4Filter recommendationV4Filter) {
+        return conversionService.convert(platformParameterService.getRecommendation(workspaceId, recommendationV4Filter.getBlueprintName(),
+                recommendationV4Filter), RecommendationV4Response.class);
     }
 
 }

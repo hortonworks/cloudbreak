@@ -60,7 +60,7 @@ public class RecommendationV4Action {
         recommendationEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint()
-                        .createRecommendation(workspaceId, recommendationEntity.getRequest().getBlueprintName(), recommendationEntity.getRequest()));
+                        .createRecommendation(workspaceId, recommendationEntity.getRequest()));
         Log.logJSON(" post Recommendations response: ", recommendationEntity.getResponse());
     }
 
