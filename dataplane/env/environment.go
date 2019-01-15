@@ -34,10 +34,11 @@ type environmentOutTableDescribe struct {
 
 type environmentOutJsonDescribe struct {
 	*environment
-	LdapConfigs  []string `json:"LdapConfigs" yaml:"LdapConfigs"`
-	ProxyConfigs []string `json:"ProxyConfigs" yaml:"ProxyConfigs"`
-	RdsConfigs   []string `json:"RdsConfigs" yaml:"RdsConfigs"`
-	ID           string   `json:"ID" yaml:"ID"`
+	LdapConfigs     []string `json:"LdapConfigs" yaml:"LdapConfigs"`
+	ProxyConfigs    []string `json:"ProxyConfigs" yaml:"ProxyConfigs"`
+	KerberosConfigs []string `json:"KerberosConfigs" yaml:"KerberosConfigs"`
+	RdsConfigs      []string `json:"RdsConfigs" yaml:"RdsConfigs"`
+	ID              string   `json:"ID" yaml:"ID"`
 }
 
 type environmentClient interface {
@@ -66,6 +67,7 @@ func CreateEnvironment(c *cli.Context) {
 	regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ",")
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
+	kerberosConfigs := utils.DelimitedStringToArray(c.String(fl.FlKerberosNamesOptional.Name), ",")
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	locationName := c.String(fl.FlEnvironmentLocationName.Name)
@@ -73,13 +75,14 @@ func CreateEnvironment(c *cli.Context) {
 	latitude := c.Float64(fl.FlEnvironmentLatitudeOptional.Name)
 
 	environmentRequest := &model.EnvironmentRequest{
-		Name:           &name,
-		Description:    &description,
-		CredentialName: credentialName,
-		Regions:        regions,
-		LdapConfigs:    ldapConfigs,
-		ProxyConfigs:   proxyConfigs,
-		RdsConfigs:     rdsConfigs,
+		Name:            &name,
+		Description:     &description,
+		CredentialName:  credentialName,
+		Regions:         regions,
+		LdapConfigs:     ldapConfigs,
+		ProxyConfigs:    proxyConfigs,
+		KerberosConfigs: kerberosConfigs,
+		RdsConfigs:      rdsConfigs,
 		Location: &model.LocationRequest{
 			LocationName: &locationName,
 			Longitude:    longitude,
@@ -220,13 +223,15 @@ func createAttachRequest(c *cli.Context) *v3_workspace_id_environments.AttachRes
 	envName := c.String(fl.FlName.Name)
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
+	kerberosConfigs := utils.DelimitedStringToArray(c.String(fl.FlKerberosNamesOptional.Name), ",")
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
-	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Rds: [%s]",
-		envName, ldapConfigs, proxyConfigs, rdsConfigs)
+	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
+		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
 	attachBody := &model.EnvironmentAttachRequest{
-		LdapConfigs:  ldapConfigs,
-		ProxyConfigs: proxyConfigs,
-		RdsConfigs:   rdsConfigs,
+		LdapConfigs:     ldapConfigs,
+		ProxyConfigs:    proxyConfigs,
+		KerberosConfigs: kerberosConfigs,
+		RdsConfigs:      rdsConfigs,
 	}
 	attachRequest := v3_workspace_id_environments.NewAttachResourcesToEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(attachBody)
 	return attachRequest
@@ -254,13 +259,15 @@ func createDetachRequest(c *cli.Context) *v3_workspace_id_environments.DetachRes
 	envName := c.String(fl.FlName.Name)
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
+	kerberosConfigs := utils.DelimitedStringToArray(c.String(fl.FlKerberosNamesOptional.Name), ",")
 	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
-	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Rds: [%s]",
-		envName, ldapConfigs, proxyConfigs, rdsConfigs)
+	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
+		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
 	detachBody := &model.EnvironmentDetachRequest{
-		LdapConfigs:  ldapConfigs,
-		ProxyConfigs: proxyConfigs,
-		RdsConfigs:   rdsConfigs,
+		LdapConfigs:     ldapConfigs,
+		ProxyConfigs:    proxyConfigs,
+		KerberosConfigs: kerberosConfigs,
+		RdsConfigs:      rdsConfigs,
 	}
 	attachRequest := v3_workspace_id_environments.NewDetachResourcesFromEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(detachBody)
 	return attachRequest
@@ -324,10 +331,11 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentResponse) *enviro
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
 		},
-		LdapConfigs:  getLdapConfigNames(env.LdapConfigs),
-		ProxyConfigs: getProxyConfigNames(env.ProxyConfigs),
-		RdsConfigs:   getRdsConfigNames(env.RdsConfigs),
-		ID:           strconv.FormatInt(env.ID, 10),
+		LdapConfigs:     getLdapConfigNames(env.LdapConfigs),
+		ProxyConfigs:    getProxyConfigNames(env.ProxyConfigs),
+		KerberosConfigs: getKerberosConfigs(env.KerberosConfigs),
+		RdsConfigs:      getRdsConfigNames(env.RdsConfigs),
+		ID:              strconv.FormatInt(env.ID, 10),
 	}
 }
 
@@ -359,6 +367,14 @@ func getRdsConfigNames(configs []*model.RDSConfigResponse) []string {
 	var names []string
 	for _, c := range configs {
 		names = append(names, *c.Name)
+	}
+	return names
+}
+
+func getKerberosConfigs(configs []*model.KerberosResponse) []string {
+	var names []string
+	for _, c := range configs {
+		names = append(names, c.Name)
 	}
 	return names
 }

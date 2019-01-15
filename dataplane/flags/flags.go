@@ -957,6 +957,13 @@ var (
 			Usage: "proxy config names delimited by comma",
 		},
 	}
+	FlKerberosNamesOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "kerberos-names",
+			Usage: "kerberos config names delimited by comma",
+		},
+	}
 	FlRdsNamesOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

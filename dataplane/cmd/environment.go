@@ -16,13 +16,13 @@ func init() {
 				Name:  "create",
 				Usage: "creates a new Environment",
 				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlRdsNamesOptional, fl.FlEnvironmentLocationName,
+					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional, fl.FlEnvironmentLocationName,
 					fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: env.CreateEnvironment,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-						fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlRdsNamesOptional, fl.FlEnvironmentLocationName,
+						fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional, fl.FlEnvironmentLocationName,
 						fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
@@ -88,12 +88,12 @@ func init() {
 				Name:  "attach",
 				Usage: "attach resources to an environment (LDAP, RDS or Proxy)",
 				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName,
-					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
+					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: env.AttachResources,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlLdapNamesOptional, fl.FlProxyNamesOptional,
-						fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -102,12 +102,12 @@ func init() {
 				Name:  "detach",
 				Usage: "detach resources from an environment (LDAP, RDS or Proxy)",
 				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName,
-					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
+					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: env.DetachResources,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlLdapNamesOptional, fl.FlProxyNamesOptional,
-						fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
