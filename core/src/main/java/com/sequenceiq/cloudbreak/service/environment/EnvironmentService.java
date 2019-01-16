@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
@@ -225,9 +224,11 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         CloudRegions cloudRegions = getCloudRegions(environment);
         if (locationAndRegionChanged(request)) {
             editRegionsAndLocation(request, environment, cloudRegions);
-        } else if (request.getLocation() != null) {
+        } else if (locationChanged(request)) {
             editLocation(request, environment, cloudRegions);
         } else if (CollectionUtils.isNotEmpty(request.getRegions())) {
+            LocationRequest locationRequest = conversionService.convert(environment, LocationRequest.class);
+            request.setLocation(locationRequest);
             editRegions(request, environment, cloudRegions);
         }
         environment = pureSave(environment);
@@ -235,7 +236,12 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     private boolean locationAndRegionChanged(EnvironmentEditRequest request) {
-        return CollectionUtils.isNotEmpty(request.getRegions()) && request.getLocation() != null;
+        return CollectionUtils.isNotEmpty(request.getRegions())
+                && locationChanged(request);
+    }
+
+    private boolean locationChanged(EnvironmentEditRequest request) {
+        return request.getLocation() != null && !request.getLocation().isEmpty();
     }
 
     private void editRegionsAndLocation(EnvironmentEditRequest request, Environment environment, CloudRegions cloudRegions) {
@@ -269,22 +275,18 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     private void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
-        try {
-            Set<Region> regionSet = new HashSet<>();
-            Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
-            for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
-                if (requestedRegions.contains(r.getRegionName())) {
-                    Region region = new Region();
-                    region.setName(r.getRegionName());
-                    String displayName = displayNames.get(r);
-                    region.setDisplayName(isEmpty(displayName) ? r.getRegionName() : displayName);
-                    regionSet.add(region);
-                }
+        Set<Region> regionSet = new HashSet<>();
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
+        for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
+            if (requestedRegions.contains(r.getRegionName())) {
+                Region region = new Region();
+                region.setName(r.getRegionName());
+                String displayName = displayNames.get(r);
+                region.setDisplayName(isEmpty(displayName) ? r.getRegionName() : displayName);
+                regionSet.add(region);
             }
-            environment.setRegions(new Json(regionSet));
-        } catch (JsonProcessingException e) {
-            throw new BadRequestException(e.getMessage());
         }
+        environment.setRegions(regionSet);
     }
 
     private void setLocation(Environment environment, LocationRequest requestedLocation, CloudRegions cloudRegions) {

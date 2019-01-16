@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentEditRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -17,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class EnvironmentUtils {
 
@@ -49,11 +47,13 @@ public class EnvironmentUtils {
         Environment environment = new Environment();
         environment.setLocation(location);
         environment.setLocationDisplayName(location);
-        try {
-            environment.setRegions(new Json(regions));
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
+        Set<com.sequenceiq.cloudbreak.domain.environment.Region> regionSet = regions.stream().map(r -> {
+            com.sequenceiq.cloudbreak.domain.environment.Region region = new com.sequenceiq.cloudbreak.domain.environment.Region();
+            region.setName(r);
+            region.setDisplayName(r);
+            return region;
+        }).collect(Collectors.toSet());
+        environment.setRegions(regionSet);
         return environment;
     }
 

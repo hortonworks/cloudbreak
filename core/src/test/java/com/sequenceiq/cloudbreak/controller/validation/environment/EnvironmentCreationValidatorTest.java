@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -76,7 +75,7 @@ public class EnvironmentCreationValidatorTest {
         region1.setName("region1");
         Region region2 = new Region();
         region2.setName("region2");
-        environment.setRegions(new Json(Set.of(region1, region2)));
+        environment.setRegions(Set.of(region1, region2));
         EnvironmentRequest environmentRequest = new EnvironmentRequest();
         environmentRequest.setLdapConfigs(Set.of("ldap1", "ldap2"));
         environmentRequest.setProxyConfigs(Set.of("proxy1", "proxy2"));
@@ -135,7 +134,7 @@ public class EnvironmentCreationValidatorTest {
         environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
         environment.setRdsConfigs(Collections.emptySet());
-        environment.setRegions(new Json(Set.of()));
+        environment.setRegions(Set.of());
         EnvironmentRequest environmentRequest = new EnvironmentRequest();
         environmentRequest.setLdapConfigs(Collections.emptySet());
         environmentRequest.setProxyConfigs(Collections.emptySet());
@@ -184,7 +183,7 @@ public class EnvironmentCreationValidatorTest {
         region1.setName("region1");
         Region region2 = new Region();
         region2.setName("region2");
-        environment.setRegions(new Json(Set.of(region1, region2)));
+        environment.setRegions(Set.of(region1, region2));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
