@@ -32,7 +32,8 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClusterCreationEnvironmentValidatorTest {
+public class ClusterCreationEnvironmentCreationValidatorTest {
+
     @Mock
     private ProxyConfigService proxyConfigService;
 

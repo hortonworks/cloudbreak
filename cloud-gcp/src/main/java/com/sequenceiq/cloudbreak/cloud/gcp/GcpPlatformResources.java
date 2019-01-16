@@ -208,7 +208,7 @@ public class GcpPlatformResources implements PlatformResources {
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion);
+        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
     }
 
     public void addCoordinate(Map<Region, Coordinate> coordinates, com.google.api.services.compute.model.Region gcpRegion) {

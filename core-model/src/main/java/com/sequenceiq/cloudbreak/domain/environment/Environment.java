@@ -20,6 +20,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
 public class Environment implements WorkspaceAwareResource {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_generator")
     @SequenceGenerator(name = "environment_generator", sequenceName = "environment_id_seq", allocationSize = 1)
@@ -68,6 +70,9 @@ public class Environment implements WorkspaceAwareResource {
 
     @Column(nullable = false)
     private String location;
+
+    @Column(nullable = false)
+    private String locationDisplayName;
 
     @Column(nullable = false)
     private Double longitude;
@@ -106,6 +111,14 @@ public class Environment implements WorkspaceAwareResource {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
     private Set<DatalakeResources> datalakeResources = new HashSet<>();
+
+    public Environment() {
+        try {
+            regions = new Json(new HashSet<>());
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     @Override
     public Long getId() {
@@ -160,7 +173,7 @@ public class Environment implements WorkspaceAwareResource {
     }
 
     public Set<Region> getRegionSet() {
-        return regions == null ? Set.of() : JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() {
+        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() {
         });
     }
 
@@ -235,6 +248,14 @@ public class Environment implements WorkspaceAwareResource {
 
     public String getLocation() {
         return location;
+    }
+
+    public String getLocationDisplayName() {
+        return locationDisplayName;
+    }
+
+    public void setLocationDisplayName(String locationDisplayName) {
+        this.locationDisplayName = locationDisplayName;
     }
 
     public void setLocation(String location) {

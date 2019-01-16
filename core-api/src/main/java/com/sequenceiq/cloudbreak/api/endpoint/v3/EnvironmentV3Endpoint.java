@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v3;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentEditRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
@@ -45,6 +47,14 @@ public interface EnvironmentV3Endpoint {
     @ApiOperation(value = EnvironmentOpDescription.GET, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "getEnvironment")
     DetailedEnvironmentResponse get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
+
+    @PUT
+    @Path("/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.EDIT, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
+            nickname = "editEnvironment")
+    DetailedEnvironmentResponse edit(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+            @NotNull EnvironmentEditRequest request);
 
     @DELETE
     @Path("/{name}")

@@ -15,6 +15,7 @@ public class EnvironmentToLocationResponseConverter extends AbstractConversionSe
         locationResponse.setLatitude(environment.getLatitude());
         locationResponse.setLongitude(environment.getLongitude());
         locationResponse.setLocationName(environment.getLocation());
+        locationResponse.setLocationDisplayName(environment.getLocationDisplayName());
         return locationResponse;
     }
 }

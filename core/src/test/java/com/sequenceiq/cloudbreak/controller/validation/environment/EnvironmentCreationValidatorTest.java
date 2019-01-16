@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.controller.validation.environment;
 
 import static com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State.ERROR;
 import static com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State.VALID;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -12,10 +15,12 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -25,14 +30,20 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvironmentCreationValidatorTest {
+
+    @Spy
+    private EnvironmentRegionValidator environmentRegionValidator = new EnvironmentRegionValidator();
+
     @InjectMocks
     private EnvironmentCreationValidator environmentCreationValidator;
 
     @Test
     public void testValidationWithMultipleErrors() throws IOException {
+        assertNotNull(environmentRegionValidator);
         Credential credential = new Credential();
 
         LdapConfig ldapConfig = new LdapConfig();
@@ -75,16 +86,17 @@ public class EnvironmentCreationValidatorTest {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setLocationName("region1");
         environmentRequest.setLocation(locationRequest);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
 
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
 
         assertEquals(ERROR, result.getState());
         assertEquals(5L, result.getErrors().size());
-        assertTrue(result.getErrors().get(0).contains("[ldap2]"));
-        assertTrue(result.getErrors().get(1).contains("[proxy2]"));
-        assertTrue(result.getErrors().get(2).contains("[rds3]"));
-        assertTrue(result.getErrors().get(3).contains("[region3]"));
-        assertTrue(result.getErrors().get(4).contains("[kdc2]"));
+        assertTrue(result.getFormattedErrors().contains("[ldap2]"));
+        assertTrue(result.getFormattedErrors().contains("[proxy2]"));
+        assertTrue(result.getFormattedErrors().contains("[rds3]"));
+        assertTrue(result.getFormattedErrors().contains("[region3]"));
+        assertTrue(result.getFormattedErrors().contains("[kdc2]"));
     }
 
     @Test
@@ -104,12 +116,14 @@ public class EnvironmentCreationValidatorTest {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setLocationName("region1");
         environmentRequest.setLocation(locationRequest);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(false);
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, false);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
         // THEN
         assertEquals(ERROR, result.getState());
         assertEquals(1L, result.getErrors().size());
-        assertTrue(result.getErrors().get(0).contains("Region are not supporeted on cloudprovider"));
+
+        assertThat(result.getErrors().get(0), containsString("Regions are not supporeted on cloudprovider"));
     }
 
     @Test
@@ -132,13 +146,13 @@ public class EnvironmentCreationValidatorTest {
         locationRequest.setLatitude(1.1);
         locationRequest.setLongitude(-1.1);
         environmentRequest.setLocation(locationRequest);
-
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
         // THEN
         assertEquals(ERROR, result.getState());
         assertEquals(1L, result.getErrors().size());
-        assertTrue(result.getErrors().get(0).contains("Region are mandatory on cloudprovider"));
+        assertThat(result.getErrors().get(0), containsString("Regions are mandatory on cloudprovider"));
     }
 
     @Test
@@ -183,8 +197,9 @@ public class EnvironmentCreationValidatorTest {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setLocationName("region1");
         environmentRequest.setLocation(locationRequest);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, true);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
         // THEN
         assertEquals(VALID, result.getState());
     }
@@ -228,9 +243,10 @@ public class EnvironmentCreationValidatorTest {
         locationRequest.setLatitude(1.1);
         locationRequest.setLongitude(-1.1);
         environmentRequest.setLocation(locationRequest);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(false);
 
         // WHEN
-        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, false);
+        ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
         // THEN
         assertEquals(VALID, result.getState());
     }

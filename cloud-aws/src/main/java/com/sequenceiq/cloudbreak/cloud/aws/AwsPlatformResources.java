@@ -372,7 +372,7 @@ public class AwsPlatformResources implements PlatformResources {
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion);
+        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
     }
 
     public void addDisplayName(Map<Region, String> displayNames, com.amazonaws.services.ec2.model.Region awsRegion) {
