@@ -72,6 +72,8 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @BeforeClass
     public void createSharedObjects() {
+        String testClassName = getClass().getSimpleName();
+        MDC.put("testlabel", testClassName);
         if (cleanupBeforeStart) {
             applicationContext.getBean(PurgeGarbageService.class).purge();
         }

@@ -1,5 +1,6 @@
 /build
 /bin
+.env
 .settings
 .project
 .classpath
