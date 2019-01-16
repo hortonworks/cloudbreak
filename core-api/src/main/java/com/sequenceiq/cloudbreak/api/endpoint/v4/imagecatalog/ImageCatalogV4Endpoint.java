@@ -66,14 +66,14 @@ public interface ImageCatalogV4Endpoint {
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.PUT_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+    @ApiOperation(value = ImageCatalogOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "updateImageCatalogInWorkspace")
     ImageCatalogV4Response update(@PathParam("workspaceId") Long workspaceId, @Valid UpdateImageCatalogV4Request request);
 
     @PUT
     @Path("{name}/set_default")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.PUT_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+    @ApiOperation(value = ImageCatalogOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "setDefaultImageCatalogByNameInWorkspace")
     ImageCatalogV4Response setDefault(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

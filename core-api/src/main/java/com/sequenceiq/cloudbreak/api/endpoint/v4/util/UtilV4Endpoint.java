@@ -79,7 +79,7 @@ public interface UtilV4Endpoint {
     @GET
     @Path("deployment")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.GET, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "getDeploymentInfo")
     DeploymentPreferencesV4Response deployment();
 }

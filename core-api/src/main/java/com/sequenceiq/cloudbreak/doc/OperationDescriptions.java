@@ -10,23 +10,11 @@ public class OperationDescriptions {
     }
 
     public static class CredentialOpDescription {
-        public static final String POST_PRIVATE = "create credential as private resource";
-        public static final String PUT_PRIVATE = "modify private credential resource";
-        public static final String POST_PUBLIC = "create credential as public resource";
-        public static final String PUT_PUBLIC = "modify public credential resource";
         public static final String PUT_IN_WORKSPACE = "modify public credential resource in workspace";
-        public static final String GET_PRIVATE = "retrieve private credentials";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) credentials";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private credential by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) credential by name";
-        public static final String GET_BY_ID = "retrieve credential by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private credential by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private credential by name";
         public static final String INTERACTIVE_LOGIN = "interactive login";
         public static final String INIT_CODE_GRANT_FLOW = "start a credential creation with Oauth2 Authorization Code Grant flow";
         public static final String INIT_CODE_GRANT_FLOW_ON_EXISTING = "Reinitialize Oauth2 Authorization Code Grant flow on an existing credential";
         public static final String AUTHORIZE_CODE_GRANT_FLOW = "Authorize Oauth2 Authorization Code Grant flow";
-        public static final String DELETE_BY_ID = "delete credential by id";
         public static final String LIST_BY_WORKSPACE = "list credentials for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get credential by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create credential in workspace";
@@ -50,19 +38,16 @@ public class OperationDescriptions {
         public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
         public static final String PUT_BY_ID = "update stack by id";
         public static final String PUT_BY_NAME = "update stack by name";
-        public static final String GET_METADATA = "retrieve stack metadata";
         public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String VALIDATE = "validate stack";
         public static final String DELETE_INSTANCE_BY_ID = "delete instance resource from stack";
-        public static final String GET_PLATFORM_VARIANTS = "retrieve available platform variants";
         public static final String GET_ALL = "retrieve all stacks";
         public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
         public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
-        public static final String CREATE_IN_WORKSPACE_FROM_TEMPLATE = "create stack in workspace from template";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";
         public static final String SYNC_BY_NAME_IN_WORKSPACE = "syncs the stack by name in workspace";
         public static final String RETRY_BY_NAME_IN_WORKSPACE = "retries the stack by name in workspace";
@@ -85,7 +70,6 @@ public class OperationDescriptions {
         public static final String GET_PUBLIC_BY_NAME = "retrieve cluster by stack name (public)";
         public static final String DELETE_BY_STACK_ID = "delete cluster on a specific stack";
         public static final String PUT_BY_STACK_ID = "update cluster by stack id";
-        public static final String PUT_BY_STACK_NAME = "update cluster by stack name";
         public static final String UPGRADE_AMBARI = "upgrade the Ambari version";
         public static final String SET_MAINTENANCE_MODE = "set maintenance mode for the cluster";
         public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
@@ -125,7 +109,6 @@ public class OperationDescriptions {
 
     public static class EventOpDescription {
         public static final String GET_BY_TIMESTAMP = "retrieve events by timestamp (long)";
-        public static final String GET_BY_ID = "retrieve events by stackid (long)";
         public static final String GET_BY_NAME = "retrieve events by name";
         public static final String GET_EVENTS_BY_NAME = "retrieve events by name";
         public static final String GET_EVENTS_ZIP_BY_NAME = "retrieve events in zip by name";
@@ -142,11 +125,7 @@ public class OperationDescriptions {
     }
 
     public static class AccountPreferencesDescription {
-        public static final String GET_PRIVATE = "retrieve account preferences for admin user";
-        public static final String IS_PLATFORM_SELECTION_DISABLED = "is platform selection disabled";
-        public static final String PLATFORM_ENABLEMENT = "is platform selection enabled";
-        public static final String PUT_PRIVATE = "update account preferences of admin user";
-        public static final String POST_PRIVATE = "post account preferences of admin user";
+        public static final String GET = "retrieve account preferences for admin user";
     }
 
     public static class LdapConfigOpDescription {
@@ -222,23 +201,10 @@ public class OperationDescriptions {
     }
 
     public static class ConnectorOpDescription {
-        public static final String GET_PLATFORMS = "retrive available platforms";
-        public static final String GET_PLATFORM_VARIANTS = "retrive available platform variants";
-        public static final String GET_PLATFORM_VARIANT_BY_TYPE = "retrive a platform variant by type";
         public static final String GET_DISK_TYPES = "retrive available disk types";
-        public static final String GET_DISK_TYPE_BY_TYPE = "retrive disks by type";
-        public static final String GET_ORCHESTRATOR_TYPES = "retrive available orchestrator types";
-        public static final String GET_ORCHESTRATORS_BY_TYPES = "retrive orchestrators by type";
-        public static final String GET_VM_TYPES = "retrive available vm types";
-        public static final String GET_VM_TYPE_BY_TYPE = "retrive vm types by type";
-        public static final String GET_REGIONS = "retrive available regions";
         public static final String GET_REGION_R_BY_TYPE = "retrive regions by type";
-        public static final String GET_REGION_AV_BY_TYPE = "retrive availability zones by type";
-        public static final String GET_IMAGES = "retrive available images";
         public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint";
         public static final String GET_TAG_SPECIFICATIONS = "retrive tag specifications";
-        public static final String GET_SPECIALS = "retrive special properties";
-        public static final String GET_IMAGE_R_BY_TYPE = "retrive images by type";
         public static final String GET_NETWORKS = "retrive network properties";
         public static final String GET_SECURITYGROUPS = "retrive securitygroups properties";
         public static final String GET_SSHKEYS = "retrive sshkeys properties";
@@ -249,47 +215,20 @@ public class OperationDescriptions {
         public static final String GET_ENCRYPTIONKEYS = "retrive encryption keys with properties";
     }
 
-    public static class SettingsOpDescription {
-        public static final String GET_ALL_SETTINGS = "retrive all available settings";
-        public static final String GET_RECIPE_SETTINGS = "retrive available recipe settings";
-        public static final String GET_DATABASE_SETTINGS = "retrive available Ambari database settings";
-    }
-
     public static class SubscriptionOpDescription {
         public static final String SUBSCRIBE = "retrive subscribe identifier";
     }
 
     public static class SmartSenseSubOpDescription {
-        public static final String POST_PRIVATE = "create SmartSense subscription as private resource";
-        public static final String POST_PUBLIC = "create SmartSense subscription as public resource";
-        public static final String GET_PRIVATE = "retrieve private SmartSense subscriptions";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) SmartSense subscriptions";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private SmartSense subscription by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) SmartSense subscription by name";
         public static final String GET = "retrieve default SmartSense subscription";
-        public static final String GET_BY_ID = "retrieve SmartSense subscription by id";
-        public static final String DELETE_BY_ID = "delete SmartSense subscription by id";
         public static final String LIST_BY_WORKSPACE = "list SmartSense subscriptions for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get SmartSense subscription by name in workspace";
-        public static final String GET_DEFAULT_IN_WORKSPACE = "get default SmartSense subscription by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create SmartSense subscription in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete SmartSense subscription by name in workspace";
     }
 
     public static class FlexSubOpDescription {
-        public static final String POST_PRIVATE = "create Flex subscription as private resource";
-        public static final String POST_PUBLIC = "create Flex subscription as public resource";
-        public static final String GET_PRIVATE = "retrieve private Flex subscriptions";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) Flex subscriptions";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private Flex subscription by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) Flex subscription by name";
-        public static final String GET_BY_ID = "retrieve Flex subscription by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private Flex subscription by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Flex subscription by name";
-        public static final String DELETE_BY_ID = "delete Flex subscription by id";
-        public static final String SET_DEFAULT_IN_ACCOUNT = "sets the account default flag on the Flex subscription";
         public static final String SET_DEFAULT_IN_WORKSPACE = "sets the workspace default flag on the Flex subscription";
-        public static final String SET_USED_FOR_CONTROLLER_IN_ACCOUNT = "sets the account 'used for controller' flag on the Flex subscription";
         public static final String SET_USED_FOR_CONTROLLER_IN_WORKSPACE = "sets the workspace 'used for controller' flag on the Flex subscription";
         public static final String LIST_BY_WORKSPACE = "list Flex subscriptions for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get Flex subscription by name in workspace";
@@ -298,7 +237,7 @@ public class OperationDescriptions {
     }
 
     public static class ImageCatalogOpDescription {
-        public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
+        public static final String PUT_BY_NAME = "update Image Catalog by id";
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
         public static final String GET_IMAGES_BY_NAME = "determines available images for the given stack or platform"
                 + "from the given imagecatalog name";
@@ -322,10 +261,6 @@ public class OperationDescriptions {
         public static final String LIST_IN_WORKSPACE = "List audit events for the given workspace";
         public static final String GET_BY_WORKSPACE = "Get audit event in workspace by id";
         public static final String LIST_IN_WORKSPACE_ZIP = "List audit events for the given workspace in zip file";
-    }
-
-    public static class KnoxServicesOpDescription {
-        public static final String LIST_IN_WORKSPACE_FOR_BLUEPRINT = "list supported exposable services for the specified blueprint";
     }
 
     public static class EnvironmentOpDescription {
