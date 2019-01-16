@@ -9,8 +9,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserEvictV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -27,19 +25,9 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
     private ConversionService conversionService;
 
     @Override
-    public UserProfileV4Response get(Long workspaceId) {
+    public UserProfileV4Response get() {
         UserProfile userProfile = userProfileService.getOrCreateForLoggedInUser();
         return conversionService.convert(userProfile, UserProfileV4Response.class);
     }
 
-    @Override
-    public UserProfileV4Response modify(Long workspaceId, UserProfileV4Request userProfileV4Request) {
-        UserProfile userProfile = userProfileService.putForLoggedInUser(userProfileV4Request, workspaceId);
-        return conversionService.convert(userProfile, UserProfileV4Response.class);
-    }
-
-    @Override
-    public UserEvictV4Response evictCurrentUserDetails(Long workspaceId) {
-        return new UserEvictV4Response(userProfileService.evictCurrentUserDetailsForLoggedInUser());
-    }
 }

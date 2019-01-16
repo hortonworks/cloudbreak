@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
 import java.util.Map;
 
-public class StackMatrixV4 {
+public class StackMatrixV4Response {
 
     private Map<String, StackDescriptorV4> hdp;
 

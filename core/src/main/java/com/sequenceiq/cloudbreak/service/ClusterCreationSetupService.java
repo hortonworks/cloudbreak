@@ -28,7 +28,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -227,7 +227,7 @@ public class ClusterCreationSetupService {
         AmbariRepo ambariRepo = ambariRepoComponent.getAttributes().get(AmbariRepo.class);
         StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
         Image image = imageComponent.getAttributes().get(Image.class);
-        StackMatrixV4 stackMatrixV4 = stackMatrixService.getStackMatrix();
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
         String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
         Map<String, StackDescriptorV4> stackDescriptorMap;
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
@@ -236,14 +236,14 @@ public class ClusterCreationSetupService {
         }
         switch (stackType) {
             case "HDP":
-                stackDescriptorMap = stackMatrixV4.getHdp();
+                stackDescriptorMap = stackMatrixV4Response.getHdp();
                 break;
             case "HDF":
-                stackDescriptorMap = stackMatrixV4.getHdf();
+                stackDescriptorMap = stackMatrixV4Response.getHdf();
                 break;
             default:
                 LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
-                stackDescriptorMap = stackMatrixV4.getHdp();
+                stackDescriptorMap = stackMatrixV4Response.getHdp();
         }
         StackDescriptorV4 stackDescriptorV4 = stackDescriptorMap.get(stackMajorVersion);
         if (stackDescriptorV4 != null) {

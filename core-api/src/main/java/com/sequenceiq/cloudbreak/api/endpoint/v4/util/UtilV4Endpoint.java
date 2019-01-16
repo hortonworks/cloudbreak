@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -46,7 +46,7 @@ public interface UtilV4Endpoint {
     @Path("stack_matrix")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.STACK_MATRIX, produces = ContentType.JSON, nickname = "getStackMatrixUtilV4")
-    StackMatrixV4 getStackMatrix();
+    StackMatrixV4Response getStackMatrix();
 
     @GET
     @Path("cloud_storage_matrix")

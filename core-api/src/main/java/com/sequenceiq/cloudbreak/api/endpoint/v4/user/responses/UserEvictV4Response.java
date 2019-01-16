@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses;
 
 import io.swagger.annotations.ApiModel;
 
@@ -6,9 +6,6 @@ import io.swagger.annotations.ApiModel;
 public class UserEvictV4Response {
 
     private String username;
-
-    public UserEvictV4Response() {
-    }
 
     public UserEvictV4Response(String username) {
         this.username = username;

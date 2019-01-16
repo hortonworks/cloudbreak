@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
@@ -90,7 +90,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public StackMatrixV4 getStackMatrix() {
+    public StackMatrixV4Response getStackMatrix() {
         return stackMatrixService.getStackMatrix();
     }
 

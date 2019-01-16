@@ -120,8 +120,7 @@ public class OperationDescriptions {
 
     public static class UserProfileOpDescription {
         public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
-        public static final String GET_USER_PROFILE_IN_WORKSPACE = "user related profile in workspace";
-        public static final String MODIFT_USER_PROFILE_IN_WORKSPACE = "modify user related profile in workspace";
+        public static final String GET_USER_PROFILE = "user related profile";
     }
 
     public static class AccountPreferencesDescription {

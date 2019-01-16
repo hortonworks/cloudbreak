@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.user;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserEvictV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UserOpDescription;
 
 import io.swagger.annotations.Api;
@@ -25,5 +28,12 @@ public interface UserV4Endpoint {
     @ApiOperation(value = UserOpDescription.GET_TENANT_USERS, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "getAllUsers")
     UserV4Responses getAll();
+
+    @DELETE
+    @Path("evict")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.CURRENT_USER_DETAILS_EVICT, produces = ContentType.JSON,
+            notes = Notes.USER_PROFILE_NOTES, nickname = "evictCurrentUserDetails")
+    UserEvictV4Response evictCurrentUserDetails();
 
 }

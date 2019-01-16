@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 
@@ -48,22 +48,22 @@ public class DefaultAmbariRepoService {
     }
 
     public AmbariRepo getDefault(String osType, String clusterType, String clusterVersion) {
-        StackMatrixV4 stackMatrixV4 = stackMatrixService.getStackMatrix();
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
         Map<String, StackDescriptorV4> stackDescriptorMap;
 
         if (clusterType != null) {
             switch (clusterType) {
                 case "HDP":
-                    stackDescriptorMap = stackMatrixV4.getHdp();
+                    stackDescriptorMap = stackMatrixV4Response.getHdp();
                     break;
                 case "HDF":
-                    stackDescriptorMap = stackMatrixV4.getHdf();
+                    stackDescriptorMap = stackMatrixV4Response.getHdf();
                     break;
                 default:
                     stackDescriptorMap = null;
             }
         } else {
-            stackDescriptorMap = stackMatrixV4.getHdp();
+            stackDescriptorMap = stackMatrixV4Response.getHdp();
         }
 
         if (stackDescriptorMap != null) {

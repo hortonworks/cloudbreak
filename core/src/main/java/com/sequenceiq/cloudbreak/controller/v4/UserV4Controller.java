@@ -10,6 +10,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.UserV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserEvictV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Response;
 import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
@@ -37,6 +38,11 @@ public class UserV4Controller implements UserV4Endpoint {
         SortedSet<UserV4Response> results = new TreeSet<>(new UserIdComparator());
         results.addAll(converterUtil.convertAllAsSet(userService.getAll(user), UserV4Response.class));
         return new UserV4Responses(results);
+    }
+
+    @Override
+    public UserEvictV4Response evictCurrentUserDetails() {
+        return new UserEvictV4Response(userService.evictCurrentUserDetailsForLoggedInUser());
     }
 
 }

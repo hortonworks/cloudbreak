@@ -60,12 +60,6 @@ public class UserProfileService {
     @Inject
     private CachedUserService cachedUserService;
 
-    public String evictCurrentUserDetailsForLoggedInUser() {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        cachedUserService.evictByIdentityUser(cloudbreakUser);
-        return cloudbreakUser.getUsername();
-    }
-
     public UserProfile getOrCreateForLoggedInUser() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);

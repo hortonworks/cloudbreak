@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
@@ -37,10 +37,10 @@ public class StackMatrixService {
     @Inject
     private AmbariInfoMapper ambariInfoMapper;
 
-    public StackMatrixV4 getStackMatrix() {
+    public StackMatrixV4Response getStackMatrix() {
         Map<String, DefaultHDFInfo> hdfEntries = defaultHDFEntries.getEntries();
         Map<String, DefaultHDPInfo> hdpEntries = defaultHDPEntries.getEntries();
-        StackMatrixV4 stackMatrixV4 = new StackMatrixV4();
+        StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
 
         Map<String, StackDescriptorV4> hdfStackDescriptors = new HashMap<>();
         for (Map.Entry<String, DefaultHDFInfo> defaultHDFInfoEntry : hdfEntries.entrySet()) {
@@ -56,9 +56,9 @@ public class StackMatrixService {
             hdpStackDescriptors.put(defaultHDPInfoEntry.getKey(), stackDescriptorV4);
         }
 
-        stackMatrixV4.setHdf(hdfStackDescriptors);
-        stackMatrixV4.setHdp(hdpStackDescriptors);
-        return stackMatrixV4;
+        stackMatrixV4Response.setHdf(hdfStackDescriptors);
+        stackMatrixV4Response.setHdp(hdpStackDescriptors);
+        return stackMatrixV4Response;
     }
 
     private StackDescriptorV4 getStackDescriptor(StackInfo stackInfo) {

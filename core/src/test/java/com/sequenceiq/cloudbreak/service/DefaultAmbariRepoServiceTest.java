@@ -19,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
@@ -37,7 +37,7 @@ public class DefaultAmbariRepoServiceTest {
     public void init() {
         Map<String, AmbariInfo> entries = new HashMap<>();
 
-        StackMatrixV4 stackMatrixV4 = new StackMatrixV4();
+        StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         Map<String, StackDescriptorV4> hdpMap = new HashMap<>();
         Map<String, StackDescriptorV4> hdfMap = new HashMap<>();
 
@@ -57,16 +57,16 @@ public class DefaultAmbariRepoServiceTest {
         hdpDescriptor30.setAmbari(ambariInfoJson27);
         hdpMap.put("3.0", hdpDescriptor30);
 
-        stackMatrixV4.setHdp(hdpMap);
+        stackMatrixV4Response.setHdp(hdpMap);
 
         StackDescriptorV4 hdfDescriptor31 = new StackDescriptorV4();
         hdfDescriptor31.setAmbari(ambariInfoJson27);
         hdfMap.put("3.1", hdfDescriptor31);
 
-        stackMatrixV4.setHdp(hdpMap);
-        stackMatrixV4.setHdf(hdfMap);
+        stackMatrixV4Response.setHdp(hdpMap);
+        stackMatrixV4Response.setHdf(hdfMap);
 
-        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4);
+        when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
 
         AmbariInfo ambariInfo26 = new AmbariInfo();
         ambariInfo26.setVersion("2.6");
