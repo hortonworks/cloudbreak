@@ -34,7 +34,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
@@ -62,6 +61,7 @@ import com.sequenceiq.cloudbreak.converter.LdapConfigToLdapConfigResponseConvert
 import com.sequenceiq.cloudbreak.converter.ProxyConfigToProxyConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.RDSConfigToRDSConfigResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToDetailedEnvironmentResponseConverter;
+import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToLocationRequestConverter;
 import com.sequenceiq.cloudbreak.converter.environment.EnvironmentToLocationResponseConverter;
 import com.sequenceiq.cloudbreak.converter.environment.RegionConverter;
 import com.sequenceiq.cloudbreak.converter.stack.StackApiViewToStackViewResponseConverter;
@@ -154,12 +154,12 @@ public class EnvironmentServiceTest {
     private TransactionService transactionService;
 
     @Spy
-    private EnvironmentDetachValidator environmentDetachValidator = new EnvironmentDetachValidator();
+    private final EnvironmentDetachValidator environmentDetachValidator = new EnvironmentDetachValidator();
 
     @Spy
-    private EnvironmentRegionValidator environmentRegionValidator = new EnvironmentRegionValidator();
+    private final EnvironmentRegionValidator environmentRegionValidator = new EnvironmentRegionValidator();
 
-    private ArgumentCaptor<StackApiView> stackApiViewCaptor = ArgumentCaptor.forClass(StackApiView.class);
+    private final ArgumentCaptor<StackApiView> stackApiViewCaptor = ArgumentCaptor.forClass(StackApiView.class);
 
     @InjectMocks
     private EnvironmentService environmentService;
@@ -167,10 +167,13 @@ public class EnvironmentServiceTest {
     private final Workspace workspace = new Workspace();
 
     @Spy
-    private RegionConverter regionConverter = new RegionConverter();
+    private final RegionConverter regionConverter = new RegionConverter();
 
     @InjectMocks
     private EnvironmentToLocationResponseConverter environmentToLocationResponseConverter;
+
+    @InjectMocks
+    private EnvironmentToLocationRequestConverter environmentToLocationRequestConverter;
 
     @InjectMocks
     private EnvironmentToDetailedEnvironmentResponseConverter environmentConverter;
@@ -636,7 +639,7 @@ public class EnvironmentServiceTest {
     }
 
     @Test
-    public void testEditLocationAndRegion() throws JsonProcessingException {
+    public void testEditLocationAndRegion() {
         String editedDescription = "edited description";
         String newLocation = "eu-west-1";
         String newRegion1 = "eu-west-2";
@@ -671,6 +674,82 @@ public class EnvironmentServiceTest {
         assertTrue(result.getRegions().getRegions().contains(newLocation));
         assertTrue(result.getRegions().getRegions().contains(newRegion1));
         assertTrue(result.getRegions().getRegions().contains(newRegion2));
+    }
+
+    @Test
+    public void testEditOnlyLocation() {
+        String region1 = "us-west-1";
+        String region2 = "us-west-2";
+        String region3 = "us-west-3";
+        String newLocation = region3;
+        EnvironmentEditRequest editRequest = new EnvironmentEditRequest();
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setLocationName(newLocation);
+        editRequest.setLocation(locationRequest);
+
+        Environment environment = EnvironmentUtils.getEnvironment(region1, Set.of(region1, region2, region3));
+        environment.setCloudPlatform("aws");
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setDescription("original descreption");
+        setCredential(environment);
+
+        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID))
+                .thenReturn(environment);
+
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(Set.of(newLocation, region1, region2));
+        when(platformParameterService.getRegionsByCredential(any()))
+                .thenReturn(cloudRegions);
+
+        when(environmentRepository.save(any(Environment.class)))
+                .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
+                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(LocationResponse.class)))
+                .thenAnswer((Answer<LocationResponse>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
+
+        DetailedEnvironmentResponse result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+
+        assertEquals(newLocation, result.getLocation().getLocationName());
+        assertTrue(result.getRegions().getRegions().contains(region1));
+        assertTrue(result.getRegions().getRegions().contains(region2));
+        assertTrue(result.getRegions().getRegions().contains(region3));
+    }
+
+    @Test
+    public void testEditOnlyRegions() {
+        String region1 = "eu-west-1";
+        String region2 = "eu-west-2";
+        String region3 = "eu-west-3";
+        EnvironmentEditRequest editRequest = new EnvironmentEditRequest();
+        editRequest.setRegions(Set.of(region2, region3));
+
+        Environment environment = EnvironmentUtils.getEnvironment(region2, Set.of(region1, region2));
+        environment.setCloudPlatform("aws");
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setDescription("original descreption");
+        setCredential(environment);
+
+        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID))
+                .thenReturn(environment);
+
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(Set.of(region1, region2, region3));
+        when(platformParameterService.getRegionsByCredential(any()))
+                .thenReturn(cloudRegions);
+
+        when(environmentRepository.save(any(Environment.class)))
+                .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
+        when(conversionService.convert(any(Environment.class), eq(LocationRequest.class)))
+                .thenAnswer((Answer<LocationRequest>) invocation -> environmentToLocationRequestConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentResponse.class)))
+                .thenAnswer((Answer<DetailedEnvironmentResponse>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
+        when(conversionService.convert(any(Environment.class), eq(LocationResponse.class)))
+                .thenAnswer((Answer<LocationResponse>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
+
+        DetailedEnvironmentResponse result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+
+        assertEquals(region2, result.getLocation().getLocationName());
+        assertTrue(result.getRegions().getRegions().contains(region2));
+        assertTrue(result.getRegions().getRegions().contains(region3));
     }
 
     private void setCredential(Environment environment) {

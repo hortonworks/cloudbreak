@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.model.environment.request;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentRequestModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -41,5 +43,9 @@ public class LocationRequest {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public boolean isEmpty() {
+        return StringUtils.isEmpty(locationName) && latitude == null && longitude == null;
     }
 }

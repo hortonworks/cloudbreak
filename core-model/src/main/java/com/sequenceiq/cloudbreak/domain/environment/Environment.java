@@ -114,7 +114,7 @@ public class Environment implements WorkspaceAwareResource {
 
     public Environment() {
         try {
-            regions = new Json(new HashSet<>());
+            regions = new Json(new HashSet<Region>());
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
@@ -168,8 +168,12 @@ public class Environment implements WorkspaceAwareResource {
         return regions;
     }
 
-    public void setRegions(Json regions) {
-        this.regions = regions;
+    public void setRegions(Set<Region> regions) {
+        try {
+            this.regions = new Json(regions);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public Set<Region> getRegionSet() {
