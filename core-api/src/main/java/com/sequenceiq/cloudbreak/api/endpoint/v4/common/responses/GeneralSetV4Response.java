@@ -13,4 +13,5 @@ public class GeneralSetV4Response<T> {
     public Set<T> getResponses() {
         return responses;
     }
+
 }

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.SmartSenseSubscriptionV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.user.UserV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
@@ -91,6 +92,7 @@ public class CloudbreakClient {
             StackV2Endpoint.class,
             StackV3Endpoint.class,
             UserProfileV4Endpoint.class,
+            UserV4Endpoint.class,
             UtilV4Endpoint.class,
             WorkspaceAwareUtilV4Endpoint.class,
             KerberosConfigV4Endpoint.class
@@ -210,8 +212,12 @@ public class CloudbreakClient {
         return getEndpoint(StackV3Endpoint.class);
     }
 
-    public UserProfileV4Endpoint userV4Endpoint() {
+    public UserProfileV4Endpoint userProfileV4Endpoint() {
         return getEndpoint(UserProfileV4Endpoint.class);
+    }
+
+    public UserV4Endpoint userV4Endpoint() {
+        return getEndpoint(UserV4Endpoint.class);
     }
 
     public FileSystemV4Endpoint filesystemV4Endpoint() {
