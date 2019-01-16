@@ -141,7 +141,7 @@ public class CloudbreakTest extends GherkinTest {
             CloudbreakClient client = CloudbreakClient.created();
             client.create(testContext);
 
-            UserProfileV4Response profile = CloudbreakClient.getSingletonCloudbreakClient().userV4Endpoint().get(client.getWorkspaceId());
+            UserProfileV4Response profile = CloudbreakClient.getSingletonCloudbreakClient().userProfileV4Endpoint().get(client.getWorkspaceId());
             LogSearchUtil.addQueryModelForLogSearchUrlToContext(testContext, LogSearchUtil.LOG_SEARCH_CBOWNER_ID,
                     LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, profile.getUsername());
 
