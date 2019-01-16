@@ -18,6 +18,9 @@ type LocationResponse struct {
 	// Location latitude of the environment.
 	Latitude float64 `json:"latitude,omitempty"`
 
+	// Display name of the location of the environment.
+	LocationDisplayName string `json:"locationDisplayName,omitempty"`
+
 	// Location of the environment.
 	LocationName string `json:"locationName,omitempty"`
 

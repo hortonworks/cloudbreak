@@ -28,7 +28,8 @@ type SimpleEnvironmentResponse struct {
 	DatalakeClusterNames []string `json:"datalakeClusterNames"`
 
 	// Datalake cluster resources registered to the environment.
-	DatalakeResourcesName string `json:"datalakeResourcesName,omitempty"`
+	// Unique: true
+	DatalakeResourcesNames []string `json:"datalakeResourcesNames"`
 
 	// description of the resource
 	Description string `json:"description,omitempty"`
@@ -61,6 +62,10 @@ func (m *SimpleEnvironmentResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateDatalakeResourcesNames(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateLocation(formats); err != nil {
 		res = append(res, err)
 	}
@@ -90,6 +95,19 @@ func (m *SimpleEnvironmentResponse) validateDatalakeClusterNames(formats strfmt.
 	}
 
 	if err := validate.UniqueItems("datalakeClusterNames", "body", m.DatalakeClusterNames); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SimpleEnvironmentResponse) validateDatalakeResourcesNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeResourcesNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("datalakeResourcesNames", "body", m.DatalakeResourcesNames); err != nil {
 		return err
 	}
 

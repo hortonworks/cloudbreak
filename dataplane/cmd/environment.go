@@ -124,6 +124,20 @@ func init() {
 					}
 				},
 			},
+			{
+				Name:  "edit",
+				Usage: "edit an environment. description, regions and location can be changed.",
+				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlDescriptionOptional, fl.FlEnvironmentRegions, fl.FlEnvironmentLocationNameOptional,
+					fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: env.EditEnvironment,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlDescriptionOptional, fl.FlEnvironmentRegions, fl.FlEnvironmentLocationNameOptional,
+						fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
 		},
 	})
 }

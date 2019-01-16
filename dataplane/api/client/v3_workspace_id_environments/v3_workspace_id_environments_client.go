@@ -175,6 +175,36 @@ func (a *Client) DetachResourcesFromEnvironment(params *DetachResourcesFromEnvir
 }
 
 /*
+EditEnvironment edits and environment location regions and description can be changed
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) EditEnvironment(params *EditEnvironmentParams) (*EditEnvironmentOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewEditEnvironmentParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "editEnvironment",
+		Method:             "PUT",
+		PathPattern:        "/v3/{workspaceId}/environments/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &EditEnvironmentReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*EditEnvironmentOK), nil
+
+}
+
+/*
 GetEnvironment gets an environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.

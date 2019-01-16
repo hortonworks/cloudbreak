@@ -300,7 +300,35 @@ func ChangeCredential(c *cli.Context) {
 	}
 	environment := resp.Payload
 	log.Infof("[ChangeCredential] credential of environment %s changed to: %s", environment.Name, environment.CredentialName)
+}
 
+func EditEnvironment(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "edit environment")
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	envName := c.String(fl.FlName.Name)
+	description := c.String(fl.FlDescriptionOptional.Name)
+	regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ",")
+	locationName := c.String(fl.FlEnvironmentLocationNameOptional.Name)
+	longitude := c.Float64(fl.FlEnvironmentLongitudeOptional.Name)
+	latitude := c.Float64(fl.FlEnvironmentLatitudeOptional.Name)
+
+	requestBody := &model.EnvironmentEditRequest{
+		Description: &description,
+		Regions:     regions,
+		Location: &model.LocationRequest{
+			LocationName: &locationName,
+			Longitude:    longitude,
+			Latitude:     latitude,
+		},
+	}
+	request := v3_workspace_id_environments.NewEditEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(requestBody)
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	resp, err := cbClient.Cloudbreak.V3WorkspaceIDEnvironments.EditEnvironment(request)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	environment := resp.Payload
+	log.Infof("[Edit] Environment %s was edited.", environment.Name)
 }
 
 func convertResponseToTableOutput(env *model.DetailedEnvironmentResponse) *environmentOutTableDescribe {
@@ -341,7 +369,7 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentResponse) *enviro
 
 func getRegionNames(region *model.CompactRegionResponse) []string {
 	var regions []string
-	for _, v := range region.DisplayNames {
+	for _, v := range region.Values {
 		regions = append(regions, v)
 	}
 	return regions

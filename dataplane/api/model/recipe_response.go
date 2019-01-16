@@ -38,7 +38,7 @@ type RecipeResponse struct {
 
 	// type of recipe
 	// Required: true
-	// Enum: [PRE_CLUSTER_MANAGER_START PRE_TERMINATION POST_CLUSTER_MANAGER_START POST_CLUSTER_INSTALL]
+	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
 	RecipeType *string `json:"recipeType"`
 
 	// workspace of the resource
@@ -113,7 +113,7 @@ var recipeResponseTypeRecipeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["PRE_CLUSTER_MANAGER_START","PRE_TERMINATION","POST_CLUSTER_MANAGER_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["PRE_AMBARI_START","PRE_TERMINATION","POST_AMBARI_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -123,14 +123,14 @@ func init() {
 
 const (
 
-	// RecipeResponseRecipeTypePRECLUSTERMANAGERSTART captures enum value "PRE_CLUSTER_MANAGER_START"
-	RecipeResponseRecipeTypePRECLUSTERMANAGERSTART string = "PRE_CLUSTER_MANAGER_START"
+	// RecipeResponseRecipeTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
+	RecipeResponseRecipeTypePREAMBARISTART string = "PRE_AMBARI_START"
 
 	// RecipeResponseRecipeTypePRETERMINATION captures enum value "PRE_TERMINATION"
 	RecipeResponseRecipeTypePRETERMINATION string = "PRE_TERMINATION"
 
-	// RecipeResponseRecipeTypePOSTCLUSTERMANAGERSTART captures enum value "POST_CLUSTER_MANAGER_START"
-	RecipeResponseRecipeTypePOSTCLUSTERMANAGERSTART string = "POST_CLUSTER_MANAGER_START"
+	// RecipeResponseRecipeTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
+	RecipeResponseRecipeTypePOSTAMBARISTART string = "POST_AMBARI_START"
 
 	// RecipeResponseRecipeTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
 	RecipeResponseRecipeTypePOSTCLUSTERINSTALL string = "POST_CLUSTER_INSTALL"

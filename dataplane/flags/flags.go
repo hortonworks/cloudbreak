@@ -1006,6 +1006,13 @@ var (
 			Usage: "location name of the environment. must be one of the regions",
 		},
 	}
+	FlEnvironmentLocationNameOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "location-name",
+			Usage: "location name of the environment. must be one of the regions",
+		},
+	}
 	FlEnvironmentLongitudeOptional = Float64Flag{
 		RequiredFlag: OPTIONAL,
 		Float64Flag: cli.Float64Flag{

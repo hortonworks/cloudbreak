@@ -34,10 +34,12 @@ type DetailedEnvironmentResponse struct {
 	DatalakeClusters []*StackViewResponse `json:"datalakeClusters"`
 
 	// Datalake cluster resources registered to the environment.
-	DatalakeResourcesName string `json:"datalakeResourcesName,omitempty"`
+	// Unique: true
+	DatalakeResourcesNames []string `json:"datalakeResourcesNames"`
 
 	// Datalake cluster resources registered to the environment.
-	DatalakeResourcesResponse *DatalakeResourcesResponse `json:"datalakeResourcesResponse,omitempty"`
+	// Unique: true
+	DatalakeResourcesResponses []*DatalakeResourcesResponse `json:"datalakeResourcesResponses"`
 
 	// description of the resource
 	Description string `json:"description,omitempty"`
@@ -98,7 +100,11 @@ func (m *DetailedEnvironmentResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateDatalakeResourcesResponse(formats); err != nil {
+	if err := m.validateDatalakeResourcesNames(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDatalakeResourcesResponses(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -190,19 +196,43 @@ func (m *DetailedEnvironmentResponse) validateDatalakeClusters(formats strfmt.Re
 	return nil
 }
 
-func (m *DetailedEnvironmentResponse) validateDatalakeResourcesResponse(formats strfmt.Registry) error {
+func (m *DetailedEnvironmentResponse) validateDatalakeResourcesNames(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.DatalakeResourcesResponse) { // not required
+	if swag.IsZero(m.DatalakeResourcesNames) { // not required
 		return nil
 	}
 
-	if m.DatalakeResourcesResponse != nil {
-		if err := m.DatalakeResourcesResponse.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("datalakeResourcesResponse")
-			}
-			return err
+	if err := validate.UniqueItems("datalakeResourcesNames", "body", m.DatalakeResourcesNames); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentResponse) validateDatalakeResourcesResponses(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatalakeResourcesResponses) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("datalakeResourcesResponses", "body", m.DatalakeResourcesResponses); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.DatalakeResourcesResponses); i++ {
+		if swag.IsZero(m.DatalakeResourcesResponses[i]) { // not required
+			continue
 		}
+
+		if m.DatalakeResourcesResponses[i] != nil {
+			if err := m.DatalakeResourcesResponses[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("datalakeResourcesResponses" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
