@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model.environment.response;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentRequestModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,13 +8,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class LocationResponse {
 
-    @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LOCATION)
+    @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION)
     private String locationName;
 
-    @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LATITUDE)
+    @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION_DISPLAY_NAME)
+    private String locationDisplayName;
+
+    @ApiModelProperty(EnvironmentRequestModelDescription.LATITUDE)
     private Double latitude;
 
-    @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LONGITUDE)
+    @ApiModelProperty(EnvironmentRequestModelDescription.LONGITUDE)
     private Double longitude;
 
     public String getLocationName() {
@@ -23,6 +26,14 @@ public class LocationResponse {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    public String getLocationDisplayName() {
+        return locationDisplayName;
+    }
+
+    public void setLocationDisplayName(String locationDisplayName) {
+        this.locationDisplayName = locationDisplayName;
     }
 
     public Double getLatitude() {

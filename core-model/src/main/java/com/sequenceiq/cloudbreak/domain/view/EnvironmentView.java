@@ -41,6 +41,9 @@ public class EnvironmentView extends CompactView {
     private String location;
 
     @Column(nullable = false)
+    private String locationDisplayName;
+
+    @Column(nullable = false)
     private Double longitude;
 
     @Column(nullable = false)
@@ -83,6 +86,14 @@ public class EnvironmentView extends CompactView {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getLocationDisplayName() {
+        return locationDisplayName;
+    }
+
+    public void setLocationDisplayName(String locationDisplayName) {
+        this.locationDisplayName = locationDisplayName;
     }
 
     public Double getLongitude() {

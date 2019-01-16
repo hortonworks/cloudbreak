@@ -15,6 +15,7 @@ public class EnvironmentViewToLocationResponseConverter extends AbstractConversi
         locationResponse.setLatitude(environmentView.getLatitude());
         locationResponse.setLongitude(environmentView.getLongitude());
         locationResponse.setLocationName(environmentView.getLocation());
+        locationResponse.setLocationDisplayName(environmentView.getLocationDisplayName());
         return locationResponse;
     }
 }

@@ -184,7 +184,7 @@ public class AzurePlatformResources implements PlatformResources {
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(cloudRegions, displayNames, coordinates, defaultRegion);
+        return new CloudRegions(cloudRegions, displayNames, coordinates, defaultRegion, true);
     }
 
     @Override

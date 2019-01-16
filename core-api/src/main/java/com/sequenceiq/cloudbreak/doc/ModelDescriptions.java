@@ -656,6 +656,7 @@ public class ModelDescriptions {
         public static final String LONGITUDE = "Location longitude of the environment.";
         public static final String LATITUDE = "Location latitude of the environment.";
         public static final String KERBEROS_CONFIGS = "Name of Kerberos configs to be attached to the environment.";
+        public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
     }
 
     public static class EnvironmentResponseModelDescription {

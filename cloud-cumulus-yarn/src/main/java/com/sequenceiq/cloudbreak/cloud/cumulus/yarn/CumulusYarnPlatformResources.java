@@ -85,7 +85,7 @@ public class CumulusYarnPlatformResources implements PlatformResources {
 
     @Override
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), regionCoordinates, "");
+        return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), regionCoordinates, "", false);
     }
 
     @Override

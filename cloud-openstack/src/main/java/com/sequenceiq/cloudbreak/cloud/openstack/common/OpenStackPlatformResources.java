@@ -213,7 +213,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         if (!cloudRegions.keySet().isEmpty()) {
             defaultRegion = ((StringType) cloudRegions.keySet().toArray()[0]).value();
         }
-        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, regionCoordinates, defaultRegion);
+        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, regionCoordinates, defaultRegion, true);
         LOGGER.debug("Openstack regions result: {}", regions);
         return regions;
     }

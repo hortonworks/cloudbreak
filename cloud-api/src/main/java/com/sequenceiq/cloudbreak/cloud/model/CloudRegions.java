@@ -3,59 +3,50 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CloudRegions {
 
-    private Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
+    private final Map<Region, List<AvailabilityZone>> cloudRegions;
 
-    private Map<Region, String> displayNames = new HashMap<>();
+    private final Map<Region, String> displayNames;
 
-    private Map<Region, Coordinate> coordinates = new HashMap<>();
+    private final Map<Region, Coordinate> coordinates;
 
-    private String defaultRegion;
+    private final String defaultRegion;
 
-    public CloudRegions() {
-    }
+    private final boolean regionsSupported;
 
     public CloudRegions(Map<Region, List<AvailabilityZone>> cloudRegions, Map<Region, String> displayNames, Map<Region, Coordinate> coordinates,
-            String defaultRegion) {
+            String defaultRegion, boolean regionsSupported) {
         this.cloudRegions = cloudRegions;
         this.displayNames = displayNames;
         this.coordinates = coordinates;
         this.defaultRegion = defaultRegion;
+        this.regionsSupported = regionsSupported;
     }
 
     public Map<Region, List<AvailabilityZone>> getCloudRegions() {
-        return cloudRegions;
-    }
-
-    public void setCloudRegions(Map<Region, List<AvailabilityZone>> cloudRegions) {
-        this.cloudRegions = cloudRegions;
+        return new HashMap<>(cloudRegions);
     }
 
     public Map<Region, String> getDisplayNames() {
-        return displayNames;
-    }
-
-    public void setDisplayNames(Map<Region, String> displayNames) {
-        this.displayNames = displayNames;
+        return new HashMap<>(displayNames);
     }
 
     public String getDefaultRegion() {
         return defaultRegion;
     }
 
-    public void setDefaultRegion(String defaultRegion) {
-        this.defaultRegion = defaultRegion;
-    }
-
     public Map<Region, Coordinate> getCoordinates() {
         return coordinates;
     }
 
-    public void setCoordinates(Map<Region, Coordinate> coordinates) {
-        this.coordinates = coordinates;
+    public Set<String> getRegionNames() {
+        return cloudRegions.keySet().stream()
+                .map(region -> region.getRegionName())
+                .collect(Collectors.toSet());
     }
 
     public String locationNames() {
@@ -65,12 +56,18 @@ public class CloudRegions {
                 .collect(Collectors.joining(", "));
     }
 
+    public boolean areRegionsSupported() {
+        return regionsSupported;
+    }
+
     @Override
     public String toString() {
         return "CloudRegions{"
                 + "cloudRegions=" + cloudRegions
                 + ", displayNames=" + displayNames
+                + ", coordinates=" + coordinates
                 + ", defaultRegion='" + defaultRegion + '\''
+                + ", regionsSupported=" + regionsSupported
                 + '}';
     }
 }

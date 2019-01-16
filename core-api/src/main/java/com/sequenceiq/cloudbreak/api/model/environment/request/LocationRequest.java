@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.environment.request;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentRequestModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,14 +10,13 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class LocationRequest {
 
-    @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LOCATION)
-    @NotNull
-    private String locationName;
+    @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION)
+    private @NotNull String locationName;
 
-    @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LATITUDE)
+    @ApiModelProperty(EnvironmentRequestModelDescription.LATITUDE)
     private Double latitude;
 
-    @ApiModelProperty(ModelDescriptions.EnvironmentRequestModelDescription.LONGITUDE)
+    @ApiModelProperty(EnvironmentRequestModelDescription.LONGITUDE)
     private Double longitude;
 
     public String getLocationName() {

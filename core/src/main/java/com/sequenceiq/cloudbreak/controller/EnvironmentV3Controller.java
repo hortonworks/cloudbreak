@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.EnvironmentV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentEditRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.response.DetailedEnvironmentResponse;
@@ -39,6 +41,11 @@ public class EnvironmentV3Controller implements EnvironmentV3Endpoint {
     @Override
     public DetailedEnvironmentResponse get(Long workspaceId, String environmentName) {
         return environmentService.get(environmentName, workspaceId);
+    }
+
+    @Override
+    public DetailedEnvironmentResponse edit(Long workspaceId, String environmentName, @NotNull EnvironmentEditRequest request) {
+        return environmentService.edit(workspaceId, environmentName, request);
     }
 
     @Override

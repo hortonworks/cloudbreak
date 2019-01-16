@@ -17,18 +17,17 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentAttachRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentDetachRequest;
+import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentEditRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
 import com.sequenceiq.cloudbreak.api.model.environment.request.RegisterDatalakeRequest;
@@ -39,10 +38,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAttachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
+import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentRegionValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
@@ -75,13 +76,11 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -108,6 +107,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     private EnvironmentAttachValidator environmentAttachValidator;
 
     @Inject
+    private EnvironmentRegionValidator environmentRegionValidator;
+
+    @Inject
     private EnvironmentViewService environmentViewService;
 
     @Inject
@@ -128,9 +130,6 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     @Inject
     private PlatformParameterService platformParameterService;
-
-    @Inject
-    private CloudParameterCache cloudParameterCache;
 
     @Inject
     private EnvironmentDetachValidator environmentDetachValidator;
@@ -176,15 +175,6 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
     }
 
-    @Override
-    protected void prepareDeletion(Environment environment) {
-        Long alive = stackService.countAliveByEnvironment(environment);
-        if (alive > 0) {
-            throw new BadRequestException("Cannot delete environment. "
-                    + "All clusters must be terminated before environment deletion. Alive clusters: " + alive);
-        }
-    }
-
     public SimpleEnvironmentResponse delete(String environmentName, Long workspaceId) {
         Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
         delete(environment);
@@ -192,6 +182,22 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     public DetailedEnvironmentResponse createForLoggedInUser(EnvironmentRequest request, @Nonnull Long workspaceId) {
+        Environment environment = initEnvironment(request, workspaceId);
+        CloudRegions cloudRegions = getCloudRegions(environment);
+        setLocation(environment, request.getLocation(), cloudRegions);
+        ValidationResult validationResult;
+        if (cloudRegions.areRegionsSupported()) {
+            setRegions(environment, request.getRegions(), cloudRegions);
+        }
+        validationResult = environmentCreationValidator.validate(environment, request, cloudRegions);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        environment = createForLoggedInUser(environment, workspaceId);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+    }
+
+    private Environment initEnvironment(EnvironmentRequest request, @Nonnull Long workspaceId) {
         Environment environment = conversionService.convert(request, Environment.class);
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdapConfigs(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxyConfigs(), workspaceId));
@@ -201,59 +207,103 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());
-        boolean regionsSupported = cloudParameterCache.areRegionsSupported(environment.getCloudPlatform());
-        setRegions(environment, request, regionsSupported);
-        ValidationResult validationResult = environmentCreationValidator.validate(environment, request, regionsSupported);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
+        return environment;
+    }
+
+    private CloudRegions getCloudRegions(Environment environment) {
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+        platformResourceRequest.setCredential(environment.getCredential());
+        platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
+        return platformParameterService.getRegionsByCredential(platformResourceRequest);
+    }
+
+    public DetailedEnvironmentResponse edit(Long workspaceId, String environmentName, EnvironmentEditRequest request) {
+        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+        if (StringUtils.isNotEmpty(request.getDescription())) {
+            environment.setDescription(request.getDescription());
         }
-        environment = createForLoggedInUser(environment, workspaceId);
+        CloudRegions cloudRegions = getCloudRegions(environment);
+        if (locationAndRegionChanged(request)) {
+            editRegionsAndLocation(request, environment, cloudRegions);
+        } else if (request.getLocation() != null) {
+            editLocation(request, environment, cloudRegions);
+        } else if (CollectionUtils.isNotEmpty(request.getRegions())) {
+            editRegions(request, environment, cloudRegions);
+        }
+        environment = pureSave(environment);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
-    private void setRegions(Environment environment, EnvironmentRequest environmentRequest, boolean regionsSupported) {
-        try {
-            PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
-            platformResourceRequest.setCredential(environment.getCredential());
-            platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
-            CloudRegions cloudRegions = platformParameterService.getRegionsByCredential(platformResourceRequest);
-            if (regionsSupported) {
-                Set<Region> regionSet = new HashSet<>();
-                Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
-                for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
-                    if (environmentRequest.getRegions().contains(r.getRegionName())) {
-                        Region region = new Region();
-                        region.setName(r.getRegionName());
-                        String displayName = displayNames.get(r);
-                        region.setDisplayName(StringUtils.isEmpty(displayName) ? r.getRegionName() : displayName);
-                        regionSet.add(region);
-                    }
-                }
-                environment.setRegions(new Json(regionSet));
-            } else {
-                environment.setRegions(new Json(new HashSet<>()));
-            }
-            setLocation(environment, environmentRequest, cloudRegions);
+    private boolean locationAndRegionChanged(EnvironmentEditRequest request) {
+        return CollectionUtils.isNotEmpty(request.getRegions()) && request.getLocation() != null;
+    }
 
+    private void editRegionsAndLocation(EnvironmentEditRequest request, Environment environment, CloudRegions cloudRegions) {
+        validateRegionAndLocation(request.getLocation(), request.getRegions(), cloudRegions, environment);
+        setLocation(environment, request.getLocation(), cloudRegions);
+        setRegions(environment, request.getRegions(), cloudRegions);
+    }
+
+    private void validateRegionAndLocation(LocationRequest location, Set<String> requestedRegions,
+            CloudRegions cloudRegions, Environment environment) {
+        ValidationResultBuilder validationResultBuilder = environmentRegionValidator
+                .validateRegions(requestedRegions, cloudRegions, environment.getCloudPlatform(), ValidationResult.builder());
+        environmentRegionValidator.validateLocation(location, requestedRegions, environment, validationResultBuilder);
+        ValidationResult validationResult = validationResultBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void editLocation(EnvironmentEditRequest request, Environment environment, CloudRegions cloudRegions) {
+        Set<String> regions = environment.getRegionSet().stream()
+                .map(Region::getName).collect(Collectors.toSet());
+        validateRegionAndLocation(request.getLocation(), regions, cloudRegions, environment);
+        setLocation(environment, request.getLocation(), cloudRegions);
+    }
+
+    private void editRegions(EnvironmentEditRequest request, Environment environment, CloudRegions cloudRegions) {
+        LocationRequest locationRequest = conversionService.convert(environment, LocationRequest.class);
+        validateRegionAndLocation(locationRequest, request.getRegions(), cloudRegions, environment);
+        setRegions(environment, request.getRegions(), cloudRegions);
+    }
+
+    private void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
+        try {
+            Set<Region> regionSet = new HashSet<>();
+            Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
+            for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
+                if (requestedRegions.contains(r.getRegionName())) {
+                    Region region = new Region();
+                    region.setName(r.getRegionName());
+                    String displayName = displayNames.get(r);
+                    region.setDisplayName(isEmpty(displayName) ? r.getRegionName() : displayName);
+                    regionSet.add(region);
+                }
+            }
+            environment.setRegions(new Json(regionSet));
         } catch (JsonProcessingException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
-    private void setLocation(Environment environment, EnvironmentRequest environmentRequest, CloudRegions cloudRegions) {
-        Coordinate coordinate = cloudRegions.getCoordinates().get(region(environmentRequest.getLocation().getLocationName()));
-        LocationRequest location = environmentRequest.getLocation();
-        if (coordinate != null) {
-            environment.setLocation(coordinate.getDisplayName());
-            environment.setLatitude(coordinate.getLatitude());
-            environment.setLongitude(coordinate.getLongitude());
-        } else if (location != null && location.getLatitude() != null && location.getLongitude() != null) {
-            environment.setLocation(location.getLocationName());
-            environment.setLatitude(location.getLatitude());
-            environment.setLongitude(location.getLongitude());
-        } else {
-            throw new BadRequestException(String.format("No location found with name %s in the location list. The supported locations are: [%s]",
-                    environmentRequest.getLocation(), cloudRegions.locationNames()));
+    private void setLocation(Environment environment, LocationRequest requestedLocation, CloudRegions cloudRegions) {
+        if (requestedLocation != null) {
+            Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getLocationName()));
+            if (coordinate != null) {
+                environment.setLocation(requestedLocation.getLocationName());
+                environment.setLocationDisplayName(coordinate.getDisplayName());
+                environment.setLatitude(coordinate.getLatitude());
+                environment.setLongitude(coordinate.getLongitude());
+            } else if (requestedLocation.getLatitude() != null && requestedLocation.getLongitude() != null) {
+                environment.setLocation(requestedLocation.getLocationName());
+                environment.setLocationDisplayName(requestedLocation.getLocationName());
+                environment.setLatitude(requestedLocation.getLatitude());
+                environment.setLongitude(requestedLocation.getLongitude());
+            } else {
+                throw new BadRequestException(String.format("No location found with name %s in the location list. The supported locations are: [%s]",
+                        requestedLocation, cloudRegions.locationNames()));
+            }
         }
     }
 
@@ -403,15 +453,15 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                     String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
                     String datalakeAmbariUser = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_USER);
                     String datalakeAmbariPassowrd = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_PASSWORD);
-                    LdapConfig ldapConfig = StringUtils.isEmpty(registerDatalakeRequest.getLdapName()) ? null
+                    LdapConfig ldapConfig = isEmpty(registerDatalakeRequest.getLdapName()) ? null
                             : ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId);
-                    KerberosConfig kerberosConfig = StringUtils.isEmpty(registerDatalakeRequest.getKerberosName()) ? null
+                    KerberosConfig kerberosConfig = isEmpty(registerDatalakeRequest.getKerberosName()) ? null
                             : kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
                     Set<RDSConfig> rdssConfigs = CollectionUtils.isEmpty(registerDatalakeRequest.getRdsNames()) ? null
                             : rdsConfigService.findByNamesInWorkspace(registerDatalakeRequest.getRdsNames(), workspaceId);
                     URL ambariUrl = new URL(datalakeAmbariUrl);
                     AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariUrl, datalakeAmbariUser, datalakeAmbariPassowrd);
-                    Map<String, Map<String, String>> serviceSecretParamMap = StringUtils.isEmpty(registerDatalakeRequest.getRangerAdminPassword())
+                    Map<String, Map<String, String>> serviceSecretParamMap = isEmpty(registerDatalakeRequest.getRangerAdminPassword())
                             ? new HashMap<>() : Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE, Map.ofEntries(
                             Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, registerDatalakeRequest.getRangerAdminPassword()))));
                     DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, envView, datalakeAmbariUrl,
@@ -425,6 +475,15 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    @Override
+    protected void prepareDeletion(Environment environment) {
+        Long aliveEnvs = stackService.countAliveByEnvironment(environment);
+        if (aliveEnvs > 0) {
+            throw new BadRequestException("Cannot delete environment. "
+                    + "All clusters must be terminated before environment deletion. Alive clusters: " + aliveEnvs);
         }
     }
 

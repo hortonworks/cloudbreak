@@ -4,33 +4,35 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.environment.request.EnvironmentRequest;
-import com.sequenceiq.cloudbreak.api.model.environment.request.LocationRequest;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.environment.Region;
 
 @Component
 public class EnvironmentCreationValidator {
 
-    public ValidationResult validate(Environment environment, EnvironmentRequest request, boolean regionsSupported) {
+    @Inject
+    private EnvironmentRegionValidator environmentRegionValidator;
+
+    public ValidationResult validate(Environment environment, EnvironmentRequest request, CloudRegions cloudRegions) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateLdapConfigs(environment, request, resultBuilder);
         validateProxyConfigs(environment, request, resultBuilder);
         validateRdsConfigs(environment, request, resultBuilder);
         validateKubernetesConfigs(environment, request, resultBuilder);
-        validateRegions(request.getRegions(), environment, regionsSupported, resultBuilder);
-        validateLocation(request.getLocation(), request.getRegions(), environment, resultBuilder);
+        environmentRegionValidator.validateRegions(request.getRegions(), cloudRegions, environment.getCloudPlatform(), resultBuilder);
+        environmentRegionValidator.validateLocation(request.getLocation(), request.getRegions(), environment, resultBuilder);
         validateKerberosConfigs(environment, request, resultBuilder);
         return resultBuilder.build();
     }
@@ -83,45 +85,6 @@ public class EnvironmentCreationValidator {
             requestedKubernetesConfigs.removeAll(foundKubernetesConfigs);
             resultBuilder.error(String.format("The following Kubernetes config(s) could not be found in the workspace: [%s]",
                     requestedKubernetesConfigs.stream().collect(Collectors.joining(", "))));
-        }
-    }
-
-    private void validateRegions(Set<String> requestedRegions, Environment environment, boolean regionsSupported, ValidationResultBuilder resultBuilder) {
-        Credential credential = environment.getCredential();
-        Set<Region> existingRegions = environment.getRegionSet();
-        String cloudPlatform = credential.cloudPlatform();
-        if (regionsSupported) {
-            validateRegionsWhereSupported(requestedRegions, existingRegions, resultBuilder, cloudPlatform);
-        } else if (!requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Region are not supporeted on cloudprovider: [%s].", cloudPlatform));
-        }
-    }
-
-    private void validateLocation(LocationRequest location, Set<String> requestedRegions, Environment environment, ValidationResultBuilder resultBuilder) {
-        String cloudPlatform = environment.getCredential().cloudPlatform();
-        if (!requestedRegions.contains(location.getLocationName())
-                && !requestedRegions.isEmpty()) {
-            if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
-                resultBuilder.error(String.format("Location is not one of the region: [%s].", location.getLocationName()));
-            }
-        }
-    }
-
-    private void validateRegionsWhereSupported(Set<String> requestedRegions, Set<Region> existingRegions, ValidationResultBuilder resultBuilder,
-            String cloudPlatform) {
-        if (requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Region are mandatory on cloudprovider: [%s]", cloudPlatform));
-        } else {
-            Set<String> existingRegionNames = existingRegions.stream().map(Region::getName).collect(Collectors.toSet());
-            requestedRegions = new HashSet<>(requestedRegions);
-            requestedRegions.removeAll(existingRegionNames);
-            if (!requestedRegions.isEmpty()) {
-                resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
-                                + "Existing regions are: [%s]",
-                        requestedRegions.stream().collect(Collectors.joining(", ")),
-                        existingRegionNames.stream().collect(Collectors.joining(", "))
-                ));
-            }
         }
     }
 }
