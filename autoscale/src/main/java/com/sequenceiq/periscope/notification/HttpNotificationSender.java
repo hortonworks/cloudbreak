@@ -51,7 +51,7 @@ public class HttpNotificationSender {
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .post(Entity.json(notification), String.class);
             } catch (Exception ex) {
-                LOGGER.warn("Could not send notification to the specified endpoint: '{}' Cause: {}", endpoint, ex.getMessage());
+                LOGGER.info("Could not send notification to the specified endpoint: '{}' Cause: {}", endpoint, ex.getMessage());
             }
         }
     }

@@ -121,7 +121,7 @@ public class StackSyncService {
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
-            LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
+            LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
         } else {
             sync(stack, stackStatusUpdateEnabled);
         }
@@ -291,7 +291,7 @@ public class StackSyncService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info("Host cannot be deleted from cluster: ", e);
+            LOGGER.error("Host cannot be deleted from cluster: ", e);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(),
                             Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));

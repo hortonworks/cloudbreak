@@ -88,7 +88,7 @@ public class GcpProvisionSetup implements Setup {
         } catch (Exception e) {
             Long stackId = cloudContext.getId();
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
-            LOGGER.warn(msg, e);
+            LOGGER.error(msg, e);
             throw new CloudConnectorException(msg, e);
         }
     }
@@ -109,7 +109,7 @@ public class GcpProvisionSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             }
         } catch (IOException e) {
-            LOGGER.info("Failed to retrieve image copy status", e);
+            LOGGER.warn("Failed to retrieve image copy status", e);
             return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
         }
         return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);

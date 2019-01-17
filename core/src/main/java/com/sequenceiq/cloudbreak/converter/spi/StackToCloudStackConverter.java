@@ -181,7 +181,7 @@ public class StackToCloudStackConverter {
                 }
             }
         } catch (IOException e) {
-            LOGGER.info("Exception during converting user defined tags.", e);
+            LOGGER.warn("Exception during converting user defined tags.", e);
         }
         return result;
     }

@@ -75,7 +75,7 @@ public class GroupResourceService {
                     context.addGroupResources(group.getName(), Collections.singletonList(resource));
                     results.addAll(pollerResult);
                 } catch (ResourceNotNeededException e) {
-                    LOGGER.debug("Skipping resource creation: {}", e.getMessage());
+                    LOGGER.warn("Skipping resource creation: {}", e.getMessage());
                 }
             }
         }

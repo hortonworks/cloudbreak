@@ -425,7 +425,7 @@ public class CloudbreakClient {
                     return method.invoke(endpoint, args);
                 } catch (InvocationTargetException ite) {
                     if (ite.getTargetException() instanceof NotAuthorizedException) {
-                        logger.debug("Unauthorized request on {}.{}(): {}, refreshing the auth token and try again...", endpointType.getCanonicalName(),
+                        logger.warn("Unauthorized request on {}.{}(): {}, refreshing the auth token and try again...", endpointType.getCanonicalName(),
                                 method.getName(), ite.getTargetException().getMessage());
                         refreshIfNeededAndGet(null, true);
                         try {

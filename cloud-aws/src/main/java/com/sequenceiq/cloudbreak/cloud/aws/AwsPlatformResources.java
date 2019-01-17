@@ -443,10 +443,10 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get instance profile roles because the user does not have enough permission.";
-                LOGGER.error(policyMessage + ase);
+                LOGGER.warn(policyMessage + ase);
                 throw new CloudConnectorException(policyMessage, ase);
             } else {
-                LOGGER.info(queryFailedMessage, ase);
+                LOGGER.warn(queryFailedMessage, ase);
                 throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
             }
         } catch (Exception e) {
@@ -499,9 +499,9 @@ public class AwsPlatformResources implements PlatformResources {
                 } catch (AmazonServiceException e) {
                     if (e.getStatusCode() == UNAUTHORIZED) {
                         String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
-                        LOGGER.error(policyMessage + e);
+                        LOGGER.warn(policyMessage + e);
                     } else {
-                        LOGGER.info(queryFailedMessage, e);
+                        LOGGER.warn(queryFailedMessage, e);
                     }
                 } catch (Exception e) {
                     LOGGER.warn(queryFailedMessage, e);
@@ -510,10 +510,10 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
-                LOGGER.error(policyMessage + ase);
+                LOGGER.warn(policyMessage + ase);
                 throw new CloudConnectorException(policyMessage, ase);
             } else {
-                LOGGER.info(queryFailedMessage, ase);
+                LOGGER.warn(queryFailedMessage, ase);
                 throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
             }
         } catch (Exception e) {

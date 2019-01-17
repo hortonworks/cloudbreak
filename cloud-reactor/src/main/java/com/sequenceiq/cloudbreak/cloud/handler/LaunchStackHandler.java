@@ -74,7 +74,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             LOGGER.info("Launching the stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
             LaunchStackResult failure = new LaunchStackResult(e, request);
-            LOGGER.warn("Error during launching the stack:", e);
+            LOGGER.error("Error during launching the stack:", e);
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(launchStackRequestEvent.getHeaders(), failure));
         }

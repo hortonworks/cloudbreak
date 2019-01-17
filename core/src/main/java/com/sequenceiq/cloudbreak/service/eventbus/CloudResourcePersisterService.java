@@ -40,7 +40,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         ResourceRepository resourceRepository = getResourceRepository();
         Resource persistedResource = resourceRepository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
         if (persistedResource != null) {
-            LOGGER.debug("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
+            LOGGER.warn("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
                     cloudResource.getName(), cloudResource.getType().name(), stackId);
             return notification;
         }

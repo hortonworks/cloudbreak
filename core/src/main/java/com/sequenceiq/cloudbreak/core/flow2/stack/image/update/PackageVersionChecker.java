@@ -50,17 +50,17 @@ public class PackageVersionChecker {
                     .findFirst().orElseThrow(() -> new NoSuchElementException("Package version is missing"))
                     .getImage().get(Image.class).getPackageVersions();
         } catch (IOException e) {
-            LOGGER.debug("Could not get image", e);
+            LOGGER.warn("Could not get image", e);
             return CheckResult.failed("Could not get image");
         }
 
         for (String packageToCompare : packagesToCompare) {
             String packageVersionInImage = packageVersions.get(packageToCompare);
             if (StringUtils.isBlank(packageVersionInImage)) {
-                LOGGER.debug("Missing package in image: " + packageToCompare);
+                LOGGER.warn("Missing package in image: " + packageToCompare);
                 missingPackageVersion.add(packageToCompare);
             } else if (!removeBuildVersion(packageVersionInImage).equalsIgnoreCase(removeBuildVersion(instancePackageVersions.get(packageToCompare)))) {
-                LOGGER.debug(String.format("Different package [%s] version on image [%s] and on instance [%s]",
+                LOGGER.warn(String.format("Different package [%s] version on image [%s] and on instance [%s]",
                         packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
                 differentPackageVersion.add(packageToCompare);
             }

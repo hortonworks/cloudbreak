@@ -124,7 +124,7 @@ public class FlexUsageGenerator {
         try {
             cbUser = cachedUserDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ignored) {
-            LOGGER.debug("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", source.getOwner());
+            LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", source.getOwner());
             cbUser = source.getOwner();
         }
         return cbUser;
@@ -214,7 +214,7 @@ public class FlexUsageGenerator {
                 Long stackTerminationInMillis = Long.valueOf(stackName.substring(indexOfDelimiter));
                 terminationTime = formatInstant(Instant.ofEpochMilli(stackTerminationInMillis), FLEX_TIME_ZONE_FORMAT_PATTERN);
             } catch (Exception ex) {
-                LOGGER.debug("Stack termination time could not be calculated.", ex);
+                LOGGER.warn("Stack termination time could not be calculated.", ex);
             }
         }
         return terminationTime;

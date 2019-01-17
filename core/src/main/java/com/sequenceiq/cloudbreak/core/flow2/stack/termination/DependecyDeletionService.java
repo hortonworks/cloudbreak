@@ -85,7 +85,7 @@ public class DependecyDeletionService {
                 networkService.delete(network);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete network {} which is associated with the stack: {}", network, ex.getMessage());
+            LOGGER.warn("Could not delete network {} which is associated with the stack: {}", network, ex.getMessage());
         }
     }
 
@@ -95,7 +95,7 @@ public class DependecyDeletionService {
                 credentialService.archiveCredential(credential);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete credential {} which is associated with the stack: {}", credential, ex.getMessage());
+            LOGGER.warn("Could not delete credential {} which is associated with the stack: {}", credential, ex.getMessage());
         }
     }
 
@@ -105,7 +105,7 @@ public class DependecyDeletionService {
                 securityGroupService.delete(securityGroup);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete securityGroup {} which is associated with the stack: {}", securityGroup, ex.getMessage());
+            LOGGER.warn("Could not delete securityGroup {} which is associated with the stack: {}", securityGroup, ex.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class DependecyDeletionService {
                 templateService.delete(template);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete template {} which is associated with the stack: {}", template, ex.getMessage());
+            LOGGER.warn("Could not delete template {} which is associated with the stack: {}", template, ex.getMessage());
         }
     }
 
@@ -125,7 +125,7 @@ public class DependecyDeletionService {
                 blueprintService.delete(blueprint);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete validation {} which is associated with the stack: {}", blueprint, ex.getMessage());
+            LOGGER.warn("Could not delete validation {} which is associated with the stack: {}", blueprint, ex.getMessage());
         }
     }
 
@@ -135,7 +135,7 @@ public class DependecyDeletionService {
                 recipeService.delete(recipe);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete recipe {} which is associated with the stack: {}", recipe, ex.getMessage());
+            LOGGER.warn("Could not delete recipe {} which is associated with the stack: {}", recipe, ex.getMessage());
         }
     }
 }

@@ -213,7 +213,7 @@ public class StackCreationService {
         LOGGER.error("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
-            LOGGER.debug("The flow has been cancelled.");
+            LOGGER.warn("The flow has been cancelled.");
         } else {
             if (!stack.isStackInDeletionPhase()) {
                 handleFailure(stack, errorReason);

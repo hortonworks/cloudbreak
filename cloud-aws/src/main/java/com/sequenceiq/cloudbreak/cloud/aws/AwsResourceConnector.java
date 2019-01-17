@@ -257,7 +257,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             } catch (Exception e) {
                 String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
                         e.getMessage());
-                LOGGER.warn(errorMessage, e);
+                LOGGER.error(errorMessage, e);
                 throw new CloudConnectorException(e.getMessage(), e);
             }
         }
@@ -380,7 +380,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i));
             }
         } else {
-            LOGGER.debug("The number of elastic ips are not equals with the number of instances. EIP association will be skipped!");
+            LOGGER.warn("The number of elastic ips are not equals with the number of instances. EIP association will be skipped!");
         }
     }
 
@@ -613,7 +613,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 address = describeResult.getAddresses().get(0);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("The allocation ID '" + elasticIpResource.getName() + "' does not exist")) {
-                    LOGGER.debug("Elastic IP with allocation ID '{}' not found. Ignoring IP release.", elasticIpResource.getName());
+                    LOGGER.warn("Elastic IP with allocation ID '{}' not found. Ignoring IP release.", elasticIpResource.getName());
                     return;
                 } else {
                     throw e;
@@ -716,7 +716,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                         .withAutoScalingGroupName(asGroupName)
                         .withMaxSize(getInstanceCount(stack, vms.get(0).getTemplate().getGroupName())));
             } catch (AmazonServiceException e) {
-                LOGGER.debug(e.getErrorMessage());
+                LOGGER.warn(e.getErrorMessage());
             }
         }
         return check(auth, resources);

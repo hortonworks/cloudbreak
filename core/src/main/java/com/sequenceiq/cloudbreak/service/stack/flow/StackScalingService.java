@@ -97,7 +97,7 @@ public class StackScalingService {
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
             } catch (Exception e) {
-                LOGGER.info("Host cannot be deleted from cluster: ", e);
+                LOGGER.error("Host cannot be deleted from cluster: ", e);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_FAILED.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));

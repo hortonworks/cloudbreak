@@ -91,7 +91,7 @@ public final class GcpStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Compute access.", e);
+            LOGGER.info("Error occurred while building Google Compute access.", e);
             throw new CredentialVerificationException("Error occurred while building Google Compute access.", e);
         }
     }
@@ -217,7 +217,7 @@ public final class GcpStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Storage access.", e);
+            LOGGER.error("Error occurred while building Google Storage access.", e);
         }
         return null;
     }
@@ -227,7 +227,7 @@ public final class GcpStackUtil {
             String[] parts = createParts(image);
             return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
         } else {
-            LOGGER.debug("No bucket found in source image path.");
+            LOGGER.warn("No bucket found in source image path.");
             return EMPTY_BUCKET;
         }
     }

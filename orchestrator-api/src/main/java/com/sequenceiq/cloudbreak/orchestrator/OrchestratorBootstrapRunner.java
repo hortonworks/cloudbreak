@@ -102,7 +102,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             } catch (CloudbreakOrchestratorInProgressException ex) {
                 actualException = ex;
                 String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
-                LOGGER.debug("Orchestrator component {} start in progress, retrying [{}/{}] {}, Reason: {}, additional info: {}",
+                LOGGER.warn("Orchestrator component {} start in progress, retrying [{}/{}] {}, Reason: {}, additional info: {}",
                         type, retryCount, maxRetryCount, elapsedTimeLog, actualException, orchestratorBootstrap);
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
@@ -113,7 +113,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             } catch (Exception ex) {
                 actualException = ex;
                 String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
-                LOGGER.debug("Orchestrator component {} failed to start, retrying [{}/{}], error count [{}/{}]. {}, Reason: {}, additional info: {}",
+                LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}], error count [{}/{}]. {}, Reason: {}, additional info: {}",
                         type, retryCount, maxRetryCount, errorCount, maxRetryOnError, elapsedTimeLog, actualException, orchestratorBootstrap);
                 retryCount++;
                 errorCount++;
@@ -166,10 +166,10 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException ie) {
-                LOGGER.debug("The thread was interrupted during sleeping. Sleeping halted, continuing execution.", ie);
+                LOGGER.warn("The thread was interrupted during sleeping. Sleeping halted, continuing execution.", ie);
             }
         } else {
-            LOGGER.debug("The thread was interrupted before sleeping. Skipping sleeping and continuing execution.");
+            LOGGER.warn("The thread was interrupted before sleeping. Skipping sleeping and continuing execution.");
         }
     }
 

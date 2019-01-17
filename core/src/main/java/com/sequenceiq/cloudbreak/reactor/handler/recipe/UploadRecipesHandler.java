@@ -56,7 +56,7 @@ public class UploadRecipesHandler implements ReactorEventHandler<UploadRecipesRe
             recipeEngine.uploadRecipes(stack, hostGroups);
             result = new UploadRecipesSuccess(stackId);
         } catch (Exception e) {
-            LOGGER.info("Failed to upload recipes", e);
+            LOGGER.error("Failed to upload recipes", e);
             result = new UploadRecipesFailed(stackId, e);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

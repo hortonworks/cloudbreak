@@ -47,7 +47,7 @@ public class RdsConnectionValidator {
                 LOGGER.error("{}, {}", msg, e.getMessage(), e);
                 throw new BadRequestException(msg, e);
             } catch (Exception e) {
-                LOGGER.info(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
                 throw new BadRequestException(e.getMessage(), e);
             }
         } catch (MalformedURLException e) {

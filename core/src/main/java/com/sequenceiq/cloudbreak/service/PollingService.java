@@ -33,7 +33,7 @@ public class PollingService<T> {
             try {
                 success = statusCheckerTask.checkStatus(t);
             } catch (Exception ex) {
-                LOGGER.debug("Exception occurred in the polling: {}", ex.getMessage(), ex);
+                LOGGER.warn("Exception occurred in the polling: {}", ex.getMessage(), ex);
                 failures++;
                 actual = ex;
             }

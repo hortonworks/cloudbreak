@@ -221,7 +221,7 @@ public class AmbariDecommissioner {
     public Map<String, HostMetadata> collectHostsToRemove(Stack stack, String hostGroupName, Set<String> hostNames) {
         Map<String, HostMetadata> hostsToRemove = collectHostMetadata(stack.getCluster(), hostGroupName, hostNames);
         if (hostsToRemove.size() != hostNames.size()) {
-            LOGGER.info("Not all the hosts found in the given host group.");
+            LOGGER.warn("Not all the hosts found in the given host group.");
         }
         AmbariClient ambariClient = getAmbariClient(stack);
         List<String> runningHosts = ambariClient.getClusterHosts();
@@ -623,7 +623,7 @@ public class AmbariDecommissioner {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info("Failed to start HDFS/YARN/HBASE services", e);
+            LOGGER.error("Failed to start HDFS/YARN/HBASE services", e);
             throw new BadRequestException("Failed to start the HDFS, YARN and HBASE services, it's possible that some of the nodes are unavailable");
         }
 

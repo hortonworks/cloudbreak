@@ -67,7 +67,7 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
             LOGGER.info("Downscale successfully finished for {}", cloudContext);
             result = new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults()));
         } catch (Exception e) {
-            LOGGER.warn("Failed to handle DownscaleStackRequest.", e);
+            LOGGER.error("Failed to handle DownscaleStackRequest.", e);
             result = new DownscaleStackResult(e.getMessage(), e, request);
         }
         request.getResult().onNext(result);

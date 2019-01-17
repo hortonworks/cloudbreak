@@ -156,7 +156,7 @@ public class RecipeEngine {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Cannot getConfigurationEntries container executor", e);
+            LOGGER.warn("Cannot getConfigurationEntries container executor", e);
         }
     }
 
@@ -194,7 +194,7 @@ public class RecipeEngine {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Cannot create HDFS home dir recipe", e);
+            LOGGER.warn("Cannot create HDFS home dir recipe", e);
         }
     }
 
@@ -216,7 +216,7 @@ public class RecipeEngine {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Cannot create s3 symlinks recipe", e);
+            LOGGER.warn("Cannot create s3 symlinks recipe", e);
         }
     }
 
@@ -248,7 +248,7 @@ public class RecipeEngine {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Cannot create SmartSense caputre schedule setter recipe", e);
+            LOGGER.warn("Cannot create SmartSense caputre schedule setter recipe", e);
         }
     }
 

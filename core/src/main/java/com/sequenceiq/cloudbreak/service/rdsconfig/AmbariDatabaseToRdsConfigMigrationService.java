@@ -76,7 +76,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
             clusterService.save(cluster);
         } else {
             cluster.getRdsConfigs().stream().findFirst().ifPresent(rdsConf ->
-                    LOGGER.debug("RdsConfig with AMBARI type already exists for cluster [{}] RdsConfig id: [{}]", cluster.getId(), rdsConf.getId()));
+                    LOGGER.warn("RdsConfig with AMBARI type already exists for cluster [{}] RdsConfig id: [{}]", cluster.getId(), rdsConf.getId()));
         }
     }
 

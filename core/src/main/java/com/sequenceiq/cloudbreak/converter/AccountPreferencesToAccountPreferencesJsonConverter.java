@@ -69,7 +69,7 @@ public class AccountPreferencesToAccountPreferencesJsonConverter
                 apJson.setDefaultTags(tags);
             }
         } catch (Exception e) {
-            LOGGER.info("Failed to convert default tags.", e);
+            LOGGER.error("Failed to convert default tags.", e);
             apJson.setDefaultTags(tags);
         }
     }

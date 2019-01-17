@@ -55,7 +55,7 @@ public class CachedImageCatalogProvider {
     public CloudbreakImageCatalogV2 getImageCatalogV2(String catalogUrl) throws CloudbreakImageCatalogException {
         CloudbreakImageCatalogV2 catalog;
         if (catalogUrl == null) {
-            LOGGER.info("No image catalog was defined!");
+            LOGGER.warn("No image catalog was defined!");
             return null;
         }
 

@@ -76,7 +76,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             }
             PollingResult orchestratorRemovalPollingResult = ambariDecommissioner.removeHostsFromOrchestrator(stack, new ArrayList<>(decomissionedHostNames));
             if (!isSuccess(orchestratorRemovalPollingResult)) {
-                LOGGER.debug("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
+                LOGGER.warn("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
             }
             result = new DecommissionResult(request, decomissionedHostNames);
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
             recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
         } catch (Exception ex) {
-            LOGGER.warn(ex.getLocalizedMessage(), ex);
+            LOGGER.error(ex.getLocalizedMessage(), ex);
         }
     }
 }
