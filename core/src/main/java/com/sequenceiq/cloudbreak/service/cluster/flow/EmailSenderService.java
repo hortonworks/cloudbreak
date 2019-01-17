@@ -193,7 +193,7 @@ public class EmailSenderService {
             LOGGER.debug("Sending email. Content: {}", emailBody);
             mailSender.send(emailMimeMessagePreparator.prepareMessage(Strings.isNullOrEmpty(mail) ? user.getUsername() : mail, subject, emailBody));
         } catch (Exception e) {
-            LOGGER.info("Could not send email. User: {}", user.getUserId());
+            LOGGER.error("Could not send email. User: {}", user.getUserId());
             throw new CloudbreakServiceException(e);
         }
     }

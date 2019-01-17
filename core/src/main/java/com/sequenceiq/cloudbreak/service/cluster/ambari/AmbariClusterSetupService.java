@@ -181,7 +181,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {
-            LOGGER.warn("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
+            LOGGER.info("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
         }
     }

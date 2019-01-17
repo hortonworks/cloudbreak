@@ -31,7 +31,7 @@ public class AmbariSmartSenseCapturer {
                 LOGGER.info("Triggering SmartSense data capture.");
                 ambariClient.smartSenseCapture(caseId);
             } catch (Exception e) {
-                LOGGER.info("Triggering SmartSense capture is failed.", e);
+                LOGGER.error("Triggering SmartSense capture is failed.", e);
             }
         }
     }

@@ -85,7 +85,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             LOGGER.info("TerminateStackHandler finished");
             eventBus.notify(result.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), result));
         } catch (Exception e) {
-            LOGGER.warn("Failed to handle TerminateStackRequest", e);
+            LOGGER.error("Failed to handle TerminateStackRequest", e);
             TerminateStackResult terminateStackResult = new TerminateStackResult("Stack termination failed.", e, request);
             request.getResult().onNext(terminateStackResult);
             eventBus.notify(terminateStackResult.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), terminateStackResult));
