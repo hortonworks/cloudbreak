@@ -234,21 +234,21 @@ cb:
             baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2
             gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       2.7:
-        version: 2.7.100.0-255
+        version: 2.7.100.0-266
         repo:
           redhat7:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-255
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-255/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-266
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-266/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           debian9:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.100.0-255
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.100.0-266
           ubuntu16:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.100.0-255
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.100.0-266
           sles12:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.100.0-255
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.100.0-255/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.100.0-266
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.100.0-266/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           amazonlinux2:
-            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.100.0-255
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.100.0-255/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.100.0-266
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.100.0-266/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       port: 5432
       user: ambari
@@ -311,17 +311,17 @@ cb:
         repo:
           stack:
             repoid: HDP-3.0
-            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.100.0-171
-            debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP/debian9/3.x/BUILDS/3.0.100.0-171
-            ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu16/3.x/BUILDS/3.0.100.0-171
-            sles12: http://s3.amazonaws.com/dev.hortonworks.com/HDP/sles12/3.x/BUILDS/3.0.100.0-171
-            amazonlinux2: http://s3.amazonaws.com/dev.hortonworks.com/HDP/amazonlinux2/3.x/BUILDS/3.0.100.0-171
-            repository-version: 3.0.100.0-171
-            vdf-redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.100.0-171/HDP-3.0.100.0-171.xml
-            vdf-debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP/debian9/3.x/BUILDS/3.0.100.0-171/HDP-3.0.100.0-171.xml
-            vdf-ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu16/3.x/BUILDS/3.0.100.0-171/HDP-3.0.100.0-171.xml
-            vdf-sles12: http://s3.amazonaws.com/dev.hortonworks.com/HDP/sles12/3.x/BUILDS/3.0.100.0-171/HDP-3.0.100.0-171.xml
-            vdf-amazonlinux2: http://s3.amazonaws.com/dev.hortonworks.com/HDP/amazonlinux2/3.x/BUILDS/3.0.100.0-171/HDP-3.0.100.0-171.xml
+            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.100.0-206
+            debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP/debian9/3.x/BUILDS/3.0.100.0-206
+            ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu16/3.x/BUILDS/3.0.100.0-206
+            sles12: http://s3.amazonaws.com/dev.hortonworks.com/HDP/sles12/3.x/BUILDS/3.0.100.0-206
+            amazonlinux2: http://s3.amazonaws.com/dev.hortonworks.com/HDP/amazonlinux2/3.x/BUILDS/3.0.100.0-206
+            repository-version: 3.0.100.0-206
+            vdf-redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.100.0-206/HDP-3.0.100.0-206.xml
+            vdf-debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP/debian9/3.x/BUILDS/3.0.100.0-206/HDP-3.0.100.0-206.xml
+            vdf-ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu16/3.x/BUILDS/3.0.100.0-206/HDP-3.0.100.0-206.xml
+            vdf-sles12: http://s3.amazonaws.com/dev.hortonworks.com/HDP/sles12/3.x/BUILDS/3.0.100.0-206/HDP-3.0.100.0-206.xml
+            vdf-amazonlinux2: http://s3.amazonaws.com/dev.hortonworks.com/HDP/amazonlinux2/3.x/BUILDS/3.0.100.0-206/HDP-3.0.100.0-206.xml
           util:
             repoid: HDP-UTILS-1.1.0.22
             redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
