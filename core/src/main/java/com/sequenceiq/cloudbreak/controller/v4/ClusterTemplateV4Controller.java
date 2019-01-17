@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -34,6 +35,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private ClusterTemplateService clusterTemplateService;
 
     @Inject
+    private ClusterTemplateViewService clusterTemplateViewService;
+
+    @Inject
     private TransactionService transactionService;
 
     @Override
@@ -45,9 +49,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
         try {
-            Set<ClusterTemplateViewV4Response> clusterTemplateV4Responses = transactionService.required(() ->
-                    converterUtil.convertAllAsSet(clusterTemplateService.findAllByWorkspaceId(workspaceId), ClusterTemplateViewV4Response.class));
-            return new ClusterTemplateViewV4Responses(clusterTemplateV4Responses);
+            Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
+                    converterUtil.convertAllAsSet(clusterTemplateViewService.findAllByWorkspaceId(workspaceId), ClusterTemplateViewV4Response.class));
+            return new ClusterTemplateViewV4Responses(responses);
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

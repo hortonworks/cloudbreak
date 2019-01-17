@@ -44,5 +44,4 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
     default void deleteAll() {
         throw new UnsupportedOperationException("Deletion is not supported from ClusterTemplateViewRepository");
     }
-
 }

@@ -47,7 +47,7 @@ public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         credentialParameters.setP12(p12Parameters);
         credentialRequest.setGcp(credentialParameters);
         // WHEN
-        String id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId().toString();
+        Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

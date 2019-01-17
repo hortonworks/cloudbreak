@@ -227,7 +227,6 @@ public class EnvironmentServiceTest {
         locationV4Request.setLocationName("region1");
         environmentV4Request.setLocation(locationV4Request);
 
-        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
@@ -250,7 +249,6 @@ public class EnvironmentServiceTest {
         locationV4Request.setLocationName("region1");
         environmentV4Request.setLocation(locationV4Request);
 
-        when(cloudParameterCache.areRegionsSupported(any())).thenReturn(false);
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());

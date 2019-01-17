@@ -153,7 +153,7 @@ public class CloudbreakTest extends GherkinTest {
 
     private void setWorkspaceByUserProfile(IntegrationTestContext testContext, UserProfileV4Response profile) {
         WorkspaceV4Response workspace = CloudbreakClient.getSingletonCloudbreakClient()
-                .workspaceV3Endpoint().get(profile.getUsername());
+                .workspaceV4Endpoint().get(profile.getUsername());
         if (workspace != null) {
             LOGGER.info("put WORKSPACE_ID to context: {}", workspace.getId());
             testContext.putContextParam(WORKSPACE_ID, workspace.getId());

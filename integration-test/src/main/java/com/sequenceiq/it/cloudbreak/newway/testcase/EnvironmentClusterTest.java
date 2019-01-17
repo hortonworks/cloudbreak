@@ -14,6 +14,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
@@ -303,6 +304,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         credentialRequest.setCloudPlatform(cloudPlatform);
         credentialRequest.setDescription(description);
         credentialRequest.setName(name);
+        credentialRequest.setMock(new MockCredentialV4Parameters());
         return credentialRequest;
     }
 

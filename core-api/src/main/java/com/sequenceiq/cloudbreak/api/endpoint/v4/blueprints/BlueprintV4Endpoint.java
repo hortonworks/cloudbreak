@@ -80,6 +80,7 @@ public interface BlueprintV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspace")
-    RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId, @BeanParam RecommendationV4Filter recommendationV4Filter);
+    RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam RecommendationV4Filter recommendationV4Filter);
 
 }

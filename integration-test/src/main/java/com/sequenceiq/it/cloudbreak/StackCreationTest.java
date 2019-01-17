@@ -61,7 +61,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
             instanceGroupRequest.setSecurityGroupId(Long.valueOf(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID)));
             igMap.add(instanceGroupRequest);
         }
-        String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
+        Long credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
@@ -70,7 +70,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackAuthenticationRequest.setPublicKey(publicKey);
         stackRequest.setStackAuthentication(stackAuthenticationRequest);
         stackRequest.setName(stackName);
-        stackRequest.setCredentialId(Long.valueOf(credentialId));
+        stackRequest.setCredentialId(credentialId);
         stackRequest.setRegion(region);
         stackRequest.setOnFailureAction(OnFailureAction.valueOf(onFailureAction));
         FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();

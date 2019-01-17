@@ -1,5 +1,7 @@
 package com.sequenceiq.it.util;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,6 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
@@ -26,7 +33,7 @@ public class CleanupService {
     @Inject
     private ITProps itProps;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId) {
         if (cleanedUp) {
             return;
         }
@@ -37,17 +44,60 @@ public class CleanupService {
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId())));
 
+        cloudbreakClient.blueprintV4Endpoint()
+                .list(workspaceId)
+                .getResponses()
+                .stream()
+                .filter(blueprint -> blueprint.getName().startsWith("it-"))
+                .forEach(blueprint -> deleteBlueprint(workspaceId, cloudbreakClient, blueprint.getId()));
+
+        cloudbreakClient.recipeV4Endpoint()
+                .list(workspaceId)
+                .getResponses()
+                .stream()
+                .filter(recipe -> recipe.getName().startsWith("it-"))
+                .forEach(recipe -> deleteRecipe(workspaceId, cloudbreakClient, recipe.getId()));
+
         cloudbreakClient.credentialV4Endpoint()
-                .list(1L)
+                .list(workspaceId)
                 .getResponses()
                 .stream()
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
-                .forEach(credential -> deleteCredential(cloudbreakClient, credential.getName()));
+                .forEach(credential -> deleteCredential(workspaceId, cloudbreakClient, credential.getId()));
+
+        DatabaseV4ListFilter databaseV4ListFilter = new DatabaseV4ListFilter();
+        databaseV4ListFilter.setAttachGlobal(Boolean.FALSE);
+        cloudbreakClient.databaseV4Endpoint()
+                .list(workspaceId, databaseV4ListFilter)
+                .getResponses()
+                .stream()
+                .filter(rds -> rds.getName().startsWith("it-"))
+                .forEach(rds -> deleteRdsConfigs(workspaceId, cloudbreakClient, rds.getId()));
     }
 
-    public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
+    public void deleteCredential(Long workspaceId, CloudbreakClient cloudbreakClient, Long credentialId) {
         if (credentialId != null) {
-            cloudbreakClient.credentialV4Endpoint().delete(1L, credentialId);
+            Optional<CredentialV4Response> response = cloudbreakClient.credentialV4Endpoint().list(workspaceId)
+                    .getResponses()
+                    .stream()
+                    .filter(credential -> credential.getId().equals(credentialId))
+                    .findFirst();
+            if (response.isPresent()) {
+                cloudbreakClient.credentialV4Endpoint().delete(workspaceId, response.get().getName());
+            }
+        }
+    }
+
+    public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
+        if (blueprintId != null) {
+            Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId)
+                    .getResponses()
+                    .stream()
+                    .filter(blueprint -> blueprint.getId().equals(blueprintId))
+                    .findFirst();
+            if (response.isPresent()) {
+                cloudbreakClient.blueprintV4Endpoint().delete(workspaceId, response.get().getName());
+            }
         }
     }
 
@@ -74,5 +124,33 @@ public class CleanupService {
             result = true;
         }
         return result;
+    }
+
+    public void deleteRecipe(Long workspaceId, CloudbreakClient cloudbreakClient, Long recipeId) {
+        Optional<RecipeViewV4Response> response = cloudbreakClient.recipeV4Endpoint().list(workspaceId)
+                .getResponses()
+                .stream()
+                .filter(recipe -> recipe.getId().equals(recipeId))
+                .findFirst();
+        if (response.isPresent()) {
+            cloudbreakClient.recipeV4Endpoint().delete(workspaceId, response.get().getName());
+        }
+    }
+
+    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name, Long workspaceId) {
+        cloudbreakClient.imageCatalogV4Endpoint().delete(workspaceId, name);
+    }
+
+    public void deleteRdsConfigs(Long workspaceId, CloudbreakClient cloudbreakClient, Long databaseId) {
+        if (databaseId != null) {
+            Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, new DatabaseV4ListFilter())
+                    .getResponses()
+                    .stream()
+                    .filter(database -> database.getId().equals(databaseId))
+                    .findFirst();
+            if (response.isPresent()) {
+                cloudbreakClient.databaseV4Endpoint().delete(workspaceId, response.get().getName());
+            }
+        }
     }
 }

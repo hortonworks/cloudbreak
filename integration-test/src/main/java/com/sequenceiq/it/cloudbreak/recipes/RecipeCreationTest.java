@@ -23,12 +23,13 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
     public void testRecipeCreation(String name, @Optional ("") String description, @Optional("") String preScript,
             @Optional("") String postScript) {
         // GIVEN
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
         if (!preScript.isEmpty()) {
-            createRecipe(name + "pre", preScript, RecipeV4Type.POST_CLUSTER_MANAGER_START, description);
+            createRecipe(name + "pre", preScript, RecipeV4Type.POST_CLUSTER_MANAGER_START, description, workspaceId);
         }
         if (!postScript.isEmpty()) {
-            createRecipe(name + "post", postScript, RecipeV4Type.POST_CLUSTER_INSTALL, description);
+            createRecipe(name + "post", postScript, RecipeV4Type.POST_CLUSTER_INSTALL, description, workspaceId);
         }
     }
 
@@ -40,7 +41,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         itContext.putContextParam(CloudbreakITContextConstants.RECIPE_ID, recipeIds);
     }
 
-    private void createRecipe(String name, String script, RecipeV4Type recipeType, String description) {
+    private void createRecipe(String name, String script, RecipeV4Type recipeType, String description, Long workspaceId) {
         RecipeV4Request recipeRequest = new RecipeV4Request();
         recipeRequest.setType(recipeType);
         recipeRequest.setName(name);
@@ -48,8 +49,6 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         recipeRequest.setDescription(description);
 
         RecipeV4Endpoint recipeEndpoint = getCloudbreakClient().recipeV4Endpoint();
-        // TOOD
-        Long workspaceId = 1L;
         Long id = recipeEndpoint.post(workspaceId, recipeRequest).getId();
         //then
         Assert.assertNotNull(id, "Recipe is not created.");

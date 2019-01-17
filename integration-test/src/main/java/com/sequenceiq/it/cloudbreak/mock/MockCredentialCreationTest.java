@@ -9,6 +9,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -28,8 +29,9 @@ public class MockCredentialCreationTest extends AbstractCloudbreakIntegrationTes
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Mock Rm credential for integrationtest");
         credentialRequest.setCloudPlatform("MOCK");
+        credentialRequest.setMock(new MockCredentialV4Parameters());
         // WHEN
-        String id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId().toString();
+        Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

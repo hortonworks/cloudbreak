@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class GeneralSetV4Response<T> {
 
-    private final Set<T> responses;
+    private Set<T> responses;
 
     public GeneralSetV4Response(Set<T> responses) {
         this.responses = responses;
@@ -14,4 +14,7 @@ public class GeneralSetV4Response<T> {
         return responses;
     }
 
+    public void setResponses(Set<T> responses) {
+        this.responses = responses;
+    }
 }

@@ -38,14 +38,16 @@ public interface ConnectorV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_VMTYPES_BY_CREDENTIAL, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getVmTypesByCredentialAndWorkspace")
-    PlatformVmtypesV4Response getVmTypesByCredential(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformVmtypesV4Response getVmTypesByCredential(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getRegionsByCredentialAndWorkspace")
-    RegionV4Response getRegionsByCredential(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    RegionV4Response getRegionsByCredential(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("disk_types")
@@ -59,49 +61,56 @@ public interface ConnectorV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_NETWORKS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformNetworksForWorkspace")
-    PlatformNetworksV4Response getCloudNetworks(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformNetworksV4Response getCloudNetworks(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("ip_pools")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_IPPOOLS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getIpPoolsCredentialIdForWorkspace")
-    PlatformIpPoolsV4Response getIpPoolsCredentialId(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformIpPoolsV4Response getIpPoolsCredentialId(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("gateways")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_GATEWAYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getGatewaysCredentialIdForWorkspace")
-    PlatformGatewaysV4Response getGatewaysCredentialId(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformGatewaysV4Response getGatewaysCredentialId(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("encryption_keys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_ENCRYPTIONKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getEncryptionKeysForWorkspace")
-    PlatformEncryptionKeysV4Response getEncryptionKeys(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformEncryptionKeysV4Response getEncryptionKeys(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("security_groups")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SECURITYGROUPS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSecurityGroupsForWorkspace")
-    PlatformSecurityGroupsV4Response getSecurityGroups(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformSecurityGroupsV4Response getSecurityGroups(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("ssh_keys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SSHKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSShKeysForWorkspace")
-    PlatformSshKeysV4Response getCloudSshKeys(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformSshKeysV4Response getCloudSshKeys(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("access_configs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getAccessConfigsForWorkspace")
-    PlatformAccessConfigsV4Response getAccessConfigs(@PathParam("workspaceId") Long workspaceId, @BeanParam PlatformResourceV4Filter resourceRequestJson);
+    PlatformAccessConfigsV4Response getAccessConfigs(@PathParam("workspaceId") Long workspaceId,
+            @BeanParam PlatformResourceV4Filter resourceRequestJson);
 
     @GET
     @Path("tag_specifications")
