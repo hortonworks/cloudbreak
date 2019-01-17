@@ -17,7 +17,7 @@ public class SecurityRulesAction {
 
         Log.log(" get Security Rules to");
         SecurityRulesV4Filter securityRulesV4Filter = new SecurityRulesV4Filter();
-        securityRulesV4Filter.setKnoxEnabled(true);
+        securityRulesV4Filter.setKnoxEnabled(Boolean.TRUE);
         securityRulesEntity.setResponse(client.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules(securityRulesV4Filter));
         Log.logJSON(" get Security Rules response: ", securityRulesEntity.getResponse());
     }

@@ -48,7 +48,7 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         credentialParameters.setTenantId(tenantId);
         credentialRequest.setAzure(credentialParameters);
         credentialRequest.setCloudPlatform("AZURE_RM");
-        String id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId().toString();
+        Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

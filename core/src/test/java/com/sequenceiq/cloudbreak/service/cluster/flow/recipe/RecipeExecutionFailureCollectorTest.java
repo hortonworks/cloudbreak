@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
-import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLUSTER_MANAGER_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_CLUSTER_MANAGER_START;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -70,9 +70,9 @@ public class RecipeExecutionFailureCollectorTest {
         worker.setName("worker");
         worker.setRecipes(Sets.newHashSet(failingRecipe1, failingRecipe2));
 
-        RecipeModel failingRecipeModel1 = new RecipeModel("failingRecipe1", POST_AMBARI_START, "");
-        RecipeModel failingRecipeModel2 = new RecipeModel("failingRecipe2", PRE_AMBARI_START, "");
-        RecipeModel goodRecipeModel = new RecipeModel("goodRecipe", POST_AMBARI_START, "");
+        RecipeModel failingRecipeModel1 = new RecipeModel("failingRecipe1", POST_CLUSTER_MANAGER_START, "");
+        RecipeModel failingRecipeModel2 = new RecipeModel("failingRecipe2", PRE_CLUSTER_MANAGER_START, "");
+        RecipeModel goodRecipeModel = new RecipeModel("goodRecipe", POST_CLUSTER_MANAGER_START, "");
 
         Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap = new HashMap<>();
 

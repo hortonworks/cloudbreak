@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
@@ -15,13 +15,14 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.testng.collections.Maps;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.converter.v4.credentials.CredentialV4RequestToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
 
 @RunWith(Parameterized.class)
 public class CredentialV4RequestToCredentialConverterTest {
@@ -31,7 +32,7 @@ public class CredentialV4RequestToCredentialConverterTest {
     private Boolean expectedGovCloudFlag;
 
     @Mock
-    private CredentialDefinitionService credentialDefinitionService;
+    private CredentialPropertyCollector credentialPropertyCollector;
 
     @Mock
     private CredentialValidator credentialValidator;
@@ -58,7 +59,7 @@ public class CredentialV4RequestToCredentialConverterTest {
     @Before
     public void setup() {
         initMocks(this);
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(any());
+        when(credentialPropertyCollector.propertyMap(any())).thenReturn(Maps.newHashMap());
     }
 
     @Test
@@ -74,7 +75,11 @@ public class CredentialV4RequestToCredentialConverterTest {
     private AwsCredentialV4Parameters createParametersWithGovCloud(Object govCloud) {
         AwsCredentialV4Parameters awsCredentialV4Parameters = new AwsCredentialV4Parameters();
         if (govCloud != null) {
-            awsCredentialV4Parameters.setGovCloud((Boolean) govCloud);
+            if (govCloud instanceof String) {
+                awsCredentialV4Parameters.setGovCloud(Boolean.valueOf((String) govCloud));
+            } else {
+                awsCredentialV4Parameters.setGovCloud((Boolean) govCloud);
+            }
         }
         return awsCredentialV4Parameters;
     }

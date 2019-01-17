@@ -23,7 +23,7 @@ public class LdapV4RequestToLdapConfigConverterTest extends AbstractJsonConverte
     public void testConvert() {
         // GIVEN
         // WHEN
-        LdapConfig result = underTest.convert(getRequest("stack/ldap_config.json"));
+        LdapConfig result = underTest.convert(getRequest("ldap_config.json"));
         // THEN
         assertAllFieldsNotNull(result, Collections.singletonList("environments"));
     }

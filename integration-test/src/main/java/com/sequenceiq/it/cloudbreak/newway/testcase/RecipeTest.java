@@ -2,9 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLUSTER_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
-import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_AMBARI_START;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock.SALT_RUN;
@@ -149,8 +148,8 @@ public class RecipeTest extends AbstractIntegrationTest {
     @DataProvider(name = "dataProviderForNonPreTerminationRecipeTypes")
     public Object[][] getData() {
         return new Object[][]{
-                {applicationContext.getBean(TestContext.class), WORKER, 1, PRE_AMBARI_START, 3},
-                {applicationContext.getBean(TestContext.class), WORKER, 1, POST_AMBARI_START, 3},
+                {applicationContext.getBean(TestContext.class), WORKER, 1, PRE_CLUSTER_MANAGER_START, 3},
+                {applicationContext.getBean(TestContext.class), WORKER, 1, POST_CLUSTER_MANAGER_START, 3},
                 {applicationContext.getBean(TestContext.class), WORKER, 1, POST_CLUSTER_INSTALL, 2}
         };
     }

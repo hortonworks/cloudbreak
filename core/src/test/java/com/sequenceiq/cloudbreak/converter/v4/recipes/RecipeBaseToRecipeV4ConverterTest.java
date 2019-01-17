@@ -22,7 +22,7 @@ public class RecipeBaseToRecipeV4ConverterTest extends AbstractJsonConverterTest
     public void testConvert() {
         // GIVEN
         // WHEN
-        Recipe result = underTest.convert(getRequest("stack/recipe.json"));
+        Recipe result = underTest.convert(getRequest("recipe.json"));
         // THEN
         assertAllFieldsNotNull(result, Collections.singletonList("plugins"));
     }

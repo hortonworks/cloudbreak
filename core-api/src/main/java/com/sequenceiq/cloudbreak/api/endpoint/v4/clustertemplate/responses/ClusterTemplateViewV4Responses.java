@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
 
 import io.swagger.annotations.ApiModel;
@@ -15,5 +16,9 @@ public class ClusterTemplateViewV4Responses extends GeneralSetV4Response<Cluster
 
     public ClusterTemplateViewV4Responses(Set<ClusterTemplateViewV4Response> responses) {
         super(responses);
+    }
+
+    public ClusterTemplateViewV4Responses() {
+        super(Sets.newHashSet());
     }
 }

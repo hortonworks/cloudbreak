@@ -84,7 +84,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakInte
             igMap.add(instanceGroupRequest);
         }
 
-        String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
+        Long credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         StackRequest stackRequest = new StackRequest();
 
@@ -95,7 +95,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakInte
         stackRequest.setStackAuthentication(stackAuthenticationRequest);
 
         stackRequest.setName(stackName);
-        stackRequest.setCredentialId(Long.valueOf(credentialId));
+        stackRequest.setCredentialId(credentialId);
         stackRequest.setRegion(region);
         stackRequest.setOnFailureAction(OnFailureAction.valueOf(onFailureAction));
         FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();

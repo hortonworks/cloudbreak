@@ -56,7 +56,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
-        Blueprint result = underTest.convert(getRequest("stack/blueprint.json"));
+        Blueprint result = underTest.convert(getRequest("blueprint.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertEquals("{}", result.getTags().getValue());
         Assert.assertEquals("HDP", result.getStackType());
@@ -65,7 +65,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
-        Blueprint result = underTest.convert(getRequest("stack/blueprint-empty-tags.json"));
+        Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertEquals("{}", result.getTags().getValue());
         Assert.assertEquals("HDP", result.getStackType());
@@ -74,7 +74,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testConvertWhenInputJsonHasTagsFieldAndItHasMoreThanOneFieldInIt() {
-        Blueprint result = underTest.convert(getRequest("stack/blueprint-filled-tags.json"));
+        Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertTrue(result.getTags().getMap().size() > 1);
         Assert.assertEquals("HDP", result.getStackType());
@@ -84,7 +84,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenUrlIsNotEmptyButInvalidThenExceptionWouldCome() {
         String wrongUrl = "some wrong content for url";
-        BlueprintV4Request request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("blueprint.json");
         request.setUrl(wrongUrl);
 
         thrown.expect(BadRequestException.class);
@@ -95,7 +95,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testConvertWhenUrlIsNotNullButEmptyThenBlueprintTextShouldBeTheProvidedAmbariBlueprint() {
-        BlueprintV4Request request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("blueprint.json");
         request.setUrl("");
 
         Blueprint result = underTest.convert(request);
@@ -108,7 +108,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenNameIsFilledThenTheSameShoulBeInTheBlueprintObject() {
         String name = "name";
-        BlueprintV4Request request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("blueprint.json");
         request.setName(name);
 
         Blueprint result = underTest.convert(request);
@@ -121,7 +121,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenNameIsNullThenGeneratedNameShouldBeRepresentedInTheBlueprintObject() {
         String generatedName = "something generated here";
-        BlueprintV4Request request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("blueprint.json");
         request.setName(null);
         when(missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT)).thenReturn(generatedName);
 
@@ -140,7 +140,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
-        underTest.convert(getRequest("stack/blueprint.json"));
+        underTest.convert(getRequest("blueprint.json"));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
-        underTest.convert(getRequest("stack/blueprint.json"));
+        underTest.convert(getRequest("blueprint.json"));
     }
 
     @Test
@@ -162,7 +162,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
-        underTest.convert(getRequest("stack/blueprint.json"));
+        underTest.convert(getRequest("blueprint.json"));
     }
 
     @Test
@@ -173,12 +173,12 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
-        underTest.convert(getRequest("stack/blueprint.json"));
+        underTest.convert(getRequest("blueprint.json"));
     }
 
     @Test
     public void testConvertWhenUnableToCreateJsonFromIncomingTagsThenExceptionWouldCome() {
-        BlueprintV4Request request = getRequest("stack/blueprint.json");
+        BlueprintV4Request request = getRequest("blueprint.json");
         Map<String, Object> invalidTags = new HashMap<>(1);
         invalidTags.put(null, null);
         request.setTags(invalidTags);
@@ -191,12 +191,12 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test(expected = BadRequestException.class)
     public void testWithInvalidDashInHostgroupName() {
-        underTest.convert(getRequest("stack/blueprint-hostgroup-name-with-dash.json"));
+        underTest.convert(getRequest("blueprint-hostgroup-name-with-dash.json"));
     }
 
     @Test
     public void testWithInvalidUnderscoreInHostgroupName() {
-        Blueprint result = underTest.convert(getRequest("stack/blueprint-hostgroup-name-with-underscore.json"));
+        Blueprint result = underTest.convert(getRequest("blueprint-hostgroup-name-with-underscore.json"));
         assertNotNull(result);
     }
 

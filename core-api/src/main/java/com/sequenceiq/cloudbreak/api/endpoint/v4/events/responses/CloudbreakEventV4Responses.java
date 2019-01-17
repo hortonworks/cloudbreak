@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralListV4Response;
 
 import io.swagger.annotations.ApiModel;
@@ -11,5 +12,9 @@ public class CloudbreakEventV4Responses extends GeneralListV4Response<Cloudbreak
 
     public CloudbreakEventV4Responses(List<CloudbreakEventV4Response> responses) {
         super(responses);
+    }
+
+    public CloudbreakEventV4Responses() {
+        super(Lists.newArrayList());
     }
 }

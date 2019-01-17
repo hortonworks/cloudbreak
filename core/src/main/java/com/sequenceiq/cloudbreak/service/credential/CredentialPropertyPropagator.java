@@ -35,6 +35,8 @@ public class CredentialPropertyPropagator {
             return Optional.of(cred.getYarn());
         } else if (cred.getCumulus() != null) {
             return Optional.of(cred.getCumulus());
+        } else if (cred.getMock() != null) {
+            return Optional.of(cred.getMock());
         }
         return Optional.empty();
     }

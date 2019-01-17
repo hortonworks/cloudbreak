@@ -180,7 +180,7 @@ public class TestContext implements ApplicationContextAware {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             clients.put(acting.getToken(), cloudbreakClient);
             Optional<WorkspaceV4Response> workspace = cloudbreakClient.getCloudbreakClient()
-                    .workspaceV3Endpoint().list().getResponses().stream()
+                    .workspaceV4Endpoint().list().getResponses().stream()
                     .filter(ws -> WorkspaceStatus.ACTIVE == ws.getStatus())
                     .findFirst();
             workspace.ifPresent(workspaceResponse -> cloudbreakClient.setWorkspaceId(workspaceResponse.getId()));
