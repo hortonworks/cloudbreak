@@ -74,7 +74,7 @@ public class StackStartStopService {
     public void finishStackStart(StackStartStopContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
         Stack stack = context.getStack();
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
-            LOGGER.debug("Size of the collected metadata set does not equal the node count of the stack. [metadata size={}] [nodecount={}]",
+            LOGGER.warn("Size of the collected metadata set does not equal the node count of the stack. [metadata size={}] [nodecount={}]",
                     coreInstanceMetaData.size(), stack.getFullNodeCount());
         }
         metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
@@ -152,7 +152,7 @@ public class StackStartStopService {
     }
 
     private void handleError(StackView stackView, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
-        LOGGER.debug(logMessage, exception);
+        LOGGER.warn(logMessage, exception);
         Status stackStatus = detailedStackStatus.getStatus();
         stackUpdater.updateStackStatus(stackView.getId(), detailedStackStatus, logMessage + exception.getMessage());
         flowMessageService.fireEventAndLog(stackView.getId(), msg, stackStatus.name(), exception.getMessage());

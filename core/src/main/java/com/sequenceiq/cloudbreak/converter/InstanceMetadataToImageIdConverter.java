@@ -25,7 +25,7 @@ public class InstanceMetadataToImageIdConverter extends AbstractConversionServic
                 LOGGER.error("InstanceMetadata's image could not be converted to Image class", e);
             }
         } else if (StringUtils.isNotBlank(source.getInstanceId())) {
-            LOGGER.debug("No image for instance [{}] in instancemetadata", source.getInstanceId());
+            LOGGER.warn("No image for instance [{}] in instancemetadata", source.getInstanceId());
         }
         return image == null ? null : image.getImageName();
     }

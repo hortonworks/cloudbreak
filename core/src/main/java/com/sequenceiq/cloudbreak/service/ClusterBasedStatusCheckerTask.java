@@ -19,13 +19,13 @@ public abstract class ClusterBasedStatusCheckerTask<T extends StackContext> exte
             Long clusterId = t.getStack().getCluster().getId();
             PollGroup stackPollGroup = InMemoryStateStore.getStack(stackId);
             if (stackPollGroup == null || CANCELLED.equals(stackPollGroup)) {
-                LOGGER.debug("Stack is getting terminated, polling is cancelled.");
+                LOGGER.warn("Stack is getting terminated, polling is cancelled.");
                 return true;
             }
 
             PollGroup clusterPollGroup = InMemoryStateStore.getCluster(clusterId);
             if (clusterPollGroup == null || CANCELLED.equals(clusterPollGroup)) {
-                LOGGER.debug("Cluster is getting terminated, polling is cancelled.");
+                LOGGER.warn("Cluster is getting terminated, polling is cancelled.");
                 return true;
             }
 

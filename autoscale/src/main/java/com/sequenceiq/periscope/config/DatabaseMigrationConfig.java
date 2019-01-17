@@ -110,7 +110,7 @@ public class DatabaseMigrationConfig {
 
     private void logMigrationResult(String migrationResult, String operation) {
         if (!migrationResult.isEmpty()) {
-            LOGGER.debug("Migration result of '{}' operation:\n{}", operation, migrationResult);
+            LOGGER.warn("Migration result of '{}' operation:\n{}", operation, migrationResult);
         }
     }
 }

@@ -41,7 +41,7 @@ public class StackRepairService {
 
     public void add(Stack stack, Collection<String> unhealthyInstanceIds) {
         if (unhealthyInstanceIds.isEmpty()) {
-            LOGGER.debug("No instances are unhealthy, returning...");
+            LOGGER.warn("No instances are unhealthy, returning...");
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
             return;
         }

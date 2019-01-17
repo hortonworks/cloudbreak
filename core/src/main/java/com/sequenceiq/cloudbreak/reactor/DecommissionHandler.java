@@ -76,7 +76,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             }
             PollingResult orchestratorRemovalPollingResult = ambariDecommissioner.removeHostsFromOrchestrator(stack, new ArrayList<>(decomissionedHostNames));
             if (!isSuccess(orchestratorRemovalPollingResult)) {
-                LOGGER.debug("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
+                LOGGER.warn("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
             }
             result = new DecommissionResult(request, decomissionedHostNames);
         } catch (Exception e) {

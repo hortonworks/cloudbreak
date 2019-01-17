@@ -55,10 +55,10 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
             throw e;
         } else {
             try {
-                LOGGER.debug("Unsuccessful address resolving: {}, retrying in {}millis", e.getMessage(), SLEEPTIME);
+                LOGGER.warn("Unsuccessful address resolving: {}, retrying in {}millis", e.getMessage(), SLEEPTIME);
                 Thread.sleep(SLEEPTIME);
             } catch (InterruptedException ie) {
-                LOGGER.info("Interrupted exception occurred: {}", ie.getMessage());
+                LOGGER.warn("Interrupted exception occurred: {}", ie.getMessage());
             }
         }
     }

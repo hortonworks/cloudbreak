@@ -70,7 +70,7 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
             }
         } catch (IOException ex) {
             String message = String.format("Could not read files from the definiated folder which was: %s", dir);
-            LOGGER.error(message, ex);
+            LOGGER.warn(message, ex);
             throw new BlueprintProcessingException(message, ex);
         }
 

@@ -120,7 +120,7 @@ public class SmartSenseSubscriptionService {
             authorizationService.hasPermission(subscription.orElseThrow(SmartSenseConfigurationNotFoundException::new), PermissionType.READ.name());
         } catch (AccessDeniedException | SmartSenseConfigurationNotFoundException issue) {
             String message = "Unable to identify SmartSense subscription for the user.";
-            LOGGER.info(message);
+            LOGGER.warn(message);
             throw new SmartSenseSubscriptionAccessDeniedException(message, issue);
         }
     }

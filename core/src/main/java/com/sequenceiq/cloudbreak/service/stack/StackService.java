@@ -593,7 +593,7 @@ public class StackService {
 
     private void repairFailedNodes(Stack stack, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
-        LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
+        LOGGER.warn("Received request to replace failed nodes: " + stack.getId());
         flowManager.triggerManualRepairFlow(stack.getId());
     }
 
@@ -606,7 +606,7 @@ public class StackService {
                 flowManager.triggerStackSync(stack.getId());
             }
         } else {
-            LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
+            LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
         }
     }
 
@@ -712,7 +712,7 @@ public class StackService {
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
         InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
         if (metaData == null) {
-            LOGGER.debug("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
+            LOGGER.warn("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
         } else {
             metaData.setInstanceStatus(status);
             instanceMetaDataRepository.save(metaData);

@@ -69,7 +69,7 @@ public class NetworkResourceService {
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                 results.addAll(pollerResult);
             } catch (ResourceNotNeededException e) {
-                LOGGER.debug("Skipping resource creation: {}", e.getMessage());
+                LOGGER.warn("Skipping resource creation: {}", e.getMessage());
             }
         }
         return results;

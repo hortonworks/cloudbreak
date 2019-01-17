@@ -1,13 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
@@ -22,6 +14,13 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class FileSystemToFileSystemResponseConverter extends AbstractConversionServiceAwareConverter<FileSystem, FileSystemResponse> {
@@ -49,7 +48,7 @@ public class FileSystemToFileSystemResponseConverter extends AbstractConversionS
                 response.setWasb(getConversionService().convert(source.getConfigurations().get(WasbFileSystem.class), WasbCloudStorageParameters.class));
             }
         } catch (IOException ioe) {
-            LOGGER.info("Something happened while we tried to obtain/convert file system", ioe);
+            LOGGER.warn("Something happened while we tried to obtain/convert file system", ioe);
         }
         response.setType(source.getType().name());
         return response;

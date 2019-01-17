@@ -45,7 +45,7 @@ public class RdsConnectionBuilder {
             preparedStatement.executeUpdate(createSQL);
         } catch (PSQLException ex) {
             if ("42P04".equals(ex.getSQLState())) {
-                LOGGER.info("The expected database already exist");
+                LOGGER.warn("The expected database already exist");
             } else {
                 throw new BadRequestException("Failed to create database in RDS: " + ex.getMessage(), ex);
             }

@@ -32,7 +32,7 @@ public class OpenStackImageVerifier {
             List<? extends BasicResource> imagesV2 = osClient.imagesV2().list(Collections.singletonMap("name", name));
             return getStatusFromImages(osClient, imagesV2, name, true);
         } catch (ProcessingException e) {
-            LOGGER.debug("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
+            LOGGER.warn("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
             List<? extends BasicResource> imagesV1 = osClient.images().list(Collections.singletonMap("name", name));
             return getStatusFromImages(osClient, imagesV1, name, false);
         }
@@ -56,21 +56,21 @@ public class OpenStackImageVerifier {
         try {
             allImages = osClient.imagesV2().list();
         } catch (ProcessingException e) {
-            LOGGER.debug("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
+            LOGGER.warn("Exception occured during listing openstack images on V2 API. Falling back to V1 API.", e);
             allImages = osClient.images().list();
         }
         if (allImages != null) {
             for (BasicResource image : allImages) {
-                LOGGER.debug("Available images: {}, entry: {}", image.getName(), image);
+                LOGGER.info("Available images: {}, entry: {}", image.getName(), image);
             }
         }
-        LOGGER.debug("OpenStack image: {} not found", name);
+        LOGGER.warn("OpenStack image: {} not found", name);
         return Optional.empty();
     }
 
     private void handleMultipleImagesFound(List<? extends BasicResource> images, String name) {
         for (BasicResource image : images) {
-            LOGGER.debug("Multiple images found: {}, entry: {}", image.getName(), image);
+            LOGGER.info("Multiple images found: {}, entry: {}", image.getName(), image);
         }
         List<String> imageIds = images.stream().map(BasicResource::getId).collect(Collectors.toList());
         throw new CloudConnectorException(String.format("Multiple OpenStack images found with ids: %s, image name: %s",

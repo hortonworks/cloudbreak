@@ -113,7 +113,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
                     }
                 }
             } catch (IOException e) {
-                LOGGER.error("Could not deserialize image json on instancemetadata id: {} because attributes was: '{}'",
+                LOGGER.warn("Could not deserialize image json on instancemetadata id: {} because attributes was: '{}'",
                         instanceMetaData.getId(), instanceMetaData.getImage());
             }
 

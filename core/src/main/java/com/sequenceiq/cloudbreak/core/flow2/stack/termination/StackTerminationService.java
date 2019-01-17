@@ -90,7 +90,7 @@ public class StackTerminationService {
             status = DetailedStackStatus.DELETE_FAILED;
             eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
             stackUpdater.updateStackStatus(stackView.getId(), status, stackUpdateMessage);
-            LOGGER.debug("Error during stack termination flow: ", errorDetails);
+            LOGGER.warn("Error during stack termination flow: ", errorDetails);
         } else {
             terminationService.finalizeTermination(stackView.getId(), true);
             clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);

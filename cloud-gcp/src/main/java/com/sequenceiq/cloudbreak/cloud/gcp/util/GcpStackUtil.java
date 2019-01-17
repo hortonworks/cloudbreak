@@ -227,7 +227,7 @@ public final class GcpStackUtil {
             String[] parts = createParts(image);
             return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
         } else {
-            LOGGER.debug("No bucket found in source image path.");
+            LOGGER.warn("No bucket found in source image path.");
             return EMPTY_BUCKET;
         }
     }

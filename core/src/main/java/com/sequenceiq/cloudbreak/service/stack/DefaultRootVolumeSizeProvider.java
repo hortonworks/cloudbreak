@@ -47,7 +47,7 @@ public class DefaultRootVolumeSizeProvider {
 
     public int getForPlatform(String platform) {
         if (!platformVolumeSizeMap.containsKey(platform.toUpperCase())) {
-            LOGGER.debug("No default root volume size found for platform: {}. Falling back to default value of 50 GB. "
+            LOGGER.warn("No default root volume size found for platform: {}. Falling back to default value of 50 GB. "
                             + "Set '{}' property if '{}' is a valid cloud provider.",
                     platform, ROOT_VOLUME_SIZE_PROPERTY_PREFIX + platform, platform);
         }
@@ -57,7 +57,7 @@ public class DefaultRootVolumeSizeProvider {
     private Integer initPlatform(Environment environment, Platform platform) {
         String propetyKey = ROOT_VOLUME_SIZE_PROPERTY_PREFIX + platform.value();
         if (!environment.containsProperty(propetyKey)) {
-            LOGGER.debug("{} property is not set. Defaulting its value to 50.", propetyKey);
+            LOGGER.warn("{} property is not set. Defaulting its value to 50.", propetyKey);
         }
         return Integer.valueOf(environment.getProperty(propetyKey, DEFAULT_ROOT_VOLUME_SIZE.toString()));
     }

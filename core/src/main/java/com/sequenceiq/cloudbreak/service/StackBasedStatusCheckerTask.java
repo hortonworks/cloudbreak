@@ -23,7 +23,7 @@ public abstract class StackBasedStatusCheckerTask<T extends StackContext> extend
             Optional<Stack> stack = stackRepository.findById(t.getStack().getId());
             return !stack.isPresent() || stack.get().isDeleteInProgress() || stack.get().isDeleteCompleted();
         } catch (Exception ex) {
-            LOGGER.debug("Error occurred when check status checker exit criteria: ");
+            LOGGER.warn("Error occurred when check status checker exit criteria: ");
             return true;
         }
     }
