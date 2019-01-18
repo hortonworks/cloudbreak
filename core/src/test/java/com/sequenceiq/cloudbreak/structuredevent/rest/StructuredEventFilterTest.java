@@ -52,7 +52,6 @@ class StructuredEventFilterTest {
     @Mock
     private StructuredEventClient structuredEventClient;
 
-
     @Mock
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
