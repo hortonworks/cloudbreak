@@ -237,16 +237,9 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         }
     }
 
-    private void extendRestParamsFromResponse(Map<String, String> params, CharSequence responseBody) {
+    protected void extendRestParamsFromResponse(Map<String, String> params, CharSequence responseBody) {
         if (responseBody != null && isResourceIdIsAbsentOrNull(params)) {
-            String resourceId = null;
-            try {
-                JsonNode jsonNode = JsonUtil.readTree(responseBody.toString());
-                JsonNode idNode = jsonNode.path("id");
-                resourceId = idNode.asText();
-            } catch (IOException e) {
-                LOGGER.error("Parsing of ID from JSON response failed", e);
-            }
+            String resourceId = extractResourceIdFromJson(responseBody);
             if (StringUtils.isEmpty(resourceId)) {
                 Matcher matcher = extendRestParamsFromResponsePattern.matcher(responseBody);
                 if (matcher.find() && matcher.groupCount() >= 1) {
@@ -258,6 +251,24 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 params.put(RESOURCE_ID, resourceId);
             }
         }
+    }
+
+    private String extractResourceIdFromJson(CharSequence responseBody) {
+        String resourceId = null;
+        try {
+            if (JsonUtil.isValid(responseBody.toString())) {
+                JsonNode jsonNode = JsonUtil.readTree(responseBody.toString());
+                JsonNode idNode = jsonNode.path("id");
+                if (idNode.isMissingNode()) {
+                    LOGGER.warn("Response was a JSON but no ID available");
+                } else {
+                    resourceId = idNode.asText();
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Json parsing failed for ", e);
+        }
+        return resourceId;
     }
 
     private boolean isResourceIdIsAbsentOrNull(Map<String, String> params) {

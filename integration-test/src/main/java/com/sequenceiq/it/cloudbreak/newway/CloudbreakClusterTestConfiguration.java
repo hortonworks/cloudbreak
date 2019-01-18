@@ -28,6 +28,11 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
 
     @BeforeClass
     public void cleanUpClusterBeforeTestClass() throws Exception {
+        String cleanup = getTestParameter().get("cleanUpBeforeClusterTest");
+        if ("false".equals(cleanup)) {
+            LOGGER.info("Clean up before cluster test is disabled");
+            return;
+        }
         String clusterName = getTestParameter().get("clusterName");
 
         LOGGER.info("Delete cluster ::: [{}]", clusterName);
