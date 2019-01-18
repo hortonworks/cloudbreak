@@ -1,14 +1,16 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 
 public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClusterTestConfiguration.class);
@@ -19,6 +21,11 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
 
     @BeforeClass
     public void cleanUpClusterBeforeTestClass() throws Exception {
+        String cleanup = getTestParameter().get("cleanUpBeforeClusterTest");
+        if ("false".equals(cleanup)) {
+            LOGGER.info("Clean up before cluster test is disabled");
+            return;
+        }
         String clusterName = getTestParameter().get("clusterName");
 
         LOGGER.info("Delete cluster ::: [{}]", clusterName);
