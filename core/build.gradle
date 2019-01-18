@@ -238,6 +238,10 @@ dependencies {
   testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
 }
 
+test{
+  useJUnitPlatform()
+}
+
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"

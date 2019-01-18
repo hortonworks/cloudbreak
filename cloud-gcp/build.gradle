@@ -36,3 +36,7 @@ dependencies {
     testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',         version: '5.2.0'
 
 }
+
+test{
+  useJUnitPlatform()
+}
