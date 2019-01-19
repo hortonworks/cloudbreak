@@ -18,6 +18,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -33,7 +34,39 @@ public class GatewayConvertUtilTest {
     private final GatewayConvertUtil underTest = new GatewayConvertUtil();
 
     @Test
-    public void testSetTopologiesWithLegacyReqeust() {
+    public void testSsoTypeWhenNull() {
+        GatewayJson source = new GatewayJson();
+        Gateway result = new Gateway();
+
+        underTest.setBasicProperties(source, result);
+
+        assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
+    }
+
+    @Test
+    public void testSsoTypeWhenNone() {
+        GatewayJson source = new GatewayJson();
+        source.setSsoType(SSOType.NONE);
+        Gateway result = new Gateway();
+
+        underTest.setBasicProperties(source, result);
+
+        assertEquals(SSOType.NONE, result.getSsoType());
+    }
+
+    @Test
+    public void testSsoTypeWhenSsoProvider() {
+        GatewayJson source = new GatewayJson();
+        source.setSsoType(SSOType.SSO_PROVIDER);
+        Gateway result = new Gateway();
+
+        underTest.setBasicProperties(source, result);
+
+        assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
+    }
+
+    @Test
+    public void testSetTopologiesWithLegacyRequest() {
         GatewayJson source = new GatewayJson();
         source.setTopologyName(DEPRECATED_TOPOLOGY_NAME);
         Gateway result = new Gateway();

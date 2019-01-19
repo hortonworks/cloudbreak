@@ -55,7 +55,7 @@ public class GatewayConvertUtil {
         if (source.getGatewayType() != null) {
             gateway.setGatewayType(source.getGatewayType());
         }
-        gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.NONE);
+        gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.SSO_PROVIDER);
         gateway.setTokenCert(source.getTokenCert());
         gateway.setKnoxMasterSecret(PasswordUtil.generatePassword());
     }

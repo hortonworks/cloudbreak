@@ -57,7 +57,7 @@
                 <name>main.ldapRealm.contextFactory</name>
                 <value>$ldapContextFactory</value>
             </param>
-           <param>
+            <param>
                 <name>main.ldapRealm.contextFactory.url</name>
                 <value>{{ salt['pillar.get']('ldap:protocol') }}://{{ salt['pillar.get']('ldap:serverHost') }}:{{ salt['pillar.get']('ldap:serverPort') }}</value>
             </param>

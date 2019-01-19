@@ -58,13 +58,35 @@ public class ClusterRequestToGatewayConverterTest {
     }
 
     @Test
-    public void testConvertSsoType() {
+    public void testConvertSsoTypeWhenNull() {
         GatewayJson source = new GatewayJson();
         source.setTopologies(getTopologies());
 
         Gateway result = underTest.convert(generateClusterRequest(source));
 
+        assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
+    }
+
+    @Test
+    public void testConvertSsoTypeWhenNone() {
+        GatewayJson source = new GatewayJson();
+        source.setTopologies(getTopologies());
+        source.setSsoType(SSOType.NONE);
+
+        Gateway result = underTest.convert(generateClusterRequest(source));
+
         assertEquals(SSOType.NONE, result.getSsoType());
+    }
+
+    @Test
+    public void testConvertSsoTypeWhenSsoProvider() {
+        GatewayJson source = new GatewayJson();
+        source.setTopologies(getTopologies());
+        source.setSsoType(SSOType.SSO_PROVIDER);
+
+        Gateway result = underTest.convert(generateClusterRequest(source));
+
+        assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
     }
 
     @Test
