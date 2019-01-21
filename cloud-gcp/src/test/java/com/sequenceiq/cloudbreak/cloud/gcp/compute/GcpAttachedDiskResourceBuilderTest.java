@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -148,11 +150,17 @@ class GcpAttachedDiskResourceBuilderTest {
         group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50);
 
+        List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        volumes.add(new VolumeSetAttributes.Volume("1234", "noop"));
+
+        VolumeSetAttributes attributes = new VolumeSetAttributes("Ireland", 0, "eph", true, "", volumes);
+        Map<String, Object> params = new HashMap<>();
+        params.put(CloudResource.ATTRIBUTES, attributes);
         buildableResource = List.of(CloudResource.builder()
                 .type(ResourceType.GCP_DISK)
                 .status(CommonStatus.REQUESTED)
                 .name("disk")
-                .params(Map.of())
+                .params(params)
                 .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
@@ -193,7 +201,7 @@ class GcpAttachedDiskResourceBuilderTest {
         assertEquals(1, build.size());
         CloudResource resource = build.iterator().next();
         assertEquals(ResourceType.GCP_DISK, resource.getType());
-        assertEquals(CommonStatus.REQUESTED, resource.getStatus());
+        assertEquals(CommonStatus.CREATED, resource.getStatus());
         assertEquals("disk", resource.getName());
 
         assertNotNull(diskCaptor.getValue());
