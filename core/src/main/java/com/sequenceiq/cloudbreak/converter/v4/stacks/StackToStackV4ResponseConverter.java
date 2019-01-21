@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,11 +28,9 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -91,7 +87,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setCustomDomains(getConversionService().convert(source, CustomDomainSettingsV4Response.class));
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         addNodeCount(source, response);
-        putS3RoleIntoResponse(source, response);
         convertComponentConfig(response, source);
         response.setTags(getTags(response, source.getTags()));
         addFlexSubscription(response, source);
@@ -104,15 +99,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
             nodeCount += instanceGroup.getNodeCount();
         }
         stackJson.setNodeCount(nodeCount);
-    }
-
-    private void putS3RoleIntoResponse(Stack source, StackV4Response stackResponse) {
-        List<Resource> resourcesByType = source.getResourcesByType(ResourceType.S3_ACCESS_ROLE_ARN);
-        Optional<Resource> accessRoleArnOptional = resourcesByType.stream().findFirst();
-        if (accessRoleArnOptional.isPresent()) {
-            String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
-            stackResponse.getAws().setAwsS3Role(s3AccessRoleArn);
-        }
     }
 
     private TagsV4Response getTags(StackV4Response stackV4Response, Json tag) {

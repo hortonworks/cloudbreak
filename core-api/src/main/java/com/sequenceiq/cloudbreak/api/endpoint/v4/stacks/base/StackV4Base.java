@@ -35,6 +35,9 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
     private OpenStackStackParametersV4 openstack;
 
+    @ApiModelProperty
+    private Long timeToLive;
+
     public String getName() {
         return name;
     }

@@ -6,8 +6,6 @@ public class OpenStackStackParametersV4 extends StackParameterV4Base {
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        OpenStackStackParametersV4 ret = new OpenStackStackParametersV4();
-        ret.setTimeToLive(getTimeToLive(parameters));
-        return (T) ret;
+        return (T) this;
     }
 }

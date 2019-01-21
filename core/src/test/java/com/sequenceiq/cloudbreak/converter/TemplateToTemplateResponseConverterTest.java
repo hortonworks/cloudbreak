@@ -89,7 +89,7 @@ public class TemplateToTemplateResponseConverterTest {
     }
 
     @Test
-    public void testGcpTemplateParametersWhenNotNull() throws JsonProcessingException {
+    public void testGcpTemplateParametersWhenNotNull() {
 
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.GCP));
@@ -103,7 +103,7 @@ public class TemplateToTemplateResponseConverterTest {
     }
 
     @Test
-    public void testOpenStackTemplateParametersWhenNotNull() throws JsonProcessingException {
+    public void testOpenStackTemplateParametersWhenNotNull() {
 
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.OPENSTACK));
@@ -127,7 +127,7 @@ public class TemplateToTemplateResponseConverterTest {
         Assert.assertNull(convert.getOpenStack());
     }
 
-    private AwsInstanceTemplateParametersV4 awsParameters() throws JsonProcessingException {
+    private AwsInstanceTemplateParametersV4 awsParameters() {
         AwsInstanceTemplateParametersV4 templateParameters = new AwsInstanceTemplateParametersV4();
         templateParameters.setSpotPrice(10.0D);
         AwsEncryptionParametersV4 awsEncryption = new AwsEncryptionParametersV4();
@@ -137,11 +137,11 @@ public class TemplateToTemplateResponseConverterTest {
         return templateParameters;
     }
 
-    private OpenStackParameters openStackParameters() throws JsonProcessingException {
+    private OpenStackParameters openStackParameters(){
         return new OpenStackParameters();
     }
 
-    private GcpParameters gcpParameters() throws JsonProcessingException {
+    private GcpParameters gcpParameters() {
         GcpParameters templateParameters = new GcpParameters();
         GcpEncryption encryption = new GcpEncryption();
         encryption.setKeyEncryptionMethod("RAW");
@@ -151,7 +151,7 @@ public class TemplateToTemplateResponseConverterTest {
         return templateParameters;
     }
 
-    private AzureParameters azureParameters() throws JsonProcessingException {
+    private AzureParameters azureParameters() {
         AzureParameters templateParameters = new AzureParameters();
         templateParameters.setPrivateId("somePrivateId");
         return templateParameters;

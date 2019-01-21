@@ -6,8 +6,6 @@ public class AzureStackParametersV4 extends StackParameterV4Base {
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        AzureStackParametersV4 ret = new AzureStackParametersV4();
-        ret.setTimeToLive(getTimeToLive(parameters));
-        return (T) ret;
+        return (T) this;
     }
 }

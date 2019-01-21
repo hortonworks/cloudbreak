@@ -6,8 +6,6 @@ public class GcpStackParametersV4 extends StackParameterV4Base {
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        GcpStackParametersV4 ret = new GcpStackParametersV4();
-        ret.setTimeToLive(getTimeToLive(parameters));
-        return (T) ret;
+        return (T) this;
     }
 }
