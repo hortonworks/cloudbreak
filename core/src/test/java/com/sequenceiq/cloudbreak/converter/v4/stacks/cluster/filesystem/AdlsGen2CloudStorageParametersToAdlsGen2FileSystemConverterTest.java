@@ -1,12 +1,13 @@
-package com.sequenceiq.cloudbreak.converter.v2.filesystem;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem.AdlsGen2CloudStorageParametersV4ToAdlsGen2FileSystemConverter;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
 
 public class AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverterTest {
 
@@ -14,11 +15,11 @@ public class AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverterTest {
 
     private static final String TEST_ACCOUNT_NAME = "testAccountName";
 
-    private AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverter underTest;
+    private AdlsGen2CloudStorageParametersV4ToAdlsGen2FileSystemConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverter();
+        underTest = new AdlsGen2CloudStorageParametersV4ToAdlsGen2FileSystemConverter();
     }
 
     @Test
@@ -32,8 +33,8 @@ public class AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverterTest {
         assertEquals(expected, result);
     }
 
-    private AdlsGen2CloudStorageParameters createAdlsGen2CloudStorageParameters() {
-        AdlsGen2CloudStorageParameters wasb = new AdlsGen2CloudStorageParameters();
+    private AdlsGen2CloudStorageParametersV4 createAdlsGen2CloudStorageParameters() {
+        AdlsGen2CloudStorageParametersV4 wasb = new AdlsGen2CloudStorageParametersV4();
         wasb.setAccountKey(TEST_ACCOUNT_KEY);
         wasb.setAccountName(TEST_ACCOUNT_NAME);
         return wasb;

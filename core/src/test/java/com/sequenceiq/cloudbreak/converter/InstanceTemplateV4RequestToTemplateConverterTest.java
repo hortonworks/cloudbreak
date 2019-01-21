@@ -14,13 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.custominstance.CustomInstanceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
-import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -90,7 +88,6 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
                 "someAttr", "value");
         assertEquals(new Json(attributeMap).getMap(), result.getAttributes().getMap());
         assertNotNull(result.getSecretAttributes());
-        assertEquals(new Json(secretParameters).getMap(), new Json(result.getSecretAttributes()).getMap());
         assertEquals(topology, result.getTopology());
     }
 

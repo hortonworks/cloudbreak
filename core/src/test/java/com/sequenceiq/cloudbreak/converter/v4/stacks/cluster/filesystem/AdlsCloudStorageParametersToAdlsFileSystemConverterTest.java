@@ -1,11 +1,12 @@
-package com.sequenceiq.cloudbreak.converter.v2.filesystem;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
 
 public class AdlsCloudStorageParametersToAdlsFileSystemConverterTest {
 
@@ -17,17 +18,17 @@ public class AdlsCloudStorageParametersToAdlsFileSystemConverterTest {
 
     private static final String TEST_TENANT_ID = "1-2-3-4-5-6-7-8-9";
 
-    private AdlsCloudStorageParametersToAdlsFileSystemConverter underTest;
+    private AdlsCloudStorageParametersV4ToAdlsFileSystemConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new AdlsCloudStorageParametersToAdlsFileSystemConverter();
+        underTest = new AdlsCloudStorageParametersV4ToAdlsFileSystemConverter();
     }
 
     @Test
     public void testConvertCheckingTheResultAdlsFileSystemIsFilledProperly() {
         AdlsFileSystem expected = createTestAdlsFileSystem();
-        AdlsCloudStorageParameters source = new AdlsCloudStorageParameters();
+        AdlsCloudStorageParametersV4 source = new AdlsCloudStorageParametersV4();
         source.setAccountName(TEST_ACCOUNT_NAME);
         source.setClientId(TEST_CLIENT_ID);
         source.setCredential(TEST_CREDENTIAL);

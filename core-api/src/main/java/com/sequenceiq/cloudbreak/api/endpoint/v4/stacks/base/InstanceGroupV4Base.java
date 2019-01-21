@@ -22,7 +22,7 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
     @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)
-    private int count;
+    private int nodeCount;
 
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
@@ -46,12 +46,12 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
-    public int getCount() {
-        return count;
+    public int getNodeCount() {
+        return nodeCount;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setNodeCount(int nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
     public String getName() {

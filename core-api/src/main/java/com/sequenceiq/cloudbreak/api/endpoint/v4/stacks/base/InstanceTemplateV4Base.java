@@ -35,7 +35,6 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
     private YarnInstanceTemplateParametersV4 yarn;
 
-
     @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 

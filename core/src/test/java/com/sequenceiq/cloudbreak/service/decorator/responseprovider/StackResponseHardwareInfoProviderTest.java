@@ -18,8 +18,8 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
@@ -53,7 +53,7 @@ public class StackResponseHardwareInfoProviderTest {
         Stack stack = new Stack();
         stack.setInstanceGroups(emptySet());
 
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(0L, actual.getHardwareInfoGroups().size());
     }
@@ -65,7 +65,7 @@ public class StackResponseHardwareInfoProviderTest {
         Stack stack = TestUtil.stack();
         stack.setInstanceGroups(Sets.newHashSet(TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L))));
 
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
     }
@@ -77,7 +77,7 @@ public class StackResponseHardwareInfoProviderTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         stack.setInstanceGroups(getInstanceGroups(instanceMetaData));
 
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
@@ -92,7 +92,7 @@ public class StackResponseHardwareInfoProviderTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         stack.setInstanceGroups(getInstanceGroups(instanceMetaData));
 
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
@@ -111,8 +111,8 @@ public class StackResponseHardwareInfoProviderTest {
         instanceMetaData.setDiscoveryFQDN("fqdn");
         stack.setInstanceGroups(getInstanceGroups(instanceMetaData));
 
-        StackResponse stackResponse = new StackResponse();
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, stackResponse);
+        StackV4Response stackResponse = new StackV4Response();
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, stackResponse);
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
@@ -128,7 +128,7 @@ public class StackResponseHardwareInfoProviderTest {
         instanceGroups.addAll(getInstanceGroups(new InstanceMetaData()));
         stack.setInstanceGroups(instanceGroups);
 
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(2L, actual.getHardwareInfoGroups().size());
 
@@ -152,7 +152,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         when(hostMetadataRepository.findHostInClusterByName(1L, "fqdn")).thenReturn(hostMetadata);
 
-        StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
+        StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 

@@ -7,14 +7,11 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
@@ -24,10 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariInfoMapperImpl;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariRepoDetailsMapperImpl;
-import com.sequenceiq.cloudbreak.converter.mapper.ManagementPackComponentListMapMapperImpl;
-import com.sequenceiq.cloudbreak.converter.mapper.StackInfoMapperImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackMatrixServiceTest {
@@ -41,26 +34,8 @@ public class StackMatrixServiceTest {
     @Mock
     private DefaultAmbariRepoService defaultAmbariRepoService;
 
-    @Spy
-    private StackInfoMapperImpl stackInfoMapper;
-
-    @Spy
-    private ManagementPackComponentListMapMapperImpl managementPackComponentListMapMapper;
-
-    @Spy
-    private AmbariInfoMapperImpl ambariInfoMapper;
-
-    @Spy
-    private AmbariRepoDetailsMapperImpl ambariRepoDetailsMapper;
-
     @InjectMocks
     private StackMatrixService stackMatrixService;
-
-    @Before
-    public void setUp() {
-        Whitebox.setInternalState(ambariInfoMapper, ambariRepoDetailsMapper);
-        Whitebox.setInternalState(stackInfoMapper, managementPackComponentListMapMapper);
-    }
 
     @Test
     public void getStackMatrix() {

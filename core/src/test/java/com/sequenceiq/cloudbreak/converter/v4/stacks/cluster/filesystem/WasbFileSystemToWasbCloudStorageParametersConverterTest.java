@@ -1,11 +1,12 @@
-package com.sequenceiq.cloudbreak.converter.v2.filesystem;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
 public class WasbFileSystemToWasbCloudStorageParametersConverterTest {
 
@@ -13,20 +14,20 @@ public class WasbFileSystemToWasbCloudStorageParametersConverterTest {
 
     private static final String TEST_ACCOUNT_NAME = "testAccountName";
 
-    private WasbFileSystemToWasbCloudStorageParametersConverter underTest;
+    private WasbFileSystemToWasbCloudStorageParametersV4Converter underTest;
 
     @Before
     public void setUp() {
-        underTest = new WasbFileSystemToWasbCloudStorageParametersConverter();
+        underTest = new WasbFileSystemToWasbCloudStorageParametersV4Converter();
     }
 
     @Test
     public void testConvertCheckEveryParameterHasPassedProperly() {
-        WasbCloudStorageParameters expected = new WasbCloudStorageParameters();
+        WasbCloudStorageParametersV4 expected = new WasbCloudStorageParametersV4();
         expected.setAccountKey(TEST_ACCOUNT_KEY);
         expected.setAccountName(TEST_ACCOUNT_NAME);
 
-        WasbCloudStorageParameters result = underTest.convert(createWasbFileSystem());
+        WasbCloudStorageParametersV4 result = underTest.convert(createWasbFileSystem());
 
         assertEquals(expected, result);
     }
