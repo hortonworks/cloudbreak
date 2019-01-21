@@ -21,15 +21,15 @@ public class InstanceGroupToInstanceGroupV4RequestConverter extends AbstractConv
 
     @Override
     public InstanceGroupV4Request convert(InstanceGroup source) {
-        InstanceGroupV4Request instanceGroupV2Request = new InstanceGroupV4Request();
-        providerParameterCalculator.to(source.getAttributes().getMap(), instanceGroupV2Request);
-        instanceGroupV2Request.setName(source.getGroupName());
-        instanceGroupV2Request.setCount(source.getNodeCount());
-        instanceGroupV2Request.setType(source.getInstanceGroupType());
-        instanceGroupV2Request.setRecipeNames(new HashSet<>());
-        instanceGroupV2Request.setTemplate(getConversionService().convert(source.getTemplate(), InstanceTemplateV4Request.class));
-        instanceGroupV2Request.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroupV4Request.class));
-        return instanceGroupV2Request;
+        InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
+        providerParameterCalculator.to(source.getAttributes().getMap(), instanceGroupRequest);
+        instanceGroupRequest.setName(source.getGroupName());
+        instanceGroupRequest.setNodeCount(source.getNodeCount());
+        instanceGroupRequest.setType(source.getInstanceGroupType());
+        instanceGroupRequest.setRecipeNames(new HashSet<>());
+        instanceGroupRequest.setTemplate(getConversionService().convert(source.getTemplate(), InstanceTemplateV4Request.class));
+        instanceGroupRequest.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroupV4Request.class));
+        return instanceGroupRequest;
     }
 
 }

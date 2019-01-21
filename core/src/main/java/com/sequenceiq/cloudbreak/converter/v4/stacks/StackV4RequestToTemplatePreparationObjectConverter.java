@@ -215,7 +215,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                             instanceGroup.getName(),
                             instanceGroup.getTemplate().getAttachedVolumes().stream().mapToInt(VolumeV4Request::getCount).sum(),
                             instanceGroup.getType(),
-                            instanceGroup.getCount()));
+                            instanceGroup.getNodeCount()));
         }
         return hostgroupViews;
     }

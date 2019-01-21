@@ -33,7 +33,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         instanceGroup.setGroupName(source.getName());
         setAttributes(source, instanceGroup);
         instanceGroup.setInstanceGroupType(source.getType());
-        if (source.getCount() > 0) {
+        if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }
         return instanceGroup;
@@ -41,7 +41,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
 
     private void addInstanceMetadatas(InstanceGroupV4Request request, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
-        for (int i = 0; i < request.getCount(); i++) {
+        for (int i = 0; i < request.getNodeCount(); i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
             instanceMetaDataSet.add(instanceMetaData);

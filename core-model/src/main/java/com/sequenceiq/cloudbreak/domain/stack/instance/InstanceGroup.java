@@ -85,7 +85,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         this.template = template;
     }
 
-    public Integer getNodeCount() {
+    public int getNodeCount() {
         return getNotTerminatedInstanceMetaDataSet().size();
     }
 
