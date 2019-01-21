@@ -435,24 +435,23 @@ cb:
             amazonlinux2:
               - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
                 stackDefault: true
-
       3.3:
-        version: 3.3.0.0-165
+        version: 3.3.1.0-10
         min-ambari: 2.7
         repo:
           stack:
             repoid: HDF-3.3
-            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.0.0
-            debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.0.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.0.0
-            sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.0.0
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.0.0
-            repository-version: 3.3.0.0-165
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.0.0/HDF-3.3.0.0-165.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.0.0/HDF-3.3.0.0-165.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.0.0/HDF-3.3.0.0-165.xml
-            vdf-sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.0.0/HDF-3.3.0.0-165.xml
-            vdf-amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.0.0/HDF-3.3.0.0-165.xml
+            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0
+            debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0
+            ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0
+            sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0
+            amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0
+            repository-version: 3.3.1.0-10
+            vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
+            vdf-debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
+            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
+            vdf-sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
+            vdf-amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
           util:
             repoid: HDP-UTILS-1.1.0.22
             redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
@@ -462,20 +461,20 @@ cb:
             amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
           mpacks:
             redhat7:
-            - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.0.0-165.tar.gz
-              stackDefault: true
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
+                stackDefault: true
             debian9:
-            - mpackUrl: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.0.0-165.tar.gz
-              stackDefault: true
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
+                stackDefault: true
             ubuntu16:
-            - mpackUrl: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.0.0-165.tar.gz
-              stackDefault: true
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
+                stackDefault: true
             sles12:
-            - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.0.0-165.tar.gz
-              stackDefault: true
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
+                stackDefault: true
             amazonlinux2:
-            - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.0.0-165.tar.gz
-              stackDefault: true
+              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
+                stackDefault: true
   smartsense.configure: false
   smartsense.enabled: true
   smartsense.id.pattern: A-9990%s-C-%s
