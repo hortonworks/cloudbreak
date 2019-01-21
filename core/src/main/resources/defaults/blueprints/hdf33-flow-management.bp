@@ -3,7 +3,7 @@
   "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdf32-flow-management",
+      "blueprint_name": "hdf33-flow-management",
       "stack_name": "HDF",
       "stack_version": "3.3"
     },
