@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.ADLS_GEN_2;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.ADLS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.S3;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.S3;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsC
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.FileSystemToCloudStorageV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
@@ -46,7 +47,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 public class FileSystemToFileSystemRequestConverterTest {
 
     @InjectMocks
-    private FileSystemToFileSystemRequestConverter underTest;
+    private FileSystemToCloudStorageV4RequestConverter underTest;
 
     @Mock
     private ConversionService conversionService;

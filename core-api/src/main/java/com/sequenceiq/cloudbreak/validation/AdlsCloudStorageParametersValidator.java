@@ -7,9 +7,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
 
-public class AdlsCloudStorageParametersValidator implements ConstraintValidator<ValidAdlsCloudStorageParameters, AdlsCloudStorageParameters> {
+public class AdlsCloudStorageParametersValidator implements ConstraintValidator<ValidAdlsCloudStorageParameters, AdlsCloudStorageParametersV4> {
 
     private static final int MIN_ACCOUNT_NAME_LENGTH = 3;
 
@@ -24,7 +24,7 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
     }
 
     @Override
-    public boolean isValid(AdlsCloudStorageParameters value, ConstraintValidatorContext context) {
+    public boolean isValid(AdlsCloudStorageParametersV4 value, ConstraintValidatorContext context) {
         boolean result = false;
         if (!isAccountNameValid(value.getAccountName())) {
             ValidatorUtil.addConstraintViolation(context, failMessage, PROPERTY_MODEL_VALUE);
@@ -36,7 +36,7 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
         return result;
     }
 
-    private boolean isClientIdOrCredentialEmpty(AdlsCloudStorageParameters value) {
+    private boolean isClientIdOrCredentialEmpty(AdlsCloudStorageParametersV4 value) {
         boolean clientIdEmpty = StringUtils.isNoneEmpty(value.getClientId());
         boolean credentialEmpty = StringUtils.isNoneEmpty(value.getCredential());
         return clientIdEmpty != credentialEmpty;

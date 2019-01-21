@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.ADLS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.S3;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.S3;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;

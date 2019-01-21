@@ -27,14 +27,14 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.conf.ConversionConfig;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayJsonValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyJsonValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayV4RequestValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ClusterRequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
-        GatewayJsonValidator.class, GatewayTopologyJsonToGatewayTopologyConverter.class, GatewayTopologyJsonValidator.class,
+        GatewayV4RequestValidator.class, GatewayTopologyJsonToGatewayTopologyConverter.class, GatewayTopologyV4RequestValidator.class,
         ExposedServiceListValidator.class})
 public class ClusterRequestToGatewayConverterTest {
 

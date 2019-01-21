@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.database;
 
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE12;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE11;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE12;
 
 import java.util.stream.Collectors;
 
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;

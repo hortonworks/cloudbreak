@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
 @Service
 public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {

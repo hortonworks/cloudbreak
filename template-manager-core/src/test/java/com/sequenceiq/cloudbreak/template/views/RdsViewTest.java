@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.template.views;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 

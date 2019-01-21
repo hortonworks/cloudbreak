@@ -22,9 +22,9 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.validation.UpdateStackRequestValidator;
 
 public class UpdateStackRequestValidatorTest {
@@ -46,7 +46,7 @@ public class UpdateStackRequestValidatorTest {
 
     @Test
     public void testIsValidShouldReturnTrueWhenStatusIsUpdated() {
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setInstanceGroupAdjustment(null);
         updateStackJson.setStatus(StatusRequest.STARTED);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
@@ -55,8 +55,8 @@ public class UpdateStackRequestValidatorTest {
 
     @Test
     public void testIsValidShouldReturnTrueWhenNodeCountIsUpdated() {
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustmentJson.setScalingAdjustment(12);
         instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
         updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
@@ -67,9 +67,9 @@ public class UpdateStackRequestValidatorTest {
 
     @Test
     public void testInValidShouldReturnTrueWhenNodeCountIsLowerThanOneUpdatedAndWithClusterEvent() {
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setWithClusterEvent(true);
-        InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustmentJson.setScalingAdjustment(-1);
         instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
         updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
@@ -80,8 +80,8 @@ public class UpdateStackRequestValidatorTest {
 
     @Test
     public void testIsValidShouldReturnFalseWhenRequestContainsNodeCountAndStatus() {
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustmentJson.setScalingAdjustment(4);
         instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
         updateStackJson.setStatus(StatusRequest.STARTED);
@@ -93,7 +93,7 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnFalseWhenRequestContainsOnlyNulls() {
 
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setInstanceGroupAdjustment(null);
         updateStackJson.setStatus(null);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);

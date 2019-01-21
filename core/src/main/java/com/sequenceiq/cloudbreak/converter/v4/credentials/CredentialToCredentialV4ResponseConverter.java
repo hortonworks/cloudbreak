@@ -10,17 +10,16 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.credential.CredentialParameterSetterUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.credential.CredentialParameterSetterUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 
 @Component
@@ -34,9 +33,6 @@ public class CredentialToCredentialV4ResponseConverter extends AbstractConversio
 
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
-
-    @Inject
-    private ConversionService conversionService;
 
     @Inject
     private CredentialParameterSetterUtil credentialParameterSetterUtil;
@@ -57,7 +53,7 @@ public class CredentialToCredentialV4ResponseConverter extends AbstractConversio
             if (credentialJson.getAws() != null) {
                 credentialJson.getAws().setGovCloud(source.getGovCloud());
             }
-            credentialJson.setAttributes(conversionService.convert(source.getAttributesSecret(), SecretResponse.class));
+            credentialJson.setAttributes(getConversionService().convert(source.getAttributesSecret(), SecretV4Response.class));
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));

@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.IpPoolV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPool;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -19,11 +19,11 @@ public class CloudIpPoolsToPlatformIpPoolsV4ResponseConverter extends AbstractCo
 
     @Override
     public PlatformIpPoolsV4Response convert(CloudIpPools source) {
-        Map<String, Set<IpPoolJson>> result = new HashMap<>();
+        Map<String, Set<IpPoolV4Response>> result = new HashMap<>();
         for (Entry<String, Set<CloudIpPool>> entry : source.getCloudIpPools().entrySet()) {
-            Set<IpPoolJson> ipPoolJsonSet = new HashSet<>();
+            Set<IpPoolV4Response> ipPoolJsonSet = new HashSet<>();
             for (CloudIpPool ipPool : entry.getValue()) {
-                IpPoolJson actual = new IpPoolJson(ipPool.getName(), ipPool.getId(), ipPool.getProperties());
+                IpPoolV4Response actual = new IpPoolV4Response(ipPool.getName(), ipPool.getId(), ipPool.getProperties());
                 ipPoolJsonSet.add(actual);
             }
             result.put(entry.getKey(), ipPoolJsonSet);

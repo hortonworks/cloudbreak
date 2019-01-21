@@ -9,8 +9,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -44,8 +44,8 @@ public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationT
         int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 + scalingAdjustment;
         // WHEN
-        UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+        HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
         hostGroupAdjustmentJson.setHostGroup(instanceGroup);
         hostGroupAdjustmentJson.setWithStackUpdate(true);
         hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);

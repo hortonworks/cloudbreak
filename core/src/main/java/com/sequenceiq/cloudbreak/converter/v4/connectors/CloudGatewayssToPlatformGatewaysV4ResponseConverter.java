@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.CloudGatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformGatewaysV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -19,11 +19,11 @@ public class CloudGatewayssToPlatformGatewaysV4ResponseConverter extends Abstrac
 
     @Override
     public PlatformGatewaysV4Response convert(CloudGateWays source) {
-        Map<String, Set<CloudGatewayJson>> result = new HashMap<>();
+        Map<String, Set<CloudGatewayV4Request>> result = new HashMap<>();
         for (Entry<String, Set<CloudGateWay>> entry : source.getCloudGateWayResponses().entrySet()) {
-            Set<CloudGatewayJson> cloudGatewayJsons = new HashSet<>();
+            Set<CloudGatewayV4Request> cloudGatewayJsons = new HashSet<>();
             for (CloudGateWay gateway : entry.getValue()) {
-                CloudGatewayJson actual = new CloudGatewayJson(gateway.getName(), gateway.getId(), gateway.getProperties());
+                CloudGatewayV4Request actual = new CloudGatewayV4Request(gateway.getName(), gateway.getId(), gateway.getProperties());
                 cloudGatewayJsons.add(actual);
             }
             result.put(entry.getKey(), cloudGatewayJsons);

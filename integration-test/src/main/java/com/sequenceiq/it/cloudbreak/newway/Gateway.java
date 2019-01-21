@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.CloudGatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformGatewaysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -36,7 +36,7 @@ public class Gateway extends Entity {
         this.request = request;
     }
 
-    public Map<String, Set<CloudGatewayJson>> getResponse() {
+    public Map<String, Set<CloudGatewayV4Request>> getResponse() {
         return response.getGateways();
     }
 
@@ -97,9 +97,9 @@ public class Gateway extends Entity {
             if (gateway.getResponse().isEmpty()) {
                 LOGGER.info("No gateways for given provider");
             } else {
-                for (Map.Entry<String, Set<CloudGatewayJson>> elem : gateway.getResponse().entrySet()) {
+                for (Map.Entry<String, Set<CloudGatewayV4Request>> elem : gateway.getResponse().entrySet()) {
                     for (Object response : elem.getValue()) {
-                        CloudGatewayJson gatewayJson = (CloudGatewayJson) response;
+                        CloudGatewayV4Request gatewayJson = (CloudGatewayV4Request) response;
                         Assert.assertFalse(gatewayJson.getName().isEmpty());
                     }
                 }

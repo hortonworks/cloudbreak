@@ -18,6 +18,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupToSecurityGroupResponseConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
 public class SecurityGroupToSecurityGroupResponseConverterTest extends AbstractEntityConverterTest<SecurityGroup> {

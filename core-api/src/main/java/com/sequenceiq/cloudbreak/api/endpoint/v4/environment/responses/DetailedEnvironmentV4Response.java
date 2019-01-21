@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -35,10 +35,10 @@ public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
     private Set<DatalakeResourcesV4Response> datalakeResourcesResponses;
 
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTERS)
-    private Set<StackViewResponse> workloadClusters = new HashSet<>();
+    private Set<StackViewV4Response> workloadClusters = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_CLUSTERS)
-    private Set<StackViewResponse> datalakeClusters = new HashSet<>();
+    private Set<StackViewV4Response> datalakeClusters = new HashSet<>();
 
     public Set<ProxyV4Response> getProxies() {
         return proxies;
@@ -80,19 +80,19 @@ public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
         this.datalakeResourcesResponses = datalakeResources;
     }
 
-    public Set<StackViewResponse> getWorkloadClusters() {
+    public Set<StackViewV4Response> getWorkloadClusters() {
         return workloadClusters;
     }
 
-    public void setWorkloadClusters(Set<StackViewResponse> workloadClusters) {
+    public void setWorkloadClusters(Set<StackViewV4Response> workloadClusters) {
         this.workloadClusters = workloadClusters;
     }
 
-    public Set<StackViewResponse> getDatalakeClusters() {
+    public Set<StackViewV4Response> getDatalakeClusters() {
         return datalakeClusters;
     }
 
-    public void setDatalakeClusters(Set<StackViewResponse> datalakeClusters) {
+    public void setDatalakeClusters(Set<StackViewV4Response> datalakeClusters) {
         this.datalakeClusters = datalakeClusters;
     }
 

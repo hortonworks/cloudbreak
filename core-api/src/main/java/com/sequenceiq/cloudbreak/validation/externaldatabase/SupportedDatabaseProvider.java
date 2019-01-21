@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.validation.externaldatabase;
 
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MYSQL;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE12;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.POSTGRES;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.MYSQL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE11;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE12;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.POSTGRES;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 
 public final class SupportedDatabaseProvider {
 

@@ -7,9 +7,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
 
-public class AdlsGen2CloudStorageParametersValidator implements ConstraintValidator<ValidAdlsGen2CloudStorageParameters, AdlsGen2CloudStorageParameters> {
+public class AdlsGen2CloudStorageParametersValidator implements ConstraintValidator<ValidAdlsGen2CloudStorageParameters, AdlsGen2CloudStorageParametersV4> {
 
     private static final int MIN_ACCOUNT_NAME_LENGTH = 3;
 
@@ -22,7 +22,7 @@ public class AdlsGen2CloudStorageParametersValidator implements ConstraintValida
     }
 
     @Override
-    public boolean isValid(AdlsGen2CloudStorageParameters value, ConstraintValidatorContext context) {
+    public boolean isValid(AdlsGen2CloudStorageParametersV4 value, ConstraintValidatorContext context) {
         boolean result;
         if (!isAccountNameValid(value.getAccountName())
                 || !isAccountKeyValid(value.getAccountKey())) {

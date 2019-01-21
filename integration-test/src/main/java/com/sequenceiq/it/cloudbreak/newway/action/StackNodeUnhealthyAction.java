@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -39,7 +39,7 @@ public class StackNodeUnhealthyAction implements ActionV2<StackEntity> {
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getGeneral().getName()));
         logJSON(LOGGER, format(" Stack unhealthy request:%n"), entity.getRequest());
-        FailureReport failureReport = new FailureReport();
+        FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(entity)));
         CloudbreakClient autoscaleClient = testContext.as(Actor::secondUser).getCloudbreakClient(SECONDARY_REFRESH_TOKEN);
         try (Response toClose = autoscaleClient.getCloudbreakClient().autoscaleEndpoint()

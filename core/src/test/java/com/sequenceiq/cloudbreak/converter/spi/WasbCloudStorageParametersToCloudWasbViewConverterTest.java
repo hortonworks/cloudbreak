@@ -13,11 +13,11 @@ public class WasbCloudStorageParametersToCloudWasbViewConverterTest {
 
     private static final String ACCOUNT_NAME = "testName";
 
-    private WasbCloudStorageParametersToCloudWasbViewConverter underTest;
+    private WasbCloudStorageParametersV4ToCloudWasbViewConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new WasbCloudStorageParametersToCloudWasbViewConverter();
+        underTest = new WasbCloudStorageParametersV4ToCloudWasbViewConverter();
     }
 
     @Test

@@ -22,7 +22,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -106,15 +107,15 @@ public class ImageService {
     }
 
     //CHECKSTYLE:OFF
-    public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName, Blueprint blueprint,
-            boolean useBaseImage, String os, CloudbreakUser cbUser, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettings, String platformString, Blueprint blueprint,
+            boolean useBaseImage, CloudbreakUser cbUser, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
-        if (imageId != null) {
-            statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, catalogName);
+        if (imageSettings.getId() != null) {
+            statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
         } else {
             if (useBaseImage) {
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, cbUser, user);
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, imageSettings.getOs(), cbUser, user);
             } else {
                 String clusterType = ImageCatalogService.UNDEFINED;
                 String clusterVersion = ImageCatalogService.UNDEFINED;
@@ -130,7 +131,8 @@ public class ImageService {
                 }
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
                         + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, cbUser, user);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, imageSettings.getOs(),
+                        cbUser, user);
             }
         }
         return statedImage;

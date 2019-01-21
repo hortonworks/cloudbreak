@@ -21,11 +21,11 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyJsonValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -41,7 +41,7 @@ public class GatewayTopologyJsonToGatewayTopologyConverterTest {
     private ConversionService conversionService;
 
     @Spy
-    private final GatewayTopologyJsonValidator validator = new GatewayTopologyJsonValidator(new ExposedServiceListValidator());
+    private final GatewayTopologyV4RequestValidator validator = new GatewayTopologyV4RequestValidator(new ExposedServiceListValidator());
 
     @InjectMocks
     private final GatewayTopologyJsonToGatewayTopologyConverter underTest = new GatewayTopologyJsonToGatewayTopologyConverter();

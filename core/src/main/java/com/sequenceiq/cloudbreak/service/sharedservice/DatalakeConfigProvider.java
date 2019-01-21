@@ -17,7 +17,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -191,8 +191,8 @@ public class DatalakeConfigProvider {
         return blueprintConfigParameters;
     }
 
-    public Map<String, String> getAdditionalParameters(StackV2Request workloadStackRequest, DatalakeResources datalakeResources) {
-        return getAdditionalParameters(workloadStackRequest.getGeneral().getName(), datalakeResources);
+    public Map<String, String> getAdditionalParameters(StackV4Request workloadStackRequest, DatalakeResources datalakeResources) {
+        return getAdditionalParameters(workloadStackRequest.getName(), datalakeResources);
     }
 
     public Map<String, String> getAdditionalParameters(Stack workloadStack, DatalakeResources datalakeResources) {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.securityrule;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,7 @@ public class SecurityRuleService {
         for (String port : ports) {
             if (StringUtils.isNotBlank(port)) {
                 SecurityRuleV4Response securityRuleV4Response = new SecurityRuleV4Response();
-                securityRuleV4Response.setPorts(port);
+                securityRuleV4Response.setPorts(Collections.singletonList(port));
                 securityRuleV4Response.setProtocol(TCP_PROTOCOL);
                 securityRuleV4Response.setSubnet(cidr);
                 rules.add(securityRuleV4Response);

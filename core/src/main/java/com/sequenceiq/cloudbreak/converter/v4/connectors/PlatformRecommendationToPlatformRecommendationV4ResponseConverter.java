@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DiskResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -30,22 +30,18 @@ public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter
         Set<VmTypeV4Response> vmTypes = source.getVirtualMachines()
                 .stream().map(vmType -> getConversionService().convert(vmType, VmTypeV4Response.class)).collect(Collectors.toSet());
 
-        Set<DiskResponse> diskResponses = new HashSet<>();
+        Set<DiskV4Response> diskResponses = new HashSet<>();
         for (Entry<DiskType, DisplayName> diskTypeDisplayName : source.getDiskTypes().displayNames().entrySet()) {
             for (Entry<String, VolumeParameterType> volumeParameterType : source.getDiskTypes().diskMapping().entrySet()) {
                 if (diskTypeDisplayName.getKey().value().equals(volumeParameterType.getKey())) {
-                    DiskResponse diskResponse = new DiskResponse(
+                    DiskV4Response diskResponse = new DiskV4Response(
                             diskTypeDisplayName.getKey().value(),
                             volumeParameterType.getValue().name(),
                             diskTypeDisplayName.getValue().value());
                     diskResponses.add(diskResponse);
                 }
-
             }
-
-
         }
-
         return new RecommendationV4Response(result, vmTypes, diskResponses);
     }
 }

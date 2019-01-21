@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakeResourcesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.ServiceDescriptorV4Response;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
@@ -73,24 +73,24 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
                 source.getStacks()
                         .stream()
                         .filter(stack -> stack.getType() == StackType.WORKLOAD)
-                        .map(workload -> getConversionService().convert(workload, StackViewResponse.class))
+                        .map(workload -> getConversionService().convert(workload, StackViewV4Response.class))
                         .collect(Collectors.toSet()));
         response.setDatalakeClusters(
                 source.getStacks()
                         .stream()
                         .filter(stack -> stack.getType() == StackType.DATALAKE)
-                        .map(stack -> getConversionService().convert(stack, StackViewResponse.class))
+                        .map(stack -> getConversionService().convert(stack, StackViewV4Response.class))
                         .collect(Collectors.toSet()));
         response.setLocation(getConversionService().convert(source, LocationV4Response.class));
         response.setWorkloadClusterNames(
                 response.getWorkloadClusters()
                         .stream()
-                        .map(StackViewResponse::getName)
+                        .map(StackViewV4Response::getName)
                         .collect(Collectors.toSet()));
         response.setDatalakeClusterNames(
                 response.getDatalakeClusters()
                         .stream()
-                        .map(StackViewResponse::getName)
+                        .map(StackViewV4Response::getName)
                         .collect(Collectors.toSet()));
         Set<String> datalakeResourcesNames = new HashSet<>();
         Set<DatalakeResourcesV4Response> datalakeResourcesResponses = new HashSet<>();

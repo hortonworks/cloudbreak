@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 

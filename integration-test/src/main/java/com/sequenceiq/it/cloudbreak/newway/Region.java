@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
-import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RegionV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.RegionV4Action;
 

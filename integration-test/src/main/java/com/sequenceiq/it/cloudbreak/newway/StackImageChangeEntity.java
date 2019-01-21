@@ -4,16 +4,16 @@ import java.util.function.Function;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeRequest, Response, StackImageChangeEntity> {
+public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeV4Request, Response, StackImageChangeEntity> {
     public static final String IMAGE_CHANGE = "IMAGE_CHANGE";
 
     protected StackImageChangeEntity(String newId) {
         super(newId);
-        setRequest(new StackImageChangeRequest());
+        setRequest(new StackImageChangeV4Request());
     }
 
     protected StackImageChangeEntity() {

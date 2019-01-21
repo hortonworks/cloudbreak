@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.IpPoolV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -36,7 +36,7 @@ public class IpPool extends Entity {
         this.request = request;
     }
 
-    private Map<String, Set<IpPoolJson>> getResponseWithIpPools() {
+    private Map<String, Set<IpPoolV4Response>> getResponseWithIpPools() {
         return response.getIppools();
     }
 
@@ -97,9 +97,9 @@ public class IpPool extends Entity {
             if (ipPool.getResponseWithIpPools().isEmpty()) {
                 LOGGER.info("No ipPool for given provider");
             } else {
-                for (Map.Entry<String, Set<IpPoolJson>> elem : ipPool.getResponseWithIpPools().entrySet()) {
+                for (Map.Entry<String, Set<IpPoolV4Response>> elem : ipPool.getResponseWithIpPools().entrySet()) {
                     for (Object response : elem.getValue()) {
-                        IpPoolJson ipPoolJson = (IpPoolJson) response;
+                        IpPoolV4Response ipPoolJson = (IpPoolV4Response) response;
                         Assert.assertFalse(ipPoolJson.getName().isEmpty());
                     }
                 }

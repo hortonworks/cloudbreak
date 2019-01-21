@@ -7,15 +7,15 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.cloudbreak.api.model.CompactViewResponse;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class BlueprintV4ViewResponse extends CompactViewResponse {
+public class BlueprintV4ViewResponse extends CompactViewV4Response {
     @ApiModelProperty(BlueprintModelDescription.STACK_TYPE)
     private String stackType;
 

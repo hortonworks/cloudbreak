@@ -24,11 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -80,23 +80,23 @@ public class ServiceEndpointCollector {
         return null;
     }
 
-    public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
+    public Map<String, Collection<ClusterExposedServiceV4Response>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
         if (cluster.getBlueprint() != null) {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             if (StringUtils.isNotEmpty(blueprintText)) {
                 BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(blueprintText);
                 Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
                 Gateway gateway = cluster.getGateway();
-                Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
+                Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
                 if (gateway != null) {
                     for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                        List<ClusterExposedServiceResponse> clusterExposedServiceResponses = new ArrayList<>();
+                        List<ClusterExposedServiceV4Response> clusterExposedServiceResponses = new ArrayList<>();
                         Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
                                 .flatMap(this::getExposedServiceStream)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
                         for (ExposedService exposedService : knownExposedServices) {
-                            ClusterExposedServiceResponse clusterExposedServiceResponse = new ClusterExposedServiceResponse();
+                            ClusterExposedServiceV4Response clusterExposedServiceResponse = new ClusterExposedServiceV4Response();
                             clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
                             clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
                             clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());

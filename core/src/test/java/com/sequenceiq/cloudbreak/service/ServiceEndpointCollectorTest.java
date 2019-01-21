@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.AMBARI;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.ATLAS;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.BEACON_SERVER;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.HIVE_SERVER;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.WEBHDFS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.AMBARI;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.ATLAS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.BEACON_SERVER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.HIVE_SERVER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.WEBHDFS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -36,7 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;

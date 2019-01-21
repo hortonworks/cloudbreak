@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.RejectedThread;
@@ -45,7 +45,7 @@ public class RejectedThreadMonitor extends AbstractMonitor<RejectedThread> {
     public EvaluatorContext getContext(RejectedThread rejectedThread) {
         try {
             if (getEvaluatorType(rejectedThread).equals(ClusterCreationEvaluator.class)) {
-                AutoscaleStackResponse response = JsonUtil.readValue(rejectedThread.getJson(), AutoscaleStackResponse.class);
+                AutoscaleStackV4Response response = JsonUtil.readValue(rejectedThread.getJson(), AutoscaleStackV4Response.class);
                 return new ClusterCreationEvaluatorContext(response);
             } else {
                 return new ClusterIdEvaluatorContext(JsonUtil.readValue(rejectedThread.getJson(), Cluster.class).getId());

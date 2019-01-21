@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 import java.util.Collection;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.ManagementPackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
@@ -57,7 +57,7 @@ public class ManagementPackEntity extends AbstractCloudbreakEntity<ManagementPac
 
     @Override
     public Collection<ManagementPackResponse> getAll(CloudbreakClient client) {
-        ManagementPackV3Endpoint managementPackV3Endpoint = client.getCloudbreakClient().managementPackV3Endpoint();
+        ManagementPackV4Endpoint managementPackV3Endpoint = client.getCloudbreakClient().managementPackV3Endpoint();
         return managementPackV3Endpoint.listByWorkspace(client.getWorkspaceId());
     }
 

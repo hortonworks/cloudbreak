@@ -28,14 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ManagementPackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.ManagementPackV3Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
@@ -49,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.ManagementPackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.SmartSenseSubscriptionV4Endpoint;
@@ -69,28 +64,23 @@ public class CloudbreakClient {
 
     private static final List<Class<?>> ENDPOINTS = Arrays.asList(
             AuditEventV4Endpoint.class,
-            AutoscaleEndpoint.class,
+            AutoscaleV4Endpoint.class,
             BlueprintV4Endpoint.class,
             DatabaseV4Endpoint.class,
             EnvironmentV4Endpoint.class,
             EventV4Endpoint.class,
-            ClusterV1Endpoint.class,
             ClusterTemplateV4Endpoint.class,
             FlexSubscriptionV4Endpoint.class,
             CredentialV4Endpoint.class,
             ImageCatalogV4Endpoint.class,
             LdapConfigV4Endpoint.class,
-            ManagementPackEndpoint.class,
-            ManagementPackV3Endpoint.class,
+            ManagementPackV4Endpoint.class,
             KubernetesV4Endpoint.class,
             WorkspaceV4Endpoint.class,
             ConnectorV4Endpoint.class,
             ProxyV4Endpoint.class,
             RecipeV4Endpoint.class,
             SmartSenseSubscriptionV4Endpoint.class,
-            StackV1Endpoint.class,
-            StackV2Endpoint.class,
-            StackV3Endpoint.class,
             UserProfileV4Endpoint.class,
             UserV4Endpoint.class,
             UtilV4Endpoint.class,
@@ -128,8 +118,8 @@ public class CloudbreakClient {
         return getEndpoint(AuditEventV4Endpoint.class);
     }
 
-    public AutoscaleEndpoint autoscaleEndpoint() {
-        return getEndpoint(AutoscaleEndpoint.class);
+    public AutoscaleV4Endpoint autoscaleEndpoint() {
+        return getEndpoint(AutoscaleV4Endpoint.class);
     }
 
     public BlueprintV4Endpoint blueprintV4Endpoint() {
@@ -142,10 +132,6 @@ public class CloudbreakClient {
 
     public EventV4Endpoint eventV3Endpoint() {
         return getEndpoint(EventV4Endpoint.class);
-    }
-
-    public ClusterV1Endpoint clusterEndpoint() {
-        return getEndpoint(ClusterV1Endpoint.class);
     }
 
     public CredentialV4Endpoint credentialV4Endpoint() {
@@ -164,12 +150,8 @@ public class CloudbreakClient {
         return getEndpoint(LdapConfigV4Endpoint.class);
     }
 
-    public ManagementPackEndpoint managementPackEndpoint() {
-        return getEndpoint(ManagementPackEndpoint.class);
-    }
-
-    public ManagementPackV3Endpoint managementPackV3Endpoint() {
-        return getEndpoint(ManagementPackV3Endpoint.class);
+    public ManagementPackV4Endpoint managementPackV3Endpoint() {
+        return getEndpoint(ManagementPackV4Endpoint.class);
     }
 
     public KubernetesV4Endpoint kubernetesConfigV3Endpoint() {
@@ -198,18 +180,6 @@ public class CloudbreakClient {
 
     public SmartSenseSubscriptionV4Endpoint smartSenseSubscriptionV4Endpoint() {
         return getEndpoint(SmartSenseSubscriptionV4Endpoint.class);
-    }
-
-    public StackV1Endpoint stackV1Endpoint() {
-        return getEndpoint(StackV1Endpoint.class);
-    }
-
-    public StackV2Endpoint stackV2Endpoint() {
-        return getEndpoint(StackV2Endpoint.class);
-    }
-
-    public StackV3Endpoint stackV3Endpoint() {
-        return getEndpoint(StackV3Endpoint.class);
     }
 
     public UserProfileV4Endpoint userProfileV4Endpoint() {

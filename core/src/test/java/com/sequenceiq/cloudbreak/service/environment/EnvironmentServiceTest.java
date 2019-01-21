@@ -36,7 +36,11 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+<<<<<<< HEAD
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+=======
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+>>>>>>> 1bbe024a7... asd
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
@@ -62,7 +66,11 @@ import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToDetailedE
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.RegionConverter;
+<<<<<<< HEAD
 import com.sequenceiq.cloudbreak.converter.v4.kerberos.KerberosConfigToKerberosV4ResponseConverter;
+=======
+import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
+>>>>>>> 1bbe024a7... asd
 import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -191,7 +199,7 @@ public class EnvironmentServiceTest {
     private KerberosConfigToKerberosV4ResponseConverter kerberosConfigResponseConverter;
 
     @InjectMocks
-    private StackApiViewToStackViewResponseConverter stackApiViewToStackViewResponseConverter;
+    private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewResponseConverter;
 
     @Before
     public void setup() throws TransactionExecutionException {

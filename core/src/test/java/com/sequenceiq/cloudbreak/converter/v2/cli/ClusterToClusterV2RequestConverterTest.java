@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +26,7 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.ClusterToClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -35,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 public class ClusterToClusterV2RequestConverterTest {
 
     @InjectMocks
-    private ClusterToClusterV2RequestConverter underTest;
+    private ClusterToClusterV4RequestConverter underTest;
 
     @Mock
     private ConversionService conversionService;

@@ -21,7 +21,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.DiskResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -58,10 +58,10 @@ public class RecommendationsTests extends CloudbreakTest {
         return new String(StreamUtils.copyToByteArray(applicationContext.getResource("classpath:/templates/diskResponses.json").getInputStream()));
     }
 
-    private Set<DiskResponse> getCustomDiskResponses() throws IOException {
+    private Set<DiskV4Response> getCustomDiskResponses() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
 
-        return new HashSet<>(mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(Set.class, DiskResponse.class)));
+        return new HashSet<>(mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(Set.class, DiskV4Response.class)));
     }
 
     private void createBlueprint() throws Exception {
@@ -124,7 +124,7 @@ public class RecommendationsTests extends CloudbreakTest {
         String expectedDisplayName = "";
 
         try {
-            Set<DiskResponse> customDiskResponseSet = getCustomDiskResponses();
+            Set<DiskV4Response> customDiskResponseSet = getCustomDiskResponses();
             expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
 
             recommendations.getResponse().setDiskResponses(customDiskResponseSet);
@@ -166,9 +166,9 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Set<DiskResponse> diskResponseSet = recommendations.getResponse().getDiskResponses();
+                    Set<DiskV4Response> diskResponseSet = recommendations.getResponse().getDiskResponses();
 
-                    for (DiskResponse diskResponse : diskResponseSet) {
+                    for (DiskV4Response diskResponse : diskResponseSet) {
                         LOGGER.debug("Disk Response is ::: {}", diskResponse.getDisplayName());
                         Assert.assertFalse(diskResponse.getDisplayName().isEmpty(), "Disk Responses should be present in response!");
                     }
@@ -207,9 +207,9 @@ public class RecommendationsTests extends CloudbreakTest {
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
                     String expectedDisplayName = setCustomDiskResponses(recommendations);
-                    Set<DiskResponse> diskResponseSet = recommendations.getResponse().getDiskResponses();
+                    Set<DiskV4Response> diskResponseSet = recommendations.getResponse().getDiskResponses();
 
-                    for (DiskResponse diskResponse : diskResponseSet) {
+                    for (DiskV4Response diskResponse : diskResponseSet) {
                         LOGGER.debug("Custom Disk Response is ::: {}", diskResponse.getDisplayName());
                         Assert.assertEquals(diskResponse.getDisplayName(), expectedDisplayName, "HDD should be the custom displayName value!");
                     }

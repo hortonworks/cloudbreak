@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Base;
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.KubernetesConfig;
@@ -16,7 +16,7 @@ public class KubernetesV4Response extends KubernetesV4Base {
     private Long id;
 
     @ApiModelProperty(KubernetesConfig.CONFIG)
-    private SecretResponse content;
+    private SecretV4Response content;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -29,11 +29,11 @@ public class KubernetesV4Response extends KubernetesV4Base {
         this.id = id;
     }
 
-    public SecretResponse getContent() {
+    public SecretV4Response getContent() {
         return content;
     }
 
-    public void setContent(SecretResponse content) {
+    public void setContent(SecretV4Response content) {
         this.content = content;
     }
 

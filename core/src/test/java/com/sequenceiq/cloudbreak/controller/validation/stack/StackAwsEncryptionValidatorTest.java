@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -100,7 +100,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(subject.getClusterRequest()).thenReturn(clusterRequest);
         when(clusterRequest.getBlueprintName()).thenReturn("dummy");
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
-        when(clusterRequest.getHostGroups()).thenReturn(Set.of(new HostGroupRequest()));
+        when(clusterRequest.getHostGroups()).thenReturn(Set.of(new HostGroupV4Request()));
     }
 
     @Test
