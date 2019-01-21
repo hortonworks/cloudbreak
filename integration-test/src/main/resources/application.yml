@@ -142,6 +142,7 @@ integrationtest:
 
     testsuite:
         threadPoolSize: 3
+        pollingInterval: 10000
         skipRemainingTestsAfterOneFailed: true
         cleanUpOnFailure: true
 
