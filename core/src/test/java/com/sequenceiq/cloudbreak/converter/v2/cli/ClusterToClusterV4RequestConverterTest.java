@@ -23,9 +23,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.ClusterToClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
-public class ClusterToClusterV2RequestConverterTest {
+public class ClusterToClusterV4RequestConverterTest {
 
     @InjectMocks
     private ClusterToClusterV4RequestConverter underTest;
@@ -51,51 +51,44 @@ public class ClusterToClusterV2RequestConverterTest {
 
     @Test
     public void testConvertWhenAmbariConversionSuccessfulThenExpectedAmbariV2RequestShouldPlacedIn() {
-        AmbariV2Request expected = mock(AmbariV2Request.class);
-        when(conversionService.convert(cluster, AmbariV2Request.class)).thenReturn(expected);
+        AmbariV4Request expected = mock(AmbariV4Request.class);
+        when(conversionService.convert(cluster, AmbariV4Request.class)).thenReturn(expected);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
         assertEquals(expected, result.getAmbari());
-    }
-
-    @Test
-    public void testConvertSettingExecutorTypeToNull() {
-        ClusterV2Request result = underTest.convert(cluster);
-
-        assertNull(result.getExecutorType());
     }
 
     @Test
     public void testConvertWhenThereIsNoFileSystemThenCloudStorageIsNull() {
         when(cluster.getFileSystem()).thenReturn(null);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
         assertNull(result.getCloudStorage());
-        verify(conversionService, times(0)).convert(null, CloudStorageRequest.class);
-        verify(conversionService, times(0)).convert(any(FileSystem.class), eq(CloudStorageRequest.class));
+        verify(conversionService, times(0)).convert(null, CloudStorageV4Request.class);
+        verify(conversionService, times(0)).convert(any(FileSystem.class), eq(CloudStorageV4Request.class));
     }
 
     @Test
     public void testConvertWhenFileSystemNotNullThenExpectedCloudStorageRequestShouldBePlaced() {
         FileSystem fileSystem = new FileSystem();
-        CloudStorageRequest expected = new CloudStorageRequest();
+        CloudStorageV4Request expected = new CloudStorageV4Request();
         when(cluster.getFileSystem()).thenReturn(fileSystem);
-        when(conversionService.convert(fileSystem, CloudStorageRequest.class)).thenReturn(expected);
+        when(conversionService.convert(fileSystem, CloudStorageV4Request.class)).thenReturn(expected);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
         assertEquals(expected, result.getCloudStorage());
-        verify(conversionService, times(1)).convert(fileSystem, CloudStorageRequest.class);
+        verify(conversionService, times(1)).convert(fileSystem, CloudStorageV4Request.class);
     }
 
     @Test
     public void testConvertWhenLdapConfigIsNullThenLdapConfigNameShouldBeNull() {
         when(cluster.getLdapConfig()).thenReturn(null);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
-        assertNull(result.getLdapConfigName());
+        assertNull(result.getLdapName());
     }
 
     @Test
@@ -105,9 +98,9 @@ public class ClusterToClusterV2RequestConverterTest {
         when(cluster.getLdapConfig()).thenReturn(ldapConfig);
         when(ldapConfig.getName()).thenReturn(expected);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
-        assertEquals(expected, result.getLdapConfigName());
+        assertEquals(expected, result.getLdapName());
     }
 
     @Test
@@ -115,7 +108,7 @@ public class ClusterToClusterV2RequestConverterTest {
         String expected = "name";
         when(cluster.getName()).thenReturn(expected);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
         assertEquals(expected, result.getName());
     }
@@ -124,7 +117,7 @@ public class ClusterToClusterV2RequestConverterTest {
     public void testConvertWhenProxyConfigIsNullThenProxyNameShouldBeNull() {
         when(cluster.getProxyConfig()).thenReturn(null);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
         assertNull(result.getProxyName());
     }
@@ -136,7 +129,7 @@ public class ClusterToClusterV2RequestConverterTest {
         when(proxyConfig.getName()).thenReturn(expected);
         when(cluster.getProxyConfig()).thenReturn(proxyConfig);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
         assertEquals(expected, result.getProxyName());
     }
@@ -145,18 +138,18 @@ public class ClusterToClusterV2RequestConverterTest {
     public void testConvertWhenRdsConfigNullThenRdsConfigNamesShouldBeEmpty() {
         when(cluster.getRdsConfigs()).thenReturn(null);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
-        assertTrue(result.getRdsConfigNames().isEmpty());
+        assertTrue(result.getDatabases().isEmpty());
     }
 
     @Test
     public void testConvertWhenRdsConfigIsNotNullButItsEmptyThenRdsConfigNamesShouldBeEmpty() {
         when(cluster.getRdsConfigs()).thenReturn(Collections.emptySet());
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
-        assertTrue(result.getRdsConfigNames().isEmpty());
+        assertTrue(result.getDatabases().isEmpty());
     }
 
     @Test
@@ -175,9 +168,9 @@ public class ClusterToClusterV2RequestConverterTest {
 
         when(cluster.getRdsConfigs()).thenReturn(rdsConfigs);
 
-        ClusterV2Request result = underTest.convert(cluster);
+        ClusterV4Request result = underTest.convert(cluster);
 
-        assertEquals(1L, result.getRdsConfigNames().size());
+        assertEquals(1L, result.getDatabases().size());
     }
 
 }

@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationResponse;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem.StorageLocationToStorageLocationV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.StorageLocation;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.location.StorageLocationV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem.StorageLocationToStorageLocationV4ResponseConverter;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
 
 public class StorageLocationToStorageLocationResponseConverterTest {
 
@@ -25,12 +26,12 @@ public class StorageLocationToStorageLocationResponseConverterTest {
 
     @Test
     public void testConvertWhenPassingStorageLocationThenAllNecessaryParametersShouldBePassed() {
-        StorageLocationResponse expected = new StorageLocationResponse();
+        StorageLocationV4Response expected = new StorageLocationV4Response();
         expected.setValue(VALUE);
         expected.setPropertyName(PROPERTY_NAME);
         expected.setPropertyFile(PROPERTY_FILE);
 
-        StorageLocationResponse result = underTest.convert(createSource());
+        StorageLocationV4Response result = underTest.convert(createSource());
 
         assertEquals(expected, result);
     }

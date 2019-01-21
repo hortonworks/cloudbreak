@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;

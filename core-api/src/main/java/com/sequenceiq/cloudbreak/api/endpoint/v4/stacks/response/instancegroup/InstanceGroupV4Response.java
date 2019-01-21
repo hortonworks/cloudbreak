@@ -1,17 +1,14 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParametersBase;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.GcpInstanceGroupParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.OpenStackInstanceGroupParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.securitygroup.SecurityGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
@@ -24,19 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class InstanceGroupV4Response extends ProviderParametersBase implements JsonEntity {
-
-    @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
-    private AzureInstanceGroupParametersV4 azure;
-
-    @ApiModelProperty(InstanceGroupModelDescription.GCP_PARAMETERS)
-    private GcpInstanceGroupParametersV4 gcp;
-
-    @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
-    private AwsInstanceGroupParametersV4 aws;
-
-    @ApiModelProperty(InstanceGroupModelDescription.OPENSTACK_PARAMETERS)
-    private OpenStackInstanceGroupParametersV4 openstack;
+public class InstanceGroupV4Response extends InstanceGroupV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
@@ -50,41 +35,7 @@ public class InstanceGroupV4Response extends ProviderParametersBase implements J
     @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupV4Response securityGroup;
 
-    @Override
-    public AzureInstanceGroupParametersV4 getAzure() {
-        return azure;
-    }
-
-    public void setAzure(AzureInstanceGroupParametersV4 azure) {
-        this.azure = azure;
-    }
-
-    @Override
-    public GcpInstanceGroupParametersV4 getGcp() {
-        return gcp;
-    }
-
-    public void setGcp(GcpInstanceGroupParametersV4 gcp) {
-        this.gcp = gcp;
-    }
-
-    @Override
-    public AwsInstanceGroupParametersV4 getAws() {
-        return aws;
-    }
-
-    public void setAws(AwsInstanceGroupParametersV4 aws) {
-        this.aws = aws;
-    }
-
-    @Override
-    public OpenStackInstanceGroupParametersV4 getOpenstack() {
-        return openstack;
-    }
-
-    public void setOpenstack(OpenStackInstanceGroupParametersV4 openstack) {
-        this.openstack = openstack;
-    }
+    private List<RecipeV4Response> recipes;
 
     public Long getId() {
         return id;
@@ -116,5 +67,13 @@ public class InstanceGroupV4Response extends ProviderParametersBase implements J
 
     public void setSecurityGroup(SecurityGroupV4Response securityGroup) {
         this.securityGroup = securityGroup;
+    }
+
+    public List<RecipeV4Response> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(List<RecipeV4Response> recipes) {
+        this.recipes = recipes;
     }
 }

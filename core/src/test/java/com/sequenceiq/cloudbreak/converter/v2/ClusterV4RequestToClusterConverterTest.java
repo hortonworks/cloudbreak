@@ -26,12 +26,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -58,13 +59,13 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClusterV2RequestToClusterConverterTest {
+public class ClusterV4RequestToClusterConverterTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
-    private ClusterV2RequestToClusterConverter underTest;
+    private ClusterV4RequestToClusterConverter underTest;
 
     @Mock
     private CloudStorageValidationUtil cloudStorageValidationUtil;
@@ -114,12 +115,12 @@ public class ClusterV2RequestToClusterConverterTest {
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspace.getId());
         when(workspaceService.get(workspace.getId(), user)).thenReturn(workspace);
 
-        when(cloudStorageValidationUtil.isCloudStorageConfigured(any(CloudStorageRequest.class))).thenReturn(false);
+        when(cloudStorageValidationUtil.isCloudStorageConfigured(any(CloudStorageV4Request.class))).thenReturn(false);
     }
 
     @Test
     public void testConvertWhenCloudStorageConfiguredAndRdsAndLdapAndProxyExistsAnd() {
-        CloudStorageRequest cloudStorageRequest = mock(CloudStorageRequest.class);
+        CloudStorageV4Request cloudStorageRequest = mock(CloudStorageV4Request.class);
 
         String rdsConfigName = "rds-name";
         String proxyName = "proxy-name";
@@ -136,11 +137,11 @@ public class ClusterV2RequestToClusterConverterTest {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(ldapName);
 
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
         source.setCloudStorage(cloudStorageRequest);
-        source.setRdsConfigNames(singleton(rdsConfigName));
+        source.setDatabases(singleton(rdsConfigName));
         source.setProxyName(proxyName);
-        source.setLdapConfigName(ldapName);
+        source.setLdapName(ldapName);
 
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
@@ -166,7 +167,7 @@ public class ClusterV2RequestToClusterConverterTest {
 
     @Test
     public void testConvertWhenNoRdsConfig() {
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
 
         Set<String> rdsConfigNames = emptySet();
 
@@ -179,12 +180,12 @@ public class ClusterV2RequestToClusterConverterTest {
 
     @Test
     public void testConvertWhenRdsConfigNotExists() {
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
 
         Set<String> rdsConfigNames = singleton("fake-rds-name");
         when(rdsConfigService.findByNamesInWorkspace(rdsConfigNames, workspace.getId())).thenReturn(emptySet());
 
-        source.setRdsConfigNames(rdsConfigNames);
+        source.setDatabases(rdsConfigNames);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("RDS config names dont exists");
@@ -196,10 +197,10 @@ public class ClusterV2RequestToClusterConverterTest {
 
     @Test
     public void testConvertWhenNoBlueprint() {
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
 
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
-        source.setAmbari(ambariV2Request);
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        source.setAmbari(ambariV4Request);
 
         Cluster actual = underTest.convert(source);
 
@@ -212,11 +213,11 @@ public class ClusterV2RequestToClusterConverterTest {
     public void testConvertWheBlueprintDoesNotExists() {
         String blueprintName = "bp-name";
 
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
 
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
-        ambariV2Request.setBlueprintName(blueprintName);
-        source.setAmbari(ambariV2Request);
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        ambariV4Request.setBlueprintName(blueprintName);
+        source.setAmbari(ambariV4Request);
 
         when(blueprintService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(null);
 
@@ -233,11 +234,11 @@ public class ClusterV2RequestToClusterConverterTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setName(blueprintName);
 
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
 
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
-        ambariV2Request.setBlueprintName(blueprintName);
-        source.setAmbari(ambariV2Request);
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        ambariV4Request.setBlueprintName(blueprintName);
+        source.setAmbari(ambariV4Request);
 
         when(blueprintService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(blueprint);
 
@@ -252,14 +253,14 @@ public class ClusterV2RequestToClusterConverterTest {
     public void testConvertWhenAmbariRepoDetailsNotNull() throws IOException {
         String baseUrl = "base-url";
 
-        ClusterV2Request source = new ClusterV2Request();
-        AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
+        ClusterV4Request source = new ClusterV4Request();
+        AmbariRepositoryV4Request ambariRepoDetailsJson = new AmbariRepositoryV4Request();
         AmbariRepo ambariRepo = new AmbariRepo();
         ambariRepo.setBaseUrl(baseUrl);
 
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
-        ambariV2Request.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
-        source.setAmbari(ambariV2Request);
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        ambariV4Request.setRepository(ambariRepoDetailsJson);
+        source.setAmbari(ambariV4Request);
 
         when(conversionService.convert(ambariRepoDetailsJson, AmbariRepo.class)).thenReturn(ambariRepo);
 
@@ -278,14 +279,14 @@ public class ClusterV2RequestToClusterConverterTest {
     public void testConvertWhenAmbariStackDetailsNotNull() throws IOException {
         String version = "2.6";
 
-        ClusterV2Request source = new ClusterV2Request();
-        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ClusterV4Request source = new ClusterV4Request();
+        StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         StackRepoDetails stackRepoDetails = new StackRepoDetails();
         stackRepoDetails.setHdpVersion(version);
 
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
-        ambariV2Request.setAmbariStackDetails(ambariStackDetailsJson);
-        source.setAmbari(ambariV2Request);
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        ambariV4Request.setStackRepository(ambariStackDetailsJson);
+        source.setAmbari(ambariV4Request);
 
         when(conversionService.convert(ambariStackDetailsJson, StackRepoDetails.class)).thenReturn(stackRepoDetails);
 
@@ -304,12 +305,11 @@ public class ClusterV2RequestToClusterConverterTest {
     public void testConvertWhenGatewayExists() {
         String clusterName = "cluster-name";
 
-        ClusterV2Request source = new ClusterV2Request();
+        ClusterV4Request source = new ClusterV4Request();
 
-        AmbariV2Request ambariV2Request = new AmbariV2Request();
-        GatewayJson gatewayJson = new GatewayJson();
-        ambariV2Request.setGateway(gatewayJson);
-        source.setAmbari(ambariV2Request);
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        GatewayV4Request gatewayJson = new GatewayV4Request();
+        source.setAmbari(ambariV4Request);
         Gateway gateway = new Gateway();
 
         when(conversionService.convert(gatewayJson, Gateway.class)).thenReturn(gateway);
@@ -318,7 +318,6 @@ public class ClusterV2RequestToClusterConverterTest {
 
         assertThat(actual.getGateway(), is(gateway));
 
-        verify(gatewayConvertUtil, times(0)).setGatewayPathAndSsoProvider(clusterName, gatewayJson, gateway);
         verify(conversionService, times(1)).convert(gatewayJson, Gateway.class);
     }
 }

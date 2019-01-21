@@ -48,7 +48,7 @@ import com.google.api.services.compute.model.InstancesStartWithEncryptionKeyRequ
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;

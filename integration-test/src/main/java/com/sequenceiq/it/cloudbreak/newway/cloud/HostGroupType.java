@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;

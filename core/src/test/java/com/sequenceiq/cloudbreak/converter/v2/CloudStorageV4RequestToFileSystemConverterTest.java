@@ -19,24 +19,24 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.converter.v2.filesystem.CloudStorageRequestToFileSystemConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem.CloudStorageV4RequestToFileSystemConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
-public class CloudStorageRequestToFileSystemConverterTest {
+public class CloudStorageV4RequestToFileSystemConverterTest {
 
     private static final String USER_ACCOUNT = "fa431902-74fb-4f61-b643-35003f680f6a";
 
@@ -52,7 +52,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
     public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
-    private CloudStorageRequestToFileSystemConverter underTest;
+    private CloudStorageV4RequestToFileSystemConverter underTest;
 
     @Mock
     private MissingResourceNameGenerator nameGenerator;
@@ -76,14 +76,14 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
     @Test
     public void testConvertWhenAdlsParametersNotNullThenItsValuesShouldBePlacedIntoTheResultInstance() {
-        CloudStorageRequest request = createV2Request();
-        AdlsCloudStorageParameters adlsFileSystemParameters = new AdlsCloudStorageParameters();
+        CloudStorageV4Request request = createV4Request();
+        AdlsCloudStorageParametersV4 adlsFileSystemParameters = new AdlsCloudStorageParametersV4();
         adlsFileSystemParameters.setAccountName("dummy account name");
         adlsFileSystemParameters.setClientId("1234");
         adlsFileSystemParameters.setCredential("123456");
         adlsFileSystemParameters.setTenantId("1111111");
         request.setAdls(adlsFileSystemParameters);
-        AdlsCloudStorageParameters adlsCloudStorageParameters = new AdlsCloudStorageParameters();
+        AdlsCloudStorageParametersV4 adlsCloudStorageParameters = new AdlsCloudStorageParametersV4();
         when(fileSystemResolver.propagateConfiguration(request)).thenReturn(adlsCloudStorageParameters);
         when(underTest.getConversionService()).thenReturn(conversionService);
         when(conversionService.convert(adlsFileSystemParameters, AdlsFileSystem.class)).thenReturn(new AdlsFileSystem());
@@ -97,15 +97,15 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
     @Test
     public void testConvertWhenGcsParametersNotNullThenItsValuesShouldBePlacedIntoTheResultInstance() {
-        CloudStorageRequest request = createV2Request();
-        GcsCloudStorageParameters gcsFileSystemParameters = new GcsCloudStorageParameters();
+        CloudStorageV4Request request = createV4Request();
+        GcsCloudStorageParametersV4 gcsFileSystemParameters = new GcsCloudStorageParametersV4();
         gcsFileSystemParameters.setServiceAccountEmail("some@email.com");
         request.setGcs(gcsFileSystemParameters);
-        GcsCloudStorageParameters gcsCloudStorageParameters = new GcsCloudStorageParameters();
+        GcsCloudStorageParametersV4 gcsCloudStorageParameters = new GcsCloudStorageParametersV4();
         when(fileSystemResolver.propagateConfiguration(request)).thenReturn(gcsCloudStorageParameters);
         when(underTest.getConversionService()).thenReturn(conversionService);
         when(conversionService.convert(gcsCloudStorageParameters, GcsFileSystem.class)).thenReturn(new GcsFileSystem());
-        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new GcsCloudStorageParameters());
+        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new GcsCloudStorageParametersV4());
 
         FileSystem result = underTest.convert(request);
 
@@ -116,16 +116,16 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
     @Test
     public void testConvertWhenWasbParametersNotNullThenItsValuesShouldBePlacedIntoTheResultInstance() {
-        CloudStorageRequest request = createV2Request();
-        WasbCloudStorageParameters wasbFileSystemParameters = new WasbCloudStorageParameters();
+        CloudStorageV4Request request = createV4Request();
+        WasbCloudStorageParametersV4 wasbFileSystemParameters = new WasbCloudStorageParametersV4();
         wasbFileSystemParameters.setAccountKey("123456789");
         wasbFileSystemParameters.setAccountName("accountNameValue");
         request.setWasb(wasbFileSystemParameters);
-        WasbCloudStorageParameters wasbCloudStorageParameters = new WasbCloudStorageParameters();
+        WasbCloudStorageParametersV4 wasbCloudStorageParameters = new WasbCloudStorageParametersV4();
         when(fileSystemResolver.propagateConfiguration(request)).thenReturn(wasbCloudStorageParameters);
         when(underTest.getConversionService()).thenReturn(conversionService);
         when(conversionService.convert(wasbCloudStorageParameters, WasbFileSystem.class)).thenReturn(new WasbFileSystem());
-        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new WasbCloudStorageParameters());
+        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new WasbCloudStorageParametersV4());
 
         FileSystem result = underTest.convert(request);
 
@@ -136,16 +136,16 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
     @Test
     public void testConvertWhenAdlsGen2ParametersNotNullThenItsValuesShouldBePlacedIntoTheResultInstance() {
-        CloudStorageRequest request = createV2Request();
-        AdlsGen2CloudStorageParameters adlsGen2FileSystemParameters = new AdlsGen2CloudStorageParameters();
+        CloudStorageV4Request request = createV4Request();
+        AdlsGen2CloudStorageParametersV4 adlsGen2FileSystemParameters = new AdlsGen2CloudStorageParametersV4();
         adlsGen2FileSystemParameters.setAccountKey("123456789");
         adlsGen2FileSystemParameters.setAccountName("accountNameValue");
         request.setAdlsGen2(adlsGen2FileSystemParameters);
-        AdlsGen2CloudStorageParameters adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageParameters();
+        AdlsGen2CloudStorageParametersV4 adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageParametersV4();
         when(fileSystemResolver.propagateConfiguration(request)).thenReturn(adlsGen2CloudStorageParameters);
         when(underTest.getConversionService()).thenReturn(conversionService);
         when(conversionService.convert(adlsGen2CloudStorageParameters, AdlsGen2FileSystem.class)).thenReturn(new AdlsGen2FileSystem());
-        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new AdlsGen2CloudStorageParameters());
+        when(fileSystemResolver.propagateConfiguration(request)).thenReturn(new AdlsGen2CloudStorageParametersV4());
 
         FileSystem result = underTest.convert(request);
 
@@ -156,7 +156,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
     @Test
     public void testConvertWhenNoFileSystemParameterInstanceHasPassedThroughTheRequestThenExceptionShouldComeIndicatingThatTheFileSystemTypeIsUndecidable() {
-        CloudStorageRequest request = createV2Request();
+        CloudStorageV4Request request = createV4Request();
         String message = "Unable to decide file system, none of the supported file system type has provided!";
         when(fileSystemResolver.propagateConfiguration(request)).thenThrow(new BadRequestException(message));
 
@@ -171,8 +171,8 @@ public class CloudStorageRequestToFileSystemConverterTest {
         assertNotNull(fileSystem.getName());
     }
 
-    private CloudStorageRequest createV2Request() {
-        return new CloudStorageRequest();
+    private CloudStorageV4Request createV4Request() {
+        return new CloudStorageV4Request();
     }
 
 }

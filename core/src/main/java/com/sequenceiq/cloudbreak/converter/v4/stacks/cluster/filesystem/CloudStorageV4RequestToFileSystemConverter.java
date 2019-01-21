@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 
 @Component
-public class CloudStorageRequestV4ToFileSystemConverter extends AbstractConversionServiceAwareConverter<CloudStorageV4Request, FileSystem> {
+public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<CloudStorageV4Request, FileSystem> {
 
     @Inject
     private MissingResourceNameGenerator nameGenerator;

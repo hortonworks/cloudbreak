@@ -13,14 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayToGatewayV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -41,11 +40,11 @@ public class GatewayToGatewayJsonConverterTest {
     private ConversionService conversionService;
 
     @InjectMocks
-    private final GatewayToGatewayJsonConverter underTest = new GatewayToGatewayJsonConverter();
+    private final GatewayToGatewayV4RequestConverter underTest = new GatewayToGatewayV4RequestConverter();
 
     @Before
     public void setup() {
-        when(conversionService.convert(any(GatewayTopology.class), eq(GatewayTopologyJson.class))).thenReturn(new GatewayTopologyJson());
+        when(conversionService.convert(any(GatewayTopology.class), eq(GatewayTopologyV4Request.class))).thenReturn(new GatewayTopologyV4Request());
     }
 
     @Test
@@ -60,13 +59,12 @@ public class GatewayToGatewayJsonConverterTest {
         gateway.setSignCert(SIGN_CERT);
         gateway.setTopologies(Sets.newHashSet(new GatewayTopology(), new GatewayTopology()));
 
-        GatewayJson result = underTest.convert(gateway);
+        GatewayV4Request result = underTest.convert(gateway);
 
         assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
         assertEquals(TOKEN_CERT, result.getTokenCert());
         assertEquals(GatewayType.CENTRAL, result.getGatewayType());
-        assertTrue(CollectionUtils.isEmpty(result.getExposedServices()));
-        assertTrue(StringUtils.isEmpty(result.getTopologyName()));
+        assertTrue(result.getTopologies().isEmpty());
         assertEquals(SSO_PROVIDER, result.getSsoProvider());
         assertEquals(PATH, result.getPath());
         assertEquals(2L, result.getTopologies().size());

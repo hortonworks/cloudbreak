@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
 import org.junit.Before;
 import org.junit.Test;

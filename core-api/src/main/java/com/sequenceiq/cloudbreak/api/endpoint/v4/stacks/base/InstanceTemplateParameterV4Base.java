@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class InstanceTemplateParameterV4Base implements JsonEntity, Mappable {
 
-    @ApiModelProperty
+    @ApiModelProperty(hidden = true)
     private CloudPlatform platformType;
 
     public CloudPlatform getPlatformType() {

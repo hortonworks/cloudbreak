@@ -35,12 +35,9 @@ import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-<<<<<<< HEAD
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-=======
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
->>>>>>> 1bbe024a7... asd
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
@@ -51,8 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -60,19 +56,15 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentRegionValidator;
-import com.sequenceiq.cloudbreak.converter.stack.StackApiViewToStackViewResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToDetailedEnvironmentV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.RegionConverter;
-<<<<<<< HEAD
 import com.sequenceiq.cloudbreak.converter.v4.kerberos.KerberosConfigToKerberosV4ResponseConverter;
-=======
-import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
->>>>>>> 1bbe024a7... asd
 import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -403,7 +395,7 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
                 .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(StackApiView.class), eq(StackViewResponse.class)))
+        when(conversionService.convert(any(StackApiView.class), eq(StackViewV4Response.class)))
                 .thenAnswer(invocation -> stackApiViewToStackViewResponseConverter.convert((StackApiView) invocation.getArgument(0)));
 
         EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();

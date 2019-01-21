@@ -17,24 +17,25 @@ import org.springframework.core.convert.TypeDescriptor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
 
     @InjectMocks
-    private InstanceGroupToInstanceGroupResponseConverter underTest;
+    private InstanceGroupToInstanceGroupV4ResponseConverter underTest;
 
     @Mock
     private ConversionService conversionService;
 
     @Before
     public void setUp() {
-        underTest = new InstanceGroupToInstanceGroupResponseConverter();
+        underTest = new InstanceGroupToInstanceGroupV4ResponseConverter();
         MockitoAnnotations.initMocks(this);
     }
 
@@ -44,9 +45,9 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(getInstanceMetaData(getSource()));
         // WHEN
-        InstanceGroupResponse result = underTest.convert(getSource());
+        InstanceGroupV4Response result = underTest.convert(getSource());
         // THEN
-        assertEquals(1L, result.getNodeCount());
+        assertEquals(1L, result.getCount());
         assertEquals(InstanceGroupType.CORE, result.getType());
         assertAllFieldsNotNull(result, Lists.newArrayList("template", "securityGroup"));
     }

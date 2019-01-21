@@ -33,6 +33,14 @@ public class GcpInstanceTemplateParametersV4 extends InstanceTemplateParameterV4
         this.encryption = encryption;
     }
 
+    public Boolean getPreemptible() {
+        return preemptible;
+    }
+
+    public void setPreemptible(Boolean preemptible) {
+        this.preemptible = preemptible;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         setPlatformType(CloudPlatform.GCP);

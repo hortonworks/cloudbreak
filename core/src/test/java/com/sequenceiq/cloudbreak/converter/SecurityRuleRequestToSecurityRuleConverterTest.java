@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -7,20 +8,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
-public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleRequest> {
+public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleV4Request> {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    private SecurityRuleRequestToSecurityRuleConverter underTest;
+    private SecurityRuleV4RequestToSecurityRuleConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new SecurityRuleRequestToSecurityRuleConverter();
+        underTest = new SecurityRuleV4RequestToSecurityRuleConverter();
     }
 
     @Test
@@ -75,13 +77,13 @@ public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJson
     }
 
     @Override
-    public Class<SecurityRuleRequest> getRequestClass() {
-        return SecurityRuleRequest.class;
+    public Class<SecurityRuleV4Request> getRequestClass() {
+        return SecurityRuleV4Request.class;
     }
 
-    private SecurityRuleRequest createRequest(String ports) {
-        SecurityRuleRequest request = new SecurityRuleRequest();
-        request.setPorts(ports);
+    private SecurityRuleV4Request createRequest(String... ports) {
+        SecurityRuleV4Request request = new SecurityRuleV4Request();
+        request.setPorts(Arrays.asList(ports));
         request.setModifiable(true);
         request.setProtocol("tcp");
         request.setSubnet("0.0.0.0/0");

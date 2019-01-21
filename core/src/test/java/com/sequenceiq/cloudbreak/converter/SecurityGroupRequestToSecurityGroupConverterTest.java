@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,21 +15,22 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupV4RequestToSecurityGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
-public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJsonConverterTest<SecurityGroupRequest> {
+public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJsonConverterTest<SecurityGroupV4Request> {
 
     @InjectMocks
-    private SecurityGroupRequestToSecurityGroupConverter underTest;
+    private SecurityGroupV4RequestToSecurityGroupConverter underTest;
 
     @Mock
     private ConversionService conversionService;
 
     @Before
     public void setUp() {
-        underTest = new SecurityGroupRequestToSecurityGroupConverter();
+        underTest = new SecurityGroupV4RequestToSecurityGroupConverter();
         MockitoAnnotations.initMocks(this);
     }
 
@@ -45,7 +46,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
     }
 
     @Override
-    public Class<SecurityGroupRequest> getRequestClass() {
-        return SecurityGroupRequest.class;
+    public Class<SecurityGroupV4Request> getRequestClass() {
+        return SecurityGroupV4Request.class;
     }
 }
