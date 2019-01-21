@@ -63,7 +63,7 @@ public class GeneralClusterConfigsProvider {
         boolean instanceMetadataPresented = false;
         int nodeCount = 0;
         for (InstanceGroupV4Request instanceGroup : stack.getInstanceGroups()) {
-            nodeCount += instanceGroup.getCount();
+            nodeCount += instanceGroup.getNodeCount();
         }
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();

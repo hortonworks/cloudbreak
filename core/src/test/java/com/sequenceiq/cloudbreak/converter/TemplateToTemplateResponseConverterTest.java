@@ -15,6 +15,16 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateParameterV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
@@ -27,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.TemplateToInstanceTemplateV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
@@ -36,16 +47,16 @@ public class TemplateToTemplateResponseConverterTest {
     private ConversionService conversionService;
 
     @InjectMocks
-    private TemplateToTemplateResponseConverter underTest;
+    private TemplateToInstanceTemplateV4ResponseConverter underTest;
 
     @Before
     public void setUp() throws JsonProcessingException {
         MockitoAnnotations.initMocks(this);
-        when(conversionService.convert(parameters(CloudConstants.AWS).getMap(), AwsParameters.class)).thenReturn(awsParameters());
-        when(conversionService.convert(parameters(CloudConstants.YARN).getMap(), YarnParameters.class)).thenReturn(yarnParameters());
-        when(conversionService.convert(parameters(CloudConstants.AZURE).getMap(), AzureParameters.class)).thenReturn(azureParameters());
-        when(conversionService.convert(parameters(CloudConstants.GCP).getMap(), GcpParameters.class)).thenReturn(gcpParameters());
-        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackParameters.class)).thenReturn(openStackParameters());
+        when(conversionService.convert(parameters(CloudConstants.AWS).getMap(), AwsInstanceTemplateParametersV4.class)).thenReturn(awsParameters());
+        when(conversionService.convert(parameters(CloudConstants.YARN).getMap(), YarnInstanceTemplateParametersV4.class)).thenReturn(yarnParameters());
+        when(conversionService.convert(parameters(CloudConstants.AZURE).getMap(), AzureInstanceTemplateParametersV4.class)).thenReturn(azureParameters());
+        when(conversionService.convert(parameters(CloudConstants.GCP).getMap(), GcpInstanceTemplateParametersV4.class)).thenReturn(gcpParameters());
+        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackInstanceTemplateParametersV4.class)).thenReturn(openStackParameters());
     }
 
     @Test
@@ -54,15 +65,15 @@ public class TemplateToTemplateResponseConverterTest {
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.AWS));
 
-        TemplateResponse convert = underTest.convert(template);
+        InstanceTemplateV4Response convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getAwsParameters());
-        Assert.assertEquals(10.0D, convert.getAwsParameters().getSpotPrice().doubleValue(), 0);
-        Assert.assertEquals("someKey", convert.getAwsParameters().getEncryption().getKey());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsParameters().getEncryption().getType());
-        Assert.assertNull(convert.getAzureParameters());
-        Assert.assertNull(convert.getGcpParameters());
-        Assert.assertNull(convert.getOpenStackParameters());
+        Assert.assertNotNull(convert.getAws());
+        Assert.assertEquals(10.0D, convert.getAws().getSpotPrice().doubleValue(), 0);
+        Assert.assertEquals("someKey", convert.getAws().getEncryption().getKey());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAws().getEncryption().getType());
+        Assert.assertNull(convert.getAzure());
+        Assert.assertNull(convert.getGcp());
+        Assert.assertNull(convert.getOpenStack());
     }
 
     @Test
@@ -71,10 +82,10 @@ public class TemplateToTemplateResponseConverterTest {
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.AZURE));
 
-        TemplateResponse convert = underTest.convert(template);
+        InstanceTemplateV4Response convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getAzureParameters());
-        Assert.assertEquals("somePrivateId", convert.getAzureParameters().getPrivateId());
+        Assert.assertNotNull(convert.getAzure());
+        Assert.assertEquals("somePrivateId", convert.getAzure().getPrivateId());
     }
 
     @Test
@@ -83,12 +94,12 @@ public class TemplateToTemplateResponseConverterTest {
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.GCP));
 
-        TemplateResponse convert = underTest.convert(template);
+        InstanceTemplateV4Response convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getGcpParameters());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getGcpParameters().getEncryption().getType());
-        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcpParameters().getEncryption().getKeyEncryptionMethod());
-        Assert.assertEquals("someKey", convert.getGcpParameters().getEncryption().getKey());
+        Assert.assertNotNull(convert.getGcp());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getGcp().getEncryption().getType());
+        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcp().getEncryption().getKeyEncryptionMethod());
+        Assert.assertEquals("someKey", convert.getGcp().getEncryption().getKey());
     }
 
     @Test
@@ -97,9 +108,9 @@ public class TemplateToTemplateResponseConverterTest {
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.OPENSTACK));
 
-        TemplateResponse convert = underTest.convert(template);
+        InstanceTemplateV4Response convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getOpenStackParameters());
+        Assert.assertNotNull(convert.getOpenStack());
     }
 
     @Test
@@ -108,27 +119,20 @@ public class TemplateToTemplateResponseConverterTest {
         Template template = new Template();
         template.setAttributes(new Json(Collections.singletonMap("key", "value")));
 
-        TemplateResponse convert = underTest.convert(template);
+        InstanceTemplateV4Response convert = underTest.convert(template);
 
-        Assert.assertNull(convert.getAwsParameters());
-        Assert.assertNull(convert.getAzureParameters());
-        Assert.assertNull(convert.getGcpParameters());
-        Assert.assertNull(convert.getOpenStackParameters());
+        Assert.assertNull(convert.getAws());
+        Assert.assertNull(convert.getAzure());
+        Assert.assertNull(convert.getGcp());
+        Assert.assertNull(convert.getOpenStack());
     }
 
-    private Json parameters(String cloudConstants) throws JsonProcessingException {
-        Map<String, Object> map = new HashMap<>();
-        map.put(BaseTemplateParameter.PLATFORM_TYPE, cloudConstants);
-        return new Json(map);
-    }
-
-    private AwsParameters awsParameters() throws JsonProcessingException {
-        AwsParameters templateParameters = new AwsParameters();
+    private AwsInstanceTemplateParametersV4 awsParameters() throws JsonProcessingException {
+        AwsInstanceTemplateParametersV4 templateParameters = new AwsInstanceTemplateParametersV4();
         templateParameters.setSpotPrice(10.0D);
-        templateParameters.setEncrypted(true);
-        AwsEncryption awsEncryption = new AwsEncryption();
+        AwsEncryptionParametersV4 awsEncryption = new AwsEncryptionParametersV4();
         awsEncryption.setKey("someKey");
-        awsEncryption.setType("CUSTOM");
+        awsEncryption.setType(EncryptionType.CUSTOM);
         templateParameters.setEncryption(awsEncryption);
         return templateParameters;
     }
