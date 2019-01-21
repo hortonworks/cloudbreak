@@ -75,22 +75,22 @@ public class StackMatrixServiceTest {
         assertEquals("2.6", stackMatrixV4Response.getHdf().get("3.1").getMinAmbari());
         assertEquals("3.1.2.0", stackMatrixV4Response.getHdf().get("3.1").getVersion());
         assertEquals("2.6.1.0", stackMatrixV4Response.getHdf().get("3.1").getAmbari().getVersion());
-        assertEquals("http://redhat6-base/2.6.1.0", stackMatrixV4Response.getHdf().get("3.1").getAmbari().getRepo().get("redhat6").getBaseUrl());
+        assertEquals("http://redhat6-base/2.6.1.0", stackMatrixV4Response.getHdf().get("3.1").getAmbari().getRepository().get("redhat6").getBaseUrl());
 
         assertEquals("2.7", stackMatrixV4Response.getHdf().get("3.2").getMinAmbari());
         assertEquals("3.2.4.1", stackMatrixV4Response.getHdf().get("3.2").getVersion());
         assertEquals("2.7.0.3", stackMatrixV4Response.getHdf().get("3.2").getAmbari().getVersion());
-        assertEquals("http://redhat7-base/2.7.0.3", stackMatrixV4Response.getHdf().get("3.2").getAmbari().getRepo().get("redhat7").getBaseUrl());
+        assertEquals("http://redhat7-base/2.7.0.3", stackMatrixV4Response.getHdf().get("3.2").getAmbari().getRepository().get("redhat7").getBaseUrl());
 
         assertEquals("2.5", stackMatrixV4Response.getHdp().get("2.6").getMinAmbari());
         assertEquals("2.6.5.0", stackMatrixV4Response.getHdp().get("2.6").getVersion());
         assertEquals("2.5.0.0", stackMatrixV4Response.getHdp().get("2.6").getAmbari().getVersion());
-        assertEquals("http://redhat6-base/2.5.0.0", stackMatrixV4Response.getHdp().get("2.6").getAmbari().getRepo().get("redhat6").getBaseUrl());
+        assertEquals("http://redhat6-base/2.5.0.0", stackMatrixV4Response.getHdp().get("2.6").getAmbari().getRepository().get("redhat6").getBaseUrl());
 
         assertEquals("2.7", stackMatrixV4Response.getHdp().get("3.1").getMinAmbari());
         assertEquals("3.1.8.0", stackMatrixV4Response.getHdp().get("3.1").getVersion());
         assertEquals("2.7.0.3", stackMatrixV4Response.getHdp().get("3.1").getAmbari().getVersion());
-        assertEquals("http://redhat7-base/2.7.0.3", stackMatrixV4Response.getHdp().get("3.1").getAmbari().getRepo().get("redhat7").getBaseUrl());
+        assertEquals("http://redhat7-base/2.7.0.3", stackMatrixV4Response.getHdp().get("3.1").getAmbari().getRepository().get("redhat7").getBaseUrl());
     }
 
     @Test
@@ -104,22 +104,22 @@ public class StackMatrixServiceTest {
 
         assertEquals("2.6", stackMatrixV4Response.getHdf().get("3.1").getMinAmbari());
         assertEquals("3.1.2.0", stackMatrixV4Response.getHdf().get("3.1").getVersion());
-        assertNull(stackMatrixV4Response.getHdf().get("3.1").getAmbari().getRepo());
+        assertNull(stackMatrixV4Response.getHdf().get("3.1").getAmbari().getRepository());
         assertNull(stackMatrixV4Response.getHdf().get("3.1").getAmbari().getVersion());
 
         assertEquals("2.7", stackMatrixV4Response.getHdf().get("3.2").getMinAmbari());
         assertEquals("3.2.4.1", stackMatrixV4Response.getHdf().get("3.2").getVersion());
-        assertNull(stackMatrixV4Response.getHdf().get("3.2").getAmbari().getRepo());
+        assertNull(stackMatrixV4Response.getHdf().get("3.2").getAmbari().getRepository());
         assertNull(stackMatrixV4Response.getHdf().get("3.2").getAmbari().getVersion());
 
         assertEquals("2.5", stackMatrixV4Response.getHdp().get("2.6").getMinAmbari());
         assertEquals("2.6.5.0", stackMatrixV4Response.getHdp().get("2.6").getVersion());
-        assertNull(stackMatrixV4Response.getHdp().get("2.6").getAmbari().getRepo());
+        assertNull(stackMatrixV4Response.getHdp().get("2.6").getAmbari().getRepository());
         assertNull(stackMatrixV4Response.getHdp().get("2.6").getAmbari().getVersion());
 
         assertEquals("2.7", stackMatrixV4Response.getHdp().get("3.1").getMinAmbari());
         assertEquals("3.1.8.0", stackMatrixV4Response.getHdp().get("3.1").getVersion());
-        assertNull(stackMatrixV4Response.getHdp().get("3.1").getAmbari().getRepo());
+        assertNull(stackMatrixV4Response.getHdp().get("3.1").getAmbari().getRepository());
         assertNull(stackMatrixV4Response.getHdp().get("3.1").getAmbari().getVersion());
     }
 

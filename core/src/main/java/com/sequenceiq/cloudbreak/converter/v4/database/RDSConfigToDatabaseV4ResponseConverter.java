@@ -3,14 +3,11 @@ package com.sequenceiq.cloudbreak.converter.v4.database;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -23,9 +20,6 @@ public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionSe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToDatabaseV4ResponseConverter.class);
 
-    @Inject
-    private ConversionService conversionService;
-
     @Override
     public DatabaseV4Response convert(RDSConfig source) {
         DatabaseV4Response json = new DatabaseV4Response();
@@ -35,8 +29,8 @@ public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionSe
         json.setConnectionURL(source.getConnectionURL());
         json.setDatabaseEngine(source.getDatabaseEngine().name());
         json.setConnectionDriver(source.getConnectionDriver());
-        json.setConnectionUserName(conversionService.convert(source.getConnectionUserNameSecret(), SecretResponse.class));
-        json.setConnectionPassword(conversionService.convert(source.getConnectionPasswordSecret(), SecretResponse.class));
+        json.setConnectionUserName(getConversionService().convert(source.getConnectionUserNameSecret(), SecretV4Response.class));
+        json.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretV4Response.class));
         json.setDatabaseEngineDisplayName(source.getDatabaseEngine().displayName());
         json.setConnectorJarUrl(source.getConnectorJarUrl());
         json.setCreationDate(source.getCreationDate());

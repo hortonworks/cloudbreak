@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbFileSystem;
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -12,11 +14,10 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
 @Component
 public class FileSystemToSpiFileSystemConverter extends AbstractConversionServiceAwareConverter<FileSystem, SpiFileSystem> {

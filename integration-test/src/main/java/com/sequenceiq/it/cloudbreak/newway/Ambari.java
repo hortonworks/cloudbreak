@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;

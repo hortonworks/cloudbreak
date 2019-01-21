@@ -17,17 +17,18 @@ import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.conf.ConversionConfig;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayJsonValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {StackV2RequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
-        GatewayJsonValidator.class})
+@ContextConfiguration(classes = {StackV4RequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
+        GatewayV4RequestValidator.class})
 public class StackV2RequestToGatewayConverterTest {
 
     @Inject
-    private StackV2RequestToGatewayConverter converter;
+    private StackV4RequestToGatewayConverter converter;
 
     @Test(expected = BadRequestException.class)
     public void testWithInvalidGatewayRequest() {

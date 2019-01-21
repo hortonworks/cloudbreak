@@ -13,7 +13,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;

@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -87,16 +87,16 @@ public class ScalingRequest implements Runnable {
         }
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
-        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+        AmbariAddressV4Request ambariAddressJson = new AmbariAddressV4Request();
         ambariAddressJson.setAmbariAddress(ambari);
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
             LOGGER.debug("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
-            UpdateStackJson updateStackJson = new UpdateStackJson();
+            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(true);
-            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
@@ -118,15 +118,15 @@ public class ScalingRequest implements Runnable {
         metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_TRIGGERED);
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
-        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+        AmbariAddressV4Request ambariAddressJson = new AmbariAddressV4Request();
         ambariAddressJson.setAmbariAddress(ambari);
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
             LOGGER.debug("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
-            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);

@@ -14,7 +14,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 import io.swagger.annotations.ApiModel;

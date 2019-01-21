@@ -4,8 +4,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -30,7 +30,7 @@ public class ClusterStopTest extends AbstractCloudbreakIntegrationTest {
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         Integer stackIntId = Integer.valueOf(stackId);
         // WHEN
-        UpdateClusterJson updateClusterJson = new UpdateClusterJson();
+        UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
         updateClusterJson.setStatus(StatusRequest.valueOf(STOPPED));
         CloudbreakUtil.checkResponse("StopCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
         CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, STOPPED);

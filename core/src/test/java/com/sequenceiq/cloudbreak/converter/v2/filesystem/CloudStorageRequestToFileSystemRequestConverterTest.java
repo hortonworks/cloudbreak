@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2.filesystem;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;

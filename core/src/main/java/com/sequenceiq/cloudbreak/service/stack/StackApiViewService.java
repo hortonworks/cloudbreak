@@ -7,13 +7,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
@@ -39,8 +37,7 @@ public class StackApiViewService {
     private EnvironmentViewService environmentViewService;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {
@@ -58,12 +55,11 @@ public class StackApiViewService {
         return stackApiViewRepository.save(stackApiView);
     }
 
-    public Set<StackViewResponse> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, boolean dataLakeOnly) {
+    public Set<StackViewV4Response> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, boolean dataLakeOnly) {
         try {
-            Set<StackViewResponse> stackViewResponses;
+            Set<StackViewV4Response> stackViewResponses;
             if (StringUtils.isEmpty(environmentName)) {
-                stackViewResponses = transactionService.required(() ->
-                        convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
+                stackViewResponses = transactionService.required(() -> convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
             } else {
                 EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
                 stackViewResponses = transactionService.required(() ->
@@ -83,8 +79,7 @@ public class StackApiViewService {
         }
     }
 
-    private Set<StackViewResponse> convertStackViews(Set<StackApiView> stacks) {
-        return (Set<StackViewResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackViewResponse.class)));
+    private Set<StackViewV4Response> convertStackViews(Set<StackApiView> stacks) {
+        return converterUtil.convertAllAsSet(stacks, StackViewV4Response.class);
     }
 }

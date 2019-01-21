@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RegionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;

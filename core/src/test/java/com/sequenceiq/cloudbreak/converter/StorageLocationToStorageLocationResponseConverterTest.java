@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationResponse;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem.StorageLocationToStorageLocationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,11 +16,11 @@ public class StorageLocationToStorageLocationResponseConverterTest {
 
     private static final String VALUE = "propertyValue";
 
-    private StorageLocationToStorageLocationResponseConverter underTest;
+    private StorageLocationToStorageLocationV4ResponseConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new StorageLocationToStorageLocationResponseConverter();
+        underTest = new StorageLocationToStorageLocationV4ResponseConverter();
     }
 
     @Test

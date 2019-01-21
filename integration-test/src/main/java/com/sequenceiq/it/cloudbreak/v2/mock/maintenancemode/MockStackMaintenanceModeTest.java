@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.v2.mock.maintenancemode;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -25,10 +25,10 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
-import com.sequenceiq.cloudbreak.api.model.MaintenanceModeJson;
-import com.sequenceiq.cloudbreak.api.model.MaintenanceModeStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
@@ -80,7 +80,7 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
     }
 
     private void postMaintenanceMode(Long workspaceId, MaintenanceModeStatus maintenanceModeStatus, HttpStatus expected) {
-        MaintenanceModeJson maintenanceMode = new MaintenanceModeJson();
+        MaintenanceModeV4Request maintenanceMode = new MaintenanceModeV4Request();
         maintenanceMode.setStatus(maintenanceModeStatus);
         try (Response response = getCloudbreakClient().stackV3Endpoint().setClusterMaintenanceMode(workspaceId, stackName, maintenanceMode)) {
             assertEquals(expected.value(), response.getStatus());
@@ -95,7 +95,7 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
     @Test(priority = 2)
     public void testUpdateAmbariDetailsInMaintenanceMode() {
         Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
-        UpdateClusterJson udateJson = new UpdateClusterJson();
+        UpdateClusterV4Request udateJson = new UpdateClusterV4Request();
         AmbariStackDetailsJson ambariStackDetails = new AmbariStackDetailsJson();
         ambariStackDetails.setStack("AMBARI");
         ambariStackDetails.setVersion("2.7");
@@ -116,7 +116,7 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
     @Test(priority = 3)
     public void testUpdateHDPDetailsInMaintenanceMode() {
         Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
-        UpdateClusterJson udateJson = new UpdateClusterJson();
+        UpdateClusterV4Request udateJson = new UpdateClusterV4Request();
         AmbariStackDetailsJson ambariStackDetails = new AmbariStackDetailsJson();
         ambariStackDetails.setStack("HDP");
         ambariStackDetails.setVersion("2.6");

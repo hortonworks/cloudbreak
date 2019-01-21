@@ -5,15 +5,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.NameComparator;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Requests;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.UserIds;
@@ -22,23 +21,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses;
-import com.sequenceiq.cloudbreak.api.model.users.UserIdComparator;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.common.NotificationController;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
 @Controller
 @Transactional(TxType.NEVER)
 public class WorkspaceV4Controller extends NotificationController implements WorkspaceV4Endpoint {
-
-    @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -55,10 +48,10 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     @Override
     public WorkspaceV4Response post(@Valid WorkspaceV4Request workspaceV4Request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = conversionService.convert(workspaceV4Request, Workspace.class);
+        Workspace workspace = converterUtil.convert(workspaceV4Request, Workspace.class);
         workspace = workspaceService.create(user, workspace);
         notify(ResourceEvent.WORKSPACE_CREATED);
-        return conversionService.convert(workspace, WorkspaceV4Response.class);
+        return converterUtil.convert(workspace, WorkspaceV4Response.class);
     }
 
     @Override
@@ -72,7 +65,7 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
     public WorkspaceV4Response get(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.getByNameForUserOrThrowNotFound(name, user);
-        return conversionService.convert(workspace, WorkspaceV4Response.class);
+        return converterUtil.convert(workspace, WorkspaceV4Response.class);
     }
 
     @Override
@@ -81,7 +74,7 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
         Workspace defaultWorkspace = workspaceService.getDefaultWorkspaceForUser(user);
         Workspace workspace = workspaceService.deleteByNameForUser(name, user, defaultWorkspace);
         notify(ResourceEvent.WORKSPACE_DELETED);
-        return conversionService.convert(workspace, WorkspaceV4Response.class);
+        return converterUtil.convert(workspace, WorkspaceV4Response.class);
     }
 
     @Override

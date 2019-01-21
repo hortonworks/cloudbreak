@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;

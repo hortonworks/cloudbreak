@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -31,9 +31,9 @@ public class InstanceMetaDataService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup,
-            Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus> newStatusByGroupType) {
+            Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus> newStatusByGroupType) {
         for (InstanceGroup group : instanceGroup) {
-            com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
+            com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
             if (newStatus != null) {
                 for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
                     instanceMetaData.setInstanceStatus(newStatus);
@@ -43,7 +43,7 @@ public class InstanceMetaDataService {
         }
     }
 
-    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus newStatus,
+    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
             Collection<String> candidateAddresses) {
         for (InstanceGroup group : instanceGroup) {
             for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
@@ -61,7 +61,7 @@ public class InstanceMetaDataService {
             if (instanceGroup != null) {
                 InstanceMetaData instanceMetaData = new InstanceMetaData();
                 instanceMetaData.setPrivateId(cloudInstance.getTemplate().getPrivateId());
-                instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED);
+                instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
                 if (save) {
                     instanceMetaDataRepository.save(instanceMetaData);
@@ -77,14 +77,14 @@ public class InstanceMetaDataService {
         for (Group group : groups) {
             InstanceGroup instanceGroup = getInstanceGroup(instanceGroups, group.getName());
             List<InstanceMetaData> existingInGroup = instanceMetaDataRepository.findAllByInstanceGroupAndInstanceStatus(instanceGroup,
-                    com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED);
+                    com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
             for (CloudInstance cloudInstance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
                 boolean exists = existingInGroup.stream().anyMatch(i -> i.getPrivateId().equals(instanceTemplate.getPrivateId()));
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus() && !exists) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
-                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED);
+                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }

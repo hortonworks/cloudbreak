@@ -7,9 +7,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
 
-public class WasbCloudStorageParametersValidator implements ConstraintValidator<ValidWasbCloudStorageParameters, WasbCloudStorageParameters> {
+public class WasbCloudStorageParametersValidator implements ConstraintValidator<ValidWasbCloudStorageParameters, WasbCloudStorageParametersV4> {
 
     private static final int MIN_ACCOUNT_NAME_LENGTH = 3;
 
@@ -22,7 +22,7 @@ public class WasbCloudStorageParametersValidator implements ConstraintValidator<
     }
 
     @Override
-    public boolean isValid(WasbCloudStorageParameters value, ConstraintValidatorContext context) {
+    public boolean isValid(WasbCloudStorageParametersV4 value, ConstraintValidatorContext context) {
         boolean result;
         if (!isAccountNameValid(value.getAccountName())
                 || !isAccountKeyValid(value.getAccountKey())

@@ -11,8 +11,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;

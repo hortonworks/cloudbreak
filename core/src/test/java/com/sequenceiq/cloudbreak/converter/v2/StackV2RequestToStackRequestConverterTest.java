@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
@@ -435,12 +435,12 @@ public class StackV2RequestToStackRequestConverterTest {
         StackV2Request source = createStackV2Request();
         source.setCluster(createClusterV2Request());
         List<InstanceGroupV2Request> instanceGroupV2Requests = createInstanceGroupV2Request();
-        List<HostGroupRequest> hostGroupRequest = createHostGroupRequests();
+        List<HostGroupV4Request> hostGroupRequest = createHostGroupRequests();
         List<InstanceGroupRequest> instanceGroupRequest = createInstanceGroupRequest();
         when(conversionService.convert(instanceGroupV2Requests.get(0), InstanceGroupRequest.class)).thenReturn(instanceGroupRequest.get(0));
-        when(conversionService.convert(instanceGroupV2Requests.get(0), HostGroupRequest.class)).thenReturn(hostGroupRequest.get(0));
+        when(conversionService.convert(instanceGroupV2Requests.get(0), HostGroupV4Request.class)).thenReturn(hostGroupRequest.get(0));
         when(conversionService.convert(instanceGroupV2Requests.get(1), InstanceGroupRequest.class)).thenReturn(instanceGroupRequest.get(1));
-        when(conversionService.convert(instanceGroupV2Requests.get(1), HostGroupRequest.class)).thenReturn(hostGroupRequest.get(1));
+        when(conversionService.convert(instanceGroupV2Requests.get(1), HostGroupV4Request.class)).thenReturn(hostGroupRequest.get(1));
         source.setInstanceGroups(instanceGroupV2Requests);
         when(sharedServiceConfigProvider.isConfigured(source.getCluster())).thenReturn(false);
         ClusterRequest convertedRequest = createClusterRequest();
@@ -508,10 +508,10 @@ public class StackV2RequestToStackRequestConverterTest {
         return requests;
     }
 
-    private List<HostGroupRequest> createHostGroupRequests() {
-        List<HostGroupRequest> requests = new ArrayList<>(2);
+    private List<HostGroupV4Request> createHostGroupRequests() {
+        List<HostGroupV4Request> requests = new ArrayList<>(2);
         for (int i = 0; i < 2; i++) {
-            requests.add(new HostGroupRequest());
+            requests.add(new HostGroupV4Request());
         }
         return requests;
     }

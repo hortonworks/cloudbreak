@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FlexSubscriptionModelDescription;
 

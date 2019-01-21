@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureContextService;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

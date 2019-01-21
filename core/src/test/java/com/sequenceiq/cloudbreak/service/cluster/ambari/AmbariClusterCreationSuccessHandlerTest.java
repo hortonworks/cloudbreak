@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;

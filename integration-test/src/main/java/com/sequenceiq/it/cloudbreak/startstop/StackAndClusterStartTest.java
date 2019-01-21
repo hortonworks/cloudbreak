@@ -6,9 +6,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -39,7 +39,7 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         // WHEN
-        UpdateStackJson updateStackJson = new UpdateStackJson();
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.valueOf(STARTED));
         CloudbreakUtil.checkResponse("StartStack", getCloudbreakClient().stackV1Endpoint().put(Long.valueOf(stackIntId), updateStackJson));
 
@@ -47,7 +47,7 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         }
 
-        UpdateClusterJson updateClusterJson = new UpdateClusterJson();
+        UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
         updateClusterJson.setStatus(StatusRequest.valueOf(STARTED));
         CloudbreakUtil.checkResponse("StartCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
         CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");

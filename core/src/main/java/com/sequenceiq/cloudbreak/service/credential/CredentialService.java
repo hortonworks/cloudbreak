@@ -26,7 +26,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;

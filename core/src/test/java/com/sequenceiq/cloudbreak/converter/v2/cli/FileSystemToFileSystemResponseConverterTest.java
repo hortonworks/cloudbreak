@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.ADLS_GEN_2;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.ADLS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.S3;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.S3;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -31,7 +31,8 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.BaseFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.FileSystemToFileSystemResponseConverter;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbFileSystem;

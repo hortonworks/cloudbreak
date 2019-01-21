@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.MAINTENANCE_MODE_ENABLED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,8 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;

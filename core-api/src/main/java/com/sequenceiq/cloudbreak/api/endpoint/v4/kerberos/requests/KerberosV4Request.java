@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.validation.ValidKerberosRequest;
 

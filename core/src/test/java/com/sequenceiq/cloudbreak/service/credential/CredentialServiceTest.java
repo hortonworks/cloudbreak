@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;

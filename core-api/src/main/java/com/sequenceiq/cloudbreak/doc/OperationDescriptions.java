@@ -55,8 +55,7 @@ public class OperationDescriptions {
         public static final String START_BY_NAME_IN_WORKSPACE = "starts the stack by name in workspace";
         public static final String SCALE_BY_NAME_IN_WORKSPACE = "scales the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE = "repairs the stack by name in workspace";
-        public static final String DELETE_WITH_KERBEROS_IN_WORKSPACE = "deletes the stack (with kerberos cluster) "
-                + "by name in workspace";
+        public static final String DELETE_WITH_KERBEROS_IN_WORKSPACE = "deletes the stack (with kerberos cluster) by name in workspace";
         public static final String GET_STACK_REQUEST_IN_WORKSPACE = "gets StackRequest by name in workspace";
         public static final String POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE = "posts stack for blueprint in workspace";
         public static final String DELETE_INSTANCE_BY_ID_IN_WORKSPACE = "deletes instance from the stack's cluster in workspace";

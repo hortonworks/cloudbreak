@@ -5,13 +5,13 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
-public class AmbariRepoValidator implements ConstraintValidator<ValidAmbariRepo, AmbariRepoDetailsJson> {
+public class AmbariRepoValidator implements ConstraintValidator<ValidAmbariRepo, AmbariRepositoryV4Response> {
 
-    private static final String MIN_AMBARI_VERSION = "2.5";
+    private static final String MIN_AMBARI_VERSION = "2.7";
 
     @Override
     public void initialize(ValidAmbariRepo constraintAnnotation) {
@@ -19,7 +19,7 @@ public class AmbariRepoValidator implements ConstraintValidator<ValidAmbariRepo,
     }
 
     @Override
-    public boolean isValid(AmbariRepoDetailsJson ambariRepoDetailsJson, ConstraintValidatorContext context) {
+    public boolean isValid(AmbariRepositoryV4Response ambariRepoDetailsJson, ConstraintValidatorContext context) {
         if (StringUtils.isBlank(ambariRepoDetailsJson.getVersion())) {
             return false;
         }

@@ -32,8 +32,8 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
@@ -143,7 +143,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
-        when(conversionService.convert(any(String.class), any())).thenAnswer(invocation -> new SecretResponse(null, invocation.getArgument(0)));
+        when(conversionService.convert(any(String.class), any())).thenAnswer(invocation -> new SecretV4Response(null, invocation.getArgument(0)));
         // WHEN
         ClusterResponse result = underTest.convert(source);
         // THEN

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
 @Service
 public class AuditEventService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> {

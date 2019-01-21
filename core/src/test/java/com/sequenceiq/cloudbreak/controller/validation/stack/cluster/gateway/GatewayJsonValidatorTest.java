@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {GatewayJsonValidator.class, ConversionConfig.class, GatewayConvertUtil.class})
+@ContextConfiguration(classes = {GatewayV4RequestValidator.class, ConversionConfig.class, GatewayConvertUtil.class})
 public class GatewayJsonValidatorTest {
 
     @Inject
-    private GatewayJsonValidator underTest;
+    private GatewayV4RequestValidator underTest;
 
     @Test
     public void testValidationWithNameDuplicates() {

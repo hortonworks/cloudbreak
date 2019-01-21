@@ -8,7 +8,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.validation.ValidRDSConfigJson;

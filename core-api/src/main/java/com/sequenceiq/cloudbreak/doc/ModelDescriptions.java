@@ -225,6 +225,10 @@ public class ModelDescriptions {
         public static final String KERBEROS_KDC_VERIFY_KDC_TRUST = "Allows to select either a trusting SSL connection or a "
                 + "validating (non-trusting) SSL connection to KDC";
         public static final String TERMINATED = "termination completion time of stack in long";
+        public static final String AWS_PARAMETERS = "aws specific parameters for stack";
+        public static final String AZURE_PARAMETERS = "azure specific parameters for stack";
+        public static final String GCP_PARAMETERS = "gcp specific parameters for stack";
+        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for stack";
     }
 
     public static class ClusterModelDescription {
@@ -244,17 +248,19 @@ public class ModelDescriptions {
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String CLUSTER_EXPOSED_SERVICES = "cluster exposed services for topologies";
-        public static final String CONFIG_STRATEGY = "config recommendation strategy";
+        public static final String CONFIG_STRATEGY = "config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'";
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
         public static final String CUSTOM_CONTAINERS = "custom containers";
         public static final String CUSTOM_QUEUE = "custom queue for yarn orchestrator";
         public static final String EXECUTOR_TYPE = "executor type of cluster";
         public static final String CONNECTED_CLUSTER = "cluster can connect to a datalake you can define the parameters here";
+        public static final String SOURCE_CLUSTER_ID = "source cluster id";
+        public static final String SOURCE_CLUSTER_NAME = "source cluster name";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
         public static final String RDSCONFIG_NAMES = "RDS configuration names for the cluster";
-        public static final String RDSCONFIGS = "RDS configurations for the cluster";
+        public static final String DATABASES = "Database configurations for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
         public static final String LDAP_CONFIG_NAME = "LDAP config name for the cluster";
         public static final String LDAP_CONFIG = "LDAP config for the cluster";
@@ -280,6 +286,10 @@ public class ModelDescriptions {
         public static final String SECURE = "tells wether the cluster is secured or not";
         public static final String KERBEROSCONFIG_NAME = "Kerberos config name for the cluster";
         public static final String AMBARI_URL = "Ambari url";
+        public static final String AWS_PARAMETERS = "aws specific parameters for cloud storage";
+        public static final String AZURE_PARAMETERS = "azure specific parameters for cloud storage";
+        public static final String GCP_PARAMETERS = "gcp specific parameters for cloud storage";
+        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for cloud storage";
     }
 
     public static class GatewayModelDescription {
@@ -346,7 +356,7 @@ public class ModelDescriptions {
         public static final String DEFAULT_REGIOS = "default regions";
     }
 
-    public static class AmbariRepoDetailsDescription {
+    public static class AmbariRepositoryDescription {
         public static final String VERSION = "version of the Ambari";
         public static final String AMBARI_BASE_URL = "url of the Ambari repository";
         public static final String AMBARI_REPO_GPG_KEY = "gpg key of the Ambari repository";
@@ -361,7 +371,7 @@ public class ModelDescriptions {
         public static final String PASSWORD = "password for the Ambari database";
     }
 
-    public static class AmbariStackDetailsDescription {
+    public static class StackRepositoryDescription {
         public static final String STACK = "name of the stack, like HDP";
         public static final String VERSION = "version of the stack";
         public static final String OS = "operating system for the stack, like redhat6";
@@ -376,6 +386,7 @@ public class ModelDescriptions {
         public static final String VDF_URL = "local path on the Ambari server or URL that point to the desired VDF file";
         public static final String MPACK_URL = "url the MPACK that needs to be installed before HDF installation";
         public static final String MPACKS = "Management packs which are needed for the HDP / HDF clusters";
+        public static final String STACK_REPO_DETAILS = "details of the Stack repository";
     }
 
     public static class Database {
@@ -418,7 +429,7 @@ public class ModelDescriptions {
 
     public static class InstanceGroupModelDescription {
         public static final String INSTANCE_GROUP_NAME = "name of the instance group";
-        public static final String INSTANCE_GROUP_TYPE = "type of the instance group";
+        public static final String INSTANCE_GROUP_TYPE = "type of the instance group, default value is CORE";
         public static final String TEMPLATE = "instancegroup related template";
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
         public static final String NODE_COUNT = "number of nodes";
@@ -428,6 +439,10 @@ public class ModelDescriptions {
         public static final String SECURITY_GROUP_ID = "security group resource id for the instance group";
         public static final String METADATA = "metadata of instances";
         public static final String PARAMETERS = "cloud specific parameters for instance group";
+        public static final String AWS_PARAMETERS = "aws specific parameters for instance group";
+        public static final String AZURE_PARAMETERS = "azure specific parameters for instance group";
+        public static final String GCP_PARAMETERS = "gcp specific parameters for instance group";
+        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for instance group";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {
@@ -499,6 +514,10 @@ public class ModelDescriptions {
 
     public static class NetworkModelDescription {
         public static final String PARAMETERS = "provider specific parameters of the specified network";
+        public static final String AWS_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String GCP_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String AZURE_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String OPEN_STACK_PARAMETERS = "provider specific parameters of the specified network";
         public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
     }
 

@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 
@@ -18,7 +18,7 @@ public class StackResponseEventProvider implements ResponseProvider {
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
     @Override
-    public StackResponse providerEntriesToStackResponse(Stack stack, StackResponse stackResponse) {
+    public StackV4Response providerEntriesToStackResponse(Stack stack, StackV4Response stackResponse) {
         List<CloudbreakEventV4Response> cloudbreakEvents = cloudbreakEventsFacade.retrieveEventsByStack(stack.getId());
         stackResponse.setCloudbreakEvents(cloudbreakEvents);
         return stackResponse;

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;

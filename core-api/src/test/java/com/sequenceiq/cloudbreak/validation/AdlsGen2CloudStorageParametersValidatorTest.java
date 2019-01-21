@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls0.AdlsGen2CloudStorageParameters;
 
 public class AdlsGen2CloudStorageParametersValidatorTest {
 

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Base;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 

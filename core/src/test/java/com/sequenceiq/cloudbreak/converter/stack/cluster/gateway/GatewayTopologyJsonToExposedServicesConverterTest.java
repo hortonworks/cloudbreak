@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;

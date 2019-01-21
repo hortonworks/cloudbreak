@@ -4,23 +4,23 @@ import java.util.Map;
 
 public class StackMatrixV4Response {
 
-    private Map<String, StackDescriptorV4> hdp;
+    private Map<String, StackDescriptorV4Response> hdp;
 
-    private Map<String, StackDescriptorV4> hdf;
+    private Map<String, StackDescriptorV4Response> hdf;
 
-    public Map<String, StackDescriptorV4> getHdp() {
+    public Map<String, StackDescriptorV4Response> getHdp() {
         return hdp;
     }
 
-    public void setHdp(Map<String, StackDescriptorV4> hdp) {
+    public void setHdp(Map<String, StackDescriptorV4Response> hdp) {
         this.hdp = hdp;
     }
 
-    public Map<String, StackDescriptorV4> getHdf() {
+    public Map<String, StackDescriptorV4Response> getHdf() {
         return hdf;
     }
 
-    public void setHdf(Map<String, StackDescriptorV4> hdf) {
+    public void setHdf(Map<String, StackDescriptorV4Response> hdf) {
         this.hdf = hdf;
     }
 }

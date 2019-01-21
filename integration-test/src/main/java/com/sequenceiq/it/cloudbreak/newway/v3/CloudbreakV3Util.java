@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.filters.EventSinceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;

@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -53,7 +53,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             return;
         }
         MDCBuilder.buildMdcContext(cluster);
-        StackResponse stackResponse = getStackById(cluster.getStackId());
+        StackV4Response stackResponse = getStackById(cluster.getStackId());
         if (stackResponse == null) {
             LOGGER.debug("Suspending cluster {}", autoscaleClusterId);
             suspendCluster(cluster);
@@ -95,11 +95,11 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         }
     }
 
-    private String getStackStatus(StackResponse stackResponse) {
+    private String getStackStatus(StackV4Response stackResponse) {
         return stackResponse.getStatus() != null ? stackResponse.getStatus().name() : "";
     }
 
-    private StackResponse getStackById(long cloudbreakStackId) {
+    private StackV4Response getStackById(long cloudbreakStackId) {
         try {
             return cloudbreakCommunicator.getById(cloudbreakStackId);
         } catch (Exception e) {
@@ -113,10 +113,10 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         clusterService.setState(cluster, ClusterState.SUSPENDED);
     }
 
-    private void reportAmbariServerFailure(Cluster cluster, StackResponse stackResponse) {
-        Optional<InstanceMetaDataJson> pgw = stackResponseUtils.getNotTerminatedPrimaryGateways(stackResponse);
+    private void reportAmbariServerFailure(Cluster cluster, StackV4Response stackResponse) {
+        Optional<InstanceMetaDataV4Response> pgw = stackResponseUtils.getNotTerminatedPrimaryGateways(stackResponse);
         if (pgw.isPresent()) {
-            FailureReport failureReport = new FailureReport();
+            FailureReportV4Request failureReport = new FailureReportV4Request();
             failureReport.setFailedNodes(Collections.singletonList(pgw.get().getDiscoveryFQDN()));
             try {
                 cloudbreakCommunicator.failureReport(cluster.getStackId(), failureReport);

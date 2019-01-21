@@ -8,8 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 

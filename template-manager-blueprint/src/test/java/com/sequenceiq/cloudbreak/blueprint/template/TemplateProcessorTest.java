@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;

@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 import javax.validation.constraints.NotEmpty;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 
 public class LdapConfigRequestDataCollector {
 

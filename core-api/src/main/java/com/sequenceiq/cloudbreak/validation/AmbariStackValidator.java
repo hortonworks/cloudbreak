@@ -5,13 +5,13 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
-public class AmbariStackValidator implements ConstraintValidator<ValidAmbariStack, AmbariStackDetailsJson> {
+public class AmbariStackValidator implements ConstraintValidator<ValidAmbariStack, StackRepositoryV4Request> {
 
-    private static final String MIN_HDP_VERSION = "2.3";
+    private static final String MIN_HDP_VERSION = "2.7";
 
     @Override
     public void initialize(ValidAmbariStack constraintAnnotation) {
@@ -19,7 +19,7 @@ public class AmbariStackValidator implements ConstraintValidator<ValidAmbariStac
     }
 
     @Override
-    public boolean isValid(AmbariStackDetailsJson ambariStackDetailsJson, ConstraintValidatorContext context) {
+    public boolean isValid(StackRepositoryV4Request ambariStackDetailsJson, ConstraintValidatorContext context) {
         if ("HDP".equalsIgnoreCase(ambariStackDetailsJson.getStack())) {
             if (StringUtils.isBlank(ambariStackDetailsJson.getVersion())) {
                 return false;

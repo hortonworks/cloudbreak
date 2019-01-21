@@ -25,8 +25,8 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3FileSystem;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;

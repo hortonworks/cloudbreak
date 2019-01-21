@@ -6,7 +6,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.model.CompactViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 import io.swagger.annotations.ApiModel;
@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class KerberosViewV4Response extends CompactViewResponse {
+public class KerberosViewV4Response extends CompactViewV4Response {
 
     private Set<String> environments = new HashSet<>();
 

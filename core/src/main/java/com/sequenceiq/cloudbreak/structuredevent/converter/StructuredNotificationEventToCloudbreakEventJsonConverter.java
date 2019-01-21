@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;

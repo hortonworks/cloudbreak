@@ -25,7 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

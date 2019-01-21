@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;

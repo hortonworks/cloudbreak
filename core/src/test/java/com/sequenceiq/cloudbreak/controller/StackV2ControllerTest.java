@@ -17,8 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -95,7 +95,7 @@ public class StackV2ControllerTest {
 
     @Test
     public void repairCluster() {
-        ClusterRepairRequest clusterRepairRequest = new ClusterRepairRequest();
+        ClusterRepairV4Request clusterRepairRequest = new ClusterRepairV4Request();
         List<String> hostGroups = Lists.newArrayList("master", "worker");
         clusterRepairRequest.setHostGroups(hostGroups);
         clusterRepairRequest.setRemoveOnly(true);
@@ -107,7 +107,7 @@ public class StackV2ControllerTest {
 
     @Test
     public void testChangeImage() {
-        StackImageChangeRequest stackImageChangeRequest = new StackImageChangeRequest();
+        StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
         stackImageChangeRequest.setImageId("asdf");
         underTest.changeImage(stack.getName(), stackImageChangeRequest);
         verify(stackCommonService).changeImageByNameInWorkspace(eq(stack.getName()), eq(WORKSPACE_ID), eq(stackImageChangeRequest));

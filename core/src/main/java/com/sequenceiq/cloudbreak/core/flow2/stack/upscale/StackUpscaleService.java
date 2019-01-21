@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.CREATED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;

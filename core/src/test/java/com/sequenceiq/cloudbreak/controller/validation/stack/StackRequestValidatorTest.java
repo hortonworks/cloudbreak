@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
@@ -480,9 +480,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
                 .map(ig -> getInstanceGroupRequest(new TemplateRequest(), ig))
                 .collect(Collectors.toList());
 
-        Set<HostGroupRequest> hostGroupSet = hostGroups.stream()
+        Set<HostGroupV4Request> hostGroupSet = hostGroups.stream()
                 .map(hg -> {
-                    HostGroupRequest hostGroupRequest = new HostGroupRequest();
+                    HostGroupV4Request hostGroupRequest = new HostGroupV4Request();
                     hostGroupRequest.setName(hg);
                     return hostGroupRequest;
                 })
@@ -520,7 +520,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     private ClusterRequest getClusterRequest() {
-        HostGroupRequest hostGroupRequest = new HostGroupRequest();
+        HostGroupV4Request hostGroupRequest = new HostGroupV4Request();
         ClusterRequest clusterRequest = new ClusterRequest();
         hostGroupRequest.setName("master");
         clusterRequest.setHostGroups(Sets.newHashSet(hostGroupRequest));

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 
 import java.util.Map;
 
@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

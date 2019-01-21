@@ -1,0 +1,26 @@
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+
+@Component
+public class StackAuthenticationToStackAuthenticationV4RequestConverter
+        extends AbstractConversionServiceAwareConverter<StackAuthentication, StackAuthenticationV4Request> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackAuthenticationToStackAuthenticationV4RequestConverter.class);
+
+    @Override
+    public StackAuthenticationV4Request convert(StackAuthentication source) {
+        StackAuthenticationV4Request stackAuthenticationRequest = new StackAuthenticationV4Request();
+        stackAuthenticationRequest.setLoginUserName(null);
+        stackAuthenticationRequest.setPublicKey(source.getPublicKey());
+        stackAuthenticationRequest.setPublicKeyId(source.getPublicKeyId());
+        return stackAuthenticationRequest;
+    }
+
+}

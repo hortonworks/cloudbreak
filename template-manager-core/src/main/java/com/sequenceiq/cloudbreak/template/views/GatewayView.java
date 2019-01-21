@@ -9,8 +9,8 @@ import javax.annotation.Nonnull;
 
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;

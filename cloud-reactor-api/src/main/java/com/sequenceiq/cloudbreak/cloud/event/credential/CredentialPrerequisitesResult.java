@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.event.credential;
 
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 

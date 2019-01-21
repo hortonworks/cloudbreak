@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 

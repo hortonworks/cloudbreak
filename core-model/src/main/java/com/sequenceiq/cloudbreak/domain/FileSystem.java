@@ -13,7 +13,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;

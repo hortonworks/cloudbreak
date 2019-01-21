@@ -16,10 +16,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupConstraintV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.updates.HostGroupToHostGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
@@ -27,16 +28,16 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterTest<HostGroup> {
 
     @InjectMocks
-    private HostGroupToHostGroupResponseConverter underTest;
+    private HostGroupToHostGroupV4ResponseConverter underTest;
 
     @Mock
     private ConversionService conversionService;
 
     @Before
     public void setUp() {
-        underTest = new HostGroupToHostGroupResponseConverter();
+        underTest = new HostGroupToHostGroupV4ResponseConverter();
         MockitoAnnotations.initMocks(this);
-        when(conversionService.convert(any(Constraint.class), any())).thenReturn(new ConstraintJson());
+        when(conversionService.convert(any(Constraint.class), any())).thenReturn(new HostGroupConstraintV4Request());
         when(conversionService.convert(any(HostMetadata.class), any())).thenReturn(new HostMetadataResponse());
     }
 

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;

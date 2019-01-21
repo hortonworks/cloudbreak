@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayTopologyJsonValidatorTest {
 
-    private final GatewayTopologyJsonValidator underTest = new GatewayTopologyJsonValidator(new ExposedServiceListValidator());
+    private final GatewayTopologyV4RequestValidator underTest = new GatewayTopologyV4RequestValidator(new ExposedServiceListValidator());
 
     @Test
     public void testWithNoTopologyName() {

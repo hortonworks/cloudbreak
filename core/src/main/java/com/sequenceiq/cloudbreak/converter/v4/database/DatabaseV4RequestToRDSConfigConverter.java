@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;

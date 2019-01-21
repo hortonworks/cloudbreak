@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidCredentialV4Base;

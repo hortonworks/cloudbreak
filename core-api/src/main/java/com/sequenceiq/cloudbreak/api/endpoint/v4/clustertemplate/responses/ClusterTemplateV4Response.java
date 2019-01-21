@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;

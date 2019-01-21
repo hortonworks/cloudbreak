@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemParametersV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller

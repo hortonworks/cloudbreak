@@ -9,8 +9,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -57,12 +58,12 @@ public class GeneralClusterConfigsProvider {
         return generalClusterConfigs;
     }
 
-    public GeneralClusterConfigs generalClusterConfigs(StackV2Request stack, User user, String email) {
+    public GeneralClusterConfigs generalClusterConfigs(StackV4Request stack, User user, String email) {
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
         int nodeCount = 0;
-        for (InstanceGroupV2Request instanceGroupV2Request : stack.getInstanceGroups()) {
-            nodeCount += instanceGroupV2Request.getNodeCount();
+        for (InstanceGroupV4Request instanceGroup : stack.getInstanceGroups()) {
+            nodeCount += instanceGroup.getCount();
         }
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -71,17 +72,17 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setAmbariIp("pending...");
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
-        if (stack.getCluster().getAmbari().getGateway() != null) {
+        if (stack.getCluster().getGateway() != null) {
             gatewayInstanceMetadataPresented = true;
         }
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
-        generalClusterConfigs.setClusterName(stack.getGeneral().getName());
-        generalClusterConfigs.setExecutorType(stack.getCluster().getExecutorType());
-        generalClusterConfigs.setStackName(stack.getGeneral().getName());
+        generalClusterConfigs.setClusterName(stack.getName());
+        generalClusterConfigs.setExecutorType(ExecutorType.CONTAINER);
+        generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid("pending...");
         generalClusterConfigs.setUserName(stack.getCluster().getAmbari().getUserName());
         generalClusterConfigs.setNodeCount(nodeCount);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable("pending..."));
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("pending..."));
         generalClusterConfigs.setKafkaReplicationFactor(1);
 
         return generalClusterConfigs;

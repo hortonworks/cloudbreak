@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;

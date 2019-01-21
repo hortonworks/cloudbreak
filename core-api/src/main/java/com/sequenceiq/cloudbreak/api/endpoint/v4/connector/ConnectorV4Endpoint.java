@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecificationsV4Response;
-import com.sequenceiq.cloudbreak.api.model.RegionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RegionV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;

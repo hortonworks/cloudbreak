@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses;
 
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -17,10 +17,10 @@ public class ProxyV4Response extends ProxyV4Base {
     private Long id;
 
     @ApiModelProperty(ProxyConfigModelDescription.USERNAME)
-    private SecretResponse userName;
+    private SecretV4Response userName;
 
     @ApiModelProperty(ProxyConfigModelDescription.PASSWORD)
-    private SecretResponse password;
+    private SecretV4Response password;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -33,19 +33,19 @@ public class ProxyV4Response extends ProxyV4Base {
         this.id = id;
     }
 
-    public SecretResponse getUserName() {
+    public SecretV4Response getUserName() {
         return userName;
     }
 
-    public void setUserName(SecretResponse userName) {
+    public void setUserName(SecretV4Response userName) {
         this.userName = userName;
     }
 
-    public SecretResponse getPassword() {
+    public SecretV4Response getPassword() {
         return password;
     }
 
-    public void setPassword(SecretResponse password) {
+    public void setPassword(SecretV4Response password) {
         this.password = password;
     }
 

@@ -14,11 +14,11 @@ public class AdlsGen2CloudStorageParametersToCloudAdlsGen2ViewConverterTest {
 
     private static final String ACCOUNT_NAME = "testName";
 
-    private AdlsGen2CloudStorageParametersToCloudAdlsGen2ViewConverter underTest;
+    private AdlsGen2CloudStorageParametersV4ToCloudAdlsGen2ViewConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new AdlsGen2CloudStorageParametersToCloudAdlsGen2ViewConverter();
+        underTest = new AdlsGen2CloudStorageParametersV4ToCloudAdlsGen2ViewConverter();
     }
 
     @Test

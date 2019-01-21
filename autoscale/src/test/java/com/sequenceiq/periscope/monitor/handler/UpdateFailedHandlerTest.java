@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;

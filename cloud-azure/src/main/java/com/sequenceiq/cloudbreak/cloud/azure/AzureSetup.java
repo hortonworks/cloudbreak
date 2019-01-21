@@ -30,7 +30,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.FileSystemType;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;

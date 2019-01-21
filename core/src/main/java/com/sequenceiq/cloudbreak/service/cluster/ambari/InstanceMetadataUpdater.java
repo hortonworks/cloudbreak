@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -30,7 +30,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.json.Json;

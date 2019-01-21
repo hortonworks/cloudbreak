@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
 
 @Component
 public class GcsFileSystemToCloudGcsView

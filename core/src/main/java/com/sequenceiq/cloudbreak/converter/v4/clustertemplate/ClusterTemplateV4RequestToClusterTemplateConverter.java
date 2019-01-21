@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
 @Component
 public class ClusterTemplateV4RequestToClusterTemplateConverter extends AbstractConversionServiceAwareConverter<ClusterTemplateV4Request, ClusterTemplate> {

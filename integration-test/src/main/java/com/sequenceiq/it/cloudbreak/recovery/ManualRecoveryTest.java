@@ -13,7 +13,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -63,7 +63,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         }
         //WHEN
         List<String> hostgroupList = Arrays.asList(hostGroup.split(","));
-        ClusterRepairRequest clusterRepairRequest = new ClusterRepairRequest();
+        ClusterRepairV4Request clusterRepairRequest = new ClusterRepairV4Request();
         clusterRepairRequest.setHostGroups(hostgroupList);
         clusterRepairRequest.setRemoveOnly(removeOnly);
         getCloudbreakClient().clusterEndpoint().repairCluster(Long.valueOf(stackId), clusterRepairRequest);

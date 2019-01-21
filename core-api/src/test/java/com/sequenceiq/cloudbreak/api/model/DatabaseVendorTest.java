@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MSSQL;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MYSQL;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE12;
-import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.POSTGRES;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.MSSQL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.MYSQL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE11;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE12;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.POSTGRES;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 

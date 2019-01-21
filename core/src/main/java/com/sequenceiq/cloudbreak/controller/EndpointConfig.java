@@ -16,7 +16,7 @@ import org.springframework.stereotype.Controller;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
-import com.sequenceiq.cloudbreak.controller.common.AutoscaleController;
+import com.sequenceiq.cloudbreak.controller.v4.AutoscaleV4Controller;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
@@ -55,7 +55,6 @@ public class EndpointConfig extends ResourceConfig {
             AuditEventV4Controller.class,
             BlueprintV4Controller.class,
             EventV4Controller.class,
-            ClusterV1Controller.class,
             ClusterTemplateV4Controller.class,
             CredentialV4Controller.class,
             DatabaseV4Controller.class,
@@ -64,24 +63,19 @@ public class EndpointConfig extends ResourceConfig {
             ImageCatalogV4Controller.class,
             KerberosConfigV4Controller.class,
             LdapV4Controller.class,
-            ManagementPackController.class,
-            ManagementPackV3Controller.class,
             KubernetesV4Endpoint.class,
             WorkspaceV4Controller.class,
             PlatformParameterV4Controller.class,
             ProxyV4Controller.class,
             RecipesV4Controller.class,
             SmartSenseSubscriptionV4Controller.class,
-            StackV1Controller.class,
-            StackV2Controller.class,
-            StackV3Controller.class,
             UserProfileV4Controller.class,
             UserV4Controller.class,
             FileSystemV4Controller.class,
             UtilV4Controller.class,
             FileSystemV4Controller.class,
             WorkspaceAwareUtilV4Controller.class,
-            AutoscaleController.class
+            AutoscaleV4Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

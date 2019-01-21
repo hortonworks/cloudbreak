@@ -28,7 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

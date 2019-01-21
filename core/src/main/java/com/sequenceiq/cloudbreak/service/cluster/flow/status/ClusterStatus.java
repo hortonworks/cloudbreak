@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 import java.util.Arrays;
 import java.util.Optional;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 
 public enum ClusterStatus {
     UNKNOWN(null, null, "Error happened during the communication with Ambari"),

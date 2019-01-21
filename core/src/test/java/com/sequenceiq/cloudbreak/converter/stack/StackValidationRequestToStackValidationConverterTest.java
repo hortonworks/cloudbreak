@@ -25,10 +25,11 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
@@ -79,9 +80,9 @@ public class StackValidationRequestToStackValidationConverterTest {
     private EnvironmentViewService environmentViewService;
 
     @InjectMocks
-    private StackValidationRequestToStackValidationConverter underTest;
+    private StackValidationV4RequestToStackValidationConverter underTest;
 
-    private StackValidationRequest validationRequest = new StackValidationRequest();
+    private StackValidationV4Request validationRequest = new StackValidationV4Request();
 
     private String bpName = "HDF3.1 Datascience Pack";
 
@@ -93,7 +94,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
     @Before
     public void init() {
-        validationRequest = new StackValidationRequest();
+        validationRequest = new StackValidationV4Request();
         mockUserRelated();
         mockCredentialRelated();
         mockBlueprintsInWorkspace();
@@ -101,7 +102,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
     @Test
     public void invalidBlueprintValidationRequest() {
-        validationRequest = new StackValidationRequest();
+        validationRequest = new StackValidationV4Request();
         Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);

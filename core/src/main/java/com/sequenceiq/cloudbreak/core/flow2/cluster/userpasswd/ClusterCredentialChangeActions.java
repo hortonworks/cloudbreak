@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 
 import java.util.Map;
 

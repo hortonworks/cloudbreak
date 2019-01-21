@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
@@ -66,7 +66,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
     @Override
     public void execute() {
         long start = System.currentTimeMillis();
-        AutoscaleStackResponse stack = (AutoscaleStackResponse) context.getData();
+        AutoscaleStackV4Response stack = (AutoscaleStackV4Response) context.getData();
         try {
             Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
             AmbariStack resolvedAmbari = createAmbariStack(stack);
@@ -101,7 +101,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
         return context;
     }
 
-    private void createCluster(AutoscaleStackResponse stack, AmbariStack resolvedAmbari) {
+    private void createCluster(AutoscaleStackV4Response stack, AmbariStack resolvedAmbari) {
         MDCBuilder.buildMdcContext(stack.getStackId(), stack.getName(), "CLUSTER");
         LOGGER.debug("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
         Cluster cluster = clusterService.create(resolvedAmbari, null,
@@ -110,7 +110,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
         notificationSender.send(cluster, history);
     }
 
-    private void updateCluster(AutoscaleStackResponse stack, Cluster cluster, AmbariStack resolvedAmbari) {
+    private void updateCluster(AutoscaleStackV4Response stack, Cluster cluster, AmbariStack resolvedAmbari) {
         if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
             MDCBuilder.buildMdcContext(cluster);
             LOGGER.debug("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
@@ -120,7 +120,7 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
         }
     }
 
-    private AmbariStack createAmbariStack(AutoscaleStackResponse stack) {
+    private AmbariStack createAmbariStack(AutoscaleStackV4Response stack) {
         String host = stack.getAmbariServerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
         SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackId());

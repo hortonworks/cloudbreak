@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsVie
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -84,7 +85,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     private static final String TEST_VERSION = "2.6";
 
     @InjectMocks
-    private StackRequestToTemplatePreparationObjectConverter underTest;
+    private StackV4RequestToTemplatePreparationObjectConverter underTest;
 
     @Mock
     private FlexSubscriptionService flexSubscriptionService;

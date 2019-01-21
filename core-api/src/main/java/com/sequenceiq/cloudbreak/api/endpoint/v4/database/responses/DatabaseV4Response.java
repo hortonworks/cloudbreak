@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
-import com.sequenceiq.cloudbreak.api.model.SecretResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
@@ -34,10 +34,10 @@ public class DatabaseV4Response extends DatabaseV4Base {
     private String databaseEngineDisplayName;
 
     @ApiModelProperty(value = Database.USERNAME)
-    private SecretResponse connectionUserName;
+    private SecretV4Response connectionUserName;
 
     @ApiModelProperty(value = ModelDescriptions.Database.PASSWORD)
-    private SecretResponse connectionPassword;
+    private SecretV4Response connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -90,19 +90,19 @@ public class DatabaseV4Response extends DatabaseV4Base {
         this.databaseEngineDisplayName = databaseEngineDisplayName;
     }
 
-    public SecretResponse getConnectionUserName() {
+    public SecretV4Response getConnectionUserName() {
         return connectionUserName;
     }
 
-    public void setConnectionUserName(SecretResponse connectionUserName) {
+    public void setConnectionUserName(SecretV4Response connectionUserName) {
         this.connectionUserName = connectionUserName;
     }
 
-    public SecretResponse getConnectionPassword() {
+    public SecretV4Response getConnectionPassword() {
         return connectionPassword;
     }
 
-    public void setConnectionPassword(SecretResponse connectionPassword) {
+    public void setConnectionPassword(SecretV4Response connectionPassword) {
         this.connectionPassword = connectionPassword;
     }
 

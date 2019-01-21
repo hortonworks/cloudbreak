@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import com.sequenceiq.cloudbreak.api.model.v3.credential.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;

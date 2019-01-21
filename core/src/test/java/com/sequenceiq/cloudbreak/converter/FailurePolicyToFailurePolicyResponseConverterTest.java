@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 

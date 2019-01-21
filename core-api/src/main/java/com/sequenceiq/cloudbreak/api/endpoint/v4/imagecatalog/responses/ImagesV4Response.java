@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 

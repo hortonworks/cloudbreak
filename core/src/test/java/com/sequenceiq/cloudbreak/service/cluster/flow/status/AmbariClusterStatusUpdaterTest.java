@@ -13,8 +13,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
