@@ -16,8 +16,9 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -26,10 +27,10 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 
-public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterRequest> {
+public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
 
     @InjectMocks
-    private ClusterRequestToClusterConverter underTest;
+    private ClusterV4RequestToClusterConverter underTest;
 
     @Mock
     private ConversionService conversionService;
@@ -45,7 +46,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
 
     @Before
     public void setUp() {
-        underTest = new ClusterRequestToClusterConverter();
+        underTest = new ClusterV4RequestToClusterConverter();
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(100L);
@@ -54,7 +55,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Test
     public void testConvert() {
         // GIVEN
-        given(conversionService.convert(any(ClusterRequest.class), eq(Gateway.class))).willReturn(new Gateway());
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Gateway.class))).willReturn(new Gateway());
         // WHEN
         Cluster result = underTest.convert(getRequest("cluster.json"));
         // THEN
@@ -67,7 +68,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void testConvertWithFileSystemDetails() {
         // GIVEN
         Gateway gateway = new Gateway();
-        given(conversionService.convert(any(ClusterRequest.class), eq(Gateway.class))).willReturn(gateway);
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Gateway.class))).willReturn(gateway);
         given(kerberosService.getByNameForWorkspaceId("somename", 100L)).willReturn(new KerberosConfig());
         given(fileSystemConfigService.getByNameForWorkspaceId("teszt", 100L)).willReturn(new FileSystem());
         // WHEN
@@ -82,7 +83,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void testNoGateway() {
         // GIVEN
         // WHEN
-        ClusterRequest clusterRequest = getRequest("cluster-no-gateway.json");
+        ClusterV4Request clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
@@ -92,7 +93,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     }
 
     @Override
-    public Class<ClusterRequest> getRequestClass() {
-        return ClusterRequest.class;
+    public Class<ClusterV4Request> getRequestClass() {
+        return ClusterV4Request.class;
     }
 }

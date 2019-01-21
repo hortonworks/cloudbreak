@@ -21,12 +21,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
@@ -36,10 +35,10 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
@@ -108,7 +107,7 @@ public class StackDecoratorTest {
     private Stack subject;
 
     @Mock
-    private StackRequest request;
+    private StackV4Request request;
 
     @Mock
     private User user;
@@ -161,7 +160,6 @@ public class StackDecoratorTest {
         when(conversionService.convert(any(InstanceGroup.class), any())).thenReturn(instanceGroupParameterRequest);
         when(subject.getFullNodeCount()).thenReturn(2);
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
-        when(request.getClusterToAttach()).thenReturn(null);
 
         Stack result = underTest.decorate(subject, request, user, workspace);
 
@@ -170,7 +168,7 @@ public class StackDecoratorTest {
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndAllSharedServiceRequirementMeetsThenEverythingShouldGoFine() {
-        ClusterRequest clusterRequest = mock(ClusterRequest.class);
+        ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
         Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive", "ranger");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
@@ -184,17 +182,14 @@ public class StackDecoratorTest {
         when(conversionService.convert(any(InstanceGroup.class), any())).thenReturn(instanceGroupParameterRequest);
         when(subject.getFullNodeCount()).thenReturn(2);
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
-        when(request.getClusterToAttach()).thenReturn(1L);
-        when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
-        when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
+        when(request.getCluster()).thenReturn(clusterRequest);
 
         underTest.decorate(subject, request, user, workspace);
     }
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndThereIsNoLdapConfiguredButRangerAndHiveRdsHaveThenExceptionWouldCome() {
-        ClusterRequest clusterRequest = mock(ClusterRequest.class);
+        ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
         Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive", "ranger");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
@@ -208,17 +203,14 @@ public class StackDecoratorTest {
         when(conversionService.convert(any(InstanceGroup.class), any())).thenReturn(instanceGroupParameterRequest);
         when(subject.getFullNodeCount()).thenReturn(2);
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
-        when(request.getClusterToAttach()).thenReturn(1L);
-        when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(null);
-        when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
+        when(request.getCluster()).thenReturn(clusterRequest);
 
         underTest.decorate(subject, request, user, workspace);
     }
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndThereIsAnLdapAndRangerRdsConfiguredButHiveRdsDoesNotThenExceptionWouldCome() {
-        ClusterRequest clusterRequest = mock(ClusterRequest.class);
+        ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
         Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("ranger");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
@@ -232,10 +224,7 @@ public class StackDecoratorTest {
         when(conversionService.convert(any(InstanceGroup.class), any())).thenReturn(instanceGroupParameterRequest);
         when(subject.getFullNodeCount()).thenReturn(2);
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
-        when(request.getClusterToAttach()).thenReturn(1L);
-        when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
-        when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
+        when(request.getCluster()).thenReturn(clusterRequest);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
@@ -245,7 +234,7 @@ public class StackDecoratorTest {
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndThereIsAnLdapAndHiveRdsConfiguredButRangerRdsDoesNotThenExceptionWouldCome() {
-        ClusterRequest clusterRequest = mock(ClusterRequest.class);
+        ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
         Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
@@ -259,10 +248,7 @@ public class StackDecoratorTest {
         when(conversionService.convert(any(InstanceGroup.class), any())).thenReturn(instanceGroupParameterRequest);
         when(subject.getFullNodeCount()).thenReturn(2);
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
-        when(request.getClusterToAttach()).thenReturn(1L);
-        when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
-        when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
+        when(request.getCluster()).thenReturn(clusterRequest);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
@@ -272,7 +258,7 @@ public class StackDecoratorTest {
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndThereIsAnLdapConfiguredButNoRangerRdsOrHiveRdsConfiguredThenExceptionWouldCome() {
-        ClusterRequest clusterRequest = mock(ClusterRequest.class);
+        ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
         Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("some other value");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
@@ -286,10 +272,7 @@ public class StackDecoratorTest {
         when(conversionService.convert(any(InstanceGroup.class), any())).thenReturn(instanceGroupParameterRequest);
         when(subject.getFullNodeCount()).thenReturn(2);
         when(subject.getInstanceGroups()).thenReturn(createInstanceGroups(GATEWAY));
-        when(request.getClusterToAttach()).thenReturn(1L);
-        when(request.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getLdapConfig()).thenReturn(new LdapV4Request());
-        when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
+        when(request.getCluster()).thenReturn(clusterRequest);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);

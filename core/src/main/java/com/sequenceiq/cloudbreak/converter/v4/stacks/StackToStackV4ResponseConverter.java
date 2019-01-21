@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
@@ -74,6 +75,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setId(source.getId());
         if (source.getEnvironment() != null) {
             response.setEnvironment(getConversionService().convert(source, EnvironmentSettingsV4Response.class));
+            response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         }
         response.setStatus(source.getStatus());
         response.setTerminated(source.getTerminated());
