@@ -73,7 +73,6 @@ public interface StackV4Endpoint {
     @ApiOperation(value = CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postStackInWorkspaceV4")
     StackV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request);
 
-
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -156,7 +155,6 @@ public interface StackV4Endpoint {
     @ApiOperation(value = GET_STATUS_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "statusStackV4")
     StackStatusV4Response getStatusByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
-
 
     @DELETE
     @Path("{name}/instance")
