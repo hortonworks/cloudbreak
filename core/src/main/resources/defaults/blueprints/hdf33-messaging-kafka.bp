@@ -4,7 +4,7 @@
   "blueprint":
   {
       "Blueprints": {
-        "blueprint_name": "hdf32-messaging-management",
+        "blueprint_name": "hdf33-messaging-management",
         "stack_name": "HDF",
         "stack_version": "3.3"
       },
