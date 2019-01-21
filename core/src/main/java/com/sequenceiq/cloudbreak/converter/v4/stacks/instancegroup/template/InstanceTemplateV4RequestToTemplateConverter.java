@@ -11,11 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.custominstance.CustomInstanceV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -44,12 +42,6 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
         template.setCloudPlatform(source.getCloudPlatform().name());
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
-        CustomInstanceV4Request customInstance = source.getCustomInstance();
-        if (customInstance != null) {
-            parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, customInstance.getMemory());
-            parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, customInstance.getCpus());
-        }
-
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
 //        Optional.ofNullable(source.getSecretParameters()).map(toJson()).map(Json::getValue).ifPresent(template::setSecretAttributes);
         return template;

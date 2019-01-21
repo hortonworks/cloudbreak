@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayTopologyToGatewayTopologyV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -26,7 +26,7 @@ public class GatewayTopologyToGatewayTopologyJsonConverterTest {
         exposedServices.setServices(ExposedService.getAllKnoxExposed());
         gatewayTopology.setExposedServices(new Json(exposedServices));
 
-        GatewayTopologyJson result = underTest.convert(gatewayTopology);
+        GatewayTopologyV4Request result = underTest.convert(gatewayTopology);
 
         assertEquals(topologyName, result.getTopologyName());
         assertEquals(ExposedService.getAllKnoxExposed().size(), result.getExposedServices().size());

@@ -15,8 +15,6 @@ public class MapToAzureCredentialV4ParametersConverter extends AbstractConversio
         AzureCredentialV4Parameters parameters = new AzureCredentialV4Parameters();
         parameters.setTenantId((String) source.get("tenantId"));
         parameters.setSubscriptionId((String) source.get("subscriptionId"));
-        parameters.setSecretKey((String) source.get("secretKey"));
-        parameters.setAccessKey((String) source.get("accessKey"));
         return parameters;
     }
 

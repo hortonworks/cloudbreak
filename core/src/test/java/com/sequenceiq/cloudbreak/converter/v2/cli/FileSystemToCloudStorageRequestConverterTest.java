@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.GCS;
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.S3;
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
@@ -26,22 +26,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.FileSystemToCloudStorageV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
 public class FileSystemToCloudStorageRequestConverterTest {
 
@@ -69,7 +70,7 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(WASB);
         when(fileSystem.getLocations()).thenReturn(null);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertTrue(result.getLocations().isEmpty());
@@ -83,7 +84,7 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(locations.getValue()).thenReturn(null);
         when(fileSystem.getLocations()).thenReturn(locations);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertTrue(result.getLocations().isEmpty());
@@ -98,7 +99,7 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(locations.get(StorageLocations.class)).thenReturn(null);
         when(fileSystem.getLocations()).thenReturn(locations);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertTrue(result.getLocations().isEmpty());
@@ -115,13 +116,13 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(locations.getValue()).thenReturn("some value");
         when(locations.get(StorageLocations.class)).thenReturn(storageLocations);
         when(fileSystem.getLocations()).thenReturn(locations);
-        when(conversionService.convert(location, StorageLocationRequest.class)).thenReturn(new StorageLocationRequest());
+        when(conversionService.convert(location, StorageLocationV4Request.class)).thenReturn(new StorageLocationV4Request());
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertEquals(1L, result.getLocations().size());
-        verify(conversionService, times(1)).convert(any(StorageLocation.class), eq(StorageLocationRequest.class));
+        verify(conversionService, times(1)).convert(any(StorageLocation.class), eq(StorageLocationV4Request.class));
     }
 
     @Test
@@ -129,17 +130,17 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(ADLS);
         AdlsFileSystem adls = mock(AdlsFileSystem.class);
         when(configurations.get(AdlsFileSystem.class)).thenReturn(adls);
-        AdlsCloudStorageParameters expected = mock(AdlsCloudStorageParameters.class);
-        when(conversionService.convert(adls, AdlsCloudStorageParameters.class)).thenReturn(expected);
+        AdlsCloudStorageParametersV4 expected = mock(AdlsCloudStorageParametersV4.class);
+        when(conversionService.convert(adls, AdlsCloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getAdls());
-        verify(conversionService, times(1)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParameters.class));
+        verify(conversionService, times(1)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParametersV4.class));
     }
 
     @Test
@@ -147,17 +148,17 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(GCS);
         GcsFileSystem gcs = mock(GcsFileSystem.class);
         when(configurations.get(GcsFileSystem.class)).thenReturn(gcs);
-        GcsCloudStorageParameters expected = mock(GcsCloudStorageParameters.class);
-        when(conversionService.convert(gcs, GcsCloudStorageParameters.class)).thenReturn(expected);
+        GcsCloudStorageParametersV4 expected = mock(GcsCloudStorageParametersV4.class);
+        when(conversionService.convert(gcs, GcsCloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getGcs());
-        verify(conversionService, times(1)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParameters.class));
+        verify(conversionService, times(1)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParametersV4.class));
     }
 
     @Test
@@ -165,17 +166,17 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(S3);
         S3FileSystem s3 = mock(S3FileSystem.class);
         when(configurations.get(S3FileSystem.class)).thenReturn(s3);
-        S3CloudStorageParameters expected = mock(S3CloudStorageParameters.class);
-        when(conversionService.convert(s3, S3CloudStorageParameters.class)).thenReturn(expected);
+        S3CloudStorageParametersV4 expected = mock(S3CloudStorageParametersV4.class);
+        when(conversionService.convert(s3, S3CloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getS3());
-        verify(conversionService, times(1)).convert(any(S3FileSystem.class), eq(S3CloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParameters.class));
+        verify(conversionService, times(1)).convert(any(S3FileSystem.class), eq(S3CloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParametersV4.class));
     }
 
     @Test
@@ -183,17 +184,17 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(WASB);
         WasbFileSystem wasb = mock(WasbFileSystem.class);
         when(configurations.get(WasbFileSystem.class)).thenReturn(wasb);
-        WasbCloudStorageParameters expected = mock(WasbCloudStorageParameters.class);
-        when(conversionService.convert(wasb, WasbCloudStorageParameters.class)).thenReturn(expected);
+        WasbCloudStorageParametersV4 expected = mock(WasbCloudStorageParametersV4.class);
+        when(conversionService.convert(wasb, WasbCloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getWasb());
-        verify(conversionService, times(1)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParameters.class));
+        verify(conversionService, times(1)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParametersV4.class));
     }
 
     @Test
@@ -201,17 +202,17 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(ADLS_GEN_2);
         AdlsGen2FileSystem adlsGen2 = mock(AdlsGen2FileSystem.class);
         when(configurations.get(AdlsGen2FileSystem.class)).thenReturn(adlsGen2);
-        AdlsGen2CloudStorageParameters expected = mock(AdlsGen2CloudStorageParameters.class);
-        when(conversionService.convert(adlsGen2, AdlsGen2CloudStorageParameters.class)).thenReturn(expected);
+        AdlsGen2CloudStorageParametersV4 expected = mock(AdlsGen2CloudStorageParametersV4.class);
+        when(conversionService.convert(adlsGen2, AdlsGen2CloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getAdlsGen2());
-        verify(conversionService, times(1)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParameters.class));
-        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParameters.class));
+        verify(conversionService, times(1)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(S3FileSystem.class), eq(S3CloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParametersV4.class));
+        verify(conversionService, times(0)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParametersV4.class));
     }
 
     @Test
@@ -220,7 +221,7 @@ public class FileSystemToCloudStorageRequestConverterTest {
         when(fileSystem.getType()).thenReturn(ADLS);
         when(configurations.get(any(Class.class))).thenThrow(new IOException("some message"));
 
-        CloudStorageRequest result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNull(result.getAdls());
         assertNull(result.getGcs());

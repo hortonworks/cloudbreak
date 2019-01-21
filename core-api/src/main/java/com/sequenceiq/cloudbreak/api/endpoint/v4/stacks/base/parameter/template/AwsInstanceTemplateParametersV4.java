@@ -55,10 +55,9 @@ public class AwsInstanceTemplateParametersV4 extends InstanceTemplateParameterV4
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        AwsInstanceTemplateParametersV4 ret = new AwsInstanceTemplateParametersV4();
         String spotPrice = getParameterOrNull(parameters, "spotPrice");
         if (spotPrice != null) {
-            ret.spotPrice = Double.parseDouble(spotPrice);
+            this.spotPrice = Double.parseDouble(spotPrice);
         }
         AwsEncryptionParametersV4 encription = new AwsEncryptionParametersV4();
         encription.setKey(getParameterOrNull(parameters, "key"));
@@ -68,8 +67,8 @@ public class AwsInstanceTemplateParametersV4 extends InstanceTemplateParameterV4
         }
         String platformType = getParameterOrNull(parameters, "platformType");
         if (platformType != null) {
-            ret.setPlatformType(CloudPlatform.valueOf(platformType));
+            setPlatformType(CloudPlatform.valueOf(platformType));
         }
-        return (T) ret;
+        return (T) this;
     }
 }

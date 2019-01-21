@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.EncryptionK
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -50,7 +50,7 @@ public class StackRequestValidator implements Validator<StackV4Request> {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private TemplateRequestValidator templateRequestValidator;
+    private InstanceTemplateV4RequestValidator templateRequestValidator;
 
     @Inject
     private BlueprintService blueprintService;

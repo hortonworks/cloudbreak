@@ -30,14 +30,13 @@ public class AzureInstanceGroupParametersV4 extends InstanceGroupParametersV4Bas
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        AzureInstanceGroupParametersV4 ret = new AzureInstanceGroupParametersV4();
-        ret.setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
-        ret.setInstanceName(getParameterOrNull(parameters, "instanceName"));
+        setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
+        setInstanceName(getParameterOrNull(parameters, "instanceName"));
         AzureAvailabiltySetV4 availabiltySet = new AzureAvailabiltySetV4();
         availabiltySet.setFaultDomainCount(getParameterOrNull(parameters, "faultDomainCount"));
         availabiltySet.setName(getParameterOrNull(parameters, "name"));
         availabiltySet.setUpdateDomainCount(getParameterOrNull(parameters, "updateDomainCount"));
-        ret.availabilitySet = availabiltySet;
-        return (T) ret;
+        availabilitySet = availabiltySet;
+        return (T) this;
     }
 }

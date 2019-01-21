@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParamet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.MockInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
@@ -30,10 +31,13 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     private GcpInstanceTemplateParametersV4 gcp;
 
     @ApiModelProperty(TemplateModelDescription.OPENSTACK_PARAMETERS)
-    private OpenStackInstanceTemplateParametersV4 openStack;
+    private OpenStackInstanceTemplateParametersV4 openstack;
 
     @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
     private YarnInstanceTemplateParametersV4 yarn;
+
+    @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
+    private MockInstanceTemplateParametersV4 mock;
 
     @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
@@ -46,6 +50,7 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
         this.instanceType = instanceType;
     }
 
+    @Override
     public AwsInstanceTemplateParametersV4 getAws() {
         return aws;
     }
@@ -54,6 +59,7 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
         this.aws = aws;
     }
 
+    @Override
     public AzureInstanceTemplateParametersV4 getAzure() {
         return azure;
     }
@@ -62,6 +68,7 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
         this.azure = azure;
     }
 
+    @Override
     public GcpInstanceTemplateParametersV4 getGcp() {
         return gcp;
     }
@@ -70,19 +77,30 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
         this.gcp = gcp;
     }
 
-    public OpenStackInstanceTemplateParametersV4 getOpenStack() {
-        return openStack;
+    @Override
+    public OpenStackInstanceTemplateParametersV4 getOpenstack() {
+        return openstack;
     }
 
-    public void setOpenStack(OpenStackInstanceTemplateParametersV4 openStack) {
-        this.openStack = openStack;
+    public void setOpenstack(OpenStackInstanceTemplateParametersV4 openstack) {
+        this.openstack = openstack;
     }
 
+    @Override
     public YarnInstanceTemplateParametersV4 getYarn() {
         return yarn;
     }
 
     public void setYarn(YarnInstanceTemplateParametersV4 yarn) {
         this.yarn = yarn;
+    }
+
+    @Override
+    public MockInstanceTemplateParametersV4 getMock() {
+        return mock;
+    }
+
+    public void setMock(MockInstanceTemplateParametersV4 mock) {
+        this.mock = mock;
     }
 }

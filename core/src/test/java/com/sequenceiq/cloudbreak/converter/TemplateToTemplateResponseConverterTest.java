@@ -16,26 +16,15 @@ import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateParameterV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.BaseTemplateParameter;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsEncryption;
-import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.KeyEncryptionMethod;
-import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.TemplateToInstanceTemplateV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -89,7 +78,7 @@ public class TemplateToTemplateResponseConverterTest {
     }
 
     @Test
-    public void testGcpTemplateParametersWhenNotNull() {
+    public void testGcpTemplateParametersWhenNotNull() throws JsonProcessingException {
 
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.GCP));
@@ -103,7 +92,7 @@ public class TemplateToTemplateResponseConverterTest {
     }
 
     @Test
-    public void testOpenStackTemplateParametersWhenNotNull() {
+    public void testOpenStackTemplateParametersWhenNotNull() throws JsonProcessingException {
 
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.OPENSTACK));
@@ -127,6 +116,12 @@ public class TemplateToTemplateResponseConverterTest {
         Assert.assertNull(convert.getOpenStack());
     }
 
+    private Json parameters(String cloudConstants) throws JsonProcessingException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("platformType", cloudConstants);
+        return new Json(map);
+    }
+
     private AwsInstanceTemplateParametersV4 awsParameters() {
         AwsInstanceTemplateParametersV4 templateParameters = new AwsInstanceTemplateParametersV4();
         templateParameters.setSpotPrice(10.0D);
@@ -137,27 +132,27 @@ public class TemplateToTemplateResponseConverterTest {
         return templateParameters;
     }
 
-    private OpenStackParameters openStackParameters(){
-        return new OpenStackParameters();
+    private OpenStackInstanceTemplateParametersV4 openStackParameters() {
+        return new OpenStackInstanceTemplateParametersV4();
     }
 
-    private GcpParameters gcpParameters() {
-        GcpParameters templateParameters = new GcpParameters();
-        GcpEncryption encryption = new GcpEncryption();
-        encryption.setKeyEncryptionMethod("RAW");
-        encryption.setType("CUSTOM");
+    private GcpInstanceTemplateParametersV4 gcpParameters() {
+        GcpInstanceTemplateParametersV4 templateParameters = new GcpInstanceTemplateParametersV4();
+        GcpEncryptionParametersV4 encryption = new GcpEncryptionParametersV4();
+        encryption.setKeyEncryptionMethod(KeyEncryptionMethod.RAW);
+        encryption.setType(EncryptionType.CUSTOM);
         encryption.setKey("someKey");
         templateParameters.setEncryption(encryption);
         return templateParameters;
     }
 
-    private AzureParameters azureParameters() {
-        AzureParameters templateParameters = new AzureParameters();
+    private AzureInstanceTemplateParametersV4 azureParameters() {
+        AzureInstanceTemplateParametersV4 templateParameters = new AzureInstanceTemplateParametersV4();
         templateParameters.setPrivateId("somePrivateId");
         return templateParameters;
     }
 
-    private YarnParameters yarnParameters() throws JsonProcessingException {
-        return new YarnParameters();
+    private YarnInstanceTemplateParametersV4 yarnParameters() throws JsonProcessingException {
+        return new YarnInstanceTemplateParametersV4();
     }
 }

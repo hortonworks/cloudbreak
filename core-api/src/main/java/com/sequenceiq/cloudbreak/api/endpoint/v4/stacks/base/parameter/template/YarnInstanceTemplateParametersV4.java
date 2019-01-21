@@ -47,18 +47,9 @@ public class YarnInstanceTemplateParametersV4 extends InstanceTemplateParameterV
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        YarnInstanceTemplateParametersV4 ret = new YarnInstanceTemplateParametersV4();
-        ret.setPlatformType(getPlatformType(parameters));
-        ret.cpus = getInt(parameters, "cpus");
-        ret.memory = getInt(parameters, "memory");
-        return (T) ret;
-    }
-
-    private Integer getInt(Map<String, Object> parameters, String key) {
-        String integer = getParameterOrNull(parameters, key);
-        if (integer != null) {
-            return Integer.parseInt(integer);
-        }
-        return null;
+        setPlatformType(getPlatformType(parameters));
+        cpus = getInt(parameters, "cpus");
+        memory = getInt(parameters, "memory");
+        return (T) this;
     }
 }

@@ -54,10 +54,9 @@ public class GcpNetworkParametersV4 implements JsonEntity, Mappable {
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        GcpNetworkParametersV4 ret = new GcpNetworkParametersV4();
-        ret.networkId = getParameterOrNull(parameters,"networkId");
-        ret.subnetId = getParameterOrNull(parameters,"subnetId");
-        ret.sharedProjectId = getParameterOrNull(parameters,"sharedProjectId");
-        return (T) ret;
+        networkId = getParameterOrNull(parameters,"networkId");
+        subnetId = getParameterOrNull(parameters,"subnetId");
+        sharedProjectId = getParameterOrNull(parameters,"sharedProjectId");
+        return (T) this;
     }
 }

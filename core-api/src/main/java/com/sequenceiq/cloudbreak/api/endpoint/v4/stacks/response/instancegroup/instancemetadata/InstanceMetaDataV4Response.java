@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceMetaDataModelDescription;
 
@@ -39,6 +40,9 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_TYPE)
     private InstanceMetadataType instanceType;
+
+    @ApiModelProperty(HostMetadataModelDescription.STATE)
+    private String state;
 
     public String getInstanceGroup() {
         return instanceGroup;
@@ -110,5 +114,13 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     public InstanceMetadataType getInstanceType() {
         return instanceType;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

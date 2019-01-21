@@ -78,12 +78,11 @@ public class AzureNetworkParametersV4 implements JsonEntity, Mappable {
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        AzureNetworkParametersV4 ret = new AzureNetworkParametersV4();
-        ret.noPublicIp = Boolean.valueOf(getParameterOrNull(parameters, "noPublicIp"));
-        ret.noFirewallRules = Boolean.valueOf(getParameterOrNull(parameters, "noFirewallRules"));
-        ret.resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
-        ret.networkId = getParameterOrNull(parameters, "networkId");
-        ret.subnetId = getParameterOrNull(parameters, "subnetId");
-        return (T) ret;
+        noPublicIp = Boolean.valueOf(getParameterOrNull(parameters, "noPublicIp"));
+        noFirewallRules = Boolean.valueOf(getParameterOrNull(parameters, "noFirewallRules"));
+        resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
+        networkId = getParameterOrNull(parameters, "networkId");
+        subnetId = getParameterOrNull(parameters, "subnetId");
+        return (T) this;
     }
 }

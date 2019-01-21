@@ -7,6 +7,14 @@ import java.util.Map;
 
 public interface Mappable {
 
+    default Integer getInt(Map<String, Object> parameters, String key) {
+        String integer = getParameterOrNull(parameters, key);
+        if (integer != null) {
+            return Integer.parseInt(integer);
+        }
+        return null;
+    }
+
     Mappable EMPTY = new Mappable() {
         @Override
         public Map<String, Object> asMap() {

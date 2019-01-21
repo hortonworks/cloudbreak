@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public abstract class ProviderParametersBase {
 
+    @ApiModelProperty(hidden = true)
     private CloudPlatform cloudPlatform;
 
     public CloudPlatform getCloudPlatform() {

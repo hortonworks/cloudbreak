@@ -8,9 +8,8 @@ public class AwsInstanceGroupParametersV4 extends InstanceGroupParametersV4Base 
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        AwsInstanceGroupParametersV4 ret = new AwsInstanceGroupParametersV4();
-        ret.setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
-        ret.setInstanceName(getParameterOrNull(parameters, "instanceName"));
-        return (T) ret;
+        setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
+        setInstanceName(getParameterOrNull(parameters, "instanceName"));
+        return (T) this;
     }
 }

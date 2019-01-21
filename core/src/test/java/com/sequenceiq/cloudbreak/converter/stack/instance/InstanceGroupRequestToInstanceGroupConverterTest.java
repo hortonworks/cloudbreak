@@ -13,16 +13,17 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupV4RequestToInstanceGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
-public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupRequest> {
+public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
 
     @InjectMocks
-    private InstanceGroupRequestToInstanceGroupConverter underTest;
+    private InstanceGroupV4RequestToInstanceGroupConverter underTest;
 
     @Mock
     private TemplateService templateService;
@@ -32,7 +33,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
 
     @Before
     public void setUp() {
-        underTest = new InstanceGroupRequestToInstanceGroupConverter();
+        underTest = new InstanceGroupV4RequestToInstanceGroupConverter();
         MockitoAnnotations.initMocks(this);
     }
 
@@ -56,7 +57,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
     }
 
     @Override
-    public Class<InstanceGroupRequest> getRequestClass() {
-        return InstanceGroupRequest.class;
+    public Class<InstanceGroupV4Request> getRequestClass() {
+        return InstanceGroupV4Request.class;
     }
 }

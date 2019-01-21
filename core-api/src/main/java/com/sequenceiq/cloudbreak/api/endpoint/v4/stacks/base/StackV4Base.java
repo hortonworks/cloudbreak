@@ -77,4 +77,12 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     public void setOpenstack(OpenStackStackParametersV4 openstack) {
         this.openstack = openstack;
     }
+
+    public Long getTimeToLive() {
+        return timeToLive;
+    }
+
+    public void setTimeToLive(Long timeToLive) {
+        this.timeToLive = timeToLive;
+    }
 }

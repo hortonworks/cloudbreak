@@ -28,10 +28,9 @@ public class OpenStackInstanceGroupParametersV4 extends InstanceGroupParametersV
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        OpenStackInstanceGroupParametersV4 ret = new OpenStackInstanceGroupParametersV4();
-        ret.setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
-        ret.setInstanceName(getParameterOrNull(parameters, "instanceName"));
-        ret.server = getParameterOrNull(parameters, "server");
-        return (T) ret;
+        setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
+        setInstanceName(getParameterOrNull(parameters, "instanceName"));
+        server = getParameterOrNull(parameters, "server");
+        return (T) this;
     }
 }

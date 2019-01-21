@@ -30,17 +30,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
+public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -71,7 +71,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
             + "LDAP configuration or its name/id to the Cluster request";
 
     @Spy
-    private final TemplateRequestValidator templateRequestValidator = new TemplateRequestValidator();
+    private final InstanceTemplateV4RequestValidator templateRequestValidator = new InstanceTemplateV4RequestValidator();
 
     @Mock
     private BlueprintService blueprintService;
@@ -88,8 +88,8 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Mock
     private RdsConfigService rdsConfigService;
 
-    public StackRequestValidatorTest() {
-        super(LoggerFactory.getLogger(StackRequestValidatorTest.class));
+    public StackV4RequestValidatorTest() {
+        super(LoggerFactory.getLogger(StackV4RequestValidatorTest.class));
     }
 
     @Before
@@ -101,28 +101,28 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWithZeroRootVolumeSize() {
         assertNotNull(templateRequestValidator);
-        StackRequest stackRequest = stackRequestWithRootVolumeSize(0);
+        StackV4Request stackRequest = stackRequestWithRootVolumeSize(0);
         ValidationResult validationResult = underTest.validate(stackRequest);
         assertEquals(State.ERROR, validationResult.getState());
     }
 
     @Test
     public void testWithNegativeRootVolumeSize() {
-        StackRequest stackRequest = stackRequestWithRootVolumeSize(-1);
+        StackV4Request stackRequest = stackRequestWithRootVolumeSize(-1);
         ValidationResult validationResult = underTest.validate(stackRequest);
         assertEquals(State.ERROR, validationResult.getState());
     }
 
     @Test
     public void testNullValueIsAllowedForRootVolumeSize() {
-        StackRequest stackRequest = stackRequestWithRootVolumeSize(null);
+        StackV4Request stackRequest = stackRequestWithRootVolumeSize(null);
         ValidationResult validationResult = underTest.validate(stackRequest);
         assertEquals(State.VALID, validationResult.getState());
     }
 
     @Test
     public void testWithPositiveRootVolumeSize() {
-        StackRequest stackRequest = stackRequestWithRootVolumeSize(1);
+        StackV4Request stackRequest = stackRequestWithRootVolumeSize(1);
         ValidationResult validationResult = underTest.validate(stackRequest);
         assertEquals(State.VALID, validationResult.getState());
     }
@@ -130,7 +130,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWithLargerInstanceGroupSetThanHostGroups() {
         String plusOne = "very master";
-        StackRequest stackRequest = stackRequestWithInstanceAndHostGroups(
+        StackV4Request stackRequest = stackRequestWithInstanceAndHostGroups(
                 Sets.newHashSet(plusOne, "master", "worker", "compute"),
                 Sets.newHashSet("master", "worker", "compute")
         );
@@ -143,7 +143,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWithLargerHostGroupSetThanInstanceGroups() {
-        StackRequest stackRequest = stackRequestWithInstanceAndHostGroups(
+        StackV4Request stackRequest = stackRequestWithInstanceAndHostGroups(
                 Sets.newHashSet("master", "worker", "compute"),
                 Sets.newHashSet("super master", "master", "worker", "compute")
         );
@@ -155,7 +155,7 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWithBothGroupContainsDifferentValues() {
-        StackRequest stackRequest = stackRequestWithInstanceAndHostGroups(
+        StackV4Request stackRequest = stackRequestWithInstanceAndHostGroups(
                 Sets.newHashSet("worker", "compute"),
                 Sets.newHashSet("master", "worker")
         );
@@ -168,10 +168,8 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyHiveRdsWithNameThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_HIVE_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
         ValidationResult validationResult = underTest.validate(request);
@@ -190,10 +188,8 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyRangerRdsWithNameThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
 
         ValidationResult validationResult = underTest.validate(request);
@@ -212,10 +208,8 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameButLdapDoesntThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
@@ -237,57 +231,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(2)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithIdThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigId(1234L);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(2)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithRequestThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setLdapConfig(new LdapV4Request());
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
@@ -306,11 +252,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothIdAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigIds(Set.of(TEST_RANGER_ID, TEST_HIVE_ID));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigNames(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Collections.emptySet());
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.get(TEST_RANGER_ID)).thenReturn(rdsConfig(RANGER));
         when(rdsConfigService.get(TEST_HIVE_ID)).thenReturn(rdsConfig(HIVE));
 
@@ -329,11 +273,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothRequestAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigJsons(Set.of(rdsConfigRequest(HIVE), rdsConfigRequest(RANGER)));
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigNames(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Collections.emptySet());
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -348,11 +290,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndIdAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigIds(Set.of(TEST_RANGER_ID));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_HIVE_NAME));
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
         when(rdsConfigService.get(TEST_RANGER_ID)).thenReturn(rdsConfig(RANGER));
 
@@ -371,11 +311,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithIdAndNameAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME));
-        request.getClusterRequest().setRdsConfigIds(Set.of(TEST_HIVE_ID));
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME));
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
         when(rdsConfigService.get(TEST_HIVE_ID)).thenReturn(rdsConfig(HIVE));
 
@@ -394,11 +332,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndRequestAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_HIVE_NAME));
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigJsons(Set.of(rdsConfigRequest(RANGER)));
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_HIVE_NAME));
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
         ValidationResult validationResult = underTest.validate(request);
@@ -415,11 +351,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithRequestAndNameAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Set.of(TEST_RANGER_NAME));
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigJsons(Set.of(rdsConfigRequest(HIVE)));
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME));
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
 
         ValidationResult validationResult = underTest.validate(request);
@@ -436,11 +370,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithRequestAndIdAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Set.of(TEST_RANGER_ID));
-        request.getClusterRequest().setRdsConfigJsons(Set.of(rdsConfigRequest(HIVE)));
-        request.getClusterRequest().setLdapConfigName(TEST_LDAP_NAME);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Collections.emptySet());
+        request.getCluster().setLdapName(TEST_LDAP_NAME);
         when(rdsConfigService.get(TEST_RANGER_ID)).thenReturn(rdsConfig(RANGER));
 
         ValidationResult validationResult = underTest.validate(request);
@@ -457,13 +389,9 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsNoLdapAndRdsConfigGivenThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackRequest request = stackRequest();
-        request.getClusterRequest().setRdsConfigNames(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigIds(Collections.emptySet());
-        request.getClusterRequest().setRdsConfigJsons(Collections.emptySet());
-        request.getClusterRequest().setLdapConfigName(null);
-        request.getClusterRequest().setLdapConfig(null);
-        request.getClusterRequest().setLdapConfigId(null);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Collections.emptySet());
+        request.getCluster().setLdapName(null);
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -475,65 +403,60 @@ public class StackRequestValidatorTest extends StackRequestValidatorTestBase {
         verify(rdsConfigService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
     }
 
-    private StackRequest stackRequestWithInstanceAndHostGroups(Set<String> instanceGroups, Set<String> hostGroups) {
-        List<InstanceGroupRequest> instanceGroupList = instanceGroups.stream()
-                .map(ig -> getInstanceGroupRequest(new TemplateRequest(), ig))
+    private StackV4Request stackRequestWithInstanceAndHostGroups(Set<String> instanceGroups, Set<String> hostGroups) {
+        List<InstanceGroupV4Request> instanceGroupList = instanceGroups.stream()
+                .map(ig -> getInstanceGroupV4Request(new InstanceTemplateV4Request(), ig))
                 .collect(Collectors.toList());
 
-        Set<HostGroupV4Request> hostGroupSet = hostGroups.stream()
-                .map(hg -> {
-                    HostGroupV4Request hostGroupRequest = new HostGroupV4Request();
-                    hostGroupRequest.setName(hg);
-                    return hostGroupRequest;
-                })
-                .collect(Collectors.toSet());
-
-        ClusterRequest clusterRequest = new ClusterRequest();
-        clusterRequest.setHostGroups(hostGroupSet);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         BlueprintV4Request bpRequest = new BlueprintV4Request();
         bpRequest.setName(TEST_BP_NAME);
-        clusterRequest.setBlueprint(bpRequest);
-        clusterRequest.setBlueprintName(TEST_BP_NAME);
-        return getStackRequest(instanceGroupList, clusterRequest);
+//        AmbariV4Request
+//        clusterRequest.setAmbari(TEST_BP_NAME);
+        return getStackV4Request(instanceGroupList, clusterRequest);
     }
 
-    private StackRequest stackRequest() {
-        TemplateRequest templateRequest = new TemplateRequest();
-        InstanceGroupRequest instanceGroupRequest = getInstanceGroupRequest(templateRequest, "master");
-        ClusterRequest clusterRequest = getClusterRequest();
-        return getStackRequest(Collections.singletonList(instanceGroupRequest), clusterRequest);
+    private StackV4Request stackRequest() {
+        InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
+        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest, "master");
+        ClusterV4Request clusterRequest = getCluster();
+        return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
     }
 
-    private StackRequest stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
-        TemplateRequest templateRequest = new TemplateRequest();
-        templateRequest.setRootVolumeSize(rootVolumeSize);
-        InstanceGroupRequest instanceGroupRequest = getInstanceGroupRequest(templateRequest, "master");
-        ClusterRequest clusterRequest = getClusterRequest();
-        return getStackRequest(Collections.singletonList(instanceGroupRequest), clusterRequest);
+    private StackV4Request stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
+        InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
+        templateRequest.setRootVolume(getRootVolume());
+        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest, "master");
+        ClusterV4Request clusterRequest = getCluster();
+        return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
     }
 
-    private InstanceGroupRequest getInstanceGroupRequest(TemplateRequest templateRequest, String master) {
-        InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
-        instanceGroupRequest.setGroup(master);
+    private VolumeV4Request getRootVolume() {
+        VolumeV4Request root = new VolumeV4Request();
+        root.setSize(100);
+        return root;
+    }
+
+    private InstanceGroupV4Request getInstanceGroupV4Request(InstanceTemplateV4Request templateRequest, String master) {
+        InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
+        instanceGroupRequest.setName(master);
         instanceGroupRequest.setTemplate(templateRequest);
         return instanceGroupRequest;
     }
 
-    private ClusterRequest getClusterRequest() {
+    private ClusterV4Request getCluster() {
         HostGroupV4Request hostGroupRequest = new HostGroupV4Request();
-        ClusterRequest clusterRequest = new ClusterRequest();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         hostGroupRequest.setName("master");
-        clusterRequest.setHostGroups(Sets.newHashSet(hostGroupRequest));
         BlueprintV4Request bpRequest = new BlueprintV4Request();
         bpRequest.setName(TEST_BP_NAME);
-        clusterRequest.setBlueprint(bpRequest);
-        clusterRequest.setBlueprintName(TEST_BP_NAME);
+//        clusterRequest.setBlueprintName(TEST_BP_NAME);
         return clusterRequest;
     }
 
-    private StackRequest getStackRequest(List<InstanceGroupRequest> instanceGroupRequests, ClusterRequest clusterRequest) {
-        StackRequest stackRequest = new StackRequest();
-        stackRequest.setClusterRequest(clusterRequest);
+    private StackV4Request getStackV4Request(List<InstanceGroupV4Request> instanceGroupRequests, ClusterV4Request clusterRequest) {
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setCluster(clusterRequest);
         stackRequest.setInstanceGroups(instanceGroupRequests);
         return stackRequest;
     }

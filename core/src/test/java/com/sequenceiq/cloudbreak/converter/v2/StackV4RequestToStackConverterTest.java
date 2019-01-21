@@ -23,18 +23,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.CustomDomainSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -53,10 +55,10 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StackV2RequestToStackConverterTest {
+public class StackV4RequestToStackConverterTest {
 
     @InjectMocks
-    private StackV2RequestToStackConverter underTest;
+    private StackV4RequestToStackConverter underTest;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -102,49 +104,48 @@ public class StackV2RequestToStackConverterTest {
     public void testConvert() throws IOException {
         Credential credential = mock(Credential.class);
         EnvironmentView environment = mock(EnvironmentView.class);
-        StackAuthenticationRequest stackAuthenticationRequest = mock(StackAuthenticationRequest.class);
+        StackAuthenticationV4Request stackAuthenticationRequest = mock(StackAuthenticationV4Request.class);
         StackAuthentication stackAuthentication = mock(StackAuthentication.class);
         Network network = mock(Network.class);
-        NetworkV2Request networkV2Request = mock(NetworkV2Request.class);
-        ClusterV2Request clusterV2Request = mock(ClusterV2Request.class);
+        NetworkV4Request networkV4Request = mock(NetworkV4Request.class);
+        ClusterV4Request clusterV4Request = mock(ClusterV4Request.class);
         Cluster cluster = mock(Cluster.class);
 
-        StackV2Request source = new StackV2Request();
-        GeneralSettings generalSettings = new GeneralSettings();
-        generalSettings.setEnvironmentName("environmentName");
-        generalSettings.setCredentialName("credentialName");
-        generalSettings.setName("name");
-        source.setGeneral(generalSettings);
-        PlacementSettings placementSettings = new PlacementSettings();
+        StackV4Request source = new StackV4Request();
+        EnvironmentSettingsV4Request environmentSettingsV4Request = new EnvironmentSettingsV4Request();
+        environmentSettingsV4Request.setName("environmentName");
+        environmentSettingsV4Request.setCredentialName("credentialName");
+        environmentSettingsV4Request.setName("name");
+        PlacementSettingsV4Request placementSettings = new PlacementSettingsV4Request();
         placementSettings.setAvailabilityZone("availablityZone");
         placementSettings.setRegion("region");
-        source.setPlacement(placementSettings);
-        source.setPlatformVariant("platformVariant");
-        CustomDomainSettings customDomainSettings = new CustomDomainSettings();
+        environmentSettingsV4Request.setPlacement(placementSettings);
+        source.setEnvironment(environmentSettingsV4Request);
+        CustomDomainSettingsV4Request customDomainSettings = new CustomDomainSettingsV4Request();
         customDomainSettings.setHostgroupNameAsHostname(true);
         customDomainSettings.setClusterNameAsSubdomain(true);
-        customDomainSettings.setCustomHostname("customHostname");
-        customDomainSettings.setCustomDomain("customDomain");
+        customDomainSettings.setHostname("customHostname");
+        customDomainSettings.setName("customDomain");
         source.setCustomDomain(customDomainSettings);
-        source.setStackAuthentication(stackAuthenticationRequest);
-        source.setNetwork(networkV2Request);
-        source.setCluster(clusterV2Request);
-        ImageSettings imageSettings = new ImageSettings();
+        source.setAuthentication(stackAuthenticationRequest);
+        source.setNetwork(networkV4Request);
+        source.setCluster(clusterV4Request);
+        ImageSettingsV4Request imageSettings = new ImageSettingsV4Request();
         imageSettings.setOs("os");
-        imageSettings.setImageId("imageId");
-        imageSettings.setImageCatalog("imageCatalog");
-        source.setImageSettings(imageSettings);
+        imageSettings.setId("imageId");
+        imageSettings.setCatalog("imageCatalog");
+        source.setImage(imageSettings);
 
-        when(credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace)).thenReturn(credential);
-        when(environmentViewService.getByNameForWorkspace(source.getGeneral().getEnvironmentName(), workspace)).thenReturn(environment);
-        when(conversionService.convert(source.getStackAuthentication(), StackAuthentication.class)).thenReturn(stackAuthentication);
+        when(credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace)).thenReturn(credential);
+        when(environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace)).thenReturn(environment);
+        when(conversionService.convert(source.getAuthentication(), StackAuthentication.class)).thenReturn(stackAuthentication);
         when(conversionService.convert(source.getNetwork(), Network.class)).thenReturn(network);
         when(conversionService.convert(source.getCluster(), Cluster.class)).thenReturn(cluster);
 
         Stack actual = underTest.convert(source);
 
-        assertThat(actual.getName(), is(source.getGeneral().getName()));
-        assertThat(actual.getDisplayName(), is(source.getGeneral().getName()));
+        assertThat(actual.getName(), is(source.getName()));
+        assertThat(actual.getDisplayName(), is(source.getName()));
         assertThat(actual.getCredential(), is(credential));
         assertThat(actual.getEnvironment(), is(environment));
         assertThat(actual.getAvailabilityZone(), is(source.getPlacement().getAvailabilityZone()));
@@ -170,7 +171,7 @@ public class StackV2RequestToStackConverterTest {
 
     @Test
     public void testConvertWhenNoGeneralAndPlacementAndNetworkAndCustomDomainAndClusterAndImage() throws IOException {
-        StackV2Request source = new StackV2Request();
+        StackV4Request source = new StackV4Request();
 
         Stack actual = underTest.convert(source);
 
@@ -196,19 +197,19 @@ public class StackV2RequestToStackConverterTest {
 
     @Test
     public void testConvertWhenHasClusterAndInstanceGroup() {
-        ClusterV2Request clusterV2Request = mock(ClusterV2Request.class);
+        ClusterV4Request clusterV4Request = mock(ClusterV4Request.class);
         Cluster cluster = new Cluster();
-        InstanceGroupV2Request instanceGroupV2Request = mock(InstanceGroupV2Request.class);
+        InstanceGroupV4Request instanceGroupV4Request = mock(InstanceGroupV4Request.class);
         InstanceGroup instanceGroup = new InstanceGroup();
         HostGroup hostGroup = new HostGroup();
 
-        StackV2Request source = new StackV2Request();
-        source.setCluster(clusterV2Request);
-        source.setInstanceGroups(Collections.singletonList(instanceGroupV2Request));
+        StackV4Request source = new StackV4Request();
+        source.setCluster(clusterV4Request);
+        source.setInstanceGroups(Collections.singletonList(instanceGroupV4Request));
 
         when(conversionService.convert(source.getCluster(), Cluster.class)).thenReturn(cluster);
-        when(conversionService.convert(instanceGroupV2Request, HostGroup.class)).thenReturn(hostGroup);
-        when(conversionService.convert(instanceGroupV2Request, InstanceGroup.class)).thenReturn(instanceGroup);
+        when(conversionService.convert(instanceGroupV4Request, HostGroup.class)).thenReturn(hostGroup);
+        when(conversionService.convert(instanceGroupV4Request, InstanceGroup.class)).thenReturn(instanceGroup);
 
         Stack actual = underTest.convert(source);
 
@@ -230,7 +231,7 @@ public class StackV2RequestToStackConverterTest {
         EnvironmentView environment = new EnvironmentView();
         environment.setCloudPlatform("cloudPlatform");
 
-        StackV2Request source = new StackV2Request();
+        StackV4Request source = new StackV4Request();
         GeneralSettings generalSettings = new GeneralSettings();
         generalSettings.setEnvironmentName("environmentName");
         source.setGeneral(generalSettings);
@@ -250,7 +251,7 @@ public class StackV2RequestToStackConverterTest {
         Credential credential = new Credential();
         credential.setCloudPlatform("cloudPlatform");
 
-        StackV2Request source = new StackV2Request();
+        StackV4Request source = new StackV4Request();
         GeneralSettings generalSettings = new GeneralSettings();
         generalSettings.setCredentialName("credentialName");
         source.setGeneral(generalSettings);
@@ -269,7 +270,7 @@ public class StackV2RequestToStackConverterTest {
     public void testConvertWhenCloudPlatfromComesFromPlatfomVariant() {
         String cloudPlatform = "cloudPlatform";
 
-        StackV2Request source = new StackV2Request();
+        StackV4Request source = new StackV4Request();
         source.setPlatformVariant("platformVariant");
 
         when(cloudParameterService.getPlatformByVariant(source.getPlatformVariant())).thenReturn("cloudPlatform");

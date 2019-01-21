@@ -35,17 +35,17 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
-import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopologyJsonToExposedServicesConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -88,7 +88,7 @@ public class ServiceEndpointCollectorTest {
     private ExposedServiceListValidator exposedServiceListValidator;
 
     @InjectMocks
-    private final GatewayTopologyJsonToExposedServicesConverter exposedServicesConverter = new GatewayTopologyJsonToExposedServicesConverter();
+    private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter = new GatewayTopologyV4RequestToExposedServicesConverter();
 
     @Mock
     private Workspace workspace;
@@ -162,13 +162,13 @@ public class ServiceEndpointCollectorTest {
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
         cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
 
-        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesMap =
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
 
         assertEquals(2L, clusterExposedServicesMap.keySet().size());
-        Collection<ClusterExposedServiceResponse> topology2ClusterExposedServiceResponses = clusterExposedServicesMap.get(topology2.getTopologyName());
-        Optional<ClusterExposedServiceResponse> webHDFS =
-                topology2ClusterExposedServiceResponses.stream().filter(service -> "WEBHDFS".equals(service.getKnoxService())).findFirst();
+        Collection<ClusterExposedServiceV4Response> topology2ClusterExposedServiceV4Responses = clusterExposedServicesMap.get(topology2.getTopologyName());
+        Optional<ClusterExposedServiceV4Response> webHDFS =
+                topology2ClusterExposedServiceV4Responses.stream().filter(service -> "WEBHDFS".equals(service.getKnoxService())).findFirst();
         if (webHDFS.isPresent()) {
             assertEquals("https://10.0.0.1:8443/gateway-path/topology2/webhdfs/v1", webHDFS.get().getServiceUrl());
             assertEquals("WEBHDFS", webHDFS.get().getKnoxService());
@@ -179,8 +179,8 @@ public class ServiceEndpointCollectorTest {
             Assert.fail("no WEBHDFS in returned exposed services for topology2");
         }
 
-        Optional<ClusterExposedServiceResponse> sparkHistoryUI =
-                topology2ClusterExposedServiceResponses.stream().filter(service -> "SPARKHISTORYUI".equals(service.getKnoxService())).findFirst();
+        Optional<ClusterExposedServiceV4Response> sparkHistoryUI =
+                topology2ClusterExposedServiceV4Responses.stream().filter(service -> "SPARKHISTORYUI".equals(service.getKnoxService())).findFirst();
         if (sparkHistoryUI.isPresent()) {
             assertEquals("https://10.0.0.1:8443/gateway-path/topology2/sparkhistory/", sparkHistoryUI.get().getServiceUrl());
             assertEquals("SPARKHISTORYUI", sparkHistoryUI.get().getKnoxService());
@@ -191,8 +191,8 @@ public class ServiceEndpointCollectorTest {
             Assert.fail("no SPARKHISTORYUI in returned exposed services for topology2");
         }
 
-        Optional<ClusterExposedServiceResponse> hiveServer =
-                topology2ClusterExposedServiceResponses.stream().filter(service -> "HIVE".equals(service.getKnoxService())).findFirst();
+        Optional<ClusterExposedServiceV4Response> hiveServer =
+                topology2ClusterExposedServiceV4Responses.stream().filter(service -> "HIVE".equals(service.getKnoxService())).findFirst();
         if (hiveServer.isPresent()) {
             assertEquals("jdbc:hive2://10.0.0.1:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
                     + "transportMode=http;httpPath=gateway-path/topology2/hive", hiveServer.get().getServiceUrl());
@@ -263,7 +263,7 @@ public class ServiceEndpointCollectorTest {
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
         try {
-            GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+            GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
             gatewayTopologyJson.setTopologyName(name);
             gatewayTopologyJson.setExposedServices(Arrays.stream(services).map(ExposedService::getKnoxService).collect(Collectors.toList()));
             ExposedServices exposedServices = exposedServicesConverter.convert(gatewayTopologyJson);

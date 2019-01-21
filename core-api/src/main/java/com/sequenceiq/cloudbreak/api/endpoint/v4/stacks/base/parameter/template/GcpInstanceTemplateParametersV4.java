@@ -54,8 +54,7 @@ public class GcpInstanceTemplateParametersV4 extends InstanceTemplateParameterV4
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        GcpInstanceTemplateParametersV4 ret = new GcpInstanceTemplateParametersV4();
-        ret.setPlatformType(getPlatformType(parameters));
+        setPlatformType(getPlatformType(parameters));
         GcpEncryptionParametersV4 encryption = new GcpEncryptionParametersV4();
         encryption.setKey(getParameterOrNull(parameters, "key"));
         String keyEncryptionMethod = getParameterOrNull(parameters, "keyEncryptionMethod");
@@ -65,12 +64,12 @@ public class GcpInstanceTemplateParametersV4 extends InstanceTemplateParameterV4
         String type = getParameterOrNull(parameters, "type");
         if (type != null) {
             encryption.setType(EncryptionType.valueOf(type));
-            ret.encryption = encryption;
+            this.encryption = encryption;
         }
         String preemptible = getParameterOrNull(parameters, "preemptible");
         if (preemptible != null) {
-            ret.preemptible = Boolean.valueOf(preemptible);
+            this.preemptible = Boolean.valueOf(preemptible);
         }
-        return (T) ret;
+        return (T) this;
     }
 }

@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.Validati
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 
 @Component
-public class TemplateRequestValidator implements Validator<InstanceTemplateV4Request> {
+public class InstanceTemplateV4RequestValidator implements Validator<InstanceTemplateV4Request> {
 
     @Override
     public ValidationResult validate(InstanceTemplateV4Request subject) {

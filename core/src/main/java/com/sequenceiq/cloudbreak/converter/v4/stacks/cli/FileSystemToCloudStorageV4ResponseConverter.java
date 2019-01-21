@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
 @Component
-public class FileSystemToFileSystemResponseConverter extends AbstractConversionServiceAwareConverter<FileSystem, CloudStorageV4Response> {
+public class FileSystemToCloudStorageV4ResponseConverter extends AbstractConversionServiceAwareConverter<FileSystem, CloudStorageV4Response> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemToFileSystemResponseConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemToCloudStorageV4ResponseConverter.class);
 
     @Override
     public CloudStorageV4Response convert(FileSystem source) {

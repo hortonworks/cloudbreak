@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Reque
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -53,7 +53,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private CredentialService credentialService;
 
     @Mock
-    private TemplateRequestValidator templateRequestValidator;
+    private InstanceTemplateV4RequestValidator templateRequestValidator;
 
     @Mock
     private StackRequest subject;
