@@ -2,17 +2,12 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-
-public class AzureStackParametersV4 implements JsonEntity, Mappable {
-    @Override
-    public Map<String, Object> asMap() {
-        return null;
-    }
+public class AzureStackParametersV4 extends StackParameterV4Base {
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        return null;
+        AzureStackParametersV4 ret = new AzureStackParametersV4();
+        ret.setTimeToLive(getTimeToLive(parameters));
+        return (T) ret;
     }
 }

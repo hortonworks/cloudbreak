@@ -1,12 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-
-public class AwsStackParametersV4 implements JsonEntity, Mappable {
+public class AwsStackParametersV4 extends StackParameterV4Base {
 
     private String awsS3Role;
 
@@ -20,11 +16,16 @@ public class AwsStackParametersV4 implements JsonEntity, Mappable {
 
     @Override
     public Map<String, Object> asMap() {
-        return new HashMap<>();
+        Map<String, Object> map = super.asMap();
+        map.put("awsS3Role", awsS3Role);
+        return map;
     }
 
     @Override
     public <T> T toClass(Map<String, Object> parameters) {
-        return null;
+        AwsStackParametersV4 ret = new AwsStackParametersV4();
+        ret.awsS3Role = getParameterOrNull(parameters, "awsS3Role");
+        ret.setTimeToLive(getTimeToLive(parameters));
+        return (T) ret;
     }
 }
