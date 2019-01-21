@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -849,6 +851,10 @@ public class TestUtil {
         }
 
         return testData;
+    }
+
+    public static <K, V> Map<K, V> combineMaps(Map<K, V> map1, Map<K, V> map2) {
+        return Stream.of(map1, map2).flatMap(m -> m.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static LdapNotificationDetails ldapNotificationDetails(String message, String type) {
