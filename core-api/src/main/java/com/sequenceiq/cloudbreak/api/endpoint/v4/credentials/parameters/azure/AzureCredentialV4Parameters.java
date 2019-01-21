@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,35 +20,35 @@ import io.swagger.annotations.ApiModelProperty;
 public class AzureCredentialV4Parameters implements CredentialV4Parameters {
 
     @NotNull
-    @ApiModelProperty(required = true)
-    private String accessKey;
-
-    @NotNull
-    @ApiModelProperty(required = true)
-    private String secretKey;
-
-    @NotNull
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(required = true, example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
     private String subscriptionId;
 
     @NotNull
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(required = true, example = "b10u3481-2451-10ba-7sfd-9o2d1v60185d")
     private String tenantId;
 
-    public String getAccessKey() {
-        return accessKey;
+    @Valid
+    @ApiModelProperty
+    private AppBased appBased;
+
+    @Valid
+    @ApiModelProperty
+    private RoleBased roleBased;
+
+    public RoleBased getRoleBased() {
+        return roleBased;
     }
 
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
+    public void setRoleBased(RoleBased roleBased) {
+        this.roleBased = roleBased;
     }
 
-    public String getSecretKey() {
-        return secretKey;
+    public AppBased getAppBased() {
+        return appBased;
     }
 
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
+    public void setAppBased(AppBased appBased) {
+        this.appBased = appBased;
     }
 
     public String getSubscriptionId() {
@@ -74,10 +75,14 @@ public class AzureCredentialV4Parameters implements CredentialV4Parameters {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("accessKey", accessKey);
-        map.put("secretKey", secretKey);
         map.put("subscriptionId", subscriptionId);
         map.put("tenantId", tenantId);
+        if (appBased != null) {
+            map.putAll(appBased.asMap());
+        }
+        if (roleBased != null) {
+            map.putAll(roleBased.asMap());
+        }
         return map;
     }
 

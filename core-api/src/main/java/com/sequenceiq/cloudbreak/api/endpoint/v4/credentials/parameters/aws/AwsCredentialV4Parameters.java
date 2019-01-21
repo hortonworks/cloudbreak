@@ -32,12 +32,12 @@ public class AwsCredentialV4Parameters implements CredentialV4Parameters {
         return keyBasedCredentialParameters;
     }
 
-    public void setKeyBasedCredentialParameters(KeyBasedCredentialParameters keyBasedCredentialParameters) {
-        this.keyBasedCredentialParameters = keyBasedCredentialParameters;
-    }
-
     public RoleBasedCredentialParameters getRoleBasedCredentialParameters() {
         return roleBasedCredentialParameters;
+    }
+
+    public void setKeyBasedCredentialParameters(KeyBasedCredentialParameters keyBasedCredentialParameters) {
+        this.keyBasedCredentialParameters = keyBasedCredentialParameters;
     }
 
     public void setRoleBasedCredentialParameters(RoleBasedCredentialParameters roleBasedCredentialParameters) {

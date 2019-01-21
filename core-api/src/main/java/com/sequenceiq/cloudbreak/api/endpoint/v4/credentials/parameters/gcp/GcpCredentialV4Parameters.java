@@ -26,12 +26,12 @@ public class GcpCredentialV4Parameters implements CredentialV4Parameters {
         return p12;
     }
 
-    public void setP12(P12Parameters p12) {
-        this.p12 = p12;
-    }
-
     public JsonParameters getJson() {
         return json;
+    }
+
+    public void setP12(P12Parameters p12) {
+        this.p12 = p12;
     }
 
     public void setJson(JsonParameters json) {

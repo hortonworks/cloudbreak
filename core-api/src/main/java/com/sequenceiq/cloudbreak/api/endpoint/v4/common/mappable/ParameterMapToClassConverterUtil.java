@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
-
 @Component
 public class ParameterMapToClassConverterUtil {
 

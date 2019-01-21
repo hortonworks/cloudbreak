@@ -21,7 +21,8 @@ public enum CloudPlatform {
                 return base.getYarn().toClass(parameters);
             case MOCK:
                 return base.getMock().toClass(parameters);
+            default:
+                return null;
         }
-        return null;
     }
 }

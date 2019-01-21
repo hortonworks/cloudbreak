@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
+import static java.util.Objects.isNull;
+
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -8,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class ProviderParameterCalculator {
 
     public Mappable get(ProviderParametersBase source) {
-        if (source.getCloudPlatform() == null) {
+        if (isNull(source)) {
             return Mappable.EMPTY;
         }
         switch (source.getCloudPlatform()) {
@@ -26,8 +28,9 @@ public class ProviderParameterCalculator {
                 return source.getOpenstack();
             case CUMULUS_YARN:
                 return source.getYarn();
+            default:
+                return Mappable.EMPTY;
         }
-        return Mappable.EMPTY;
     }
 
     public void to(Map<String, Object> parameters, ProviderParametersBase base) {
