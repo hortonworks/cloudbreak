@@ -29,10 +29,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
-import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -148,13 +147,12 @@ public class StackV4RequestToStackConverterTest {
         assertThat(actual.getDisplayName(), is(source.getName()));
         assertThat(actual.getCredential(), is(credential));
         assertThat(actual.getEnvironment(), is(environment));
-        assertThat(actual.getAvailabilityZone(), is(source.getPlacement().getAvailabilityZone()));
-        assertThat(actual.getRegion(), is(source.getPlacement().getRegion()));
+        assertThat(actual.getAvailabilityZone(), is(source.getEnvironment().getPlacement().getAvailabilityZone()));
+        assertThat(actual.getRegion(), is(source.getEnvironment().getPlacement().getRegion()));
         assertThat(actual.getStackAuthentication(), is(stackAuthentication));
-        assertThat(actual.getPlatformVariant(), is(source.getPlatformVariant()));
         assertThat(actual.getNetwork(), is(network));
-        assertThat(actual.getCustomDomain(), is(source.getCustomDomain().getCustomDomain()));
-        assertThat(actual.getCustomHostname(), is(source.getCustomDomain().getCustomHostname()));
+        assertThat(actual.getCustomDomain(), is(source.getCustomDomain().getName()));
+        assertThat(actual.getCustomHostname(), is(source.getCustomDomain().getHostname()));
         assertThat(actual.isClusterNameAsSubdomain(), is(source.getCustomDomain().isClusterNameAsSubdomain()));
         assertThat(actual.isHostgroupNameAsHostname(), is(source.getCustomDomain().isHostgroupNameAsHostname()));
         assertThat(actual.getCluster(), is(cluster));
@@ -164,9 +162,9 @@ public class StackV4RequestToStackConverterTest {
 
         Image image = actual.getComponents().iterator().next().getAttributes().get(Image.class);
 
-        assertThat(image.getImageCatalogName(), is(source.getImageSettings().getImageCatalog()));
-        assertThat(image.getImageId(), is(source.getImageSettings().getImageId()));
-        assertThat(image.getOs(), is(source.getImageSettings().getOs()));
+        assertThat(image.getImageCatalogName(), is(source.getImage().getCatalog()));
+        assertThat(image.getImageId(), is(source.getImage().getId()));
+        assertThat(image.getOs(), is(source.getImage().getOs()));
     }
 
     @Test
@@ -232,17 +230,17 @@ public class StackV4RequestToStackConverterTest {
         environment.setCloudPlatform("cloudPlatform");
 
         StackV4Request source = new StackV4Request();
-        GeneralSettings generalSettings = new GeneralSettings();
-        generalSettings.setEnvironmentName("environmentName");
-        source.setGeneral(generalSettings);
+        EnvironmentSettingsV4Request generalSettings = new EnvironmentSettingsV4Request();
+        generalSettings.setName("environmentName");
+        source.setEnvironment(generalSettings);
 
-        when(environmentViewService.getByNameForWorkspace(source.getGeneral().getEnvironmentName(), workspace)).thenReturn(environment);
+        when(environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace)).thenReturn(environment);
 
         Stack actual = underTest.convert(source);
 
         assertThat(actual.cloudPlatform(), is(environment.getCloudPlatform()));
 
-        Mockito.verify(environmentViewService, times(1)).getByNameForWorkspace(generalSettings.getEnvironmentName(), workspace);
+        Mockito.verify(environmentViewService, times(1)).getByNameForWorkspace(generalSettings.getName(), workspace);
         Mockito.verify(credentialService, times(0)).getByNameForWorkspace(any(), eq(workspace));
     }
 
@@ -252,34 +250,17 @@ public class StackV4RequestToStackConverterTest {
         credential.setCloudPlatform("cloudPlatform");
 
         StackV4Request source = new StackV4Request();
-        GeneralSettings generalSettings = new GeneralSettings();
+        EnvironmentSettingsV4Request generalSettings = new EnvironmentSettingsV4Request();
         generalSettings.setCredentialName("credentialName");
-        source.setGeneral(generalSettings);
+        source.setEnvironment(generalSettings);
 
-        when(credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace)).thenReturn(credential);
+        when(credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace)).thenReturn(credential);
 
         Stack actual = underTest.convert(source);
 
         assertThat(actual.cloudPlatform(), is(credential.cloudPlatform()));
 
         Mockito.verify(credentialService, times(1)).getByNameForWorkspace(generalSettings.getCredentialName(), workspace);
-        Mockito.verify(environmentViewService, times(0)).getByNameForWorkspace(any(), eq(workspace));
-    }
-
-    @Test
-    public void testConvertWhenCloudPlatfromComesFromPlatfomVariant() {
-        String cloudPlatform = "cloudPlatform";
-
-        StackV4Request source = new StackV4Request();
-        source.setPlatformVariant("platformVariant");
-
-        when(cloudParameterService.getPlatformByVariant(source.getPlatformVariant())).thenReturn("cloudPlatform");
-
-        Stack actual = underTest.convert(source);
-
-        assertThat(actual.cloudPlatform(), is(cloudPlatform));
-
-        Mockito.verify(credentialService, times(0)).getByNameForWorkspace(any(), eq(workspace));
         Mockito.verify(environmentViewService, times(0)).getByNameForWorkspace(any(), eq(workspace));
     }
 }

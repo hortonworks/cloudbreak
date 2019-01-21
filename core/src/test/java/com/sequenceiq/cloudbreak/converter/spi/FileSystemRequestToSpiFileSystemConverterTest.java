@@ -1,26 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
-import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -31,6 +10,28 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+
 public class FileSystemRequestToSpiFileSystemConverterTest {
 
     private static final String TEST_NAME = "testname";
@@ -39,13 +40,13 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
     public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
-    private FileSystemRequestToSpiFileSystemConverter underTest;
+    private CloudStorageV4RequestToSpiFileSystemConverter underTest;
 
     @Mock
     private ConversionService conversionService;
 
     @Mock
-    private FileSystemRequest request;
+    private CloudStorageV4Request request;
 
     @Before
     public void setUp() {
@@ -55,7 +56,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenAdlsNotNullThenCloudAdlsShouldBeInReturningObject() {
-        AdlsCloudStorageParameters adls = mock(AdlsCloudStorageParameters.class);
+        AdlsCloudStorageParametersV4 adls = mock(AdlsCloudStorageParametersV4.class);
         CloudAdlsView expected = mock(CloudAdlsView.class);
         when(request.getAdls()).thenReturn(adls);
         when(request.getType()).thenReturn(FileSystemType.ADLS.name());
@@ -74,7 +75,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenGcsNotNullThenCloudGcsShouldBeInReturningObject() {
-        GcsCloudStorageParameters gcs = mock(GcsCloudStorageParameters.class);
+        GcsCloudStorageParametersV4 gcs = mock(GcsCloudStorageParametersV4.class);
         CloudGcsView expected = mock(CloudGcsView.class);
         when(request.getGcs()).thenReturn(gcs);
         when(request.getType()).thenReturn(FileSystemType.GCS.name());
@@ -93,7 +94,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenS3NotNullThenCloudS3ShouldBeInReturningObject() {
-        S3CloudStorageParameters s3 = mock(S3CloudStorageParameters.class);
+        S3CloudStorageParametersV4 s3 = mock(S3CloudStorageParametersV4.class);
         CloudS3View expected = mock(CloudS3View.class);
         when(request.getS3()).thenReturn(s3);
         when(request.getType()).thenReturn(FileSystemType.S3.name());
@@ -112,7 +113,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenWasbNotNullThenCloudWasbShouldBeInReturningObject() {
-        WasbCloudStorageParameters wasb = mock(WasbCloudStorageParameters.class);
+        WasbCloudStorageParametersV4 wasb = mock(WasbCloudStorageParametersV4.class);
         CloudWasbView expected = mock(CloudWasbView.class);
         when(request.getWasb()).thenReturn(wasb);
         when(request.getType()).thenReturn(WASB.name());

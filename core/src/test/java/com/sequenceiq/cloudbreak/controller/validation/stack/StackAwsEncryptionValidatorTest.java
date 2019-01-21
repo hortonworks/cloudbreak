@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,12 +23,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -56,13 +54,13 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private InstanceTemplateV4RequestValidator templateRequestValidator;
 
     @Mock
-    private StackRequest subject;
+    private StackV4Request subject;
 
     @Mock
-    private TemplateRequest templateRequest;
+    private InstanceTemplateV4Request templateRequest;
 
     @Mock
-    private InstanceGroupRequest instanceGroupRequest;
+    private InstanceGroupV4Request instanceGroupRequest;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -71,7 +69,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
-    private ClusterRequest clusterRequest;
+    private ClusterV4Request clusterRequest;
 
     @Mock
     private BlueprintService blueprintService;
@@ -94,13 +92,9 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     @Before
     public void setup() {
         parameters = new LinkedHashMap<>();
-        when(subject.getClusterToAttach()).thenReturn(null);
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
-        when(subject.getClusterRequest()).thenReturn(clusterRequest);
-        when(clusterRequest.getBlueprintName()).thenReturn("dummy");
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
-        when(clusterRequest.getHostGroups()).thenReturn(Set.of(new HostGroupV4Request()));
     }
 
     @Test
@@ -202,15 +196,14 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
     }
 
-    private InstanceGroupRequest createRequestWithParameters(Map<String, Object> parameters) {
-        InstanceGroupRequest request = new InstanceGroupRequest();
-        TemplateRequest template = new TemplateRequest();
-        template.setParameters(parameters);
+    private InstanceGroupV4Request createRequestWithParameters(Map<String, Object> parameters) {
+        InstanceGroupV4Request request = new InstanceGroupV4Request();
+        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
         request.setTemplate(template);
         return request;
     }
 
-    private List<InstanceGroupRequest> getInstanceGroupWithRequest(InstanceGroupRequest... requests) {
+    private List<InstanceGroupV4Request> getInstanceGroupWithRequest(InstanceGroupV4Request... requests) {
         return Arrays.asList(requests);
     }
 

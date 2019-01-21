@@ -10,18 +10,18 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GatewayTopologyJsonValidatorTest {
+public class GatewayTopologyV4RequestValidatorTest {
 
     private final GatewayTopologyV4RequestValidator underTest = new GatewayTopologyV4RequestValidator(new ExposedServiceListValidator());
 
     @Test
     public void testWithNoTopologyName() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
@@ -31,7 +31,7 @@ public class GatewayTopologyJsonValidatorTest {
 
     @Test
     public void testWithTopologyNameButNoServices() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
@@ -41,7 +41,7 @@ public class GatewayTopologyJsonValidatorTest {
 
     @Test
     public void testWithKnoxServiceButNoTopologyName() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
@@ -52,7 +52,7 @@ public class GatewayTopologyJsonValidatorTest {
 
     @Test
     public void testWithKnoxServiceAndTopologyName() {
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
         gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
 
@@ -64,7 +64,7 @@ public class GatewayTopologyJsonValidatorTest {
     @Test
     public void testWithInvalidKnoxService() {
         String invalidService = "INVALID_SERVICE";
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
         gatewayTopologyJson.setExposedServices(Collections.singletonList(invalidService));
 
@@ -78,7 +78,7 @@ public class GatewayTopologyJsonValidatorTest {
     @Test
     public void testWithInvalidKnoxServiceAndNoTopologyName() {
         String invalidService = "INVALID_SERVICE";
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setExposedServices(Collections.singletonList(invalidService));
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);

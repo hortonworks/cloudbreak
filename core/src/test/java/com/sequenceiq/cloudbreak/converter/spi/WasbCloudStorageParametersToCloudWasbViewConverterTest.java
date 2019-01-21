@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 
 public class WasbCloudStorageParametersToCloudWasbViewConverterTest {
 
@@ -33,8 +34,8 @@ public class WasbCloudStorageParametersToCloudWasbViewConverterTest {
         assertEquals(expected, result);
     }
 
-    private WasbCloudStorageParameters createSource() {
-        WasbCloudStorageParameters parameters = new WasbCloudStorageParameters();
+    private WasbCloudStorageParametersV4 createSource() {
+        WasbCloudStorageParametersV4 parameters = new WasbCloudStorageParametersV4();
         parameters.setSecure(true);
         parameters.setAccountKey(ACCOUNT_KEY);
         parameters.setAccountName(ACCOUNT_NAME);
