@@ -166,6 +166,14 @@ func AddReadWriteUser(c *cli.Context) {
 	addUser(c, []string{"ALL:READ", "ALL:WRITE"})
 }
 
+func AddManageUser(c *cli.Context) {
+	addUser(c, []string{"WORKSPACE:MANAGE"})
+}
+
+func AddReadWriteManageUser(c *cli.Context) {
+	addUser(c, []string{"ALL:READ", "ALL:WRITE", "WORKSPACE:MANAGE"})
+}
+
 func addUser(c *cli.Context, permissions []string) {
 	defer utils.TimeTrack(time.Now(), "add user to workspace")
 	log.Infof("[AddUser] add user to workspace")

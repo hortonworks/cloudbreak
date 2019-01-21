@@ -17,6 +17,18 @@ func init() {
 				Usage: "add user to the workspace",
 				Subcommands: []cli.Command{
 					{
+						Name:   "manage",
+						Usage:  "add user to the workspace with workspace manage permission",
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: workspace.AddManageUser,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
 						Name:   "read",
 						Usage:  "add user to the workspace with read permission",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
@@ -34,6 +46,18 @@ func init() {
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: workspace.AddReadWriteUser,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "read-write-manage",
+						Usage:  "add user to the workspace with read, write and manage workspace permission",
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: workspace.AddReadWriteManageUser,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlUserID).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
