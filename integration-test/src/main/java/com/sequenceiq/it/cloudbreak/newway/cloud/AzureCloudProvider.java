@@ -1,5 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -14,12 +20,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class AzureCloudProvider extends CloudProviderHelper {
 
@@ -262,14 +262,12 @@ public class AzureCloudProvider extends CloudProviderHelper {
                 .withLdapConfigName(resourceHelper.getLdapConfigName());
     }
 
-    public Cluster aValidClusterWithFs(String versionDefinitionFile) {
+    public Cluster aValidClusterWithFs() {
         AmbariV2Request ambariV2Request = ambariRequestWithBlueprintName(getDatalakeBlueprintName());
         AmbariStackDetailsJson ambariStackDetails = ambariV2Request.getAmbariStackDetails();
-        ambariStackDetails.setVersionDefinitionFileUrl(versionDefinitionFile);
         ambariStackDetails.setVersion("3.0");
         ambariStackDetails.setOs("centos7");
         ambariStackDetails.setStack("HDP");
-        ambariStackDetails.setRepositoryVersion("3.0.2.0-1");
         ambariStackDetails.setEnableGplRepo(false);
         ambariStackDetails.setVerify(false);
 
