@@ -18,12 +18,12 @@ public class AzureAdlsGen2ClusterTest extends CloudbreakTest {
     private String defaultPrivateKeyFile;
 
     @Test(priority = 10)
-    @Parameters({"clusterName", "versionDefinitionFile"})
-    public void testCreateClusterWithAdlsGen2(String clusterName, String versionDefinitionFile) throws Exception {
+    @Parameters({"clusterName"})
+    public void testCreateClusterWithAdlsGen2(String clusterName) throws Exception {
         AzureCloudProvider azureCloudProvider = new AzureCloudProvider(getTestParameter());
         given(CloudbreakClient.created());
         given(azureCloudProvider.aValidCredential());
-        given(azureCloudProvider.aValidClusterWithFs(versionDefinitionFile));
+        given(azureCloudProvider.aValidClusterWithFs());
         given(azureCloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
 
