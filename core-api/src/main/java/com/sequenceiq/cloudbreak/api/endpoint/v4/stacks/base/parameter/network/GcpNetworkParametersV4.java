@@ -19,6 +19,12 @@ public class GcpNetworkParametersV4 implements JsonEntity, Mappable {
     @ApiModelProperty
     private String sharedProjectId;
 
+    @ApiModelProperty
+    private Boolean noPublicIp;
+
+    @ApiModelProperty
+    private Boolean noFirewallRules;
+
     public String getNetworkId() {
         return networkId;
     }
@@ -43,12 +49,30 @@ public class GcpNetworkParametersV4 implements JsonEntity, Mappable {
         this.sharedProjectId = sharedProjectId;
     }
 
+    public Boolean getNoPublicIp() {
+        return noPublicIp;
+    }
+
+    public void setNoPublicIp(Boolean noPublicIp) {
+        this.noPublicIp = noPublicIp;
+    }
+
+    public Boolean getNoFirewallRules() {
+        return noFirewallRules;
+    }
+
+    public void setNoFirewallRules(Boolean noFirewallRules) {
+        this.noFirewallRules = noFirewallRules;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("networkId", networkId);
         map.put("subnetId", subnetId);
         map.put("sharedProjectId", sharedProjectId);
+        map.put("noFirewallRules", noFirewallRules);
+        map.put("noPublicIp", noPublicIp);
         return map;
     }
 
@@ -57,5 +81,7 @@ public class GcpNetworkParametersV4 implements JsonEntity, Mappable {
         networkId = getParameterOrNull(parameters,"networkId");
         subnetId = getParameterOrNull(parameters,"subnetId");
         sharedProjectId = getParameterOrNull(parameters,"sharedProjectId");
+        noFirewallRules = getBoolean(parameters,"noFirewallRules");
+        noPublicIp = getBoolean(parameters,"noPublicIp");
     }
 }

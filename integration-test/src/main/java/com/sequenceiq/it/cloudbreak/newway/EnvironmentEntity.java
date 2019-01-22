@@ -23,9 +23,11 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
-    private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
+    public static final String EUROPE = "Europe";
 
-    private static final String VALID_LOCATION = "London";
+    public static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList(EUROPE));
+
+    public static final String LONDON = "London";
 
     private Set<SimpleEnvironmentV4Response> response;
 
@@ -53,7 +55,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
         return withName(getNameCreator().getRandomNameForMock())
                 .withDescription("Description for environment")
                 .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
+                .withLocation(LONDON)
                 .withCredentialName(getTestContext().get(CredentialEntity.class).getName());
     }
 
