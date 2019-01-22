@@ -50,19 +50,19 @@ public class CertificateTrustManager {
         return new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
-                LOGGER.info("accept all issuer");
+                LOGGER.debug("accept all issuer");
                 return null;
             }
 
             @Override
             public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
-                LOGGER.info("checkClientTrusted");
+                LOGGER.debug("checkClientTrusted");
                 // Trust everything
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
-                LOGGER.info("checkServerTrusted");
+                LOGGER.debug("checkServerTrusted");
                 // Trust everything
             }
         };
