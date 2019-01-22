@@ -5,24 +5,29 @@ import java.util.Map;
 public enum CloudPlatform {
     AWS, GCP, AZURE, OPENSTACK, CUMULUS_YARN, YARN, MOCK;
 
-    public <T> T to(Map<String, Object> parameters, ProviderParametersBase base) {
+    public void parse(Map<String, Object> parameters, ProviderParametersBase base) {
         switch (this) {
             case AWS:
-                return base.getAws().toClass(parameters);
+                base.getAws().parse(parameters);
+                break;
             case GCP:
-                return base.getGcp().toClass(parameters);
+                base.getGcp().parse(parameters);
+                break;
             case CUMULUS_YARN:
-                return base.getYarn().toClass(parameters);
+                base.getYarn().parse(parameters);
+                break;
             case OPENSTACK:
-                return base.getGcp().toClass(parameters);
+                base.getGcp().parse(parameters);
+                break;
             case AZURE:
-                return base.getAzure().toClass(parameters);
+                base.getAzure().parse(parameters);
+                break;
             case YARN:
-                return base.getYarn().toClass(parameters);
+                base.getYarn().parse(parameters);
+                break;
             case MOCK:
-                return base.getMock().toClass(parameters);
-            default:
-                return null;
+                base.getMock().parse(parameters);
+                break;
         }
     }
 }

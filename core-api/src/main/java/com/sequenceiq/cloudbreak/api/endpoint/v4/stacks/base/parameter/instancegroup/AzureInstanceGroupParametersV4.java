@@ -29,7 +29,8 @@ public class AzureInstanceGroupParametersV4 extends InstanceGroupParametersV4Bas
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
+        super.parse(parameters);
         setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
         setInstanceName(getParameterOrNull(parameters, "instanceName"));
         AzureAvailabiltySetV4 availabiltySet = new AzureAvailabiltySetV4();
@@ -37,6 +38,5 @@ public class AzureInstanceGroupParametersV4 extends InstanceGroupParametersV4Bas
         availabiltySet.setName(getParameterOrNull(parameters, "name"));
         availabiltySet.setUpdateDomainCount(getParameterOrNull(parameters, "updateDomainCount"));
         availabilitySet = availabiltySet;
-        return (T) this;
     }
 }

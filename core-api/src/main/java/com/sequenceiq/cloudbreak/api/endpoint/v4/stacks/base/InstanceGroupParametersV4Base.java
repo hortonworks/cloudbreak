@@ -33,6 +33,12 @@ public abstract class InstanceGroupParametersV4Base implements JsonEntity, Mappa
     }
 
     @Override
+    public void parse(Map<String, Object> parameters) {
+        discoveryName = getParameterOrNull(parameters, "discoveryName");
+        instanceName = getParameterOrNull(parameters, "instanceName");
+    }
+
+    @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("discoveryName", discoveryName);

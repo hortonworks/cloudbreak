@@ -46,10 +46,9 @@ public class YarnInstanceTemplateParametersV4 extends InstanceTemplateParameterV
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
         setPlatformType(getPlatformType(parameters));
         cpus = getInt(parameters, "cpus");
         memory = getInt(parameters, "memory");
-        return (T) this;
     }
 }

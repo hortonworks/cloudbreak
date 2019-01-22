@@ -91,7 +91,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
 
     private CustomDomainSettingsV4Request getCustomDomainSettings(Stack stack) {
         CustomDomainSettingsV4Request cd = new CustomDomainSettingsV4Request();
-        cd.setName(stack.getCustomDomain());
+        cd.setDomainName(stack.getCustomDomain());
         cd.setHostname(stack.getCustomHostname());
         cd.setHostgroupNameAsHostname(stack.isHostgroupNameAsHostname());
         cd.setClusterNameAsSubdomain(stack.isClusterNameAsSubdomain());

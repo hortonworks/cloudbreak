@@ -27,10 +27,10 @@ public class OpenStackInstanceGroupParametersV4 extends InstanceGroupParametersV
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
+        super.parse(parameters);
         setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
         setInstanceName(getParameterOrNull(parameters, "instanceName"));
         server = getParameterOrNull(parameters, "server");
-        return (T) this;
     }
 }

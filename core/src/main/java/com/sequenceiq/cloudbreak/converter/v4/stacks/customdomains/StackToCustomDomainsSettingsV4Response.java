@@ -8,7 +8,7 @@ public class StackToCustomDomainsSettingsV4Response extends AbstractConversionSe
     @Override
     public CustomDomainSettingsV4Response convert(Stack source) {
         CustomDomainSettingsV4Response response = new CustomDomainSettingsV4Response();
-        response.setName(source.getCustomDomain());
+        response.setDomainName(source.getCustomDomain());
         response.setHostname(source.getCustomHostname());
         response.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
         response.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());

@@ -77,12 +77,11 @@ public class OpenStackNetworkParametersV4 implements JsonEntity, Mappable {
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
         networkId = getParameterOrNull(parameters,"networkId");
         routerId = getParameterOrNull(parameters,"routerId");
         subnetId = getParameterOrNull(parameters,"subnetId");
         publicNetId = getParameterOrNull(parameters,"publicNetId");
         networkingOption = getParameterOrNull(parameters,"networkingOption");
-        return (T) this;
     }
 }

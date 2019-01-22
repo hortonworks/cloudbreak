@@ -22,8 +22,7 @@ public class OpenStackInstanceTemplateParametersV4 extends InstanceTemplateParam
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
-        setPlatformType(CloudPlatform.valueOf(getParameterOrNull(parameters, "platformType")));
-        return (T) this;
+    public void parse(Map<String, Object> parameters) {
+        setPlatformType(getPlatformType(parameters));
     }
 }

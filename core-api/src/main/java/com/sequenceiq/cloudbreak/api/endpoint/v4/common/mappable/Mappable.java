@@ -15,21 +15,19 @@ public interface Mappable {
         return null;
     }
 
-    Mappable EMPTY = new Mappable() {
-        @Override
-        public Map<String, Object> asMap() {
-            return Collections.emptyMap();
+    default boolean getBoolean(Map<String, Object> parameters, String key) {
+        String value = getParameterOrNull(parameters, key);
+        if (value != null) {
+            return Boolean.parseBoolean(value);
         }
+        return false;
+    }
 
-        @Override
-        public <T> T toClass(Map<String, Object> parameters) {
-            return null;
-        }
-    };
+    Mappable EMPTY = Collections::emptyMap;
 
     Map<String, Object> asMap();
 
-    <T> T toClass(Map<String, Object> parameters);
+    default void parse(Map<String, Object> parameters) {}
 
     default String getParameterOrNull(Map<String, Object> parameters, String key) {
         Object value = isNull(parameters) ? null : parameters.get(key);

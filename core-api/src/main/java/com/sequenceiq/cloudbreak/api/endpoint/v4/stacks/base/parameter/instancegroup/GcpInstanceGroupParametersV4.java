@@ -24,10 +24,10 @@ public class GcpInstanceGroupParametersV4 extends InstanceGroupParametersV4Base 
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
+        super.parse(parameters);
         setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
         setInstanceName(getParameterOrNull(parameters, "instanceName"));
         opId = getParameterOrNull(parameters, "opid");
-        return (T) this;
     }
 }

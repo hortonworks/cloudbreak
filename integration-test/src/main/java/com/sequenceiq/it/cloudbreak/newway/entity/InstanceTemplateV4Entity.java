@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -10,7 +9,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -93,24 +91,8 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
         return this;
     }
 
-    public InstanceTemplateV4Entity withVolumeType(String volumeType) {
-        getRequest().setVolumeType(volumeType);
-        return this;
-    }
-
     public InstanceTemplateV4Entity withInstanceType(String instanceType) {
         getRequest().setInstanceType(instanceType);
-        return this;
-    }
-
-
-    public InstanceTemplateV4Entity withRootVolumeSize(Integer rootVolumeSize) {
-        getRequest().setRootVolumeSize(rootVolumeSize);
-        return this;
-    }
-
-    public InstanceTemplateV4Entity withYarnParameters(YarnParameters yarnParameters) {
-        getRequest().setYarnParameters(yarnParameters);
         return this;
     }
 }

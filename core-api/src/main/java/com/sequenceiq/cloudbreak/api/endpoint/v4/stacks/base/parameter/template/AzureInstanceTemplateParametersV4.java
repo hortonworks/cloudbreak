@@ -35,9 +35,8 @@ public class AzureInstanceTemplateParametersV4 extends InstanceTemplateParameter
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
         privateId = getParameterOrNull(parameters, "privateId");
         setPlatformType(getPlatformType(parameters));
-        return (T) this;
     }
 }

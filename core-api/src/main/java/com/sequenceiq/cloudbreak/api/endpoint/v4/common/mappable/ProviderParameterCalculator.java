@@ -35,6 +35,6 @@ public class ProviderParameterCalculator {
 
     public void to(Map<String, Object> parameters, ProviderParametersBase base) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(parameters.get("cloudPlatform").toString());
-        cloudPlatform.to(parameters, base);
+        cloudPlatform.parse(parameters, base);
     }
 }

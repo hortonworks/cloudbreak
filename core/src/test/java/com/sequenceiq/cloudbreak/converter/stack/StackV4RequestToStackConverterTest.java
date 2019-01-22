@@ -160,7 +160,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     @Test
     public void testConvertSharedServicePreparateWhenSourceTagsAndClusterToAttachFieldsAreNullThenDatalakeIdShouldNotBeSet() throws CloudbreakException {
         StackV4Request source = getRequest("stack.json");
-        source.getTags().setApplicationTags(null);
+        source.getTags().setApplication(null);
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
@@ -179,7 +179,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     public void testConvertSharedServicePreparateWhenSourceTagsNotNullButNoDatalakeIdEntryInItAndClusterToAttachIsNullThenDatalakeIdShouldNotBeSet()
             throws CloudbreakException {
         StackV4Request source = getRequest("stack.json");
-        source.getTags().setApplicationTags(Collections.emptyMap());
+        source.getTags().setApplication(Collections.emptyMap());
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
@@ -199,7 +199,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
             throws CloudbreakException {
         Long expectedDataLakeId = 1L;
         StackV4Request source = getRequest("stack.json");
-        source.getTags().setApplicationTags(Collections.emptyMap());
+        source.getTags().setApplication(Collections.emptyMap());
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
@@ -221,7 +221,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         StackV4Request source = getRequest("stack.json");
         Map<String, String> applicationTags = new LinkedHashMap<>(1);
         applicationTags.put("datalakeId", expectedDataLakeId);
-        source.getTags().setApplicationTags(applicationTags);
+        source.getTags().setApplication(applicationTags);
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 

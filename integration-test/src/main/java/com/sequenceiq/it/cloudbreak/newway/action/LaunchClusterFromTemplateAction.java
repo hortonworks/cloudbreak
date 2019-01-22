@@ -26,8 +26,8 @@ public class LaunchClusterFromTemplateAction implements ActionV2<ClusterTemplate
         logJSON(LOGGER, "Stack from template post request:\n", entity.getRequest().getStackTemplate());
         StackTemplateEntity stackEntity = testContext.get(stackTemplateKey);
         stackEntity.setResponse(client.getCloudbreakClient()
-                .stackV3Endpoint()
-                .createInWorkspace(client.getWorkspaceId(), stackEntity.getRequest()));
+                .stackV4Endpoint()
+                .post(client.getWorkspaceId(), stackEntity.getRequest()));
         logJSON(LOGGER, " Stack from template created  successfully:\n", entity.getResponse());
         log(LOGGER, "Stack from template ID: " + entity.getResponse().getId());
         return entity;

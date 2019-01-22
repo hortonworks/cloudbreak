@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class CustomDomainSettingsV4Base implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN)
-    private String name;
+    private String domainName;
 
     @ApiModelProperty(StackModelDescription.CUSTOM_HOSTNAME)
     private String hostname;
@@ -26,12 +26,12 @@ public class CustomDomainSettingsV4Base implements JsonEntity {
     @ApiModelProperty(StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
     private boolean hostgroupNameAsHostname;
 
-    public String getName() {
-        return name;
+    public String getDomainName() {
+        return domainName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 
     public String getHostname() {

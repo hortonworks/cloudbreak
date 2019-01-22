@@ -109,7 +109,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getNetwork() != null) {
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         }
-        stack.setCustomDomain(source.getCustomDomain().getName());
+        stack.setCustomDomain(source.getCustomDomain().getDomainName());
         stack.setCustomHostname(source.getCustomDomain().getHostname());
         stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
         stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());

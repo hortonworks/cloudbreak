@@ -1,29 +1,21 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
-import javax.ws.rs.WebApplicationException;
-
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response, EnvironmentSettingsV4Entity>
-        implements Purgable<SimpleEnvironmentV4Response> {
+public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response, EnvironmentSettingsV4Entity> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
-    private static final String VALID_REGION = "Europe";
+    public static final String VALID_REGION = "Europe";
 
     private static final String VALID_LOCATION = "London";
 
@@ -84,59 +76,5 @@ public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<Enviro
     public EnvironmentSettingsV4Entity withPlacement(PlacementSettingsEntity placementSettings) {
         getRequest().setPlacement(placementSettings.getRequest());
         return this;
-    }
-
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        try {
-            SimpleEnvironmentV4Response entity = new SimpleEnvironmentV4Response();
-            entity.setName(getName());
-            delete(entity, cloudbreakClient);
-        } catch (WebApplicationException ignore) {
-            LOGGER.info("Something happend.");
-        }
-    }
-
-    public Set<SimpleEnvironmentV4Response> getResponseSimpleEnvSet() {
-        return response;
-    }
-
-    public void setResponseSimpleEnvSet(Set<SimpleEnvironmentV4Response> response) {
-        this.response = response;
-    }
-
-    public SimpleEnvironmentV4Response getResponseSimpleEnv() {
-        return simpleResponse;
-    }
-
-    public void setResponseSimpleEnv(SimpleEnvironmentV4Response simpleResponse) {
-        this.simpleResponse = simpleResponse;
-    }
-
-    @Override
-    public List<SimpleEnvironmentV4Response> getAll(CloudbreakClient client) {
-        EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV3Endpoint();
-        return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getResponses());
-    }
-
-    @Override
-    public boolean deletable(SimpleEnvironmentV4Response entity) {
-        return entity.getName().startsWith("mock-");
-    }
-
-    @Override
-    public void delete(SimpleEnvironmentV4Response entity, CloudbreakClient client) {
-        try {
-            client.getCloudbreakClient().environmentV3Endpoint().delete(client.getWorkspaceId(), entity.getName());
-        } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public int order() {
-        return 500;
     }
 }

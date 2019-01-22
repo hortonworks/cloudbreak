@@ -10,6 +10,9 @@ public class AzureStackParametersV4 extends StackParameterV4Base {
     @ApiModelProperty
     private String resourceGroupName;
 
+    @ApiModelProperty
+    private boolean encryptStorage;
+
     public String getResourceGroupName() {
         return resourceGroupName;
     }
@@ -22,12 +25,13 @@ public class AzureStackParametersV4 extends StackParameterV4Base {
     public Map<String, Object> asMap() {
         Map<String, Object> ret = new HashMap<>();
         ret.put("resourceGroupName", resourceGroupName);
+        ret.put("encryptStorage", encryptStorage);
         return ret;
     }
 
     @Override
-    public <T> T toClass(Map<String, Object> parameters) {
+    public void parse(Map<String, Object> parameters) {
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
-        return (T) this;
+        encryptStorage = getBoolean(parameters, "encryptStorage");
     }
 }

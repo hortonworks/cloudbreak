@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClus
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreationWithProperties;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.GeneralSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -160,11 +161,11 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "testContext")
     public void testCreateSpecialNameClusterTemplate(TestContext testContext) {
-        testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(VALID_LOCATION)
-                .when(Environment::post)
-                .given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
+        testContext
+                .given(EnvironmentSettingsV4Entity.class).withPlacement("")
                 .given("placementSettings", PlacementSettingsEntity.class).withRegion(EUROPE)
-                .given("stackTemplate", StackTemplateEntity.class).withGeneralSettings("generalSettings").withPlacementSettings("placementSettings")
+                .when(Environment::post)
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("environment")
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate").withName(SPECIAL_CT_NAME)
                 .when(new ClusterTemplateV4CreateAction())
                 .validate();
@@ -182,9 +183,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateAgainClusterTemplate(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(VALID_LOCATION)
                 .when(Environment::post)
-                .given(ClusterTemplateEntity.class).given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
+                .given(ClusterTemplateEntity.class)
                 .given("placementSettings", PlacementSettingsEntity.class).withRegion(EUROPE)
-                .given("stackTemplate", StackTemplateEntity.class).withGeneralSettings("generalSettings").withPlacementSettings("placementSettings")
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("placementSettings")
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new ClusterTemplateV4CreateAction(), key("againCtName"))
