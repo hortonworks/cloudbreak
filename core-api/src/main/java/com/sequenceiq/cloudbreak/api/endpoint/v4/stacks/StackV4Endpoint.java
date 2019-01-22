@@ -112,13 +112,13 @@ public interface StackV4Endpoint {
     @PUT
     @Path("{name}/scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SCALE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "repairStackInWorkspaceV4")
+    @ApiOperation(value = SCALE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "putScalingStackInWorkspaceV4")
     void putScaling(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid StackScaleV4Request updateRequest);
 
     @POST
     @Path("{name}/manual_repair")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = REPAIR_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES)
+    @ApiOperation(value = REPAIR_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES, nickname = "repairStackInWorkspaceV4")
     void repairCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid ClusterRepairV4Request clusterRepairRequest);
 
     @POST
