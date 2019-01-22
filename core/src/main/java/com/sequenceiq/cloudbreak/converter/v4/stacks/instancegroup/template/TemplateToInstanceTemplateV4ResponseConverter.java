@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.CustomInstanceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -37,23 +35,7 @@ public class TemplateToInstanceTemplateV4ResponseConverter extends AbstractConve
             Map<String, Object> parameters = attributes.getMap();
             ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr).getMap()));
             providerParameterCalculator.to(parameters, response);
-
-            CustomInstanceV4Response customInstance = new CustomInstanceV4Response();
-            Object memory = parameters.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY);
-            Object cpus = parameters.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS);
-            if (memory != null) {
-                customInstance.setMemory(Integer.parseInt(memory.toString()));
-            }
-            if (cpus != null) {
-                customInstance.setCpus(Integer.parseInt(cpus.toString()));
-            }
-
-            if (cpus != null || memory != null) {
-                response.setCustomInstance(customInstance);
-            }
         }
-
-
         response.setCloudPlatform(CloudPlatform.valueOf(source.cloudPlatform()));
         return response;
     }

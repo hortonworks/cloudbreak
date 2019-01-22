@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,9 +19,6 @@ public class InstanceTemplateV4Response extends InstanceTemplateV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
-
-    @ApiModelProperty(TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
-    private CustomInstanceV4Response customInstance;
 
     private VolumeV4Response rootVolume;
 
@@ -36,14 +32,6 @@ public class InstanceTemplateV4Response extends InstanceTemplateV4Base {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public CustomInstanceV4Response getCustomInstance() {
-        return customInstance;
-    }
-
-    public void setCustomInstance(CustomInstanceV4Response customInstance) {
-        this.customInstance = customInstance;
     }
 
     public VolumeV4Response getRootVolume() {

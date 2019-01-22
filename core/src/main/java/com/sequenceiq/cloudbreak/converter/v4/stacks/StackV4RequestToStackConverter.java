@@ -157,7 +157,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             if (tags == null) {
                 return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
             }
-            return new Json(new StackTags(tags.getUserDefinedTags(), tags.getApplicationTags(), getDefaultTags(cloudPlatform)));
+            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), getDefaultTags(cloudPlatform)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }

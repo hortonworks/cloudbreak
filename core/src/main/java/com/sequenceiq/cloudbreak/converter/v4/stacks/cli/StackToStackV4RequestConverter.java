@@ -152,9 +152,9 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
                 StackTags stackTags = source.getTags().get(StackTags.class);
                 if (stackTags.getUserDefinedTags() != null) {
                     TagsV4Request tags = new TagsV4Request();
-                    tags.setApplicationTags(null);
-                    tags.setDefaultTags(null);
-                    tags.setUserDefinedTags(stackTags.getUserDefinedTags());
+                    tags.setApplication(null);
+                    tags.setDefaults(null);
+                    tags.setUserDefined(stackTags.getUserDefinedTags());
                     stackV2Request.setTags(tags);
                 }
             }
