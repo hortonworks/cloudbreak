@@ -3,18 +3,17 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Response, AmbariEntity> {
+public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Response, AmbariEntity> {
 
     public AmbariEntity(TestContext testContex) {
-        super(new AmbariV2Request(), testContex);
+        super(new AmbariV4Request(), testContex);
     }
 
     public AmbariEntity() {
@@ -28,21 +27,11 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
                 .withValidateRepositories(true);
     }
 
-    public AmbariEntity withBlueprintId(Long blueprintId) {
-        getRequest().setBlueprintId(blueprintId);
-        return this;
-    }
-
     public AmbariEntity withBlueprintName(String blueprintName) {
         getRequest().setBlueprintName(blueprintName);
         return this;
     }
 
-    public AmbariEntity withGateway(String key) {
-        GatewayEntity gatewayEntity = getTestContext().get(key);
-        getRequest().setGateway(gatewayEntity.getRequest());
-        return this;
-    }
 
     public AmbariEntity withUserName(String userName) {
         getRequest().setUserName(userName);
@@ -51,11 +40,6 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
 
     public AmbariEntity withPassword(String password) {
         getRequest().setPassword(password);
-        return this;
-    }
-
-    public AmbariEntity withKerberos(String kerberos) {
-        getRequest().setKerberosConfigName(kerberos);
         return this;
     }
 
@@ -69,23 +53,23 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
         return this;
     }
 
-    public AmbariEntity withAmbariStackDetails(String key) {
-        AmbariStackDetailsEntity ambariStack = getTestContext().get(key);
-        return withAmbariStackDetails(ambariStack);
+    public AmbariEntity withStackRepository(String key) {
+        StackRepositoryEntity ambariStack = getTestContext().get(key);
+        return withStackRepository(ambariStack);
     }
 
-    public AmbariEntity withAmbariStackDetails(AmbariStackDetailsEntity ambariStackDetails) {
-        getRequest().setAmbariStackDetails(ambariStackDetails.getRequest());
+    public AmbariEntity withStackRepository(StackRepositoryEntity ambariStackDetails) {
+        getRequest().setStackRepository(ambariStackDetails.getRequest());
         return this;
     }
 
     public AmbariEntity withAmbariRepoDetails(String key) {
-        AmbariRepoDetailsEntity ambariRepo = getTestContext().get(key);
+        AmbariRepositoryV4Entity ambariRepo = getTestContext().get(key);
         return withAmbariRepoDetails(ambariRepo);
     }
 
-    public AmbariEntity withAmbariRepoDetails(AmbariRepoDetailsEntity ambariRepoDetailsJson) {
-        getRequest().setAmbariRepoDetailsJson(ambariRepoDetailsJson.getRequest());
+    public AmbariEntity withAmbariRepoDetails(AmbariRepositoryV4Entity ambariRepoDetailsJson) {
+        getRequest().setRepository(ambariRepoDetailsJson.getRequest());
         return this;
     }
 
@@ -94,13 +78,8 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
         return this;
     }
 
-    public AmbariEntity withConnectedCluster(ConnectedClusterRequest connectedCluster) {
-        getRequest().setConnectedCluster(connectedCluster);
-        return this;
-    }
-
     public AmbariEntity withAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
-        getRequest().setAmbariSecurityMasterKey(ambariSecurityMasterKey);
+        getRequest().setSecurityMasterKey(ambariSecurityMasterKey);
         return this;
     }
 

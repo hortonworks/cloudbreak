@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2.cli;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
@@ -26,39 +26,27 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.location.StorageLocationV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.FileSystemToCloudStorageV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.BaseFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
-public class FileSystemToCloudStorageV4ResponseConverterTest {
-
-    private static final Long FILE_SYSTEM_ID = 1L;
-
-    private static final String FILE_SYSTEM_NAME = "fsName";
-
-    private static final FileSystemType EXAMPLE_FILE_SYSTEM_TYPE = GCS;
-
-    private static final boolean EXAMPLE_IS_DEFAULT_FS_VALUE = true;
+public class FileSystemToCloudStorageRequestConverterTest {
 
     @InjectMocks
-    private FileSystemToCloudStorageV4ResponseConverter underTest;
+    private FileSystemToCloudStorageV4RequestConverter underTest;
 
     @Mock
     private ConversionService conversionService;
@@ -76,26 +64,12 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
     }
 
     @Test
-    public void testConvertWhenSourceContainsValidDataThenThisShouldBeConvertedIntoResponse() throws IOException {
-        FileSystem fileSystem = createFileSystemSource();
-        when(conversionService.convert(fileSystem.getConfigurations().get(BaseFileSystem.class), AdlsCloudStorageParametersV4.class))
-                .thenReturn(new AdlsCloudStorageParametersV4());
-
-        CloudStorageV4Response result = underTest.convert(fileSystem);
-
-        assertEquals(FILE_SYSTEM_ID, result.getId());
-        assertEquals(FILE_SYSTEM_NAME, result.getName());
-        assertEquals(EXAMPLE_FILE_SYSTEM_TYPE.name(), result.getType());
-        assertEquals(EXAMPLE_IS_DEFAULT_FS_VALUE, result.isDefaultFs());
-    }
-
-    @Test
     public void testConvertWhenLocationIsNullThenEmptySetShouldBeSet() {
         // wasb just for testing reason
         when(fileSystem.getType()).thenReturn(WASB);
         when(fileSystem.getLocations()).thenReturn(null);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertTrue(result.getLocations().isEmpty());
@@ -109,7 +83,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         when(locations.getValue()).thenReturn(null);
         when(fileSystem.getLocations()).thenReturn(locations);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertTrue(result.getLocations().isEmpty());
@@ -124,7 +98,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         when(locations.get(StorageLocations.class)).thenReturn(null);
         when(fileSystem.getLocations()).thenReturn(locations);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertTrue(result.getLocations().isEmpty());
@@ -134,22 +108,20 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
     public void testConvertWhelLocationsAreExistsThenTheseLocationsShouldBeStored() throws IOException {
         // wasb just for testing reason
         when(fileSystem.getType()).thenReturn(WASB);
-
-        StorageLocations storageLocations = new StorageLocations();
+        StorageLocations storageLocations = mock(StorageLocations.class);
         StorageLocation location = new StorageLocation();
-        storageLocations.setLocations(Collections.singleton(location));
+        when(storageLocations.getLocations()).thenReturn(Collections.singleton(location));
         Json locations = mock(Json.class);
-
         when(locations.getValue()).thenReturn("some value");
         when(locations.get(StorageLocations.class)).thenReturn(storageLocations);
         when(fileSystem.getLocations()).thenReturn(locations);
-        when(conversionService.convert(location, StorageLocationV4Response.class)).thenReturn(new StorageLocationV4Response());
+        when(conversionService.convert(location, StorageLocationV4Request.class)).thenReturn(new StorageLocationV4Request());
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNotNull(result.getLocations());
         assertEquals(1L, result.getLocations().size());
-        verify(conversionService, times(1)).convert(any(StorageLocation.class), eq(StorageLocationV4Response.class));
+        verify(conversionService, times(1)).convert(any(StorageLocation.class), eq(StorageLocationV4Request.class));
     }
 
     @Test
@@ -160,7 +132,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         AdlsCloudStorageParametersV4 expected = mock(AdlsCloudStorageParametersV4.class);
         when(conversionService.convert(adls, AdlsCloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getAdls());
         verify(conversionService, times(1)).convert(any(AdlsFileSystem.class), eq(AdlsCloudStorageParametersV4.class));
@@ -178,7 +150,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         GcsCloudStorageParametersV4 expected = mock(GcsCloudStorageParametersV4.class);
         when(conversionService.convert(gcs, GcsCloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getGcs());
         verify(conversionService, times(1)).convert(any(GcsFileSystem.class), eq(GcsCloudStorageParametersV4.class));
@@ -196,7 +168,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         S3CloudStorageParametersV4 expected = mock(S3CloudStorageParametersV4.class);
         when(conversionService.convert(s3, S3CloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getS3());
         verify(conversionService, times(1)).convert(any(S3FileSystem.class), eq(S3CloudStorageParametersV4.class));
@@ -214,7 +186,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         WasbCloudStorageParametersV4 expected = mock(WasbCloudStorageParametersV4.class);
         when(conversionService.convert(wasb, WasbCloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getWasb());
         verify(conversionService, times(1)).convert(any(WasbFileSystem.class), eq(WasbCloudStorageParametersV4.class));
@@ -232,7 +204,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         AdlsGen2CloudStorageParametersV4 expected = mock(AdlsGen2CloudStorageParametersV4.class);
         when(conversionService.convert(adlsGen2, AdlsGen2CloudStorageParametersV4.class)).thenReturn(expected);
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertEquals(expected, result.getAdlsGen2());
         verify(conversionService, times(1)).convert(any(AdlsGen2FileSystem.class), eq(AdlsGen2CloudStorageParametersV4.class));
@@ -248,23 +220,13 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         when(fileSystem.getType()).thenReturn(ADLS);
         when(configurations.get(any(Class.class))).thenThrow(new IOException("some message"));
 
-        CloudStorageV4Response result = underTest.convert(fileSystem);
+        CloudStorageV4Request result = underTest.convert(fileSystem);
 
         assertNull(result.getAdls());
         assertNull(result.getGcs());
         assertNull(result.getS3());
         assertNull(result.getWasb());
         assertNull(result.getAdlsGen2());
-    }
-
-    private FileSystem createFileSystemSource() throws JsonProcessingException {
-        FileSystem fileSystem = new FileSystem();
-        fileSystem.setId(FILE_SYSTEM_ID);
-        fileSystem.setName(FILE_SYSTEM_NAME);
-        fileSystem.setType(EXAMPLE_FILE_SYSTEM_TYPE);
-        fileSystem.setDefaultFs(EXAMPLE_IS_DEFAULT_FS_VALUE);
-        fileSystem.setConfigurations(new Json(new AdlsFileSystem()));
-        return fileSystem;
     }
 
 }

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.TemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 
 public interface CloudProvider {
 
@@ -12,7 +12,7 @@ public interface CloudProvider {
 
     String region();
 
-    TemplateEntity template(TestContext testContext);
+    InstanceTemplateV4Entity template(TestContext testContext);
 
     String getVpcId();
 

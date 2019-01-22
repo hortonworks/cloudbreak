@@ -47,7 +47,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
         // WHEN
         InstanceGroupV4Response result = underTest.convert(getSource());
         // THEN
-        assertEquals(1L, result.getCount());
+        assertEquals(1L, result.getNodeCount());
         assertEquals(InstanceGroupType.CORE, result.getType());
         assertAllFieldsNotNull(result, Lists.newArrayList("template", "securityGroup"));
     }

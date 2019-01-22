@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.TemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -61,7 +61,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public TemplateEntity template(TestContext testContext) {
+    public InstanceTemplateV4Entity template(TestContext testContext) {
         String instanceTypeDefaultValue = "large";
         String instanceTypeParam = getTestParameter().get("mockInstanceType");
 
@@ -74,7 +74,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         String volumeTypeDefault = "magnetic";
         String volumeTypeParam = getTestParameter().get("mockInstanceVolumeType");
 
-        return testContext.init(TemplateEntity.class)
+        return testContext.init(InstanceTemplateV4Entity.class)
                 .withInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam)
                 .withVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam))
                 .withVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam))

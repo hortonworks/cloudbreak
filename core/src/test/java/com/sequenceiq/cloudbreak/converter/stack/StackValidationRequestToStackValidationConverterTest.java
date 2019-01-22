@@ -23,8 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -96,7 +94,6 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void init() {
         validationRequest = new StackValidationV4Request();
         mockUserRelated();
-        mockCredentialRelated();
         mockBlueprintsInWorkspace();
     }
 
@@ -132,59 +129,6 @@ public class StackValidationRequestToStackValidationConverterTest {
     }
 
     @Test
-    public void validBlueprintById() {
-        validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintId(1L);
-
-        when(credentialService.get(any(), eq(workspace))).thenReturn(credential);
-
-        Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
-        platformParametersMap.put(Platform.platform("GCP"), parameters);
-        when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
-        when(networkService.get(any())).thenReturn(TestUtil.network());
-
-        StackValidation result = underTest.convert(validationRequest);
-
-        assertEquals(bpName, result.getBlueprint().getName());
-    }
-
-    @Test
-    public void validBlueprintByIdAndName() {
-        validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintId(1L);
-        validationRequest.setBlueprintName(bpName2);
-
-        when(credentialService.get(any(), eq(workspace))).thenReturn(credential);
-
-        Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
-        platformParametersMap.put(Platform.platform("GCP"), parameters);
-        when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
-        when(networkService.get(any())).thenReturn(TestUtil.network());
-
-        StackValidation result = underTest.convert(validationRequest);
-
-        assertEquals("Blueprint ID overrides blueprint name", bpName, result.getBlueprint().getName());
-    }
-
-    @Test
-    public void validBlueprintByText() {
-        validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprint(new BlueprintV4Request());
-
-        when(credentialService.get(any(), eq(workspace))).thenReturn(credential);
-        when(conversionService.convert(any(), eq(Blueprint.class))).thenReturn(TestUtil.blueprint(bpName));
-
-        Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
-        platformParametersMap.put(Platform.platform("GCP"), parameters);
-        when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
-        when(networkService.get(any())).thenReturn(TestUtil.network());
-
-        StackValidation result = underTest.convert(validationRequest);
-
-        assertEquals(bpName, result.getBlueprint().getName());
-    }
-
-    @Test
     public void convertShouldUseEnvironmentCredentialWhenItisGiven() {
         // GIVEN
         validationRequest.setNetworkId(442L);
@@ -192,7 +136,7 @@ public class StackValidationRequestToStackValidationConverterTest {
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setName("env");
         environmentView.setCredential(credential);
-        validationRequest.setEnvironment(environmentView.getName());
+        validationRequest.setEnvironmentName(environmentView.getName());
         Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
         platformParametersMap.put(Platform.platform("GCP"), parameters);
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
@@ -210,20 +154,11 @@ public class StackValidationRequestToStackValidationConverterTest {
         // GIVEN
         validationRequest.setNetworkId(442L);
         validationRequest.setBlueprintName(bpName);
-        validationRequest.setCredentialId(null);
-        validationRequest.setCredential(null);
         expectedEx.expect(BadRequestException.class);
         expectedEx.expectMessage("Credential is not configured for the validation request!");
         // WHEN
         underTest.convert(validationRequest);
         // THEN expected exception should be thrown
-    }
-
-    private void mockCredentialRelated() {
-        CredentialV4Request credentialRequest = new CredentialV4Request();
-        validationRequest.setCredentialId(1L);
-        credentialRequest.setCloudPlatform("AWS");
-        validationRequest.setCredential(credentialRequest);
     }
 
     private void mockBlueprintsInWorkspace() {

@@ -116,11 +116,11 @@ public class AmbariClusterServiceTest {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         when(rdsConfigService.findByClusterIdAndType(any(Long.class), any(DatabaseType.class))).thenReturn(rdsConfig);
-        clusterService.recreate(TestUtil.stack(), 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(TestUtil.stack(), "bp-name", new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 
     @Test
     public void testRecreateSuccess() throws TransactionExecutionException {
-        clusterService.recreate(TestUtil.stack(), 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(TestUtil.stack(), "bp-name", new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }

@@ -1,18 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class CloudProvider {
 
@@ -24,15 +24,15 @@ public abstract class CloudProvider {
 
     public abstract CredentialEntity aValidCredential(boolean create);
 
-    public abstract AmbariV2Request ambariRequestWithBlueprintId(Long id);
+    public abstract AmbariV4Request ambariRequestWithBlueprintId(Long id);
 
     public abstract Stack aValidStackCreated();
 
     public abstract StackEntity aValidAttachedStackRequest();
 
-    public abstract AmbariV2Request ambariRequestWithBlueprintName(String bluePrintName);
+    public abstract AmbariV4Request ambariRequestWithBlueprintName(String bluePrintName);
 
-    public abstract AmbariV2Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+    public abstract AmbariV4Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey);
 
     public abstract String getClusterName();
@@ -59,21 +59,21 @@ public abstract class CloudProvider {
 
     public abstract String region();
 
-    public abstract NetworkV2Request newNetwork();
+    public abstract NetworkV4Request newNetwork();
 
-    public abstract NetworkV2Request existingNetwork();
+    public abstract NetworkV4Request existingNetwork();
 
-    public abstract NetworkV2Request existingSubnet();
+    public abstract NetworkV4Request existingSubnet();
 
     public abstract String availabilityZone();
 
-    public abstract List<InstanceGroupV2Request> instanceGroups(String securityGroupId);
+    public abstract List<InstanceGroupV4Request> instanceGroups(String securityGroupId);
 
-    public abstract List<InstanceGroupV2Request> instanceGroups(Set<String> recipes);
+    public abstract List<InstanceGroupV4Request> instanceGroups(Set<String> recipes);
 
     public abstract Stack aValidAttachedClusterStackCreated(HostGroupType... groupTypes);
 
-    public abstract AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName);
+    public abstract AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName);
 
     public abstract ResourceHelper<?> getResourceHelper();
 
@@ -81,15 +81,15 @@ public abstract class CloudProvider {
 
     public abstract Cluster aValidAttachedCluster(String datalakeClusterName);
 
-    public abstract TemplateV2Request template();
+    public abstract InstanceTemplateV4Request template();
 
-    public abstract List<InstanceGroupV2Request> instanceGroups();
+    public abstract List<InstanceGroupV4Request> instanceGroups();
 
-    public abstract List<InstanceGroupV2Request> instanceGroups(HostGroupType... groupTypes);
+    public abstract List<InstanceGroupV4Request> instanceGroups(HostGroupType... groupTypes);
 
-    public abstract List<InstanceGroupV2Request> instanceGroups(String securityGroupId, HostGroupType... groupTypes);
+    public abstract List<InstanceGroupV4Request> instanceGroups(String securityGroupId, HostGroupType... groupTypes);
 
-    public abstract List<InstanceGroupV2Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes);
+    public abstract List<InstanceGroupV4Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes);
 
     public abstract RecoveryMode getRecoveryModeParam(String hostgroupName);
 }

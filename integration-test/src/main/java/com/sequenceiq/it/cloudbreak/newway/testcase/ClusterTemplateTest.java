@@ -70,12 +70,10 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testClusterTemplateCreateAndGetAndDelete(TestContext testContext) {
         testContext
-                .given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(VALID_LOCATION)
+                .given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(EUROPE)
                 .when(Environment::post)
-                .given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
-                .given("stackTemplate", StackTemplateEntity.class).withGeneralSettings("generalSettings")
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironment("environment")
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
-
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new ClusterTemplateV4ListAction())
                 .then(new CheckClusterTemplateGetResponse())
@@ -90,8 +88,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testClusterTemplateWithType(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(VALID_LOCATION)
                 .when(Environment::post)
-                .given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
-                .given("stackTemplate", StackTemplateEntity.class).withGeneralSettings("generalSettings")
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("environment")
                 .given(ClusterTemplateEntity.class).withType(SPARK).withStackTemplate("stackTemplate")
                 .capture(ClusterTemplateEntity::count, key("ctSize"))
                 .when(new ClusterTemplateV4CreateAction())

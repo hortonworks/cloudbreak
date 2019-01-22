@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.Temp
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
-public class TemplateToTemplateResponseConverterTest {
+public class TemplateToInstanceTemplateV4ResponseConverterTest {
 
     @Mock
     private ConversionService conversionService;
@@ -62,7 +62,7 @@ public class TemplateToTemplateResponseConverterTest {
         Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAws().getEncryption().getType());
         Assert.assertNull(convert.getAzure());
         Assert.assertNull(convert.getGcp());
-        Assert.assertNull(convert.getOpenStack());
+        Assert.assertNull(convert.getOpenstack());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class TemplateToTemplateResponseConverterTest {
 
         InstanceTemplateV4Response convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getOpenStack());
+        Assert.assertNotNull(convert.getOpenstack());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class TemplateToTemplateResponseConverterTest {
         Assert.assertNull(convert.getAws());
         Assert.assertNull(convert.getAzure());
         Assert.assertNull(convert.getGcp());
-        Assert.assertNull(convert.getOpenStack());
+        Assert.assertNull(convert.getOpenstack());
     }
 
     private Json parameters(String cloudConstants) throws JsonProcessingException {

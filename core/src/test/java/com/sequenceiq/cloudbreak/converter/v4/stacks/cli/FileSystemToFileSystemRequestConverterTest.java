@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v2.cli;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
 import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.FileSystemToCloudStorageV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
@@ -44,7 +43,7 @@ import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
-public class FileSystemToCloudStorageRequestConverterTest {
+public class FileSystemToFileSystemRequestConverterTest {
 
     @InjectMocks
     private FileSystemToCloudStorageV4RequestConverter underTest;

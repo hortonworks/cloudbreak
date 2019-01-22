@@ -4,26 +4,25 @@ import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, ClusterResponse, ClusterEntity> {
+public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, ClusterV4Response, ClusterEntity> {
 
     private static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
 
-    public ClusterEntity(ClusterV2Request request, TestContext testContex) {
+    public ClusterEntity(ClusterV4Request request, TestContext testContex) {
         super(request, testContex);
     }
 
     public ClusterEntity(TestContext testContex) {
-        super(new ClusterV2Request(), testContex);
+        super(new ClusterV4Request(), testContex);
     }
 
     public ClusterEntity() {
@@ -49,13 +48,8 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, Cl
         return this;
     }
 
-    public ClusterEntity withExecutorType(ExecutorType executorType) {
-        getRequest().setExecutorType(executorType);
-        return this;
-    }
-
     public ClusterEntity withLdapConfigName(String ldap) {
-        getRequest().setLdapConfigName(ldap);
+        getRequest().setLdapName(ldap);
         return this;
     }
 
@@ -65,25 +59,37 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, Cl
     }
 
     public ClusterEntity withRdsConfigNames(String... names) {
-        getRequest().setRdsConfigNames(newHashSet(names));
+        getRequest().setDatabases(newHashSet(names));
         return this;
     }
 
     public ClusterEntity withRdsConfigNames(Set<String> names) {
-        getRequest().setRdsConfigNames(names);
+        getRequest().setDatabases(names);
         return this;
     }
 
-    public ClusterEntity withCloudStorage(CloudStorageRequest cloudStorage) {
+    public ClusterEntity withCloudStorage(CloudStorageV4Request cloudStorage) {
         getRequest().setCloudStorage(cloudStorage);
         return this;
     }
 
     public ClusterEntity withSharedService(String datalakeClusterName) {
-        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
-        sharedServiceRequest.setSharedCluster(datalakeClusterName);
+        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
+        sharedServiceRequest.setSharedClusterName(datalakeClusterName);
         getRequest().setSharedService(sharedServiceRequest);
         return this;
     }
+
+    public ClusterEntity withGateway(String key) {
+        GatewayEntity gatewayEntity = getTestContext().get(key);
+        getRequest().setGateway(gatewayEntity.getRequest());
+        return this;
+    }
+
+    public ClusterEntity withKerberos(String kerberos) {
+        getRequest().setKerberosName(kerberos);
+        return this;
+    }
+
 }
 

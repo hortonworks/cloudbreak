@@ -43,7 +43,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.SecurityGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthentication;
+import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.testcase.ClusterTemplateTest;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
@@ -84,7 +84,7 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()))
                 .withCredentialName(getTestContext().get(CredentialEntity.class).getName())
-                .withStackAuthentication(getTestContext().init(StackAuthentication.class))
+                .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
                 .withGatewayPort(getTestContext().getSparkServer().getPort())
                 .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
     }
@@ -273,7 +273,7 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
         return this;
     }
 
-    public StackEntity withStackAuthentication(StackAuthentication stackAuthentication) {
+    public StackEntity withStackAuthentication(StackAuthenticationEntity stackAuthentication) {
         getRequest().setStackAuthentication(stackAuthentication.getRequest());
         return this;
     }

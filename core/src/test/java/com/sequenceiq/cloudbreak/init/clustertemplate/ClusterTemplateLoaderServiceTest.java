@@ -20,11 +20,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -151,12 +151,11 @@ public class ClusterTemplateLoaderServiceTest {
     private DefaultClusterTemplateV4Request clusterTemplateRequest(String templateName) {
         DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName(templateName);
-        StackV2Request stack = new StackV2Request();
-        ClusterV2Request cluster = new ClusterV2Request();
+        StackV4Request stack = new StackV4Request();
+        ClusterV4Request cluster = new ClusterV4Request();
         stack.setCluster(cluster);
-        stack.setPlatformVariant("VARIANT");
-        InstanceGroupV2Request instanceGroup = new InstanceGroupV2Request();
-        instanceGroup.setGroup("master");
+        InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
+        instanceGroup.setName("master");
         stack.setInstanceGroups(singletonList(instanceGroup));
         clusterTemplate.setStackTemplate(stack);
         return clusterTemplate;

@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.it.cloudbreak.WaitResult;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 
@@ -36,11 +37,11 @@ public class WaitUtil {
         }
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
-            Map<String, Object> statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient().stackV3Endpoint()
-                    .getStatusByNameInWorkspace(cloudbreakClient.getWorkspaceId(), stackName);
+            StackStatusV4Response statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
+                    .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null) {
                 desiredStatuses.forEach((key, value) -> {
-                    Object o = statusByNameInWorkspace.get(key);
+                    Object o = statusByNameInWorkspace.getStatuses().get(key);
                     if (o != null) {
                         ret.put(key, o.toString());
                     }
@@ -49,16 +50,16 @@ public class WaitUtil {
                 ret.forEach((key, value) -> {
                     builder.append(key).append(',').append(value).append(System.lineSeparator());
                 });
-                builder.append("statusReason: ").append(statusByNameInWorkspace.get("statusReason"));
+                builder.append("statusReason: ").append(statusByNameInWorkspace.getStatuses().get("statusReason"));
             }
             throw new RuntimeException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
             throw new RuntimeException("Timeout happened");
         } else if (!"DELETE_COMPLETED".equals(desiredStatuses.get("status"))) {
-            Map<String, Object> statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient()
-                    .stackV3Endpoint().getStatusByNameInWorkspace(cloudbreakClient.getWorkspaceId(), stackName);
+            StackStatusV4Response statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient()
+                    .stackV4Endpoint().getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null) {
-                Object statusReason = statusByNameInWorkspace.get("statusReason");
+                Object statusReason = statusByNameInWorkspace.getStatuses().get("statusReason");
                 if (statusReason != null) {
                     ret.put("statusReason", statusReason.toString());
                 }
@@ -76,9 +77,9 @@ public class WaitUtil {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
 
             sleep();
-            StackV3Endpoint stackV3Endpoint = cloudbreakClient.getCloudbreakClient().stackV3Endpoint();
+            StackV4Endpoint stackV4Endpoint = cloudbreakClient.getCloudbreakClient().stackV4Endpoint();
             try {
-                Map<String, Object> statusResult = stackV3Endpoint.getStatusByNameInWorkspace(cloudbreakClient.getWorkspaceId(), stackName);
+                Map<String, Object> statusResult = stackV4Endpoint.getStatusByName(cloudbreakClient.getWorkspaceId(), stackName).getStatuses();
                 for (String statusPath : desiredStatuses.keySet()) {
                     String currStatus = "DELETE_COMPLETED";
                     if (!CollectionUtils.isEmpty(statusResult)) {

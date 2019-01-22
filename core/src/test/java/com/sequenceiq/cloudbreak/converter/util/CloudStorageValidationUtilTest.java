@@ -6,12 +6,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsGen2CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.gcs.GcsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.s3.S3CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.wasb.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CloudStorageValidationUtilTest {
@@ -28,15 +28,15 @@ public class CloudStorageValidationUtilTest {
 
     @Test
     public void testIsCloudStorageConfiguredWhenCloudStorageNotNull() {
-        boolean actual = underTest.isCloudStorageConfigured(new CloudStorageRequest());
+        boolean actual = underTest.isCloudStorageConfigured(new CloudStorageV4Request());
 
         Assert.assertFalse(actual);
     }
 
     @Test
     public void testIsCloudStorageConfiguredWhenAdlsNotNull() {
-        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        cloudStorageRequest.setAdls(new AdlsCloudStorageParameters());
+        CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
+        cloudStorageRequest.setAdls(new AdlsCloudStorageParametersV4());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -44,8 +44,8 @@ public class CloudStorageValidationUtilTest {
 
     @Test
     public void testIsCloudStorageConfiguredWhenWasbNotNull() {
-        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        cloudStorageRequest.setWasb(new WasbCloudStorageParameters());
+        CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
+        cloudStorageRequest.setWasb(new WasbCloudStorageParametersV4());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -53,8 +53,8 @@ public class CloudStorageValidationUtilTest {
 
     @Test
     public void testIsCloudStorageConfiguredWhenAdlsGen2NotNull() {
-        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        cloudStorageRequest.setAdlsGen2(new AdlsGen2CloudStorageParameters());
+        CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
+        cloudStorageRequest.setAdlsGen2(new AdlsGen2CloudStorageParametersV4());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -62,8 +62,8 @@ public class CloudStorageValidationUtilTest {
 
     @Test
     public void testIsCloudStorageConfiguredWhenS3NotNull() {
-        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        cloudStorageRequest.setS3(new S3CloudStorageParameters());
+        CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
+        cloudStorageRequest.setS3(new S3CloudStorageParametersV4());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -71,8 +71,8 @@ public class CloudStorageValidationUtilTest {
 
     @Test
     public void testIsCloudStorageConfiguredWhenGcsNotNull() {
-        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        cloudStorageRequest.setGcs(new GcsCloudStorageParameters());
+        CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
+        cloudStorageRequest.setGcs(new GcsCloudStorageParametersV4());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);

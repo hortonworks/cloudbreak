@@ -16,8 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -50,7 +49,7 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
     public void testValidateShouldBeSuccessWhenStackRegionIsValidAndEnvironmentsResourcesAreNotGiven() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        ClusterRequest clusterRequest = new ClusterRequest();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
@@ -62,25 +61,22 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         // GIVEN
         Stack stack = getStack();
         stack.setEnvironment(null);
-        ClusterRequest clusterRequest = new ClusterRequest();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy", Sets.newHashSet());
         clusterRequest.setProxyName(proxyConfig.getName());
         Mockito.when(proxyConfigService.getByNameForWorkspaceId(proxyConfig.getName(), stack.getWorkspace().getId())).thenReturn(proxyConfig);
         LdapConfig ldapConfig = createLdapConfig("ldap", Sets.newHashSet());
         Mockito.when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
-        clusterRequest.setLdapConfigName("ldap");
+        clusterRequest.setLdapName("ldap");
         RDSConfig rdsConfig1 = createRdsConfig("rds1", Sets.newHashSet());
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig1.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig1);
         RDSConfig rdsConfig2 = createRdsConfig("rds2", Sets.newHashSet());
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig2.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig2);
-        clusterRequest.setRdsConfigNames(Sets.newHashSet(rdsConfig1.getName(), rdsConfig2.getName()));
+        clusterRequest.setDatabases(Sets.newHashSet(rdsConfig1.getName(), rdsConfig2.getName()));
         RDSConfig rdsConfig3 = createRdsConfig("rds3", Sets.newHashSet());
         Mockito.when(rdsConfigService.get(rdsConfig3.getId())).thenReturn(rdsConfig3);
         RDSConfig rdsConfig4 = createRdsConfig("rds4", Sets.newHashSet());
         Mockito.when(rdsConfigService.get(rdsConfig4.getId())).thenReturn(rdsConfig4);
-        clusterRequest.setRdsConfigIds(Sets.newHashSet(rdsConfig3.getId(), rdsConfig4.getId()));
-        clusterRequest.setRdsConfigJsons(Sets.newHashSet(createRdsConfigRequest("rds5", Sets.newHashSet()),
-                createRdsConfigRequest("rds5", Sets.newHashSet())));
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
@@ -91,25 +87,22 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
     public void testValidateShouldBeSuccessWhenResourcesAreInTheSameEnvironmentOrGlobals() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        ClusterRequest clusterRequest = new ClusterRequest();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy", Sets.newHashSet("env1", "env2"));
         clusterRequest.setProxyName(proxyConfig.getName());
         Mockito.when(proxyConfigService.getByNameForWorkspaceId(proxyConfig.getName(), stack.getWorkspace().getId())).thenReturn(proxyConfig);
         LdapConfig ldapConfig = createLdapConfig("ldap", Sets.newHashSet());
         Mockito.when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
-        clusterRequest.setLdapConfigName("ldap");
+        clusterRequest.setLdapName("ldap");
         RDSConfig rdsConfig1 = createRdsConfig("rds1", Sets.newHashSet());
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig1.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig1);
         RDSConfig rdsConfig2 = createRdsConfig("rds2", Sets.newHashSet("env1", "env3"));
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig2.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig2);
-        clusterRequest.setRdsConfigNames(Sets.newHashSet(rdsConfig1.getName(), rdsConfig2.getName()));
+        clusterRequest.setDatabases(Sets.newHashSet(rdsConfig1.getName(), rdsConfig2.getName()));
         RDSConfig rdsConfig3 = createRdsConfig("rds3", Sets.newHashSet("env1", "env2"));
         Mockito.when(rdsConfigService.get(rdsConfig3.getId())).thenReturn(rdsConfig3);
         RDSConfig rdsConfig4 = createRdsConfig("rds4", Sets.newHashSet("env1", "env5"));
         Mockito.when(rdsConfigService.get(rdsConfig4.getId())).thenReturn(rdsConfig4);
-        clusterRequest.setRdsConfigIds(Sets.newHashSet(rdsConfig3.getId(), rdsConfig4.getId()));
-        clusterRequest.setRdsConfigJsons(Sets.newHashSet(createRdsConfigRequest("rds5", Sets.newHashSet()),
-                createRdsConfigRequest("rds5", Sets.newHashSet("env1", "env6"))));
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
@@ -121,13 +114,13 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         // GIVEN
         Stack stack = getStack();
         stack.setRegion("region3");
-        ClusterRequest clusterRequest = new ClusterRequest();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy", Sets.newHashSet("env2", "env3"));
         clusterRequest.setProxyName(proxyConfig.getName());
         Mockito.when(proxyConfigService.getByNameForWorkspaceId(proxyConfig.getName(), stack.getWorkspace().getId())).thenReturn(proxyConfig);
         LdapConfig ldapConfig = createLdapConfig("ldap", Sets.newHashSet());
         Mockito.when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
-        clusterRequest.setLdapConfigName("ldap");
+        clusterRequest.setLdapName("ldap");
         RDSConfig rdsConfig3 = createRdsConfig("rds1", Sets.newHashSet("env2", "env3"));
         Mockito.when(rdsConfigService.get(rdsConfig3.getId())).thenReturn(rdsConfig3);
         RDSConfig rdsConfig4 = createRdsConfig("rds2", Sets.newHashSet("env4", "env5"));
@@ -136,10 +129,7 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig1.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig1);
         RDSConfig rdsConfig2 = createRdsConfig("rds4", Sets.newHashSet("env2", "env3"));
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig2.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig2);
-        clusterRequest.setRdsConfigNames(Sets.newLinkedHashSet(Arrays.asList(rdsConfig1.getName(), rdsConfig2.getName())));
-        clusterRequest.setRdsConfigIds(Sets.newLinkedHashSet(Arrays.asList(rdsConfig3.getId(), rdsConfig4.getId())));
-        clusterRequest.setRdsConfigJsons(Sets.newLinkedHashSet(Arrays.asList(createRdsConfigRequest("rds5", Sets.newHashSet()),
-                createRdsConfigRequest("rds6", Sets.newHashSet("env5", "env6")))));
+        clusterRequest.setDatabases(Sets.newLinkedHashSet(Arrays.asList(rdsConfig1.getName(), rdsConfig2.getName())));
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
@@ -163,13 +153,13 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         // GIVEN
         Stack stack = getStack();
         stack.setEnvironment(null);
-        ClusterRequest clusterRequest = new ClusterRequest();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy", Sets.newHashSet("env2", "env3"));
         clusterRequest.setProxyName(proxyConfig.getName());
         Mockito.when(proxyConfigService.getByNameForWorkspaceId(proxyConfig.getName(), stack.getWorkspace().getId())).thenReturn(proxyConfig);
         LdapConfig ldapConfig = createLdapConfig("ldap", Sets.newHashSet());
         Mockito.when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
-        clusterRequest.setLdapConfigName("ldap");
+        clusterRequest.setLdapName("ldap");
         RDSConfig rdsConfig3 = createRdsConfig("rds1", Sets.newHashSet("env2", "env3"));
         Mockito.when(rdsConfigService.get(rdsConfig3.getId())).thenReturn(rdsConfig3);
         RDSConfig rdsConfig4 = createRdsConfig("rds2", Sets.newHashSet("env4", "env5"));
@@ -178,10 +168,7 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig1.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig1);
         RDSConfig rdsConfig2 = createRdsConfig("rds4", Sets.newHashSet("env2", "env3"));
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig2.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig2);
-        clusterRequest.setRdsConfigNames(Sets.newLinkedHashSet(Arrays.asList(rdsConfig1.getName(), rdsConfig2.getName())));
-        clusterRequest.setRdsConfigIds(Sets.newLinkedHashSet(Arrays.asList(rdsConfig3.getId(), rdsConfig4.getId())));
-        clusterRequest.setRdsConfigJsons(Sets.newLinkedHashSet(Arrays.asList(createRdsConfigRequest("rds5", Sets.newHashSet()),
-                createRdsConfigRequest("rds6", Sets.newHashSet("env5", "env6")))));
+        clusterRequest.setDatabases(Sets.newLinkedHashSet(Arrays.asList(rdsConfig1.getName(), rdsConfig2.getName())));
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
@@ -197,41 +184,6 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
                 actualResult.getErrors().get(3));
         Assert.assertEquals("Stack without environment cannot use rds6 RDSConfig resource which attached to an environment.",
                 actualResult.getErrors().get(4));
-    }
-
-    @Test
-    public void testValidateShouldBeFailedWhenLdapConfigGivenWithIdIsNotInGoodEnvironment() throws IOException {
-        // GIVEN
-        Stack stack = getStack();
-        ClusterRequest clusterRequest = new ClusterRequest();
-        LdapConfig ldapConfig = createLdapConfig("ldap", Sets.newHashSet("env2", "env3"));
-        Mockito.when(ldapConfigService.get(ldapConfig.getId())).thenReturn(ldapConfig);
-        clusterRequest.setLdapConfigId(ldapConfig.getId());
-        // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack);
-        // THEN
-        Assert.assertTrue(actualResult.hasError());
-        Assert.assertEquals(1, actualResult.getErrors().size());
-        Assert.assertEquals("Stack cannot use ldap LdapConfig resource which is not attached to env1 environment and not global.",
-                actualResult.getErrors().get(0));
-    }
-
-    @Test
-    public void testValidateShouldBeFailedWhenLdapConfigGivenWithRequestIsNotInGoodEnvironment() throws IOException {
-        // GIVEN
-        Stack stack = getStack();
-        ClusterRequest clusterRequest = new ClusterRequest();
-        LdapV4Request ldapV4Request = new LdapV4Request();
-        ldapV4Request.setName("ldap");
-        ldapV4Request.setEnvironments(Sets.newHashSet("env2", "env3"));
-        clusterRequest.setLdapConfig(ldapV4Request);
-        // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack);
-        // THEN
-        Assert.assertTrue(actualResult.hasError());
-        Assert.assertEquals(1, actualResult.getErrors().size());
-        Assert.assertEquals("Stack cannot use ldap LdapConfig resource which is not attached to env1 environment and not global.",
-                actualResult.getErrors().get(0));
     }
 
     private Stack getStack() throws IOException {

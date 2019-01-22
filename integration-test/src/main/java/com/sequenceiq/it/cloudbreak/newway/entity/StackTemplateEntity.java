@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 import static java.util.Collections.emptyMap;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,53 +15,49 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.CustomDomainSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.Tags;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.testcase.ClusterTemplateTest;
 
 @Prototype
-public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse, StackTemplateEntity> {
+public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, StackTemplateEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTemplateEntity.class);
 
     public StackTemplateEntity(TestContext testContext) {
-        super(new StackV2Request(), testContext);
+        super(new StackV4Request(), testContext);
     }
 
     public StackTemplateEntity valid() {
         String randomNameForMock = getNameCreator().getRandomNameForMock();
         return withInputs(emptyMap())
-                .withGeneralSettings(getTestContext().init(GeneralSettingsEntity.class))
-                .withPlacementSettings(getTestContext().init(PlacementSettingsEntity.class))
+                .withEnvironment(getTestContext().get(EnvironmentSettingsV4Entity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()))
-                .withCredentialName(getTestContext().get(CredentialEntity.class).getName())
-                .withStackAuthentication(getTestContext().init(StackAuthentication.class))
+                .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
                 .withGatewayPort(getTestContext().getSparkServer().getPort())
                 .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
     }
 
     public StackTemplateEntity withEveryProperties() {
         ImageCatalogEntity imgCat = getTestContext().get(ImageCatalogEntity.class);
-        getTestContext().given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
-                .given("placementSettings", PlacementSettingsEntity.class).withRegion(ClusterTemplateTest.EUROPE)
-                .given("network", NetworkV2Entity.class).withSubnetCIDR("10.10.0.0/16").withParameters(Map.of("customParameter", "subnet-value"))
+        getTestContext()
+                .given("network", NetworkV2Entity.class).withSubnetCIDR("10.10.0.0/16")
                 .given("securityRulesWorker", SecurityRulesEntity.class).withPorts("55,66,77").withProtocol("ftp").withSubnet("10.0.0.0/32")
                 .given("securityGroupMaster", SecurityGroupEntity.class).withSecurityGroupIds("scgId1", "scgId2")
                 .given("securityGroupWorker", SecurityGroupEntity.class).withSecurityRules("securityRulesWorker")
@@ -70,53 +65,36 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
                 .given("worker", InstanceGroupEntity.class).withHostGroup(WORKER).withSecurityGroup("securityGroupWorker")
                 .given("compute", InstanceGroupEntity.class).withHostGroup(COMPUTE)
                 .given("mpackDetails", ManagementPackDetailsEntity.class).withName("mock-test-mpack")
-                .given("ambariStack", AmbariStackDetailsEntity.class).withMpacks("mpackDetails")
-                .given("ambariRepo", AmbariRepoDetailsEntity.class)
+                .given("ambariStack", StackRepositoryEntity.class).withMpacks("mpackDetails")
+                .given("ambariRepo", AmbariRepositoryV4Entity.class)
                 .given("gatewayTopology", GatewayTopologyEntity.class).withExposedServices("AMBARI").withTopologyName("proxy-name")
                 .given("gateway", GatewayEntity.class).withTopologies("gatewayTopology")
-                .given("ambari", AmbariEntity.class).withAmbariRepoDetails("ambariRepo").withAmbariStackDetails("ambariStack").withGateway("gateway")
-                .given("cluster", ClusterEntity.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap").withAmbari("ambari")
+                .given("ambari", AmbariEntity.class).withAmbariRepoDetails("ambariRepo").withStackRepository("ambariStack")
+                .given("cluster", ClusterEntity.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap").withAmbari("ambari").withGateway("gateway")
                 .given("imageSettings", ImageSettingsEntity.class).withImageId("f6e778fc-7f17-4535-9021-515351df3691").withImageCatalog(imgCat.getName());
 
-        return withGeneralSettings("generalSettings")
-                .withPlacementSettings("placementSettings")
-                .withNetwork("network")
+        return withNetwork("network")
                 .withInstanceGroups("master", "worker", "compute")
                 .withCluster("cluster")
                 .withUserDefinedTags(Map.of("some-tag", "custom-tag"))
                 .withInputs(Map.of("some-input", "custom-input"))
-                .withImageSettings("imageSettings")
-                .withParameters(Map.of("param1", "some-value"));
+                .withImageSettings("imageSettings");
     }
 
-    public StackTemplateEntity withPlacementSettings(String key) {
-        PlacementSettingsEntity placementSettings = getTestContext().get(key);
-        return withPlacementSettings(placementSettings);
-    }
-
-    public StackTemplateEntity withPlacementSettings(PlacementSettingsEntity placementSettings) {
-        getRequest().setPlacement(placementSettings.getRequest());
+    public StackTemplateEntity withEnvironment(EnvironmentSettingsV4Entity environment) {
+        getRequest().setEnvironment(environment.getRequest());
         return this;
     }
 
-    public StackTemplateEntity withGeneralSettings(GeneralSettingsEntity generalSettings) {
-        getRequest().setGeneral(generalSettings.getRequest());
+    public StackTemplateEntity withEnvironmentKey(String environmentKey) {
+        EnvironmentSettingsV4Entity environment = getTestContext().get(environmentKey);
+        getRequest().setEnvironment(environment.getRequest());
         return this;
-    }
-
-    public StackTemplateEntity withGeneralSettings(String key) {
-        GeneralSettingsEntity generalSettings = getTestContext().get(key);
-        return withGeneralSettings(generalSettings);
     }
 
     public StackTemplateEntity withName(String name) {
-        getRequest().getGeneral().setName(name);
+        getRequest().setName(name);
         setName(name);
-        return this;
-    }
-
-    public StackTemplateEntity withCredentialName(String credentialName) {
-        getRequest().getGeneral().setCredentialName(credentialName);
         return this;
     }
 
@@ -130,19 +108,19 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
         return this;
     }
 
-    public StackTemplateEntity withClusterRequest(ClusterV2Request clusterRequest) {
+    public StackTemplateEntity withClusterRequest(ClusterV4Request clusterRequest) {
         getRequest().setCluster(clusterRequest);
         return this;
     }
 
     public StackTemplateEntity withAvailabilityZone(String availabilityZone) {
-        getRequest().getPlacement().setAvailabilityZone(availabilityZone);
+        getRequest().getEnvironment().getPlacement().setAvailabilityZone(availabilityZone);
         return this;
     }
 
     public StackTemplateEntity withClusterNameAsSubdomain(boolean b) {
         if (getRequest().getCustomDomain() == null) {
-            getRequest().setCustomDomain(new CustomDomainSettings());
+            getRequest().setCustomDomain(new CustomDomainSettingsV4Request());
         }
         getRequest().getCustomDomain().setClusterNameAsSubdomain(b);
         return this;
@@ -155,36 +133,36 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
 
     public StackTemplateEntity withImageSettings(String key) {
         ImageSettingsEntity imageSettingsEntity = getTestContext().get(key);
-        getRequest().setImageSettings(imageSettingsEntity.getRequest());
+        getRequest().setImage(imageSettingsEntity.getRequest());
         return this;
     }
 
     public StackTemplateEntity withImageCatalog(String imageCatalog) {
-        if (getRequest().getImageSettings() == null) {
-            getRequest().setImageSettings(new ImageSettings());
+        if (getRequest().getImage() == null) {
+            getRequest().setImage(new ImageSettingsV4Request());
         }
-        getRequest().getImageSettings().setImageCatalog(imageCatalog);
+        getRequest().getImage().setCatalog(imageCatalog);
         return this;
     }
 
     public StackTemplateEntity withImageId(String imageId) {
-        if (getRequest().getImageSettings() == null) {
-            getRequest().setImageSettings(new ImageSettings());
+        if (getRequest().getImage() == null) {
+            getRequest().setImage(new ImageSettingsV4Request());
         }
-        getRequest().getImageSettings().setImageId(imageId);
+        getRequest().getImage().setId(imageId);
         return this;
     }
 
     public StackTemplateEntity withInputs(Map<String, Object> inputs) {
         if (inputs == null) {
-            getRequest().setInputs(Collections.emptyMap());
+            getRequest().setInputs(emptyMap());
         } else {
             getRequest().setInputs(inputs);
         }
         return this;
     }
 
-    public StackTemplateEntity withInstanceGroups(List<InstanceGroupV2Request> instanceGroups) {
+    public StackTemplateEntity withInstanceGroups(List<InstanceGroupV4Request> instanceGroups) {
         getRequest().setInstanceGroups(instanceGroups);
         return this;
     }
@@ -205,8 +183,8 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
                 .map(this::getInstanceGroupV2Request)
                 .forEach(ig -> {
                     for (int i = 0; i < getRequest().getInstanceGroups().size(); i++) {
-                        InstanceGroupV2Request old = getRequest().getInstanceGroups().get(i);
-                        if (old.getGroup().equals(ig.getGroup())) {
+                        InstanceGroupV4Request old = getRequest().getInstanceGroups().get(i);
+                        if (old.getName().equals(ig.getName())) {
                             getRequest().getInstanceGroups().remove(i);
                             getRequest().getInstanceGroups().add(i, ig);
                         }
@@ -215,7 +193,7 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
         return this;
     }
 
-    private InstanceGroupV2Request getInstanceGroupV2Request(String key) {
+    private InstanceGroupV4Request getInstanceGroupV2Request(String key) {
         InstanceGroupEntity instanceGroupEntity = getTestContext().get(key);
         if (instanceGroupEntity == null) {
             throw new IllegalStateException("Given key is not exists in the test context: " + key);
@@ -240,34 +218,29 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
         return this;
     }
 
-    public StackTemplateEntity withNetwork(NetworkV2Request network) {
+    public StackTemplateEntity withNetwork(NetworkV4Request network) {
         getRequest().setNetwork(network);
         return this;
     }
 
-    public StackTemplateEntity withParameters(Map<String, String> parameters) {
-        getRequest().setParameters(parameters);
+    public StackTemplateEntity withAzure(AzureStackParametersV4 azure) {
+        getRequest().setAzure(azure);
         return this;
     }
 
-    public StackTemplateEntity withRegion(String region) {
-        getRequest().getPlacement().setRegion(region);
+    public StackTemplateEntity withStackAuthentication(StackAuthenticationV4Request stackAuthentication) {
+        getRequest().setAuthentication(stackAuthentication);
         return this;
     }
 
-    public StackTemplateEntity withStackAuthentication(StackAuthenticationRequest stackAuthentication) {
-        getRequest().setStackAuthentication(stackAuthentication);
-        return this;
-    }
-
-    public StackTemplateEntity withStackAuthentication(StackAuthentication stackAuthentication) {
-        getRequest().setStackAuthentication(stackAuthentication.getRequest());
+    public StackTemplateEntity withStackAuthentication(StackAuthenticationEntity stackAuthentication) {
+        getRequest().setAuthentication(stackAuthentication.getRequest());
         return this;
     }
 
     public StackTemplateEntity withUserDefinedTags(Map<String, String> tags) {
         if (getRequest().getTags() == null) {
-            getRequest().setTags(new Tags());
+            getRequest().setTags(new TagsV4Request());
         }
         getRequest().getTags().setUserDefinedTags(tags);
         return this;
@@ -287,12 +260,12 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
         return getRequest().getCluster() != null;
     }
 
-    public List<InstanceGroupResponse> getInstanceGroups() {
+    public List<InstanceGroupV4Response> getInstanceGroups() {
         return getResponse().getInstanceGroups();
     }
 
     public String getInstanceId(String hostGroupName) {
-        Set<InstanceMetaDataJson> metadata = getInstanceMetaData(hostGroupName);
+        Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(hostGroupName);
         return metadata
                 .stream()
                 .findFirst()
@@ -300,9 +273,9 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
                 .getInstanceId();
     }
 
-    public Set<InstanceMetaDataJson> getInstanceMetaData(String hostGroupName) {
+    public Set<InstanceMetaDataV4Response> getInstanceMetaData(String hostGroupName) {
         return getResponse().getInstanceGroups()
-                .stream().filter(im -> im.getGroup().equals(hostGroupName))
+                .stream().filter(im -> im.getName().equals(hostGroupName))
                 .findFirst()
                 .get()
                 .getMetadata();
@@ -310,6 +283,6 @@ public class StackTemplateEntity extends AbstractCloudbreakEntity<StackV2Request
 
     @Override
     public String getName() {
-        return getRequest().getGeneral().getName();
+        return getRequest().getName();
     }
 }
