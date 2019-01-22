@@ -121,11 +121,11 @@ func init() {
 					{
 						Name:   "by-params",
 						Usage:  "test database connection parameters",
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsType).AddAuthenticationFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: rds.TestRdsByParams,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsType).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
