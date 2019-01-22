@@ -27,6 +27,8 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     public static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList(EUROPE));
 
+    public static final String AVAILABILITY_ZONE = "London";
+
     public static final String LONDON = "London";
 
     private Set<SimpleEnvironmentV4Response> response;

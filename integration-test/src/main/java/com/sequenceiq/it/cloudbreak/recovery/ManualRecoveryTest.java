@@ -12,7 +12,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -46,7 +46,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
+        StackV4Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);

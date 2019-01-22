@@ -8,8 +8,6 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.force
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -38,8 +36,6 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClus
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreationWithProperties;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.GeneralSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
@@ -68,9 +64,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testClusterTemplateCreateAndGetAndDelete(TestContext testContext) {
         testContext
-                .given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(EUROPE)
+                .given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .given("stackTemplate", StackTemplateEntity.class).withEnvironment("environment")
+                .given("stackTemplate", StackTemplateEntity.class)
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new ClusterTemplateV4ListAction())
@@ -100,9 +96,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testLaunchClusterFromTemplate(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
-                .given("generalSettings", GeneralSettingsEntity.class).withEnvironmentKey("environment")
-                .given("placementSettings", PlacementSettingsEntity.class).withRegion(EUROPE)
-                .given("stackTemplate", StackTemplateEntity.class).withGeneralSettings("generalSettings").withPlacementSettings("placementSettings")
+                .given("stackTemplate", StackTemplateEntity.class)
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new LaunchClusterFromTemplateAction("stackTemplate"))
@@ -159,8 +153,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateSpecialNameClusterTemplate(TestContext testContext) {
         testContext
-                .given(EnvironmentSettingsV4Entity.class).withPlacement("")
-                .given("placementSettings", PlacementSettingsEntity.class).withRegion(EUROPE)
+                .given(EnvironmentEntity.class)
                 .when(Environment::post)
                 .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("environment")
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate").withName(SPECIAL_CT_NAME)
@@ -178,7 +171,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "testContext")
     public void testCreateAgainClusterTemplate(TestContext testContext) {
-        testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(VALID_LOCATION)
+        testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
                 .given(ClusterTemplateEntity.class)
                 .given("placementSettings", PlacementSettingsEntity.class).withRegion(EUROPE)
@@ -193,7 +186,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateLongDescriptionClusterTemplate(TestContext testContext) {
         String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
-        testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(VALID_LOCATION)
+        testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
                 .given(ClusterTemplateEntity.class).withDescription(invalidLongDescripton)
                 .when(new ClusterTemplateV4CreateAction(), key("longCtDescription"))

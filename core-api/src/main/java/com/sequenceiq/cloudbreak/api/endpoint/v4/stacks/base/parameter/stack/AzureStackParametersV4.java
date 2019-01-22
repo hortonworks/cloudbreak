@@ -13,6 +13,9 @@ public class AzureStackParametersV4 extends StackParameterV4Base {
     @ApiModelProperty
     private boolean encryptStorage;
 
+    @ApiModelProperty
+    private boolean yarnQueue;
+
     public String getResourceGroupName() {
         return resourceGroupName;
     }
@@ -21,11 +24,28 @@ public class AzureStackParametersV4 extends StackParameterV4Base {
         this.resourceGroupName = resourceGroupName;
     }
 
+    public boolean isEncryptStorage() {
+        return encryptStorage;
+    }
+
+    public void setEncryptStorage(boolean encryptStorage) {
+        this.encryptStorage = encryptStorage;
+    }
+
+    public boolean isYarnQueue() {
+        return yarnQueue;
+    }
+
+    public void setYarnQueue(boolean yarnQueue) {
+        this.yarnQueue = yarnQueue;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> ret = new HashMap<>();
         ret.put("resourceGroupName", resourceGroupName);
         ret.put("encryptStorage", encryptStorage);
+        ret.put("yarnQueue", yarnQueue);
         return ret;
     }
 
@@ -33,5 +53,6 @@ public class AzureStackParametersV4 extends StackParameterV4Base {
     public void parse(Map<String, Object> parameters) {
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
         encryptStorage = getBoolean(parameters, "encryptStorage");
+        yarnQueue = getBoolean(parameters, "yarnQueue");
     }
 }

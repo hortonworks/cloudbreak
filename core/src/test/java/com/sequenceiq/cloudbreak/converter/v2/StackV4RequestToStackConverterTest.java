@@ -124,7 +124,7 @@ public class StackV4RequestToStackConverterTest {
         customDomainSettings.setHostgroupNameAsHostname(true);
         customDomainSettings.setClusterNameAsSubdomain(true);
         customDomainSettings.setHostname("customHostname");
-        customDomainSettings.setName("customDomain");
+        customDomainSettings.setDomainName("customDomain");
         source.setCustomDomain(customDomainSettings);
         source.setAuthentication(stackAuthenticationRequest);
         source.setNetwork(networkV4Request);
@@ -151,7 +151,7 @@ public class StackV4RequestToStackConverterTest {
         assertThat(actual.getRegion(), is(source.getEnvironment().getPlacement().getRegion()));
         assertThat(actual.getStackAuthentication(), is(stackAuthentication));
         assertThat(actual.getNetwork(), is(network));
-        assertThat(actual.getCustomDomain(), is(source.getCustomDomain().getName()));
+        assertThat(actual.getCustomDomain(), is(source.getCustomDomain().getDomainName()));
         assertThat(actual.getCustomHostname(), is(source.getCustomDomain().getHostname()));
         assertThat(actual.isClusterNameAsSubdomain(), is(source.getCustomDomain().isClusterNameAsSubdomain()));
         assertThat(actual.isHostgroupNameAsHostname(), is(source.getCustomDomain().isHostgroupNameAsHostname()));

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
+import static com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity.EUROPE;
+
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
@@ -7,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnv
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -14,12 +17,6 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response, EnvironmentSettingsV4Entity> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
-
-    public static final String VALID_REGION = "Europe";
-
-    private static final String VALID_LOCATION = "London";
-
-    private static final String AVAILABILITY_ZONE = "London";
 
     private Set<SimpleEnvironmentV4Response> response;
 
@@ -49,8 +46,8 @@ public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<Enviro
             throw new IllegalArgumentException("Credential is mandatory for EnvironmentSettings");
         }
         PlacementSettingsEntity placementSettings = getTestContext().get(PlacementSettingsEntity.class)
-                .withRegion(VALID_REGION)
-                .withAvailabilityZone(AVAILABILITY_ZONE);
+                .withRegion(EUROPE)
+                .withAvailabilityZone(EnvironmentEntity.AVAILABILITY_ZONE);
 
         return withName(getNameCreator().getRandomNameForMock())
                 .withPlacement(placementSettings)
