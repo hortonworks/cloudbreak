@@ -260,7 +260,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 JsonNode jsonNode = JsonUtil.readTree(responseBody.toString());
                 JsonNode idNode = jsonNode.path("id");
                 if (idNode.isMissingNode()) {
-                    LOGGER.warn("Response was a JSON but no ID available");
+                    LOGGER.debug("Response was a JSON but no ID available");
                 } else {
                     resourceId = idNode.asText();
                 }
