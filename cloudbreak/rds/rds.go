@@ -61,7 +61,8 @@ func TestRdsByParams(c *cli.Context) {
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlRdsUserName.Name),
 		c.String(fl.FlRdsPassword.Name),
-		c.String(fl.FlRdsURL.Name))
+		c.String(fl.FlRdsURL.Name),
+		c.String(fl.FlRdsConnectorJarURLOptional.Name))
 }
 
 func testRdsByNameImpl(client rdsClient, workspaceID int64, name string) {
@@ -79,7 +80,7 @@ func testRdsByNameImpl(client rdsClient, workspaceID int64, name string) {
 	}
 }
 
-func testRdsByParamsImpl(client rdsClient, workspaceID int64, username string, password string, URL string) {
+func testRdsByParamsImpl(client rdsClient, workspaceID int64, username string, password string, URL string, jarURL string) {
 	defer utils.TimeTrack(time.Now(), "test database configuration by parameters")
 	rdsRequest := &model.RdsTestRequest{
 		RdsConfig: &model.RdsConfig{
@@ -88,6 +89,7 @@ func testRdsByParamsImpl(client rdsClient, workspaceID int64, username string, p
 			ConnectionPassword: &password,
 			ConnectionURL:      &URL,
 			Type:               &(&types.S{S: "testtype"}).S,
+			ConnectorJarURL:    jarURL,
 		},
 	}
 	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")

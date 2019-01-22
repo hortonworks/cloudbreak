@@ -70,7 +70,7 @@ RSpec.describe 'Database test cases', :type => :aruba do
 
   it "Database - Test - By parameters - Failure" do
     with_environment 'DEBUG' => '1' do
-      result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).type("Hive").build(false)
+      result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).build(false)
       expect(result.exit_status).to eql 1
       expect(result.stderr.to_s.downcase).to include("failed")
     end
@@ -89,7 +89,7 @@ RSpec.describe 'Database test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('testRdsConnectionInWorkspace', '{"connectionResult": "connected"}', '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).type("Hive").build(false)
+      result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr.to_s.downcase).not_to include("failed")
     end
