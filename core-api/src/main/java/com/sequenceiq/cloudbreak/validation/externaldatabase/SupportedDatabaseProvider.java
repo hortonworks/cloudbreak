@@ -13,29 +13,29 @@ import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 
 public final class SupportedDatabaseProvider {
 
-    private static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases = new HashSet<>();
+    private static final Set<SupportedExternalDatabaseServiceEntry> SUPPORTED_EXTERNAL_DATABASES = new HashSet<>();
 
     private SupportedDatabaseProvider() {
     }
 
     static {
-        supportedExternalDatabases.add(getSupportedServiceEntry("Hive", POSTGRES, MYSQL, ORACLE11, ORACLE12));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Oozie", POSTGRES, MYSQL, ORACLE11, ORACLE12));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Ranger", POSTGRES, MYSQL, ORACLE11, ORACLE12));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Other", POSTGRES, MYSQL, ORACLE11, ORACLE12));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Druid", POSTGRES, MYSQL));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Superset", POSTGRES, MYSQL));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Beacon", POSTGRES, MYSQL));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Registry", MYSQL, ORACLE11, ORACLE12));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Hive", POSTGRES, MYSQL, ORACLE11, ORACLE12));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Oozie", POSTGRES, MYSQL, ORACLE11, ORACLE12));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Ranger", POSTGRES, MYSQL, ORACLE11, ORACLE12));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Other", POSTGRES, MYSQL, ORACLE11, ORACLE12));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Druid", POSTGRES, MYSQL));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Superset", POSTGRES, MYSQL));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Beacon", POSTGRES, MYSQL));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Registry", POSTGRES, MYSQL, ORACLE11, ORACLE12));
     }
 
     public static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases() {
-        return supportedExternalDatabases;
+        return SUPPORTED_EXTERNAL_DATABASES;
     }
 
     public static Optional<SupportedExternalDatabaseServiceEntry> getOthers() {
-        return supportedExternalDatabases.stream().filter(item -> item.getName().equals("Other".toUpperCase())).findFirst();
+        return SUPPORTED_EXTERNAL_DATABASES.stream().filter(item -> item.getName().equals("Other".toUpperCase())).findFirst();
     }
 
     private static SupportedExternalDatabaseServiceEntry getSupportedServiceEntry(String name, DatabaseVendor... vendors) {
