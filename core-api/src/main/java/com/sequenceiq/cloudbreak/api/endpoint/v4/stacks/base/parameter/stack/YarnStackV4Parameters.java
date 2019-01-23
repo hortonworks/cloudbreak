@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModelProperty;
 public class YarnStackV4Parameters extends StackV4ParameterBase {
 
     @ApiModelProperty
-    private boolean yarnQueue;
+    private String yarnQueue;
 
-    public boolean isYarnQueue() {
+    public String getYarnQueue() {
         return yarnQueue;
     }
 
-    public void setYarnQueue(boolean yarnQueue) {
+    public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
     }
 
@@ -27,6 +27,6 @@ public class YarnStackV4Parameters extends StackV4ParameterBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
-        yarnQueue = getBoolean(parameters, "yarnQueue");
+        yarnQueue = getParameterOrNull(parameters, "yarnQueue");
     }
 }
