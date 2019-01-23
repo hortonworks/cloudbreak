@@ -127,7 +127,10 @@ cb:
                 HDF-3.3 Messaging Management: Apache Kafka=hdf33-messaging-kafka;
                 Messaging Management: Apache Kafka, Schema Registry=hdf33-messaging-kafka-registry;
                 Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;
-                Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha
+                Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha;
+                HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin=hdp31-data-science-spark2;
+                HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp31-edw-analytics;
+                HDP 3.1 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp31-shared-services
      internal: >
                 HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;
                 HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics;
