@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -144,10 +143,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public StackStatusV4Response getStatusByName(Long workspaceId, String name) {
-        Map<String, Object> status = stackService.getStatusByNameInWorkspace(name, workspaceId);
-        StackStatusV4Response response = new StackStatusV4Response();
-        response.setStatuses(status);
-        return response;
+        return converterUtil.convert(stackService.getByNameInWorkspace(name, workspaceId), StackStatusV4Response.class);
     }
 
     @Override

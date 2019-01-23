@@ -413,10 +413,6 @@ public class StackService {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
-    public Map<String, Object> getStatusByNameInWorkspace(String name, Long workspaceId) {
-        return converterUtil.convert(getByNameInWorkspace(name, workspaceId), Map.class);
-    }
-
     public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
