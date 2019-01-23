@@ -54,6 +54,7 @@ public class UptimeNotifier {
         notification.setWorkspaceId(stack.getWorkspace().getId());
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
+        notification.setStackStatus(stack.getStatus());
         notification.setEventType(UPTIME_NOTIFICATION);
         notification.setEventMessage(String.valueOf(uptime));
         if (stack.getCredential() == null) {
@@ -69,6 +70,7 @@ public class UptimeNotifier {
             notification.setBlueprintName(stack.getCluster().getBlueprint().getAmbariName());
             notification.setClusterName(stack.getCluster().getName());
             notification.setClusterId(stack.getCluster().getId());
+            notification.setClusterStatus(stack.getCluster().getStatus());
         }
         return new Notification<>(notification);
     }
