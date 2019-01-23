@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Aws
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -36,7 +37,7 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     private OpenStackStackV4Parameters openstack;
 
     @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
-    private OpenStackStackV4Parameters openstack;
+    private YarnStackV4Parameters yarn;
 
     @ApiModelProperty
     private Long timeToLive;
@@ -79,6 +80,15 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
 
     public void setOpenstack(OpenStackStackV4Parameters openstack) {
         this.openstack = openstack;
+    }
+
+    @Override
+    public YarnStackV4Parameters getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(YarnStackV4Parameters yarn) {
+        this.yarn = yarn;
     }
 
     public Long getTimeToLive() {
