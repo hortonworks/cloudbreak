@@ -12,7 +12,6 @@ import javax.ws.rs.core.StreamingOutput;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.events.filters.EventSinceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
@@ -33,8 +32,8 @@ public class EventV4Controller implements EventV4Endpoint {
     private StructuredEventService structuredEventService;
 
     @Override
-    public CloudbreakEventV4Responses list(Long workspaceId, EventSinceV4Filter since) {
-        return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspaceId, since.getSince()));
+    public CloudbreakEventV4Responses list(Long workspaceId, Long since) {
+        return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspaceId, since));
     }
 
     @Override

@@ -9,11 +9,6 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.DeleteInstanceByNameV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.DeleteStackByNameV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.DeleteStackWithKerberosV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.GetAllStackV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.GetStackByNameV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ReinstallV4Request;
@@ -66,9 +61,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     private ConverterUtil converterUtil;
 
     @Override
-    public StackViewV4Responses list(Long workspaceId, GetAllStackV4Filter filter) {
-        Set<StackViewV4Response> stackViewResponses = stackCommonService.retrieveStacksByWorkspaceId(workspaceId,
-                filter.getEnvironment(), filter.isOnlyDatalakes());
+    public StackViewV4Responses list(Long workspaceId, String environment, Boolean onlyDatalakes) {
+        Set<StackViewV4Response> stackViewResponses = stackCommonService.retrieveStacksByWorkspaceId(workspaceId, environment, onlyDatalakes);
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -81,14 +75,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public StackV4Response get(Long workspaceId, String name, GetStackByNameV4Filter filter) {
-        return stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, filter.getEntries());
+    public StackV4Response get(Long workspaceId, String name, Set<String> entries) {
+        return stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries);
     }
 
     @Override
-    public void delete(Long workspaceId, String name, DeleteStackByNameV4Filter filter) {
+    public void delete(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackCommonService.deleteInWorkspace(name, workspaceId, filter.getForced(), filter.getDeleteDependencies(), user);
+        stackCommonService.deleteInWorkspace(name, workspaceId, forced, deleteDependencies, user);
     }
 
     @Override
@@ -132,8 +126,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void deleteWithKerberos(Long workspaceId, String name, DeleteStackWithKerberosV4Filter filter) {
-        stackCommonService.deleteWithKerbereosInWorkspace(name, workspaceId, filter.getWithStackDelete(), filter.getDeleteDependencies());
+    public void deleteWithKerberos(Long workspaceId, String name, Boolean withStackDelete, Boolean deleteDependencies) {
+        stackCommonService.deleteWithKerbereosInWorkspace(name, workspaceId, withStackDelete, deleteDependencies);
     }
 
     @Override
@@ -147,8 +141,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void deleteInstance(Long workspaceId, String name, DeleteInstanceByNameV4Filter filter) {
-        stackCommonService.deleteInstanceByNameInWorkspace(name, workspaceId, filter.getInstanceId(), filter.getForced());
+    public void deleteInstance(Long workspaceId, String name, Boolean forced, String instanceId) {
+        stackCommonService.deleteInstanceByNameInWorkspace(name, workspaceId, instanceId, forced);
     }
 
     @Override

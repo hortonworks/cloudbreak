@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
@@ -34,9 +33,8 @@ public class DatabaseV4Controller extends NotificationController implements Data
     private ConverterUtil converterUtil;
 
     @Override
-    public DatabaseV4Responses list(Long workspaceId, DatabaseV4ListFilter databaseV4ListFilter) {
-        Set<RDSConfig> allInWorkspaceAndEnvironment = databaseService.findAllInWorkspaceAndEnvironment(workspaceId,
-                databaseV4ListFilter.getEnvironment(), databaseV4ListFilter.getAttachGlobal());
+    public DatabaseV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
+        Set<RDSConfig> allInWorkspaceAndEnvironment = databaseService.findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal);
         return new DatabaseV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, DatabaseV4Response.class));
     }
 

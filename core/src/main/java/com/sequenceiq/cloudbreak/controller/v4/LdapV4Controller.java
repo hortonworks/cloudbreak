@@ -9,7 +9,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
@@ -34,9 +33,9 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     private ConverterUtil converterUtil;
 
     @Override
-    public LdapV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
+    public LdapV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<LdapConfig> allInWorkspaceAndEnvironment = ldapConfigService.findAllInWorkspaceAndEnvironment(workspaceId,
-                listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+                environment, attachGlobal);
         return new LdapV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, LdapV4Response.class));
     }
 

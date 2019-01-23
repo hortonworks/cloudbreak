@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials;
 
 import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,12 +13,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.filter.AuthCodeGrantFlowFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.InteractiveCredentialV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -102,5 +100,5 @@ public interface CredentialV4Endpoint {
             nickname = "authorizeCodeGrantFlowBasedCredentialInWorkspace", notes = "Authorize code grant flow based credential creation.",
             httpMethod = "GET")
     CredentialV4Response authorizeCodeGrantFlow(@PathParam("workspaceId") Long workspaceId, @PathParam("cloudPlatform") String platform,
-            @BeanParam AuthCodeGrantFlowFilter filter);
+            @QueryParam("code") String code, @QueryParam("state") String state);
 }

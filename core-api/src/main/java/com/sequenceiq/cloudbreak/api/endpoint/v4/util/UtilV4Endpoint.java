@@ -1,17 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util;
 
 import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.ClientVersionV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.SecurityRulesV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.StackVersionV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
@@ -40,7 +38,7 @@ public interface UtilV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.CHECK_CLIENT_VERSION, produces = ContentType.JSON,
             nickname = "checkClientVersionV4")
-    VersionCheckV4Result checkClientVersion(@BeanParam ClientVersionV4Filter clientVersionV4Filter);
+    VersionCheckV4Result checkClientVersion(@QueryParam("version") String version);
 
     @GET
     @Path("stack_matrix")
@@ -53,7 +51,7 @@ public interface UtilV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.CLOUD_STORAGE_MATRIX, produces = ContentType.JSON, nickname = "getCloudStorageMatrixV4",
             notes = "Define stack version at least at patch level eg. 2.6.0")
-    CloudStorageSupportedV4Responses getCloudStorageMatrix(@BeanParam StackVersionV4Filter stackVersionV4Filter);
+    CloudStorageSupportedV4Responses getCloudStorageMatrix(@QueryParam("stackVersion") String stackVersion);
 
     @POST
     @Path("validate_repository")
@@ -67,7 +65,7 @@ public interface UtilV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
             notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
-    SecurityRulesV4Response getDefaultSecurityRules(@BeanParam SecurityRulesV4Filter securityRulesV4Filter);
+    SecurityRulesV4Response getDefaultSecurityRules(@QueryParam("knoxEnabled") @DefaultValue("false") Boolean knoxEnabled);
 
     @POST
     @Path("subscribe")

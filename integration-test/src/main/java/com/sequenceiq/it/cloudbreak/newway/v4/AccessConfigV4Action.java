@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
+import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -27,7 +27,7 @@ public class AccessConfigV4Action {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
-        PlatformResourceV4Filter request = new PlatformResourceV4Filter();
+        PlatformResourceParameters request = new PlatformResourceParameters();
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
         if (credential != null && accessConfig.getRequest().getCredentialName() == null) {

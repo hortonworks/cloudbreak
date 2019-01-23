@@ -2,19 +2,19 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
@@ -38,7 +38,8 @@ public interface DatabaseV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "listDatabasesByWorkspace")
-    DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam DatabaseV4ListFilter databaseV4ListFilter);
+    DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+            @QueryParam("attachGlobal") @DefaultValue("false") Boolean attachGlobal);
 
     @POST
     @Path("")

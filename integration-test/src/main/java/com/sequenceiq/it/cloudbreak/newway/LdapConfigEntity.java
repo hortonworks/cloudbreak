@@ -5,9 +5,8 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
@@ -159,7 +158,7 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, Ld
     @Override
     public List<LdapV4Response> getAll(CloudbreakClient client) {
         LdapConfigV4Endpoint ldapConfigV4Endpoint = client.getCloudbreakClient().ldapConfigV4Endpoint();
-        return ldapConfigV4Endpoint.list(client.getWorkspaceId(), new ListV4Filter()).getResponses()
+        return ldapConfigV4Endpoint.list(client.getWorkspaceId(), null, false).getResponses()
                 .stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());

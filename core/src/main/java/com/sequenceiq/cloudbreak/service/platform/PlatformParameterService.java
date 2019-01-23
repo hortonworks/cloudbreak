@@ -3,11 +3,12 @@ package com.sequenceiq.cloudbreak.service.platform;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -21,9 +22,8 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -50,6 +50,31 @@ public class PlatformParameterService {
 
     @Inject
     private CloudResourceAdvisor cloudResourceAdvisor;
+
+    @Inject
+    private CredentialService credentialService;
+
+    public PlatformResourceRequest getPlatformResourceRequest(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+
+        if (!Strings.isNullOrEmpty(credentialName)) {
+            platformResourceRequest.setCredential(credentialService.getByNameForWorkspaceId(credentialName, workspaceId));
+        } else {
+            throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
+        }
+        if (!Strings.isNullOrEmpty(platformVariant)) {
+            platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().cloudPlatform());
+        } else {
+            platformResourceRequest.setPlatformVariant(
+                    Strings.isNullOrEmpty(platformVariant) ? platformResourceRequest.getCredential().cloudPlatform() : platformVariant);
+        }
+        platformResourceRequest.setRegion(region);
+        platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().cloudPlatform());
+        if (!Strings.isNullOrEmpty(availabilityZone)) {
+            platformResourceRequest.setAvailabilityZone(availabilityZone);
+        }
+        return platformResourceRequest;
+    }
 
     public CloudVmTypes getVmTypesByCredential(PlatformResourceRequest request) {
         checkFieldIsNotEmpty(request.getRegion(), "region");
@@ -86,14 +111,12 @@ public class PlatformParameterService {
                 request.getPlatformVariant(), request.getFilters());
     }
 
-    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, RecommendationV4Filter request) {
-        PlatformResourceRequest resourceRequest = conversionService.convert(request, PlatformResourceRequest.class);
-        checkFieldIsNotEmpty(request.getRegion(), "region");
-        checkFieldIsNotEmpty(request.getAvailabilityZone(), "availabilityZone");
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(workspaceId, user);
-        return cloudResourceAdvisor.createForBlueprint(blueprintName,
-                        resourceRequest, user, workspace);
+    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
+            String region, String platformVariant, String availabilityZone) {
+        if (!ObjectUtils.allNotNull(region, availabilityZone)) {
+            throw new BadRequestException("region and availabilityZone cannot be null");
+        }
+        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone);
     }
 
     public CloudSecurityGroups getSecurityGroups(PlatformResourceRequest request) {

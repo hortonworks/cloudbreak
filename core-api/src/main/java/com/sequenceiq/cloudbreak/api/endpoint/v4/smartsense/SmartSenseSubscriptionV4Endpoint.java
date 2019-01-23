@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense;
 
 import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.base.SmartSenseSubscriptionListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -33,7 +33,7 @@ public interface SmartSenseSubscriptionV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "listSmartSenseSubscriptionsByWorkspace")
-    SmartSenseSubscriptionV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam SmartSenseSubscriptionListV4Filter filter);
+    SmartSenseSubscriptionV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("onlyDefault") @DefaultValue("false") Boolean onlyDefault);
 
     @GET
     @Path("{name}")

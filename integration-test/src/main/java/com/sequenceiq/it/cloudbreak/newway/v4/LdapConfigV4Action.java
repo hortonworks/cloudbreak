@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -49,7 +48,7 @@ public class LdapConfigV4Action {
         ldapconfigEntity.setResponses(
                 client.getCloudbreakClient()
                         .ldapConfigV4Endpoint()
-                        .list(workspaceId, new ListV4Filter()).getResponses());
+                        .list(workspaceId, null, Boolean.FALSE).getResponses());
         logJSON(" get all ldap config response: ", ldapconfigEntity.getResponse());
     }
 

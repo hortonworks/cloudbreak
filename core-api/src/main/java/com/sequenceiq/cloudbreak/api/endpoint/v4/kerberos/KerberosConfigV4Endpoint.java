@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,10 +10,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses;
@@ -36,7 +35,8 @@ public interface KerberosConfigV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KerberosOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.KERBEROS_CONFIG_NOTES,
             nickname = "listKerberosConfigByWorkspace")
-    KerberosViewV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam ListV4Filter listV4Filter);
+    KerberosViewV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+            @QueryParam("attachGlobal") Boolean attachGlobal);
 
     @GET
     @Path("{name}")

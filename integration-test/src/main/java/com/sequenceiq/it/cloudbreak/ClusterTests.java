@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
@@ -289,9 +288,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(CloudbreakClient.created());
         CloudbreakClient clientContext = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext());
         com.sequenceiq.cloudbreak.client.CloudbreakClient client = clientContext.getCloudbreakClient();
-        ImageCatalogGetImagesV4Filter filter = new ImageCatalogGetImagesV4Filter();
-        filter.setPlatform(provider);
-        ImagesV4Response imagesByProvider = client.imageCatalogV4Endpoint().getImages(clientContext.getWorkspaceId(), filter);
+        ImagesV4Response imagesByProvider = client.imageCatalogV4Endpoint().getImages(clientContext.getWorkspaceId(), null, provider);
         List<? extends ImageV4Response> images;
         switch (imageDescription) {
             case "hdf":

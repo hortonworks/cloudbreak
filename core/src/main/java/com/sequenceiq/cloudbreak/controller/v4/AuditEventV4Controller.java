@@ -11,7 +11,6 @@ import javax.ws.rs.core.StreamingOutput;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.filter.GetAuditEventRequestV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
@@ -29,17 +28,16 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
     }
 
     @Override
-    public AuditEventV4Responses getAuditEvents(Long workspaceId, GetAuditEventRequestV4Filter getAuditRequest) {
-        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId,
-                getAuditRequest.getResourceType(), getAuditRequest.getResourceId());
+    public AuditEventV4Responses getAuditEvents(Long workspaceId, String resourceType, Long resourceId) {
+        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, resourceType, resourceId);
         return new AuditEventV4Responses(auditEventsByWorkspaceId);
 
     }
 
     @Override
-    public Response getAuditEventsZip(Long workspaceId, GetAuditEventRequestV4Filter getAuditRequest) {
-        List<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, getAuditRequest).getResponses();
-        return getAuditEventsZipResponse(auditEvents, getAuditRequest.getResourceType(), getAuditRequest.getResourceId());
+    public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId) {
+        List<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, resourceType, resourceId).getResponses();
+        return getAuditEventsZipResponse(auditEvents, resourceType, resourceId);
     }
 
     private Response getAuditEventsZipResponse(List<AuditEventV4Response> auditEventV4Responses, String resourceType, Long resourceId) {

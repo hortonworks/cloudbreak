@@ -9,7 +9,6 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
@@ -32,9 +31,9 @@ public class KerberosConfigV4Controller extends NotificationController implement
     private ConverterUtil converterUtil;
 
     @Override
-    public KerberosViewV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
+    public KerberosViewV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<KerberosConfig> allInWorkspaceAndEnvironment = kerberosService.findAllInWorkspaceAndEnvironment(workspaceId,
-                listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+                environment, attachGlobal);
         return new KerberosViewV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, KerberosViewV4Response.class));
     }
 

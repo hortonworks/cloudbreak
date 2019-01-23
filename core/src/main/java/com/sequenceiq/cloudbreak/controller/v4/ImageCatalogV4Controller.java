@@ -9,8 +9,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.GetImageCatalogV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
@@ -41,9 +39,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    public ImageCatalogV4Response get(Long workspaceId, String name, GetImageCatalogV4Filter getImageCatalogV4Filter) {
+    public ImageCatalogV4Response get(Long workspaceId, String name, Boolean withImages) {
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(imageCatalogService.get(workspaceId, name), ImageCatalogV4Response.class);
-        Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, name, getImageCatalogV4Filter.getWithImages());
+        Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, name, withImages);
         if (images != null) {
             imageCatalogResponse.setImages(converterUtil.convert(images, ImagesV4Response.class));
         }
@@ -82,14 +80,14 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    public ImagesV4Response getImages(Long workspaceId, ImageCatalogGetImagesV4Filter filter) throws Exception {
-        Images images = imageCatalogService.getImagesFromDefault(workspaceId, filter.getPlatform(), filter.getStackName());
+    public ImagesV4Response getImages(Long workspaceId, String stackName, String platform) throws Exception {
+        Images images = imageCatalogService.getImagesFromDefault(workspaceId, platform, stackName);
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 
     @Override
-    public ImagesV4Response getImagesByName(Long workspaceId, String name, ImageCatalogGetImagesV4Filter filter) throws Exception {
-        Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, filter.getStackName(), filter.getPlatform());
+    public ImagesV4Response getImagesByName(Long workspaceId, String name, String stackName, String platform) throws Exception {
+        Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, stackName, platform);
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 

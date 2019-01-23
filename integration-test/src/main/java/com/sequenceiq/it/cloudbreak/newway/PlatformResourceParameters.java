@@ -1,25 +1,13 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters;
+package com.sequenceiq.it.cloudbreak.newway;
 
-import javax.ws.rs.QueryParam;
+public class PlatformResourceParameters {
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.swagger.annotations.ApiModel;
-
-@ApiModel
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class PlatformResourceV4Filter {
-
-    @QueryParam("credentialName")
     private String credentialName;
 
-    @QueryParam("region")
     private String region;
 
-    @QueryParam("platformVariant")
     private String platformVariant;
 
-    @QueryParam("availabilityZone")
     private String availabilityZone;
 
     public String getCredentialName() {

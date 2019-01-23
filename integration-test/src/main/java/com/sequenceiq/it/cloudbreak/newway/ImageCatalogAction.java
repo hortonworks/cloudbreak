@@ -6,8 +6,6 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.util.HashSet;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.GetImageCatalogV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ImageCatalogAction {
@@ -37,11 +35,9 @@ public class ImageCatalogAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        GetImageCatalogV4Filter filter = new GetImageCatalogV4Filter();
-        filter.setWithImages(false);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogV4Endpoint().get(client.getWorkspaceId(), imageCatalogEntity.getName(), filter));
+                        .imageCatalogV4Endpoint().get(client.getWorkspaceId(), imageCatalogEntity.getName(), Boolean.FALSE));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
     }
 
@@ -51,11 +47,9 @@ public class ImageCatalogAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         String provider = integrationTestContext.getContextParam(CLOUDPROVIDER, String.class);
-        ImageCatalogGetImagesV4Filter filter = new ImageCatalogGetImagesV4Filter();
-        filter.setPlatform(provider);
         imageCatalogEntity.setResponseByProvider(
                 client.getCloudbreakClient()
-                        .imageCatalogV4Endpoint().getImagesByName(client.getWorkspaceId(), imageCatalogEntity.getName(), filter));
+                        .imageCatalogV4Endpoint().getImagesByName(client.getWorkspaceId(), imageCatalogEntity.getName(), null, provider));
         logJSON("get response by provider from image catalog: ", imageCatalogEntity.getResponseByProvider());
     }
 
@@ -65,11 +59,9 @@ public class ImageCatalogAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         String provider = integrationTestContext.getContextParam(CLOUDPROVIDER, String.class);
-        ImageCatalogGetImagesV4Filter filter = new ImageCatalogGetImagesV4Filter();
-        filter.setPlatform(provider);
         imageCatalogEntity.setResponseByProvider(
                 client.getCloudbreakClient()
-                        .imageCatalogV4Endpoint().getImages(client.getWorkspaceId(), filter));
+                        .imageCatalogV4Endpoint().getImages(client.getWorkspaceId(), null, provider));
         logJSON("Imagecatalog get response by provider: ", imageCatalogEntity.getResponseByProvider());
     }
 

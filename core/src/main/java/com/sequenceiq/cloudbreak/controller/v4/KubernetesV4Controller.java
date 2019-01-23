@@ -9,7 +9,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.requests.KubernetesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
@@ -32,9 +31,9 @@ public class KubernetesV4Controller extends NotificationController implements Ku
     private ConverterUtil converterUtil;
 
     @Override
-    public KubernetesV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
+    public KubernetesV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<KubernetesConfig> allInWorkspaceAndEnvironment = kubernetesConfigService
-                .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+                .findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal);
         return new KubernetesV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, KubernetesV4Response.class));
     }
 

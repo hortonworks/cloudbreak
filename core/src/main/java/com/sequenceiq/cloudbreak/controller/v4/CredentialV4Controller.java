@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.filter.AuthCodeGrantFlowFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
@@ -97,8 +96,8 @@ public class CredentialV4Controller extends NotificationController implements Cr
     }
 
     @Override
-    public CredentialV4Response authorizeCodeGrantFlow(Long workspaceId, String platform, AuthCodeGrantFlowFilter filter) {
-        Credential credential = credentialService.authorizeCodeGrantFlow(filter.getCode(), filter.getState(), workspaceId, platform);
+    public CredentialV4Response authorizeCodeGrantFlow(Long workspaceId, String platform, String code, String state) {
+        Credential credential = credentialService.authorizeCodeGrantFlow(code, state, workspaceId, platform);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return converterUtil.convert(credential, CredentialV4Response.class);
     }

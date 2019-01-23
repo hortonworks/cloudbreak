@@ -9,9 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.ClientVersionV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.SecurityRulesV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.StackVersionV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
@@ -73,12 +70,12 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private String cbVersion;
 
     @Override
-    public VersionCheckV4Result checkClientVersion(ClientVersionV4Filter version) {
-        boolean compatible = ClientVersionUtil.checkVersion(cbVersion, version.getVersion());
+    public VersionCheckV4Result checkClientVersion(String version) {
+        boolean compatible = ClientVersionUtil.checkVersion(cbVersion, version);
         if (compatible) {
             return new VersionCheckV4Result(true);
         }
-        return new VersionCheckV4Result(false, String.format("Versions not compatible: [server: '%s', client: '%s']", cbVersion, version.getVersion()));
+        return new VersionCheckV4Result(false, String.format("Versions not compatible: [server: '%s', client: '%s']", cbVersion, version));
     }
 
     @Override
@@ -87,8 +84,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public CloudStorageSupportedV4Responses getCloudStorageMatrix(StackVersionV4Filter stackVersionV4Filter) {
-        return new CloudStorageSupportedV4Responses(fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersionV4Filter.getStackVersion()));
+    public CloudStorageSupportedV4Responses getCloudStorageMatrix(String stackVersion) {
+        return new CloudStorageSupportedV4Responses(fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersion));
     }
 
     @Override
@@ -97,8 +94,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public SecurityRulesV4Response getDefaultSecurityRules(SecurityRulesV4Filter securityRulesV4Filter) {
-        return securityRuleService.getDefaultSecurityRules(securityRulesV4Filter.isKnoxEnabled());
+    public SecurityRulesV4Response getDefaultSecurityRules(Boolean knoxEnabled) {
+        return securityRuleService.getDefaultSecurityRules(knoxEnabled);
     }
 
     @Override
