@@ -10,10 +10,10 @@ public class AzureAvailabiltySetV4 implements JsonEntity {
     private String name;
 
     @ApiModelProperty
-    private String faultDomainCount;
+    private Integer faultDomainCount;
 
     @ApiModelProperty
-    private String updateDomainCount;
+    private Integer updateDomainCount;
 
     public String getName() {
         return name;
@@ -23,19 +23,19 @@ public class AzureAvailabiltySetV4 implements JsonEntity {
         this.name = name;
     }
 
-    public String getFaultDomainCount() {
+    public Integer getFaultDomainCount() {
         return faultDomainCount;
     }
 
-    public void setFaultDomainCount(String faultDomainCount) {
+    public void setFaultDomainCount(Integer faultDomainCount) {
         this.faultDomainCount = faultDomainCount;
     }
 
-    public String getUpdateDomainCount() {
+    public Integer getUpdateDomainCount() {
         return updateDomainCount;
     }
 
-    public void setUpdateDomainCount(String updateDomainCount) {
+    public void setUpdateDomainCount(Integer updateDomainCount) {
         this.updateDomainCount = updateDomainCount;
     }
 }
