@@ -26,12 +26,12 @@ import org.springframework.util.StringUtils;
 import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.filters.EventSinceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
@@ -99,19 +99,19 @@ public class CloudbreakV3Util {
                 Assert.fail("Expected status is failed, actual: " + waitResult);
             } else {
                 StackV4Endpoint stackV3Endpoint = cloudbreakClient.stackV4Endpoint();
-                return stackV3Endpoint.getStatusByName(workspaceId, stackName).getStatuses().get("statusReason").toString();
+                return stackV3Endpoint.getStatusByName(workspaceId, stackName).getStatusReason();
             }
         }
         return "";
     }
 
     public static Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName,
-            Map<String, String> desiredStatuses) {
+            String clusterStatus, String status) {
         Map<String, String> ret = new HashMap<>();
         for (int i = 0; i < 3; i++) {
             WaitResult waitResult = waitForStatuses(cloudbreakClient, workspaceId, stackName, desiredStatuses);
             if (waitResult == WaitResult.FAILED) {
-                Map<String, Object> statusByNameInWorkspace = cloudbreakClient.stackV4Endpoint().getStatusByName(workspaceId, stackName).getStatuses();
+                StackStatusV4Response statusByNameInWorkspace = cloudbreakClient.stackV4Endpoint().getStatusByName(workspaceId, stackName);
                 if (statusByNameInWorkspace != null) {
                     desiredStatuses.forEach((key, value) -> {
                         Object o = statusByNameInWorkspace.get(key);
@@ -120,11 +120,12 @@ public class CloudbreakV3Util {
                         }
                     });
 
+
                     StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
                     ret.forEach((key, value) -> {
                         builder.append(key).append(',').append(value).append(System.lineSeparator());
                     });
-                    builder.append("statusReason: ").append(statusByNameInWorkspace.get("statusReason"));
+                    builder.append("statusReason: ").append(statusByNameInWorkspace.getStatusReason());
                     Assert.fail(builder.toString());
                 }
             }
@@ -156,7 +157,7 @@ public class CloudbreakV3Util {
         do {
             LOGGER.info("Waiting for host status {} in hostgroup {} ...", desiredStatus, hostGroup);
             sleep();
-            StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
+            StackResponse stackResponse = stackV3Endpoint.get(workspaceId, stackName, new HashSet<>());
             Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
             for (HostGroupResponse hr : hostGroupResponse) {
                 if (hr.getName().equals(hostGroup)) {
@@ -267,18 +268,19 @@ public class CloudbreakV3Util {
         return ambariIp;
     }
 
-    private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses) {
+    private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String clusterStatus, String status) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, String> currentStatuses = new HashMap<>();
 
         int retryCount = 0;
         do {
-            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
+            LOGGER.info("Waiting for status(es) clusterStatus: {}, stackStatus: {} stack id: {}, current status(es) {} ...", clusterStatus, status,
+                    stackName, currentStatuses);
 
             sleep();
-            StackV4Endpoint stackV3Endpoint = cloudbreakClient.stackV3Endpoint();
+            StackV4Endpoint stackV3Endpoint = cloudbreakClient.stackV4Endpoint();
             try {
-                Map<String, Object> statusResult = stackV3Endpoint.getStatusByNameInWorkspace(workspaceId, stackName);
+                StackStatusV4Response statusResult = stackV3Endpoint.getStatusByName(workspaceId, stackName);
                 for (String statusPath : desiredStatuses.keySet()) {
                     String currStatus = "DELETE_COMPLETED";
                     if (!CollectionUtils.isEmpty(statusResult)) {

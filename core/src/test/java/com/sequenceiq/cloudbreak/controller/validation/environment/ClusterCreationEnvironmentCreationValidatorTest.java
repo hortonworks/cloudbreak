@@ -134,18 +134,13 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
         Assert.assertTrue(actualResult.hasError());
-        Assert.assertEquals(6, actualResult.getErrors().size());
-        Assert.assertEquals("[region3] region is not enabled in [env1] environment. Enabled environments: [region1,region2]", actualResult.getErrors().get(0));
+        Assert.assertEquals(3, actualResult.getErrors().size());
+        Assert.assertEquals("[region3] region is not enabled in [env1] environment. Enabled environments: [region1,region2]",
+                actualResult.getErrors().get(0));
         Assert.assertEquals("Stack cannot use proxy ProxyConfig resource which is not attached to env1 environment and not global.",
                 actualResult.getErrors().get(1));
-        Assert.assertEquals("Stack cannot use rds1 RDSConfig resource which is not attached to env1 environment and not global.",
-                actualResult.getErrors().get(2));
-        Assert.assertEquals("Stack cannot use rds2 RDSConfig resource which is not attached to env1 environment and not global.",
-                actualResult.getErrors().get(3));
         Assert.assertEquals("Stack cannot use rds4 RDSConfig resource which is not attached to env1 environment and not global.",
-                actualResult.getErrors().get(4));
-        Assert.assertEquals("Stack cannot use rds6 RDSConfig resource which is not attached to env1 environment and not global.",
-                actualResult.getErrors().get(5));
+                actualResult.getErrors().get(2));
     }
 
     @Test
@@ -160,10 +155,6 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         LdapConfig ldapConfig = createLdapConfig("ldap", Sets.newHashSet());
         Mockito.when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
         clusterRequest.setLdapName("ldap");
-        RDSConfig rdsConfig3 = createRdsConfig("rds1", Sets.newHashSet("env2", "env3"));
-        Mockito.when(rdsConfigService.get(rdsConfig3.getId())).thenReturn(rdsConfig3);
-        RDSConfig rdsConfig4 = createRdsConfig("rds2", Sets.newHashSet("env4", "env5"));
-        Mockito.when(rdsConfigService.get(rdsConfig4.getId())).thenReturn(rdsConfig4);
         RDSConfig rdsConfig1 = createRdsConfig("rds3", Sets.newHashSet());
         Mockito.when(rdsConfigService.getByNameForWorkspaceId(rdsConfig1.getName(), stack.getWorkspace().getId())).thenReturn(rdsConfig1);
         RDSConfig rdsConfig2 = createRdsConfig("rds4", Sets.newHashSet("env2", "env3"));
@@ -173,17 +164,11 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         ValidationResult actualResult = underTest.validate(clusterRequest, stack);
         // THEN
         Assert.assertTrue(actualResult.hasError());
-        Assert.assertEquals(5, actualResult.getErrors().size());
+        Assert.assertEquals(2, actualResult.getErrors().size());
         Assert.assertEquals("Stack without environment cannot use proxy ProxyConfig resource which attached to an environment.",
                 actualResult.getErrors().get(0));
-        Assert.assertEquals("Stack without environment cannot use rds1 RDSConfig resource which attached to an environment.",
-                actualResult.getErrors().get(1));
-        Assert.assertEquals("Stack without environment cannot use rds2 RDSConfig resource which attached to an environment.",
-                actualResult.getErrors().get(2));
         Assert.assertEquals("Stack without environment cannot use rds4 RDSConfig resource which attached to an environment.",
-                actualResult.getErrors().get(3));
-        Assert.assertEquals("Stack without environment cannot use rds6 RDSConfig resource which attached to an environment.",
-                actualResult.getErrors().get(4));
+                actualResult.getErrors().get(1));
     }
 
     private Stack getStack() throws IOException {

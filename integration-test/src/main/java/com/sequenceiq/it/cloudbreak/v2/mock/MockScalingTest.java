@@ -10,8 +10,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -34,8 +34,8 @@ public class MockScalingTest extends StackScalingV2Test {
     public void configMockServer(@Optional("9443") int mockPort, @Optional("2020") int sshPort, int desiredCount, String hostGroup) {
         IntegrationTestContext itContext = getItContext();
         String clusterName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
-        StackResponse response = getCloudbreakClient().stackV2Endpoint().getStackFromDefaultWorkspace(clusterName, null);
-        java.util.Optional<InstanceGroupResponse> igg = response.getInstanceGroups().stream().filter(ig -> ig.getGroup().equals(hostGroup)).findFirst();
+        StackV4Response response = getCloudbreakClient().stackV4Endpoint().getStatusByName(clusterName);
+        java.util.Optional<InstanceGroupV4Response> igg = response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(hostGroup)).findFirst();
         Map<String, CloudVmInstanceStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
         ScalingMock scalingMock = (ScalingMock) applicationContext.getBean(ScalingMock.NAME, mockPort, sshPort, instanceMap);
         scalingMock.addSPIEndpoints();

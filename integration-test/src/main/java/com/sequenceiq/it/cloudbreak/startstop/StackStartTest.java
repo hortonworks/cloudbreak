@@ -18,6 +18,7 @@ public class StackStartTest extends AbstractCloudbreakIntegrationTest {
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID), "Workspace id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID), "Ambari port id is mandatory.");
@@ -32,7 +33,7 @@ public class StackStartTest extends AbstractCloudbreakIntegrationTest {
         //WHEN
         UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.valueOf(STARTED));
-        CloudbreakUtil.checkResponse("StartStack", getCloudbreakClient().stackV1Endpoint().put(Long.valueOf(stackIntId), updateStackJson));
+        getCloudbreakClient().stackV4Endpoint().putStart(Long.valueOf(stackIntId), updateStackJson);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         //THEN
     }

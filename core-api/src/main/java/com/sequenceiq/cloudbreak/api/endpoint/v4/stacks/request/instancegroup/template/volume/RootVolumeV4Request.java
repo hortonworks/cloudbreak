@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class RootVolumeV4Request implements JsonEntity {
 
-    @ApiModelProperty(VOLUME_SIZE)
+    @ApiModelProperty(value = VOLUME_SIZE, required = true)
     private Integer size;
 
     public Integer getSize() {

@@ -27,9 +27,6 @@ public class GatewayV4RequestValidator implements Validator<GatewayV4Request> {
     public ValidationResult validate(GatewayV4Request subject) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (CollectionUtils.isEmpty(subject.getTopologies())) {
-            return validationResultBuilder.build();
-        }
-        if (CollectionUtils.isEmpty(subject.getTopologies())) {
             return validationResultBuilder.error("No topology is defined in gateway request. Please define a topology in "
                     + "'gateway.topologies'.").build();
         }
@@ -45,7 +42,7 @@ public class GatewayV4RequestValidator implements Validator<GatewayV4Request> {
                 .filter(i -> Collections.frequency(topologyNames, i) > 1)
                 .collect(Collectors.toSet());
 
-        validationResultBuilder.ifError(() -> !topologyNames.isEmpty(),
+        validationResultBuilder.ifError(() -> !duplicates.isEmpty(),
                 "There are duplicate topology names is gateway.topologies! "
                         + "All topology name should be unique for a gateway. Duplicates are: "
                         + String.join(", ", duplicates));

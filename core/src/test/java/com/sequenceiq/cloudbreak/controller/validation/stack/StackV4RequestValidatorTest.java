@@ -28,13 +28,11 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
@@ -52,15 +50,11 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final Long TEST_HIVE_ID = 1111L;
+    private static final String TEST_HIVE_RDS_NAME = "hive-rds";
 
-    private static final Long TEST_RANGER_ID = 2222L;
+    private static final String TEST_RANGER_RDS_NAME = "ranger-rds";
 
     private static final String TEST_LDAP_NAME = "ldap";
-
-    private static final String TEST_HIVE_NAME = "hive";
-
-    private static final String TEST_RANGER_NAME = "ranger";
 
     private static final String TEST_BP_NAME = "testBpName";
 
@@ -128,49 +122,11 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithLargerInstanceGroupSetThanHostGroups() {
-        String plusOne = "very master";
-        StackV4Request stackRequest = stackRequestWithInstanceAndHostGroups(
-                Sets.newHashSet(plusOne, "master", "worker", "compute"),
-                Sets.newHashSet("master", "worker", "compute")
-        );
-
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.ERROR, validationResult.getState());
-        assertTrue(validationResult.getErrors().get(0).startsWith("There are instance groups in the request that do not have a corresponding host group: "
-                + plusOne));
-    }
-
-    @Test
-    public void testWithLargerHostGroupSetThanInstanceGroups() {
-        StackV4Request stackRequest = stackRequestWithInstanceAndHostGroups(
-                Sets.newHashSet("master", "worker", "compute"),
-                Sets.newHashSet("super master", "master", "worker", "compute")
-        );
-
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.ERROR, validationResult.getState());
-        assertTrue(validationResult.getErrors().get(0).startsWith("There are host groups in the request that do not have a corresponding instance group"));
-    }
-
-    @Test
-    public void testWithBothGroupContainsDifferentValues() {
-        StackV4Request stackRequest = stackRequestWithInstanceAndHostGroups(
-                Sets.newHashSet("worker", "compute"),
-                Sets.newHashSet("master", "worker")
-        );
-
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.ERROR, validationResult.getState());
-        assertEquals(2L, validationResult.getErrors().size());
-    }
-
-    @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyHiveRdsWithNameThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_HIVE_NAME));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
+        request.getCluster().setDatabases(Set.of(TEST_HIVE_RDS_NAME));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -180,17 +136,16 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
         verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID);
         verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
     }
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyRangerRdsWithNameThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -200,18 +155,17 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
         verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID);
         verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
     }
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameButLdapDoesntThenErrorComes() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -222,20 +176,19 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
         verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID);
         verify(rdsConfigService, times(2)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
     }
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME, TEST_HIVE_NAME));
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
         request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -243,20 +196,19 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
         verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID);
         verify(rdsConfigService, times(2)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
     }
 
     @Test
     public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothIdAndLdapWithNameThenEverythingIsFine() {
         when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Collections.emptySet());
+        request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
         request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.get(TEST_RANGER_ID)).thenReturn(rdsConfig(RANGER));
-        when(rdsConfigService.get(TEST_HIVE_ID)).thenReturn(rdsConfig(HIVE));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -264,126 +216,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
         verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).get(TEST_RANGER_ID);
-        verify(rdsConfigService, times(1)).get(TEST_HIVE_ID);
-        verify(rdsConfigService, times(2)).get(anyLong());
-        verify(rdsConfigService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothRequestAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Collections.emptySet());
-        request.getCluster().setLdapName(TEST_LDAP_NAME);
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
-        verify(rdsConfigService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndIdAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_HIVE_NAME));
-        request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
-        when(rdsConfigService.get(TEST_RANGER_ID)).thenReturn(rdsConfig(RANGER));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).get(TEST_RANGER_ID);
-        verify(rdsConfigService, times(1)).get(anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithIdAndNameAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME));
-        request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
-        when(rdsConfigService.get(TEST_HIVE_ID)).thenReturn(rdsConfig(HIVE));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).get(TEST_HIVE_ID);
-        verify(rdsConfigService, times(1)).get(anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndRequestAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_HIVE_NAME));
-        request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithRequestAndNameAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Set.of(TEST_RANGER_NAME));
-        request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_NAME, WORKSPACE_ID);
-        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-    }
-
-    @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithRequestAndIdAndLdapWithNameThenEverythingIsFine() {
-        when(blueprintService.isDatalakeBlueprint(any())).thenReturn(true);
-        StackV4Request request = stackRequest();
-        request.getCluster().setDatabases(Collections.emptySet());
-        request.getCluster().setLdapName(TEST_LDAP_NAME);
-        when(rdsConfigService.get(TEST_RANGER_ID)).thenReturn(rdsConfig(RANGER));
-
-        ValidationResult validationResult = underTest.validate(request);
-
-        assertValidationErrorIsEmpty(validationResult.getErrors());
-
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
-        verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(1)).get(TEST_RANGER_ID);
-        verify(rdsConfigService, times(1)).get(anyLong());
-        verify(rdsConfigService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID);
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID);
     }
 
     @Test
@@ -399,8 +233,6 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
         verify(blueprintService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
-        verify(rdsConfigService, times(0)).get(anyLong());
-        verify(rdsConfigService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
     }
 
     private StackV4Request stackRequestWithInstanceAndHostGroups(Set<String> instanceGroups, Set<String> hostGroups) {
@@ -409,10 +241,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
                 .collect(Collectors.toList());
 
         ClusterV4Request clusterRequest = new ClusterV4Request();
-        BlueprintV4Request bpRequest = new BlueprintV4Request();
-        bpRequest.setName(TEST_BP_NAME);
-//        AmbariV4Request
-//        clusterRequest.setAmbari(TEST_BP_NAME);
+        clusterRequest.setAmbari(getAmbariV4Request());
         return getStackV4Request(instanceGroupList, clusterRequest);
     }
 
@@ -425,15 +254,15 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
     private StackV4Request stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
         InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
-        templateRequest.setRootVolume(getRootVolume());
+        templateRequest.setRootVolume(getRootVolume(rootVolumeSize));
         InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest, "master");
         ClusterV4Request clusterRequest = getCluster();
         return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
     }
 
-    private VolumeV4Request getRootVolume() {
+    private VolumeV4Request getRootVolume(Integer size) {
         VolumeV4Request root = new VolumeV4Request();
-        root.setSize(100);
+        root.setSize(size);
         return root;
     }
 
@@ -445,13 +274,16 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     private ClusterV4Request getCluster() {
-        HostGroupV4Request hostGroupRequest = new HostGroupV4Request();
         ClusterV4Request clusterRequest = new ClusterV4Request();
-        hostGroupRequest.setName("master");
-        BlueprintV4Request bpRequest = new BlueprintV4Request();
-        bpRequest.setName(TEST_BP_NAME);
-//        clusterRequest.setBlueprintName(TEST_BP_NAME);
+        AmbariV4Request ambariV4Request = getAmbariV4Request();
+        clusterRequest.setAmbari(ambariV4Request);
         return clusterRequest;
+    }
+
+    private AmbariV4Request getAmbariV4Request() {
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        ambariV4Request.setBlueprintName(TEST_BP_NAME);
+        return ambariV4Request;
     }
 
     private StackV4Request getStackV4Request(List<InstanceGroupV4Request> instanceGroupRequests, ClusterV4Request clusterRequest) {

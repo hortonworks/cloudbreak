@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -42,9 +40,6 @@ public class StackV4Request extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.HDP_VERSION)
     private String hdpVersion;
-
-    @ApiModelProperty(StackModelDescription.INPUTS)
-    private Map<String, Object> inputs = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettingsV4Request customDomain;
@@ -104,14 +99,6 @@ public class StackV4Request extends StackV4Base {
 
     public void setHdpVersion(String hdpVersion) {
         this.hdpVersion = hdpVersion;
-    }
-
-    public Map<String, Object> getInputs() {
-        return inputs;
-    }
-
-    public void setInputs(Map<String, Object> inputs) {
-        this.inputs = inputs;
     }
 
     public CustomDomainSettingsV4Request getCustomDomain() {

@@ -21,12 +21,11 @@ import org.springframework.util.StringUtils;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -95,7 +94,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(source, cloudPlatform));
-        stack.setInputs(getInputs(source));
         stack.setDatalakeId(getSharedClusterNameOrDatalakeName(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setAvailabilityZone(source.getEnvironment().getPlacement().getAvailabilityZone());
@@ -171,17 +169,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             LOGGER.debug("Exception during reading default tags.", e);
         }
         return result;
-    }
-
-    private Json getInputs(StackV4Request source) {
-        try {
-            if (source.getInputs() == null) {
-                return new Json(new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>()));
-            }
-            return new Json(new StackInputs(source.getInputs(), new HashMap<>(), new HashMap<>()));
-        } catch (Exception ignored) {
-            throw new BadRequestException("Failed to convert dynamic inputs.");
-        }
     }
 
     private Long getSharedClusterNameOrDatalakeName(StackV4Request source, Workspace workspace) {

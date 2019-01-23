@@ -14,13 +14,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.conf.ConversionConfig;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {GatewayV4RequestValidator.class, ConversionConfig.class, GatewayConvertUtil.class})
+@ContextConfiguration(classes = {GatewayV4RequestValidator.class, ConversionConfig.class, ConverterUtil.class, GatewayConvertUtil.class})
 public class GatewayV4RequestValidatorTest {
 
     @Inject
@@ -44,15 +45,15 @@ public class GatewayV4RequestValidatorTest {
 
     @Test
     public void testValidationWithoutNameDuplicates() {
-        GatewayV4Request gatewayJson = new GatewayV4Request();
+        GatewayV4Request gatewayJsonV4Request = new GatewayV4Request();
         GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
         topology1.setTopologyName("Apple");
         GatewayTopologyV4Request topology2 = new GatewayTopologyV4Request();
         topology2.setTopologyName("Banana");
         GatewayTopologyV4Request topology3 = new GatewayTopologyV4Request();
         topology3.setTopologyName("Citrone");
-        gatewayJson.setTopologies(Arrays.asList(topology1, topology2, topology3));
-        ValidationResult result = underTest.validate(gatewayJson);
+        gatewayJsonV4Request.setTopologies(Arrays.asList(topology1, topology2, topology3));
+        ValidationResult result = underTest.validate(gatewayJsonV4Request);
 
         assertEquals(State.VALID, result.getState());
     }

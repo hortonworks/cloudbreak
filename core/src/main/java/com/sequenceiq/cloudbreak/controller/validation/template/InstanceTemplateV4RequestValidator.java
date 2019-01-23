@@ -18,7 +18,9 @@ public class InstanceTemplateV4RequestValidator implements Validator<InstanceTem
         if (Objects.isNull(subject)) {
             resultBuilder.error("Template request cannot be null in the instance group request.");
         } else {
-            resultBuilder.ifError(() -> subject.getRootVolume().getSize() != null && subject.getRootVolume().getSize() < 1,
+            resultBuilder.ifError(() -> subject.getRootVolume() != null
+                            && subject.getRootVolume().getSize() != null
+                            && subject.getRootVolume().getSize() < 1,
                     "Root volume size cannot be smaller than 1 gigabyte.");
         }
         return resultBuilder.build();

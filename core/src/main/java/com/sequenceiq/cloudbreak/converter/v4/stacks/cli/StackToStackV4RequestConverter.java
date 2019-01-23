@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthenticat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -69,7 +68,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         stackV2Request.setInstanceGroups(getInstanceGroups(source));
         prepareImage(source, stackV2Request);
         prepareTags(source, stackV2Request);
-        prepareInputs(source, stackV2Request);
         prepareDatalakeRequest(source, stackV2Request);
         return stackV2Request;
     }
@@ -162,18 +160,4 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
             stackV2Request.setTags(null);
         }
     }
-
-    private void prepareInputs(Stack source, StackV4Request stackV2Request) {
-        try {
-
-            StackInputs stackInputs = Strings.isNullOrEmpty(source.getInputs().getValue())
-                    ? new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>()) : source.getInputs().get(StackInputs.class);
-            if (stackInputs.getCustomInputs() != null) {
-                stackV2Request.setInputs(stackInputs.getCustomInputs());
-            }
-        } catch (IOException e) {
-            stackV2Request.setInputs(null);
-        }
-    }
-
 }

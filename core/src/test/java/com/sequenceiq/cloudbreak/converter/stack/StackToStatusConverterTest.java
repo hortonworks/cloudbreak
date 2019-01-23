@@ -2,13 +2,12 @@ package com.sequenceiq.cloudbreak.converter.stack;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -27,11 +26,11 @@ public class StackToStatusConverterTest extends AbstractEntityConverterTest<Stac
     public void testConvert() {
         // GIVEN
         // WHEN
-        Map<String, Object> result = underTest.convert(getSource());
+        StackStatusV4Response result = underTest.convert(getSource());
         // THEN
-        assertEquals(1L, result.get("id"));
-        assertEquals(Status.AVAILABLE.name(), result.get("status"));
-        assertEquals(Status.AVAILABLE.name(), result.get("clusterStatus"));
+        assertEquals(1L, result.getId().longValue());
+        assertEquals(Status.AVAILABLE.name(), result.getStatus());
+        assertEquals(Status.AVAILABLE.name(), result.getClusterStatus());
     }
 
     @Override

@@ -165,8 +165,8 @@ public class StackRequestValidator implements Validator<StackV4Request> {
     }
 
     private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(stackRequest.getCluster()
-                .getAmbari().getBlueprintName(), restRequestThreadLocalService.getRequestedWorkspaceId());
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(stackRequest.getCluster().getAmbari().getBlueprintName(),
+                restRequestThreadLocalService.getRequestedWorkspaceId());
         boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
             Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getCluster());
@@ -194,11 +194,11 @@ public class StackRequestValidator implements Validator<StackV4Request> {
                 rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType()).collect(Collectors.toSet());
     }
 
-    private void validateKerberos(String kerberosConfigName, ValidationResultBuilder validationBuilder) {
-        if (StringUtils.isEmpty(kerberosConfigName)) {
-            validationBuilder.error("kerberosConfigNameParameter should not be empty. Should be neither filled or null!");
-        } else if (StringUtils.isNotEmpty(kerberosConfigName)) {
-            kerberosService.getByNameForWorkspaceId(kerberosConfigName, restRequestThreadLocalService.getRequestedWorkspaceId());
+    private void validateKerberos(String kerberosName, ValidationResultBuilder validationBuilder) {
+        if (kerberosName != null && kerberosName.isEmpty()) {
+            validationBuilder.error("kerberosName should not be empty. Should be either filled or null!");
+        } else if (StringUtils.isNotEmpty(kerberosName)) {
+            kerberosService.getByNameForWorkspaceId(kerberosName, restRequestThreadLocalService.getRequestedWorkspaceId());
         }
     }
 
