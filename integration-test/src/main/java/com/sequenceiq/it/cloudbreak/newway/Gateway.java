@@ -11,7 +11,6 @@ import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.CloudGatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformGatewaysV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.GatewayV4Action;
 
@@ -20,7 +19,7 @@ public class Gateway extends Entity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Gateway.class);
 
-    private PlatformResourceV4Filter request = new PlatformResourceV4Filter();
+    private PlatformResourceParameters request = new PlatformResourceParameters();
 
     private PlatformGatewaysV4Response response;
 
@@ -32,7 +31,7 @@ public class Gateway extends Entity {
         this(IPPOOL);
     }
 
-    public void setRequest(PlatformResourceV4Filter request) {
+    public void setRequest(PlatformResourceParameters request) {
         this.request = request;
     }
 
@@ -40,7 +39,7 @@ public class Gateway extends Entity {
         return response.getGateways();
     }
 
-    public PlatformResourceV4Filter getRequest() {
+    public PlatformResourceParameters getRequest() {
         return request;
     }
 

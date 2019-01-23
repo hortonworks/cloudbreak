@@ -30,37 +30,38 @@ public class RecommendationV4Action {
 
         Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
         if (blueprint != null && blueprint.getResponse() != null) {
-            recommendationEntity.getRequest().setBlueprintName(blueprint.getResponse().getName());
+            recommendationEntity.withAvailabilityZone(blueprint.getResponse().getName());
         }
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && recommendationEntity.getRequest().getCredentialName() == null) {
-            recommendationEntity.getRequest().setCredentialName(credential.getResponse().getName());
+        if (credential != null) {
+            recommendationEntity.withCredentialName(credential.getResponse().getName());
         }
 
         Region region = Region.getTestContextRegion().apply(integrationTestContext);
-        if (region != null && recommendationEntity.getRequest().getRegion() == null) {
-            recommendationEntity.getRequest().setRegion(region.getRegionV4Response().getDefaultRegion());
+        if (region != null) {
+            recommendationEntity.withRegion(region.getRegionV4Response().getDefaultRegion());
         }
-        if (region != null && recommendationEntity.getRequest().getAvailabilityZone() == null) {
+        if (region != null) {
             Map<String, Collection<String>> regionsAvailabilityZones = region.getRegionV4Response().getAvailabilityZones();
             List<String> availabilityZones = new ArrayList<>();
 
             for (Entry<String, Collection<String>> regionAvailabilityZones : regionsAvailabilityZones.entrySet()) {
                 availabilityZones.addAll(regionAvailabilityZones.getValue());
             }
-            recommendationEntity.getRequest().setAvailabilityZone(availabilityZones.get(1));
+            recommendationEntity.withAvailabilityZone(availabilityZones.get(1));
         }
 
         Log.log(String.join(" ", " post Recommendations to",
-                recommendationEntity.getRequest().getCredentialName(), "credential and to",
-                recommendationEntity.getRequest().getBlueprintName(), "blueprint",
-                recommendationEntity.getRequest().getRegion(), "region",
-                recommendationEntity.getRequest().getAvailabilityZone(), "availability zone. "));
+                recommendationEntity.getCredentialName(), "credential and to",
+                recommendationEntity.getBlueprintName(), "blueprint",
+                recommendationEntity.getRegion(), "region",
+                recommendationEntity.getAvailabilityZone(), "availability zone. "));
         recommendationEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint()
-                        .createRecommendation(workspaceId, recommendationEntity.getRequest()));
+                        .createRecommendation(workspaceId, recommendationEntity.getBlueprintName(), recommendationEntity.getCredentialName(),
+                                recommendationEntity.getRegion(), null, recommendationEntity.getAvailabilityZone()));
         Log.logJSON(" post Recommendations response: ", recommendationEntity.getResponse());
     }
 

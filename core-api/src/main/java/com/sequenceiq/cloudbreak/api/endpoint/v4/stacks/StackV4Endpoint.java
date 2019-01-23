@@ -20,24 +20,22 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STOP_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_BY_NAME_IN_WORKSPACE;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.DeleteInstanceByNameV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.DeleteStackByNameV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.DeleteStackWithKerberosV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.GetAllStackV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.filter.GetStackByNameV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ReinstallV4Request;
@@ -65,7 +63,8 @@ public interface StackV4Endpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "listStackInWorkspaceV4")
-    StackViewV4Responses list(@PathParam("workspaceId") Long workspaceId, @BeanParam GetAllStackV4Filter filter);
+    StackViewV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+            @QueryParam("onlyDatalakes") @DefaultValue("false") Boolean onlyDatalakes);
 
     @POST
     @Path("")
@@ -77,13 +76,14 @@ public interface StackV4Endpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackInWorkspaceV4")
-    StackV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @BeanParam GetStackByNameV4Filter filter);
+    StackV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteStackInWorkspaceV4")
-    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @BeanParam DeleteStackByNameV4Filter filter);
+    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @PUT
     @Path("{name}/sync")
@@ -140,7 +140,9 @@ public interface StackV4Endpoint {
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_WITH_KERBEROS_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
-    void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @BeanParam DeleteStackWithKerberosV4Filter filter);
+    void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("withStackDelete") @DefaultValue("false") Boolean withStackDelete,
+            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @GET
     @Path("{name}/request")
@@ -161,7 +163,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV4")
-    void deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @BeanParam DeleteInstanceByNameV4Filter filter);
+    void deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced, @QueryParam("instanceId") String instanceId);
 
     @PUT
     @Path("{name}/reinstall")

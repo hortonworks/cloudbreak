@@ -9,7 +9,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.filter.ListV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
@@ -32,9 +31,9 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
     private ConverterUtil converterUtil;
 
     @Override
-    public ProxyV4Responses list(Long workspaceId, ListV4Filter listV4Filter) {
+    public ProxyV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<ProxyConfig> allInWorkspaceAndEnvironment = proxyConfigService
-                .findAllInWorkspaceAndEnvironment(workspaceId, listV4Filter.getEnvironment(), listV4Filter.getAttachGlobal());
+                .findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal);
         return new ProxyV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, ProxyV4Response.class));
     }
 

@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util;
 
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.BlueprintNameV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -26,5 +25,5 @@ public interface WorkspaceAwareUtilV4Endpoint {
     @Path("knox_services")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.KNOX_SERVICES, produces = ContentType.JSON, nickname = "getKnoxServices")
-    ExposedServiceV4Responses getKnoxServices(@PathParam("workspaceId") Long workspaceId, @BeanParam BlueprintNameV4Filter blueprintNameV4Filter);
+    ExposedServiceV4Responses getKnoxServices(@PathParam("workspaceId") Long workspaceId, @QueryParam("blueprintName") String blueprintName);
 }

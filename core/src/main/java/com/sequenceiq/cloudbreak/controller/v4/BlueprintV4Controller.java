@@ -9,7 +9,6 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
@@ -79,9 +78,10 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    public RecommendationV4Response createRecommendation(Long workspaceId, RecommendationV4Filter recommendationV4Filter) {
-        return converterUtil.convert(platformParameterService.getRecommendation(workspaceId, recommendationV4Filter.getBlueprintName(),
-                recommendationV4Filter), RecommendationV4Response.class);
+    public RecommendationV4Response createRecommendation(Long workspaceId, String blueprintName, String credentialName,
+            String region, String platformVariant, String availabilityZone) {
+        return converterUtil.convert(platformParameterService.getRecommendation(workspaceId, blueprintName,
+                credentialName, region, platformVariant, availabilityZone), RecommendationV4Response.class);
     }
 
 }

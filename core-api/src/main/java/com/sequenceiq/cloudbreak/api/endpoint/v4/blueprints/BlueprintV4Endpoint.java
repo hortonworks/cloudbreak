@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
 import static com.sequenceiq.cloudbreak.doc.Notes.BLUEPRINT_NOTES;
 
 import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,9 +11,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.filters.RecommendationV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponses;
@@ -81,6 +80,8 @@ public interface BlueprintV4Endpoint {
     @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspace")
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam RecommendationV4Filter recommendationV4Filter);
+            @QueryParam("blueprintName") String blueprintName, @QueryParam("credentialName") String credentialName,
+            @QueryParam("region") String region, @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
 }

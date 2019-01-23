@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -41,12 +40,10 @@ public class RdsConfigAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        DatabaseV4ListFilter listRequest = new DatabaseV4ListFilter();
-        listRequest.setAttachGlobal(false);
         rdsconfigEntity.setResponses(
                 client.getCloudbreakClient()
                         .databaseV4Endpoint()
-                        .list(client.getWorkspaceId(), listRequest)
+                        .list(client.getWorkspaceId(), null, Boolean.FALSE)
                         .getResponses());
         logJSON(" get all rds config response: ", rdsconfigEntity.getResponse());
     }

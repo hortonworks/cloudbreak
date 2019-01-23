@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -20,7 +19,7 @@ public class SshKey extends Entity {
 
     private static final String SSHKEY = "SSHKEY";
 
-    private PlatformResourceV4Filter request = new PlatformResourceV4Filter();
+    private PlatformResourceParameters request = new PlatformResourceParameters();
 
     private PlatformSshKeysV4Response response;
 
@@ -32,7 +31,7 @@ public class SshKey extends Entity {
         this(SSHKEY);
     }
 
-    public void setRequest(PlatformResourceV4Filter request) {
+    public void setRequest(PlatformResourceParameters request) {
         this.request = request;
     }
 
@@ -40,7 +39,7 @@ public class SshKey extends Entity {
         return response.getSshKeys();
     }
 
-    public PlatformResourceV4Filter getRequest() {
+    public PlatformResourceParameters getRequest() {
         return request;
     }
 

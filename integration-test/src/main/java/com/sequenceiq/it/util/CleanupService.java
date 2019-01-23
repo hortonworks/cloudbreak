@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -65,10 +64,8 @@ public class CleanupService {
                 .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
                 .forEach(credential -> deleteCredential(workspaceId, cloudbreakClient, credential.getId()));
 
-        DatabaseV4ListFilter databaseV4ListFilter = new DatabaseV4ListFilter();
-        databaseV4ListFilter.setAttachGlobal(Boolean.FALSE);
         cloudbreakClient.databaseV4Endpoint()
-                .list(workspaceId, databaseV4ListFilter)
+                .list(workspaceId, null, Boolean.FALSE)
                 .getResponses()
                 .stream()
                 .filter(rds -> rds.getName().startsWith("it-"))
@@ -143,7 +140,7 @@ public class CleanupService {
 
     public void deleteRdsConfigs(Long workspaceId, CloudbreakClient cloudbreakClient, Long databaseId) {
         if (databaseId != null) {
-            Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, new DatabaseV4ListFilter())
+            Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, null, Boolean.FALSE)
                     .getResponses()
                     .stream()
                     .filter(database -> database.getId().equals(databaseId))

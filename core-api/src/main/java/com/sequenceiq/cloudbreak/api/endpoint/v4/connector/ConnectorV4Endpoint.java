@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.connector;
 
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformAccessConfigsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
@@ -18,8 +17,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSecurityGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformSshKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecificationsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RegionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecificationsV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -39,7 +38,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_VMTYPES_BY_CREDENTIAL, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getVmTypesByCredentialAndWorkspace")
     PlatformVmtypesV4Response getVmTypesByCredential(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("regions")
@@ -47,7 +47,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getRegionsByCredentialAndWorkspace")
     RegionV4Response getRegionsByCredential(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("disk_types")
@@ -62,7 +63,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_NETWORKS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformNetworksForWorkspace")
     PlatformNetworksV4Response getCloudNetworks(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("ip_pools")
@@ -70,7 +72,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_IPPOOLS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getIpPoolsCredentialIdForWorkspace")
     PlatformIpPoolsV4Response getIpPoolsCredentialId(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("gateways")
@@ -78,7 +81,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_GATEWAYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getGatewaysCredentialIdForWorkspace")
     PlatformGatewaysV4Response getGatewaysCredentialId(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("encryption_keys")
@@ -86,7 +90,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_ENCRYPTIONKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getEncryptionKeysForWorkspace")
     PlatformEncryptionKeysV4Response getEncryptionKeys(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("security_groups")
@@ -94,7 +99,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_SECURITYGROUPS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSecurityGroupsForWorkspace")
     PlatformSecurityGroupsV4Response getSecurityGroups(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("ssh_keys")
@@ -102,7 +108,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_SSHKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSShKeysForWorkspace")
     PlatformSshKeysV4Response getCloudSshKeys(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("access_configs")
@@ -110,7 +117,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getAccessConfigsForWorkspace")
     PlatformAccessConfigsV4Response getAccessConfigs(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam PlatformResourceV4Filter resourceRequestJson);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region, 
+    @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("tag_specifications")

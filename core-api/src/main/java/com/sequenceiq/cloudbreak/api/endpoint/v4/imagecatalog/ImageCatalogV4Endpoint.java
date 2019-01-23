@@ -3,19 +3,18 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog;
 import static com.sequenceiq.cloudbreak.doc.Notes.IMAGE_CATALOG_NOTES;
 
 import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.GetImageCatalogV4Filter;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.filter.ImageCatalogGetImagesV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
@@ -47,7 +46,7 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.IMAGE_CATALOG_NOTES,
             nickname = "getImageCatalogInWorkspace")
     ImageCatalogV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @BeanParam GetImageCatalogV4Filter getImageCatalogV4Filter);
+            @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
 
     @POST
     @Path("")
@@ -90,7 +89,7 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES, produces = ContentType.JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesInWorkspace")
     ImagesV4Response getImages(@PathParam("workspaceId") Long workspaceId,
-            @BeanParam ImageCatalogGetImagesV4Filter imageCatalogGetImagesV4Filter) throws Exception;
+            @QueryParam("stackName") String stackName, @QueryParam("platform") String platform) throws Exception;
 
     @GET
     @Path("{name}/images")
@@ -98,6 +97,6 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_NAME, produces = ContentType.JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByNameInWorkspace")
     ImagesV4Response getImagesByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @BeanParam ImageCatalogGetImagesV4Filter imageCatalogGetImagesV4Filter) throws Exception;
+            @QueryParam("stackName") String stackName, @QueryParam("platform") String platform) throws Exception;
 
 }

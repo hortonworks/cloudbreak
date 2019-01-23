@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.io.IOException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.filter.SecurityRulesV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
@@ -16,9 +15,7 @@ public class SecurityRulesAction {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
 
         Log.log(" get Security Rules to");
-        SecurityRulesV4Filter securityRulesV4Filter = new SecurityRulesV4Filter();
-        securityRulesV4Filter.setKnoxEnabled(Boolean.TRUE);
-        securityRulesEntity.setResponse(client.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules(securityRulesV4Filter));
+        securityRulesEntity.setResponse(client.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules(Boolean.FALSE));
         Log.logJSON(" get Security Rules response: ", securityRulesEntity.getResponse());
     }
 }

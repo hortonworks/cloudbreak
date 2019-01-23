@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.RegionV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.RegionV4Action;
@@ -11,20 +10,20 @@ import com.sequenceiq.it.cloudbreak.newway.v4.RegionV4Action;
 public class Region extends Entity {
     public static final String REGION = "REGION";
 
-    private PlatformResourceV4Filter platformResourceRequest;
+    private PlatformResourceParameters platformResourceRequest;
 
     private RegionV4Response regionV4Response;
 
     public Region(String id) {
         super(id);
-        platformResourceRequest = new PlatformResourceV4Filter();
+        platformResourceRequest = new PlatformResourceParameters();
     }
 
     public Region() {
         this(REGION);
     }
 
-    public void setPlatformResourceRequest(PlatformResourceV4Filter platformResourceRequest) {
+    public void setPlatformResourceRequest(PlatformResourceParameters platformResourceRequest) {
         this.platformResourceRequest = platformResourceRequest;
     }
 
@@ -73,7 +72,7 @@ public class Region extends Entity {
         return new Assertion<>(getTestContextRegion(GherkinTest.RESULT), check);
     }
 
-    public PlatformResourceV4Filter getPlatformResourceRequest() {
+    public PlatformResourceParameters getPlatformResourceRequest() {
         return platformResourceRequest;
     }
 

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.EncryptionKeyConfigV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.EncryptionKeyConfigV4Response;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
@@ -151,17 +150,10 @@ public class StackRequestValidator implements Validator<StackV4Request> {
     private Optional<PlatformEncryptionKeysV4Response> getEncryptionKeysWithExceptionHandling(String credentialName, String region) {
         try {
             return Optional.ofNullable(connectorV4Endpoint.getEncryptionKeys(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                    getRequestForEncryptionKeys(credentialName, region)));
+                    credentialName, region, null, null));
         } catch (RuntimeException ignore) {
             return Optional.empty();
         }
-    }
-
-    private PlatformResourceV4Filter getRequestForEncryptionKeys(String credentialName, String region) {
-        PlatformResourceV4Filter request = new PlatformResourceV4Filter();
-        request.setRegion(region);
-        request.setCredentialName(credentialName);
-        return request;
     }
 
     private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {

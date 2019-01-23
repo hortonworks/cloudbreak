@@ -8,7 +8,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
+import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
 import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -26,7 +26,7 @@ public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
         credentialName = StringUtils.hasText(credentialName) ? credentialName : itContext.getContextParam(CloudbreakV2Constants.CREDENTIAL_NAME);
         region = StringUtils.hasText(region) ? region : itContext.getContextParam(CloudbreakV2Constants.REGION);
         availabilityZone = StringUtils.hasText(availabilityZone) ? availabilityZone : itContext.getContextParam(CloudbreakV2Constants.AVAILABILTYZONE);
-        PlatformResourceV4Filter resourceRequestJson = new PlatformResourceV4Filter();
+        PlatformResourceParameters resourceRequestJson = new PlatformResourceParameters();
         resourceRequestJson.setCredentialName(credentialName);
         resourceRequestJson.setRegion(region);
         resourceRequestJson.setAvailabilityZone(availabilityZone);

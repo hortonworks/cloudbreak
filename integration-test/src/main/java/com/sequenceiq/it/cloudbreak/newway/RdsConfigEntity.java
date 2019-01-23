@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.filter.DatabaseV4ListFilter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
@@ -92,9 +91,7 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<DatabaseV4Request,
     @Override
     public List<DatabaseV4Response> getAll(CloudbreakClient client) {
         DatabaseV4Endpoint databaseV4Endpoint = client.getCloudbreakClient().databaseV4Endpoint();
-        DatabaseV4ListFilter listRequest = new DatabaseV4ListFilter();
-        listRequest.setAttachGlobal(false);
-        return databaseV4Endpoint.list(client.getWorkspaceId(), listRequest).getResponses().stream()
+        return databaseV4Endpoint.list(client.getWorkspaceId(), null, Boolean.FALSE).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
     }

@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.audits;
 
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.filter.GetAuditEventRequestV4Filter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -30,14 +29,16 @@ public interface AuditEventV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsInWorkspace")
-    AuditEventV4Responses getAuditEvents(@PathParam("workspaceId") Long workspaceId, @BeanParam GetAuditEventRequestV4Filter filter);
+    AuditEventV4Responses getAuditEvents(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
+            @QueryParam("resourceId") Long resourceId);
 
     @GET
     @Path("zip")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = ContentType.FILE_STREAM, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipInWorkspace")
-    Response getAuditEventsZip(@PathParam("workspaceId") Long workspaceId, @BeanParam GetAuditEventRequestV4Filter getAuditRequest);
+    Response getAuditEventsZip(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
+            @QueryParam("resourceId") Long resourceId);
 
     @GET
     @Path("{auditId}")

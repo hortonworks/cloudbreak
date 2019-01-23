@@ -9,14 +9,13 @@ import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworksV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.NetworksV3Action;
 
 public class Networks extends Entity {
     private static final String NETWORKS = "NETWORKS";
 
-    private final PlatformResourceV4Filter platformResourceV4Filter = new PlatformResourceV4Filter();
+    private final PlatformResourceParameters platformResourceParameters = new PlatformResourceParameters();
 
     private PlatformNetworksV4Response response;
 
@@ -25,22 +24,22 @@ public class Networks extends Entity {
     }
 
     public Networks withAvailabilityZone(String availabilityZone) {
-        platformResourceV4Filter.setAvailabilityZone(availabilityZone);
+        platformResourceParameters.setAvailabilityZone(availabilityZone);
         return this;
     }
 
     public Networks withCredentialName(String credName) {
-        platformResourceV4Filter.setCredentialName(credName);
+        platformResourceParameters.setCredentialName(credName);
         return this;
     }
 
     public Networks withPlatformVariant(String platformVariant) {
-        platformResourceV4Filter.setPlatformVariant(platformVariant);
+        platformResourceParameters.setPlatformVariant(platformVariant);
         return this;
     }
 
     public Networks withRegion(String region) {
-        platformResourceV4Filter.setRegion(region);
+        platformResourceParameters.setRegion(region);
         return this;
     }
 
@@ -60,8 +59,8 @@ public class Networks extends Entity {
         return response.getNetworks();
     }
 
-    public PlatformResourceV4Filter getRequest() {
-        return platformResourceV4Filter;
+    public PlatformResourceParameters getRequest() {
+        return platformResourceParameters;
     }
 
     public static Action<Networks> post() {

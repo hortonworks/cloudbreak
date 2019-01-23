@@ -11,7 +11,6 @@ import org.testng.Assert;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.IpPoolV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.filters.PlatformResourceV4Filter;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.IpPoolV4Action;
 
@@ -20,7 +19,7 @@ public class IpPool extends Entity {
 
     private static final String IPPOOL = "IPPOOL";
 
-    private PlatformResourceV4Filter request = new PlatformResourceV4Filter();
+    private PlatformResourceParameters request = new PlatformResourceParameters();
 
     private PlatformIpPoolsV4Response response;
 
@@ -32,7 +31,7 @@ public class IpPool extends Entity {
         this(IPPOOL);
     }
 
-    public void setRequest(PlatformResourceV4Filter request) {
+    public void setRequest(PlatformResourceParameters request) {
         this.request = request;
     }
 
@@ -40,7 +39,7 @@ public class IpPool extends Entity {
         return response.getIppools();
     }
 
-    public PlatformResourceV4Filter getRequest() {
+    public PlatformResourceParameters getRequest() {
         return request;
     }
 
