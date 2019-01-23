@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralSetV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralCollectionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -65,7 +65,7 @@ public class KerberosV4Action {
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private blueprints. ");
-        GeneralSetV4Response<KerberosViewV4Response> kerberoses =
+        GeneralCollectionV4Response<KerberosViewV4Response> kerberoses =
                 client.getCloudbreakClient().kerberosConfigV4Endpoint().list(workspaceId, null, Boolean.FALSE);
         Set<KerberosV4Response> detailedKerberoses = kerberoses.getResponses().stream().map(krv ->
                 client.getCloudbreakClient().kerberosConfigV4Endpoint().get(workspaceId, krv.getName())).collect(Collectors.toSet());
