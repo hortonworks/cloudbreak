@@ -32,9 +32,9 @@ public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBas
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
         AzureAvailabiltySetV4 availabiltySet = new AzureAvailabiltySetV4();
-        availabiltySet.setFaultDomainCount(getParameterOrNull(parameters, "faultDomainCount"));
+        availabiltySet.setFaultDomainCount(getInt(parameters, "faultDomainCount"));
         availabiltySet.setName(getParameterOrNull(parameters, "name"));
-        availabiltySet.setUpdateDomainCount(getParameterOrNull(parameters, "updateDomainCount"));
+        availabiltySet.setUpdateDomainCount(getInt(parameters, "updateDomainCount"));
         availabilitySet = availabiltySet;
     }
 }
