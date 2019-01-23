@@ -6,16 +6,16 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
-public abstract class ResourceHelper<T extends CloudStorageParameters> {
+public abstract class ResourceHelper<T extends CloudStorageParametersV4> {
 
     private final TestParameter testParameter;
 
@@ -43,9 +43,9 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
 
     public abstract RdsConfig aValidRangerDatabase();
 
-    public abstract CloudStorageRequest getCloudStorageRequestForDatalake();
+    public abstract CloudStorageV4Request getCloudStorageRequestForDatalake();
 
-    public abstract CloudStorageRequest getCloudStorageRequestForAttachedCluster();
+    public abstract CloudStorageV4Request getCloudStorageRequestForAttachedCluster();
 
     protected abstract T getCloudStorage();
 
@@ -64,8 +64,8 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
         return request;
     }
 
-    protected Set<StorageLocationRequest> defaultDatalakeStorageLocations(CloudStorageTypePathPrefix type, String parameterToInsert) {
-        Set<StorageLocationRequest> request = new LinkedHashSet<>(2);
+    protected Set<StorageLocationV4Request> defaultDatalakeStorageLocations(CloudStorageTypePathPrefix type, String parameterToInsert) {
+        Set<StorageLocationV4Request> request = new LinkedHashSet<>(2);
         request.add(createLocation(
                 String.format("%s://%s/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
                 "hive-site",
@@ -77,10 +77,10 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
         return request;
     }
 
-    protected CloudStorageRequest getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
-                    CloudStorageParameters cloudStorageParameterInstance) {
-        var request = new CloudStorageRequest();
-        var locations = new LinkedHashSet<StorageLocationRequest>(1);
+    protected CloudStorageV4Request getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
+                    CloudStorageParametersV4 cloudStorageParameterInstance) {
+        var request = new CloudStorageV4Request();
+        var locations = new LinkedHashSet<StorageLocationV4Request>(1);
         locations.add(
                 createLocation(
                         String.format("%s://%s/attached/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
@@ -91,8 +91,8 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
         return request;
     }
 
-    private StorageLocationRequest createLocation(String value, String propertyFile, String propertyName) {
-        var location = new StorageLocationRequest();
+    private StorageLocationV4Request createLocation(String value, String propertyFile, String propertyName) {
+        var location = new StorageLocationV4Request();
         location.setValue(value);
         location.setPropertyFile(propertyFile);
         location.setPropertyName(propertyName);

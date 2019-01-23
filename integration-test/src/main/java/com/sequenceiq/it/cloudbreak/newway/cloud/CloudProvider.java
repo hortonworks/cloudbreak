@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
@@ -13,6 +15,8 @@ import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
+import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 
 public abstract class CloudProvider {
 
@@ -23,8 +27,6 @@ public abstract class CloudProvider {
     public abstract CredentialEntity aValidCredential();
 
     public abstract CredentialEntity aValidCredential(boolean create);
-
-    public abstract AmbariV4Request ambariRequestWithBlueprintId(Long id);
 
     public abstract Stack aValidStackCreated();
 
@@ -56,6 +58,28 @@ public abstract class CloudProvider {
     public abstract String getVpcId();
 
     public abstract String getSubnetId();
+
+    public EnvironmentSettingsV4Request getEnvironmentSettings() {
+        return getEnvironmentSettings(getCredentialName(), getPlacementSettings());
+    }
+
+    public EnvironmentSettingsV4Request getEnvironmentSettings(String credentialName, PlacementSettingsV4Request placementSettingsV4Request) {
+        EnvironmentSettingsV4Entity settingsV4Entity = new EnvironmentSettingsV4Entity().valid();
+        settingsV4Entity.getRequest().setPlacement(placementSettingsV4Request);
+        settingsV4Entity.getRequest().setCredentialName(credentialName);
+        return settingsV4Entity.getRequest();
+    }
+
+    protected PlacementSettingsV4Request getPlacementSettings() {
+        return getPlacementSettings(region(), availabilityZone());
+    }
+
+    public PlacementSettingsV4Request getPlacementSettings(String region, String availabilityZone) {
+        PlacementSettingsEntity placementSettingsEntity = new PlacementSettingsEntity().valid();
+        placementSettingsEntity.getRequest().setRegion(region);
+        placementSettingsEntity.getRequest().setAvailabilityZone(availabilityZone);
+        return placementSettingsEntity.getRequest();
+    }
 
     public abstract String region();
 

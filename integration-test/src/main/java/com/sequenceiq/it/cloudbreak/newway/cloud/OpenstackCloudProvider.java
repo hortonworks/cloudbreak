@@ -2,16 +2,20 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.KeystoneV2Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack.OpenstackCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -42,8 +46,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     private static final String INTERNET_GATEWAY_ID = null;
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
-
-    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting os network";
 
     private static final String NETWORKING_DEFAULT_OPTION = "self-service";
 
@@ -81,21 +83,25 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackAuthenticationRequest stackauth() {
-        StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackauth() {
+        StackAuthenticationV4Request stackauth = new StackAuthenticationV4Request();
 
         stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 
     @Override
-    public TemplateV2Request template() {
-        TemplateV2Request t = new TemplateV2Request();
+    public InstanceTemplateV4Request template() {
+        InstanceTemplateV4Request t = new InstanceTemplateV4Request();
+        t.setCloudPlatform(CloudPlatform.OPENSTACK);
+
+        VolumeV4Request vol = new VolumeV4Request();
+        vol.setCount(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeCount", "0")));
+        vol.setSize(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeSize", "50")));
+        vol.setType(getTestParameter().getWithDefault("openstackInstanceVolumeType", "HDD"));
+        t.setAttachedVolumes(Set.of(vol));
 
         t.setInstanceType(getTestParameter().getWithDefault("openstackInstanceType", "m1.xlarge"));
-        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeCount", "0")));
-        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeSize", "50")));
-        t.setVolumeType(getTestParameter().getWithDefault("openstackInstanceVolumeType", "HDD"));
 
         return t;
     }
@@ -183,35 +189,47 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public NetworkV2Request newNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request newNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(newNetworkProperties());
+        OpenStackNetworkV4Parameters params = new OpenStackNetworkV4Parameters();
+        params.setPublicNetId(getPublicNetId());
+        network.setOpenstack(params);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request existingNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
-        network.setParameters(networkProperties());
+        OpenStackNetworkV4Parameters params = new OpenStackNetworkV4Parameters();
+        params.setPublicNetId(getPublicNetId());
+        params.setNetworkId(getVpcId());
+        params.setRouterId(getRouterId());
+        network.setOpenstack(params);
         return network;
     }
 
     @Override
-    public NetworkV2Request existingSubnet() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setParameters(subnetProperties());
+    public NetworkV4Request existingSubnet() {
+        NetworkV4Request network = new NetworkV4Request();
+        OpenStackNetworkV4Parameters params = new OpenStackNetworkV4Parameters();
+        params.setPublicNetId(getPublicNetId());
+        params.setNetworkId(getVpcId());
+        params.setRouterId(getRouterId());
+        params.setNetworkingOption(getNetworkingOption());
+        params.setSubnetId(getSubnetId());
+        network.setOpenstack(params);
         return network;
     }
 
     @Override
-    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
         var ambari = ambariRequestWithBlueprintName(blueprintName);
-        var stackDetails = new AmbariStackDetailsJson();
+        var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
-        ambari.setAmbariStackDetails(stackDetails);
+        ambari.setStackRepository(stackDetails);
         return ambari;
     }
 

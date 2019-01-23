@@ -83,7 +83,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testClusterTemplateWithType(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
-                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("environment")
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentSettings("environment")
                 .given(ClusterTemplateEntity.class).withType(SPARK).withStackTemplate("stackTemplate")
                 .capture(ClusterTemplateEntity::count, key("ctSize"))
                 .when(new ClusterTemplateV4CreateAction())
@@ -156,7 +156,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("environment")
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentSettings("environment")
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate").withName(SPECIAL_CT_NAME)
                 .when(new ClusterTemplateV4CreateAction())
                 .validate();
@@ -176,7 +176,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .given(ClusterTemplateEntity.class)
                 .given("placementSettings", PlacementSettingsEntity.class).withRegion(EUROPE)
-                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentKey("placementSettings")
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentSettings("placementSettings")
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new ClusterTemplateV4CreateAction(), key("againCtName"))

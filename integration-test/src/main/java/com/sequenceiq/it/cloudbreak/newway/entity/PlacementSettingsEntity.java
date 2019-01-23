@@ -9,12 +9,18 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 @Prototype
 public class PlacementSettingsEntity extends AbstractCloudbreakEntity<PlacementSettingsV4Request, PlacementSettingsV4Response, PlacementSettingsEntity> {
 
+    private static final String PLACEMENT = "PLACEMENT";
+
+    public PlacementSettingsEntity() {
+        super(PLACEMENT);
+    }
+
     protected PlacementSettingsEntity(TestContext testContext) {
         super(new PlacementSettingsV4Request(), testContext);
     }
 
     @Override
-    public CloudbreakEntity valid() {
+    public PlacementSettingsEntity valid() {
         return withRegion(getCloudProvider().region())
                 .withAvailabilityZone(getCloudProvider().availabilityZone());
     }

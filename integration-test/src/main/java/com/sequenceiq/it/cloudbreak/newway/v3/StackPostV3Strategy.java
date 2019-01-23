@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
@@ -47,8 +47,8 @@ public class StackPostV3Strategy implements Strategy {
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
-        if (credential != null && stackEntity.getRequest().getGeneral().getCredentialName() == null) {
-            stackEntity.getRequest().getGeneral().setCredentialName(credential.getName());
+        if (credential != null && stackEntity.getRequest().getEnvironment().getCredentialName() == null) {
+            stackEntity.getRequest().getEnvironment().setCredentialName(credential.getName());
         }
 
         Cluster cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
@@ -76,26 +76,22 @@ public class StackPostV3Strategy implements Strategy {
 
         KerberosEntity kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getAmbari().getKerberosConfigName() == null;
+                && stackEntity.getRequest().getCluster().getKerberosName() == null;
         if (kerberos != null && updateKerberos) {
-            AmbariV2Request ambariReq = stackEntity.getRequest().getCluster().getAmbari();
-            ambariReq.setKerberosConfigName(kerberos.getRequest().getName());
+            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
         }
 
         ClusterGateway clusterGateway = ClusterGateway.getTestContextGateway().apply(integrationTestContext);
         if (clusterGateway != null) {
             if (stackEntity.hasCluster()) {
-                ClusterV2Request clusterV2Request = stackEntity.getRequest().getCluster();
-                AmbariV2Request ambariV2Request = clusterV2Request.getAmbari();
-                if (ambariV2Request != null) {
-                    ambariV2Request.setGateway(clusterGateway.getRequest());
-                }
+                ClusterV4Request clusterV2Request = stackEntity.getRequest().getCluster();
+                clusterV2Request.setGateway(clusterGateway.getRequest());
             }
         }
 
         ImageSettingsEntity imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
-            stackEntity.getRequest().setImageSettings(imageSettings.getRequest());
+            stackEntity.getRequest().setImage(imageSettings.getRequest());
         }
 
         HostGroups hostGroups = HostGroups.getTestContextHostGroups().apply(integrationTestContext);
@@ -103,7 +99,7 @@ public class StackPostV3Strategy implements Strategy {
             stackEntity.getRequest().setInstanceGroups(hostGroups.getRequest());
         }
 
-        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
+        DatalakeCluster datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (datalakeStack != null && datalakeStack.getResponse() != null && datalakeStack.getResponse().getNetwork() != null) {
             String subnetId = null;
             String networkId = null;

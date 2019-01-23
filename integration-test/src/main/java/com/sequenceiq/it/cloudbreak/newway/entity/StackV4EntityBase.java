@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
@@ -51,7 +52,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return withInputs(emptyMap())
                 .withEnvironment(getTestContext().get(EnvironmentSettingsV4Entity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
-                .withNetwork(getCloudProvider().newNetwork(getTestContext()))
+                .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
                 .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
                 .withGatewayPort(getTestContext().getSparkServer().getPort())
                 .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
@@ -89,15 +90,14 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withEnvironmentKey(String environmentKey) {
+    public StackV4EntityBase<T> withEnvironmentSettings(String environmentKey) {
         EnvironmentSettingsV4Entity environment = getTestContext().get(environmentKey);
         getRequest().setEnvironment(environment.getRequest());
         return this;
     }
 
-    public StackV4EntityBase<T> withEnvironmentKey(Class<EnvironmentSettingsV4Entity> environmentKey) {
-        EnvironmentSettingsV4Entity environment = getTestContext().get(environmentKey);
-        getRequest().setEnvironment(environment.getRequest());
+    public StackV4EntityBase<T> withEnvironmentSettings(EnvironmentSettingsV4Request environment) {
+        getRequest().setEnvironment(environment);
         return this;
     }
 
@@ -206,11 +206,11 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> withNetwork(String key) {
         NetworkV2Entity network = getTestContext().get(key);
-        return withNetwork(network);
+        return withNetwork(network.getRequest());
     }
 
-    public StackV4EntityBase<T> withNetwork(NetworkV2Entity network) {
-        getRequest().setNetwork(network.getRequest());
+    public StackV4EntityBase<T> withNetwork(NetworkV4Request network) {
+        getRequest().setNetwork(network);
         return this;
     }
 

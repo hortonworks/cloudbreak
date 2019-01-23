@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParamet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
@@ -28,6 +29,18 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
 
     @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
     private OpenStackNetworkV4Parameters openstack;
+
+    @ApiModelProperty(hidden = true)
+    private MockNetworkV4Parameters mock;
+
+    @Override
+    public MockNetworkV4Parameters getMock() {
+        return mock;
+    }
+
+    public void setMock(MockNetworkV4Parameters mock) {
+        this.mock = mock;
+    }
 
     public String getSubnetCIDR() {
         return subnetCIDR;
