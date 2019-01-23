@@ -6,12 +6,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -44,8 +48,6 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
-    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting azure network";
-
     private static final String CREDENTIAL_ACCESS_KEY_ENV_KEY = "integrationtest.azurermcredential.accessKey";
 
     private static final String CREDENTIAL_SECRET_KEY_ENV_KEY = "integrationtest.azurermcredential.secretKey";
@@ -57,14 +59,6 @@ public class AzureCloudProvider extends CloudProviderHelper {
     private static final String CREDENTIAL_TENANT_ID_ENV_KEY = "integrationtest.azurermcredential.tenantId";
 
     private static final String CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY = "integrationtest.azurermcredential.subscriptionId";
-
-    private static final String ACCESS_KEY_PARAM_KEY = "accessKey";
-
-    private static final String SECRET_KEY_PARAM_KEY = "secretKey";
-
-    private static final String SUBSCRIPTION_ID_PARAM_KEY = "subscriptionId";
-
-    private static final String TENANT_ID_PARAM_KEY = "tenantId";
 
     private static final String GENERIC_TEST_VALUE = "12345abcdefg789";
 
@@ -111,24 +105,31 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackAuthenticationRequest stackauth() {
-        StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
+    public StackAuthenticationV4Request stackauth() {
+        StackAuthenticationV4Request stackauth = new StackAuthenticationV4Request();
 
         stackauth.setPublicKey(getTestParameter().get(INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 
     @Override
-    public TemplateV2Request template() {
-        TemplateV2Request t = new TemplateV2Request();
-
+    public InstanceTemplateV4Request template() {
+        InstanceTemplateV4Request t = new InstanceTemplateV4Request();
         t.setInstanceType(getTestParameter().getWithDefault("azureInstanceType", "Standard_D3_v2"));
-        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeCount", "1")));
-        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeSize", "100")));
-        t.setVolumeType(getTestParameter().getWithDefault("azureInstanceVolumeType", "Standard_LRS"));
 
-        Map<String, Object> params = Map.of("encrypted", "false", "managedDisk", "true");
-        t.setParameters(params);
+        VolumeV4Request volume = new VolumeV4Request();
+
+        volume.setCount(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeCount", "1")));
+        volume.setSize(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeSize", "100")));
+        volume.setType(getTestParameter().getWithDefault("azureInstanceVolumeType", "Standard_LRS"));
+
+        t.setAttachedVolumes(Set.of(volume));
+
+        AzureInstanceTemplateV4Parameters params = new AzureInstanceTemplateV4Parameters();
+        params.setEncrypted(false);
+        params.setManagedDisk(true);
+
+        t.setAzure(params);
         return t;
     }
 
@@ -207,31 +208,37 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public NetworkV2Request newNetwork() {
-        NetworkV2Request network = new NetworkV2Request();
+    public NetworkV4Request newNetwork() {
+        NetworkV4Request network = new NetworkV4Request();
         network.setSubnetCIDR(getSubnetCIDR());
         return network;
     }
 
     @Override
-    public NetworkV2Request existingNetwork() {
+    public NetworkV4Request existingNetwork() {
         return null;
     }
 
     @Override
-    public NetworkV2Request existingSubnet() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setParameters(subnetProperties());
+    public NetworkV4Request existingSubnet() {
+        NetworkV4Request network = new NetworkV4Request();
+        AzureNetworkV4Parameters params = new AzureNetworkV4Parameters();
+        params.setSubnetId(getSubnetId());
+        params.setNetworkId(getVpcId());
+        params.setResourceGroupName(getResourceGroupName());
+        params.setNoFirewallRules(getNoFirewallRules());
+        params.setNoPublicIp(getNoPublicIp());
+        network.setAzure(params);
         return network;
     }
 
     @Override
-    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
         var ambari = ambariRequestWithBlueprintName(blueprintName);
-        var stackDetails = new AmbariStackDetailsJson();
+        var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
-        ambari.setAmbariStackDetails(stackDetails);
+        ambari.setStackRepository(stackDetails);
         return ambari;
     }
 
@@ -264,15 +271,15 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Cluster aValidClusterWithFs(String versionDefinitionFile) {
-        AmbariV2Request ambariV2Request = ambariRequestWithBlueprintName(getDatalakeBlueprintName());
-        AmbariStackDetailsJson ambariStackDetails = ambariV2Request.getAmbariStackDetails();
-        ambariStackDetails.setVersionDefinitionFileUrl(versionDefinitionFile);
-        ambariStackDetails.setVersion("3.0");
-        ambariStackDetails.setOs("centos7");
-        ambariStackDetails.setStack("HDP");
-        ambariStackDetails.setRepositoryVersion("3.0.2.0-1");
-        ambariStackDetails.setEnableGplRepo(false);
-        ambariStackDetails.setVerify(false);
+        AmbariV4Request ambariV2Request = ambariRequestWithBlueprintName(getDatalakeBlueprintName());
+        StackRepositoryV4Request stackRepo = ambariV2Request.getStackRepository();
+        stackRepo.setVersionDefinitionFileUrl(versionDefinitionFile);
+        stackRepo.setVersion("3.0");
+        stackRepo.setOs("centos7");
+        stackRepo.setStack("HDP");
+        stackRepo.setVersion("3.0.2.0-1");
+        stackRepo.setEnableGplRepo(false);
+        stackRepo.setVerify(false);
 
         return Cluster.request()
                 .withAmbariRequest(ambariV2Request)
@@ -281,8 +288,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public AzureCredentialV4Parameters azureCredentialDetails() {
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        AppBased appBased = new AppBased();
+        appBased.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        appBased.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
         credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
         return credentialParameters;
@@ -290,8 +299,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public AzureCredentialV4Parameters azureCredentialDetailsNewApplication() {
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_NEWACCESS_KEY_ENV_KEY));
-        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_NEWSECRET_KEY_ENV_KEY));
+        AppBased appBased = new AppBased();
+        appBased.setSecretKey(getTestParameter().get(CREDENTIAL_NEWSECRET_KEY_ENV_KEY));
+        appBased.setAccessKey(getTestParameter().get(CREDENTIAL_NEWACCESS_KEY_ENV_KEY));
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
         credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
         return credentialParameters;
@@ -299,8 +310,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public AzureCredentialV4Parameters azureCredentialDetailsInvalidAccessKey() {
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(GENERIC_TEST_VALUE);
-        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        AppBased appBased = new AppBased();
+        appBased.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        appBased.setAccessKey(getTestParameter().get(GENERIC_TEST_VALUE));
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
         credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
         return credentialParameters;
@@ -308,8 +321,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public AzureCredentialV4Parameters azureCredentialDetailsInvalidSecretKey() {
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        credentialParameters.setSecretKey(GENERIC_TEST_VALUE);
+        AppBased appBased = new AppBased();
+        appBased.setSecretKey(getTestParameter().get(GENERIC_TEST_VALUE));
+        appBased.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
         credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
         return credentialParameters;
@@ -317,8 +332,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public AzureCredentialV4Parameters azureCredentialDetailsInvalidSubscriptionID() {
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        AppBased appBased = new AppBased();
+        appBased.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        appBased.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(GENERIC_TEST_VALUE);
         credentialParameters.setTenantId(getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
         return credentialParameters;
@@ -326,8 +343,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public AzureCredentialV4Parameters azureCredentialDetailsInvalidTenantID() {
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
-        credentialParameters.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        AppBased appBased = new AppBased();
+        appBased.setSecretKey(getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        appBased.setAccessKey(getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
         credentialParameters.setTenantId(GENERIC_TEST_VALUE);
         return credentialParameters;

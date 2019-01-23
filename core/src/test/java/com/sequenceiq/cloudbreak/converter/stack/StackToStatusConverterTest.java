@@ -28,9 +28,9 @@ public class StackToStatusConverterTest extends AbstractEntityConverterTest<Stac
         // WHEN
         StackStatusV4Response result = underTest.convert(getSource());
         // THEN
-        assertEquals(1L, result.getId().longValue());
-        assertEquals(Status.AVAILABLE.name(), result.getStatus());
-        assertEquals(Status.AVAILABLE.name(), result.getClusterStatus());
+        assertEquals(Long.valueOf(1L), result.getId());
+        assertEquals(Status.AVAILABLE, result.getStatus());
+        assertEquals(Status.AVAILABLE, result.getClusterStatus());
     }
 
     @Override

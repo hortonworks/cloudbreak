@@ -10,6 +10,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -52,7 +53,8 @@ public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
         String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         stackCreationMock.verifyCalls(stackName);
         StackV4Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
-        if (stackV2Request.getCluster().getGateway() != null) {
+        ClusterV4Request ambariV2Request = stackV2Request.getCluster();
+        if (ambariV2Request.getGateway() != null) {
             stackCreationMock.verifyGatewayCalls();
         }
     }

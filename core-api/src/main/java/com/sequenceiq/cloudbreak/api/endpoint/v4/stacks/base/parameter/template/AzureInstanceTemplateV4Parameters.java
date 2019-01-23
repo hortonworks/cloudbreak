@@ -20,6 +20,28 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
     @ApiModelProperty(TemplateModelDescription.AZURE_PRIVATE_ID)
     private String privateId;
 
+    @ApiModelProperty(notes = "by default false")
+    private Boolean encrypted = Boolean.FALSE;
+
+    @ApiModelProperty(notes = "by default true")
+    private Boolean managedDisk = Boolean.TRUE;
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public Boolean getManagedDisk() {
+        return managedDisk;
+    }
+
+    public void setManagedDisk(Boolean managedDisk) {
+        this.managedDisk = managedDisk;
+    }
+
     public String getPrivateId() {
         return privateId;
     }

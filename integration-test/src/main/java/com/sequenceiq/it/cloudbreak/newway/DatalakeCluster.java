@@ -2,13 +2,13 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.DatalakeClusterV3Action;
 
-public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, StackResponse, DatalakeCluster> {
+public class DatalakeCluster extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, DatalakeCluster> {
 
     private static final String DATALAKE_CLUSTER_ID = "DATALAKE_CLUSTER";
 
@@ -21,7 +21,7 @@ public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, St
     }
 
     public DatalakeCluster(TestContext testContext) {
-        super(new StackV2Request(), testContext);
+        super(new StackV4Request(), testContext);
     }
 
     public static DatalakeCluster isCreatedWithName(String name) {

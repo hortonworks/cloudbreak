@@ -1,15 +1,28 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
@@ -18,18 +31,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -106,11 +107,10 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     public StackEntity aValidStackRequest() {
-        return Stack.request()
+        return (StackEntity) Stack.request()
                 .withInputs(Collections.emptyMap())
                 .withName(getClusterName())
-                .withRegion(region())
-                .withAvailabilityZone(availabilityZone())
+                .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
@@ -126,8 +126,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     public Stack aValidStackCreated() {
         return (Stack) Stack.created()
                 .withName(getClusterName())
-                .withRegion(region())
-                .withAvailabilityZone(availabilityZone())
+                .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
@@ -136,27 +135,26 @@ public abstract class CloudProviderHelper extends CloudProvider {
     public Stack aValidAttachedClusterStackCreated(HostGroupType... groupTypes) {
         return (Stack) Stack.request()
                 .withName(getClusterName())
-                .withRegion(region())
-                .withAvailabilityZone(availabilityZone())
+                .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups(groupTypes))
                 .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
-    public abstract StackAuthenticationRequest stackauth();
+    public abstract StackAuthenticationV4Request stackauth();
 
-    public abstract NetworkV2Request newNetwork();
+    public abstract NetworkV4Request newNetwork();
 
-    public abstract NetworkV2Request existingNetwork();
+    public abstract NetworkV4Request existingNetwork();
 
-    public abstract NetworkV2Request existingSubnet();
+    public abstract NetworkV4Request existingSubnet();
 
-    public List<InstanceGroupV2Request> instanceGroups() {
+    public List<InstanceGroupV4Request> instanceGroups() {
         return instanceGroups(MASTER, COMPUTE, WORKER);
     }
 
-    public List<InstanceGroupV2Request> instanceGroups(HostGroupType... groupTypes) {
-        List<InstanceGroupV2Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
+    public List<InstanceGroupV4Request> instanceGroups(HostGroupType... groupTypes) {
+        List<InstanceGroupV4Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
         if (groupTypes != null) {
             for (HostGroupType groupType : groupTypes) {
                 requests.add(groupType.hostgroupRequest(this, testParameter));
@@ -165,8 +163,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return requests;
     }
 
-    public List<InstanceGroupV2Request> instanceGroups(String securityGroupId, HostGroupType... groupTypes) {
-        List<InstanceGroupV2Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
+    public List<InstanceGroupV4Request> instanceGroups(String securityGroupId, HostGroupType... groupTypes) {
+        List<InstanceGroupV4Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
         if (groupTypes != null) {
             for (HostGroupType groupType : groupTypes) {
                 requests.add(groupType.hostgroupRequest(this, testParameter, securityGroupId));
@@ -175,8 +173,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return requests;
     }
 
-    public List<InstanceGroupV2Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes) {
-        List<InstanceGroupV2Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
+    public List<InstanceGroupV4Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes) {
+        List<InstanceGroupV4Request> requests = new ArrayList<>(groupTypes != null ? groupTypes.length : 0);
         if (groupTypes != null) {
             for (HostGroupType groupType : groupTypes) {
                 requests.add(groupType.hostgroupRequest(this, testParameter, recipes));
@@ -196,40 +194,30 @@ public abstract class CloudProviderHelper extends CloudProvider {
         }
     }
 
-    public List<InstanceGroupV2Request> instanceGroups(String securityGroupId) {
+    public List<InstanceGroupV4Request> instanceGroups(String securityGroupId) {
         return instanceGroups(securityGroupId, MASTER, COMPUTE, WORKER);
 
     }
 
-    public List<InstanceGroupV2Request> instanceGroups(Set<String> recipes) {
+    public List<InstanceGroupV4Request> instanceGroups(Set<String> recipes) {
         return instanceGroups(recipes, MASTER, COMPUTE, WORKER);
     }
 
     @Override
-    public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
-        AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
-        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
-        req.setBlueprintId(id);
-        req.setValidateRepositories(Boolean.TRUE);
-        return req;
-    }
-
-    @Override
-    public AmbariV2Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+    public AmbariV4Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
         return ambariRequestWithBlueprintName(bluePrintName);
     }
 
     @Override
-    public AmbariV2Request ambariRequestWithBlueprintName(String bluePrintName) {
-        var req = new AmbariV2Request();
+    public AmbariV4Request ambariRequestWithBlueprintName(String bluePrintName) {
+        var req = new AmbariV4Request();
         req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(bluePrintName);
         req.setValidateBlueprint(false);
         req.setValidateRepositories(Boolean.TRUE);
-        req.setAmbariStackDetails(new AmbariStackDetailsJson());
+        req.setStackRepository(new StackRepositoryV4Request());
         return req;
     }
 
@@ -241,8 +229,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return testParameter;
     }
 
-    protected Set<StorageLocationRequest> defaultDatalakeStorageLocations(CloudStorageTypePathPrefix type, String parameterToInsert) {
-        Set<StorageLocationRequest> request = new LinkedHashSet<>(2);
+    protected Set<StorageLocationV4Request> defaultDatalakeStorageLocations(CloudStorageTypePathPrefix type, String parameterToInsert) {
+        Set<StorageLocationV4Request> request = new LinkedHashSet<>(2);
         request.add(createLocation(
                 String.format("%s://%s/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
                 "hive-site",
@@ -254,10 +242,10 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return request;
     }
 
-    protected CloudStorageRequest getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
-                                                                    CloudStorageParameters emptyType) {
-        var request = new CloudStorageRequest();
-        var locations = new LinkedHashSet<StorageLocationRequest>(1);
+    protected CloudStorageV4Request getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
+                                                                    CloudStorageParametersV4 emptyType) {
+        var request = new CloudStorageV4Request();
+        var locations = new LinkedHashSet<StorageLocationV4Request>(1);
         locations.add(
                 createLocation(
                         String.format("%s://%s/attached/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
@@ -268,8 +256,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return request;
     }
 
-    protected StorageLocationRequest createLocation(String value, String propertyFile, String propertyName) {
-        var location = new StorageLocationRequest();
+    protected StorageLocationV4Request createLocation(String value, String propertyFile, String propertyName) {
+        var location = new StorageLocationV4Request();
         location.setValue(value);
         location.setPropertyFile(propertyFile);
         location.setPropertyName(propertyName);
@@ -281,14 +269,4 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return blueprintName != null ? blueprintName : DEFAULT_DATALAKE_BLUEPRINT;
     }
 
-    private int determineInstanceCount(String key) {
-        String instanceCount = testParameter.get(key);
-        int instanceCountInt;
-        try {
-            instanceCountInt = Integer.parseInt(instanceCount);
-        } catch (NumberFormatException e) {
-            instanceCountInt = 1;
-        }
-        return instanceCountInt;
-    }
 }

@@ -13,8 +13,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -66,7 +66,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(AwsKerberos.kerberosOnAws(getTestParameter()));
         given(Cluster.request()
-                        .withAmbariRequest(AwsKerberos.getAmbariV2RequestForAwsKerberos(cloudProvider, blueprintName, getTestParameter())),
+                        .withKerberos(AwsKerberos.KERBEROS_CLOUDY)
+                        .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, blueprintName, getTestParameter())),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -133,9 +134,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
-        then(Stack.checkClusterHasAmbariRunningThroughKnox(
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
-                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+        then(Stack.checkClusterHasAmbariRunningThroughKnox(),
                 "check if ambari is available through knox");
     }
 
