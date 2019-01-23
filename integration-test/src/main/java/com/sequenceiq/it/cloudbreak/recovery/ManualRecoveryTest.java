@@ -56,6 +56,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 - removedInstanceCount;
 
+
         WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV1Endpoint, stackId, hostGroup, "UNHEALTHY");
 
         if (waitResult == WaitResult.TIMEOUT) {

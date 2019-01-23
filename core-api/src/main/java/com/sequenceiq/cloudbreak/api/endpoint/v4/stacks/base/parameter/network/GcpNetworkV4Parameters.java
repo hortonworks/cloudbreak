@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class GcpNetworkParametersV4 implements JsonEntity, Mappable {
+public class GcpNetworkV4Parameters implements JsonEntity, Mappable {
 
     @ApiModelProperty
     private String networkId;

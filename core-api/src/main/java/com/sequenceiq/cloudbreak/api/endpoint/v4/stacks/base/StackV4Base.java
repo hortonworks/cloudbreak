@@ -6,10 +6,10 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParametersBase;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -24,16 +24,19 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     private String name;
 
     @ApiModelProperty(StackModelDescription.AWS_PARAMETERS)
-    private AwsStackParametersV4 aws;
+    private AwsStackV4Parameters aws;
 
     @ApiModelProperty(StackModelDescription.GCP_PARAMETERS)
-    private GcpStackParametersV4 gcp;
+    private GcpStackV4Parameters gcp;
 
     @ApiModelProperty(StackModelDescription.AZURE_PARAMETERS)
-    private AzureStackParametersV4 azure;
+    private AzureStackV4Parameters azure;
 
     @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
-    private OpenStackStackParametersV4 openstack;
+    private OpenStackStackV4Parameters openstack;
+
+    @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
+    private OpenStackStackV4Parameters openstack;
 
     @ApiModelProperty
     private Long timeToLive;
@@ -46,35 +49,35 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.name = name;
     }
 
-    public AwsStackParametersV4 getAws() {
+    public AwsStackV4Parameters getAws() {
         return aws;
     }
 
-    public void setAws(AwsStackParametersV4 aws) {
+    public void setAws(AwsStackV4Parameters aws) {
         this.aws = aws;
     }
 
-    public GcpStackParametersV4 getGcp() {
+    public GcpStackV4Parameters getGcp() {
         return gcp;
     }
 
-    public void setGcp(GcpStackParametersV4 gcp) {
+    public void setGcp(GcpStackV4Parameters gcp) {
         this.gcp = gcp;
     }
 
-    public AzureStackParametersV4 getAzure() {
+    public AzureStackV4Parameters getAzure() {
         return azure;
     }
 
-    public void setAzure(AzureStackParametersV4 azure) {
+    public void setAzure(AzureStackV4Parameters azure) {
         this.azure = azure;
     }
 
-    public OpenStackStackParametersV4 getOpenstack() {
+    public OpenStackStackV4Parameters getOpenstack() {
         return openstack;
     }
 
-    public void setOpenstack(OpenStackStackParametersV4 openstack) {
+    public void setOpenstack(OpenStackStackV4Parameters openstack) {
         this.openstack = openstack;
     }
 

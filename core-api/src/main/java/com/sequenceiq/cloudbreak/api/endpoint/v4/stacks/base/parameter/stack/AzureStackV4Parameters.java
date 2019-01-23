@@ -5,7 +5,7 @@ import java.util.Map;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class AzureStackParametersV4 extends StackParameterV4Base {
+public class AzureStackV4Parameters extends StackV4ParameterBase {
 
     @ApiModelProperty
     private String resourceGroupName;

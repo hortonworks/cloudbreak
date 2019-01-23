@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParametersBase;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
@@ -18,16 +18,16 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     private String subnetCIDR;
 
     @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
-    private AwsNetworkParametersV4 aws;
+    private AwsNetworkV4Parameters aws;
 
     @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
-    private GcpNetworkParametersV4 gcp;
+    private GcpNetworkV4Parameters gcp;
 
     @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
-    private AzureNetworkParametersV4 azure;
+    private AzureNetworkV4Parameters azure;
 
     @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
-    private OpenStackNetworkParametersV4 openstack;
+    private OpenStackNetworkV4Parameters openstack;
 
     public String getSubnetCIDR() {
         return subnetCIDR;
@@ -37,35 +37,35 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
         this.subnetCIDR = subnetCIDR;
     }
 
-    public AwsNetworkParametersV4 getAws() {
+    public AwsNetworkV4Parameters getAws() {
         return aws;
     }
 
-    public void setAws(AwsNetworkParametersV4 aws) {
+    public void setAws(AwsNetworkV4Parameters aws) {
         this.aws = aws;
     }
 
-    public GcpNetworkParametersV4 getGcp() {
+    public GcpNetworkV4Parameters getGcp() {
         return gcp;
     }
 
-    public void setGcp(GcpNetworkParametersV4 gcp) {
+    public void setGcp(GcpNetworkV4Parameters gcp) {
         this.gcp = gcp;
     }
 
-    public AzureNetworkParametersV4 getAzure() {
+    public AzureNetworkV4Parameters getAzure() {
         return azure;
     }
 
-    public void setAzure(AzureNetworkParametersV4 azure) {
+    public void setAzure(AzureNetworkV4Parameters azure) {
         this.azure = azure;
     }
 
-    public OpenStackNetworkParametersV4 getOpenstack() {
+    public OpenStackNetworkV4Parameters getOpenstack() {
         return openstack;
     }
 
-    public void setOpenstack(OpenStackNetworkParametersV4 openstack) {
+    public void setOpenstack(OpenStackNetworkV4Parameters openstack) {
         this.openstack = openstack;
     }
 }

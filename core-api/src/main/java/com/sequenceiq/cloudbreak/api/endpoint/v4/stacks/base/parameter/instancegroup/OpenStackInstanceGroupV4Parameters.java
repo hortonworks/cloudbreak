@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instance
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupParametersV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4ParametersBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class OpenStackInstanceGroupParametersV4 extends InstanceGroupParametersV4Base {
+public class OpenStackInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase {
 
     @ApiModelProperty
     private String server;

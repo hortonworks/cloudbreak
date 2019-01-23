@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instance
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupParametersV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4ParametersBase;
 
-public class GcpInstanceGroupParametersV4 extends InstanceGroupParametersV4Base {
+public class GcpInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase {
 
     private String opId;
 
@@ -26,8 +26,6 @@ public class GcpInstanceGroupParametersV4 extends InstanceGroupParametersV4Base 
     @Override
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
-        setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
-        setInstanceName(getParameterOrNull(parameters, "instanceName"));
         opId = getParameterOrNull(parameters, "opid");
     }
 }

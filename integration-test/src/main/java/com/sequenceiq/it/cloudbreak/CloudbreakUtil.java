@@ -26,6 +26,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -90,7 +91,7 @@ public class CloudbreakUtil {
         }
     }
 
-    public static WaitResult waitForHostStatusStack(StackV4Endpoint stackV2Endpoint, String stackId, String hostGroup, String desiredStatus) {
+    public static WaitResult waitForHostStatusStack(StackV4Endpoint stackV2Endpoint, String stackName, String hostGroup, String desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean found = FALSE;
 
@@ -98,8 +99,8 @@ public class CloudbreakUtil {
         do {
             LOGGER.info("Waiting for host status {} in hostgroup {} ...", desiredStatus, hostGroup);
             sleep();
-            StackV4Response stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
-            Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
+            StackV4Response stackResponse = stackV2Endpoint.get(stackName, new HashSet<>());
+            List<InstanceGroupV4Response> hostGroupResponse = stackResponse.getInstanceGroups();
             for (HostGroupResponse hr : hostGroupResponse) {
                 if (hr.getName().equals(hostGroup)) {
                     Set<HostMetadataResponse> hostMetadataResponses = hr.getMetadata();

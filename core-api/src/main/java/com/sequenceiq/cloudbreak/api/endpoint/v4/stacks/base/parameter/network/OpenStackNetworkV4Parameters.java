@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class OpenStackNetworkParametersV4 implements JsonEntity, Mappable {
+public class OpenStackNetworkV4Parameters implements JsonEntity, Mappable {
 
     @ApiModelProperty
     private String networkId;

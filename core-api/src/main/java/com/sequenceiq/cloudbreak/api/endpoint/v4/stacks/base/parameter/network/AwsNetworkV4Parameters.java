@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class AwsNetworkParametersV4 implements JsonEntity, Mappable {
+public class AwsNetworkV4Parameters implements JsonEntity, Mappable {
 
     @ApiModelProperty
     private String vpcId;

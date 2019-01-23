@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class AzureNetworkParametersV4 implements JsonEntity, Mappable {
+public class AzureNetworkV4Parameters implements JsonEntity, Mappable {
 
     @ApiModelProperty
     private Boolean noPublicIp;

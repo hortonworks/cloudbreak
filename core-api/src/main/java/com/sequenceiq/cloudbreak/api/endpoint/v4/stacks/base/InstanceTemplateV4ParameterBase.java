@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class InstanceTemplateParameterV4Base implements JsonEntity, Mappable {
+public abstract class InstanceTemplateV4ParameterBase implements JsonEntity, Mappable {
 
     @ApiModelProperty(hidden = true)
     private CloudPlatform platformType;

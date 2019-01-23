@@ -16,7 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -67,7 +67,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         source.setRootVolume(getRootVolume(100));
         source.setInstanceType("large");
 
-        YarnInstanceTemplateParametersV4 customInstanceType = new YarnInstanceTemplateParametersV4();
+        YarnInstanceTemplateV4Parameters customInstanceType = new YarnInstanceTemplateV4Parameters();
         customInstanceType.setCpus(1);
         customInstanceType.setMemory(1);
         source.setYarn(customInstanceType);

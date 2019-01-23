@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public abstract class InstanceGroupParametersV4Base implements JsonEntity, Mappable {
+public abstract class InstanceGroupV4ParametersBase implements JsonEntity, Mappable {
 
     @ApiModelProperty
     private String discoveryName;

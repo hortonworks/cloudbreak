@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instance
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupParametersV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4ParametersBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class AzureInstanceGroupParametersV4 extends InstanceGroupParametersV4Base {
+public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase {
 
     @ApiModelProperty
     private AzureAvailabiltySetV4 availabilitySet;
@@ -31,8 +31,6 @@ public class AzureInstanceGroupParametersV4 extends InstanceGroupParametersV4Bas
     @Override
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
-        setDiscoveryName(getParameterOrNull(parameters, "discoveryName"));
-        setInstanceName(getParameterOrNull(parameters, "instanceName"));
         AzureAvailabiltySetV4 availabiltySet = new AzureAvailabiltySetV4();
         availabiltySet.setFaultDomainCount(getParameterOrNull(parameters, "faultDomainCount"));
         availabiltySet.setName(getParameterOrNull(parameters, "name"));

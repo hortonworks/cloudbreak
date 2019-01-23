@@ -18,12 +18,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.TemplateToInstanceTemplateV4ResponseConverter;
@@ -41,11 +41,11 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
     @Before
     public void setUp() throws JsonProcessingException {
         MockitoAnnotations.initMocks(this);
-        when(conversionService.convert(parameters(CloudConstants.AWS).getMap(), AwsInstanceTemplateParametersV4.class)).thenReturn(awsParameters());
-        when(conversionService.convert(parameters(CloudConstants.YARN).getMap(), YarnInstanceTemplateParametersV4.class)).thenReturn(yarnParameters());
-        when(conversionService.convert(parameters(CloudConstants.AZURE).getMap(), AzureInstanceTemplateParametersV4.class)).thenReturn(azureParameters());
-        when(conversionService.convert(parameters(CloudConstants.GCP).getMap(), GcpInstanceTemplateParametersV4.class)).thenReturn(gcpParameters());
-        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackInstanceTemplateParametersV4.class)).thenReturn(openStackParameters());
+        when(conversionService.convert(parameters(CloudConstants.AWS).getMap(), AwsInstanceTemplateV4Parameters.class)).thenReturn(awsParameters());
+        when(conversionService.convert(parameters(CloudConstants.YARN).getMap(), YarnInstanceTemplateV4Parameters.class)).thenReturn(yarnParameters());
+        when(conversionService.convert(parameters(CloudConstants.AZURE).getMap(), AzureInstanceTemplateV4Parameters.class)).thenReturn(azureParameters());
+        when(conversionService.convert(parameters(CloudConstants.GCP).getMap(), GcpInstanceTemplateV4Parameters.class)).thenReturn(gcpParameters());
+        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackInstanceTemplateV4Parameters.class)).thenReturn(openStackParameters());
     }
 
     @Test
@@ -122,8 +122,8 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
         return new Json(map);
     }
 
-    private AwsInstanceTemplateParametersV4 awsParameters() {
-        AwsInstanceTemplateParametersV4 templateParameters = new AwsInstanceTemplateParametersV4();
+    private AwsInstanceTemplateV4Parameters awsParameters() {
+        AwsInstanceTemplateV4Parameters templateParameters = new AwsInstanceTemplateV4Parameters();
         templateParameters.setSpotPrice(10.0D);
         AwsEncryptionParametersV4 awsEncryption = new AwsEncryptionParametersV4();
         awsEncryption.setKey("someKey");
@@ -132,12 +132,12 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
         return templateParameters;
     }
 
-    private OpenStackInstanceTemplateParametersV4 openStackParameters() {
-        return new OpenStackInstanceTemplateParametersV4();
+    private OpenStackInstanceTemplateV4Parameters openStackParameters() {
+        return new OpenStackInstanceTemplateV4Parameters();
     }
 
-    private GcpInstanceTemplateParametersV4 gcpParameters() {
-        GcpInstanceTemplateParametersV4 templateParameters = new GcpInstanceTemplateParametersV4();
+    private GcpInstanceTemplateV4Parameters gcpParameters() {
+        GcpInstanceTemplateV4Parameters templateParameters = new GcpInstanceTemplateV4Parameters();
         GcpEncryptionParametersV4 encryption = new GcpEncryptionParametersV4();
         encryption.setKeyEncryptionMethod(KeyEncryptionMethod.RAW);
         encryption.setType(EncryptionType.CUSTOM);
@@ -146,13 +146,13 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
         return templateParameters;
     }
 
-    private AzureInstanceTemplateParametersV4 azureParameters() {
-        AzureInstanceTemplateParametersV4 templateParameters = new AzureInstanceTemplateParametersV4();
+    private AzureInstanceTemplateV4Parameters azureParameters() {
+        AzureInstanceTemplateV4Parameters templateParameters = new AzureInstanceTemplateV4Parameters();
         templateParameters.setPrivateId("somePrivateId");
         return templateParameters;
     }
 
-    private YarnInstanceTemplateParametersV4 yarnParameters() throws JsonProcessingException {
-        return new YarnInstanceTemplateParametersV4();
+    private YarnInstanceTemplateV4Parameters yarnParameters() throws JsonProcessingException {
+        return new YarnInstanceTemplateV4Parameters();
     }
 }

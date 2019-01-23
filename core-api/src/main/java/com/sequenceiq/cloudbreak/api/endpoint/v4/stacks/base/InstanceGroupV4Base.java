@@ -7,10 +7,10 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParametersBase;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.GcpInstanceGroupParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.OpenStackInstanceGroupParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.GcpInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.OpenStackInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
@@ -32,16 +32,16 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     private InstanceGroupType type = InstanceGroupType.CORE;
 
     @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
-    private AzureInstanceGroupParametersV4 azure;
+    private AzureInstanceGroupV4Parameters azure;
 
     @ApiModelProperty(InstanceGroupModelDescription.GCP_PARAMETERS)
-    private GcpInstanceGroupParametersV4 gcp;
+    private GcpInstanceGroupV4Parameters gcp;
 
     @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
-    private AwsInstanceGroupParametersV4 aws;
+    private AwsInstanceGroupV4Parameters aws;
 
     @ApiModelProperty(InstanceGroupModelDescription.OPENSTACK_PARAMETERS)
-    private OpenStackInstanceGroupParametersV4 openstack;
+    private OpenStackInstanceGroupV4Parameters openstack;
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
@@ -70,35 +70,35 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
         this.type = type;
     }
 
-    public AzureInstanceGroupParametersV4 getAzure() {
+    public AzureInstanceGroupV4Parameters getAzure() {
         return azure;
     }
 
-    public void setAzure(AzureInstanceGroupParametersV4 azure) {
+    public void setAzure(AzureInstanceGroupV4Parameters azure) {
         this.azure = azure;
     }
 
-    public GcpInstanceGroupParametersV4 getGcp() {
+    public GcpInstanceGroupV4Parameters getGcp() {
         return gcp;
     }
 
-    public void setGcp(GcpInstanceGroupParametersV4 gcp) {
+    public void setGcp(GcpInstanceGroupV4Parameters gcp) {
         this.gcp = gcp;
     }
 
-    public AwsInstanceGroupParametersV4 getAws() {
+    public AwsInstanceGroupV4Parameters getAws() {
         return aws;
     }
 
-    public void setAws(AwsInstanceGroupParametersV4 aws) {
+    public void setAws(AwsInstanceGroupV4Parameters aws) {
         this.aws = aws;
     }
 
-    public OpenStackInstanceGroupParametersV4 getOpenstack() {
+    public OpenStackInstanceGroupV4Parameters getOpenstack() {
         return openstack;
     }
 
-    public void setOpenstack(OpenStackInstanceGroupParametersV4 openstack) {
+    public void setOpenstack(OpenStackInstanceGroupV4Parameters openstack) {
         this.openstack = openstack;
     }
 
