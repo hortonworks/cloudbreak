@@ -27,7 +27,7 @@ public abstract class RecipeV4Base implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = RecipeModelDescription.TYPE,
-            allowableValues = "PRE_AMBARI_START,PRE_TERMINATION,PRE_AMBARI_START,POST_CLUSTER_INSTALL")
+            allowableValues = "PRE_AMBARI_START,PRE_TERMINATION,POST_AMBARI_START,POST_CLUSTER_INSTALL")
     private RecipeV4Type type = RecipeV4Type.PRE_AMBARI_START;
 
     @ApiModelProperty(RecipeModelDescription.CONTENT)
