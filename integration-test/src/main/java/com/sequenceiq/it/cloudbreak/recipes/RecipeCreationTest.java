@@ -26,7 +26,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
         if (!preScript.isEmpty()) {
-            createRecipe(name + "pre", preScript, RecipeV4Type.POST_CLUSTER_MANAGER_START, description, workspaceId);
+            createRecipe(name + "pre", preScript, RecipeV4Type.POST_AMBARI_START, description, workspaceId);
         }
         if (!postScript.isEmpty()) {
             createRecipe(name + "post", postScript, RecipeV4Type.POST_CLUSTER_INSTALL, description, workspaceId);

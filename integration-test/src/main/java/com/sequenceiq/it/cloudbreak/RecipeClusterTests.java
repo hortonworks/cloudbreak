@@ -102,7 +102,7 @@ public class RecipeClusterTests extends CloudbreakTest {
         given(Recipe.isCreated()
                 .withName(INVALID_RECIPE_NAME)
                 .withDescription(VALID_RECIPE_DESCRIPTION)
-                .withRecipeType(RecipeV4Type.POST_CLUSTER_MANAGER_START)
+                .withRecipeType(RecipeV4Type.POST_AMBARI_START)
                 .withContent(Base64.encodeBase64String("#!/bin/bash \nexit -1".getBytes()))
         );
     }
