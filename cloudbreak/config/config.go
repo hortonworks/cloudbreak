@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"syscall"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cloudbreak/common"
 	fl "github.com/hortonworks/cb-cli/cloudbreak/flags"
 	ws "github.com/hortonworks/cb-cli/cloudbreak/workspace"
 	"github.com/hortonworks/cb-cli/utils"
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-	"strconv"
-	"syscall"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -48,12 +49,20 @@ func (c ConfigList) Yaml() string {
 func CheckConfigAndCommandFlags(c *cli.Context) error {
 	err := fl.CheckRequiredFlagsAndArguments(c)
 	if err == nil {
-		return configRead(c)
+		return configRead(c, true)
 	}
 	return err
 }
 
-func configRead(c *cli.Context) error {
+func CheckConfigAndCommandFlagsWithoutWorkspace(c *cli.Context) error {
+	err := fl.CheckRequiredFlagsAndArguments(c)
+	if err == nil {
+		return configRead(c, false)
+	}
+	return err
+}
+
+func configRead(c *cli.Context, checkWorkspace bool) error {
 	args := c.Args()
 	if args.Present() {
 		name := args.First()
@@ -121,38 +130,45 @@ func configRead(c *cli.Context) error {
 			set(fl.FlPassword.Name, config.Password)
 		}
 	}
-	if len(workspace) == 0 {
-		if len(config.Workspace) == 0 {
-			workspaceList := ws.GetWorkspaceList(c)
-			var workspaceID string
-			for _, workspace := range workspaceList {
-				if workspace.Name == c.String(fl.FlUsername.Name) {
-					workspaceID = strconv.FormatInt(workspace.ID, 10)
-				}
-			}
-
-			err = WriteConfigToFile(GetHomeDirectory(), config.Server, config.Username, config.Password, config.Output, profile, config.AuthType, config.Username)
-			if err != nil {
-				utils.LogErrorAndExit(err)
-			}
-			set(fl.FlWorkspaceOptional.Name, workspaceID)
-		} else {
-			workspaceID := ws.GetWorkspaceIdByName(c, config.Workspace)
-			set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
-		}
-	} else {
-		workspaceID := ws.GetWorkspaceIdByName(c, workspace)
-		set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
-	}
-
 	server = c.String(fl.FlServerOptional.Name)
 	username = c.String(fl.FlUsername.Name)
 	password = c.String(fl.FlPassword.Name)
+	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
+		message := fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+			[]string{"--" + fl.FlServerOptional.Name, "--" + fl.FlUsername.Name, "--" + fl.FlPassword.Name})
+		log.Error(message)
+		panic(message)
+	}
+	if !checkWorkspace {
+		return nil
+	}
+	var workspaceID string
+
+	if len(workspace) != 0 {
+		workspaceID = strconv.FormatInt(ws.GetWorkspaceIdByName(c, workspace), 10)
+	} else if len(config.Workspace) != 0 {
+		workspaceID = strconv.FormatInt(ws.GetWorkspaceIdByName(c, config.Workspace), 10)
+	} else {
+		workspaceList := ws.GetWorkspaceList(c)
+		for _, workspace := range workspaceList {
+			if workspace.Name == c.String(fl.FlUsername.Name) {
+				workspaceID = strconv.FormatInt(workspace.ID, 10)
+				break
+			}
+		}
+		err = WriteConfigToFile(GetHomeDirectory(), config.Server, config.Username, config.Password, config.Output, profile, config.AuthType, config.Username)
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+	}
+	set(fl.FlWorkspaceOptional.Name, workspaceID)
+
 	workspace = c.String(fl.FlWorkspaceOptional.Name)
-	if len(server) == 0 || len(username) == 0 || len(password) == 0 || len(workspace) == 0 {
-		log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
-			[]string{"--" + fl.FlServerOptional.Name, "--" + fl.FlUsername.Name, "--" + fl.FlPassword.Name, "--" + fl.FlWorkspaceOptional.Name}))
-		os.Exit(1)
+	if len(workspace) == 0 {
+		message := fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+			[]string{"--" + fl.FlWorkspaceOptional.Name})
+		log.Error(message)
+		panic(message)
 	}
 	return nil
 }
