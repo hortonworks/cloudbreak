@@ -117,7 +117,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public Images getImagesFromDefault(Long workspaceId,  String stackName, String platform) throws CloudbreakImageCatalogException {
+    public Images getImagesFromDefault(Long workspaceId, String stackName, String platform) throws CloudbreakImageCatalogException {
         if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
             throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
         }
