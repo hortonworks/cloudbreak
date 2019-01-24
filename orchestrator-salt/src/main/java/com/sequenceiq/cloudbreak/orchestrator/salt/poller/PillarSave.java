@@ -56,11 +56,11 @@ public class PillarSave implements OrchestratorBootstrap {
         Map<String, Map<String, List<String>>> scripts = new HashMap<>(recipes.size());
         for (Entry<String, List<RecipeModel>> entry : recipes.entrySet()) {
             List<String> preAmbariStart = entry.getValue().stream().
-                    filter(h -> h.getRecipeType() == RecipeType.PRE_CLUSTER_MANAGER_START).map(RecipeModel::getName).collect(Collectors.toList());
+                    filter(h -> h.getRecipeType() == RecipeType.PRE_AMBARI_START).map(RecipeModel::getName).collect(Collectors.toList());
             List<String> preTermination = entry.getValue().stream().
                     filter(h -> h.getRecipeType() == RecipeType.PRE_TERMINATION).map(RecipeModel::getName).collect(Collectors.toList());
             List<String> postAmbariStart = entry.getValue().stream().
-                filter(h -> h.getRecipeType() == RecipeType.POST_CLUSTER_MANAGER_START).map(RecipeModel::getName).collect(Collectors.toList());
+                filter(h -> h.getRecipeType() == RecipeType.POST_AMBARI_START).map(RecipeModel::getName).collect(Collectors.toList());
             List<String> postClusterInstall = entry.getValue().stream().
                     filter(h -> h.getRecipeType() == RecipeType.POST_CLUSTER_INSTALL).map(RecipeModel::getName).collect(Collectors.toList());
             Map<String, List<String>> prePostScripts = new HashMap<>();

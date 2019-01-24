@@ -19,11 +19,11 @@ public enum RecipeExecutionPhase {
 
     public static RecipeExecutionPhase convert(RecipeType recipeType) {
         switch (recipeType) {
-            case PRE_CLUSTER_MANAGER_START:
+            case PRE_AMBARI_START:
                 return PRE_AMBARI_START;
             case PRE_TERMINATION:
                 return PRE_TERMINATION;
-            case POST_CLUSTER_MANAGER_START:
+            case POST_AMBARI_START:
                 return POST_AMBARI_START;
             case POST_CLUSTER_INSTALL:
                 return POST_CLUSTER_INSTALL;
