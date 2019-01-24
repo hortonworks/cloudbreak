@@ -58,8 +58,8 @@ class MockHelper
         actualTrace = getTrace()
         prettyJsonActualTrace = JSON.pretty_generate(actualTrace)
         prettyJsonExpectedResponse = JSON.pretty_generate(expectedResponse)
-        hashActualTraceValue = JSON.parse(prettyJsonActualTrace)[1]["params"]["body"]["value"]
-        hashActualTraceURL = JSON.parse(prettyJsonActualTrace)[1]["url"]
+        hashActualTraceValue = JSON.parse(prettyJsonActualTrace)[-1]["params"]["body"]["value"]
+        hashActualTraceURL = JSON.parse(prettyJsonActualTrace)[-1]["url"]
         hashExpectedResponseValue = JSON.parse(prettyJsonExpectedResponse)["sentValue"]
         hashExpectedResponseURL = JSON.parse(prettyJsonExpectedResponse)["calledEndpoint"]
 

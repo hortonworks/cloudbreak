@@ -14,9 +14,9 @@ import (
 	ws "github.com/hortonworks/cb-cli/dataplane/workspace"
 	"github.com/hortonworks/dp-cli-common/caasauth"
 	"github.com/hortonworks/dp-cli-common/utils"
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -49,6 +49,16 @@ func CheckConfigAndCommandFlags(c *cli.Context) error {
 		resp := configRead(c)
 		setWorkspaceInContext(c)
 		validateContext(c, []fl.StringFlag{fl.FlServerOptional, fl.FlWorkspaceOptional})
+		return resp
+	}
+	return err
+}
+
+func CheckConfigAndCommandFlagsWithoutWorkspace(c *cli.Context) error {
+	err := fl.CheckRequiredFlagsAndArguments(c)
+	if err == nil {
+		resp := configRead(c)
+		validateContext(c, []fl.StringFlag{fl.FlServerOptional})
 		return resp
 	}
 	return err

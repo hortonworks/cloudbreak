@@ -1291,6 +1291,13 @@ func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
 	return fb
 }
 
+func (fb *FlagBuilder) AddAuthenticationFlagsWithoutWorkspace() *FlagBuilder {
+	for _, f := range []cli.Flag{FlServerOptional, FlProfileOptional, FlRefreshTokenOptional} {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
 func (fb *FlagBuilder) AddResourceDefaultFlags() *FlagBuilder {
 	for _, f := range []cli.Flag{FlName, FlDescriptionOptional} {
 		fb.flags = append(fb.flags, f)
