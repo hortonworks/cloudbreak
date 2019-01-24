@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.services.filesystem.BaseFileSystem;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
@@ -42,7 +42,7 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
         FileSystem fileSystem = new FileSystem();
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
         fileSystem.setDefaultFs(false);
-        CloudStorageParametersV4 cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
+        CloudStorageV4Parameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
         fileSystem.setType(cloudStorageParameters.getType());
 
         Set<StorageLocation> locations = new HashSet<>();

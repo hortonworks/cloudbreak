@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
 
 public class AdlsCloudStorageParametersToAdlsFileSystemConverterTest {
@@ -28,7 +28,7 @@ public class AdlsCloudStorageParametersToAdlsFileSystemConverterTest {
     @Test
     public void testConvertCheckingTheResultAdlsFileSystemIsFilledProperly() {
         AdlsFileSystem expected = createTestAdlsFileSystem();
-        AdlsCloudStorageParametersV4 source = new AdlsCloudStorageParametersV4();
+        AdlsCloudStorageV4Parameters source = new AdlsCloudStorageV4Parameters();
         source.setAccountName(TEST_ACCOUNT_NAME);
         source.setClientId(TEST_CLIENT_ID);
         source.setCredential(TEST_CREDENTIAL);

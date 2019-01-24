@@ -22,13 +22,13 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     private Double spotPrice;
 
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
-    private AwsEncryptionParametersV4 encryption;
+    private AwsEncryptionV4Parameters encryption;
 
-    public AwsEncryptionParametersV4 getEncryption() {
+    public AwsEncryptionV4Parameters getEncryption() {
         return encryption;
     }
 
-    public void setEncryption(AwsEncryptionParametersV4 encryption) {
+    public void setEncryption(AwsEncryptionV4Parameters encryption) {
         this.encryption = encryption;
     }
 
@@ -46,11 +46,19 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         Map<String, Object> map = super.asMap();
         map.put("spotPrice", spotPrice);
         if (encryption != null) {
-            map.put("key", encryption.getKey());
             map.put("type", encryption.getType());
             map.put("encrypted", true);
         }
         return map;
+    }
+
+    @Override
+    public Map<String, Object> asSecretMap() {
+        Map<String, Object> secretMap = super.asSecretMap();
+        if (encryption != null) {
+            secretMap.put("key", encryption.getKey());
+        }
+        return secretMap;
     }
 
     @Override
@@ -59,7 +67,7 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         if (spotPrice != null) {
             this.spotPrice = Double.parseDouble(spotPrice);
         }
-        AwsEncryptionParametersV4 encription = new AwsEncryptionParametersV4();
+        AwsEncryptionV4Parameters encription = new AwsEncryptionV4Parameters();
         encription.setKey(getParameterOrNull(parameters, "key"));
         String type = getParameterOrNull(parameters, "type");
         if (type != null) {

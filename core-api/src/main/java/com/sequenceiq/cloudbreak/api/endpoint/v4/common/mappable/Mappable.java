@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 import static java.util.Objects.isNull;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public interface Mappable {
@@ -26,6 +27,10 @@ public interface Mappable {
     Mappable EMPTY = Collections::emptyMap;
 
     Map<String, Object> asMap();
+
+    default Map<String, Object> asSecretMap() {
+        return new HashMap<>();
+    }
 
     default void parse(Map<String, Object> parameters) {}
 

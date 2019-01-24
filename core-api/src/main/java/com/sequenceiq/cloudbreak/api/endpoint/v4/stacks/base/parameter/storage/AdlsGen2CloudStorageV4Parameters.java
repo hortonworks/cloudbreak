@@ -1,10 +1,9 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage;
 
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.validation.ValidAdlsGen2CloudStorageParameters;
 
@@ -13,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @ValidAdlsGen2CloudStorageParameters
-public class AdlsGen2CloudStorageParametersV4 implements CloudStorageParametersV4 {
+public class AdlsGen2CloudStorageV4Parameters implements CloudStorageV4Parameters {
 
     @ApiModelProperty
     @NotNull
@@ -50,10 +49,10 @@ public class AdlsGen2CloudStorageParametersV4 implements CloudStorageParametersV
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AdlsGen2CloudStorageParametersV4)) {
+        if (!(o instanceof AdlsGen2CloudStorageV4Parameters)) {
             return false;
         }
-        AdlsGen2CloudStorageParametersV4 that = (AdlsGen2CloudStorageParametersV4) o;
+        AdlsGen2CloudStorageV4Parameters that = (AdlsGen2CloudStorageV4Parameters) o;
         return Objects.equals(getAccountKey(), that.getAccountKey())
                 && Objects.equals(getAccountName(), that.getAccountName());
     }

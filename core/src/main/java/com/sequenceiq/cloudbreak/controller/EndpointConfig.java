@@ -15,26 +15,28 @@ import org.springframework.stereotype.Controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
-import com.sequenceiq.cloudbreak.controller.v4.AutoscaleV4Controller;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.AutoscaleV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CredentialV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.EnvironmentV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FlexSubscriptionV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.EnvironmentV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.KubernetesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.LdapV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ManagementPackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.PlatformParameterV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.SmartSenseSubscriptionV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
@@ -63,7 +65,7 @@ public class EndpointConfig extends ResourceConfig {
             ImageCatalogV4Controller.class,
             KerberosConfigV4Controller.class,
             LdapV4Controller.class,
-            KubernetesV4Endpoint.class,
+            KubernetesV4Controller.class,
             WorkspaceV4Controller.class,
             PlatformParameterV4Controller.class,
             ProxyV4Controller.class,
@@ -75,7 +77,9 @@ public class EndpointConfig extends ResourceConfig {
             UtilV4Controller.class,
             FileSystemV4Controller.class,
             WorkspaceAwareUtilV4Controller.class,
-            AutoscaleV4Controller.class
+            AutoscaleV4Controller.class,
+            ManagementPackV4Controller.class,
+            StackV4Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

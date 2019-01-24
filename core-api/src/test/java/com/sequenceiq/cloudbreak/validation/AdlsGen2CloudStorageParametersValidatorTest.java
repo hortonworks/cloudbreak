@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
 
 public class AdlsGen2CloudStorageParametersValidatorTest {
 
@@ -46,12 +46,12 @@ public class AdlsGen2CloudStorageParametersValidatorTest {
                 "utgWEh7k/rB7CAwSsTWY8tjskMJc5N4glKm+DYpRvdnQ0kOy5l04kvPeFmQMQjQhJvjCwVZtmPk/fvORZP3zwCR=")));
     }
 
-    private boolean testValidator(AdlsGen2CloudStorageParametersV4 adlsGen2CloudStorageParameters) {
+    private boolean testValidator(AdlsGen2CloudStorageV4Parameters adlsGen2CloudStorageParameters) {
         return validator.isValid(adlsGen2CloudStorageParameters, context);
     }
 
-    private AdlsGen2CloudStorageParametersV4 create(String accountName, String accountKey) {
-        AdlsGen2CloudStorageParametersV4 adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageParametersV4();
+    private AdlsGen2CloudStorageV4Parameters create(String accountName, String accountKey) {
+        AdlsGen2CloudStorageV4Parameters adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageV4Parameters();
         adlsGen2CloudStorageParameters.setAccountKey(accountKey);
         adlsGen2CloudStorageParameters.setAccountName(accountName);
         return adlsGen2CloudStorageParameters;

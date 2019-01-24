@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
 
-public class GcsCloudStorageParametersValidator implements ConstraintValidator<ValidGcsCloudStorageParameters, GcsCloudStorageParametersV4> {
+public class GcsCloudStorageParametersValidator implements ConstraintValidator<ValidGcsCloudStorageParameters, GcsCloudStorageV4Parameters> {
 
     private String failMessage = "";
 
@@ -14,7 +14,7 @@ public class GcsCloudStorageParametersValidator implements ConstraintValidator<V
     }
 
     @Override
-    public boolean isValid(GcsCloudStorageParametersV4 value, ConstraintValidatorContext context) {
+    public boolean isValid(GcsCloudStorageV4Parameters value, ConstraintValidatorContext context) {
         boolean result;
         if (!isServiceAccountEmailValid(value.getServiceAccountEmail())) {
             ValidatorUtil.addConstraintViolation(context, failMessage, "status");

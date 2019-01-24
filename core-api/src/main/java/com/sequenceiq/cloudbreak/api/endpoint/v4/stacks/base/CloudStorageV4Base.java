@@ -4,11 +4,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsCloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.gcs.GcsCloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
@@ -30,23 +30,23 @@ public abstract class CloudStorageV4Base implements JsonEntity {
 
     @Valid
     @ApiModelProperty
-    private AdlsCloudStorageParametersV4 adls;
+    private AdlsCloudStorageV4Parameters adls;
 
     @Valid
     @ApiModelProperty
-    private WasbCloudStorageParametersV4 wasb;
+    private WasbCloudStorageV4Parameters wasb;
 
     @Valid
     @ApiModelProperty
-    private GcsCloudStorageParametersV4 gcs;
+    private GcsCloudStorageV4Parameters gcs;
 
     @Valid
     @ApiModelProperty
-    private S3CloudStorageParametersV4 s3;
+    private S3CloudStorageV4Parameters s3;
 
     @Valid
     @ApiModelProperty
-    private AdlsGen2CloudStorageParametersV4 adlsGen2;
+    private AdlsGen2CloudStorageV4Parameters adlsGen2;
 
     public String getName() {
         return name;
@@ -72,43 +72,43 @@ public abstract class CloudStorageV4Base implements JsonEntity {
         this.defaultFs = defaultFs;
     }
 
-    public AdlsCloudStorageParametersV4 getAdls() {
+    public AdlsCloudStorageV4Parameters getAdls() {
         return adls;
     }
 
-    public void setAdls(AdlsCloudStorageParametersV4 adls) {
+    public void setAdls(AdlsCloudStorageV4Parameters adls) {
         this.adls = adls;
     }
 
-    public WasbCloudStorageParametersV4 getWasb() {
+    public WasbCloudStorageV4Parameters getWasb() {
         return wasb;
     }
 
-    public void setWasb(WasbCloudStorageParametersV4 wasb) {
+    public void setWasb(WasbCloudStorageV4Parameters wasb) {
         this.wasb = wasb;
     }
 
-    public GcsCloudStorageParametersV4 getGcs() {
+    public GcsCloudStorageV4Parameters getGcs() {
         return gcs;
     }
 
-    public void setGcs(GcsCloudStorageParametersV4 gcs) {
+    public void setGcs(GcsCloudStorageV4Parameters gcs) {
         this.gcs = gcs;
     }
 
-    public S3CloudStorageParametersV4 getS3() {
+    public S3CloudStorageV4Parameters getS3() {
         return s3;
     }
 
-    public void setS3(S3CloudStorageParametersV4 s3) {
+    public void setS3(S3CloudStorageV4Parameters s3) {
         this.s3 = s3;
     }
 
-    public AdlsGen2CloudStorageParametersV4 getAdlsGen2() {
+    public AdlsGen2CloudStorageV4Parameters getAdlsGen2() {
         return adlsGen2;
     }
 
-    public void setAdlsGen2(AdlsGen2CloudStorageParametersV4 adlsGen2) {
+    public void setAdlsGen2(AdlsGen2CloudStorageV4Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
     }
 }

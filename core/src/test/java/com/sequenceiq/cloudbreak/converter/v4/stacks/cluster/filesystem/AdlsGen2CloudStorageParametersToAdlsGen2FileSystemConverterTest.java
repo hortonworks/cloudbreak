@@ -5,8 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem.AdlsGen2CloudStorageParametersV4ToAdlsGen2FileSystemConverter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
 
 public class AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverterTest {
@@ -33,8 +32,8 @@ public class AdlsGen2CloudStorageParametersToAdlsGen2FileSystemConverterTest {
         assertEquals(expected, result);
     }
 
-    private AdlsGen2CloudStorageParametersV4 createAdlsGen2CloudStorageParameters() {
-        AdlsGen2CloudStorageParametersV4 wasb = new AdlsGen2CloudStorageParametersV4();
+    private AdlsGen2CloudStorageV4Parameters createAdlsGen2CloudStorageParameters() {
+        AdlsGen2CloudStorageV4Parameters wasb = new AdlsGen2CloudStorageV4Parameters();
         wasb.setAccountKey(TEST_ACCOUNT_KEY);
         wasb.setAccountName(TEST_ACCOUNT_NAME);
         return wasb;

@@ -20,16 +20,16 @@ import io.swagger.annotations.ApiModelProperty;
 public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4ParameterBase {
 
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
-    private GcpEncryptionParametersV4 encryption;
+    private GcpEncryptionV4Parameters encryption;
 
     @ApiModelProperty
     private Boolean preemptible;
 
-    public GcpEncryptionParametersV4 getEncryption() {
+    public GcpEncryptionV4Parameters getEncryption() {
         return encryption;
     }
 
-    public void setEncryption(GcpEncryptionParametersV4 encryption) {
+    public void setEncryption(GcpEncryptionV4Parameters encryption) {
         this.encryption = encryption;
     }
 
@@ -45,7 +45,6 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     public Map<String, Object> asMap() {
         setPlatformType(CloudPlatform.GCP);
         Map<String, Object> map = super.asMap();
-        map.put("key", encryption.getKey());
         map.put("keyEncryptionMethod", encryption.getKeyEncryptionMethod());
         map.put("type", encryption.getType());
         map.put("preemptible", preemptible);
@@ -53,9 +52,16 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     }
 
     @Override
+    public Map<String, Object> asSecretMap() {
+        Map<String, Object> secretMap = super.asSecretMap();
+        secretMap.put("key", encryption.getKey());
+        return secretMap;
+    }
+
+    @Override
     public void parse(Map<String, Object> parameters) {
         setPlatformType(getPlatformType(parameters));
-        GcpEncryptionParametersV4 encryption = new GcpEncryptionParametersV4();
+        GcpEncryptionV4Parameters encryption = new GcpEncryptionV4Parameters();
         encryption.setKey(getParameterOrNull(parameters, "key"));
         String keyEncryptionMethod = getParameterOrNull(parameters, "keyEncryptionMethod");
         if (keyEncryptionMethod != null) {

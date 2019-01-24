@@ -1,10 +1,9 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage;
 
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.validation.ValidWasbCloudStorageParameters;
 
@@ -13,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @ValidWasbCloudStorageParameters
-public class WasbCloudStorageParametersV4 implements CloudStorageParametersV4 {
+public class WasbCloudStorageV4Parameters implements CloudStorageV4Parameters {
 
     @ApiModelProperty
     @NotNull
@@ -60,11 +59,11 @@ public class WasbCloudStorageParametersV4 implements CloudStorageParametersV4 {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof WasbCloudStorageParametersV4)) {
+        if (!(o instanceof WasbCloudStorageV4Parameters)) {
             return false;
         }
-        WasbCloudStorageParametersV4 that = (WasbCloudStorageParametersV4) o;
-        return isSecure().booleanValue() == that.isSecure().booleanValue()
+        WasbCloudStorageV4Parameters that = (WasbCloudStorageV4Parameters) o;
+        return Objects.equals(isSecure(),that.isSecure())
                 && Objects.equals(getAccountKey(), that.getAccountKey())
                 && Objects.equals(getAccountName(), that.getAccountName());
     }

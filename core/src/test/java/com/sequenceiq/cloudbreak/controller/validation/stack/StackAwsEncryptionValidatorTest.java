@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.EncryptionKeyConfigV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -220,8 +220,8 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         return Arrays.asList(requests);
     }
 
-    private AwsEncryptionParametersV4 encryption(EncryptionType type, String key) {
-        AwsEncryptionParametersV4 encryption = new AwsEncryptionParametersV4();
+    private AwsEncryptionV4Parameters encryption(EncryptionType type, String key) {
+        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
         encryption.setType(type);
         encryption.setKey(key);
         return encryption;

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks;
 
-import java.util.Set;
-
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -32,7 +31,7 @@ public interface ManagementPackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "listManagementPacksByWorkspace")
-    Set<ManagementPackV4Response> listByWorkspace(@PathParam("workspaceId") Long workspaceId);
+    ManagementPackV4Responses listByWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("/{name}")

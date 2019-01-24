@@ -17,10 +17,10 @@ import org.springframework.core.convert.ConversionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
@@ -125,7 +125,7 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
     private AwsInstanceTemplateV4Parameters awsParameters() {
         AwsInstanceTemplateV4Parameters templateParameters = new AwsInstanceTemplateV4Parameters();
         templateParameters.setSpotPrice(10.0D);
-        AwsEncryptionParametersV4 awsEncryption = new AwsEncryptionParametersV4();
+        AwsEncryptionV4Parameters awsEncryption = new AwsEncryptionV4Parameters();
         awsEncryption.setKey("someKey");
         awsEncryption.setType(EncryptionType.CUSTOM);
         templateParameters.setEncryption(awsEncryption);
@@ -138,7 +138,7 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
 
     private GcpInstanceTemplateV4Parameters gcpParameters() {
         GcpInstanceTemplateV4Parameters templateParameters = new GcpInstanceTemplateV4Parameters();
-        GcpEncryptionParametersV4 encryption = new GcpEncryptionParametersV4();
+        GcpEncryptionV4Parameters encryption = new GcpEncryptionV4Parameters();
         encryption.setKeyEncryptionMethod(KeyEncryptionMethod.RAW);
         encryption.setType(EncryptionType.CUSTOM);
         encryption.setKey("someKey");

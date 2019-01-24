@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GcpEncryptionParametersV4 extends EncryptionParametersV4Base {
+public class GcpEncryptionV4Parameters extends EncryptionParametersV4Base {
 
     @ApiModelProperty(value = TemplateModelDescription.ENCRYPTION_METHOD, allowableValues = "RAW,RSA,KMS")
     private KeyEncryptionMethod keyEncryptionMethod;

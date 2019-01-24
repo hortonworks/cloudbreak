@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class StackRepositoryV4Request implements JsonEntity {
 
+    @ApiModelProperty
     private RepositoryV4Request repository;
 
     @ApiModelProperty(StackRepositoryDescription.STACK)

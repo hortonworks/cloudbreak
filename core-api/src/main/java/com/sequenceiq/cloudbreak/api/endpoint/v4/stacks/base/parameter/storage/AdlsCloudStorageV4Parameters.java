@@ -1,11 +1,10 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.validation.ValidAdlsCloudStorageParameters;
 
@@ -16,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ValidAdlsCloudStorageParameters
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AdlsCloudStorageParametersV4 implements CloudStorageParametersV4 {
+public class AdlsCloudStorageV4Parameters implements CloudStorageV4Parameters {
 
     @ApiModelProperty
     @NotNull

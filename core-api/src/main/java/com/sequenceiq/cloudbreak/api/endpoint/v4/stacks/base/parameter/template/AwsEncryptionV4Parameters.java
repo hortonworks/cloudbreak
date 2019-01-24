@@ -7,6 +7,6 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AwsEncryptionParametersV4 extends EncryptionParametersV4Base {
+public class AwsEncryptionV4Parameters extends EncryptionParametersV4Base {
 
 }
