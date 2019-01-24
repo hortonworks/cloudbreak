@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.ParameterValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
@@ -41,17 +41,17 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -100,10 +100,10 @@ public class StackDecorator {
     private CloudParameterCache cloudParameterCache;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private List<ParameterValidator> parameterValidators;
 
     @Inject
-    private List<ParameterValidator> parameterValidators;
+    private SharedServiceValidator sharedServiceValidator;
 
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, User user, Workspace workspace) {
         String stackName = request.getName();
@@ -154,59 +154,13 @@ public class StackDecorator {
             LOGGER.info("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            checkSharedServiceStackRequirements(request, user, workspace);
+            ValidationResult validationResult = sharedServiceValidator.checkSharedServiceStackRequirements(request, workspace);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
             LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
         return subject;
-    }
-
-    private void checkSharedServiceStackRequirements(StackRequest request, User user, Workspace workspace) {
-        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request, user, workspace)) {
-            throw new BadRequestException("Shared service stack should contains both Hive RDS and Ranger RDS and a properly configured LDAP also. "
-                    + "One of them may be missing");
-        }
-    }
-
-    private boolean isSharedServiceRequirementsMeets(StackRequest request, User user, Workspace workspace) {
-        boolean hasConfiguredLdap = hasConfiguredLdap(request);
-        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, workspace, RdsType.HIVE);
-        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, workspace, RdsType.RANGER);
-        return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
-    }
-
-    private boolean hasConfiguredRdsByType(StackRequest request, User user, Workspace workspace, RdsType rdsType) {
-        boolean hasConfiguredRds = false;
-        if (!request.getClusterRequest().getRdsConfigJsons().isEmpty()) {
-            hasConfiguredRds = request.getClusterRequest().getRdsConfigJsons().stream()
-                    .anyMatch(rdsConfigRequest -> rdsType.name().equalsIgnoreCase(rdsConfigRequest.getType()));
-        }
-        if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
-            for (String rds : request.getClusterRequest().getRdsConfigNames()) {
-                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getByNameForWorkspace(rds, workspace).getType())) {
-                    hasConfiguredRds = true;
-                    break;
-                }
-            }
-        }
-        if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
-            for (Long rds : request.getClusterRequest().getRdsConfigIds()) {
-                if (rdsType.name().equalsIgnoreCase(rdsConfigService.get(rds).getType())) {
-                    hasConfiguredRds = true;
-                    break;
-                }
-            }
-        }
-        return hasConfiguredRds;
-    }
-
-    private boolean hasConfiguredLdap(StackRequest request) {
-        boolean hasConfiguredLdap = false;
-        if (request.getClusterRequest().getLdapConfig() != null
-                || request.getClusterRequest().getLdapConfigName() != null
-                || request.getClusterRequest().getLdapConfigId() != null) {
-            hasConfiguredLdap = true;
-        }
-        return hasConfiguredLdap;
     }
 
     private void prepareCredential(Stack subject, StackRequest request, User user, Workspace workspace) {
