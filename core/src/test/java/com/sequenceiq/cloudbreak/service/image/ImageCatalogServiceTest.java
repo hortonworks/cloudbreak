@@ -463,7 +463,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesFromDefaultGivenBothInput() throws CloudbreakImageCatalogException {
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesFromDefault(ORG_ID, "AWS", "stack");
+        underTest.getImagesFromDefault(ORG_ID, "stack", "AWS");
 
         thrown.expectMessage("Platform or stackName cannot be filled in the same request");
     }
@@ -473,7 +473,7 @@ public class ImageCatalogServiceTest {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
                 Lists.newArrayList(), Sets.newHashSet()));
 
-        underTest.getImagesFromDefault(ORG_ID, null, "stack");
+        underTest.getImagesFromDefault(ORG_ID, "stack", null);
 
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString());
@@ -484,7 +484,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
 
-        underTest.getImagesFromDefault(ORG_ID, "AWS", null);
+        underTest.getImagesFromDefault(ORG_ID, null, "AWS");
 
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
@@ -494,7 +494,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWithEmptyInput() throws CloudbreakImageCatalogException {
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesByCatalogName(ORG_ID, null, null, "catalog");
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", null, null);
 
         thrown.expectMessage("Either platform or stackName should be filled in request");
     }
@@ -503,7 +503,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesGivenBothInput() throws CloudbreakImageCatalogException {
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesByCatalogName(ORG_ID, "AWS", "stack", "catalog");
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", "AWS");
 
         thrown.expectMessage("Platform or stackName cannot be filled in the same request");
     }
@@ -513,7 +513,7 @@ public class ImageCatalogServiceTest {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
                 Lists.newArrayList(), Sets.newHashSet()));
 
-        underTest.getImagesByCatalogName(ORG_ID, null, "stack", "catalog");
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", null);
 
         verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
@@ -525,7 +525,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new ImageCatalog());
 
-        underTest.getImagesByCatalogName(ORG_ID, "AWS", null, "catalog");
+        underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
 
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());

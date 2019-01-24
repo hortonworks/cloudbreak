@@ -117,7 +117,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(0)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(0)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(0)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(0)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -138,12 +138,13 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any())).thenReturn(null);
+        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
+                .thenReturn(null);
 
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -152,12 +153,13 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any())).thenReturn(new PlatformEncryptionKeysV4Response());
+        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
+                .thenReturn(new PlatformEncryptionKeysV4Response());
 
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -167,14 +169,15 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any())).thenReturn(encryptionKeysResponse);
+        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
+                .thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
         assertEquals("There is no encryption key provided but CUSTOM type is given for encryption.", result.getErrors().get(0));
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -184,14 +187,15 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any())).thenReturn(encryptionKeysResponse);
+        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
+                .thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
         assertEquals("The provided encryption key does not exists in the given region's encryption key list for this credential.", result.getErrors().get(0));
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     @Test
@@ -200,12 +204,13 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, TEST_ENCRYPTION_KEY));
         PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any())).thenReturn(encryptionKeysResponse);
+        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
+                .thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any());
+        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
     }
 
     private InstanceGroupV4Request createRequestWithParameters(AwsInstanceTemplateV4Parameters parameters) {

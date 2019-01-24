@@ -104,7 +104,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public Images getImagesByCatalogName(Long workspaceId, String platform, String stackName, String catalogName) throws CloudbreakImageCatalogException {
+    public Images getImagesByCatalogName(Long workspaceId, String catalogName, String stackName, String platform) throws CloudbreakImageCatalogException {
         if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
             throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
         }
@@ -117,7 +117,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public Images getImagesFromDefault(Long workspaceId, String platform, String stackName) throws CloudbreakImageCatalogException {
+    public Images getImagesFromDefault(Long workspaceId,  String stackName, String platform) throws CloudbreakImageCatalogException {
         if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
             throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
         }

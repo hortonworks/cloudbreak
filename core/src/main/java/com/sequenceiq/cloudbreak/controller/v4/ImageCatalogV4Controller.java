@@ -81,7 +81,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     public ImagesV4Response getImages(Long workspaceId, String stackName, String platform) throws Exception {
-        Images images = imageCatalogService.getImagesFromDefault(workspaceId, platform, stackName);
+        Images images = imageCatalogService.getImagesFromDefault(workspaceId, stackName, platform);
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 
