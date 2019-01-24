@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -36,11 +37,11 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
 
     @Override
     public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId) {
-        List<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, resourceType, resourceId).getResponses();
+        Collection<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, resourceType, resourceId).getResponses();
         return getAuditEventsZipResponse(auditEvents, resourceType, resourceId);
     }
 
-    private Response getAuditEventsZipResponse(List<AuditEventV4Response> auditEventV4Responses, String resourceType, Long resourceId) {
+    private Response getAuditEventsZipResponse(Collection<AuditEventV4Response> auditEventV4Responses, String resourceType, Long resourceId) {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
