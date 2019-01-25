@@ -6,21 +6,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 
 @Component
 public class CredentialPropertyPropagator {
 
     public Optional<CredentialV4Parameters> propagateCredentialProperty(CredentialV4Base request) {
-        return propagate(request);
-    }
-
-    public Optional<CredentialV4Parameters> propagateCredentialProperty(CredentialV4Request request) {
-        return propagate(request);
-    }
-
-    public Optional<CredentialV4Parameters> propagateCredentialProperty(CredentialV4Response request) {
         return propagate(request);
     }
 
@@ -37,6 +27,8 @@ public class CredentialPropertyPropagator {
             return Optional.of(cred.getCumulus());
         } else if (cred.getMock() != null) {
             return Optional.of(cred.getMock());
+        } else if (cred.getGcp() != null) {
+            return Optional.of(cred.getGcp());
         }
         return Optional.empty();
     }
