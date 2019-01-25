@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -165,7 +166,7 @@ public class ServiceEndpointCollectorTest {
         Optional<ClusterExposedServiceResponse> webHDFS =
                 topology2ClusterExposedServiceResponses.stream().filter(service -> "WEBHDFS".equals(service.getKnoxService())).findFirst();
         if (webHDFS.isPresent()) {
-            assertEquals("https://10.0.0.1:8443/gateway-path/topology2/webhdfs/", webHDFS.get().getServiceUrl());
+            assertEquals("https://10.0.0.1:8443/gateway-path/topology2/webhdfs/v1", webHDFS.get().getServiceUrl());
             assertEquals("WEBHDFS", webHDFS.get().getKnoxService());
             assertEquals("WebHDFS", webHDFS.get().getDisplayName());
             assertEquals("NAMENODE", webHDFS.get().getServiceName());
@@ -236,6 +237,33 @@ public class ServiceEndpointCollectorTest {
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(3L, exposedServiceResponses.size());
+    }
+
+    @Test
+    public void testGetKnoxServicesWithLivyServerAndResourceManagerV2() {
+        when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER")));
+        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
+        assertEquals(3L, exposedServiceResponses.size());
+        assertFalse(exposedServiceResponses
+                .stream()
+                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
+                    || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER"))
+                .findFirst()
+                .isPresent());
+
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
+        exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
+        assertEquals(5L, exposedServiceResponses.size());
+        assertTrue(exposedServiceResponses
+                .stream()
+                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
+                        || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER"))
+                .count() == 2);
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {

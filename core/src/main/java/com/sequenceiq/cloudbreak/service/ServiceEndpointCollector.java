@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
@@ -129,7 +130,7 @@ public class ServiceEndpointCollector {
                     .stream()
                     .filter(exposedService -> !("HDP".equals(stackName)
                             && versionComparator.compare(() -> stackVersion, () -> "2.6") <= 0
-                            && exposedService == ExposedService.LIVY_SERVER))
+                            && excludedServicesForHdp26().contains(exposedService)))
                     .collect(Collectors.toSet());
         }
     }
@@ -139,6 +140,10 @@ public class ServiceEndpointCollector {
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
         haComponents.remove(ExposedService.RANGER.getServiceName());
         return ExposedServiceResponse.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
+    }
+
+    private List<ExposedService> excludedServicesForHdp26() {
+        return Lists.newArrayList(ExposedService.LIVY_SERVER, ExposedService.RESOURCEMANAGER_WEB_V2);
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
