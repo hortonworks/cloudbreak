@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -50,7 +51,7 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = conversionService.convert(workspaceRequest, Workspace.class);
         workspace = workspaceService.create(user, workspace);
-        notify(ResourceEvent.WORKSPACE_CREATED);
+        notify(ResourceEvent.WORKSPACE_CREATED, false, Collections.singleton(workspace.getId()));
         return conversionService.convert(workspace, WorkspaceResponse.class);
     }
 
@@ -73,7 +74,7 @@ public class WorkspaceV3Controller extends NotificationController implements Wor
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace defaultWorkspace = workspaceService.getDefaultWorkspaceForUser(user);
         Workspace workspace = workspaceService.deleteByNameForUser(name, user, defaultWorkspace);
-        notify(ResourceEvent.WORKSPACE_DELETED);
+        notify(ResourceEvent.WORKSPACE_DELETED, false, Collections.singleton(workspace.getId()));
         return conversionService.convert(workspace, WorkspaceResponse.class);
     }
 
