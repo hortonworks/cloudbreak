@@ -72,6 +72,10 @@ public class StackView extends CompactView {
         return cloudPlatform;
     }
 
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
     public boolean isAvailable() {
         return AVAILABLE.equals(getStatus());
     }
