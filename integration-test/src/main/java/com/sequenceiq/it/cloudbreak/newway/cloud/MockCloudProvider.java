@@ -9,11 +9,11 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.MockInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
@@ -265,8 +265,8 @@ public class MockCloudProvider extends CloudProviderHelper {
         return network;
     }
 
-    private S3CloudStorageParametersV4 s3CloudStorage() {
-        S3CloudStorageParametersV4 s3 = new S3CloudStorageParametersV4();
+    private S3CloudStorageV4Parameters s3CloudStorage() {
+        S3CloudStorageV4Parameters s3 = new S3CloudStorageV4Parameters();
         s3.setInstanceProfile(getTestParameter().get("NN_AWS_INSTANCE_PROFILE"));
         return s3;
     }

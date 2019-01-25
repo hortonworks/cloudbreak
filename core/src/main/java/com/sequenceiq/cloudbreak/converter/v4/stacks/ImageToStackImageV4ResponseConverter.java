@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -17,9 +16,6 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
 public class ImageToStackImageV4ResponseConverter extends AbstractConversionServiceAwareConverter<Image, StackImageV4Response> {
-
-    @Value("${cb.image.catalog.url}")
-    private String defaultCatalogUrl;
 
     @Inject
     private ImageCatalogService imageCatalogService;

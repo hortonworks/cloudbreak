@@ -22,9 +22,9 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v4/{workspaceId}/cluster_template")
+@Path("/v4/{workspaceId}/cluster_templates")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/clustertemplate", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https")
 public interface ClusterTemplateV4Endpoint {
     @POST
     @Path("")

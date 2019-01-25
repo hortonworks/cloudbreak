@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
 import static java.util.Objects.isNull;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +22,6 @@ public interface Mappable {
         }
         return false;
     }
-
-    Mappable EMPTY = Collections::emptyMap;
 
     Map<String, Object> asMap();
 

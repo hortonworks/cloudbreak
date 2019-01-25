@@ -10,7 +10,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParamet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.GcpInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.MockInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.OpenStackInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.YarnInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
@@ -42,6 +44,12 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     @ApiModelProperty(InstanceGroupModelDescription.OPENSTACK_PARAMETERS)
     private OpenStackInstanceGroupV4Parameters openstack;
+
+    @ApiModelProperty(hidden = true)
+    private YarnInstanceGroupV4Parameters yarn;
+
+    @ApiModelProperty(hidden = true)
+    private MockInstanceGroupV4Parameters mock;
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
@@ -100,6 +108,24 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public void setOpenstack(OpenStackInstanceGroupV4Parameters openstack) {
         this.openstack = openstack;
+    }
+
+    @Override
+    public YarnInstanceGroupV4Parameters getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(YarnInstanceGroupV4Parameters yarn) {
+        this.yarn = yarn;
+    }
+
+    @Override
+    public MockInstanceGroupV4Parameters getMock() {
+        return mock;
+    }
+
+    public void setMock(MockInstanceGroupV4Parameters mock) {
+        this.mock = mock;
     }
 
     public RecoveryMode getRecoveryMode() {

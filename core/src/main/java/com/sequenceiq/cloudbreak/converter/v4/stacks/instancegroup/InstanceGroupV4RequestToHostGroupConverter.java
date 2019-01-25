@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
+@Component
 public class InstanceGroupV4RequestToHostGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupV4Request, HostGroup> {
 
     @Inject

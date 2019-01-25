@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.environment;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
+@Component
 public class StackToEnvironmentSettingsV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, EnvironmentSettingsV4Response> {
     @Override
     public EnvironmentSettingsV4Response convert(Stack source) {

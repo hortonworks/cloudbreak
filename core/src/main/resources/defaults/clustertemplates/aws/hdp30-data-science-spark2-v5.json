@@ -9,38 +9,42 @@
       "ambari": {
         "blueprintName": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
         "validateBlueprint": false,
-        "gateway": {
-          "enableGateway": true,
-          "topologies": [
-            {
-              "topologyName": "dp-proxy",
-              "exposedServices": [
-                "ALL"
-              ]
-            }
-          ],
-          "ssoType": "NONE"
-        },
-        "ambariStackDetails": {
+        "stackRepository": {
           "stack": "HDP",
           "version": "3.0",
           "verify": false,
           "enableGplRepo": false
         }
       },
-      "rdsConfigNames": []
+      "gateway": {
+        "topologies": [
+          {
+            "topologyName": "dp-proxy",
+            "exposedServices": [
+              "ALL"
+            ]
+          }
+        ],
+        "ssoType": "NONE"
+      },
+      "databases": []
     },
     "instanceGroups": [
       {
-        "group": "master",
+        "name": "master",
         "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "standard",
+              "size": 100
+            }
+          ],
           "instanceType": "m5.2xlarge",
-          "rootVolumeSize": 50,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "standard",
-          "parameters": {},
-          "awsParameters": {
+          "aws": {
             "encryption": {
               "type": "NONE"
             }
@@ -49,37 +53,35 @@
         "nodeCount": 1,
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
-        "parameters": {},
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "9443",
-              "protocol": "tcp"
-            },
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": "8443",
-              "protocol": "tcp"
-            },
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22",
+                "8443",
+                "9443"
+              ],
               "protocol": "tcp"
             }
           ]
         }
       },
       {
-        "group": "worker",
+        "name": "worker",
         "template": {
           "instanceType": "m5.xlarge",
-          "rootVolumeSize": 50,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "standard",
-          "parameters": {},
-          "awsParameters": {
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "standard",
+              "size": 100
+            }
+          ],
+          "aws": {
             "encryption": {
               "type": "NONE"
             }
@@ -88,27 +90,33 @@
         "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL",
-        "parameters": {},
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22"
+              ],
               "protocol": "tcp"
             }
           ]
         }
       },
       {
-        "group": "compute",
+        "name": "compute",
         "template": {
           "instanceType": "m5.xlarge",
-          "rootVolumeSize": 50,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "standard",
-          "parameters": {},
-          "awsParameters": {
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "standard",
+              "size": 100
+            }
+          ],
+          "aws": {
             "encryption": {
               "type": "NONE"
             }
@@ -117,12 +125,13 @@
         "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL",
-        "parameters": {},
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22"
+              ],
               "protocol": "tcp"
             }
           ]
@@ -130,7 +139,6 @@
       }
     ],
     "network": {
-      "parameters": {},
       "subnetCIDR": "10.0.0.0/16"
     }
   }

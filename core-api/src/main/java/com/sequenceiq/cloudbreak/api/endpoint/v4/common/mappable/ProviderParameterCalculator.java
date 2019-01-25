@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
-import static java.util.Objects.isNull;
+import static java.lang.String.*;
 
 import java.util.Map;
 
@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 public class ProviderParameterCalculator {
 
     public Mappable get(ProviderParametersBase source) {
-        if (isNull(source)) {
-            return Mappable.EMPTY;
-        }
         switch (source.getCloudPlatform()) {
             case AWS:
                 return source.getAws();
@@ -29,7 +26,7 @@ public class ProviderParameterCalculator {
             case CUMULUS_YARN:
                 return source.getYarn();
             default:
-                return Mappable.EMPTY;
+                throw new IllegalArgumentException(format("No mappable for cloudplatform [%s] and source [%s]", source.getCloudPlatform(), source.getClass()));
         }
     }
 

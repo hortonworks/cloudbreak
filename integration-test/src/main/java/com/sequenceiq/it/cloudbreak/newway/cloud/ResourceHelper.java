@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
@@ -15,7 +15,7 @@ import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
-public abstract class ResourceHelper<T extends CloudStorageParametersV4> {
+public abstract class ResourceHelper<T extends CloudStorageV4Parameters> {
 
     private final TestParameter testParameter;
 
@@ -78,7 +78,7 @@ public abstract class ResourceHelper<T extends CloudStorageParametersV4> {
     }
 
     protected CloudStorageV4Request getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
-                    CloudStorageParametersV4 cloudStorageParameterInstance) {
+            CloudStorageV4Parameters cloudStorageParameterInstance) {
         var request = new CloudStorageV4Request();
         var locations = new LinkedHashSet<StorageLocationV4Request>(1);
         locations.add(

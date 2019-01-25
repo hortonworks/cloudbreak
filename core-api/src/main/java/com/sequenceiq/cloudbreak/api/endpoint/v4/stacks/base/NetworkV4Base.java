@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
@@ -32,6 +33,9 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
 
     @ApiModelProperty(hidden = true)
     private MockNetworkV4Parameters mock;
+
+    @ApiModelProperty(hidden = true)
+    private YarnNetworkV4Parameters yarn;
 
     @Override
     public MockNetworkV4Parameters getMock() {
@@ -80,5 +84,14 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
 
     public void setOpenstack(OpenStackNetworkV4Parameters openstack) {
         this.openstack = openstack;
+    }
+
+    @Override
+    public YarnNetworkV4Parameters getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(YarnNetworkV4Parameters yarn) {
+        this.yarn = yarn;
     }
 }

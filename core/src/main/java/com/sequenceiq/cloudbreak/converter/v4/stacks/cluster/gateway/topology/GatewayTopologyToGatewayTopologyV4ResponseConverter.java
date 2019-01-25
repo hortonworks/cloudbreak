@@ -4,12 +4,14 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
+@Component
 public class GatewayTopologyToGatewayTopologyV4ResponseConverter extends AbstractConversionServiceAwareConverter<GatewayTopology, GatewayTopologyV4Response> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayTopologyToGatewayTopologyV4ResponseConverter.class);

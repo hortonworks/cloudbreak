@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class NetworkV4RequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkV4Request, Network> {
+
     @Inject
     private TopologyService topologyService;
 

@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 @Component
 public class StackAuthenticationToStackAuthenticationV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<StackAuthentication, StackAuthenticationV4Response> {
+
     @Override
     public StackAuthenticationV4Response convert(StackAuthentication source) {
         StackAuthenticationV4Response stackAuthenticationResponse = new StackAuthenticationV4Response();

@@ -15,27 +15,15 @@ public abstract class ProviderParametersBase {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Mappable getAws() {
-        return Mappable.EMPTY;
-    }
+    public abstract Mappable getAws();
 
-    public Mappable getGcp() {
-        return Mappable.EMPTY;
-    }
+    public abstract Mappable getGcp();
 
-    public Mappable getAzure() {
-        return Mappable.EMPTY;
-    }
+    public abstract Mappable getAzure();
 
-    public Mappable getOpenstack() {
-        return Mappable.EMPTY;
-    }
+    public abstract Mappable getOpenstack();
 
-    public Mappable getYarn() {
-        return Mappable.EMPTY;
-    }
+    public abstract Mappable getYarn();
 
-    public Mappable getMock() {
-        return Mappable.EMPTY;
-    }
+    public abstract Mappable getMock();
 }

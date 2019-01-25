@@ -2,12 +2,15 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway;
 
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
+@Component
 public class GatewayToGatewayV4ResponseConverter extends AbstractConversionServiceAwareConverter<Gateway, GatewayV4Response> {
 
     @Inject

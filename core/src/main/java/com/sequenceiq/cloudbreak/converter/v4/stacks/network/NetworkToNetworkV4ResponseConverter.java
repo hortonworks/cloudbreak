@@ -6,21 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ParameterMapToClassConverterUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 
 @Component
-@JsonInclude(Include.NON_NULL)
 public class NetworkToNetworkV4ResponseConverter extends AbstractConversionServiceAwareConverter<Network, NetworkV4Response> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkToNetworkV4ResponseConverter.class);
-
-    private ParameterMapToClassConverterUtil parameterMapToClassConverterUtil;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;

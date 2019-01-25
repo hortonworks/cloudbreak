@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 @Component
 public class HostGroupV4RequestToHostGroupConverter extends AbstractConversionServiceAwareConverter<HostGroupV4Request, HostGroup> {
+
     @Override
     public HostGroup convert(HostGroupV4Request source) {
         HostGroup hostGroup = new HostGroup();

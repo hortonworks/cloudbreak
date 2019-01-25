@@ -9,38 +9,43 @@
       "ambari": {
         "blueprintName": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
         "validateBlueprint": false,
-        "gateway": {
-          "enableGateway": true,
-          "topologies": [
-            {
-              "topologyName": "dp-proxy",
-              "exposedServices": [
-                "ALL"
-              ]
-            }
-          ],
-          "ssoType": "NONE"
-        },
-        "ambariStackDetails": {
+        "stackRepository": {
           "stack": "HDP",
           "version": "3.0",
           "verify": false,
           "enableGplRepo": false
         }
       },
-      "rdsConfigNames": []
+      "gateway": {
+        "enableGateway": true,
+        "topologies": [
+          {
+            "topologyName": "dp-proxy",
+            "exposedServices": [
+              "ALL"
+            ]
+          }
+        ],
+        "ssoType": "NONE"
+      },
+      "databases": []
     },
     "instanceGroups": [
       {
-        "group": "master",
+        "name": "master",
         "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "pd-standard",
+              "size": 100
+            }
+          ],
           "instanceType": "n1-standard-8",
-          "rootVolumeSize": 50,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "pd-standard",
-          "parameters": {},
-          "gcpParameters": {
+          "gcp": {
             "encryption": {
               "type": "DEFAULT"
             }
@@ -54,32 +59,31 @@
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "9443",
-              "protocol": "tcp"
-            },
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": "8443",
-              "protocol": "tcp"
-            },
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22",
+                "8443",
+                "9443"
+              ],
               "protocol": "tcp"
             }
           ]
         }
       },
       {
-        "group": "worker",
+        "name": "worker",
         "template": {
           "instanceType": "n1-standard-4",
-          "rootVolumeSize": 50,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "pd-standard",
-          "parameters": {},
-          "gcpParameters": {
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "pd-standard",
+              "size": 100
+            }
+          ],
+          "gcp": {
             "encryption": {
               "type": "DEFAULT"
             }
@@ -88,27 +92,33 @@
         "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL",
-        "parameters": {},
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22"
+              ],
               "protocol": "tcp"
             }
           ]
         }
       },
       {
-        "group": "compute",
+        "name": "compute",
         "template": {
           "instanceType": "n1-standard-4",
-          "rootVolumeSize": 50,
-          "volumeCount": 1,
-          "volumeSize": 100,
-          "volumeType": "pd-standard",
-          "parameters": {},
-          "gcpParameters": {
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "type": "pd-standard",
+              "size": 100
+            }
+          ],
+          "gcp": {
             "encryption": {
               "type": "DEFAULT"
             }
@@ -117,12 +127,13 @@
         "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL",
-        "parameters": {},
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
-              "ports": "22",
+              "ports": [
+                "22"
+              ],
               "protocol": "tcp"
             }
           ]
@@ -130,7 +141,7 @@
       }
     ],
     "network": {
-      "parameters": {
+      "gcp": {
         "noFirewallRules": false,
         "noPublicIp": false
       },

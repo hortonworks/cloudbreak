@@ -2,15 +2,15 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class AmbariRepositoryV4RequestToAmbariRepoConverter extends AbstractConversionServiceAwareConverter<AmbariRepositoryV4Request, AmbariRepo> {
+public class AmbariRepoToAmbariRepositoryV4ResponseConverter extends AbstractConversionServiceAwareConverter<AmbariRepositoryV4Response, AmbariRepo> {
 
     @Override
-    public AmbariRepo convert(AmbariRepositoryV4Request source) {
+    public AmbariRepo convert(AmbariRepositoryV4Response source) {
         AmbariRepo ambariRepo = new AmbariRepo();
         ambariRepo.setPredefined(Boolean.FALSE);
         ambariRepo.setVersion(source.getVersion());

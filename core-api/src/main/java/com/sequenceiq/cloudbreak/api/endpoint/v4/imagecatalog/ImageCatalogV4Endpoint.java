@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ImageCatalogOpDescrip
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v4/{workspaceId}/imagecatalogs")
+@Path("/v4/{workspaceId}/image_catalogs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/imagecatalogs", description = ControllerDescription.IMAGE_CATALOG_V4_DESCRIPTION, protocols = "http,https")
 public interface ImageCatalogV4Endpoint {

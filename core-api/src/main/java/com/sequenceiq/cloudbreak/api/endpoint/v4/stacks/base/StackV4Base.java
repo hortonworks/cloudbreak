@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParamet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -38,6 +39,9 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
 
     @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
     private YarnStackV4Parameters yarn;
+
+    @ApiModelProperty(hidden = true)
+    private MockStackV4Parameters mock;
 
     @ApiModelProperty
     private Long timeToLive;
@@ -89,6 +93,15 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
 
     public void setYarn(YarnStackV4Parameters yarn) {
         this.yarn = yarn;
+    }
+
+    @Override
+    public MockStackV4Parameters getMock() {
+        return mock;
+    }
+
+    public void setMock(MockStackV4Parameters mock) {
+        this.mock = mock;
     }
 
     public Long getTimeToLive() {
