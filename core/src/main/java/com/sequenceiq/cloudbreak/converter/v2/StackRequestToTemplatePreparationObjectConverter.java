@@ -27,24 +27,28 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
@@ -108,6 +112,9 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
@@ -115,7 +122,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = credentialService.getByNameForWorkspace(source.getGeneral().getCredentialName(), workspace);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
-            SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
+            SmartSenseSubscription smartsenseSubscription = flexSubscription.map(FlexSubscription::getSmartSenseSubscription).orElse(null);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, workspace);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
@@ -127,7 +134,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user,
                     restRequestThreadLocalService.getCloudbreakUser().getUsername());
-            TemplatePreparationObject.Builder builder = TemplatePreparationObject.Builder.builder()
+            Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
@@ -142,14 +149,25 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
             if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                Stack dataLakeStack = stackService.getByNameInWorkspace(sharedService.getSharedCluster(), workspace.getId());
-                SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
-                        .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
-                ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
-                builder.withSharedServiceConfigs(sharedServiceConfigsView)
-                        .withFixInputs(configsResponse.getFixInputs())
-                        .withCustomInputs(configsResponse.getDatalakeInputs());
-
+                try {
+                    transactionService.required(() -> {
+                        Stack dataLakeStack = stackService.getByNameInWorkspace(sharedService.getSharedCluster(), workspace.getId());
+                        SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
+                                .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
+                        try {
+                            ConfigsResponse configsResponse = sharedServiceConfigProvider
+                                    .retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
+                            builder.withSharedServiceConfigs(sharedServiceConfigsView)
+                                    .withFixInputs(configsResponse.getFixInputs())
+                                    .withCustomInputs(configsResponse.getDatalakeInputs());
+                            return null;
+                        } catch (IOException e) {
+                            throw new CloudbreakServiceException(e.getMessage(), e);
+                        }
+                    });
+                } catch (TransactionExecutionException e) {
+                    throw new TransactionRuntimeExecutionException(e);
+                }
             }
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
