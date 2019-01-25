@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,18 +25,17 @@ public class GatewayToGatewayV4RequestConverter extends AbstractConversionServic
         gatewayJson.setSsoProvider(gateway.getSsoProvider());
         gatewayJson.setSsoType(gateway.getSsoType());
         gatewayJson.setGatewayType(gateway.getGatewayType());
-        gatewayJson = convertTopologies(gateway, gatewayJson);
+        gatewayJson.setTopologies(convertTopologies(gateway, gatewayJson));
         return gatewayJson;
     }
 
-    private GatewayV4Request convertTopologies(Gateway gateway, GatewayV4Request gatewayJson) {
+    private List<GatewayTopologyV4Request> convertTopologies(Gateway gateway, GatewayV4Request gatewayJson) {
         Set<GatewayTopology> gatewayTopologies = gateway.getTopologies();
         if (!CollectionUtils.isEmpty(gatewayTopologies)) {
-            List<GatewayTopologyV4Request> topologies = gatewayTopologies.stream()
+            return gatewayTopologies.stream()
                     .map(t -> getConversionService().convert(t, GatewayTopologyV4Request.class))
                     .collect(Collectors.toList());
-            gatewayJson.setTopologies(topologies);
         }
-        return gatewayJson;
+        return Collections.emptyList();
     }
 }

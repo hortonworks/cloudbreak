@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 
 import java.util.Set;
 
@@ -12,14 +13,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -33,6 +36,12 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
     @Mock
     private ConversionService conversionService;
 
+    @Mock
+    private ConverterUtil converterUtil;
+
+    @Mock
+    private ProviderParameterCalculator providerParameterCalculator;
+
     @Before
     public void setUp() {
         underTest = new InstanceGroupToInstanceGroupV4ResponseConverter();
@@ -42,8 +51,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
     @Test
     public void testConvert() {
         // GIVEN
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(getInstanceMetaData(getSource()));
+        given(converterUtil.convertAllAsSet(anySet(), eq(InstanceMetaDataV4Response.class))).willReturn(getInstanceMetaData(getSource()));
         // WHEN
         InstanceGroupV4Response result = underTest.convert(getSource());
         // THEN

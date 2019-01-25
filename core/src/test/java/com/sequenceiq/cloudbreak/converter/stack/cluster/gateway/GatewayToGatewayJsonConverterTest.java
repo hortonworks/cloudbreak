@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -64,7 +63,7 @@ public class GatewayToGatewayJsonConverterTest {
         assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
         assertEquals(TOKEN_CERT, result.getTokenCert());
         assertEquals(GatewayType.CENTRAL, result.getGatewayType());
-        assertTrue(result.getTopologies().isEmpty());
+        assertEquals(result.getTopologies().size(), 2);
         assertEquals(SSO_PROVIDER, result.getSsoProvider());
         assertEquals(PATH, result.getPath());
         assertEquals(2L, result.getTopologies().size());

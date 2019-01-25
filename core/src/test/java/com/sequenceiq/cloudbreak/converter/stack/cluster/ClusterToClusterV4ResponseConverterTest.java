@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
@@ -121,6 +121,9 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Mock
     private BlueprintService blueprintService;
 
+    @Mock
+    private ConverterUtil converterUtil;
+
     @Before
     public void setUp() throws CloudbreakException {
         underTest = new ClusterToClusterV4ResponseConverter();
@@ -145,13 +148,13 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
         when(conversionService.convert(any(String.class), any())).thenAnswer(invocation -> new SecretV4Response(null, invocation.getArgument(0)));
+        when(conversionService.convert(source.getProxyConfig(), ProxyV4Response.class)).thenReturn(new ProxyV4Response());
         // WHEN
         ClusterV4Response result = underTest.convert(source);
         // THEN
         assertEquals(1L, (long) result.getId());
-        assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "userName", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
-                "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers", "extendedBlueprintText",
-                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosV4Response", "fileSystemResponse"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("blueprintCustomProperties", "ldap",
+                "exposedKnoxServices", "customContainers", "ambari", "creationFinished", "kerberos", "cloudStorage", "gateway"));
     }
 
     @Test
@@ -173,29 +176,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         ClusterV4Response result = underTest.convert(getSource());
         // THEN
         assertEquals(1L, (long) result.getId());
-    }
-
-    @Test
-    public void testConvertWhenExtendedBlueprintTextIsNull() throws IOException {
-        // GIVEN
-        mockAll();
-        // WHEN
-        ClusterV4Response clusterResponse = underTest.convert(getSource());
-        // THEN
-        assertNull(clusterResponse.getAmbari().getExtendedBlueprintText());
-
-    }
-
-    @Test
-    public void testConvertWhenExtendedBlueprintTextIsNotNull() throws IOException {
-        // GIVEN
-        mockAll();
-        getSource().setExtendedBlueprintText("extendedBlueprintText");
-        // WHEN
-        ClusterV4Response clusterResponse = underTest.convert(getSource());
-        // THEN
-        assertEquals("extendedBlueprintText", clusterResponse.getAmbari().getExtendedBlueprintText());
-
     }
 
     @Test
