@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -18,13 +16,13 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
+import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
@@ -36,13 +34,13 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private ConversionService conversionService;
 
     @Mock
-    private FileSystemConfigService fileSystemConfigService;
-
-    @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private KerberosService kerberosService;
+
+    @Mock
+    private CloudStorageValidationUtil cloudStorageValidationUtil;
 
     @Before
     public void setUp() {
@@ -55,28 +53,32 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Test
     public void testConvert() {
         // GIVEN
-        given(conversionService.convert(any(ClusterV4Request.class), eq(Gateway.class))).willReturn(new Gateway());
+        ClusterV4Request request = getRequest("cluster.json");
+
+        given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
         // WHEN
-        Cluster result = underTest.convert(getRequest("cluster.json"));
+        Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant"));
+                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant", "description"));
     }
 
     @Test
-    public void testConvertWithFileSystemDetails() {
+    public void testConvertWithCloudStorageDetails() {
         // GIVEN
-        Gateway gateway = new Gateway();
-        given(conversionService.convert(any(ClusterV4Request.class), eq(Gateway.class))).willReturn(gateway);
+        ClusterV4Request request = getRequest("cluster-with-cloud-storage.json");
+
+        given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
         given(kerberosService.getByNameForWorkspaceId("somename", 100L)).willReturn(new KerberosConfig());
-        given(fileSystemConfigService.getByNameForWorkspaceId("teszt", 100L)).willReturn(new FileSystem());
+        given(conversionService.convert(request.getCloudStorage(), FileSystem.class)).willReturn(new FileSystem());
+        given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
         // WHEN
-        Cluster result = underTest.convert(getRequest("cluster-with-file-system.json"));
+        Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant"));
+                "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant", "description"));
     }
 
     @Test
@@ -88,7 +90,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment", "variant"));
+                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment", "variant", "description"));
         assertNull(result.getGateway());
     }
 

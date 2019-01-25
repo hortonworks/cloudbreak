@@ -4,10 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,15 +18,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.topology.TopologyService;
+import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InstanceTemplateV4RequestToTemplateConverterTest {
@@ -33,7 +36,18 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
     private InstanceTemplateV4RequestToTemplateConverter underTest;
 
     @Mock
-    private TopologyService topologyService;
+    private MissingResourceNameGenerator missingResourceNameGenerator;
+
+    @Mock
+    private ProviderParameterCalculator providerParameterCalculator;
+
+    @Mock
+    private Mappable mappable;
+
+    @Before
+    public void setup() {
+        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+    }
 
     @Test
     public void convert() throws Exception {
@@ -42,58 +56,63 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         source.setRootVolume(getRootVolume(100));
         source.setInstanceType("large");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("someAttr", "value");
+        parameters.put("cpus", 1);
 
-        Topology topology = new Topology();
-        when(topologyService.get(1L)).thenReturn(topology);
+        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(providerParameterCalculator.get(source)).thenReturn(mappable);
+        when(mappable.asMap()).thenReturn(parameters);
 
         Template result = underTest.convert(source);
 
         assertEquals(ResourceStatus.USER_MANAGED, result.getStatus());
-        assertEquals(source.getCloudPlatform(), result.cloudPlatform());
+        assertEquals(source.getCloudPlatform().name(), result.cloudPlatform());
         assertEquals(source.getRootVolume().getSize(), result.getRootVolumeSize());
         assertEquals(source.getInstanceType(), result.getInstanceType());
 
         assertNotNull(result.getAttributes());
-        assertEquals(new Json(parameters), result.getAttributes());
+        assertEquals(1, result.getAttributes().getMap().get("cpus"));
         assertNotNull(result.getSecretAttributes());
-        assertEquals(topology, result.getTopology());
     }
 
     @Test
-    public void convertWithCustomInstanceType() throws Exception {
+    public void convertWithCustomInstanceType() {
         InstanceTemplateV4Request source = new InstanceTemplateV4Request();
         source.setCloudPlatform(CloudPlatform.GCP);
         source.setRootVolume(getRootVolume(100));
         source.setInstanceType("large");
+        source.setAttachedVolumes(getAttachedVolumes(50));
 
-        YarnInstanceTemplateV4Parameters customInstanceType = new YarnInstanceTemplateV4Parameters();
-        customInstanceType.setCpus(1);
-        customInstanceType.setMemory(1);
-        source.setYarn(customInstanceType);
+        Map<String, Object> attributeMap = Map.of(
+                PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, 1,
+                PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, 1);
 
-        Topology topology = new Topology();
-        when(topologyService.get(1L)).thenReturn(topology);
+        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        when(providerParameterCalculator.get(source)).thenReturn(mappable);
+        when(mappable.asMap()).thenReturn(attributeMap);
 
         Template result = underTest.convert(source);
 
         assertEquals(ResourceStatus.USER_MANAGED, result.getStatus());
-        assertEquals(source.getCloudPlatform(), result.cloudPlatform());
+        assertEquals(source.getCloudPlatform().name(), result.cloudPlatform());
         assertEquals(source.getInstanceType(), result.getInstanceType());
 
         assertNotNull(result.getAttributes());
-        Map<String, ? extends Serializable> attributeMap = Map.of(
-                PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, 1,
-                PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, 1,
-                "someAttr", "value");
-        assertEquals(new Json(attributeMap).getMap(), result.getAttributes().getMap());
+        assertEquals(result.getAttributes().getMap().get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY), 1);
+        assertEquals(result.getAttributes().getMap().get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS), 1);
         assertNotNull(result.getSecretAttributes());
-        assertEquals(topology, result.getTopology());
     }
 
-    private VolumeV4Request getRootVolume(int size) {
-        VolumeV4Request rootVolume = new VolumeV4Request();
+    private RootVolumeV4Request getRootVolume(int size) {
+        RootVolumeV4Request rootVolume = new RootVolumeV4Request();
         rootVolume.setSize(size);
         return rootVolume;
+    }
+
+    private Set<VolumeV4Request> getAttachedVolumes(int size) {
+        VolumeV4Request volume = new VolumeV4Request();
+        volume.setSize(size);
+        volume.setCount(1);
+        volume.setType("type");
+        return Collections.singleton(volume);
     }
 }

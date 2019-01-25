@@ -4,18 +4,19 @@
   "emailNeeded" : true,
   "blueprintId": 50,
   "description" : "my cluster description",
-  "userName" : "user",
-  "password" : "pass",
-  "kerberosConfigName" : "somename",
+  "kerberosName" : "somename",
   "gateway" : {
     "enableKnoxGateway": "false"
   },
+  "ambari":{
+    "userName" : "user",
+    "password" : "pass"
+  },
   "validateBlueprint" : true,
   "emailTo": "admin@example.com",
-  "fileSystem" : {
+  "cloudStorage" : {
     "name": "teszt",
     "type": "WASB",
-    "defaultFs": true,
-    "properties": {}
+    "defaultFs": true
   }
 }

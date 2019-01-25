@@ -12,9 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.EncryptionKeyConfigV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -22,17 +19,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -61,7 +62,7 @@ public class StackRequestValidator implements Validator<StackV4Request> {
     private KerberosService kerberosService;
 
     @Inject
-    private ConnectorV4Endpoint connectorV4Endpoint;
+    private PlatformParameterService platformParameterService;
 
     @Override
     public ValidationResult validate(StackV4Request subject) {
@@ -126,11 +127,11 @@ public class StackRequestValidator implements Validator<StackV4Request> {
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupV4Request instanceGroupRequest, String credentialName,
             String region, ValidationResultBuilder validationBuilder) {
-        Optional<PlatformEncryptionKeysV4Response> keys = getEncryptionKeysWithExceptionHandling(credentialName, region);
-        if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
+        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region);
+        if (keys.isPresent() && !keys.get().getCloudEncryptionKeys().isEmpty()) {
             if (getEncryptionKey(instanceGroupRequest.getTemplate()) == null) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
-            } else if (keys.get().getEncryptionKeyConfigs().stream().map(EncryptionKeyConfigV4Response::getName)
+            } else if (keys.get().getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName)
                     .noneMatch(s -> s.equals(getEncryptionKey(instanceGroupRequest.getTemplate())))) {
                 validationBuilder.error("The provided encryption key does not exists in the given region's encryption key list for this credential.");
             }
@@ -147,10 +148,11 @@ public class StackRequestValidator implements Validator<StackV4Request> {
         return null;
     }
 
-    private Optional<PlatformEncryptionKeysV4Response> getEncryptionKeysWithExceptionHandling(String credentialName, String region) {
+    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String credentialName, String region) {
         try {
-            return Optional.ofNullable(connectorV4Endpoint.getEncryptionKeys(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                    credentialName, region, null, null));
+            PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(restRequestThreadLocalService.getRequestedWorkspaceId(),
+                    credentialName, region, null, null);
+            return Optional.ofNullable(platformParameterService.getEncryptionKeys(request));
         } catch (RuntimeException ignore) {
             return Optional.empty();
         }

@@ -60,14 +60,18 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
     }
 
     private void setVolumesProperty(InstanceTemplateV4Request source, Template template) {
-        source.getAttachedVolumes().stream().findFirst().ifPresent(v -> {
-            String volumeType = v.getType();
-            template.setVolumeType(volumeType == null ? "HDD" : volumeType);
-            Integer volumeCount = v.getCount();
-            template.setVolumeCount(volumeCount == null ? Integer.valueOf(0) : volumeCount);
-            Integer volumeSize = v.getSize();
-            template.setVolumeSize(volumeSize == null ? Integer.valueOf(0) : volumeSize);
-        });
-        template.setRootVolumeSize(source.getRootVolume().getSize());
+        if (source.getAttachedVolumes() != null) {
+            source.getAttachedVolumes().stream().findFirst().ifPresent(v -> {
+                String volumeType = v.getType();
+                template.setVolumeType(volumeType == null ? "HDD" : volumeType);
+                Integer volumeCount = v.getCount();
+                template.setVolumeCount(volumeCount == null ? Integer.valueOf(0) : volumeCount);
+                Integer volumeSize = v.getSize();
+                template.setVolumeSize(volumeSize == null ? Integer.valueOf(0) : volumeSize);
+            });
+        }
+        if (source.getRootVolume() != null) {
+            template.setRootVolumeSize(source.getRootVolume().getSize());
+        }
     }
 }

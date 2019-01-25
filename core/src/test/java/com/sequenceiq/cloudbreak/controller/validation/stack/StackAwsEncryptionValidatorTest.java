@@ -5,11 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -21,9 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.EncryptionKeyConfigV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
@@ -34,12 +33,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.Envi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -81,13 +84,16 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private Json blueprintTags;
 
     @Mock
+    private PlatformResourceRequest platformResourceRequest;
+
+    @Mock
     private EnvironmentSettingsV4Request environmentSettingsRequest;
 
     @Mock
     private PlacementSettingsV4Request placementSettingsRequest;
 
     @Mock
-    private ConnectorV4Endpoint connectorV4Endpoint;
+    private PlatformParameterService platformParameterService;
 
     @InjectMocks
     private StackRequestValidator underTest;
@@ -106,6 +112,8 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(subject.getCluster()).thenReturn(clusterRequest);
         when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
         when(ambariRequest.getBlueprintName()).thenReturn("dummy");
+        when(platformParameterService.getPlatformResourceRequest(anyLong(), eq(null), eq(null), eq(null), eq(null)))
+                .thenReturn(platformResourceRequest);
     }
 
     @Test
@@ -117,7 +125,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(0)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(0)).getEncryptionKeys(platformResourceRequest);
     }
 
     @Test
@@ -129,7 +137,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(0)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(0)).getEncryptionKeys(platformResourceRequest);
     }
 
     @Test
@@ -138,13 +146,12 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
-                .thenReturn(null);
+        when(platformParameterService.getEncryptionKeys(platformResourceRequest)).thenReturn(null);
 
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(1)).getEncryptionKeys(platformResourceRequest);
     }
 
     @Test
@@ -153,41 +160,39 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
-                .thenReturn(new PlatformEncryptionKeysV4Response());
+        when(platformParameterService.getEncryptionKeys(platformResourceRequest)).thenReturn(new CloudEncryptionKeys(Collections.emptySet()));
 
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(1)).getEncryptionKeys(platformResourceRequest);
     }
 
     @Test
     public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsButDoesNotContainsKeyEntryThenValidationErrorShouldComeBack() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
+        CloudEncryptionKeys encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
-                .thenReturn(encryptionKeysResponse);
+        when(platformParameterService.getEncryptionKeys(platformResourceRequest)).thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
         assertEquals("There is no encryption key provided but CUSTOM type is given for encryption.", result.getErrors().get(0));
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(1)).getEncryptionKeys(platformResourceRequest);
     }
 
     @Test
     public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsAndContainsKeyEntryButItsValueIsNotInTheListedKeysThenValidationErrorShouldComeBack() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, "some invalid value which does not exists in the listed encryption keys"));
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
+        CloudEncryptionKeys encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
 
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
+        when(platformParameterService.getEncryptionKeys(platformResourceRequest))
                 .thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
@@ -195,22 +200,21 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
         assertEquals("The provided encryption key does not exists in the given region's encryption key list for this credential.", result.getErrors().get(0));
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(1)).getEncryptionKeys(platformResourceRequest);
     }
 
     @Test
     public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsAndContainsKeyEntryAndItsValueIsInTheListedKeysThenEverythingShouldGoFine() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, TEST_ENCRYPTION_KEY));
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
+        CloudEncryptionKeys encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(connectorV4Endpoint.getEncryptionKeys(anyLong(), any(), any(), any(), any()))
-                .thenReturn(encryptionKeysResponse);
+        when(platformParameterService.getEncryptionKeys(platformResourceRequest)).thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(connectorV4Endpoint, times(1)).getEncryptionKeys(anyLong(), any(), any(), any(), any());
+        verify(platformParameterService, times(1)).getEncryptionKeys(platformResourceRequest);
     }
 
     private InstanceGroupV4Request createRequestWithParameters(AwsInstanceTemplateV4Parameters parameters) {
@@ -232,11 +236,9 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         return encryption;
     }
 
-    private PlatformEncryptionKeysV4Response createPlatformEncryptionKeysResponseWithNameValue() {
-        PlatformEncryptionKeysV4Response encryptionKeysResponse = new PlatformEncryptionKeysV4Response();
-        EncryptionKeyConfigV4Response testInput = new EncryptionKeyConfigV4Response();
+    private CloudEncryptionKeys createPlatformEncryptionKeysResponseWithNameValue() {
+        CloudEncryptionKey testInput = new CloudEncryptionKey();
         testInput.setName(TEST_ENCRYPTION_KEY);
-        encryptionKeysResponse.setEncryptionKeyConfigs(Set.of(testInput));
-        return encryptionKeysResponse;
+        return new CloudEncryptionKeys(Set.of(testInput));
     }
 }

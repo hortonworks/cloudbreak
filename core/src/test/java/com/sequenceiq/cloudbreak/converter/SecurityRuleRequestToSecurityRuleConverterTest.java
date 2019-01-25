@@ -27,13 +27,13 @@ public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJson
 
     @Test
     public void testConvert() {
-        SecurityRule result = underTest.convert(createRequest("80,22,9443,1-65535"));
+        SecurityRule result = underTest.convert(createRequest("80", "22", "9443", "1-65535"));
         assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
     }
 
     @Test
     public void testConvert2() {
-        SecurityRule result = underTest.convert(createRequest("22,9443"));
+        SecurityRule result = underTest.convert(createRequest("22", "9443"));
         assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
     }
 
@@ -45,13 +45,13 @@ public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJson
 
     @Test
     public void testConvert4() {
-        SecurityRule result = underTest.convert(createRequest("20-23,9400-9500"));
+        SecurityRule result = underTest.convert(createRequest("20-23", "9400-9500"));
         assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
     }
 
     @Test
     public void testConvert5() {
-        SecurityRule result = underTest.convert(createRequest("22,9400-9500"));
+        SecurityRule result = underTest.convert(createRequest("22", "9400-9500"));
         assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
     }
 
@@ -59,7 +59,7 @@ public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJson
     public void testInvalidPorts() {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Ports must be in range of 1-65535");
-        underTest.convert(createRequest("0,22,443,70000"));
+        underTest.convert(createRequest("0","22","443","70000"));
     }
 
     @Test
