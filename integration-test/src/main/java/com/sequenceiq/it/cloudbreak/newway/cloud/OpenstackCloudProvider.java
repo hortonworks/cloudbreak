@@ -263,7 +263,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         credentialParameters.setPassword(getTestParameter().get("integrationtest.openstackEngcredential.password"));
         KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
         keystoneV2Parameters.setTenantName(getTestParameter().get("integrationtest.openstackEngcredential.tenantName"));
-        credentialParameters.setKeystoneV2Parameters(keystoneV2Parameters);
+        credentialParameters.setKeystoneV2(keystoneV2Parameters);
         return credentialParameters;
     }
 

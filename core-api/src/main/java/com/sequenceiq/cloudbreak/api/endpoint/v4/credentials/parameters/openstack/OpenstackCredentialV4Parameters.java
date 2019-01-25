@@ -28,9 +28,9 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
     @ApiModelProperty(required = true)
     private String userName;
 
-    private KeystoneV2Parameters keystoneV2Parameters;
+    private KeystoneV2Parameters keystoneV2;
 
-    private KeystoneV3Parameters keystoneV3Parameters;
+    private KeystoneV3Parameters keystoneV3;
 
     public String getEndpoint() {
         return endpoint;
@@ -64,20 +64,20 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
         this.userName = userName;
     }
 
-    public KeystoneV2Parameters getKeystoneV2Parameters() {
-        return keystoneV2Parameters;
+    public KeystoneV2Parameters getKeystoneV2() {
+        return keystoneV2;
     }
 
-    public void setKeystoneV2Parameters(KeystoneV2Parameters keystoneV2Parameters) {
-        this.keystoneV2Parameters = keystoneV2Parameters;
+    public void setKeystoneV2(KeystoneV2Parameters keystoneV2) {
+        this.keystoneV2 = keystoneV2;
     }
 
-    public KeystoneV3Parameters getKeystoneV3Parameters() {
-        return keystoneV3Parameters;
+    public KeystoneV3Parameters getKeystoneV3() {
+        return keystoneV3;
     }
 
-    public void setKeystoneV3Parameters(KeystoneV3Parameters v3Parameter) {
-        this.keystoneV3Parameters = v3Parameter;
+    public void setKeystoneV3(KeystoneV3Parameters v3Parameter) {
+        this.keystoneV3 = v3Parameter;
     }
 
     @Override
@@ -92,10 +92,10 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
         mapOfFields.put("facing", facing);
         mapOfFields.put("password", password);
         mapOfFields.put("userName", userName);
-        if (keystoneV2Parameters != null) {
-            mapOfFields.putAll(keystoneV2Parameters.asMap());
-        } else if (keystoneV3Parameters != null) {
-            mapOfFields.putAll(keystoneV3Parameters.asMap());
+        if (keystoneV2 != null) {
+            mapOfFields.putAll(keystoneV2.asMap());
+        } else if (keystoneV3 != null) {
+            mapOfFields.putAll(keystoneV3.asMap());
         }
         return mapOfFields;
     }

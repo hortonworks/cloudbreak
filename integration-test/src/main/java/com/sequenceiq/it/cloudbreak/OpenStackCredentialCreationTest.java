@@ -49,7 +49,7 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         credentialParameters.setPassword(password);
         KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
         keystoneV2Parameters.setTenantName(tenantName);
-        credentialParameters.setKeystoneV2Parameters(keystoneV2Parameters);
+        credentialParameters.setKeystoneV2(keystoneV2Parameters);
 
         credentialRequest.setOpenstack(credentialParameters);
         credentialRequest.setCloudPlatform("OPENSTACK");

@@ -26,7 +26,7 @@ public class MapToOpenstackCredentialV4ParametersConverter extends
         if (source.get("userDomain") == null) {
             KeystoneV2Parameters v2Parameters = new KeystoneV2Parameters();
             v2Parameters.setTenantName((String) source.get("tenantName"));
-            parameters.setKeystoneV2Parameters(v2Parameters);
+            parameters.setKeystoneV2(v2Parameters);
         } else  {
             KeystoneV3Parameters v3Parameters = new KeystoneV3Parameters();
             if (source.get("projectDomainName") != null) {
@@ -43,7 +43,7 @@ public class MapToOpenstackCredentialV4ParametersConverter extends
             } else {
                 throw new InvalidParameterException("Unalbe to decide Keystone V3 subtype!");
             }
-            parameters.setKeystoneV3Parameters(v3Parameters);
+            parameters.setKeystoneV3(v3Parameters);
         }
         return parameters;
     }
