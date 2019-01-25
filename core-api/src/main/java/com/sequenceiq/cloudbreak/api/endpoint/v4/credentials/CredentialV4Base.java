@@ -62,7 +62,7 @@ public abstract class CredentialV4Base implements JsonEntity {
     private YarnCredentialV4Parameters yarn;
 
     @Valid
-    @ApiModelProperty(value = CredentialModelDescription.YARN_PARAMETERS, hidden = true)
+    @ApiModelProperty(hidden = true)
     private MockCredentialV4Parameters mock;
 
     @Size(max = 1000)

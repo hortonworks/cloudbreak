@@ -42,12 +42,12 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         if (roleArn != null && !roleArn.isEmpty()) {
             RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
             roleBasedCredentialParameters.setRoleArn(roleArn);
-            credentialParameters.setRoleBasedCredentialParameters(roleBasedCredentialParameters);
+            credentialParameters.setRoleBased(roleBasedCredentialParameters);
         } else {
             KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
             keyBasedCredentialParameters.setAccessKey(accessKey);
             keyBasedCredentialParameters.setSecretKey(secretKey);
-            credentialParameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+            credentialParameters.setKeyBased(keyBasedCredentialParameters);
         }
 
         credentialRequest.setAws(credentialParameters);

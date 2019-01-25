@@ -89,7 +89,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
         RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
         roleBasedCredentialParameters.setRoleArn(getTestParameter().get("integrationtest.awscredential.roleArn"));
-        parameters.setRoleBasedCredentialParameters(roleBasedCredentialParameters);
+        parameters.setRoleBased(roleBasedCredentialParameters);
         return parameters;
     }
 
@@ -97,7 +97,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
         RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
         roleBasedCredentialParameters.setRoleArn("arn:aws:iam::123456789012:role/fake");
-        parameters.setRoleBasedCredentialParameters(roleBasedCredentialParameters);
+        parameters.setRoleBased(roleBasedCredentialParameters);
         return parameters;
     }
 
@@ -106,7 +106,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
         keyBasedCredentialParameters.setAccessKey(getTestParameter().get("integrationtest.awscredential.accessKey"));
         keyBasedCredentialParameters.setSecretKey(getTestParameter().get("integrationtest.awscredential.secretKey"));
-        parameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+        parameters.setKeyBased(keyBasedCredentialParameters);
         return parameters;
     }
 
@@ -115,7 +115,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
         keyBasedCredentialParameters.setAccessKey("ABCDEFGHIJKLMNOPQRST");
         keyBasedCredentialParameters.setSecretKey(getTestParameter().get("integrationtest.awscredential.secretKey"));
-        parameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+        parameters.setKeyBased(keyBasedCredentialParameters);
         return parameters;
     }
 
@@ -124,7 +124,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
         keyBasedCredentialParameters.setSecretKey("123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
         keyBasedCredentialParameters.setAccessKey(getTestParameter().get("integrationtest.awscredential.accessKey"));
-        parameters.setKeyBasedCredentialParameters(keyBasedCredentialParameters);
+        parameters.setKeyBased(keyBasedCredentialParameters);
         return parameters;
     }
 

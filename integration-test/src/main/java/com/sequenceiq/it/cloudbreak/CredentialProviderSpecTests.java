@@ -215,8 +215,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
         when(Credential.put(), VALID_AWSROLE_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    Assert.assertNotNull(credential.getResponse().getAws().getKeyBasedCredentialParameters(), "The credential should be key-based!");
-                    Assert.assertNull(credential.getResponse().getAws().getRoleBasedCredentialParameters());
+                    Assert.assertNotNull(credential.getResponse().getAws().getKeyBased(), "The credential should be key-based!");
+                    Assert.assertNull(credential.getResponse().getAws().getRoleBased());
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }
@@ -236,9 +236,9 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
         when(Credential.put(), VALID_AWSKEY_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    Assert.assertNotNull(credential.getResponse().getAws().getRoleBasedCredentialParameters(),
+                    Assert.assertNotNull(credential.getResponse().getAws().getRoleBased(),
                             "The credential should be role-based!");
-                    Assert.assertNull(credential.getResponse().getAws().getKeyBasedCredentialParameters());
+                    Assert.assertNull(credential.getResponse().getAws().getKeyBased());
                 }), "Credential Parameter Mapping should be part of the response."
         );
     }

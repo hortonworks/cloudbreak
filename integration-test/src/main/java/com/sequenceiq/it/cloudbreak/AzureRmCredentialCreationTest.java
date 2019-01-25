@@ -7,6 +7,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 
@@ -42,9 +43,11 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Azure Rm credential for integartiontest");
         AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(accessKey);
+        AppBased appBased = new AppBased();
+        appBased.setAccessKey(accessKey);
+        appBased.setSecretKey(secretKey);
+        credentialParameters.setAppBased(appBased);
         credentialParameters.setSubscriptionId(subscriptionId);
-        credentialParameters.setSecretKey(secretKey);
         credentialParameters.setTenantId(tenantId);
         credentialRequest.setAzure(credentialParameters);
         credentialRequest.setCloudPlatform("AZURE_RM");

@@ -27,10 +27,10 @@ public class MapToAwsCredentialV4ParametersConverter extends AbstractConversionS
         String selector = (String) source.get("selector");
         if (selector != null) {
             if (AwsSelectorType.KEY_BASED.getName().equals(selector)) {
-                parameters.setKeyBasedCredentialParameters(exec(() -> new Json(source).get(KeyBasedCredentialParameters.class),
+                parameters.setKeyBased(exec(() -> new Json(source).get(KeyBasedCredentialParameters.class),
                         KeyBasedCredentialParameters.class));
             } else if (AwsSelectorType.ROLE_BASED.getName().equals(selector)) {
-                parameters.setRoleBasedCredentialParameters(exec(() -> new Json(source).get(RoleBasedCredentialParameters.class),
+                parameters.setRoleBased(exec(() -> new Json(source).get(RoleBasedCredentialParameters.class),
                         RoleBasedCredentialParameters.class));
             } else {
                 throw new InvalidParameterException(UNABLE_TO_CHOOSE_MESSAGE);

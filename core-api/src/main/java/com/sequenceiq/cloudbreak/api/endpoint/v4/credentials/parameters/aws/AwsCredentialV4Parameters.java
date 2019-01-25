@@ -19,29 +19,29 @@ import io.swagger.annotations.ApiModelProperty;
 public class AwsCredentialV4Parameters implements CredentialV4Parameters {
 
     @ApiModelProperty
-    private KeyBasedCredentialParameters keyBasedCredentialParameters;
+    private KeyBasedCredentialParameters keyBased;
 
     @ApiModelProperty
-    private RoleBasedCredentialParameters roleBasedCredentialParameters;
+    private RoleBasedCredentialParameters roleBased;
 
     @NotNull
     @ApiModelProperty(required = true)
     private Boolean govCloud = false;
 
-    public KeyBasedCredentialParameters getKeyBasedCredentialParameters() {
-        return keyBasedCredentialParameters;
+    public KeyBasedCredentialParameters getKeyBased() {
+        return keyBased;
     }
 
-    public RoleBasedCredentialParameters getRoleBasedCredentialParameters() {
-        return roleBasedCredentialParameters;
+    public RoleBasedCredentialParameters getRoleBased() {
+        return roleBased;
     }
 
-    public void setKeyBasedCredentialParameters(KeyBasedCredentialParameters keyBasedCredentialParameters) {
-        this.keyBasedCredentialParameters = keyBasedCredentialParameters;
+    public void setKeyBased(KeyBasedCredentialParameters keyBased) {
+        this.keyBased = keyBased;
     }
 
-    public void setRoleBasedCredentialParameters(RoleBasedCredentialParameters roleBasedCredentialParameters) {
-        this.roleBasedCredentialParameters = roleBasedCredentialParameters;
+    public void setRoleBased(RoleBasedCredentialParameters roleBased) {
+        this.roleBased = roleBased;
     }
 
     public boolean getGovCloud() {
@@ -61,10 +61,10 @@ public class AwsCredentialV4Parameters implements CredentialV4Parameters {
     public Map<String, Object> asMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("govCloud", govCloud);
-        if (keyBasedCredentialParameters != null) {
-            map.putAll(keyBasedCredentialParameters.asMap());
-        } else if (roleBasedCredentialParameters != null) {
-            map.putAll(roleBasedCredentialParameters.asMap());
+        if (keyBased != null) {
+            map.putAll(keyBased.asMap());
+        } else if (roleBased != null) {
+            map.putAll(roleBased.asMap());
         }
         return map;
     }
