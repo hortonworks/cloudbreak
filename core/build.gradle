@@ -114,6 +114,8 @@ dependencyManagement {
       entry 'junit-jupiter-api'
       entry 'junit-jupiter-engine'
     }
+    
+    dependency group: 'org.junit.vintage',                  name: 'junit-vintage-engine',        version: '5.2.0'
 
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
 
@@ -234,12 +236,15 @@ dependencies {
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
   testCompile group: 'com.h2database',           name: 'h2'
   testCompile group: 'org.mockito',              name: 'mockito-junit-jupiter'
+  testCompile group: 'org.junit.vintage',        name: 'junit-vintage-engine'
   testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-api'
   testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
 }
 
 test{
-  useJUnitPlatform()
+  useJUnitPlatform {
+    includeEngines 'junit-jupiter', 'junit-vintage'
+  }
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
