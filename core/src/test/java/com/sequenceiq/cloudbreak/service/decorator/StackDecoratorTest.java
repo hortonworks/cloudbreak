@@ -33,13 +33,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -140,6 +142,9 @@ public class StackDecoratorTest {
     @Mock
     private InstanceGroupParameterRequest instanceGroupParameterRequest;
 
+    @Mock
+    private SharedServiceValidator sharedServiceValidator;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -188,6 +193,7 @@ public class StackDecoratorTest {
         when(request.getClusterRequest()).thenReturn(clusterRequest);
         when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
+        when(sharedServiceValidator.checkSharedServiceStackRequirements(any(), any())).thenReturn(ValidationResult.builder().build());
 
         underTest.decorate(subject, request, user, workspace);
     }
@@ -213,6 +219,13 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(null);
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
+        ValidationResult validationResult = ValidationResult.builder().error("LDAP config missing").build();
+        when(sharedServiceValidator.checkSharedServiceStackRequirements(any(), any()))
+                .thenReturn(validationResult);
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage(validationResult.getFormattedErrors());
+
         underTest.decorate(subject, request, user, workspace);
     }
 
@@ -237,8 +250,12 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
+        ValidationResult validationResult = ValidationResult.builder().error("HIVE RDS config missing").build();
+        when(sharedServiceValidator.checkSharedServiceStackRequirements(any(), any()))
+                .thenReturn(validationResult);
+
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
+        thrown.expectMessage(validationResult.getFormattedErrors());
 
         underTest.decorate(subject, request, user, workspace);
     }
@@ -264,8 +281,12 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
+        ValidationResult validationResult = ValidationResult.builder().error("Ranger RDS config missing").build();
+        when(sharedServiceValidator.checkSharedServiceStackRequirements(any(), any()))
+                .thenReturn(validationResult);
+
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
+        thrown.expectMessage(validationResult.getFormattedErrors());
 
         underTest.decorate(subject, request, user, workspace);
     }
@@ -291,8 +312,12 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(new LdapConfigRequest());
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
+        ValidationResult validationResult = ValidationResult.builder().error("Ranger and HIVE RDS config missing").build();
+        when(sharedServiceValidator.checkSharedServiceStackRequirements(any(), any()))
+                .thenReturn(validationResult);
+
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
+        thrown.expectMessage(validationResult.getFormattedErrors());
 
         underTest.decorate(subject, request, user, workspace);
     }
