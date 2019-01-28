@@ -19,9 +19,10 @@ public class SecurityRuleV4Base implements JsonEntity {
     private String subnet;
 
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.PORTS, required = true)
-    @Pattern(regexp = "^[1-9][0-9]{0,4}(-[1-9][0-9]{0,4}){0,1}(,[1-9][0-9]{0,4}(-[1-9][0-9]{0,4}){0,1})*$",
-            message = "The ports field should contain a comma separated list of port numbers, for example: 8080,9090,5555")
-    private List<String> ports;
+    private List<@Pattern(regexp = "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
+            + "(-([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$",
+            message = "The ports field should contain a list of port numbers (1..65535) & ranges (two ports separated with a hyphen, both ends inclusive), "
+                    + "for example: 8080 or 9090-9092") String> ports;
 
     @ApiModelProperty(value = SecurityRuleModelDescription.PROTOCOL, required = true)
     private String protocol;
