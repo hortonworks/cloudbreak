@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
-public class AmbariStackValidator implements ConstraintValidator<ValidAmbariStack, StackRepositoryV4Request> {
+public class StackRepositoryV4Validator implements ConstraintValidator<ValidAmbariStack, StackRepositoryV4Request> {
 
     private static final String MIN_HDP_VERSION = "2.7";
 

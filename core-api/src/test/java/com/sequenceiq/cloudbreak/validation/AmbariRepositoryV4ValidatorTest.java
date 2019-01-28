@@ -10,12 +10,12 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 
-public class AmbariRepoValidatorTest {
+public class AmbariRepositoryV4ValidatorTest {
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
 
-    private final AmbariRepoValidator ambariRepoValidator = new AmbariRepoValidator();
+    private final AmbariRepositoryV4Validator ambariRepoValidator = new AmbariRepositoryV4Validator();
 
     @Test
     public void testAmbari24() {
@@ -28,14 +28,14 @@ public class AmbariRepoValidatorTest {
     public void testAmbari25() {
         AmbariRepositoryV4Response ambariRepoDetailsJson = new AmbariRepositoryV4Response();
         ambariRepoDetailsJson.setVersion("2.5");
-        assertTrue(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+        assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
     }
 
     @Test
     public void testAmbari26() {
         AmbariRepositoryV4Response ambariRepoDetailsJson = new AmbariRepositoryV4Response();
         ambariRepoDetailsJson.setVersion("2.6");
-        assertTrue(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+        assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class AmbariRepoValidatorTest {
     public void testAmbari25WithMinor() {
         AmbariRepositoryV4Response ambariRepoDetailsJson = new AmbariRepositoryV4Response();
         ambariRepoDetailsJson.setVersion("2.5.2");
-        assertTrue(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+        assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class AmbariRepoValidatorTest {
     public void testAmbari26WithMinor() {
         AmbariRepositoryV4Response ambariRepoDetailsJson = new AmbariRepositoryV4Response();
         ambariRepoDetailsJson.setVersion("2.6.2");
-        assertTrue(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+        assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
     }
 
     @Test

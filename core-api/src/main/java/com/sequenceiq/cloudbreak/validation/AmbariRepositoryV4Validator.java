@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
-public class AmbariRepoValidator implements ConstraintValidator<ValidAmbariRepo, AmbariRepositoryV4Response> {
+public class AmbariRepositoryV4Validator implements ConstraintValidator<ValidAmbariRepo, AmbariRepositoryV4Response> {
 
     private static final String MIN_AMBARI_VERSION = "2.7";
 

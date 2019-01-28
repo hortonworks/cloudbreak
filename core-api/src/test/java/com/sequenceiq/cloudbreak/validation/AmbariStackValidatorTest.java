@@ -15,7 +15,7 @@ public class AmbariStackValidatorTest {
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
 
-    private final AmbariStackValidator ambariStackValidator = new AmbariStackValidator();
+    private final StackRepositoryV4Validator ambariStackValidator = new StackRepositoryV4Validator();
 
     @Test
     public void testHdp22() {
@@ -30,7 +30,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.3");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -38,7 +38,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.4");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.5");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.6");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.3.2");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.4.2");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.5.2");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class AmbariStackValidatorTest {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.6.2");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
