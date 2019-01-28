@@ -24,21 +24,31 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customco
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -64,8 +74,24 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private BlueprintService blueprintService;
+
+    @Inject
+    private WorkspaceService workspaceService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
+
     @Override
     public Cluster convert(ClusterV4Request source) {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+
         Cluster cluster = new Cluster();
         cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
@@ -84,6 +110,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setDpAmbariUser(dpUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
+        cluster.setBlueprint(getBlueprint(source.getAmbari(), workspace));
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystem.class));
         }
@@ -95,6 +122,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             cluster.setCustomContainerDefinition(null);
         }
         cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
+        updateDatabases(source, cluster, workspace);
         return cluster;
     }
 
@@ -145,6 +173,27 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             cluster.setComponents(components);
         } catch (IOException e) {
             throw new BadRequestException("Cannot serialize the stack template", e);
+        }
+    }
+
+    private Blueprint getBlueprint(AmbariV4Request ambariV2Request, Workspace workspace) {
+        Blueprint blueprint = null;
+        if (!StringUtils.isEmpty(ambariV2Request.getBlueprintName())) {
+            blueprint = blueprintService.getByNameForWorkspace(ambariV2Request.getBlueprintName(), workspace);
+            if (blueprint == null) {
+                throw new NotFoundException("Blueprint does not exists by name: " + ambariV2Request.getBlueprintName());
+            }
+        }
+        return blueprint;
+    }
+
+    private void updateDatabases(ClusterV4Request source, Cluster cluster, Workspace workspace) {
+        if (!source.getDatabases().isEmpty()) {
+            Set<RDSConfig> rdsConfigs = rdsConfigService.findByNamesInWorkspace(source.getDatabases(), workspace.getId());
+            if (rdsConfigs.isEmpty()) {
+                throw new NotFoundException("RDS config names dont exists");
+            }
+            cluster.setRdsConfigs(rdsConfigs);
         }
     }
 }

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackAuthentication
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("StackAuthentication")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StackAuthenticationV4Request extends StackAuthenticationV4Base {

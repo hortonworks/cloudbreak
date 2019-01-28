@@ -8,9 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -20,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -48,6 +49,8 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterTemplate.setWorkspace(workspace);
+        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(JsonUtil.writeValueAsStringSilent(source).getBytes()));
+        source.getStackTemplate().setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         Stack stack = converterUtil.convert(source.getStackTemplate(), Stack.class);
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
@@ -60,7 +63,6 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
             clusterTemplate.setType(source.getType());
         }
         clusterTemplate.setDatalakeRequired(source.getDatalakeRequired());
-        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(JsonUtil.writeValueAsStringSilent(source).getBytes()));
         return clusterTemplate;
     }
 

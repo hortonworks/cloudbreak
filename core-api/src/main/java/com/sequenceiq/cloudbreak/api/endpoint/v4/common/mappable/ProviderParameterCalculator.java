@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 import java.util.Map;
 
@@ -10,24 +10,33 @@ import org.springframework.stereotype.Component;
 public class ProviderParameterCalculator {
 
     public Mappable get(ProviderParametersBase source) {
+        Mappable mappable;
         switch (source.getCloudPlatform()) {
             case AWS:
-                return source.getAws();
+                mappable = source.getAws();
+                break;
             case GCP:
-                return source.getGcp();
+                mappable = source.getGcp();
+                break;
             case MOCK:
-                return source.getMock();
+                mappable = source.getMock();
+                break;
             case YARN:
-                return source.getYarn();
+                mappable = source.getYarn();
+                break;
             case AZURE:
-                return source.getAzure();
+                mappable = source.getAzure();
+                break;
             case OPENSTACK:
-                return source.getOpenstack();
+                mappable = source.getOpenstack();
+                break;
             case CUMULUS_YARN:
-                return source.getYarn();
+                mappable = source.getYarn();
+                break;
             default:
                 throw new IllegalArgumentException(format("No mappable for cloudplatform [%s] and source [%s]", source.getCloudPlatform(), source.getClass()));
         }
+        return mappable == null ? () -> null : mappable;
     }
 
     public void to(Map<String, Object> parameters, ProviderParametersBase base) {

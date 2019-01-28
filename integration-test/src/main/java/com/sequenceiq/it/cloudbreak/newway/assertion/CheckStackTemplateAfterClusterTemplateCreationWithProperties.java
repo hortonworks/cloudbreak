@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
@@ -45,7 +46,7 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("SubnetCIDR is mismatch!");
         }
 
-        if (!"subnet-value".equals(stackTemplate.getNetwork().getParameters().get("customParameter"))) {
+        if (!"subnet-value".equals(((StackV4Request) stackTemplate).getNetwork().getAzure().getResourceGroupName().getParameters().get("customParameter"))) {
             throw new IllegalArgumentException("CustomParameter is mismatch!");
         }
 

@@ -6,12 +6,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class GatewayV4RequestToGatewayConverter extends AbstractConversionServiceAwareConverter<GatewayV4Request, Gateway> {
@@ -21,6 +27,15 @@ public class GatewayV4RequestToGatewayConverter extends AbstractConversionServic
 
     @Inject
     private GatewayV4RequestValidator gatewayJsonValidator;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private WorkspaceService workspaceService;
 
     @Override
     public Gateway convert(GatewayV4Request source) {
@@ -35,6 +50,11 @@ public class GatewayV4RequestToGatewayConverter extends AbstractConversionServic
         gatewayConvertUtil.setBasicProperties(source, gateway);
         gatewayConvertUtil.setTopologies(source, gateway);
         gatewayConvertUtil.setGatewayPathAndSsoProvider(source, gateway);
+
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        gateway.setWorkspace(workspace);
         return gateway;
     }
 }

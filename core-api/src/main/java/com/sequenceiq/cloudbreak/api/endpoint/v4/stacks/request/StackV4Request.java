@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
@@ -52,6 +53,7 @@ public class StackV4Request extends StackV4Base {
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
 
+    @NotNull(message = "You should define authentication for stack!")
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationV4Request authentication;
 
@@ -76,6 +78,8 @@ public class StackV4Request extends StackV4Base {
 
     @ApiModelProperty
     private String datalakeName;
+
+    private StackType type;
 
     public EnvironmentSettingsV4Request getEnvironment() {
         return environment;
@@ -179,5 +183,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setFlexId(Long flexId) {
         this.flexId = flexId;
+    }
+
+    public StackType getType() {
+        return type;
+    }
+
+    public void setType(StackType type) {
+        this.type = type;
     }
 }

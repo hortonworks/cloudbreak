@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -83,39 +84,66 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Override
     public Stack convert(StackV4Request source) {
-        validateStackAuthentication(source);
-
-        Stack stack = new Stack();
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
 
-        String cloudPlatform = determineCloudPlatform(source, workspace);
-        stack.setName(source.getName());
+        Stack stack = new Stack();
+
+        if (source.getType() != StackType.TEMPLATE) {
+            convertAsStack(source, stack, workspace);
+        } else {
+            convertAsStackTemplate(source, stack, workspace);
+        }
+
+        stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
+        stack.setDatalakeId(getSharedClusterNameOrDatalakeName(source, workspace));
+        stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
+        stack.setCreated(Calendar.getInstance().getTimeInMillis());
+        stack.setInstanceGroups(convertInstanceGroups(source, stack));
+        updateCluster(source, stack, workspace);
+        if (source.getNetwork() != null) {
+            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
+            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+        }
+        if (source.getCustomDomain() != null) {
+            stack.setCustomDomain(source.getCustomDomain().getDomainName());
+            stack.setCustomHostname(source.getCustomDomain().getHostname());
+            stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
+            stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
+        }
+        stack.setGatewayPort(source.getGatewayPort());
+        stack.setUuid(UUID.randomUUID().toString());
+        stack.setType(source.getType());
+        return stack;
+    }
+
+    private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace) {
+        validateStackAuthentication(source);
+        updateEnvironment(source, stack, workspace);
+        updateCloudPlatformAndRelatedFields(source, stack, workspace);
+        stack.setName(source.getName());
+        stack.setAvailabilityZone(source.getEnvironment().getPlacement().getAvailabilityZone());
+        stack.setOrchestrator(getOrchestrator());
+    }
+
+    private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, Workspace workspace) {
+        String cloudPlatform = determineCloudPlatform(source, workspace);
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(source, cloudPlatform));
-        stack.setDatalakeId(getSharedClusterNameOrDatalakeName(source, workspace));
-        stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
-        stack.setAvailabilityZone(source.getEnvironment().getPlacement().getAvailabilityZone());
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
-        stack.setCreated(Calendar.getInstance().getTimeInMillis());
         stack.setPlatformVariant(cloudPlatform);
-        stack.setOrchestrator(getOrchestrator());
-        updateGeneral(source, stack, workspace);
-        stack.setInstanceGroups(convertInstanceGroups(source, stack));
-        updateCluster(source, stack);
-        if (source.getNetwork() != null) {
-            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+    }
+
+    private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace) {
+        if (source.getEnvironment() != null) {
+            updateEnvironment(source, stack, workspace);
+            updateCloudPlatformAndRelatedFields(source, stack, workspace);
+            stack.setAvailabilityZone(source.getEnvironment().getPlacement().getAvailabilityZone());
         }
-        stack.setCustomDomain(source.getCustomDomain().getDomainName());
-        stack.setCustomHostname(source.getCustomDomain().getHostname());
-        stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
-        stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
-        stack.setGatewayPort(source.getGatewayPort());
-        stack.setUuid(UUID.randomUUID().toString());
-        return stack;
+        stack.setName(UUID.randomUUID().toString());
     }
 
     private Orchestrator getOrchestrator() {
@@ -144,8 +172,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return source.getEnvironment().getPlacement().getRegion();
     }
 
-    public String determineCloudPlatform(StackV4Request source, Workspace workspace) {
-
+    private String determineCloudPlatform(StackV4Request source, Workspace workspace) {
         return StringUtils.isEmpty(source.getEnvironment().getName())
                 ? credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace).cloudPlatform()
                 : environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace).getCloudPlatform();
@@ -180,16 +207,14 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         } else if (source.getCluster().getSharedService() != null) {
             name = source.getCluster().getSharedService().getSharedClusterName();
         }
-        if (StringUtils.isEmpty(name)) {
+        if (!StringUtils.isEmpty(name)) {
             return stackService.getByNameInWorkspace(name, workspace.getId()).getId();
         }
         return null;
     }
 
     private void validateStackAuthentication(StackV4Request source) {
-        if (source.getAuthentication() == null) {
-            throw new BadRequestException("You should define authentication for stack!");
-        } else if (Strings.isNullOrEmpty(source.getAuthentication().getPublicKey())
+        if (Strings.isNullOrEmpty(source.getAuthentication().getPublicKey())
                 && Strings.isNullOrEmpty(source.getAuthentication().getPublicKeyId())) {
             throw new BadRequestException("You should define the publickey or publickeyid!");
         } else if (source.getAuthentication().getLoginUserName() != null) {
@@ -197,7 +222,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void updateGeneral(StackV4Request source, Stack stack, Workspace workspace) {
+    private void updateEnvironment(StackV4Request source, Stack stack, Workspace workspace) {
         if (!StringUtils.isEmpty(source.getEnvironment().getCredentialName())) {
             Credential credential = credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace);
             stack.setCredential(credential);
@@ -214,7 +239,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
-                .map(ig -> getConversionService().convert(ig, InstanceGroup.class))
+                .map(ig -> {
+                    ig.setCloudPlatform(source.getCloudPlatform());
+                    return getConversionService().convert(ig, InstanceGroup.class);
+                })
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
@@ -222,8 +250,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return convertedSet;
     }
 
-    private void updateCluster(StackV4Request source, Stack stack) {
+    private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
         if (source.getCluster() != null) {
+            source.getCluster().setName(stack.getName());
             Cluster cluster = getConversionService().convert(source.getCluster(), Cluster.class);
             Set<HostGroup> hostGroups = source.getInstanceGroups().stream()
                     .map(ig -> {

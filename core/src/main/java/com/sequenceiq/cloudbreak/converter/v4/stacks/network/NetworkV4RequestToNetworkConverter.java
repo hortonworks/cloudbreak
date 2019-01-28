@@ -36,7 +36,7 @@ public class NetworkV4RequestToNetworkConverter extends AbstractConversionServic
         network.setSubnetCIDR(source.getSubnetCIDR());
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
-        if (!parameters.isEmpty()) {
+        if (parameters != null) {
             parameters.put("cloudPlatform", source.getCloudPlatform().name());
             try {
                 network.setAttributes(new Json(parameters));

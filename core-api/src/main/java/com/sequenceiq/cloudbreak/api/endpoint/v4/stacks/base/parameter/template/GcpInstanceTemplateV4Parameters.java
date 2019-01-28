@@ -45,8 +45,10 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     public Map<String, Object> asMap() {
         setPlatformType(CloudPlatform.GCP);
         Map<String, Object> map = super.asMap();
-        map.put("keyEncryptionMethod", encryption.getKeyEncryptionMethod());
-        map.put("type", encryption.getType());
+        if (encryption != null) {
+            map.put("keyEncryptionMethod", encryption.getKeyEncryptionMethod());
+            map.put("type", encryption.getType());
+        }
         map.put("preemptible", preemptible);
         return map;
     }
@@ -54,7 +56,9 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     @Override
     public Map<String, Object> asSecretMap() {
         Map<String, Object> secretMap = super.asSecretMap();
-        secretMap.put("key", encryption.getKey());
+        if (encryption != null) {
+            secretMap.put("key", encryption.getKey());
+        }
         return secretMap;
     }
 

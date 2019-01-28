@@ -78,7 +78,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Override
     protected void prepareDeletion(ClusterTemplate resource) {
-        if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
+         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
             throw new AccessDeniedException("Default template deletion is forbidden");
         }
     }
@@ -156,7 +156,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
             outdatedTemplates.forEach(ct -> {
                 ct.setStatus(ResourceStatus.OUTDATED);
-                delete(ct.getName(), ct.getWorkspace().getId());
+                delete(ct);
             });
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
             clusterTemplates = clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
@@ -179,6 +179,12 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public ClusterTemplate delete(String name, Long workspaceId) {
         ClusterTemplate clusterTemplate = getByNameForWorkspaceId(name, workspaceId);
         deleteByNameFromWorkspace(name, workspaceId);
+        stackTemplateService.delete(clusterTemplate.getStackTemplate());
+        return clusterTemplate;
+    }
+
+    public ClusterTemplate delete(ClusterTemplate clusterTemplate) {
+        super.delete(clusterTemplate);
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;
     }

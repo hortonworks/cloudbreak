@@ -5,6 +5,7 @@
   "cloudPlatform": "AWS",
   "datalakeRequired": "NONE",
   "stackTemplate": {
+    "type": "TEMPLATE",
     "cluster": {
       "ambari": {
         "blueprintName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",

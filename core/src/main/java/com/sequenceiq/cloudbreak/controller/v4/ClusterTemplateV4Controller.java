@@ -49,6 +49,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
         try {
+            clusterTemplateService.findAllByWorkspaceId(workspaceId);
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
                     converterUtil.convertAllAsSet(clusterTemplateViewService.findAllByWorkspaceId(workspaceId), ClusterTemplateViewV4Response.class));
             return new ClusterTemplateViewV4Responses(responses);

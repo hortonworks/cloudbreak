@@ -38,9 +38,4 @@ public abstract class InstanceTemplateV4ParameterBase implements JsonEntity, Map
         map.put("platformType", platformType.name());
         return map;
     }
-
-    @Override
-    public Map<String, Object> asSecretMap() {
-        return null;
-    }
 }

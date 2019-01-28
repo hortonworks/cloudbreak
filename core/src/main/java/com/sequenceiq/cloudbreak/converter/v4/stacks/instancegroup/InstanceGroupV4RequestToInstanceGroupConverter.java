@@ -28,6 +28,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
     @Override
     public InstanceGroup convert(InstanceGroupV4Request source) {
         InstanceGroup instanceGroup = new InstanceGroup();
+        source.getTemplate().setCloudPlatform(source.getCloudPlatform());
         instanceGroup.setTemplate(getConversionService().convert(source.getTemplate(), Template.class));
         instanceGroup.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroup.class));
         instanceGroup.setGroupName(source.getName());
@@ -51,7 +52,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
 
     private void setAttributes(InstanceGroupV4Request source, InstanceGroup instanceGroup) {
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
-        if (!parameters.isEmpty()) {
+        if (parameters != null) {
             parameters.put("cloudPlatform", source.getCloudPlatform().name());
             try {
                 instanceGroup.setAttributes(new Json(parameters));
