@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.v2;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,11 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 
-public class StackV2RequestCompatibilityTest {
+public class StackV4RequestCompatibilityTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackV2RequestCompatibilityTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestCompatibilityTest.class);
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -37,7 +36,7 @@ public class StackV2RequestCompatibilityTest {
 
     @Test
     public void testApiCompatibility2dot4() throws IOException {
-        StackV4Request request = mapper.readValue(new ClassPathResource("api-compatibility/StackV2Request_v2.4.0.json").getURL(), StackV4Request.class);
+        StackV4Request request = mapper.readValue(new ClassPathResource("api-compatibility/StackV4Request_v2.10.0.json").getURL(), StackV4Request.class);
         Set<ConstraintViolation<StackV4Request>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
             LOGGER.warn("violations: {}", violations);

@@ -1,11 +1,12 @@
 {
-  "general": {
+  "name": "string",
+  "environment": {
     "name": "string",
-    "credentialName": "string"
-  },
-  "placement": {
-    "availabilityZone": "string",
-    "region": "string"
+    "credentialName": "string",
+    "placement": {
+      "availabilityZone": "string",
+      "region": "string"
+    }
   },
   "platformVariant": "string",
   "ambariVersion": "string",
@@ -18,20 +19,22 @@
     "hostgroupNameAsHostname": false
   },
   "tags": {
-    "applicationTags": {},
-    "userDefinedTags": {},
-    "defaultTags": {}
+    "application": {},
+    "userDefined": {},
+    "defaults": {}
   },
   "instanceGroups": [
     {
+      "cloudPlatform": "AWS",
       "nodeCount": 0,
-      "group": "string",
+      "name": "string",
       "type": "GATEWAY",
-      "parameters": {},
+      "aws": {},
       "template": {
         "volumeCount": 0,
         "volumeSize": 0,
-        "parameters": {},
+        "cloudPlatform": "AWS",
+        "aws": {},
         "volumeType": "string",
         "instanceType": "string",
         "customInstanceType": {
@@ -44,7 +47,11 @@
         "securityRules": [
           {
             "subnet": "10.0.0.0/24",
-            "ports": "1111,2222,3333",
+            "ports": [
+              "1111",
+              "2222-2224",
+              "3333"
+            ],
             "protocol": "string",
             "modifiable": false
           }
@@ -60,7 +67,7 @@
     "threshold": 0,
     "adjustmentType": "EXACT"
   },
-  "stackAuthentication": {
+  "authentication": {
     "publicKey": "string",
     "publicKeyId": "string",
     "loginUserName": "string"
