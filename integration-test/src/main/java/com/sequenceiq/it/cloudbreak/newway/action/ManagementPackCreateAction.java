@@ -20,7 +20,7 @@ public class ManagementPackCreateAction implements ActionV2<ManagementPackEntity
         logJSON(LOGGER, " ManagementPack post request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
-                        .managementPackV3Endpoint()
+                        .managementPackV4Endpoint()
                         .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
         logJSON(LOGGER, " ManagementPack created  successfully:\n", entity.getResponse());
         log(LOGGER, "ManagementPack ID: " + entity.getResponse().getId());

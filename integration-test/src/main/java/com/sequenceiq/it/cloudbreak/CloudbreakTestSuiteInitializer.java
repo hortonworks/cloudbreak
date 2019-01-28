@@ -22,9 +22,9 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -140,7 +140,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
                 .credentialV4Endpoint(), cloudProvider, credentialName, workspaceId);
         putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
-                .stackV1Endpoint(), stackName);
+                .stackV4Endpoint(), workspaceId, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
         }
@@ -163,8 +163,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             blueprintName = defaultBlueprintName;
         }
         if (StringUtils.hasLength(blueprintName)) {
-            String resourceId = endpoint.get(workspaceId, blueprintName).getId().toString();
-            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
+            String resourceName = endpoint.get(workspaceId, blueprintName).getName();
+            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_NAME, resourceName);
         }
     }
 
@@ -184,9 +184,9 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID, ambariPort);
     }
 
-    private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
+    private void putStackToContextIfExist(StackV4Endpoint endpoint, Long workspaceId, String stackName) {
         if (StringUtils.hasLength(stackName)) {
-            Long resourceId = endpoint.getStackFromDefaultWorkspace(stackName, new HashSet<>()).getId();
+            Long resourceId = endpoint.getStatusByName(workspaceId, stackName).getId();
             itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId.toString());
             itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackName);
         }

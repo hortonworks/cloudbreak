@@ -65,7 +65,7 @@ tests:
       threshold: 1
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: test adls filesystem with terasort
     parameters:

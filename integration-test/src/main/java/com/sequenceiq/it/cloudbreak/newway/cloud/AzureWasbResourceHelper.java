@@ -4,15 +4,15 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseTy
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
 import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.WASB;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.WasbCloudStorageParametersV4;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Storage.Wasb;
 
-public class AzureWasbResourceHelper extends ResourceHelper<WasbCloudStorageParametersV4> {
+public class AzureWasbResourceHelper extends ResourceHelper<WasbCloudStorageV4Parameters> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AZURE_RANGER_DB_CONFIG";
 
@@ -54,11 +54,12 @@ public class AzureWasbResourceHelper extends ResourceHelper<WasbCloudStoragePara
     }
 
     @Override
-    protected WasbCloudStorageParametersV4 getCloudStorage() {
-        var params = new WasbCloudStorageParametersV4();
+    protected WasbCloudStorageV4Parameters getCloudStorage() {
+        var params = new WasbCloudStorageV4Parameters();
         params.setAccountName(getTestParameter().get(Wasb.ACCOUNT));
         params.setAccountKey(getTestParameter().get(Wasb.ACCESS_KEY));
         params.setSecure(true);
         return params;
     }
+
 }

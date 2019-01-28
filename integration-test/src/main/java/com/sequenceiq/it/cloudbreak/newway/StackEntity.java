@@ -56,7 +56,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
         StackV4Endpoint stackEndpoint = client.getCloudbreakClient().stackV4Endpoint();
-        return stackEndpoint.list(client.getWorkspaceId(), null).getResponses().stream()
+        return stackEndpoint.list(client.getWorkspaceId(), null, false).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     StackV4Response stackResponse = new StackV4Response();
@@ -73,7 +73,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     @Override
     public void delete(StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), null);
+            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
             wait(AbstractIntegrationTest.STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);

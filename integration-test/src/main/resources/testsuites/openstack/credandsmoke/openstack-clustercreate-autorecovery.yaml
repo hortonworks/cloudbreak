@@ -62,7 +62,7 @@ tests:
       autoRecoveryMode: True
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
 
   - name: auto recovery
     parameters:

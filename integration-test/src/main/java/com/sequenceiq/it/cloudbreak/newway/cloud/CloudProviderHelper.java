@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageParametersV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -27,8 +27,6 @@ import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackAction;
-import com.sequenceiq.it.cloudbreak.newway.StackCreation;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
@@ -114,12 +112,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
-    }
-
-    public StackEntity aValidAttachedStackRequest() {
-        var request = new StackCreation(aValidStackRequest());
-        request.setCreationStrategy(StackAction::determineNetworkFromDatalakeStack);
-        return request.getStack();
     }
 
     @Override
@@ -243,7 +235,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     protected CloudStorageV4Request getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
-                                                                    CloudStorageParametersV4 emptyType) {
+            CloudStorageV4Parameters emptyType) {
         var request = new CloudStorageV4Request();
         var locations = new LinkedHashSet<StorageLocationV4Request>(1);
         locations.add(

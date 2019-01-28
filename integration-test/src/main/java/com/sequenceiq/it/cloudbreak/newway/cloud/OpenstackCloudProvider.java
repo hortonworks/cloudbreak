@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthenticat
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
@@ -70,6 +71,11 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
                 .withOpenstackParameters(openstackCredentialDetailsKilo());
+    }
+
+    @Override
+    public StackEntity aValidAttachedStackRequest() {
+        throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
     @Override

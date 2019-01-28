@@ -329,11 +329,6 @@ public class TestUtil {
         return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.CORE);
     }
 
-    public static InstanceMetaData primaryGateWayInstanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
-            InstanceGroup instanceGroup) {
-        return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.GATEWAY_PRIMARY);
-    }
-
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 1; i <= count; i++) {

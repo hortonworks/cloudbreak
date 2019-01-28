@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.JsonParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.P12Parameters;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthenticat
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
@@ -61,6 +64,11 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(GCP_CAPITAL)
                 .withGcpParameters(gcpCredentialDetails());
+    }
+
+    @Override
+    public StackEntity aValidAttachedStackRequest() {
+        throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
     @Override

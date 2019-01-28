@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.EntityCreationStrategy;
 import com.sequenceiq.it.cloudbreak.newway.PostCredentialWithNameFromMockStrategy;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class MockCloudProvider extends CloudProviderHelper {
@@ -66,6 +67,11 @@ public class MockCloudProvider extends CloudProviderHelper {
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(MOCK_CAPITAL);
+    }
+
+    @Override
+    public StackEntity aValidAttachedStackRequest() {
+        throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
     @Override

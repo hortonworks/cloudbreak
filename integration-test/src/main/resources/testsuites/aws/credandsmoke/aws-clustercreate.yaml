@@ -56,4 +56,4 @@ tests:
       clusterName: it-aws-cred
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
-      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+

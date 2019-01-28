@@ -302,7 +302,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
         when(Credential.put(), VALID_ARMINTTESTAPP_CRED_NAME + " credential has been modified.");
         then(Credential.assertThis(
                 (credential, t) -> {
-                    Assert.assertEquals(credential.getResponse().getAzure().getAccessKey(), provider.getNewApplicationID(),
+                    Assert.assertEquals(credential.getResponse().getAzure().getAppBased().getAccessKey(), provider.getNewApplicationID(),
                             "New Appliction ID should be present as accessKey in response!");
                 }), "Credential Parameter Mapping should be part of the response."
         );

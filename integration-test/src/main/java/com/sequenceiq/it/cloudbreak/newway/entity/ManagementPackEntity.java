@@ -3,9 +3,8 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 import java.util.Collection;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.ManagementPackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackRequest;
-import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -13,11 +12,11 @@ import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ManagementPackEntity extends AbstractCloudbreakEntity<ManagementPackRequest, ManagementPackResponse, ManagementPackEntity>
-        implements Purgable<ManagementPackResponse> {
+public class ManagementPackEntity extends AbstractCloudbreakEntity<ManagementPackV4Request, ManagementPackV4Response, ManagementPackEntity>
+        implements Purgable<ManagementPackV4Response> {
 
     public ManagementPackEntity(TestContext testContext) {
-        super(new ManagementPackRequest(), testContext);
+        super(new ManagementPackV4Request(), testContext);
     }
 
     public ManagementPackEntity valid() {
@@ -56,19 +55,18 @@ public class ManagementPackEntity extends AbstractCloudbreakEntity<ManagementPac
     }
 
     @Override
-    public Collection<ManagementPackResponse> getAll(CloudbreakClient client) {
-        ManagementPackV4Endpoint managementPackV3Endpoint = client.getCloudbreakClient().managementPackV3Endpoint();
-        return managementPackV3Endpoint.listByWorkspace(client.getWorkspaceId());
+    public Collection<ManagementPackV4Response> getAll(CloudbreakClient client) {
+        return client.getCloudbreakClient().managementPackV4Endpoint().listByWorkspace(client.getWorkspaceId()).getResponses();
     }
 
     @Override
-    public boolean deletable(ManagementPackResponse entity) {
+    public boolean deletable(ManagementPackV4Response entity) {
         return entity.getName().startsWith("mock-");
     }
 
     @Override
-    public void delete(ManagementPackResponse entity, CloudbreakClient client) {
-        client.getCloudbreakClient().managementPackV3Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName());
+    public void delete(ManagementPackV4Response entity, CloudbreakClient client) {
+        client.getCloudbreakClient().managementPackV4Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName());
     }
 
     @Override

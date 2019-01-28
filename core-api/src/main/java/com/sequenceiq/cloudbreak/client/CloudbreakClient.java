@@ -152,7 +152,7 @@ public class CloudbreakClient {
         return getEndpoint(LdapConfigV4Endpoint.class);
     }
 
-    public ManagementPackV4Endpoint managementPackV3Endpoint() {
+    public ManagementPackV4Endpoint managementPackV4Endpoint() {
         return getEndpoint(ManagementPackV4Endpoint.class);
     }
 

@@ -11,6 +11,8 @@ public class CloudbreakITContextConstants {
 
     public static final String BLUEPRINT_ID = "BLUEPRINT_ID";
 
+    public static final String BLUEPRINT_NAME = "BLUEPRINT_NAME";
+
     public static final String RECIPE_ID = "RECIPE_ID";
 
     public static final String TEMPLATE_ID = "TEMPLATE_ID";
@@ -20,6 +22,8 @@ public class CloudbreakITContextConstants {
     public static final String SECURITY_GROUP_ID = "SECURITY_GROUP_ID";
 
     public static final String CREDENTIAL_ID = "CREDENTIAL_ID";
+
+    public static final String CREDENTIAL_NAME = "CREDENTIAL_ID";
 
     public static final String STACK_ID = "STACK_ID";
 
