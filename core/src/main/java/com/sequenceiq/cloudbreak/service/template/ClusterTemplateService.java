@@ -78,7 +78,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Override
     protected void prepareDeletion(ClusterTemplate resource) {
-         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
+        if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
             throw new AccessDeniedException("Default template deletion is forbidden");
         }
     }
@@ -138,18 +138,24 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Override
     public Set<ClusterTemplate> findAllByWorkspace(Workspace workspace) {
-        return getAllAvailableInWorkspace(workspace);
+        updateDefaultClusterTemplates(workspace);
+        return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
     @Override
     public Set<ClusterTemplate> findAllByWorkspaceId(Long workspaceId) {
+        updateDefaultClusterTemplates(workspaceId);
+        return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspaceId);
+    }
+
+    public void updateDefaultClusterTemplates(long workspaceId) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        return getAllAvailableInWorkspace(workspace);
+        updateDefaultClusterTemplates(workspace);
     }
 
-    private Set<ClusterTemplate> getAllAvailableInWorkspace(Workspace workspace) {
+    private void updateDefaultClusterTemplates(Workspace workspace) {
         Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllTemplateContentNameStatusByNotDeletedInWorkspace(workspace.getId());
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
             LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{}' workspace.", workspace.getId());
@@ -159,10 +165,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
                 delete(ct);
             });
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-            clusterTemplates = clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
+            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
             LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
-        return clusterTemplates;
     }
 
     private Collection<ClusterTemplate> createAll(Iterable<ClusterTemplate> clusterTemplates) {
