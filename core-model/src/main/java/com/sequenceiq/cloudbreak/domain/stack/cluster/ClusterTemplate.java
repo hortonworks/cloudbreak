@@ -58,6 +58,18 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String templateContent;
 
+    public ClusterTemplate() {
+
+    }
+
+
+    public ClusterTemplate(String templateContent, String name, ResourceStatus status, Workspace workspace) {
+        this.templateContent = templateContent;
+        this.name = name;
+        this.status = status;
+        this.workspace = workspace;
+    }
+
     public Stack getStackTemplate() {
         return stackTemplate;
     }
