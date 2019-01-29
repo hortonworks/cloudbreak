@@ -39,7 +39,7 @@ public class SharedServiceValidator {
         } else {
             CloudPlatform requestedCloudPlatform = request.getCloudPlatform();
             String datalakeCloudPlatform = datalakeStack.cloudPlatform();
-            if (!datalakeCloudPlatform.equals(requestedCloudPlatform)) {
+            if (!datalakeCloudPlatform.equals(requestedCloudPlatform.name())) {
                 resultBuilder.error(String.format("Requested cloud platform [%s] does not match with the datalake"
                         + " cluser's cloud platform [%s].", requestedCloudPlatform, datalakeCloudPlatform));
             }
