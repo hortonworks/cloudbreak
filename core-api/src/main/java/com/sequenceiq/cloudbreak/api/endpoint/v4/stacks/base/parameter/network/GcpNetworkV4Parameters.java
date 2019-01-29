@@ -78,10 +78,10 @@ public class GcpNetworkV4Parameters implements JsonEntity, Mappable {
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        networkId = getParameterOrNull(parameters,"networkId");
-        subnetId = getParameterOrNull(parameters,"subnetId");
-        sharedProjectId = getParameterOrNull(parameters,"sharedProjectId");
-        noFirewallRules = getBoolean(parameters,"noFirewallRules");
-        noPublicIp = getBoolean(parameters,"noPublicIp");
+        networkId = getParameterOrNull(parameters, "networkId");
+        subnetId = getParameterOrNull(parameters, "subnetId");
+        sharedProjectId = getParameterOrNull(parameters, "sharedProjectId");
+        noFirewallRules = getBoolean(parameters, "noFirewallRules");
+        noPublicIp = getBoolean(parameters, "noPublicIp");
     }
 }

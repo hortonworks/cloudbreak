@@ -63,7 +63,7 @@ public class WasbCloudStorageV4Parameters implements CloudStorageV4Parameters {
             return false;
         }
         WasbCloudStorageV4Parameters that = (WasbCloudStorageV4Parameters) o;
-        return Objects.equals(isSecure(),that.isSecure())
+        return Objects.equals(isSecure(), that.isSecure())
                 && Objects.equals(getAccountKey(), that.getAccountKey())
                 && Objects.equals(getAccountName(), that.getAccountName());
     }

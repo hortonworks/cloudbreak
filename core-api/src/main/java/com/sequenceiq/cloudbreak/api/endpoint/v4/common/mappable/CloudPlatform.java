@@ -28,6 +28,8 @@ public enum CloudPlatform {
             case MOCK:
                 base.getMock().parse(parameters);
                 break;
+            default:
+                throw new IllegalStateException("Unhandled CloudPlatform constant: " + name());
         }
     }
 }

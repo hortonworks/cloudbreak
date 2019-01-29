@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.v2;
 
-import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.WORKSPACE_ID;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -128,16 +126,17 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         IntegrationTestContext itContext = getItContext();
         StackV4Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
         // WHEN
-        String stackId = getCloudbreakClient().stackV4Endpoint().post(itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class)
-                , stackV2Request).getId().toString();
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String stackId = getCloudbreakClient().stackV4Endpoint().post(workspaceId, stackV2Request).getId().toString();
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId, true);
-        itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackV2Request.getName());
+        String stackName = stackV2Request.getName();
+        itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackName);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
     }
 
     protected NetworkV4Request createNetworkRequest(IntegrationTestContext itContext, String subnetCidr) {

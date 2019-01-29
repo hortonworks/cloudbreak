@@ -29,7 +29,8 @@ public interface Mappable {
         return new HashMap<>();
     }
 
-    default void parse(Map<String, Object> parameters) {}
+    default void parse(Map<String, Object> parameters) {
+    }
 
     default String getParameterOrNull(Map<String, Object> parameters, String key) {
         Object value = isNull(parameters) ? null : parameters.get(key);
