@@ -8,12 +8,12 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.IpPoolV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpPoolsV4Response;
-import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 
 public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
     @Test
@@ -30,12 +30,14 @@ public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
         resourceRequestJson.setCredentialName(credentialName);
         resourceRequestJson.setRegion(region);
         resourceRequestJson.setAvailabilityZone(availabilityZone);
+        String platformVariant = getCloudbreakClient().credentialV4Endpoint().get(workspaceId, credentialName).getCloudPlatform();
         // WHEN
-        PlatformIpPoolsV4Response ipPoolsResponse = getCloudbreakClient().connectorV4Endpoint().getIpPoolsCredentialId(workspaceId, resourceRequestJson);
+        PlatformIpPoolsV4Response ipPoolsResponse = getCloudbreakClient().connectorV4Endpoint().getIpPoolsCredentialId(workspaceId, credentialName, region,
+                platformVariant, availabilityZone);
         // THEN
-        Set<IpPoolJson> ipPools = ipPoolsResponse.getIppools().get(availabilityZone);
+        Set<IpPoolV4Response> ipPools = ipPoolsResponse.getIppools().get(availabilityZone);
         Assert.assertNotNull(ipPools, "ippools cannot be null for " + region);
-        java.util.Optional<IpPoolJson> selected = ipPools.stream().filter(rk -> rk.getName().equals(poolName)).findFirst();
+        java.util.Optional<IpPoolV4Response> selected = ipPools.stream().filter(rk -> rk.getName().equals(poolName)).findFirst();
         Assert.assertTrue(selected.isPresent(), "the ippool list doesn't contain [" + poolName + ']');
         getItContext().putContextParam(CloudbreakV2Constants.OPENSTACK_FLOATING_POOL, selected.get().getId());
     }

@@ -3,15 +3,15 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.azure.AdlsGen2CloudStorageParametersV4;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
 
-public class AzureAdlsGen2ResourceHelper extends ResourceHelper<AdlsGen2CloudStorageParametersV4> {
+public class AzureAdlsGen2ResourceHelper extends ResourceHelper<AdlsGen2CloudStorageV4Parameters> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AZURE_RANGER_DB_CONFIG";
 
@@ -52,8 +52,8 @@ public class AzureAdlsGen2ResourceHelper extends ResourceHelper<AdlsGen2CloudSto
     }
 
     @Override
-    public AdlsGen2CloudStorageParametersV4 getCloudStorage() {
-        var parameters = new AdlsGen2CloudStorageParametersV4();
+    public AdlsGen2CloudStorageV4Parameters getCloudStorage() {
+        var parameters = new AdlsGen2CloudStorageV4Parameters();
         parameters.setAccountKey(getTestParameter().get("integrationtest.filesystemconfig.accountKeyAbfs"));
         parameters.setAccountName(getTestParameter().get("integrationtest.filesystemconfig.accountNameAbfs"));
         return parameters;

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.v2.mock;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import org.testng.Assert;
@@ -10,9 +11,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -25,7 +26,7 @@ public class MockScalingTest extends StackScalingV2Test {
     public void setContextParameters() {
         super.setContextParameters();
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class),
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class),
                 "StackCreationRequest is mandatory.");
     }
 
@@ -34,7 +35,8 @@ public class MockScalingTest extends StackScalingV2Test {
     public void configMockServer(@Optional("9443") int mockPort, @Optional("2020") int sshPort, int desiredCount, String hostGroup) {
         IntegrationTestContext itContext = getItContext();
         String clusterName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
-        StackV4Response response = getCloudbreakClient().stackV4Endpoint().getStatusByName(clusterName);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        StackV4Response response = getCloudbreakClient().stackV4Endpoint().get(workspaceId, clusterName, new HashSet<>());
         java.util.Optional<InstanceGroupV4Response> igg = response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(hostGroup)).findFirst();
         Map<String, CloudVmInstanceStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
         ScalingMock scalingMock = (ScalingMock) applicationContext.getBean(ScalingMock.NAME, mockPort, sshPort, instanceMap);
@@ -58,9 +60,10 @@ public class MockScalingTest extends StackScalingV2Test {
         super.testStackScaling(hostGroup, desiredCount, checkAmbari);
         // THEN
         ScalingMock scalingMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, ScalingMock.class);
-        String stackId = getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID);
-        StackV2Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        scalingMock.verifyV2Calls(stackV2Request.getCluster(), ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV2Endpoint(), stackId));
+        String stackName = getItContext().getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        var stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
+        scalingMock.verifyV2Calls(stackV2Request.getCluster(), ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV4Endpoint(), workspaceId, stackName));
     }
 
     @AfterClass

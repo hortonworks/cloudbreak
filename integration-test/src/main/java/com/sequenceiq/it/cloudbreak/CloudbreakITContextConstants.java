@@ -27,6 +27,8 @@ public class CloudbreakITContextConstants {
 
     public static final String STACK_ID = "STACK_ID";
 
+    public static final String STACK_NAME = "STACK_NAME";
+
     public static final String HOSTGROUP_ID = "HOSTGROUP_ID";
 
     public static final String FAILED_TESTS = "FAILED_TESTS";

@@ -16,13 +16,10 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -73,13 +70,14 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakInte
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
-        List<InstanceGroupRequest> igMap = new ArrayList<>();
+        List<InstanceGroupV4Request> igMap = new ArrayList<>();
 
         for (InstanceGroup ig : instanceGroups) {
-            InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
-            instanceGroupRequest.setGroup(ig.getName());
+            InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
+            instanceGroupRequest.setName(ig.getName());
             instanceGroupRequest.setNodeCount(ig.getNodeCount());
-            instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
+            // FIXME: should figure out how to fill the template
+//            instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
             instanceGroupRequest.setType(InstanceGroupType.valueOf(ig.getType()));
             igMap.add(instanceGroupRequest);
         }
