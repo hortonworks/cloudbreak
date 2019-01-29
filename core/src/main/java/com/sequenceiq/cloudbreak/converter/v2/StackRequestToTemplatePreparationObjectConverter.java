@@ -38,6 +38,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -115,6 +118,9 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
     @Inject
     private AmbariClientFactory ambariClientFactory;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Override
     public TemplatePreparationObject convert(StackV2Request source) {
         try {
@@ -123,7 +129,7 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = getCredential(source, workspace);
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
-            SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
+            SmartSenseSubscription smartsenseSubscription = flexSubscription.map(FlexSubscription::getSmartSenseSubscription).orElse(null);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, workspace);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
@@ -160,19 +166,26 @@ public class StackRequestToTemplatePreparationObjectConverter extends AbstractCo
 
             SharedServiceRequest sharedService = source.getCluster().getSharedService();
             if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                Stack dataLakeStack = stackService.getByNameInWorkspaceWithLists(sharedService.getSharedCluster(), workspace.getId());
-                AmbariClient datalakeAmbariClient = ambariClientFactory.getAmbariClient(dataLakeStack, dataLakeStack.getCluster());
-                DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(dataLakeStack, datalakeAmbariClient);
-                if (datalakeResources != null) {
-                    SharedServiceConfigsView sharedServiceConfigsView = datalakeConfigProvider.createSharedServiceConfigView(datalakeResources);
-                    Map<String, String> blueprintConfigParams =
-                            datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, blueprint, datalakeAmbariClient);
-                    Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(source, datalakeResources);
-                    builder.withSharedServiceConfigs(sharedServiceConfigsView)
-                            .withFixInputs((Map) additionalParams)
-                            .withCustomInputs((Map) blueprintConfigParams);
-                } else {
-                    throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
+                try {
+                    transactionService.required(() -> {
+                        Stack dataLakeStack = stackService.getByNameInWorkspaceWithLists(sharedService.getSharedCluster(), workspace.getId());
+                        AmbariClient datalakeAmbariClient = ambariClientFactory.getAmbariClient(dataLakeStack, dataLakeStack.getCluster());
+                        DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(dataLakeStack, datalakeAmbariClient);
+                        if (datalakeResources != null) {
+                            SharedServiceConfigsView sharedServiceConfigsView = datalakeConfigProvider.createSharedServiceConfigView(datalakeResources);
+                            Map<String, String> blueprintConfigParams =
+                                    datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, blueprint, datalakeAmbariClient);
+                            Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(source, datalakeResources);
+                            builder.withSharedServiceConfigs(sharedServiceConfigsView)
+                                    .withFixInputs((Map) additionalParams)
+                                    .withCustomInputs((Map) blueprintConfigParams);
+                            return null;
+                        } else {
+                            throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
+                        }
+                    });
+                } catch (TransactionExecutionException e) {
+                    throw new TransactionRuntimeExecutionException(e);
                 }
             }
             return builder.build();
