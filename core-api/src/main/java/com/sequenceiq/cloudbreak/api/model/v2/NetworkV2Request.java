@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
+import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
 import io.swagger.annotations.ApiModel;
@@ -19,7 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class NetworkV2Request implements JsonEntity {
 
     @ApiModelProperty(NetworkModelDescription.SUBNET_CIDR)
-    @ValidSubnet
+    @ValidSubnet(SubnetType.RFC_1918_COMPLIANT_ONLY)
     private String subnetCIDR;
 
     @ApiModelProperty(NetworkModelDescription.PARAMETERS)
