@@ -1,7 +1,0 @@
-{
-  "parameters": {},
-  "name": "${networkName}",
-  "description": "mock network",
-  "subnetCIDR": "10.0.37.0/24",
-  "cloudPlatform": "MOCK"
-}
