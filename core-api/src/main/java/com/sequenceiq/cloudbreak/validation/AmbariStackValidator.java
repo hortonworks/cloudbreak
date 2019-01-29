@@ -11,11 +11,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
 public class AmbariStackValidator implements ConstraintValidator<ValidAmbariStack, AmbariStackDetailsJson> {
 
-    private static final String MIN_HDP_VERSION = "2.3";
+    public static final String MIN_HDP_VERSION = "2.5";
 
     @Override
     public void initialize(ValidAmbariStack constraintAnnotation) {
-
     }
 
     @Override

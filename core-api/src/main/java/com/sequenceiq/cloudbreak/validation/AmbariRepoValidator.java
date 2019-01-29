@@ -11,11 +11,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
 public class AmbariRepoValidator implements ConstraintValidator<ValidAmbariRepo, AmbariRepoDetailsJson> {
 
-    private static final String MIN_AMBARI_VERSION = "2.5";
+    public static final String MIN_AMBARI_VERSION = "2.6";
 
     @Override
     public void initialize(ValidAmbariRepo constraintAnnotation) {
-
     }
 
     @Override
