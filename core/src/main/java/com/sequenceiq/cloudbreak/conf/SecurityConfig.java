@@ -68,17 +68,11 @@ public class SecurityConfig {
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
         private static final String[] BLUEPRINT_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/blueprints/**"};
 
-        private static final String[] TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/templates/**"};
-
         private static final String[] CREDENTIAL_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/credentials/**"};
 
         private static final String[] RECIPE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/recipes/**"};
 
         private static final String[] MPACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/mpacks/**"};
-
-        private static final String[] NETWORK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/networks/**"};
-
-        private static final String[] SECURITYGROUP_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/securitygroups/**"};
 
         private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/stacks/**", API_ROOT_CONTEXT + "/v2/stacks/**"};
 
@@ -115,18 +109,12 @@ public class SecurityConfig {
                     .access("#oauth2.hasScope('cloudbreak.blueprints.read') or #oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers(HttpMethod.GET, STACK_TEMPLATE_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(HttpMethod.GET, TEMPLATE_URL_PATTERNS)
-                    .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(HttpMethod.GET, CREDENTIAL_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.credentials.read') or #oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(HttpMethod.GET, RECIPE_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.recipes.read') or #oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers(HttpMethod.GET, MPACK_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.recipes.read') or #oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers(HttpMethod.GET, NETWORK_URL_PATTERNS)
-                    .access("#oauth2.hasScope('cloudbreak.networks.read') or #oauth2.hasScope('cloudbreak.networks')")
-                    .antMatchers(HttpMethod.GET, SECURITYGROUP_URL_PATTERNS)
-                    .access("#oauth2.hasScope('cloudbreak.securitygroups.read') or #oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(HttpMethod.GET, SECURITY_RULE_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.securitygroups.read') or #oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(HttpMethod.GET, STACK_URL_PATTERNS)
@@ -143,12 +131,9 @@ public class SecurityConfig {
 
                     .antMatchers(API_ROOT_CONTEXT + "/v1/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
-                    .antMatchers(TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(CREDENTIAL_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(RECIPE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers(MPACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers(NETWORK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.networks')")
-                    .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(STACK_TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(SECURITY_RULE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")

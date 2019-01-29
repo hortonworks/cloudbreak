@@ -1,9 +1,0 @@
-{
-  "volumeCount": 1,
-  "volumeSize": 100,
-  "volumeType": "magnetic",
-  "instanceType": "large",
-  "name": "${templateName}",
-  "description": "mock template",
-  "cloudPlatform": "MOCK"
-}
