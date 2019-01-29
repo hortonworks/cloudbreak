@@ -1,6 +1,12 @@
 create-bundle() {
     declare desc="Exports and anonymizes logs for fault analysis. Usage: cbd create-bundle [archive_name]"
     declare archivename=$1
+
+    if ! [ $(id -u) = 0 ]; then
+        error "Please run as root, otherwise the tool cannot collect some necessary information for analysis."
+        _exit 1
+    fi
+
     if [[ -z $archivename ]] || [[ "/" == $archivename ]]; then
         archivename="cbd_export_$(date +%s)"
         warn "Invalid archive filename. Generated filename: $archivename"
