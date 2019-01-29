@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
+import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +22,7 @@ public abstract class NetworkBase implements JsonEntity {
     private String description;
 
     @ApiModelProperty(NetworkModelDescription.SUBNET_CIDR)
-    @ValidSubnet
+    @ValidSubnet(SubnetType.RFC_1918_COMPLIANT_ONLY)
     private String subnetCIDR;
 
     @NotNull

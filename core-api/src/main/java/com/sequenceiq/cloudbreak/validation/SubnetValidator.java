@@ -12,8 +12,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class SubnetValidator implements ConstraintValidator<ValidSubnet, String> {
 
+    private SubnetType subnetType;
+
     @Override
     public void initialize(ValidSubnet constraintAnnotation) {
+        this.subnetType = constraintAnnotation.value();
     }
 
     @Override
@@ -25,18 +28,28 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         }
         try {
             SubnetInfo info = new SubnetUtils(value).getInfo();
-            long addr = toLong(info.getAddress());
-            long lowerAddr = toLong(info.getLowAddress()) - 1;
-            if (addr != lowerAddr) {
+            if (!info.getAddress().equals(info.getNetworkAddress())) {
                 return false;
             }
-            Ip ip = new Ip(info.getAddress());
-            return (new Ip("10.0.0.0").compareTo(ip) <= 0 && new Ip("10.255.255.255").compareTo(ip) >= 0)
-                    || (new Ip("172.16.0.0").compareTo(ip) <= 0 && new Ip("172.31.255.255").compareTo(ip) >= 0)
-                    || (new Ip("192.168.0.0").compareTo(ip) <= 0 && new Ip("192.168.255.255").compareTo(ip) >= 0);
+            if (subnetType.equals(SubnetType.RFC_1918_COMPLIANT_ONLY)) {
+                return isRfc1918CompliantSubnet(info);
+            }
+            return true;
         } catch (RuntimeException ignored) {
             return false;
         }
+    }
+
+    private boolean isRfc1918CompliantSubnet(SubnetInfo info) {
+        Ip ip = new Ip(info.getAddress());
+        long addr = toLong(info.getAddress());
+        long lowerAddr = toLong(info.getLowAddress()) - 1;
+        if (addr != lowerAddr) {
+            return false;
+        }
+        return (new Ip("10.0.0.0").compareTo(ip) <= 0 && new Ip("10.255.255.255").compareTo(ip) >= 0)
+                || (new Ip("172.16.0.0").compareTo(ip) <= 0 && new Ip("172.31.255.255").compareTo(ip) >= 0)
+                || (new Ip("192.168.0.0").compareTo(ip) <= 0 && new Ip("192.168.255.255").compareTo(ip) >= 0);
     }
 
     private long toLong(String addr) {
