@@ -140,14 +140,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupV2Request.setRecipeNames(recipeNames);
                         instanceGroupV2Request.setRecoveryMode(hostGroup.getRecoveryMode());
-                        hostGroup.getHostMetadata().forEach(hmd -> {
-                            instanceGroup.getInstanceMetaDataSet()
-                                    .forEach(imd -> {
-                                        if (hmd.getHostName().equals(imd.getDomain())) {
-
-                                        }
-                                    });
-                        });
                     });
         }
     }

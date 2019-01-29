@@ -54,7 +54,8 @@ public class PlatformParameterService {
     @Inject
     private CredentialService credentialService;
 
-    public PlatformResourceRequest getPlatformResourceRequest(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
+    public PlatformResourceRequest getPlatformResourceRequest(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {

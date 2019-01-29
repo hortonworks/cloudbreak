@@ -87,7 +87,8 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
             String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
-                if (hostGroup.isInstanceGroupConfigured() && InstanceGroupType.GATEWAY.equals(hostGroup.getInstanceGroupType()) && hostGroup.getNodeCount().equals(1)) {
+                if (hostGroup.isInstanceGroupConfigured() && InstanceGroupType.GATEWAY.equals(hostGroup.getInstanceGroupType())
+                        && hostGroup.getNodeCount().equals(1)) {
                     aHostGroupName = hostGroup.getName();
                     singleNodeGatewayFound = true;
                     break;
