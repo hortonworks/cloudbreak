@@ -38,6 +38,10 @@ public class SharedServiceValidatorTest {
 
     private static final String HIVE_DB_NAME = "hivetest";
 
+    private static final String RANGER_TYPE_STRING = "RANGER";
+
+    private static final String HIVE_TYPE_STRING = "HIVE";
+
     @Mock
     private RdsConfigService rdsConfigService;
 
@@ -51,8 +55,8 @@ public class SharedServiceValidatorTest {
     public void testWithValidRequest() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP, LDAP_NAME);
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
-        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getRdsConfig("RANGER"));
-        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getRdsConfig("HIVE"));
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -63,21 +67,21 @@ public class SharedServiceValidatorTest {
     public void testWithMissingHive() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP, LDAP_NAME);
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
-        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getRdsConfig("RANGER"));
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(null);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
         assertTrue(validationResult.hasError());
         assertEquals(1L, validationResult.getErrors().size());
-        assertThat(validationResult.getErrors().get(0), containsString("HIVE"));
+        assertThat(validationResult.getErrors().get(0), containsString(HIVE_TYPE_STRING));
     }
 
     @Test
     public void testWithMissingRangerAndWrongCloudPlatform() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.AWS, LDAP_NAME);
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
-        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getRdsConfig("HIVE"));
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(null);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
@@ -85,15 +89,15 @@ public class SharedServiceValidatorTest {
         assertTrue(validationResult.hasError());
         assertEquals(2L, validationResult.getErrors().size());
         assertThat(validationResult.getErrors().get(0), containsString("cloud platform"));
-        assertThat(validationResult.getErrors().get(1), containsString("RANGER"));
+        assertThat(validationResult.getErrors().get(1), containsString(RANGER_TYPE_STRING));
     }
 
     @Test
     public void testWithMissingLdap() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP, null);
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
-        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getRdsConfig("RANGER"));
-        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getRdsConfig("HIVE"));
+        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
+        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -102,7 +106,7 @@ public class SharedServiceValidatorTest {
         assertThat(validationResult.getErrors().get(0), containsString("LDAP"));
     }
 
-    private RDSConfig getRdsConfig(String type) {
+    private RDSConfig getDatabase(String type) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(type);
         return rdsConfig;
