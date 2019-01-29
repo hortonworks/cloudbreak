@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.stackauthentication;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

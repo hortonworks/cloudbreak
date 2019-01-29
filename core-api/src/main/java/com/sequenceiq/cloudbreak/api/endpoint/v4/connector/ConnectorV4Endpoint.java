@@ -117,8 +117,8 @@ public interface ConnectorV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getAccessConfigsForWorkspace")
     PlatformAccessConfigsV4Response getAccessConfigs(@PathParam("workspaceId") Long workspaceId,
-            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region, 
-    @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("tag_specifications")

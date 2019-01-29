@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetai
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.stackauthentication.StackAuthenticationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;

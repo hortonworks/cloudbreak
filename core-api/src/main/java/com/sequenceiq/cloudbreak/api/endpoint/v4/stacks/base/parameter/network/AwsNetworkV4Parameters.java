@@ -55,7 +55,7 @@ public class AwsNetworkV4Parameters implements JsonEntity, Mappable {
     @Override
     public void parse(Map<String, Object> parameters) {
         vpcId = getParameterOrNull(parameters, "vpcId");
-        internetGatewayId = getParameterOrNull(parameters,"internetGatewayId");
-        subnetId = getParameterOrNull(parameters,"subnetId");
+        internetGatewayId = getParameterOrNull(parameters, "internetGatewayId");
+        subnetId = getParameterOrNull(parameters, "subnetId");
     }
 }

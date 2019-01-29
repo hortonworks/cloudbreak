@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.stackauthentication;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.stackauthentication.StackAuthenticationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 
