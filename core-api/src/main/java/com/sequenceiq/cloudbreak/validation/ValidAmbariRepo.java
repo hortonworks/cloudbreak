@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidAmbariRepo {
 
-    String message() default "Ambari version is not valid. Only 2.6 and later versions are supported";
+    String message() default "Ambari version is not valid. Only " + AmbariRepoValidator.MIN_AMBARI_VERSION + " and later versions are supported";
 
     Class<?>[] groups() default { };
 
