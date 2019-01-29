@@ -14,7 +14,8 @@ public class EnvironmentToLocationV4ResponseConverter extends AbstractConversion
         LocationV4Response locationV4Response = new LocationV4Response();
         locationV4Response.setLatitude(environment.getLatitude());
         locationV4Response.setLongitude(environment.getLongitude());
-        locationV4Response.setLocationName(environment.getLocation());
+        locationV4Response.setName(environment.getLocation());
+        locationV4Response.setDisplayName(environment.getLocationDisplayName());
         return locationV4Response;
     }
 }

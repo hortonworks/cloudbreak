@@ -147,6 +147,13 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupResponse.setRecipes(converterUtil.convertAll(hostGroup.getRecipes(), RecipeV4Response.class));
                         instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
+
+                        instanceGroupResponse.getMetadata()
+                                .forEach(imd -> hostGroup.getHostMetadata().stream()
+                                        .filter(s -> s.getHostName().equals(imd.getDiscoveryFQDN()))
+                                        .findFirst()
+                                        .ifPresent(hmd -> imd.setState(hmd.getHostMetadataState().name()))
+                                );
                     });
         }
     }
