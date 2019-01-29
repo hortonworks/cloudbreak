@@ -30,7 +30,7 @@ public class AmbariStackValidatorTest {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.3");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -38,7 +38,7 @@ public class AmbariStackValidatorTest {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.4");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AmbariStackValidatorTest {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.3.2");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class AmbariStackValidatorTest {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.4.2");
-        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
