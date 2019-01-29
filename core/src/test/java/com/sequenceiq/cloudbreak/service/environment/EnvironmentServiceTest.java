@@ -670,7 +670,7 @@ public class EnvironmentServiceTest {
         DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
         assertEquals(editedDescription, result.getDescription());
-        assertEquals(newLocation, result.getLocation().getLocationName());
+        assertEquals(newLocation, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(newLocation));
         assertTrue(result.getRegions().getRegions().contains(newRegion1));
         assertTrue(result.getRegions().getRegions().contains(newRegion2));
@@ -709,7 +709,7 @@ public class EnvironmentServiceTest {
 
         DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
-        assertEquals(newLocation, result.getLocation().getLocationName());
+        assertEquals(newLocation, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region1));
         assertTrue(result.getRegions().getRegions().contains(region2));
         assertTrue(result.getRegions().getRegions().contains(region3));
@@ -747,7 +747,7 @@ public class EnvironmentServiceTest {
 
         DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
-        assertEquals(region2, result.getLocation().getLocationName());
+        assertEquals(region2, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region2));
         assertTrue(result.getRegions().getRegions().contains(region3));
     }
