@@ -16,19 +16,19 @@ public class AmbariHostsStatusCheckerTask extends ClusterBasedStatusCheckerTask<
 
     @Override
     public boolean checkStatus(AmbariHostsCheckerContext t) {
-        Map<String, String> healthyHostNames = t.getAmbariClient().getHostNamesByState("HEALTHY");
-        Map<String, String> unHealthyHostNames = t.getAmbariClient().getHostNamesByState("UNHEALTHY");
-        Map<String, String> alertHostNames = t.getAmbariClient().getHostNamesByState("ALERT");
-        Map<String, String> unknownHostNames = t.getAmbariClient().getHostNamesByState("UNKNOWN");
-        int totalNodes = healthyHostNames.size() + unHealthyHostNames.size() + alertHostNames.size() + unknownHostNames.size();
-        LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", totalNodes, t.getHostsInCluster().size(), t.getStack().getId());
+        Map<String, String> hostNamesWithStatus = t.getAmbariClient().getHostStatuses();
+        int totalNodes = hostNamesWithStatus.size();
+        LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}'] | Known hosts with status: [{}]",
+                totalNodes, t.getHostsInCluster().size(), t.getStack().getId(), hostNamesWithStatus);
         return totalNodes >= t.getHostsInCluster().size();
     }
 
     @Override
     public void handleTimeout(AmbariHostsCheckerContext t) {
-        throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to find all '%s' Ambari hosts. Stack: '%s'",
-                t.getHostsInCluster().size(), t.getStack().getId()));
+        Map<String, String> hostNamesWithStatus = t.getAmbariClient().getHostStatuses();
+        throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to find all '%s' Ambari hosts. Stack: '%s' "
+                        + "| Known hosts with status: [%s]",
+                t.getHostsInCluster().size(), t.getStack().getId(), hostNamesWithStatus));
     }
 
     @Override
