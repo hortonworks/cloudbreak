@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 
 public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClusterTestConfiguration.class);
@@ -58,11 +58,11 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
         }
     }
 
-    private StackV2Request getRequestFromName(Long workspaceId, String clusterName) {
-        StackV2Request result;
+    private StackV4Request getRequestFromName(Long workspaceId, String clusterName) {
+        StackV4Request result;
         try {
             result = CloudbreakClient.getTestContextCloudbreakClient().apply(getItContext()).getCloudbreakClient()
-                    .stackV3Endpoint().getRequestfromName(workspaceId, clusterName);
+                    .stackV4Endpoint().getRequestfromName(workspaceId, clusterName);
         } catch (ForbiddenException ex) {
             result = null;
         }

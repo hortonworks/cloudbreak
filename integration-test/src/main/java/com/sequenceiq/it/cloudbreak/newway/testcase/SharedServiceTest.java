@@ -20,14 +20,14 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.adls.AdlsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
@@ -124,7 +124,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String rangerRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        CloudStorageRequest cloudStorage = cloudStorage();
+        CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(HIVE, RdsConfigEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(RdsConfig.postV2())
@@ -146,7 +146,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String hiveRdsName = creator.getRandomNameForMock();
         String rangerRdsName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        CloudStorageRequest cloudStorage = cloudStorage();
+        CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(HIVE, RdsConfigEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(RdsConfig.postV2())
@@ -168,7 +168,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String hiveRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        CloudStorageRequest cloudStorage = cloudStorage();
+        CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(HIVE, RdsConfigEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(RdsConfig.postV2())
@@ -190,7 +190,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String rangerRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        CloudStorageRequest cloudStorage = cloudStorage();
+        CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(RANGER, RdsConfigEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(RdsConfig.postV2())
@@ -211,7 +211,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     public void testCreateDatalakeClusterWithoutRds(TestContext testContext) {
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
-        CloudStorageRequest cloudStorage = cloudStorage();
+        CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV2())
@@ -229,7 +229,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT)
     public void testCreateDatalakeClusterWithoutRdsAndLdap(TestContext testContext) {
         String blueprintName = creator.getRandomNameForMock();
-        CloudStorageRequest cloudStorage = cloudStorage();
+        CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV2())
@@ -242,9 +242,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private CloudStorageRequest cloudStorage() {
-        AdlsCloudStorageParameters adls = new AdlsCloudStorageParameters();
-        CloudStorageRequest csr = new CloudStorageRequest();
+    private CloudStorageV4Request cloudStorage() {
+        AdlsCloudStorageV4Parameters adls = new AdlsCloudStorageV4Parameters();
+        CloudStorageV4Request csr = new CloudStorageV4Request();
         csr.setLocations(Set.of(storageLocation()));
         adls.setCredential("value");
         adls.setAccountName("some");
@@ -254,8 +254,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return csr;
     }
 
-    private StorageLocationRequest storageLocation() {
-        StorageLocationRequest storageLocation = new StorageLocationRequest();
+    private StorageLocationV4Request storageLocation() {
+        StorageLocationV4Request storageLocation = new StorageLocationV4Request();
         storageLocation.setValue("TheValueOfGivePropertyForStorageLocation");
         storageLocation.setPropertyName("NameOfThisProperty");
         storageLocation.setPropertyFile("SomePropertyHere");
@@ -263,7 +263,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private ClusterEntity datalakeReadyCluster(TestContext testContext, String hiveRdsName, String rangerRdsName, String ldapName, String blueprintName,
-                    CloudStorageRequest cloudStorage) {
+            CloudStorageV4Request cloudStorage) {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName, rangerRdsName))
@@ -288,7 +288,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private static StackEntity checkBlueprintTaggedWithSharedService(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
-        Map<String, Object> blueprintTags = stack.getResponse().getCluster().getBlueprint().getTags();
+        Map<String, Object> blueprintTags = stack.getResponse().getCluster().getAmbari().getBlueprint().getTags();
         if (!blueprintTags.containsKey(SHARED_SERVICE_TAG) || blueprintTags.get(SHARED_SERVICE_TAG) == null
                 || !(blueprintTags.get(SHARED_SERVICE_TAG) instanceof Boolean)
                 || !((Boolean) blueprintTags.get(SHARED_SERVICE_TAG))) {
@@ -366,19 +366,19 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private static Set<String> rdsConfigNamesFromResponse(StackEntity entity) {
-        return entity.getResponse().getCluster().getRdsConfigs().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet());
+        return entity.getResponse().getCluster().getDatabases().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet());
     }
 
     private static Set<String> rdsConfigNamesFromRequest(StackEntity entity) {
-        return entity.getRequest().getCluster().getRdsConfigNames();
+        return entity.getRequest().getCluster().getDatabases();
     }
 
     private static String ldapNameFromRequest(StackEntity entity) {
-        return entity.getRequest().getCluster().getLdapConfigName();
+        return entity.getRequest().getCluster().getLdapName();
     }
 
     private static String ldapNameFromResponse(StackEntity entity) {
-        return entity.getResponse().getCluster().getLdapConfig().getName();
+        return entity.getResponse().getCluster().getLdap().getName();
     }
 
 }

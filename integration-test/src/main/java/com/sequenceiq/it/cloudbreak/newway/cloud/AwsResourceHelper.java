@@ -4,15 +4,15 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseTy
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
 import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix.S3;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.s3.S3CloudStorageParametersV4;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Storage;
 
-public class AwsResourceHelper extends ResourceHelper<S3CloudStorageParametersV4> {
+public class AwsResourceHelper extends ResourceHelper<S3CloudStorageV4Parameters> {
 
     private static final String RANGER_RDS_ENTITY_ID = "AWS_RANGER_DB_CONFIG";
 
@@ -54,7 +54,7 @@ public class AwsResourceHelper extends ResourceHelper<S3CloudStorageParametersV4
     }
 
     @Override
-    protected S3CloudStorageParametersV4 getCloudStorage() {
-        return new S3CloudStorageParametersV4();
+    protected S3CloudStorageV4Parameters getCloudStorage() {
+        return new S3CloudStorageV4Parameters();
     }
 }
