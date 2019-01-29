@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.ForbiddenException;
 
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.it.cloudbreak.WaitResult;
@@ -41,7 +43,7 @@ public class WaitUtil {
                     .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null) {
                 desiredStatuses.forEach((key, value) -> {
-                    Object o = statusByNameInWorkspace.getStatuses().get(key);
+                    Object o = statusByNameInWorkspace.getStatus().name();
                     if (o != null) {
                         ret.put(key, o.toString());
                     }
@@ -50,7 +52,7 @@ public class WaitUtil {
                 ret.forEach((key, value) -> {
                     builder.append(key).append(',').append(value).append(System.lineSeparator());
                 });
-                builder.append("statusReason: ").append(statusByNameInWorkspace.getStatuses().get("statusReason"));
+                builder.append("statusReason: ").append(statusByNameInWorkspace.getStatusReason());
             }
             throw new RuntimeException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
@@ -59,7 +61,7 @@ public class WaitUtil {
             StackStatusV4Response statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient()
                     .stackV4Endpoint().getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null) {
-                Object statusReason = statusByNameInWorkspace.getStatuses().get("statusReason");
+                Object statusReason = statusByNameInWorkspace.getStatusReason();
                 if (statusReason != null) {
                     ret.put("statusReason", statusReason.toString());
                 }
@@ -68,25 +70,23 @@ public class WaitUtil {
         return ret;
     }
 
-    private WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, String> desiredStatuses) {
+    private WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, String stackName, Status desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
-        Map<String, String> currentStatuses = new HashMap<>();
+        Status currentStatuses = null;
 
         int retryCount = 0;
-        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY) {
-            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
+        while (!checkStatuses(currentStatuses, desiredStatus) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY) {
+            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, stackName, currentStatuses);
 
             sleep();
             StackV4Endpoint stackV4Endpoint = cloudbreakClient.getCloudbreakClient().stackV4Endpoint();
             try {
-                Map<String, Object> statusResult = stackV4Endpoint.getStatusByName(cloudbreakClient.getWorkspaceId(), stackName).getStatuses();
-                for (String statusPath : desiredStatuses.keySet()) {
-                    String currStatus = "DELETE_COMPLETED";
-                    if (!CollectionUtils.isEmpty(statusResult)) {
-                        currStatus = (String) statusResult.get(statusPath);
-                    }
-                    currentStatuses.put(statusPath, currStatus);
+                var statusResult = Optional.ofNullable(stackV4Endpoint.getStatusByName(cloudbreakClient.getWorkspaceId(), stackName).getStatus());
+                Status currStatus = Status.DELETE_COMPLETED;
+                if (!statusResult.isPresent()) {
+                    currStatus = statusResult.get();
                 }
+                currentStatuses = currStatus;
             } catch (RuntimeException ignore) {
                 if (ignore instanceof ForbiddenException) {
                     desiredStatuses.entrySet().stream()

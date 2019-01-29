@@ -60,7 +60,8 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
         AutoscalingUtil.createPolicy(autoscaleClient, policyName, clusterId, alertId, hostGroup, scalingAdjustment);
         // THEN
         AutoscalingUtil.checkHistory(autoscaleClient, clusterId, currentTime);
-        AutoscalingUtil.checkScaling(itContext, getCloudbreakClient(), scalingAdjustment, stackName, expectedNodeCountStack, expectedNodeCountCluster);
+        AutoscalingUtil.checkScaling(itContext, getCloudbreakClient(), workspaceId, scalingAdjustment, stackName, expectedNodeCountStack,
+                expectedNodeCountCluster);
     }
 
     @AfterTest

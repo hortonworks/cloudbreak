@@ -25,6 +25,8 @@ public class CloudbreakV2Constants {
 
     public static final String STACK_NAME = "STACK_NAME";
 
+    public static final String WORKSPACE_ID = "WORKSPACE_ID";
+
     public static final String MOCK_SERVER = "MOCK_SERVER";
 
     private CloudbreakV2Constants() {
