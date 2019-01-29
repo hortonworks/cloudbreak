@@ -78,20 +78,14 @@ class CloudbreakSimulation extends Simulation {
     .feed(Feeders.userFeeder)
     .exec(getToken)
     //init
-    .exec(TemplateRequests.queryTemplates)
-    .exec(SecurityGroupRequests.querySecurityGroups)
     .exec(CredentialRequests.queryCredentials)
-    .exec(NetworkRequests.queryNetworks)
     .exec(Utils.addVariableToSession(_, "blueprintName", "multinode-hdfs-yarn-" + r.alphanumeric.take(10).mkString.toLowerCase))
     .exec(BlueprintRequests.createBlueprint)
     .exec(Utils.addVariableToSession(_, "credentialName", "mock-credential-" + r.alphanumeric.take(10).mkString.toLowerCase))
     .exec(CredentialRequests.createMock)
     .exec(Utils.addVariableToSession(_, "networkName", "mock-network-" + r.alphanumeric.take(10).mkString.toLowerCase))
-    .exec(NetworkRequests.createMock)
     .exec(Utils.addVariableToSession(_, "securitygroupName", "mock-securitygroup-" + r.alphanumeric.take(10).mkString.toLowerCase))
-    .exec(SecurityGroupRequests.createMock)
     .exec(Utils.addVariableToSession(_, "templateName", "mock-template-" + r.alphanumeric.take(10).mkString.toLowerCase))
-    .exec(TemplateRequests.createMock)
     .exec(Utils.printSession(_))
 
     //create cluster
@@ -111,10 +105,6 @@ class CloudbreakSimulation extends Simulation {
     }
     .exec(BlueprintRequests.deleteBlueprint)
     .exec(CredentialRequests.deleteMock)
-    .exec(NetworkRequests.deleteMock)
-    .exec(SecurityGroupRequests.deleteMock)
-    .exec(TemplateRequests.deleteMock)
-
 
   setUp(scn2.inject(rampUsers(numberOfUsers) over (rampupSeconds seconds)).protocols(httpConf))
 }
