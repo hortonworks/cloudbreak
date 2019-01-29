@@ -59,7 +59,7 @@ public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJson
     public void testInvalidPorts() {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Ports must be in range of 1-65535");
-        underTest.convert(createRequest("0","22","443","70000"));
+        underTest.convert(createRequest("0", "22", "443", "70000"));
     }
 
     @Test

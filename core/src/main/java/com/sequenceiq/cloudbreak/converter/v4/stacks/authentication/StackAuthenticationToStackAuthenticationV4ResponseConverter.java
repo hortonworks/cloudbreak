@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v4.stacks.stackauthentication;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.authentication;
 
 import org.springframework.stereotype.Component;
 

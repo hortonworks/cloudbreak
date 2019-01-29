@@ -45,7 +45,8 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
         when(conversionService.convert(parameters(CloudConstants.YARN).getMap(), YarnInstanceTemplateV4Parameters.class)).thenReturn(yarnParameters());
         when(conversionService.convert(parameters(CloudConstants.AZURE).getMap(), AzureInstanceTemplateV4Parameters.class)).thenReturn(azureParameters());
         when(conversionService.convert(parameters(CloudConstants.GCP).getMap(), GcpInstanceTemplateV4Parameters.class)).thenReturn(gcpParameters());
-        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackInstanceTemplateV4Parameters.class)).thenReturn(openStackParameters());
+        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackInstanceTemplateV4Parameters.class))
+                .thenReturn(openStackParameters());
     }
 
     @Test

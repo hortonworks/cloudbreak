@@ -33,8 +33,9 @@ public interface ClusterTemplateRepository extends WorkspaceResourceRepository<C
     @CheckPermissionsByReturnValue
     Set<ClusterTemplate> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
 
-    @Query("SELECT NEW ClusterTemplate(c.templateContent, c.name, c.status, c.workspace) " +
-            "FROM ClusterTemplate c WHERE c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
+    @Query("SELECT NEW ClusterTemplate(c.templateContent, c.name, c.status, c.workspace) "
+            + "FROM ClusterTemplate c WHERE c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Set<ClusterTemplate> findAllTemplateContentNameStatusByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
+
 }

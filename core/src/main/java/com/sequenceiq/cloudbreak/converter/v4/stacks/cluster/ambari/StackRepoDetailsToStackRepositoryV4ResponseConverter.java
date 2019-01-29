@@ -63,7 +63,6 @@ public class StackRepoDetailsToStackRepositoryV4ResponseConverter
         return stackRepositoryV4Response;
     }
 
-
     private void updateRepository(StackRepoDetails source, StackRepositoryV4Response response) {
         RepositoryV4Response ret = new RepositoryV4Response();
         Map<String, String> stack = source.getStack();
@@ -86,4 +85,5 @@ public class StackRepoDetailsToStackRepositoryV4ResponseConverter
         }
         response.setRepository(ret);
     }
+
 }

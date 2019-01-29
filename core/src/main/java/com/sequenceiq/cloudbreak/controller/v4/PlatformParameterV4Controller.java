@@ -51,15 +51,18 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
     private CloudParameterService cloudParameterService;
 
     @Override
-    public PlatformVmtypesV4Response getVmTypesByCredential(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformVmtypesV4Response getVmTypesByCredential(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         return converterUtil.convert(cloudVmTypes, PlatformVmtypesV4Response.class);
     }
 
     @Override
     public RegionV4Response getRegionsByCredential(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request);
         return converterUtil.convert(regions, RegionV4Response.class);
     }
@@ -71,50 +74,63 @@ public class PlatformParameterV4Controller implements ConnectorV4Endpoint {
     }
 
     @Override
-    public PlatformNetworksV4Response getCloudNetworks(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformNetworksV4Response getCloudNetworks(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
         return converterUtil.convert(networks, PlatformNetworksV4Response.class);
     }
 
     @Override
-    public PlatformIpPoolsV4Response getIpPoolsCredentialId(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformIpPoolsV4Response getIpPoolsCredentialId(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(request);
         return converterUtil.convert(ipPools, PlatformIpPoolsV4Response.class);
     }
 
     @Override
-    public PlatformGatewaysV4Response getGatewaysCredentialId(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformGatewaysV4Response getGatewaysCredentialId(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudGateWays gateWays = platformParameterService.getGatewaysCredentialId(request);
         return converterUtil.convert(gateWays, PlatformGatewaysV4Response.class);
     }
 
     @Override
-    public PlatformEncryptionKeysV4Response getEncryptionKeys(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformEncryptionKeysV4Response getEncryptionKeys(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(request);
         return converterUtil.convert(encryptionKeys, PlatformEncryptionKeysV4Response.class);
     }
 
     @Override
-    public PlatformSecurityGroupsV4Response getSecurityGroups(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformSecurityGroupsV4Response getSecurityGroups(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
         return converterUtil.convert(securityGroups, PlatformSecurityGroupsV4Response.class);
     }
 
     @Override
     public PlatformSshKeysV4Response getCloudSshKeys(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
         return converterUtil.convert(sshKeys, PlatformSshKeysV4Response.class);
     }
 
     @Override
-    public PlatformAccessConfigsV4Response getAccessConfigs(Long workspaceId, String credentialName, String region, String platformVariant, String availabilityZone) {
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant, availabilityZone);
+    public PlatformAccessConfigsV4Response getAccessConfigs(Long workspaceId, String credentialName, String region, String platformVariant,
+            String availabilityZone) {
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, platformVariant,
+                availabilityZone);
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(request);
         return converterUtil.convert(accessConfigs, PlatformAccessConfigsV4Response.class);
     }

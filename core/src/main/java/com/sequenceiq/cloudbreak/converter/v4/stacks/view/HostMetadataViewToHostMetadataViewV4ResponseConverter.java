@@ -7,7 +7,9 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.view.HostMetadataView;
 
 @Component
-public class HostMetadataViewToHostMetadataViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<HostMetadataView, HostMetadataViewV4Response> {
+public class HostMetadataViewToHostMetadataViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<HostMetadataView,
+        HostMetadataViewV4Response> {
+
     @Override
     public HostMetadataViewV4Response convert(HostMetadataView source) {
         HostMetadataViewV4Response hostMetadataViewResponse = new HostMetadataViewV4Response();
@@ -16,4 +18,5 @@ public class HostMetadataViewToHostMetadataViewV4ResponseConverter extends Abstr
         hostMetadataViewResponse.setState(source.getHostMetadataState().name());
         return hostMetadataViewResponse;
     }
+
 }

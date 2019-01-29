@@ -7,7 +7,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePassword
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class UserNamePasswordV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<UserNamePasswordV4Request, UpdateClusterV4Request> {
+public class UserNamePasswordV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<UserNamePasswordV4Request,
+        UpdateClusterV4Request> {
 
     @Override
     public UpdateClusterV4Request convert(UserNamePasswordV4Request source) {
@@ -15,4 +16,5 @@ public class UserNamePasswordV4RequestToUpdateClusterV4RequestConverter extends 
         updateStackJson.setUserNamePassword(source);
         return updateStackJson;
     }
+
 }
