@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidAmbariStack {
 
-    String message() default "HDP version is not valid. Only 2.6 and later versions are supported";
+    String message() default "HDP version is not valid. Only " + AmbariStackValidator.MIN_HDP_VERSION + " and later versions are supported";
 
     Class<?>[] groups() default { };
 
