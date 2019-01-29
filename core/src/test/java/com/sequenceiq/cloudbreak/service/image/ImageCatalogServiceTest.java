@@ -16,9 +16,13 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,15 +48,15 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -206,11 +210,25 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
+    public void testGetStatedImagesFilteredByOperatingSystems() throws CloudbreakImageCatalogException, IOException {
+        setupUserProfileService();
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
+        Set<String> operatingSystems = new HashSet<>(Arrays.asList("redhat7", "redhat6", "amazonlinux2"));
+        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems("aws", operatingSystems, cloudbreakUser, user);
+
+        Set<Image> allImage = Stream.of(images.getImages().getHdpImages(), images.getImages().getHdpImages(), images.getImages().getBaseImages())
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        boolean allMatch = allImage.stream().allMatch(image -> operatingSystems.contains(image.getOsType()));
+        assertTrue("All images should be based on supported OS", allMatch);
+    }
+
+    @Test
     public void testGetImagesWhenExactVersionExistsInCatalog() throws Exception {
         String cbVersion = "1.16.4";
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", cbVersion);
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), cbVersion));
 
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
@@ -221,7 +239,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenExactVersionExistsInCatalogAndMorePlatformRequested() throws Exception {
         String cbVersion = "1.12.0";
         ImageCatalog imageCatalog = getImageCatalog();
-        StatedImages images = underTest.getImages(imageCatalog, ImmutableSet.of("aws", "azure"), cbVersion);
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, ImmutableSet.of("aws", "azure"), cbVersion));
         boolean awsAndAzureWerePresentedInTheTest = false;
         assertEquals(2L, images.getImages().getHdpImages().size());
         for (Image image : images.getImages().getHdpImages()) {
@@ -247,7 +265,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, PROD_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0"));
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb".equals(img.getUuid()));
@@ -259,7 +277,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-dev.132");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-dev.132"));
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "b150efce-33ac-49c9-7206-7f148d162744".equals(img.getUuid()));
@@ -271,7 +289,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, RC_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13"));
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "bbc63453-086c-4bf7-4337-a04c37d51b68".equals(img.getUuid()));
@@ -283,7 +301,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13"));
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("bbc63453-086c-4bf7-4337-a04c37d51b68"));
@@ -294,7 +312,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-dev.132");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "1.16.4-dev.132"));
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
@@ -305,7 +323,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-rc.13");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "1.16.4-rc.13"));
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
@@ -316,7 +334,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.1.0-dev.4000");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.1.0-dev.4000"));
 
         boolean hdfImgMatch = images.getImages().getHdfImages().stream()
                 .anyMatch(ambariImage -> "9958938a-1261-48e2-aff9-dbcb2cebf6cd".equals(ambariImage.getUuid()));
@@ -331,7 +349,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarRcVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.0.0-rc.4");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.0.0-rc.4"));
 
         boolean allMatch = images.getImages().getHdpImages().stream()
                 .allMatch(img -> "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265".equals(img.getUuid())
@@ -343,7 +361,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenExactVersionExistsInCatalogForPlatform() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(imageCatalog, "AWS", "1.16.4");
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("AWS"), "1.16.4"));
 
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
@@ -357,7 +375,7 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("Platform(s) owncloud are not supported by the current catalog");
         thrown.expect(CloudbreakImageCatalogException.class);
 
-        underTest.getImages(imageCatalog, "owncloud", "1.16.4");
+        underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("owncloud"), "1.16.4"));
     }
 
     @Test
