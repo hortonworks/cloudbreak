@@ -8,11 +8,12 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
+@RunWith(MockitoJUnitRunner.class)
 public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
 
     @InjectMocks
@@ -34,11 +36,8 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
     @Mock
     private ConverterUtil converterUtil;
 
-    @Before
-    public void setUp() {
-        underTest = new InstanceGroupToInstanceGroupV4ResponseConverter();
-        MockitoAnnotations.initMocks(this);
-    }
+    @Mock
+    private ConversionService conversionService;
 
     @Test
     public void testConvert() {

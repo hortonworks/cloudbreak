@@ -32,11 +32,12 @@ import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GatewayV4RequestToGatewayConverter.class, ConversionConfig.class, ConverterUtil.class, GatewayConvertUtil.class,
         GatewayV4RequestValidator.class, GatewayTopologyV4RequestToGatewayTopologyConverter.class, GatewayTopologyV4RequestValidator.class,
-        ExposedServiceListValidator.class})
+        ExposedServiceListValidator.class, UserService.class})
 public class ClusterRequestToGatewayConverterTest {
 
     private static final String DEPRECATED_TOPOLOGY = "deprecated topology";

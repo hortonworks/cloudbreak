@@ -8,7 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,6 +30,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
+
+    @Rule
+    private final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private InstanceGroupV4RequestToInstanceGroupConverter underTest;
@@ -53,9 +58,11 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
 
     @Test(expected = AccessDeniedException.class)
     public void testConvertWhenAccessDenied() {
+        InstanceGroupV4Request request = getRequest("instance-group.json");
         // GIVEN
+        given(providerParameterCalculator.get(request)).willReturn(() -> new HashMap<>(Map.of("key", "value")));
         // WHEN
-        underTest.convert(getRequest("instance-group.json"));
+        underTest.convert(request);
     }
 
     @Override

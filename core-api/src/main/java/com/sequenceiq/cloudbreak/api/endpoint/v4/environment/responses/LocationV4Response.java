@@ -9,10 +9,10 @@ import io.swagger.annotations.ApiModelProperty;
 public class LocationV4Response {
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION)
-    private String locationName;
+    private String name;
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION_DISPLAY_NAME)
-    private String locationDisplayName;
+    private String displayName;
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LATITUDE)
     private Double latitude;
@@ -20,20 +20,20 @@ public class LocationV4Response {
     @ApiModelProperty(EnvironmentRequestModelDescription.LONGITUDE)
     private Double longitude;
 
-    public String getLocationName() {
-        return locationName;
+    public String getName() {
+        return name;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getLocationDisplayName() {
-        return locationDisplayName;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setLocationDisplayName(String locationDisplayName) {
-        this.locationDisplayName = locationDisplayName;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public Double getLatitude() {

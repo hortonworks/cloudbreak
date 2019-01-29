@@ -8,9 +8,10 @@ import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
@@ -24,7 +25,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
 
     @InjectMocks
@@ -42,11 +47,18 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Mock
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private RdsConfigService rdsConfigService;
+
     @Before
     public void setUp() {
-        underTest = new ClusterV4RequestToClusterConverter();
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
-        MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(100L);
     }
 
