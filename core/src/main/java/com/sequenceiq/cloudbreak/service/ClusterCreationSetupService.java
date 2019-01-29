@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryV
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +27,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -54,12 +52,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -206,30 +204,17 @@ public class ClusterCreationSetupService {
         AmbariRepo ambariRepo = ambariRepoComponent.getAttributes().get(AmbariRepo.class);
         StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
         Image image = imageComponent.getAttributes().get(Image.class);
-        StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
         String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
-        Map<String, StackDescriptor> stackDescriptorMap;
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {
             stackType = stackType.substring(0, stackType.indexOf("-"));
         }
-        switch (stackType) {
-            case "HDP":
-                stackDescriptorMap = stackMatrix.getHdp();
-                break;
-            case "HDF":
-                stackDescriptorMap = stackMatrix.getHdf();
-                break;
-            default:
-                LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
-                stackDescriptorMap = stackMatrix.getHdp();
-        }
-        StackDescriptor stackDescriptor = stackDescriptorMap.get(stackMajorVersion);
+        StackDescriptor stackDescriptor = stackMatrixService.getStackDescriptor(stackType, stackMajorVersion);
         if (stackDescriptor != null) {
             boolean hasDefaultStackRepoUrlForOsType = stackDescriptor.getRepo().getStack().containsKey(image.getOsType());
             boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptor.getAmbari().getRepo().containsKey(image.getOsType());
             boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptor.getMinAmbari().length()),
-                    () -> stackDescriptor.getMinAmbari()) >= 0;
+                    stackDescriptor::getMinAmbari) >= 0;
             if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
                 String message = String.format("The given repository information seems to be incompatible."
                                 + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),

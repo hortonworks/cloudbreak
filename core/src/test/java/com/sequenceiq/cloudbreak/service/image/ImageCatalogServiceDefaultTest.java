@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.junit.Assert;
@@ -127,7 +128,8 @@ public class ImageCatalogServiceDefaultTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", cbVersion);
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, os, cloudbreakUser, user);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, Collections.singleton(os),
+                cloudbreakUser, user);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }
