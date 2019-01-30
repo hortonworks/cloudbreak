@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
@@ -38,7 +39,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class StackRequestValidator implements Validator<StackV4Request> {
+public class StackV4RequestValidator implements Validator<StackV4Request> {
 
     @Inject
     private ClusterService clusterService;
@@ -89,17 +90,19 @@ public class StackRequestValidator implements Validator<StackV4Request> {
         checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, validationBuilder);
         SharedServiceV4Request sharedService = stackRequest.getCluster().getSharedService();
         if (sharedService != null) {
-            Stack stack = stackService.getByNameInWorkspace(sharedService.getSharedClusterName(), restRequestThreadLocalService.getRequestedWorkspaceId());
-            if (stack == null) {
-                validationBuilder.error("Unable to attach to datalake because it doesn't exists.");
-            } else if (AVAILABLE.equals(stack.getStatus())) {
-                Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId()));
-                if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
-                    validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
-                            + "Please check Ambari before trying to attach cluster to datalake.");
+            try {
+                Stack stack = stackService.getByNameInWorkspace(sharedService.getSharedClusterName(), restRequestThreadLocalService.getRequestedWorkspaceId());
+                if (AVAILABLE.equals(stack.getStatus())) {
+                    Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId()));
+                    if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
+                        validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
+                                + "Please check Ambari before trying to attach cluster to datalake.");
+                    }
+                } else {
+                    validationBuilder.error("Unable to attach to datalake because it's infrastructure is not ready.");
                 }
-            } else if (!AVAILABLE.equals(stack.getStatus())) {
-                validationBuilder.error("Unable to attach to datalake because it's infrastructure is not ready.");
+            } catch (NotFoundException e) {
+                validationBuilder.error("Unable to attach to datalake because it doesn't exists.");
             }
         }
     }

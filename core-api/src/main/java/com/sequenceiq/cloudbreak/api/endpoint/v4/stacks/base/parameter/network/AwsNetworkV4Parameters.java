@@ -53,9 +53,9 @@ public class AwsNetworkV4Parameters extends MappableBase implements JsonEntity {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map,"vpcId", vpcId);
-        putIfValueNotNull(map,"internetGatewayId", internetGatewayId);
-        putIfValueNotNull(map,"subnetId", subnetId);
+        putIfValueNotNull(map, "vpcId", vpcId);
+        putIfValueNotNull(map, "internetGatewayId", internetGatewayId);
+        putIfValueNotNull(map, "subnetId", subnetId);
         return map;
     }
 

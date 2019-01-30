@@ -74,7 +74,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @InjectMocks
-    private StackRequestValidator underTest;
+    private StackV4RequestValidator underTest;
 
     @Mock
     private Blueprint blueprint;

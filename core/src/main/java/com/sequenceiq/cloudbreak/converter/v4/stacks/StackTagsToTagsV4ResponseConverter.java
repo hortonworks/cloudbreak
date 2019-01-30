@@ -15,6 +15,7 @@ public class StackTagsToTagsV4ResponseConverter extends AbstractConversionServic
         response.setApplicationTags(source.getApplicationTags());
         response.setDefaultTags(source.getDefaultTags());
         response.setUserDefinedTags(source.getUserDefinedTags());
-        return null;
+        return response;
     }
+
 }

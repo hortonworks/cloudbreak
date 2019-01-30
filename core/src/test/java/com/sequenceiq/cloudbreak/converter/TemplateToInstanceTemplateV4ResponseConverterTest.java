@@ -51,7 +51,6 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
 
     @Test
     public void testAwsTemplateParametersWhenNotNull() throws JsonProcessingException {
-
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.AWS));
 
@@ -60,7 +59,7 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
         Assert.assertNotNull(convert.getAws());
         Assert.assertEquals(10.0D, convert.getAws().getSpotPrice().doubleValue(), 0);
         Assert.assertEquals("someKey", convert.getAws().getEncryption().getKey());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAws().getEncryption().getType());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAws().getEncryption().getType().name());
         Assert.assertNull(convert.getAzure());
         Assert.assertNull(convert.getGcp());
         Assert.assertNull(convert.getOpenstack());
@@ -68,7 +67,6 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
 
     @Test
     public void testAzureTemplateParametersWhenNotNull() throws JsonProcessingException {
-
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.AZURE));
 
@@ -80,21 +78,19 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
 
     @Test
     public void testGcpTemplateParametersWhenNotNull() throws JsonProcessingException {
-
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.GCP));
 
         InstanceTemplateV4Response convert = underTest.convert(template);
 
         Assert.assertNotNull(convert.getGcp());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getGcp().getEncryption().getType());
-        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcp().getEncryption().getKeyEncryptionMethod());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getGcp().getEncryption().getType().name());
+        Assert.assertEquals(KeyEncryptionMethod.RAW.name(), convert.getGcp().getEncryption().getKeyEncryptionMethod().name());
         Assert.assertEquals("someKey", convert.getGcp().getEncryption().getKey());
     }
 
     @Test
     public void testOpenStackTemplateParametersWhenNotNull() throws JsonProcessingException {
-
         Template template = new Template();
         template.setAttributes(parameters(CloudConstants.OPENSTACK));
 
@@ -105,7 +101,6 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
 
     @Test
     public void testTemplateParametersWhenNull() throws JsonProcessingException {
-
         Template template = new Template();
         template.setAttributes(new Json(Collections.singletonMap("key", "value")));
 
@@ -153,7 +148,8 @@ public class TemplateToInstanceTemplateV4ResponseConverterTest {
         return templateParameters;
     }
 
-    private YarnInstanceTemplateV4Parameters yarnParameters() throws JsonProcessingException {
+    private YarnInstanceTemplateV4Parameters yarnParameters() {
         return new YarnInstanceTemplateV4Parameters();
     }
+
 }

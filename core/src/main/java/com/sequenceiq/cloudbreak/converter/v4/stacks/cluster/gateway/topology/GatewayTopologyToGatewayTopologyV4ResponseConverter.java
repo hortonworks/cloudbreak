@@ -24,7 +24,7 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverter extends Abstrac
             response.setExposedServices(exposedServices.getServices());
         }
         response.setTopologyName(source.getTopologyName());
-        return null;
+        return response;
     }
 
     private ExposedServices getExposedServices(GatewayTopology source) {
@@ -35,4 +35,5 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverter extends Abstrac
         }
         return null;
     }
+
 }

@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackV4RequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -67,7 +67,7 @@ public class StackDecoratorTest {
     private AuthenticatedUserService authenticatedUserService;
 
     @Mock
-    private StackRequestValidator stackValidator;
+    private StackV4RequestValidator stackValidator;
 
     @Mock
     private StackParameterService stackParameterService;
@@ -174,7 +174,8 @@ public class StackDecoratorTest {
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndAllSharedServiceRequirementMeetsThenEverythingShouldGoFine() {
         ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
-        Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive", "ranger");
+        // FIXME probably it is rather Set<String> for clusterRequest.databases
+//        Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive", "ranger");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(platformParametersMap.get(any(Platform.class))).thenReturn(pps);
@@ -242,7 +243,8 @@ public class StackDecoratorTest {
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndThereIsAnLdapAndHiveRdsConfiguredButRangerRdsDoesNotThenExceptionWouldCome() {
         ClusterV4Request clusterRequest = mock(ClusterV4Request.class);
-        Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive");
+        // FIXME probably it is rather Set<String> for clusterRequest.databases
+//        Set<DatabaseV4Request> rdsConfigRequests = createRdsConfigRequests("hive");
         when(subject.getCredential()).thenReturn(mock(Credential.class));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(platformParametersMap.get(any(Platform.class))).thenReturn(pps);

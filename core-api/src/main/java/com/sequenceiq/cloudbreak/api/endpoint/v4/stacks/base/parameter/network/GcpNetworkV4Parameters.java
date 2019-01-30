@@ -75,11 +75,11 @@ public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map,"networkId", networkId);
-        putIfValueNotNull(map,"subnetId", subnetId);
-        putIfValueNotNull(map,"sharedProjectId", sharedProjectId);
-        putIfValueNotNull(map,"noFirewallRules", noFirewallRules);
-        putIfValueNotNull(map,"noPublicIp", noPublicIp);
+        putIfValueNotNull(map, "networkId", networkId);
+        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, "sharedProjectId", sharedProjectId);
+        putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
+        putIfValueNotNull(map, "noPublicIp", noPublicIp);
         return map;
     }
 

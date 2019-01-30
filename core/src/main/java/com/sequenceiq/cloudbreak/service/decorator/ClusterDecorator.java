@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -129,18 +128,6 @@ public class ClusterDecorator {
                 }
             });
         }
-    }
-
-    private void prepareLdap(Cluster cluster, @NotNull Long ldapConfigId) {
-        LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
-        cluster.setLdapConfig(ldapConfig);
-    }
-
-    private void prepareLdap(Cluster cluster, Workspace workspace, @NotNull LdapV4Request ldapV4Request, User user) {
-        LdapConfig ldapConfig = conversionService.convert(ldapV4Request, LdapConfig.class);
-        ldapConfigValidator.validateLdapConnection(ldapConfig);
-        ldapConfig = ldapConfigService.create(ldapConfig, workspace, user);
-        cluster.setLdapConfig(ldapConfig);
     }
 
     private void prepareLdap(Cluster cluster, Workspace workspace, @NotNull String ldapName) {

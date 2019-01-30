@@ -31,9 +31,9 @@ public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBas
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         if (availabilitySet != null) {
-            putIfValueNotNull(map,"faultDomainCount", availabilitySet.getFaultDomainCount());
-            putIfValueNotNull(map,"name", availabilitySet.getName());
-            putIfValueNotNull(map,"updateDomainCount", availabilitySet.getUpdateDomainCount());
+            putIfValueNotNull(map, "faultDomainCount", availabilitySet.getFaultDomainCount());
+            putIfValueNotNull(map, "name", availabilitySet.getName());
+            putIfValueNotNull(map, "updateDomainCount", availabilitySet.getUpdateDomainCount());
         }
         return map;
     }

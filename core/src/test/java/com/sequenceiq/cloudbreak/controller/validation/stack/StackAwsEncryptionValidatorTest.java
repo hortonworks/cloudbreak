@@ -96,7 +96,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private PlatformParameterService platformParameterService;
 
     @InjectMocks
-    private StackRequestValidator underTest;
+    private StackV4RequestValidator underTest;
 
     public StackAwsEncryptionValidatorTest() {
         super(LoggerFactory.getLogger(StackAwsEncryptionValidatorTest.class));

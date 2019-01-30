@@ -75,11 +75,11 @@ public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEn
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map,"networkId", networkId);
-        putIfValueNotNull(map,"routerId", routerId);
-        putIfValueNotNull(map,"subnetId", subnetId);
-        putIfValueNotNull(map,"publicNetId", publicNetId);
-        putIfValueNotNull(map,"networkingOption", networkingOption);
+        putIfValueNotNull(map, "networkId", networkId);
+        putIfValueNotNull(map, "routerId", routerId);
+        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, "publicNetId", publicNetId);
+        putIfValueNotNull(map, "networkingOption", networkingOption);
         return map;
     }
 
