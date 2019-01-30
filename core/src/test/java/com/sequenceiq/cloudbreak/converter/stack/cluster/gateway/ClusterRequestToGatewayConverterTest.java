@@ -9,12 +9,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -51,11 +49,6 @@ public class ClusterRequestToGatewayConverterTest {
 
     @Inject
     private GatewayV4RequestToGatewayConverter underTest;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testConvertSsoType() {
