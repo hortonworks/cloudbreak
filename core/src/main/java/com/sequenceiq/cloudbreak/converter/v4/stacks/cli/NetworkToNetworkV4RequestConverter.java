@@ -22,7 +22,7 @@ public class NetworkToNetworkV4RequestConverter extends AbstractConversionServic
     public NetworkV4Request convert(Network source) {
         NetworkV4Request networkRequest = new NetworkV4Request();
         if (source.getAttributes() != null) {
-            providerParameterCalculator.to(cleanMap(source.getAttributes().getMap()), networkRequest);
+            providerParameterCalculator.parse(cleanMap(source.getAttributes().getMap()), networkRequest);
         }
         networkRequest.setSubnetCIDR(source.getSubnetCIDR());
         return networkRequest;

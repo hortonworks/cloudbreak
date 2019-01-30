@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 @Component
 public class TemplateToInstanceTemplateV4RequestConverter extends AbstractConversionServiceAwareConverter<Template, InstanceTemplateV4Request> {
 
+    @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
     @Override
@@ -26,7 +29,7 @@ public class TemplateToInstanceTemplateV4RequestConverter extends AbstractConver
         Map<String, Object> parameters = new HashMap<>();
         ofNullable(source.getAttributes()).ifPresent(attr -> parameters.putAll(attr.getMap()));
         ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr).getMap()));
-        providerParameterCalculator.to(parameters, templateRequest);
+        providerParameterCalculator.parse(parameters, templateRequest);
         templateRequest.setInstanceType(source.getInstanceType());
         templateRequest.setAttachedVolumes(Set.of(getAttachedVolume(source)));
         templateRequest.setRootVolume(getRootVolume(source));

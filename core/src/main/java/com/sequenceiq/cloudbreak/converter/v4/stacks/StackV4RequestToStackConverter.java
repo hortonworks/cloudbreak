@@ -24,6 +24,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -79,6 +80,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private StackService stackService;
 
+    @Inject
+    private ProviderParameterCalculator providerParameterCalculator;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -96,6 +100,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             convertAsStackTemplate(source, stack, workspace);
         }
 
+        Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
+        if (asMap != null) {
+            Map<String, String> parameter = new HashMap<>();
+            asMap.forEach((key, value) -> parameter.put(key, value.toString()));
+            stack.setParameters(parameter);
+        }
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
         stack.setDatalakeId(getSharedClusterNameOrDatalakeName(source, workspace));

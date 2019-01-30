@@ -62,7 +62,8 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     }
 
-    public ClusterTemplate(String templateContent, String name, ResourceStatus status, Workspace workspace) {
+    public ClusterTemplate(Long id, String templateContent, String name, ResourceStatus status, Workspace workspace) {
+        this.id = id;
         this.templateContent = templateContent;
         this.name = name;
         this.status = status;

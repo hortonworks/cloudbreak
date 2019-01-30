@@ -34,7 +34,7 @@ public class TemplateToInstanceTemplateV4ResponseConverter extends AbstractConve
         if (attributes != null) {
             Map<String, Object> parameters = attributes.getMap();
             ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr).getMap()));
-            providerParameterCalculator.to(parameters, response);
+            providerParameterCalculator.parse(parameters, response);
         }
         response.setCloudPlatform(CloudPlatform.valueOf(source.cloudPlatform()));
         return response;

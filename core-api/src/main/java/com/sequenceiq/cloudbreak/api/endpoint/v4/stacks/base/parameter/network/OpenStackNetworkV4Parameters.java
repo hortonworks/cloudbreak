@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class OpenStackNetworkV4Parameters implements JsonEntity, Mappable {
+public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private String networkId;
@@ -67,13 +68,20 @@ public class OpenStackNetworkV4Parameters implements JsonEntity, Mappable {
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("networkId", networkId);
-        map.put("routerId", routerId);
-        map.put("subnetId", subnetId);
-        map.put("publicNetId", publicNetId);
-        map.put("networkingOption", networkingOption);
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map,"networkId", networkId);
+        putIfValueNotNull(map,"routerId", routerId);
+        putIfValueNotNull(map,"subnetId", subnetId);
+        putIfValueNotNull(map,"publicNetId", publicNetId);
+        putIfValueNotNull(map,"networkingOption", networkingOption);
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.OPENSTACK;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -51,14 +52,25 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
     }
 
     @Override
-    public Map<String, Object> asMap() {
-        setPlatformType(CloudPlatform.AZURE);
-        return super.asMap();
+    public void parse(Map<String, Object> parameters) {
+        privateId = getParameterOrNull(parameters, "privateId");
+        encrypted = getBoolean(parameters, "encrypted");
+        managedDisk = getBoolean(parameters, "managedDisk");
     }
 
     @Override
-    public void parse(Map<String, Object> parameters) {
-        privateId = getParameterOrNull(parameters, "privateId");
-        setPlatformType(getPlatformType(parameters));
+    public Map<String, Object> asMap() {
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map, "privateId", privateId);
+        putIfValueNotNull(map, "encrypted", encrypted);
+        putIfValueNotNull(map, "managedDisk", managedDisk);
+        return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 }

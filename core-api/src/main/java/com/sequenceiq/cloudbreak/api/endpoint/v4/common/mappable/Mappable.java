@@ -23,7 +23,15 @@ public interface Mappable {
         return false;
     }
 
+    default Map<String, Object> defaultMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("cloudPlatform", getCloudPlatform().name());
+        return map;
+    }
+
     Map<String, Object> asMap();
+
+    CloudPlatform getCloudPlatform();
 
     default Map<String, Object> asSecretMap() {
         return new HashMap<>();
@@ -38,5 +46,11 @@ public interface Mappable {
             return null;
         }
         return value.toString();
+    }
+
+    default void putIfValueNotNull(Map<String, Object> parameters, String key, Object value) {
+        if (value != null) {
+            parameters.put(key, value.toString());
+        }
     }
 }

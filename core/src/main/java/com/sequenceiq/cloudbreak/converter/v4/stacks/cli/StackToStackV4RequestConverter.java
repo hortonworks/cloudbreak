@@ -61,7 +61,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         stackV2Request.setEnvironment(getEnvironment(source));
         stackV2Request.setCustomDomain(getCustomDomainSettings(source));
         stackV2Request.setFlexId(source.getFlexSubscription() == null ? null : source.getFlexSubscription().getId());
-        providerParameterCalculator.to(new HashMap<>(source.getParameters()), stackV2Request);
+        providerParameterCalculator.parse(new HashMap<>(source.getParameters()), stackV2Request);
         stackV2Request.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Request.class));
         stackV2Request.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Request.class));
         stackV2Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Request.class));

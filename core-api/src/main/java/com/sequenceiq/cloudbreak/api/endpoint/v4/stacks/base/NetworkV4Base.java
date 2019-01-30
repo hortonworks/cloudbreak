@@ -38,7 +38,10 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     private YarnNetworkV4Parameters yarn;
 
     @Override
-    public MockNetworkV4Parameters getMock() {
+    public MockNetworkV4Parameters createMock() {
+        if (mock == null) {
+            mock = new MockNetworkV4Parameters();
+        }
         return mock;
     }
 
@@ -54,7 +57,10 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
         this.subnetCIDR = subnetCIDR;
     }
 
-    public AwsNetworkV4Parameters getAws() {
+    public AwsNetworkV4Parameters createAws() {
+        if (aws == null) {
+            aws = new AwsNetworkV4Parameters();
+        }
         return aws;
     }
 
@@ -62,7 +68,10 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
         this.aws = aws;
     }
 
-    public GcpNetworkV4Parameters getGcp() {
+    public GcpNetworkV4Parameters createGcp() {
+        if (gcp == null) {
+            gcp = new GcpNetworkV4Parameters();
+        }
         return gcp;
     }
 
@@ -70,7 +79,10 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
         this.gcp = gcp;
     }
 
-    public AzureNetworkV4Parameters getAzure() {
+    public AzureNetworkV4Parameters createAzure() {
+        if (azure == null) {
+            azure = new AzureNetworkV4Parameters();
+        }
         return azure;
     }
 
@@ -78,7 +90,10 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
         this.azure = azure;
     }
 
-    public OpenStackNetworkV4Parameters getOpenstack() {
+    public OpenStackNetworkV4Parameters createOpenstack() {
+        if (openstack == null) {
+            openstack = new OpenStackNetworkV4Parameters();
+        }
         return openstack;
     }
 
@@ -87,11 +102,38 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     }
 
     @Override
-    public YarnNetworkV4Parameters getYarn() {
+    public YarnNetworkV4Parameters createYarn() {
+        if (yarn == null) {
+            yarn = new YarnNetworkV4Parameters();
+        }
         return yarn;
     }
 
     public void setYarn(YarnNetworkV4Parameters yarn) {
         this.yarn = yarn;
+    }
+
+    public AwsNetworkV4Parameters getAws() {
+        return aws;
+    }
+
+    public GcpNetworkV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public AzureNetworkV4Parameters getAzure() {
+        return azure;
+    }
+
+    public OpenStackNetworkV4Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public MockNetworkV4Parameters getMock() {
+        return mock;
+    }
+
+    public YarnNetworkV4Parameters getYarn() {
+        return yarn;
     }
 }

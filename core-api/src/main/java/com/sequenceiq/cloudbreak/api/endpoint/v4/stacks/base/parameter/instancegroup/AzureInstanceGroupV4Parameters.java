@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instance
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4ParametersBase;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -22,10 +24,19 @@ public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBas
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        map.put("faultDomainCount", availabilitySet.getFaultDomainCount());
-        map.put("name", availabilitySet.getName());
-        map.put("updateDomainCount", availabilitySet.getUpdateDomainCount());
+        if (availabilitySet != null) {
+            putIfValueNotNull(map,"faultDomainCount", availabilitySet.getFaultDomainCount());
+            putIfValueNotNull(map,"name", availabilitySet.getName());
+            putIfValueNotNull(map,"updateDomainCount", availabilitySet.getUpdateDomainCount());
+        }
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 
     @Override
@@ -35,6 +46,10 @@ public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBas
         availabiltySet.setFaultDomainCount(getInt(parameters, "faultDomainCount"));
         availabiltySet.setName(getParameterOrNull(parameters, "name"));
         availabiltySet.setUpdateDomainCount(getInt(parameters, "updateDomainCount"));
-        availabilitySet = availabiltySet;
+        if (availabiltySet.getFaultDomainCount() != null
+                || availabiltySet.getName() != null
+                || availabiltySet.getUpdateDomainCount() != null) {
+            availabilitySet = availabiltySet;
+        }
     }
 }

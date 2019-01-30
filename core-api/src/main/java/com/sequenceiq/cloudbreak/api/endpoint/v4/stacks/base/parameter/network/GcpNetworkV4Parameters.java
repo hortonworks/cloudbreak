@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class GcpNetworkV4Parameters implements JsonEntity, Mappable {
+public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private String networkId;
@@ -67,13 +68,20 @@ public class GcpNetworkV4Parameters implements JsonEntity, Mappable {
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("networkId", networkId);
-        map.put("subnetId", subnetId);
-        map.put("sharedProjectId", sharedProjectId);
-        map.put("noFirewallRules", noFirewallRules);
-        map.put("noPublicIp", noPublicIp);
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map,"networkId", networkId);
+        putIfValueNotNull(map,"subnetId", subnetId);
+        putIfValueNotNull(map,"sharedProjectId", sharedProjectId);
+        putIfValueNotNull(map,"noFirewallRules", noFirewallRules);
+        putIfValueNotNull(map,"noPublicIp", noPublicIp);
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.GCP;
     }
 
     @Override

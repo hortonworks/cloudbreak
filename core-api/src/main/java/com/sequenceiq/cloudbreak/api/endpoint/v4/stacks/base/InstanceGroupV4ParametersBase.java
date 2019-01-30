@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public abstract class InstanceGroupV4ParametersBase implements JsonEntity, Mappable {
+public abstract class InstanceGroupV4ParametersBase extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private String discoveryName;
@@ -40,7 +39,7 @@ public abstract class InstanceGroupV4ParametersBase implements JsonEntity, Mappa
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = super.asMap();
         map.put("discoveryName", discoveryName);
         map.put("instanceName", instanceName);
         return map;

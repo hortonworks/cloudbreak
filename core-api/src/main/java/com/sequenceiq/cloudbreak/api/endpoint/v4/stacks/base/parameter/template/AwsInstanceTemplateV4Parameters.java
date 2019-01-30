@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -42,14 +43,20 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
 
     @Override
     public Map<String, Object> asMap() {
-        setPlatformType(CloudPlatform.AWS);
         Map<String, Object> map = super.asMap();
-        map.put("spotPrice", spotPrice);
+        putIfValueNotNull(map, "spotPrice", spotPrice);
         if (encryption != null) {
-            map.put("type", encryption.getType());
-            map.put("encrypted", true);
+            putIfValueNotNull(map, "type", encryption.getType());
+            putIfValueNotNull(map, "encrypted", true);
         }
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
     }
 
     @Override
@@ -73,6 +80,5 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         if (type != null) {
             encription.setType(EncryptionType.valueOf(type));
         }
-        setPlatformType(getPlatformType(parameters));
     }
 }

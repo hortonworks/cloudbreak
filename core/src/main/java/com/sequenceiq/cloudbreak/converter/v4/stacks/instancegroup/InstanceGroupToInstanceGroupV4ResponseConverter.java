@@ -36,7 +36,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
         }
         Json attributes = source.getAttributes();
         if (attributes != null) {
-            providerParameterCalculator.to(attributes.getMap(), instanceGroupResponse);
+            providerParameterCalculator.parse(attributes.getMap(), instanceGroupResponse);
         }
         return instanceGroupResponse;
     }

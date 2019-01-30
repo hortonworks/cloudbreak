@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class YarnStackV4Parameters extends StackV4ParameterBase {
@@ -19,9 +22,16 @@ public class YarnStackV4Parameters extends StackV4ParameterBase {
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> ret = super.asMap();
-        ret.put("yarnQueue", yarnQueue);
-        return ret;
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map, "yarnQueue", yarnQueue);
+        return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.YARN;
     }
 
     @Override

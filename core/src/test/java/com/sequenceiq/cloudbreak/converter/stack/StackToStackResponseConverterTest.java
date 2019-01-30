@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -145,7 +146,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         // GIVEN
         getSource().setFailurePolicy(null);
         given(conversionService.convert(any(), any()))
-                .willReturn(new ImageV4Response())
+                .willReturn(new StackImageV4Response())
                 .willReturn(new StackAuthenticationV4Response())
                 .willReturn(new CredentialV4Response())
                 .willReturn(new ClusterV4Response())

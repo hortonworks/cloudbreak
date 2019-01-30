@@ -54,7 +54,10 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.name = name;
     }
 
-    public AwsStackV4Parameters getAws() {
+    public AwsStackV4Parameters createAws() {
+        if (aws == null) {
+            aws = new AwsStackV4Parameters();
+        }
         return aws;
     }
 
@@ -62,7 +65,10 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.aws = aws;
     }
 
-    public GcpStackV4Parameters getGcp() {
+    public GcpStackV4Parameters createGcp() {
+        if (gcp == null) {
+            gcp = new GcpStackV4Parameters();
+        }
         return gcp;
     }
 
@@ -70,7 +76,10 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.gcp = gcp;
     }
 
-    public AzureStackV4Parameters getAzure() {
+    public AzureStackV4Parameters createAzure() {
+        if (azure == null) {
+            azure = new AzureStackV4Parameters();
+        }
         return azure;
     }
 
@@ -78,7 +87,10 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.azure = azure;
     }
 
-    public OpenStackStackV4Parameters getOpenstack() {
+    public OpenStackStackV4Parameters createOpenstack() {
+        if (openstack == null) {
+            openstack = new OpenStackStackV4Parameters();
+        }
         return openstack;
     }
 
@@ -87,7 +99,10 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     }
 
     @Override
-    public YarnStackV4Parameters getYarn() {
+    public YarnStackV4Parameters createYarn() {
+        if (yarn == null) {
+            yarn = new YarnStackV4Parameters();
+        }
         return yarn;
     }
 
@@ -96,6 +111,33 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     }
 
     @Override
+    public MockStackV4Parameters createMock() {
+        if (mock == null) {
+            mock = new MockStackV4Parameters();
+        }
+        return mock;
+    }
+
+    public AwsStackV4Parameters getAws() {
+        return aws;
+    }
+
+    public GcpStackV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public AzureStackV4Parameters getAzure() {
+        return azure;
+    }
+
+    public OpenStackStackV4Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public YarnStackV4Parameters getYarn() {
+        return yarn;
+    }
+
     public MockStackV4Parameters getMock() {
         return mock;
     }

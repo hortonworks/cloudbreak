@@ -53,7 +53,6 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
     private void setAttributes(InstanceGroupV4Request source, InstanceGroup instanceGroup) {
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {
-            parameters.put("cloudPlatform", source.getCloudPlatform().name());
             try {
                 instanceGroup.setAttributes(new Json(parameters));
             } catch (JsonProcessingException ignored) {

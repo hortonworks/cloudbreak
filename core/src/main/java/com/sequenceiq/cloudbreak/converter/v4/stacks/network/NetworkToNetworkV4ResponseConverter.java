@@ -23,7 +23,7 @@ public class NetworkToNetworkV4ResponseConverter extends AbstractConversionServi
     public NetworkV4Response convert(Network source) {
         NetworkV4Response networkRequest = new NetworkV4Response();
         if (source.getAttributes() != null) {
-            providerParameterCalculator.to(cleanMap(source.getAttributes().getMap()), networkRequest);
+            providerParameterCalculator.parse(cleanMap(source.getAttributes().getMap()), networkRequest);
         }
         networkRequest.setSubnetCIDR(source.getSubnetCIDR());
         return networkRequest;

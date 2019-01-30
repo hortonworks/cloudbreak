@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -42,11 +44,18 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> ret = new HashMap<>();
-        ret.put("resourceGroupName", resourceGroupName);
-        ret.put("encryptStorage", encryptStorage);
-        ret.put("yarnQueue", yarnQueue);
-        return ret;
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map,"resourceGroupName", resourceGroupName);
+        putIfValueNotNull(map,"encryptStorage", encryptStorage);
+        putIfValueNotNull(map,"yarnQueue", yarnQueue);
+        return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 
     @Override

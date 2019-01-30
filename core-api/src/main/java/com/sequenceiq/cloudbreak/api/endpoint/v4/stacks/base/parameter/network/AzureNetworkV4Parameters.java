@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class AzureNetworkV4Parameters implements JsonEntity, Mappable {
+public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity{
 
     @ApiModelProperty
     private Boolean noPublicIp;
@@ -67,13 +68,20 @@ public class AzureNetworkV4Parameters implements JsonEntity, Mappable {
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> ret = new HashMap<>();
-        ret.put("noPublicIp", noPublicIp);
-        ret.put("noFirewallRules", noFirewallRules);
-        ret.put("resourceGroupName", resourceGroupName);
-        ret.put("networkId", networkId);
-        ret.put("subnetId", subnetId);
-        return ret;
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map,"noPublicIp", noPublicIp);
+        putIfValueNotNull(map,"noFirewallRules", noFirewallRules);
+        putIfValueNotNull(map,"resourceGroupName", resourceGroupName);
+        putIfValueNotNull(map,"networkId", networkId);
+        putIfValueNotNull(map,"subnetId", subnetId);
+        return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 
     @Override

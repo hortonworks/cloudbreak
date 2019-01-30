@@ -78,7 +78,10 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
         this.type = type;
     }
 
-    public AzureInstanceGroupV4Parameters getAzure() {
+    public AzureInstanceGroupV4Parameters createAzure() {
+        if (azure == null) {
+            azure = new AzureInstanceGroupV4Parameters();
+        }
         return azure;
     }
 
@@ -86,7 +89,10 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
         this.azure = azure;
     }
 
-    public GcpInstanceGroupV4Parameters getGcp() {
+    public GcpInstanceGroupV4Parameters createGcp() {
+        if (gcp == null) {
+            gcp = new GcpInstanceGroupV4Parameters();
+        }
         return gcp;
     }
 
@@ -94,7 +100,10 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
         this.gcp = gcp;
     }
 
-    public AwsInstanceGroupV4Parameters getAws() {
+    public AwsInstanceGroupV4Parameters createAws() {
+        if (aws == null) {
+            aws = new AwsInstanceGroupV4Parameters();
+        }
         return aws;
     }
 
@@ -102,7 +111,10 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
         this.aws = aws;
     }
 
-    public OpenStackInstanceGroupV4Parameters getOpenstack() {
+    public OpenStackInstanceGroupV4Parameters createOpenstack() {
+        if (openstack == null) {
+            openstack = new OpenStackInstanceGroupV4Parameters();
+        }
         return openstack;
     }
 
@@ -111,7 +123,10 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     }
 
     @Override
-    public YarnInstanceGroupV4Parameters getYarn() {
+    public YarnInstanceGroupV4Parameters createYarn() {
+        if (yarn == null) {
+            yarn = new YarnInstanceGroupV4Parameters();
+        }
         return yarn;
     }
 
@@ -120,12 +135,39 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     }
 
     @Override
-    public MockInstanceGroupV4Parameters getMock() {
+    public MockInstanceGroupV4Parameters createMock() {
+        if (mock == null) {
+            mock = new MockInstanceGroupV4Parameters();
+        }
         return mock;
     }
 
     public void setMock(MockInstanceGroupV4Parameters mock) {
         this.mock = mock;
+    }
+
+    public AzureInstanceGroupV4Parameters getAzure() {
+        return azure;
+    }
+
+    public GcpInstanceGroupV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public AwsInstanceGroupV4Parameters getAws() {
+        return aws;
+    }
+
+    public OpenStackInstanceGroupV4Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public YarnInstanceGroupV4Parameters getYarn() {
+        return yarn;
+    }
+
+    public MockInstanceGroupV4Parameters getMock() {
+        return mock;
     }
 
     public RecoveryMode getRecoveryMode() {

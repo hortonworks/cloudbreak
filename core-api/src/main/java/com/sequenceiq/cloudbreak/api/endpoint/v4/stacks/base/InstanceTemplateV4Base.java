@@ -51,6 +51,13 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
+    public AwsInstanceTemplateV4Parameters createAws() {
+        if (aws == null) {
+            aws = new AwsInstanceTemplateV4Parameters();
+        }
+        return aws;
+    }
+
     public AwsInstanceTemplateV4Parameters getAws() {
         return aws;
     }
@@ -60,7 +67,10 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
-    public AzureInstanceTemplateV4Parameters getAzure() {
+    public AzureInstanceTemplateV4Parameters createAzure() {
+        if (azure == null) {
+            azure = new AzureInstanceTemplateV4Parameters();
+        }
         return azure;
     }
 
@@ -69,7 +79,10 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
-    public GcpInstanceTemplateV4Parameters getGcp() {
+    public GcpInstanceTemplateV4Parameters createGcp() {
+        if (gcp == null) {
+            gcp = new GcpInstanceTemplateV4Parameters();
+        }
         return gcp;
     }
 
@@ -78,7 +91,10 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
-    public OpenStackInstanceTemplateV4Parameters getOpenstack() {
+    public OpenStackInstanceTemplateV4Parameters createOpenstack() {
+        if (openstack == null) {
+            openstack = new OpenStackInstanceTemplateV4Parameters();
+        }
         return openstack;
     }
 
@@ -87,7 +103,10 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
-    public YarnInstanceTemplateV4Parameters getYarn() {
+    public YarnInstanceTemplateV4Parameters createYarn() {
+        if (yarn == null) {
+            yarn = new YarnInstanceTemplateV4Parameters();
+        }
         return yarn;
     }
 
@@ -96,11 +115,34 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
-    public MockInstanceTemplateV4Parameters getMock() {
+    public MockInstanceTemplateV4Parameters createMock() {
         return mock;
     }
 
     public void setMock(MockInstanceTemplateV4Parameters mock) {
+        if (mock == null) {
+            mock = new MockInstanceTemplateV4Parameters();
+        }
         this.mock = mock;
+    }
+
+    public AzureInstanceTemplateV4Parameters getAzure() {
+        return azure;
+    }
+
+    public GcpInstanceTemplateV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public OpenStackInstanceTemplateV4Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public YarnInstanceTemplateV4Parameters getYarn() {
+        return yarn;
+    }
+
+    public MockInstanceTemplateV4Parameters getMock() {
+        return mock;
     }
 }

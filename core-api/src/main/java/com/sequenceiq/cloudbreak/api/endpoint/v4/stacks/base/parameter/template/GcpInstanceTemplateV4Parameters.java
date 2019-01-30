@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -43,14 +44,20 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
 
     @Override
     public Map<String, Object> asMap() {
-        setPlatformType(CloudPlatform.GCP);
         Map<String, Object> map = super.asMap();
         if (encryption != null) {
-            map.put("keyEncryptionMethod", encryption.getKeyEncryptionMethod());
-            map.put("type", encryption.getType());
+            putIfValueNotNull(map, "keyEncryptionMethod", encryption.getKeyEncryptionMethod());
+            putIfValueNotNull(map, "type", encryption.getType());
         }
-        map.put("preemptible", preemptible);
+        putIfValueNotNull(map, "preemptible", preemptible);
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.GCP;
     }
 
     @Override
@@ -64,7 +71,6 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        setPlatformType(getPlatformType(parameters));
         GcpEncryptionV4Parameters encryption = new GcpEncryptionV4Parameters();
         encryption.setKey(getParameterOrNull(parameters, "key"));
         String keyEncryptionMethod = getParameterOrNull(parameters, "keyEncryptionMethod");

@@ -2,7 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instance
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4ParametersBase;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class GcpInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase {
 
@@ -19,8 +23,15 @@ public class GcpInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        map.put("opid", opId);
+        putIfValueNotNull(map,"opid", opId);
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.GCP;
     }
 
     @Override

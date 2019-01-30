@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class MockNetworkV4Parameters implements JsonEntity, Mappable {
+public class MockNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private String vpcId;
@@ -45,11 +46,18 @@ public class MockNetworkV4Parameters implements JsonEntity, Mappable {
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("vpcId", vpcId);
-        map.put("internetGatewayId", internetGatewayId);
-        map.put("subnetId", subnetId);
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map,"vpcId", vpcId);
+        putIfValueNotNull(map,"internetGatewayId", internetGatewayId);
+        putIfValueNotNull(map,"subnetId", subnetId);
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.MOCK;
     }
 
     @Override

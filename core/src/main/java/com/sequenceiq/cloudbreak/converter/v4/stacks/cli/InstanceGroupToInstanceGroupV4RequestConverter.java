@@ -22,7 +22,7 @@ public class InstanceGroupToInstanceGroupV4RequestConverter extends AbstractConv
     @Override
     public InstanceGroupV4Request convert(InstanceGroup source) {
         InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
-        providerParameterCalculator.to(source.getAttributes().getMap(), instanceGroupRequest);
+        providerParameterCalculator.parse(source.getAttributes().getMap(), instanceGroupRequest);
         instanceGroupRequest.setName(source.getGroupName());
         instanceGroupRequest.setNodeCount(source.getNodeCount());
         instanceGroupRequest.setType(source.getInstanceGroupType());

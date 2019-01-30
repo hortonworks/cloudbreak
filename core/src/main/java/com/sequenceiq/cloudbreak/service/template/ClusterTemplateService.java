@@ -156,7 +156,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     private void updateDefaultClusterTemplates(Workspace workspace) {
-        Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllTemplateContentNameStatusByNotDeletedInWorkspace(workspace.getId());
+        Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
             LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{}' workspace.", workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);

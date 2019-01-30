@@ -37,7 +37,6 @@ public class NetworkV4RequestToNetworkConverter extends AbstractConversionServic
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {
-            parameters.put("cloudPlatform", source.getCloudPlatform().name());
             try {
                 network.setAttributes(new Json(parameters));
             } catch (JsonProcessingException ignored) {

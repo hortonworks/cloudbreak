@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4ParameterBase;
 
 import io.swagger.annotations.ApiModel;
@@ -40,14 +42,20 @@ public class YarnInstanceTemplateV4Parameters extends InstanceTemplateV4Paramete
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        map.put("memory", memory);
-        map.put("cpus", cpus);
+        putIfValueNotNull(map, "memory", memory);
+        putIfValueNotNull(map, "cpus", cpus);
         return map;
     }
 
     @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.YARN;
+    }
+
+    @Override
     public void parse(Map<String, Object> parameters) {
-        setPlatformType(getPlatformType(parameters));
         cpus = getInt(parameters, "cpus");
         memory = getInt(parameters, "memory");
     }
