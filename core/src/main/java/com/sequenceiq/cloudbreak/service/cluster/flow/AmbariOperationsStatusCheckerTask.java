@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
@@ -43,13 +44,13 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {
             AmbariClient ambariClient = t.getAmbariClient();
-            BigDecimal installProgress = Optional.ofNullable(ambariClient.getRequestProgress(request.getValue())).orElse(PENDING);
+            BigDecimal installProgress = getInstallProgressFromAmbari(request, ambariClient);
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
             notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
             if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
                 for (int i = 0; i < MAX_RETRY; i++) {
-                    if (ambariClient.getRequestProgress(request.getValue()).compareTo(FAILED) != 0) {
+                    if (getInstallProgressFromAmbari(request, ambariClient).compareTo(FAILED) != 0) {
                         failed = false;
                         break;
                     }
@@ -63,6 +64,18 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
             allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
         }
         return allFinished;
+    }
+
+    private BigDecimal getInstallProgressFromAmbari(Entry<String, Integer> request, AmbariClient ambariClient) {
+        try {
+            return Optional.ofNullable(ambariClient.getRequestProgress(request.getValue())).orElse(PENDING);
+        } catch (AmbariConnectionException e) {
+            LOGGER.warn(e.getMessage());
+            return FAILED;
+        } catch (Exception e) {
+            LOGGER.error("Failed to retrieve Ambari request progress.", e);
+            return FAILED;
+        }
     }
 
     private Notification<CloudbreakEventsJson> getAmbariProgressNotification(Long progressValue, Stack stack, AmbariOperationType ambariOperationType) {
