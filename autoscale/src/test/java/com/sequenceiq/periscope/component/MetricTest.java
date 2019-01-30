@@ -404,7 +404,7 @@ public class MetricTest {
     }
 
     private StackV4Response getStackResponse(Status stackStatus, Status clusterStatus) {
-        var stackResponse = new StackV4Response();
+        StackV4Response stackResponse = new StackV4Response();
         stackResponse.setStatus(stackStatus);
         stackResponse.setCluster(new ClusterV4Response());
         stackResponse.getCluster().setStatus(clusterStatus);
