@@ -13,7 +13,9 @@ public class SecurityRuleToSecurityRuleResponseConverter extends AbstractConvers
     public SecurityRuleResponse convert(SecurityRule entity) {
         SecurityRuleResponse json = new SecurityRuleResponse(entity.getCidr());
         json.setId(entity.getId());
-        json.setPorts(StringUtils.join(entity.getPorts(), ","));
+        if (!SecurityRule.ICMP.equalsIgnoreCase(entity.getProtocol())) {
+            json.setPorts(StringUtils.join(entity.getPorts(), ","));
+        }
         json.setProtocol(entity.getProtocol());
         json.setModifiable(entity.isModifiable());
         return json;

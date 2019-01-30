@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -70,6 +73,9 @@ public class ImageService {
 
     @Inject
     private BlueprintUtils blueprintUtils;
+
+    @Inject
+    private StackMatrixService stackMatrixService;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProvider.getImage(stackId);
@@ -107,33 +113,36 @@ public class ImageService {
 
     //CHECKSTYLE:OFF
     public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName, Blueprint blueprint,
-            boolean useBaseImage, String os, CloudbreakUser cbUser, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImage statedImage;
+            boolean useBaseImage, String requestedOs, CloudbreakUser cloudbreakUser, User user) throws CloudbreakImageNotFoundException,
+            CloudbreakImageCatalogException {
+        String clusterType = ImageCatalogService.UNDEFINED;
+        String clusterVersion = ImageCatalogService.UNDEFINED;
+        if (blueprint != null) {
+            try {
+                JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
+                clusterType = blueprintUtils.getBlueprintStackName(root);
+                clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
+            } catch (IOException ex) {
+                LOGGER.warn("Can not initiate default hdp info: ", ex);
+            }
+        }
+        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterType, clusterVersion);
+        if (!StringUtils.isEmpty(requestedOs)) {
+            operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(requestedOs)).collect(Collectors.toSet());
+        }
         if (imageId != null) {
-            statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, catalogName);
+            return imageCatalogService.getImageByCatalogName(workspaceId, imageId, catalogName);
         } else {
             if (useBaseImage) {
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os, cbUser, user);
+                return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, cloudbreakUser, user);
             } else {
-                String clusterType = ImageCatalogService.UNDEFINED;
-                String clusterVersion = ImageCatalogService.UNDEFINED;
-                if (blueprint != null) {
-                    String blueprintText = blueprint.getBlueprintText();
-                    try {
-                        JsonNode root = JsonUtil.readTree(blueprintText);
-                        clusterType = blueprintUtils.getBlueprintStackName(root);
-                        clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
-                    } catch (IOException ex) {
-                        LOGGER.warn("Can not initiate default hdp info: ", ex);
-                    }
-                }
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
-                        + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os, cbUser, user);
+                    + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
+                return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems,
+                        cloudbreakUser, user);
             }
         }
-        return statedImage;
     }
     //CHECKSTYLE:ON
 

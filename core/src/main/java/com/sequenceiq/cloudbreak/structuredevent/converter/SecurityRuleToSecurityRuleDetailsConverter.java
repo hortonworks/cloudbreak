@@ -17,7 +17,9 @@ public class SecurityRuleToSecurityRuleDetailsConverter extends AbstractConversi
         SecurityRuleDetails securityRuleDetails = new SecurityRuleDetails();
         securityRuleDetails.setCidr(source.getCidr());
         securityRuleDetails.setProtocol(source.getProtocol());
-        securityRuleDetails.setPorts(Arrays.stream(source.getPorts()).collect(Collectors.joining(",")));
+        if (!SecurityRule.ICMP.equalsIgnoreCase(source.getProtocol())) {
+            securityRuleDetails.setPorts(Arrays.stream(source.getPorts()).collect(Collectors.joining(",")));
+        }
         return securityRuleDetails;
     }
 }

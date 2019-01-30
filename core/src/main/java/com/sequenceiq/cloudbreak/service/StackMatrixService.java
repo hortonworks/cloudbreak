@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
@@ -21,6 +24,8 @@ import com.sequenceiq.cloudbreak.converter.mapper.StackInfoMapper;
 
 @Service
 public class StackMatrixService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackMatrixService.class);
 
     @Inject
     private DefaultHDFEntries defaultHDFEntries;
@@ -59,6 +64,36 @@ public class StackMatrixService {
         stackMatrix.setHdf(hdfStackDescriptors);
         stackMatrix.setHdp(hdpStackDescriptors);
         return stackMatrix;
+    }
+
+    public Set<String> getSupportedOperatingSystems(String clusterType, String clusterVersion) {
+        StackDescriptor stackDescriptor = getStackDescriptor(clusterType, clusterVersion);
+        return stackDescriptor.getAmbari().getRepo().keySet();
+    }
+
+    public StackDescriptor getStackDescriptor(String clusterType, String clusterVersion) {
+        StackMatrix stackMatrix = getStackMatrix();
+        Map<String, StackDescriptor> stackDescriptorMap = getStackDescriptorMap(clusterType, stackMatrix, true);
+        return stackDescriptorMap.get(clusterVersion);
+    }
+
+    public Map<String, StackDescriptor> getStackDescriptorMap(String clusterType, StackMatrix stackMatrix, boolean fallbackToHDP) {
+        Map<String, StackDescriptor> stackDescriptorMap = null;
+        switch (clusterType) {
+            case "HDP":
+                stackDescriptorMap = stackMatrix.getHdp();
+                break;
+            case "HDF":
+                stackDescriptorMap = stackMatrix.getHdf();
+                break;
+            default:
+                LOGGER.debug("No stack descriptor map found for clusterType {}", clusterType);
+                if (fallbackToHDP) {
+                    LOGGER.debug("Fallback to HDP");
+                    stackDescriptorMap = stackMatrix.getHdp();
+                }
+        }
+        return stackDescriptorMap;
     }
 
     private StackDescriptor getStackDescriptor(StackInfo stackInfo) {

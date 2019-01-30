@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,7 +71,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     public ImagesResponse getImagesByProvider(String platform) throws Exception {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        Images images = imageCatalogService.getImagesOsFiltered(platform, null, user).getImages();
+        Images images = imageCatalogService.getStatedImagesFilteredByOperatingSystems(platform, Collections.emptySet(), cloudbreakUser, user).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 
