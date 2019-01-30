@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -36,9 +37,8 @@ public class TemplateToInstanceTemplateV4RequestConverter extends AbstractConver
         return templateRequest;
     }
 
-    private VolumeV4Request getRootVolume(Template source) {
-        VolumeV4Request ret = new VolumeV4Request();
-        ret.setCount(1);
+    private RootVolumeV4Request getRootVolume(Template source) {
+        RootVolumeV4Request ret = new RootVolumeV4Request();
         ret.setSize(source.getVolumeSize());
         return ret;
     }

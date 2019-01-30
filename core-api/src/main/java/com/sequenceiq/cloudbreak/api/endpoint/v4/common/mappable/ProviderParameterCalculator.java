@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
+import static java.lang.String.format;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,59 +17,39 @@ public class ProviderParameterCalculator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderParameterCalculator.class);
 
     public Mappable get(ProviderParametersBase source) {
-        Mappable mappable = getMappable(source, source.getCloudPlatform());
-        return mappable == null ? new Mappable() {
-            @Override
-            public Map<String, Object> asMap() {
-                return null;
-            }
+        return getMappable(source, source.getCloudPlatform());
 
-            @Override
-            public CloudPlatform getCloudPlatform() {
-                return null;
-            }
-        } : mappable;
     }
 
     private Mappable getMappable(ProviderParametersBase source, CloudPlatform cloudPlatform) {
-        Mappable mappable = null;
         switch (cloudPlatform) {
             case AWS:
-                mappable = source.createAws();
-                break;
+                return source.createAws();
             case GCP:
-                mappable = source.createGcp();
-                break;
+                return source.createGcp();
             case MOCK:
-                mappable = source.createMock();
-                break;
+                return source.createMock();
             case YARN:
-                mappable = source.createYarn();
-                break;
+                return source.createYarn();
             case AZURE:
-                mappable = source.createAzure();
-                break;
+                return source.createAzure();
             case OPENSTACK:
-                mappable = source.createOpenstack();
-                break;
+                return source.createOpenstack();
             case CUMULUS_YARN:
-                mappable = source.createYarn();
-                break;
+                return source.createYarn();
+            default:
+                throw new BadRequestException(format("No mappable for cloudplatform [%s] and source [%s]", source.getCloudPlatform(), source.getClass()));
         }
-        if (mappable != null) {
-            return mappable;
-        }
-        LOGGER.info("No mappable for cloudplatform [{}] and source [{}]", source.getCloudPlatform(), source.getClass());
-        return null;
     }
 
     public void parse(Map<String, Object> parameters, ProviderParametersBase base) {
         if (parameters != null) {
             if (parameters.get("cloudPlatform") != null) {
                 CloudPlatform cloudPlatform = CloudPlatform.valueOf(parameters.get("cloudPlatform").toString());
-                Mappable mappable = getMappable(base, cloudPlatform);
-                if (mappable != null) {
-                    mappable.parse(parameters);
+                Map<String, Object> map = cleanNullValue(parameters);
+                if (map.size() > 1) {
+                    Mappable mappable = getMappable(base, cloudPlatform);
+                    mappable.parse(map);
                 }
             } else {
                 LOGGER.info("Cannot determine cloudPlatform for {}", parameters);
