@@ -111,6 +111,7 @@ public class ConfigQueryEntry {
         configQueryEntry.relatedServices = relatedServices;
         configQueryEntry.propertyName = propertyName;
         configQueryEntry.requiredForAttachedCluster = requiredForAttachedCluster;
+        configQueryEntry.supportedStorages = new HashSet<>(supportedStorages);
         return configQueryEntry;
     }
 

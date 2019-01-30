@@ -15,10 +15,12 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSubnet {
 
-    String message() default "The subnet field should contains a valid RFC-1918 CIDR definition.";
+    String message() default "The field should contain a valid CIDR definition.";
 
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
+
+    SubnetType value();
 
 }

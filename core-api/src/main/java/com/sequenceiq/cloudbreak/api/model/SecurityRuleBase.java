@@ -4,6 +4,8 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityRuleModelDescription;
+import com.sequenceiq.cloudbreak.validation.SubnetType;
+import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -11,9 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class SecurityRuleBase implements JsonEntity {
 
     @ApiModelProperty(value = SecurityRuleModelDescription.SUBNET, required = true)
-    @Pattern(regexp =
-            "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            message = "The subnet field should contain a valid CIDR definition.")
+    @ValidSubnet(SubnetType.CUSTOM)
     private String subnet;
 
     @ApiModelProperty(value = SecurityRuleModelDescription.PORTS, required = true)
