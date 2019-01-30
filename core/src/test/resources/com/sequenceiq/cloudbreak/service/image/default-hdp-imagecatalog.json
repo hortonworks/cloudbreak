@@ -5,6 +5,7 @@
         "uuid": "latest-base",
         "date": "2016-09-20",
         "os": "centos7",
+        "os_type": "redhat7",
         "images": {
           "aws": {
             "ap-northeast-1": "ami-0fc3016e",
@@ -48,6 +49,7 @@
         "uuid": "second-latest-base",
         "date": "2016-09-19",
         "os": "centos7",
+        "os_type": "redhat7",
         "images": {
           "aws": {
             "ap-northeast-1": "ami-0fc3016e",
@@ -91,6 +93,7 @@
         "uuid": "third-latest-base-amazonlinux",
         "date": "2016-09-18",
         "os": "amazonlinux2",
+        "os_type": "amazonlinux2",
         "images": {
           "aws": {
             "ap-northeast-1": "ami-0fc3016e",
@@ -134,6 +137,7 @@
         "uuid": "forth-latest-base-amazonlinux",
         "date": "2016-09-17",
         "os": "amazonlinux2",
+        "os_type": "amazonlinux2",
         "images": {
           "aws": {
             "ap-northeast-1": "ami-0fc3016e",
@@ -208,6 +212,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
           "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"
@@ -248,6 +253,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
           "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"
@@ -305,6 +311,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.0.1",
           "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.0.1"
@@ -345,6 +352,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.0.1",
           "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.0.1"
@@ -383,6 +391,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.1.0-19/"
         },
@@ -420,6 +429,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.1.0-19/"
         },
@@ -457,6 +467,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.1.0-19/"
         },
@@ -494,6 +505,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.1.0-22/"
         },
@@ -531,6 +543,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
         },
@@ -568,6 +581,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
         },
@@ -624,6 +638,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/",
           "redhat7": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
@@ -662,6 +677,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
         },
@@ -699,6 +715,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
         },
@@ -736,6 +753,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
         },
@@ -773,6 +791,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1/"
         },
@@ -810,6 +829,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.0-608"
         },
@@ -847,6 +867,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-608"
         },
@@ -884,6 +905,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-771"
         },
@@ -921,6 +943,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-1094"
         },
@@ -958,6 +981,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-1096"
         },
@@ -995,6 +1019,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.2-65"
         },
@@ -1032,6 +1057,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.2-65"
         },
@@ -1069,6 +1095,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.3"
         },
@@ -1106,6 +1133,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.3-7"
         },
@@ -1143,6 +1171,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.1.2-1"
         },
@@ -1180,6 +1209,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.1.9-4"
         },
@@ -1217,6 +1247,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.2.0"
         },
@@ -1254,6 +1285,7 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
         },
@@ -1291,6 +1323,7 @@
           }
         },
         "os": "amazonlinux2",
+        "os_type": "amazonlinux2",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
         },
@@ -1328,8 +1361,10 @@
           }
         },
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
-          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3",
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
         },
         "uuid": "latest-hdp",
         "version": "2.5.2.5-3"
@@ -1341,6 +1376,7 @@
         "date": "2016-09-20",
         "version": "2.5.0.0-1157",
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
           "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"

@@ -5,6 +5,7 @@
         "uuid": "latest-base",
         "date": "2016-09-20",
         "os": "centos7",
+        "os_type": "redhat7",
         "images": {
           "aws": {
             "ap-northeast-1": "ami-0fc3016e",
@@ -52,6 +53,7 @@
         "date": "2016-09-20",
         "version": "2.5.0.0-1157",
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
           "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"
@@ -92,6 +94,7 @@
         "date": "2017-09-20",
         "version": "2.5.0.0-1157",
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
           "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"
@@ -132,6 +135,7 @@
         "date": "2018-09-20",
         "version": "2.5.0.0-1157",
         "os": "centos7",
+        "os_type": "redhat7",
         "repo": {
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
           "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"
