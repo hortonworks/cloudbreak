@@ -408,9 +408,9 @@ public class FileSystemConfigQueryServiceTest {
         Optional<ConfigQueryEntry> rangerAdminEntry = serviceEntry(bigCluster, RANGER_ADMIN);
 
         Assert.assertTrue(hiveServerEntry.isPresent());
-        Assert.assertTrue(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+        Assert.assertTrue(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "/"));
         Assert.assertTrue(rangerAdminEntry.isPresent());
-        Assert.assertTrue(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+        Assert.assertTrue(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "/"));
 
         bigCluster = getConfigQueryEntriesS3(STORAGE_NAME + "copy");
 
@@ -418,11 +418,11 @@ public class FileSystemConfigQueryServiceTest {
         rangerAdminEntry = serviceEntry(bigCluster, RANGER_ADMIN);
 
         Assert.assertTrue(hiveServerEntry.isPresent());
-        Assert.assertTrue(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "copy/" + CLUSTER_NAME));
-        Assert.assertFalse(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+        Assert.assertTrue(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "copy/"));
+        Assert.assertFalse(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "/"));
         Assert.assertTrue(rangerAdminEntry.isPresent());
-        Assert.assertTrue(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "copy/" + CLUSTER_NAME));
-        Assert.assertFalse(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+        Assert.assertTrue(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "copy/"));
+        Assert.assertFalse(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "/"));
     }
 
     private Set<ConfigQueryEntry> getConfigQueryEntriesS3(String storageName) {
