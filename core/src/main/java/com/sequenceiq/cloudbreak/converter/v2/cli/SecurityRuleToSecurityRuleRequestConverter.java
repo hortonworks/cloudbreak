@@ -20,7 +20,9 @@ public class SecurityRuleToSecurityRuleRequestConverter extends AbstractConversi
         for (String portDefinition : source.getPorts()) {
             sb.append(String.format("%s,", portDefinition));
         }
-        securityRuleRequest.setPorts(sb.toString().substring(0, sb.toString().length() - 1));
+        if (!SecurityRule.ICMP.equalsIgnoreCase(source.getProtocol())) {
+            securityRuleRequest.setPorts(sb.toString().substring(0, sb.toString().length() - 1));
+        }
         securityRuleRequest.setProtocol(source.getProtocol());
         securityRuleRequest.setSubnet(source.getCidr());
         return securityRuleRequest;

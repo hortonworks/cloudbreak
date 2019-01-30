@@ -44,6 +44,8 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
     private static final int ORDER = 0;
 
+    private static final String ICMP = "icmp";
+
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network) {
         if (noFirewallRules(network)) {
@@ -58,9 +60,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
             throws Exception {
         String projectId = context.getProjectId();
 
-        ComputeRequest<Operation> firewallRequest;
-
-        firewallRequest = StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)
+        ComputeRequest<Operation> firewallRequest = StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)
                 ? updateExistingFirewallForNewTargets(context, auth, group, security)
                 : createNewFirewallRule(context, auth, group, network, security, buildableResource, projectId);
         try {
@@ -86,16 +86,12 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
     private ComputeRequest<Operation> createNewFirewallRule(GcpContext context, AuthenticatedContext auth, Group group, Network network, Security security,
             CloudResource buildableResource, String projectId) throws IOException {
-        ComputeRequest<Operation> firewallRequest;
         List<String> sourceRanges = getSourceRanges(security);
 
         Firewall firewall = new Firewall();
         firewall.setSourceRanges(sourceRanges);
 
-        List<Allowed> allowedRules = new ArrayList<>();
-        allowedRules.add(new Allowed().setIPProtocol("icmp"));
-
-        allowedRules.addAll(createRule(security));
+        List<Allowed> allowedRules = new ArrayList<>(createAllowedRules(security));
 
         firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group)));
         firewall.setAllowed(allowedRules);
@@ -159,21 +155,23 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         return sourceRanges;
     }
 
-    private Collection<Allowed> createRule(Security security) {
+    private Collection<Allowed> createAllowedRules(Security security) {
         Collection<Allowed> rules = new LinkedList<>();
         List<SecurityRule> securityRules = security.getRules();
         for (SecurityRule securityRule : securityRules) {
             Allowed rule = new Allowed();
             rule.setIPProtocol(securityRule.getProtocol());
-            List<String> ports = new ArrayList<>();
-            for (PortDefinition portDefinition : securityRule.getPorts()) {
-                if (portDefinition.isRange()) {
-                    ports.add(String.format("%s-%s", portDefinition.getFrom(), portDefinition.getTo()));
-                } else {
-                    ports.add(portDefinition.getFrom());
+            if (!ICMP.equalsIgnoreCase(securityRule.getProtocol())) {
+                List<String> ports = new ArrayList<>();
+                for (PortDefinition portDefinition : securityRule.getPorts()) {
+                    if (portDefinition.isRange()) {
+                        ports.add(String.format("%s-%s", portDefinition.getFrom(), portDefinition.getTo()));
+                    } else {
+                        ports.add(portDefinition.getFrom());
+                    }
                 }
+                rule.setPorts(ports);
             }
-            rule.setPorts(ports);
             rules.add(rule);
         }
         return rules;
