@@ -32,7 +32,7 @@ public class StackGetWithEntriesV3Strategy implements Strategy {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get stack " + stackEntity.getName());
-        stackEntity.setResponse(client.getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, stackEntity.getName(),
+        stackEntity.setResponse(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, stackEntity.getName(),
                 entries.stream().map(StackResponseEntries::getEntryName).collect(Collectors.toSet())));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }

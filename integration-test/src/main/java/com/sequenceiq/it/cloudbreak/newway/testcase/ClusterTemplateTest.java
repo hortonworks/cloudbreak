@@ -16,6 +16,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
@@ -101,9 +102,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new LaunchClusterFromTemplateAction("stackTemplate"))
-                .await(STACK_AVAILABLE, key("stackTemplate"))
+                .await(Status.AVAILABLE, key("stackTemplate"))
                 .when(new DeleteClusterFromTemplateAction("stackTemplate"))
-                .await(STACK_DELETED, key("stackTemplate"))
+                .await(Status.DELETE_COMPLETED, key("stackTemplate"))
                 .validate();
     }
 
@@ -137,9 +138,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(new ClusterTemplateGetAction())
                 .then(new CheckStackTemplateAfterClusterTemplateCreationWithProperties())
                 .when(new LaunchClusterFromTemplateAction("stackTemplate"))
-                .await(STACK_AVAILABLE, key("stackTemplate"))
+                .await(Status.AVAILABLE, key("stackTemplate"))
                 .when(new DeleteClusterFromTemplateAction("stackTemplate"), force())
-                .await(STACK_DELETED, key("stackTemplate").withSkipOnFail(false))
+                .await(Status.DELETE_COMPLETED, key("stackTemplate").withSkipOnFail(false))
                 .validate();
     }
 

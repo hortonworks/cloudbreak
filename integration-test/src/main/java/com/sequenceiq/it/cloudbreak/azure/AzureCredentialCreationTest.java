@@ -7,6 +7,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -41,16 +42,18 @@ public class AzureCredentialCreationTest extends AbstractCloudbreakIntegrationTe
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccesKey;
 
         // WHEN
-        CredentialV4Request credentialRequest = new CredentialV4Request();
-        credentialRequest.setName(credentialName);
+        var credentialRequest = new CredentialV4Request();
+        var credentialParameters = new AzureCredentialV4Parameters();
+        var appBased = new AppBased();
+        appBased.setAccessKey(accessKey);
+        appBased.setSecretKey(secretKey);
         credentialRequest.setDescription("Azure credential for integartion test");
-        AzureCredentialV4Parameters credentialParameters = new AzureCredentialV4Parameters();
-        credentialParameters.setAccessKey(accessKey);
-        credentialParameters.setSubscriptionId(subscriptionId);
-        credentialParameters.setSecretKey(secretKey);
-        credentialParameters.setTenantId(tenantId);
+        credentialRequest.setName(credentialName);
         credentialRequest.setAzure(credentialParameters);
         credentialRequest.setCloudPlatform("AZURE");
+        credentialParameters.setAppBased(appBased);
+        credentialParameters.setTenantId(tenantId);
+        credentialParameters.setSubscriptionId(subscriptionId);
         Long id = getCloudbreakClient().credentialV4Endpoint().post(1L, credentialRequest).getId();
         // THEN
         Assert.assertNotNull(id);

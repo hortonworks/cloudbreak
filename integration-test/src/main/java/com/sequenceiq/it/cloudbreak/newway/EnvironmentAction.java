@@ -2,8 +2,11 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class EnvironmentAction {
@@ -20,7 +23,7 @@ public class EnvironmentAction {
 
         environmentEntity.setResponse(
                 client.getCloudbreakClient()
-                        .environmentV3Endpoint()
+                        .environmentV4Endpoint()
                         .post(client.getWorkspaceId(), environmentEntity.getRequest()));
 
         logJSON("Environment post request: ", environmentEntity.getRequest());
@@ -33,7 +36,7 @@ public class EnvironmentAction {
                 CloudbreakClient.class);
         environmentEntity.setResponse(
                 client.getCloudbreakClient()
-                        .environmentV3Endpoint()
+                        .environmentV4Endpoint()
                         .get(client.getWorkspaceId(), environmentEntity.getName()));
         logJSON("Environment get response: ", environmentEntity.getResponse());
     }
@@ -44,8 +47,8 @@ public class EnvironmentAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         environmentEntity.setResponseSimpleEnvSet(
-                client.getCloudbreakClient()
-                        .environmentV3Endpoint()
+                (Set<SimpleEnvironmentV4Response>) client.getCloudbreakClient()
+                        .environmentV4Endpoint()
                         .list(client.getWorkspaceId()).getResponses());
         logJSON("Environment list response: ", environmentEntity.getResponse());
     }
@@ -62,7 +65,7 @@ public class EnvironmentAction {
                 CloudbreakClient.class);
         environmentEntity.setResponse(
                 client.getCloudbreakClient()
-                        .environmentV3Endpoint()
+                        .environmentV4Endpoint()
                         .attach(client.getWorkspaceId(), environmentEntity.getName(), environmentAttachV4Request));
         logJSON("Environment put attach response: ", environmentEntity.getResponse());
     }
@@ -79,7 +82,7 @@ public class EnvironmentAction {
                 CloudbreakClient.class);
         environmentEntity.setResponse(
                 client.getCloudbreakClient()
-                        .environmentV3Endpoint()
+                        .environmentV4Endpoint()
                         .detach(client.getWorkspaceId(), environmentEntity.getName(), environmentDetachV4Request));
         logJSON("Environment put detach response: ", environmentEntity.getResponse());
     }

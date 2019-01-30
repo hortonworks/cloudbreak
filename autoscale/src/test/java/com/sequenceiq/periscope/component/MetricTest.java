@@ -61,8 +61,8 @@ import org.springframework.vault.core.VaultTemplate;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -403,10 +403,10 @@ public class MetricTest {
         return cluster;
     }
 
-    private StackResponse getStackResponse(Status stackStatus, Status clusterStatus) {
-        StackResponse stackResponse = new StackResponse();
+    private StackV4Response getStackResponse(Status stackStatus, Status clusterStatus) {
+        var stackResponse = new StackV4Response();
         stackResponse.setStatus(stackStatus);
-        stackResponse.setCluster(new ClusterResponse());
+        stackResponse.setCluster(new ClusterV4Response());
         stackResponse.getCluster().setStatus(clusterStatus);
         return stackResponse;
     }

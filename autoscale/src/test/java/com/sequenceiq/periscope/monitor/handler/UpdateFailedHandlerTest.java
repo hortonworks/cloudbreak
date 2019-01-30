@@ -19,9 +19,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
@@ -29,6 +29,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 public class UpdateFailedHandlerTest {
+
     private static final long AUTOSCALE_CLUSTER_ID = 1L;
 
     private static final long CLOUDBREAK_STACK_ID = 2L;
@@ -211,16 +212,16 @@ public class UpdateFailedHandlerTest {
         verify(cloudbreakCommunicator, never()).failureReport(anyLong(), any());
     }
 
-    private Optional<InstanceMetaDataJson> getPrimaryGateway() {
-        InstanceMetaDataJson instanceMetaDataJson = new InstanceMetaDataJson();
+    private Optional<InstanceMetaDataV4Response> getPrimaryGateway() {
+        var instanceMetaDataJson = new InstanceMetaDataV4Response();
         instanceMetaDataJson.setDiscoveryFQDN("");
         return Optional.of(instanceMetaDataJson);
     }
 
-    private StackResponse getStackResponse(Status stackStatus, Status clusterStatus) {
-        StackResponse stackResponse = new StackResponse();
+    private StackV4Response getStackResponse(Status stackStatus, Status clusterStatus) {
+        var stackResponse = new StackV4Response();
         stackResponse.setStatus(stackStatus);
-        ClusterResponse clusterResponse = new ClusterResponse();
+        var clusterResponse = new ClusterV4Response();
         clusterResponse.setStatus(clusterStatus);
         stackResponse.setCluster(clusterResponse);
         return stackResponse;

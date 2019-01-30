@@ -4,8 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -28,13 +26,12 @@ public class StackStartTest extends AbstractCloudbreakIntegrationTest {
     public void testStackStart() {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        Integer stackIntId = Integer.valueOf(stackId);
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         //WHEN
-        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-        updateStackJson.setStatus(StatusRequest.valueOf(STARTED));
-        getCloudbreakClient().stackV4Endpoint().putStart(Long.valueOf(stackIntId), updateStackJson);
-        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
+        getCloudbreakClient().stackV4Endpoint().putStart(workspaceId, stackName);
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(),
+                workspaceId, stackName, "AVAILABLE");
         //THEN
     }
 }

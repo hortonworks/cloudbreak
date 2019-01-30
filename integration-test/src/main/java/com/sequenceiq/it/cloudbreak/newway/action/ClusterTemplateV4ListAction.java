@@ -20,7 +20,7 @@ public class ClusterTemplateV4ListAction implements ActionV2<ClusterTemplateEnti
     @Override
     public ClusterTemplateEntity action(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
         logJSON(LOGGER, " ClusterTemplateEntity get request:\n", entity.getRequest());
-        Set<ClusterTemplateViewV4Response> responses = client.getCloudbreakClient()
+        Set<ClusterTemplateViewV4Response> responses = (Set<ClusterTemplateViewV4Response>) client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
                 .list(client.getWorkspaceId()).getResponses();
         entity.setResponses(ClusterTemplateUtil.getResponseFromViews(responses));

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -8,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -31,6 +33,11 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
     public InstanceTemplateV4Entity valid() {
         return withInstanceType("large")
                 .witAttachedVolume(getTestContext().get(VolumeV4Entity.class));
+    }
+
+    public InstanceTemplateV4Entity withAttachedVolumes(Set<VolumeV4Request> volumes) {
+        getRequest().setAttachedVolumes(volumes);
+        return this;
     }
 
     public InstanceTemplateV4Entity withAwsParameters(AwsInstanceTemplateV4Parameters awsParameters) {

@@ -9,6 +9,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -289,6 +290,13 @@ public class Stack extends StackEntity {
             assertTrue(imageIds.size() > 1);
             assertTrue(imageIds.contains(stack.getResponse().getImage().getId()));
         });
+    }
+
+    public static StackEntity getByName(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().stackV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getRequest().getName(), new HashSet<>())
+        );
+        return entity;
     }
 
     public static Action<Stack> repair(String hostgroupName) {

@@ -6,10 +6,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
@@ -28,11 +26,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -109,7 +107,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
-        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Collections.singleton(stack));
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(new AutoscaleStackV4Responses(List.of(stack)));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(ambariClient.healthCheck()).thenReturn("RUNNING");
 
@@ -130,7 +128,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         Cluster cluster = cluster(2L);
 
-        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Collections.singleton(stack));
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(new AutoscaleStackV4Responses(List.of(stack)));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(ambariClient.healthCheck()).thenReturn("NOT_RUNNING");
 
@@ -143,13 +141,15 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
     @Test
     public void testCollectStackDetailsWhenRejected() {
-        AutoscaleStackV4Response stack = autoscaleStackResponse(1L);
-
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
-        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Sets.newHashSet(stack, autoscaleStackResponse(2L), autoscaleStackResponse(3L),
-                autoscaleStackResponse(4L), autoscaleStackResponse(5L)));
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(1L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(2L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(3L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(4L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(5L))));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(2L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(3L)).thenReturn(cluster);
@@ -169,13 +169,15 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     @Test
     @Ignore("@Topolyai Gergely should take care of this random failing test.")
     public void testCollectStackDetailsWhenRejectedAndRemoveIt() {
-        AutoscaleStackV4Response stack = autoscaleStackResponse(1L);
-
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
-        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(Sets.newHashSet(stack, autoscaleStackResponse(2L), autoscaleStackResponse(3L),
-                autoscaleStackResponse(4L), autoscaleStackResponse(5L)));
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(1L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(2L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(3L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(4L))),
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(5L))));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(2L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(3L)).thenReturn(cluster);
@@ -187,13 +189,13 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
         waitForTasksToFinish();
 
-        Set<AutoscaleStackV4Response> stacks = rejectedThreadService.getAllRejectedCluster()
+        List<AutoscaleStackV4Response> stacks = rejectedThreadService.getAllRejectedCluster()
                 .stream()
                 .map(t -> JsonUtil.readValueOpt(t.getJson(), AutoscaleStackV4Response.class).orElse(null))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
-        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(stacks);
+        when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(new AutoscaleStackV4Responses(stacks));
 
         underTest.collectStackDetails();
 

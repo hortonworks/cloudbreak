@@ -4,12 +4,12 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -19,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
 @Prototype
@@ -50,7 +49,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         when(StackV3Action::deleteV2, withoutLogError());
-        await(AbstractIntegrationTest.STACK_DELETED);
+        await(Status.DELETE_COMPLETED);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     public void delete(StackV4Response entity, CloudbreakClient client) {
         try {
             client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
-            wait(AbstractIntegrationTest.STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
+            wait(Status.DELETE_COMPLETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
         }
@@ -86,7 +85,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     }
 
     @Override
-    public CloudbreakEntity wait(Map<String, String> desiredStatuses, RunningParameter runningParameter) {
+    public CloudbreakEntity wait(Status desiredStatuses, RunningParameter runningParameter) {
         return await(desiredStatuses, runningParameter);
     }
 }

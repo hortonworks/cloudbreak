@@ -128,7 +128,7 @@ public class CloudbreakClient {
         return getEndpoint(BlueprintV4Endpoint.class);
     }
 
-    public EnvironmentV4Endpoint environmentV3Endpoint() {
+    public EnvironmentV4Endpoint environmentV4Endpoint() {
         return getEndpoint(EnvironmentV4Endpoint.class);
     }
 

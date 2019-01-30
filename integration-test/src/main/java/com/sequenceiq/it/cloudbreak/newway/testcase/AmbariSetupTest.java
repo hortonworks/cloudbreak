@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
@@ -25,7 +26,7 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
                 // create stack
                 .given(StackEntity.class)
                 .when(Stack.postV2(), key("stack-post"))
-                .await(STACK_AVAILABLE)
+                .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").exactTimes(2).bodyContains("\"Users/active\": true"))
                 .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").exactTimes(2).bodyContains("\"Users/admin\": true"))
                 .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").exactTimes(1).bodyContains("\"Users/user_name\": \"cloudbreak\""))

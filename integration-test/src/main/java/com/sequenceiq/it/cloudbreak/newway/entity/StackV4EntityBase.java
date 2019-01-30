@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
-import static java.util.Collections.emptyMap;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,12 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -49,8 +48,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> valid() {
         String randomNameForMock = getNameCreator().getRandomNameForMock();
-        return withInputs(emptyMap())
-                .withEnvironment(getTestContext().get(EnvironmentSettingsV4Entity.class))
+        return withEnvironment(getTestContext().get(EnvironmentSettingsV4Entity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
                 .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
@@ -81,7 +79,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .withInstanceGroups("master", "worker", "compute")
                 .withCluster("cluster")
                 .withUserDefinedTags(Map.of("some-tag", "custom-tag"))
-                .withInputs(Map.of("some-input", "custom-input"))
                 .withImageSettings("imageSettings");
     }
 
@@ -146,15 +143,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
             getRequest().setImage(new ImageSettingsV4Request());
         }
         getRequest().getImage().setId(imageId);
-        return this;
-    }
-
-    public StackV4EntityBase<T> withInputs(Map<String, Object> inputs) {
-        if (inputs == null) {
-            getRequest().setInputs(emptyMap());
-        } else {
-            getRequest().setInputs(inputs);
-        }
         return this;
     }
 

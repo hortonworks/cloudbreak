@@ -104,7 +104,7 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<DatabaseV4Request,
     @Override
     public void delete(DatabaseV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV3Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName(), true, false);
+            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
         }

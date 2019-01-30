@@ -3,10 +3,12 @@ package com.sequenceiq.it.cloudbreak.newway.v4;
 import static com.sequenceiq.it.cloudbreak.RetryOnGatewayTimeout.retry;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -95,7 +97,7 @@ public class CredentialV4Action {
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private credential. ");
-        credentialEntity.setResponses(retry(() -> client.getCloudbreakClient()
+        credentialEntity.setResponses((Set<CredentialV4Response>) retry(() -> client.getCloudbreakClient()
                         .credentialV4Endpoint()
                         .list(workspaceId), retryQuantity).getResponses());
     }

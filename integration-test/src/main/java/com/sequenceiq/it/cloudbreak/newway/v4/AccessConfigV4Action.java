@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AccessConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
+import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 import com.sequenceiq.it.cloudbreak.newway.Region;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
@@ -56,7 +56,9 @@ public class AccessConfigV4Action {
         Log.log(String.join(" ", " post AccessConfig"));
         accessConfig.setResponse(
                 client.getCloudbreakClient()
-                        .connectorV4Endpoint().getAccessConfigs(workspaceId, accessConfig.getRequest()));
+                        .connectorV4Endpoint().getAccessConfigs(workspaceId, accessConfig.getRequest().getCredentialName(),
+                        accessConfig.getRequest().getRegion(), accessConfig.getRequest().getPlatformVariant(),
+                        accessConfig.getRequest().getAvailabilityZone()));
         Log.logJSON(" post AccessConfig response: ", accessConfig.getResponse());
     }
 

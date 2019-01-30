@@ -3,7 +3,9 @@ package com.sequenceiq.it.cloudbreak.newway.v4;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
+import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -44,7 +46,7 @@ public class ProxyV4Action {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         proxyconfigEntity.setResponses(
-                client.getCloudbreakClient()
+                (Set<ProxyV4Response>) client.getCloudbreakClient()
                         .proxyConfigV4Endpoint()
                         .list(workspaceId, null, Boolean.FALSE).getResponses());
         logJSON(" get all proxy config response: ", proxyconfigEntity.getResponse());

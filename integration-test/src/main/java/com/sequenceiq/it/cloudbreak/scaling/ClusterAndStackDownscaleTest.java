@@ -30,16 +30,15 @@ public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationT
     public void testClusterAndStackDownscale(@Optional("slave_1") String instanceGroup, int scalingAdjustment) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.parseInt(stackId);
+        String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);
         StackV4Endpoint stackV4Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackV4Endpoint();
         Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
-        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackV4Endpoint, workspaceId, stackId) + scalingAdjustment;
-        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV4Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
+        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackV4Endpoint, workspaceId, stackName) + scalingAdjustment;
+        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV4Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext)
                 + scalingAdjustment;
         // WHEN
         UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
@@ -48,12 +47,12 @@ public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationT
         hostGroupAdjustmentJson.setWithStackUpdate(true);
         hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
         updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-        getCloudbreakClient().stackV4Endpoint().putCluster(workspaceId, stackId, updateClusterJson);
-        CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), workspaceId, stackId, "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackId, "AVAILABLE");
+        getCloudbreakClient().stackV4Endpoint().putCluster(workspaceId, stackName, updateClusterJson);
+        CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         // THEN
-        ScalingUtil.checkStackScaled(stackV4Endpoint, workspaceId, stackId, expectedNodeCountStack);
-        ScalingUtil.checkClusterScaled(stackV4Endpoint, ambariPort, workspaceId, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
-        ScalingUtil.putInstanceCountToContext(itContext, workspaceId, stackId);
+        ScalingUtil.checkStackScaled(stackV4Endpoint, workspaceId, stackName, expectedNodeCountStack);
+        ScalingUtil.checkClusterScaled(stackV4Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
+        ScalingUtil.putInstanceCountToContext(itContext, workspaceId, stackName);
     }
 }
