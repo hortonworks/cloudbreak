@@ -58,7 +58,7 @@ public class StackRepositoryV4RequestToStackRepoDetailsConverter extends Abstrac
             }
         }
 
-        if (!StringUtils.isEmpty(source.getRepository().getVersion())) {
+        if (source.getRepository() != null && !StringUtils.isEmpty(source.getRepository().getVersion())) {
             stack.put(StackRepoDetails.REPOSITORY_VERSION, source.getRepository().getVersion());
             stack.put(StackRepoDetails.REPO_ID_TAG, source.getStack());
         }
@@ -89,11 +89,19 @@ public class StackRepositoryV4RequestToStackRepoDetailsConverter extends Abstrac
     }
 
     public boolean isBaseRepoRequiredFieldsExists(StackRepositoryV4Request source) {
-        return Stream.of(source.getRepoId(), source.getRepository().getBaseUrl(), source.getUtilsRepoId(), source.getUtilsBaseURL())
-                    .noneMatch(StringUtils::isEmpty);
+        String baseUrl = "";
+        if (source.getRepository() != null) {
+            baseUrl = source.getRepository().getBaseUrl();
+        }
+        return Stream.of(source.getRepoId(), baseUrl, source.getUtilsRepoId(), source.getUtilsBaseURL())
+                .noneMatch(StringUtils::isEmpty);
     }
 
     public boolean isVdfRequiredFieldsExists(StackRepositoryV4Request source) {
-        return Stream.of(source.getRepository().getVersion(), source.getVersionDefinitionFileUrl()).noneMatch(StringUtils::isEmpty);
+        String version = "";
+        if (source.getRepository() != null) {
+            version = source.getRepository().getVersion();
+        }
+        return Stream.of(version, source.getVersionDefinitionFileUrl()).noneMatch(StringUtils::isEmpty);
     }
 }

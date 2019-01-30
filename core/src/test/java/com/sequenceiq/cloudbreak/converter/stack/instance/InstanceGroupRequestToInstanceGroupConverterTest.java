@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
@@ -34,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
 
     @Rule
-    private final ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private InstanceGroupV4RequestToInstanceGroupConverter underTest;
@@ -70,15 +69,6 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
                 return null;
             }
         };
-    }
-
-    @Test(expected = AccessDeniedException.class)
-    public void testConvertWhenAccessDenied() {
-        InstanceGroupV4Request request = getRequest("instance-group.json");
-        // GIVEN
-        given(providerParameterCalculator.get(request)).willReturn((getMappable()));
-        // WHEN
-        underTest.convert(request);
     }
 
     @Override

@@ -123,6 +123,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         }
         cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
         updateDatabases(source, cluster, workspace);
+        extractAmbariAndHdpRepoConfig(cluster, source.getAmbari());
         return cluster;
     }
 
