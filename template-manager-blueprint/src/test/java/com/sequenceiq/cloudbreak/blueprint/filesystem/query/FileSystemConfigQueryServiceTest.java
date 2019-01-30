@@ -201,6 +201,44 @@ public class FileSystemConfigQueryServiceTest {
         return configQueryEntries.stream().filter(b -> b.getRelatedService().equals(serviceName)).findFirst();
     }
 
+    @Test
+    public void testCopyOfContigEntries() {
+        prepareBlueprintProcessorFactoryMock(HIVE_SERVER, RANGER_ADMIN);
+
+        Set<ConfigQueryEntry> bigCluster = getConfigQueryEntriesS3(STORAGE_NAME);
+
+        Optional<ConfigQueryEntry> hiveServerEntry = serviceEntry(bigCluster, HIVE_SERVER);
+        Optional<ConfigQueryEntry> rangerAdminEntry = serviceEntry(bigCluster, RANGER_ADMIN);
+
+        Assert.assertTrue(hiveServerEntry.isPresent());
+        Assert.assertTrue(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+        Assert.assertTrue(rangerAdminEntry.isPresent());
+        Assert.assertTrue(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+
+        bigCluster = getConfigQueryEntriesS3(STORAGE_NAME + "copy");
+
+        hiveServerEntry = serviceEntry(bigCluster, HIVE_SERVER);
+        rangerAdminEntry = serviceEntry(bigCluster, RANGER_ADMIN);
+
+        Assert.assertTrue(hiveServerEntry.isPresent());
+        Assert.assertTrue(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "copy/" + CLUSTER_NAME));
+        Assert.assertFalse(hiveServerEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+        Assert.assertTrue(rangerAdminEntry.isPresent());
+        Assert.assertTrue(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "copy/" + CLUSTER_NAME));
+        Assert.assertFalse(rangerAdminEntry.get().getDefaultPath().contains(STORAGE_NAME + "/" + CLUSTER_NAME));
+    }
+
+    private Set<ConfigQueryEntry> getConfigQueryEntriesS3(String storageName) {
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(storageName)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withAttachedCluster(true)
+                .withFileSystemType(FileSystemType.S3.name())
+                .build();
+        return underTest.queryParameters(fileSystemConfigQueryObject);
+    }
+
     private void prepareBlueprintProcessorFactoryMock(String... services) {
         Map<String, Set<String>> result = new HashMap<>();
         result.put("master", Sets.newHashSet(services));

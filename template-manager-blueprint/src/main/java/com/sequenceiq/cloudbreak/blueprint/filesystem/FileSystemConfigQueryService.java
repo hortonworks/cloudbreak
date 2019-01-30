@@ -66,7 +66,6 @@ public class FileSystemConfigQueryService {
                         .stream()
                         .filter(configQueryEntry -> configQueryEntry.getRelatedService().equalsIgnoreCase(service))
                         .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
-                        .map(configQueryEntry -> configQueryEntry.copy())
                         .collect(Collectors.toSet());
                 filtered.addAll(collectedEntries);
             }

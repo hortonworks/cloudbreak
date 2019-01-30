@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.template.filesystem.query;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -11,10 +12,9 @@ public class ConfigQueryEntries {
     private Set<ConfigQueryEntry> entries = new HashSet<>();
 
     public Set<ConfigQueryEntry> getEntries() {
-        return entries;
-    }
-
-    public void setEntries(Set<ConfigQueryEntry> entries) {
-        this.entries = entries;
+        return entries
+                .stream()
+                .map(ConfigQueryEntry::copy)
+                .collect(Collectors.toSet());
     }
 }
