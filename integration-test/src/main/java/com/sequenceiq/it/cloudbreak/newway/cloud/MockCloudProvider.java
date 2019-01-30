@@ -7,17 +7,16 @@ import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.MockInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -137,10 +136,7 @@ public class MockCloudProvider extends CloudProviderHelper {
         String instanceTypeParam = getTestParameter().get("mockInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
-        MockInstanceTemplateV4Parameters parameters = new MockInstanceTemplateV4Parameters();
-        parameters.setPlatformType(CloudPlatform.MOCK);
-
-        t.setMock(parameters);
+        t.setMock(new MockInstanceTemplateV4Parameters());
 
         VolumeV4Request volume = new VolumeV4Request();
 

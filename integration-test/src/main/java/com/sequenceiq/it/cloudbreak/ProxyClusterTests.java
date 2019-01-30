@@ -84,7 +84,7 @@ public class ProxyClusterTests extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari is running and components available");
         then(Stack.assertThis(
-                (stack, t) -> Assert.assertTrue(stack.getResponse().getCluster().getProxyName().equals(VALID_PROXY_CONFIG))
+                (stack, t) -> Assert.assertTrue(stack.getResponse().getCluster().getProxy().getName().equals(VALID_PROXY_CONFIG))
         ));
     }
 

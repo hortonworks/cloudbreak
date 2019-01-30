@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.v4;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,7 @@ public class BlueprintV4Action {
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private blueprints. ");
-        Set<BlueprintV4ViewResponse> blueprints = client.getCloudbreakClient().blueprintV4Endpoint()
+        Collection<BlueprintV4ViewResponse> blueprints = client.getCloudbreakClient().blueprintV4Endpoint()
                 .list(workspaceId).getResponses();
         Set<BlueprintV4Response> detailedBlueprints = blueprints.stream().map(bp -> client.getCloudbreakClient().blueprintV4Endpoint()
                 .get(workspaceId, bp.getName())).collect(Collectors.toSet());

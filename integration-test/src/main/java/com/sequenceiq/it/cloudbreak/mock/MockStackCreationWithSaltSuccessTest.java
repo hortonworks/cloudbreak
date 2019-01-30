@@ -1,9 +1,8 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -15,11 +14,12 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -82,46 +82,32 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakInte
             igMap.add(instanceGroupRequest);
         }
 
-        Long credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class);
-        String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
-        StackRequest stackRequest = new StackRequest();
+        String credentialName = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_NAME);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        var stackRequest = new StackV4Request();
 
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
-        StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
+        var stackAuthenticationRequest = new StackAuthenticationV4Request();
+        var environment = new EnvironmentV4Request();
         stackAuthenticationRequest.setPublicKey(publicKey);
-        stackRequest.setStackAuthentication(stackAuthenticationRequest);
-
+        stackRequest.setAuthentication(stackAuthenticationRequest);
+        environment.setCredentialName(credentialName);
+        environment.setRegions(Set.of(region));
         stackRequest.setName(stackName);
-        stackRequest.setCredentialId(credentialId);
-        stackRequest.setRegion(region);
-        stackRequest.setOnFailureAction(OnFailureAction.valueOf(onFailureAction));
-        FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();
-        failurePolicyRequest.setAdjustmentType(AdjustmentType.valueOf(adjustmentType));
-        failurePolicyRequest.setThreshold(threshold);
-        stackRequest.setFailurePolicy(failurePolicyRequest);
-        stackRequest.setNetworkId(Long.valueOf(networkId));
-        stackRequest.setPlatformVariant(variant);
-        stackRequest.setAvailabilityZone(availabilityZone);
+
+        // FIXME: should figure out how on earth can we obtain a valid network request and where to set the availability zone
+        // stackRequest.setNetworkId(Long.valueOf(networkId));
+        // stackRequest.setAvailabilityZone(availabilityZone);
+        stackRequest.setCloudPlatform(CloudPlatform.valueOf(variant.toUpperCase()));
+
         stackRequest.setInstanceGroups(igMap);
 
-        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
-        orchestratorRequest.setType(orchestrator);
-        stackRequest.setOrchestrator(orchestratorRequest);
-
-        Map<String, String> map = new HashMap<>();
-        if (persistentStorage != null && !persistentStorage.isEmpty()) {
-            map.put("persistentStorage", persistentStorage);
-        }
-        stackRequest.setParameters(map);
-
-        // WHEN
-        String stackId = getCloudbreakClient().stackV1Endpoint().postPrivate(stackRequest).getId().toString();
         // THEN
-        Assert.assertNotNull(stackId);
-        itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
-        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
-        itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
+        Assert.assertNotNull(stackName);
+        itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackName);
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
+        itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackName);
     }
 
     @AfterClass

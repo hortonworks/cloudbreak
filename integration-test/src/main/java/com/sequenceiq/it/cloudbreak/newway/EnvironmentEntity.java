@@ -139,7 +139,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     @Override
     public List<SimpleEnvironmentV4Response> getAll(CloudbreakClient client) {
-        EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV3Endpoint();
+        EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV4Endpoint();
         return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getResponses());
     }
 
@@ -151,7 +151,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
     @Override
     public void delete(SimpleEnvironmentV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().environmentV3Endpoint().delete(client.getWorkspaceId(), entity.getName());
+            client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), e.getMessage(), e);
         }

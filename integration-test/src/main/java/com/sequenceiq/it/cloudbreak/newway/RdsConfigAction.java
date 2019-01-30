@@ -3,8 +3,10 @@ package com.sequenceiq.it.cloudbreak.newway;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RdsConfigAction {
@@ -41,7 +43,7 @@ public class RdsConfigAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         rdsconfigEntity.setResponses(
-                client.getCloudbreakClient()
+                (Set<DatabaseV4Response>) client.getCloudbreakClient()
                         .databaseV4Endpoint()
                         .list(client.getWorkspaceId(), null, Boolean.FALSE)
                         .getResponses());

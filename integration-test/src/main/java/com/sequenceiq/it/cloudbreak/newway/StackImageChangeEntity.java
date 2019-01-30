@@ -36,9 +36,8 @@ public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageC
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
-        Log.log(" changeImage " + stack.getRequest().getGeneral().getName());
-        stackImageChange.setResponse(client.getCloudbreakClient().stackV2Endpoint()
-                .changeImage(stack.getRequest().getGeneral().getName(), stackImageChange.getRequest()));
+        Log.log(" changeImage " + stack.getRequest().getName());
+        client.getCloudbreakClient().stackV4Endpoint().changeImage(client.getWorkspaceId(), stack.getRequest().getName(), stackImageChange.getRequest());
     }
 
     public static StackImageChangeEntity request() {

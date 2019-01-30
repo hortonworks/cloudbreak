@@ -220,7 +220,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
             Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
-            cleanUpService.deleteStackAndWait(cloudbreakClient, stackId);
+            cleanUpService.deleteStackAndWait(cloudbreakClient, workspaceId, stackId);
             List<InstanceGroup> instanceGroups = itContext.getCleanUpParameter(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
             if (instanceGroups != null && !instanceGroups.isEmpty()) {
                 Collection<String> deletedTemplates = new HashSet<>();

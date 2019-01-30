@@ -37,7 +37,10 @@ public class RegionV4Action {
 
         regionEntity.setRegionV4Response(retry(() -> client.getCloudbreakClient()
                 .connectorV4Endpoint()
-                .getRegionsByCredential(workspaceId, regionEntity.getPlatformResourceRequest()), retryQuantity));
+                        .getRegionsByCredential(workspaceId, regionEntity.getPlatformResourceRequest().getCredentialName(),
+                                regionEntity.getPlatformResourceRequest().getRegion(), regionEntity.getPlatformResourceRequest().getPlatformVariant(),
+                                regionEntity.getPlatformResourceRequest().getAvailabilityZone()),
+                retryQuantity));
 
         Log.logJSON(" get region response: ", regionEntity.getRegionV4Response());
     }

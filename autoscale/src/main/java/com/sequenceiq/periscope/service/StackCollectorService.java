@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.service;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
@@ -43,7 +43,7 @@ public class StackCollectorService {
         if (LOCK.tryLock()) {
             try {
                 CloudbreakIdentityClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-                Set<AutoscaleStackV4Response> allStacks = cloudbreakClient.autoscaleEndpoint().getAllForAutoscale();
+                Collection<AutoscaleStackV4Response> allStacks = cloudbreakClient.autoscaleEndpoint().getAllForAutoscale().getResponses();
                 for (AutoscaleStackV4Response stack : allStacks) {
                     Status clusterStatus = stack.getClusterStatus();
                     try {

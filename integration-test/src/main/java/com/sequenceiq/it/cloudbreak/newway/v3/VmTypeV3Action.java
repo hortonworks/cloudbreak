@@ -36,7 +36,8 @@ public class VmTypeV3Action {
                 vmtypeEntity.getRequest().getRegion(), "region "));
         vmtypeEntity.setResponse(client.getCloudbreakClient()
                 .connectorV4Endpoint()
-                .getVmTypesByCredential(workspaceId, vmtypeEntity.getRequest()));
+                .getVmTypesByCredential(workspaceId, vmtypeEntity.getRequest().getCredentialName(), vmtypeEntity.getRequest().getRegion(),
+                        vmtypeEntity.getRequest().getPlatformVariant(), vmtypeEntity.getRequest().getAvailabilityZone()));
         Log.logJSON(" get Virtual Machine Types response: ", vmtypeEntity.getResponse());
     }
 }

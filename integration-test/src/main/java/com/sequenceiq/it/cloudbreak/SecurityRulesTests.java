@@ -42,7 +42,7 @@ public class SecurityRulesTests extends CloudbreakTest {
 
         try {
             List<SecurityRuleV4Response> customGatewaySet = getCustomGatewaysResponses();
-            expectedPort = getCustomGatewaysResponses().iterator().next().getPorts();
+            expectedPort = String.join(",", getCustomGatewaysResponses().iterator().next().getPorts());
 
             securityrules.getResponse().setGateway(customGatewaySet);
         } catch (IOException e) {
