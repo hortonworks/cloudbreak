@@ -48,7 +48,8 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
 
         assertEquals(source.getNodeCount(), result.getNodeCount());
         assertEquals(getSource().getInstanceGroupType(), result.getType());
-        assertAllFieldsNotNull(result, Lists.newArrayList("template", "securityGroup", "gcp", "name", "mock", "openstack", "aws", "yarn", "azure"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("recipes", "template", "securityGroup", "gcp", "name", "mock", "openstack",
+                "aws", "yarn", "azure"));
     }
 
     @Override

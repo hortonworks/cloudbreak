@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,16 +11,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -31,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -143,18 +139,12 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
             cluster.getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
                     .findFirst()
-                    .ifPresent(hostGroup -> {
-                        Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
-                        instanceGroupResponse.setRecipes(converterUtil.convertAll(hostGroup.getRecipes(), RecipeV4Response.class));
-                        instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
-
-                        instanceGroupResponse.getMetadata()
-                                .forEach(imd -> hostGroup.getHostMetadata().stream()
-                                        .filter(s -> s.getHostName().equals(imd.getDiscoveryFQDN()))
-                                        .findFirst()
-                                        .ifPresent(hmd -> imd.setState(hmd.getHostMetadataState().name()))
-                                );
-                    });
+                    .ifPresent(hostGroup ->
+                            mergeInstanceGroups(getConversionService().convert(hostGroup, InstanceGroupV4Response.class), instanceGroupResponse));
         }
+    }
+
+    private void mergeInstanceGroups(InstanceGroupV4Response mergeInto, InstanceGroupV4Response mergeThis) {
+        mergeInto.setRecipes(mergeThis.getRecipes());
     }
 }
