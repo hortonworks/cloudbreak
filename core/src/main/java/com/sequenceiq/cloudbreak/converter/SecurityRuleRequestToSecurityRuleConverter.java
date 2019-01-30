@@ -23,17 +23,19 @@ public class SecurityRuleRequestToSecurityRuleConverter extends AbstractConversi
         SecurityRule entity = new SecurityRule();
         entity.setCidr(json.getSubnet());
         String ports = json.getPorts();
-        validatePorts(ports);
+        validatePorts(ports, json.getProtocol());
         entity.setPorts(ports);
         entity.setProtocol(json.getProtocol());
         entity.setModifiable(json.isModifiable() == null ? false : json.isModifiable());
         return entity;
     }
 
-    private void validatePorts(String ports) {
-        for (String portString : ports.split(",")) {
-            if (!Pattern.matches(PORT_REGEX, portString)) {
-                throw new BadRequestException(String.format("Ports must be in range of %d-%d", MIN_RANGE, MAX_RANGE));
+    private void validatePorts(String ports, String protocol) {
+        if (!SecurityRule.ICMP.equalsIgnoreCase(protocol)) {
+            for (String portString : ports.split(",")) {
+                if (!Pattern.matches(PORT_REGEX, portString)) {
+                    throw new BadRequestException(String.format("Ports must be in range of %d-%d", MIN_RANGE, MAX_RANGE));
+                }
             }
         }
     }
