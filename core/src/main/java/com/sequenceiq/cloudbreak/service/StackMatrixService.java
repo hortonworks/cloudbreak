@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,11 @@ public class StackMatrixService {
 
     public Set<String> getSupportedOperatingSystems(String clusterType, String clusterVersion) {
         StackDescriptor stackDescriptor = getStackDescriptor(clusterType, clusterVersion);
-        return stackDescriptor.getAmbari().getRepo().keySet();
+        if (stackDescriptor != null) {
+            return stackDescriptor.getAmbari().getRepo().keySet();
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     public StackDescriptor getStackDescriptor(String clusterType, String clusterVersion) {

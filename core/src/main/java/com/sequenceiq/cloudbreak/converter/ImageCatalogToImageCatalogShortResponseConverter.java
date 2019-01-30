@@ -41,7 +41,7 @@ public class ImageCatalogToImageCatalogShortResponseConverter extends AbstractCo
     private boolean isDefault(String imageCatalogName) {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(cloudbreakUser, user);
+        String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(user);
         return imageCatalogName.equals(defaultImageCatalogName) || (defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName));
     }
 }
