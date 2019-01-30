@@ -51,9 +51,9 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map,"resourceGroupName", resourceGroupName);
-        putIfValueNotNull(map,"encryptStorage", encryptStorage);
-        putIfValueNotNull(map,"yarnQueue", yarnQueue);
+        putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
+        putIfValueNotNull(map, "encryptStorage", encryptStorage);
+        putIfValueNotNull(map, "yarnQueue", yarnQueue);
         return map;
     }
 

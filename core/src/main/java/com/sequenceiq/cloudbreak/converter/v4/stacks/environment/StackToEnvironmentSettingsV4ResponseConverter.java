@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
 public class StackToEnvironmentSettingsV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, EnvironmentSettingsV4Response> {
+
     @Override
     public EnvironmentSettingsV4Response convert(Stack source) {
         if (source.getEnvironment() != null) {
@@ -19,8 +20,11 @@ public class StackToEnvironmentSettingsV4ResponseConverter extends AbstractConve
             PlacementSettingsV4Response placement = new PlacementSettingsV4Response();
             placement.setAvailabilityZone(source.getAvailabilityZone());
             placement.setRegion(source.getRegion());
+            response.setPlacement(placement);
+
             return response;
         }
         return null;
     }
+
 }

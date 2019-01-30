@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity{
+public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
     private Boolean noPublicIp;
@@ -75,11 +75,11 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map,"noPublicIp", noPublicIp);
-        putIfValueNotNull(map,"noFirewallRules", noFirewallRules);
-        putIfValueNotNull(map,"resourceGroupName", resourceGroupName);
-        putIfValueNotNull(map,"networkId", networkId);
-        putIfValueNotNull(map,"subnetId", subnetId);
+        putIfValueNotNull(map, "noPublicIp", noPublicIp);
+        putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
+        putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
+        putIfValueNotNull(map, "networkId", networkId);
+        putIfValueNotNull(map, "subnetId", subnetId);
         return map;
     }
 

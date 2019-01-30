@@ -40,4 +40,5 @@ public class SecurityGroupToSecurityGroupResponseConverterTest extends AbstractE
     public SecurityGroup createSource() {
         return TestUtil.securityGroup(new HashSet<>());
     }
+
 }

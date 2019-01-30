@@ -29,7 +29,7 @@ public class GcpInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map,"opid", opId);
+        putIfValueNotNull(map, "opid", opId);
         return map;
     }
 
