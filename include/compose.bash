@@ -489,7 +489,7 @@ cloudbreak:
         - CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP
         - CB_AWS_VPC
         - CB_ENABLEDPLATFORMS
-        - "CB_ENABLED_LINUX_TYPES=redhat6,redhat7,centos6,centos7,amazonlinux"
+        - CB_ENABLED_LINUX_TYPES
         - CB_MAX_SALT_NEW_SERVICE_RETRY
         - CB_MAX_SALT_NEW_SERVICE_RETRY_ONERROR
         - CB_MAX_SALT_RECIPE_EXECUTION_RETRY
