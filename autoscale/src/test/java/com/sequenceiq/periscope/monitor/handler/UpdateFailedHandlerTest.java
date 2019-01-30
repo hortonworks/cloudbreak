@@ -213,15 +213,15 @@ public class UpdateFailedHandlerTest {
     }
 
     private Optional<InstanceMetaDataV4Response> getPrimaryGateway() {
-        var instanceMetaDataJson = new InstanceMetaDataV4Response();
+        InstanceMetaDataV4Response instanceMetaDataJson = new InstanceMetaDataV4Response();
         instanceMetaDataJson.setDiscoveryFQDN("");
         return Optional.of(instanceMetaDataJson);
     }
 
     private StackV4Response getStackResponse(Status stackStatus, Status clusterStatus) {
-        var stackResponse = new StackV4Response();
+        StackV4Response stackResponse = new StackV4Response();
         stackResponse.setStatus(stackStatus);
-        var clusterResponse = new ClusterV4Response();
+        ClusterV4Response clusterResponse = new ClusterV4Response();
         clusterResponse.setStatus(clusterStatus);
         stackResponse.setCluster(clusterResponse);
         return stackResponse;
