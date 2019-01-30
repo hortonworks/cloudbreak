@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
@@ -105,10 +106,11 @@ public class InstanceMetadataUpdater {
             Map<String, String> packageVersionsOnHost = packageVersionsByNameByHost.get(im.getDiscoveryFQDN());
             if (!CollectionUtils.isEmpty(packageVersionsOnHost)) {
                 Image image = im.getImage().get(Image.class);
-                if (!image.getPackageVersions().equals(packageVersionsOnHost)) {
+                if (!Maps.transformValues(image.getPackageVersions(), this::removeBuildVersion)
+                        .equals(Maps.transformValues(packageVersionsOnHost, this::removeBuildVersion))) {
                     Multimap<String, String> pkgVersionsMMap = LinkedHashMultimap.create();
-                    pkgVersionsMMap.putAll(Multimaps.forMap(packageVersionsOnHost));
-                    pkgVersionsMMap.putAll(Multimaps.forMap(image.getPackageVersions()));
+                    pkgVersionsMMap.putAll(Multimaps.forMap(Maps.transformValues(packageVersionsOnHost, this::removeBuildVersion)));
+                    pkgVersionsMMap.putAll(Multimaps.forMap(Maps.transformValues(image.getPackageVersions(), this::removeBuildVersion)));
                     changedVersionsByHost.put(im.getDiscoveryFQDN(), pkgVersionsMMap);
                 }
                 image = updatePackageVersions(image, packageVersionsOnHost);
@@ -272,6 +274,14 @@ public class InstanceMetadataUpdater {
             return matcher.group(1);
         }
         return versionCommandOutput;
+    }
+
+    public boolean isPackagesVersionEqual(String expectedVersion, String actualVersion) {
+        return removeBuildVersion(expectedVersion).equalsIgnoreCase(removeBuildVersion(actualVersion));
+    }
+
+    private String removeBuildVersion(String version) {
+        return version.split("-")[0];
     }
 
     private Image updatePackageVersions(Image image, Map<String, String> packageVersionsOnHost) {
