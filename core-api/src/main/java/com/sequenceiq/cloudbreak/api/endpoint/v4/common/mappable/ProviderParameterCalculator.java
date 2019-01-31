@@ -18,7 +18,6 @@ public class ProviderParameterCalculator {
 
     public Mappable get(ProviderParametersBase source) {
         return getMappable(source, source.getCloudPlatform());
-
     }
 
     private Mappable getMappable(ProviderParametersBase source, CloudPlatform cloudPlatform) {
@@ -38,7 +37,7 @@ public class ProviderParameterCalculator {
             case CUMULUS_YARN:
                 return source.createYarn();
             default:
-                throw new BadRequestException(format("No mappable for cloudplatform [%s] and source [%s]", source.getCloudPlatform(), source.getClass()));
+                throw new BadRequestException(format("No mappable for cloudplatform [%s] and source [%s]", cloudPlatform, source.getClass()));
         }
     }
 

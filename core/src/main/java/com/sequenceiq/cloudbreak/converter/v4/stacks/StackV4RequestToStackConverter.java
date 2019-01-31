@@ -24,6 +24,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
@@ -141,6 +142,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, Workspace workspace) {
         String cloudPlatform = determineCloudPlatform(source, workspace);
+        source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(source, cloudPlatform));
