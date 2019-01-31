@@ -72,7 +72,8 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .given("gatewayTopology", GatewayTopologyEntity.class).withExposedServices("AMBARI").withTopologyName("proxy-name")
                 .given("gateway", GatewayEntity.class).withTopologies("gatewayTopology")
                 .given("ambari", AmbariEntity.class).withAmbariRepoDetails("ambariRepo").withStackRepository("ambariStack")
-                .given("cluster", ClusterEntity.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap").withAmbari("ambari").withGateway("gateway")
+                .given("cluster", ClusterEntity.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap").withAmbari("ambari")
+                .withGateway("gateway")
                 .given("imageSettings", ImageSettingsEntity.class).withImageId("f6e778fc-7f17-4535-9021-515351df3691").withImageCatalog(imgCat.getName());
 
         return withNetwork("network")
@@ -198,11 +199,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     public StackV4EntityBase<T> withNetwork(NetworkV4Request network) {
-        getRequest().setNetwork(network);
-        return this;
-    }
-
-    public StackV4EntityBase<T> Network(NetworkV4Request network) {
         getRequest().setNetwork(network);
         return this;
     }

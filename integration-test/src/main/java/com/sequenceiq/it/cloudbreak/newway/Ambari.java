@@ -28,7 +28,6 @@ public class Ambari extends Entity  {
         this.request = request;
     }
 
-
     public Ambari withBlueprintName(String name) {
         request.setBlueprintName(name);
         return this;

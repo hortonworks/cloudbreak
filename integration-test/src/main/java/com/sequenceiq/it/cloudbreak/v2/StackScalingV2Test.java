@@ -51,7 +51,8 @@ public class StackScalingV2Test extends AbstractCloudbreakIntegrationTest {
         ScalingUtil.checkStackScaled(getCloudbreakClient().stackV4Endpoint(), workspaceId, stackName, hostGroup, desiredCount);
         if (checkAmbari) {
             int nodeCount = ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV4Endpoint(), workspaceId, stackName);
-            ScalingUtil.checkClusterScaled(getCloudbreakClient().stackV4Endpoint(), ambariPort, workspaceId, stackName, ambariUser, ambariPassword, nodeCount, itContext);
+            ScalingUtil.checkClusterScaled(getCloudbreakClient().stackV4Endpoint(), ambariPort, workspaceId, stackName, ambariUser, ambariPassword, nodeCount,
+                    itContext);
         }
     }
 }

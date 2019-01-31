@@ -14,7 +14,8 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response, EnvironmentSettingsV4Entity> {
+public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response,
+        EnvironmentSettingsV4Entity> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 

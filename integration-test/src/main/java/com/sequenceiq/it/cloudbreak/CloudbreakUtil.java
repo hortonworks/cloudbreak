@@ -93,7 +93,8 @@ public class CloudbreakUtil {
         }
     }
 
-    public static WaitResult waitForHostStatusStack(StackV4Endpoint stackV4Endpoint, Long workspaceId, String stackName, String hostGroup, String desiredStatus) {
+    public static WaitResult waitForHostStatusStack(StackV4Endpoint stackV4Endpoint, Long workspaceId, String stackName, String hostGroup,
+            String desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean found = FALSE;
 
@@ -130,7 +131,8 @@ public class CloudbreakUtil {
         Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
     }
 
-    public static void checkClusterAvailability(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser, String ambariPassowrd,
+    public static void checkClusterAvailability(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser,
+            String ambariPassowrd,
             boolean checkAmbari) {
         StackV4Response stackResponse = stackV4Endpoint.get(workspaceId, stackName, new HashSet<>());
         checkClusterAvailability(stackResponse, port, ambariUser, ambariPassowrd, checkAmbari);
@@ -166,7 +168,8 @@ public class CloudbreakUtil {
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
     }
 
-    public static void checkClusterStopped(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser, String ambariPassword) {
+    public static void checkClusterStopped(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser,
+            String ambariPassword) {
         StackV4Response stackResponse = stackV4Endpoint.get(workspaceId, stackName, new HashSet<>());
         checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
     }

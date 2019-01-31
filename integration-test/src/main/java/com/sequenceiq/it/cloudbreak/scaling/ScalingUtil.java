@@ -47,8 +47,8 @@ public class ScalingUtil {
                 "After scaling, the number of the nodes in stack differs from the expected number!");
     }
 
-    public static void checkClusterScaled(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser, String ambariPassword,
-            int expectedNodeCount, IntegrationTestContext itContext) {
+    public static void checkClusterScaled(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser,
+            String ambariPassword, int expectedNodeCount, IntegrationTestContext itContext) {
         StackV4Response stackResponse = stackV4Endpoint.get(workspaceId, stackName, new HashSet<>());
         checkClusterScaled(CloudbreakUtil.getAmbariIp(stackResponse, itContext), port, ambariUser, ambariPassword, expectedNodeCount, stackResponse);
     }
@@ -70,8 +70,8 @@ public class ScalingUtil {
         return getNodeCount(stackResponse);
     }
 
-    public static int getNodeCountAmbari(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackId, String ambariUser, String ambariPassword,
-            IntegrationTestContext itContext) {
+    public static int getNodeCountAmbari(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackId, String ambariUser,
+            String ambariPassword, IntegrationTestContext itContext) {
 
         String ambariIp = CloudbreakUtil.getAmbariIp(stackV4Endpoint, workspaceId, stackId, itContext);
 
