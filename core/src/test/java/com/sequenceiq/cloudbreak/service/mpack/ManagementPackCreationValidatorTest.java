@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.mpack;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,22 @@ public class ManagementPackCreationValidatorTest {
             ValidationResult validationResult = underTest.validate(managementPack);
             assertEquals(1L, validationResult.getErrors().size());
             assertThat(validationResult.getErrors().get(0), CoreMatchers.containsString(WRONG_CONTENT_TYPE));
+            assertThat(validationResult.getErrors().get(0), CoreMatchers.containsString("application/x-tar"));
+        }
+    }
+
+    @Test
+    public void testWithValidMediaType() {
+        WebTarget webTarget = Mockito.mock(WebTarget.class);
+        Builder webTargetRequest = Mockito.mock(Builder.class);
+        when(webTarget.request()).thenReturn(webTargetRequest);
+        when(client.target(anyString())).thenReturn(webTarget);
+        try (Response response = Response.ok().header("Content-Type", "application/octet-stream").build()) {
+            when(webTargetRequest.head()).thenReturn(response);
+            ManagementPack managementPack = new ManagementPack();
+            managementPack.setMpackUrl("url");
+            ValidationResult validationResult = underTest.validate(managementPack);
+            assertFalse(validationResult.hasError());
         }
     }
 

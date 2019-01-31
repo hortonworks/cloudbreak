@@ -23,6 +23,8 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
 
     private static final String MEDIA_SUB_TYPE_X_TAR = "x-tar";
 
+    private static final String MEDIA_SUB_TYPE_OCTET_STREAM = "octet-stream";
+
     private Client client;
 
     @PostConstruct
@@ -42,7 +44,8 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
             }
             if (response.getMediaType() != null) {
                 if (!isMediaTypeValid(response.getMediaType())) {
-                    resultBuilder.error(String.format("Media type ['%s'] is invalid.", response.getMediaType()));
+                    resultBuilder.error(String.format("Media type ['%s'] is invalid. It should be ['%s' or '%s'].", response.getMediaType(),
+                            MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_X_TAR, MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_OCTET_STREAM));
                 }
             }
         }
@@ -51,6 +54,6 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
 
     private boolean isMediaTypeValid(MediaType mediaType) {
         return MEDIA_TYPE_APPLICATION.equalsIgnoreCase(mediaType.getType())
-                && MEDIA_SUB_TYPE_X_TAR.equalsIgnoreCase(mediaType.getSubtype());
+                && (MEDIA_SUB_TYPE_X_TAR.equalsIgnoreCase(mediaType.getSubtype()) || MEDIA_SUB_TYPE_OCTET_STREAM.equalsIgnoreCase(mediaType.getSubtype()));
     }
 }
