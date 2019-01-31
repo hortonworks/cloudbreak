@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.HashMap;
@@ -24,6 +22,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -77,10 +76,13 @@ public class StackValidationRequestToStackValidationConverterTest {
     @Mock
     private EnvironmentViewService environmentViewService;
 
+    @Mock
+    private ConverterUtil converterUtil;
+
     @InjectMocks
     private StackValidationV4RequestToStackValidationConverter underTest;
 
-    private StackValidationV4Request validationRequest = new StackValidationV4Request();
+    private StackValidationV4Request validationRequest;
 
     private String bpName = "HDF3.1 Datascience Pack";
 
@@ -103,20 +105,18 @@ public class StackValidationRequestToStackValidationConverterTest {
         Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        try {
-            StackValidation result = underTest.convert(validationRequest);
-            fail("Validation did not fail on invalid StackValidationRequest");
-        } catch (BadRequestException e) {
-            assertEquals("Blueprint is not configured for the validation request!", e.getMessage());
-        }
+        expectedEx.expect(BadRequestException.class);
+        expectedEx.expectMessage("Blueprint is not configured for the validation request!");
+        underTest.convert(validationRequest);
     }
 
     @Test
     public void validBlueprintByName() {
         validationRequest.setNetworkId(442L);
         validationRequest.setBlueprintName(bpName);
+        validationRequest.setCredentialName("credName");
 
-        when(credentialService.get(any(), eq(workspace))).thenReturn(credential);
+        when(credentialService.getByNameForWorkspace(validationRequest.getCredentialName(), workspace)).thenReturn(credential);
 
         Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
         platformParametersMap.put(Platform.platform("GCP"), parameters);

@@ -80,12 +80,16 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         formatAccessDeniedMessage(
-                () -> validateBlueprint(stackValidationRequest, stackValidation, workspace), "blueprint", stackValidationRequest.getBlueprintName()
+                () -> validateBlueprint(stackValidationRequest, stackValidation, workspace),
+                "blueprint", stackValidationRequest.getBlueprintName()
         );
         formatAccessDeniedMessage(
-                () -> {
-                    validateEnvironment(stackValidationRequest, stackValidation, workspace);
-                }, "environment", stackValidationRequest.getEnvironmentName()
+                () -> validateEnvironment(stackValidationRequest, stackValidation, workspace),
+                "environment", stackValidationRequest.getEnvironmentName()
+        );
+        formatAccessDeniedMessage(
+                () -> validateCredential(stackValidationRequest, stackValidation, workspace),
+                "credential", stackValidationRequest.getCredentialName()
         );
         formatAccessDeniedMessage(
                 () -> validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation),
@@ -121,7 +125,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         if (stackValidationRequest.getCredentialName() != null) {
             Credential credential = credentialService.getByNameForWorkspace(stackValidationRequest.getCredentialName(), workspace);
             stackValidation.setCredential(credential);
-        } else {
+        } else if (stackValidation.getCredential() == null) {
             throw new BadRequestException("Credential is not configured for the validation request!");
         }
     }
