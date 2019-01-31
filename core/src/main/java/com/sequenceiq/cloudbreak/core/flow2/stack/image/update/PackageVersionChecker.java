@@ -59,7 +59,7 @@ public class PackageVersionChecker {
             if (StringUtils.isBlank(packageVersionInImage)) {
                 LOGGER.debug("Missing package in image: " + packageToCompare);
                 missingPackageVersion.add(packageToCompare);
-            } else if (!removeBuildVersion(packageVersionInImage).equalsIgnoreCase(removeBuildVersion(instancePackageVersions.get(packageToCompare)))) {
+            } else if (!instanceMetadataUpdater.isPackagesVersionEqual(packageVersionInImage, instancePackageVersions.get(packageToCompare))) {
                 LOGGER.debug(String.format("Different package [%s] version on image [%s] and on instance [%s]",
                         packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
                 differentPackageVersion.add(packageToCompare);
@@ -95,10 +95,6 @@ public class PackageVersionChecker {
             return CheckResult.failed(message);
         }
         return CheckResult.ok();
-    }
-
-    private String removeBuildVersion(String version) {
-        return version.split("-")[0];
     }
 
     private enum Msg {

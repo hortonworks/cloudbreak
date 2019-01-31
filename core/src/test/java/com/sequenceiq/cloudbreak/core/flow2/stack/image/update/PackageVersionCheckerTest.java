@@ -64,6 +64,7 @@ public class PackageVersionCheckerTest {
         prewarmedPackage.setName(packageName);
         prewarmedPackage.setPrewarmed(true);
         when(instanceMetadataUpdater.getPackages()).thenReturn(Lists.newArrayList(aPackage, prewarmedPackage));
+        when(instanceMetadataUpdater.isPackagesVersionEqual(anyString(), anyString())).thenReturn(true);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
@@ -86,6 +87,7 @@ public class PackageVersionCheckerTest {
         aPackage.setName(packageName);
         aPackage.setPrewarmed(true);
         when(instanceMetadataUpdater.getPackages()).thenReturn(Collections.singletonList(aPackage));
+        when(instanceMetadataUpdater.isPackagesVersionEqual(anyString(), anyString())).thenReturn(true);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
