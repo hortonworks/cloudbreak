@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.RoleBased;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.RoleType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
@@ -34,7 +33,6 @@ public class MapToAzureCredentialV4ParametersConverter extends AbstractConversio
         } else if (!isNull(source.get("roleName"))) {
             RoleBased roleBased = new RoleBased();
             roleBased.setRoleName((String) source.get("roleName"));
-            roleBased.setType(RoleType.valueOf((String) source.get("roleType")));
             parameters.setRoleBased(roleBased);
         } else {
             throw new InvalidParameterException(String.format(INVALID_MESSAGE_FORMAT, "none of them are set"));
