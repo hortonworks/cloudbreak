@@ -26,6 +26,9 @@ public class AbstractConverterTest {
         Field[] fields = obtainFields(obj);
         int count = 0;
         int skippedCount = 0;
+        Set<String> remainingFields = new HashSet<>(skippedFields);
+        remainingFields.remove("workspace");
+        remainingFields.remove("id");
         Set<String> missing = new HashSet<>();
         for (Field field : fields) {
             if (!skippedFields.contains(field.getName())) {
@@ -36,7 +39,9 @@ public class AbstractConverterTest {
             } else {
                 skippedCount++;
             }
+            remainingFields.remove(field.getName());
         }
+        assertTrue("Field(s) \"" + String.join("\", \"", remainingFields) + "\" is not exists on class anymore.", remainingFields.isEmpty());
         LOGGER.info("Checked fields count: {}, skipped counts: {}", count, skippedCount);
         assertTrue("Field(s) \"" + String.join("\", \"", missing) + "\" is null.", missing.isEmpty());
     }

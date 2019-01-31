@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Collections;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +21,7 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends Abstr
     public void testConvertWhenBaseImage() {
         StackRepoDetails result = underTest.convert(getRequest("stack/ambari-stack-details-base-image.json"));
 
-        assertAllFieldsNotNull(result, Collections.singletonList("knox"));
+        assertAllFieldsNotNull(result);
 
         Assert.assertFalse(result.getStack().containsKey(StackRepoDetails.CUSTOM_VDF_REPO_KEY));
     }

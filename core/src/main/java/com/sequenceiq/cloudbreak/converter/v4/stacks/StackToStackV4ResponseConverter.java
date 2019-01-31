@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
@@ -139,12 +141,21 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
             cluster.getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
                     .findFirst()
-                    .ifPresent(hostGroup ->
-                            mergeInstanceGroups(getConversionService().convert(hostGroup, InstanceGroupV4Response.class), instanceGroupResponse));
-        }
-    }
+                    .ifPresent(hostGroup -> {
+                        instanceGroupResponse.setRecipes(converterUtil.convertAll(hostGroup.getRecipes(), RecipeV4Response.class));
+                        instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
 
-    private void mergeInstanceGroups(InstanceGroupV4Response mergeInto, InstanceGroupV4Response mergeThis) {
-        mergeInto.setRecipes(mergeThis.getRecipes());
+                        Map<String, String> metaDataStates = new HashMap<>();
+
+                        instanceGroup.getInstanceMetaDataSet()
+                                .forEach(imd -> hostGroup.getHostMetadata().stream()
+                                        .filter(s -> s.getHostName().equals(imd.getDiscoveryFQDN()))
+                                        .findFirst()
+                                        .ifPresent(hmd -> metaDataStates.put(hmd.getHostName(), hmd.getHostMetadataState().name()))
+                                );
+
+                        instanceGroupResponse.getMetadata().forEach(md -> md.setState(metaDataStates.get(md.getDiscoveryFQDN())));
+                    });
+        }
     }
 }

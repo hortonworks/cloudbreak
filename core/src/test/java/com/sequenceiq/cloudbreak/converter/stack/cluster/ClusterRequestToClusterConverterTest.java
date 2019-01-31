@@ -72,7 +72,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
+                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime",
                 "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant", "description"));
     }
 
@@ -89,8 +89,8 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
-                "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant", "description"));
+                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText",
+                "environment", "variant", "description"));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(clusterRequest);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
+                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime",
                 "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment", "variant", "description"));
         assertNull(result.getGateway());
     }

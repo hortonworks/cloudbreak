@@ -47,7 +47,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
         // WHEN
         SecurityGroup result = underTest.convert(getRequest("security-group/security-group.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("securityGroupId", "cloudPlatform", "description"));
+        assertAllFieldsNotNull(result, Arrays.asList("cloudPlatform", "description"));
     }
 
     @Override

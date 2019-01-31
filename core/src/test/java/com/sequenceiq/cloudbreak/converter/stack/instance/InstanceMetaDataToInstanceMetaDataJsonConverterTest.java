@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.converter.stack.instance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,7 +33,7 @@ public class InstanceMetaDataToInstanceMetaDataJsonConverterTest extends Abstrac
         // THEN
         assertEquals("test-1-1", result.getDiscoveryFQDN());
         assertTrue(result.getAmbariServer());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("state"));
     }
 
     @Override

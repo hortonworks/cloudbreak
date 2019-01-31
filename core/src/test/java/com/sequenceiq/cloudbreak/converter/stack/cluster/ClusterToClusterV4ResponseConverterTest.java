@@ -153,8 +153,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         ClusterV4Response result = underTest.convert(source);
         // THEN
         assertEquals(1L, (long) result.getId());
-        assertAllFieldsNotNull(result, Lists.newArrayList("blueprintCustomProperties", "ldap",
-                "exposedKnoxServices", "customContainers", "ambari", "creationFinished", "kerberos", "cloudStorage", "gateway"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("ldap", "customContainers", "ambari", "creationFinished", "kerberos", "cloudStorage", "gateway"));
     }
 
     @Test
