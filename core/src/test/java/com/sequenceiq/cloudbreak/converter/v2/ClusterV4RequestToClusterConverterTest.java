@@ -50,12 +50,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,12 +73,6 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Mock
     private WorkspaceService workspaceService;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private ProxyConfigService proxyConfigService;
@@ -110,10 +102,7 @@ public class ClusterV4RequestToClusterConverterTest {
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         User user = mock(User.class);
 
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspace.getId());
-        when(workspaceService.get(workspace.getId(), user)).thenReturn(workspace);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
 
         when(cloudStorageValidationUtil.isCloudStorageConfigured(any(CloudStorageV4Request.class))).thenReturn(false);
     }
@@ -142,6 +131,7 @@ public class ClusterV4RequestToClusterConverterTest {
         source.setDatabases(singleton(rdsConfigName));
         source.setProxyName(proxyName);
         source.setLdapName(ldapName);
+        source.setAmbari(new AmbariV4Request());
 
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
@@ -168,6 +158,7 @@ public class ClusterV4RequestToClusterConverterTest {
     @Test
     public void testConvertWhenNoRdsConfig() {
         ClusterV4Request source = new ClusterV4Request();
+        source.setAmbari(new AmbariV4Request());
 
         Set<String> rdsConfigNames = emptySet();
 
@@ -181,6 +172,7 @@ public class ClusterV4RequestToClusterConverterTest {
     @Test
     public void testConvertWhenRdsConfigNotExists() {
         ClusterV4Request source = new ClusterV4Request();
+        source.setAmbari(new AmbariV4Request());
 
         Set<String> rdsConfigNames = singleton("fake-rds-name");
         when(rdsConfigService.findByNamesInWorkspace(rdsConfigNames, workspace.getId())).thenReturn(emptySet());
@@ -309,6 +301,7 @@ public class ClusterV4RequestToClusterConverterTest {
 
         AmbariV4Request ambariV4Request = new AmbariV4Request();
         GatewayV4Request gatewayJson = new GatewayV4Request();
+        source.setGateway(gatewayJson);
         source.setAmbari(ambariV4Request);
         Gateway gateway = new Gateway();
 

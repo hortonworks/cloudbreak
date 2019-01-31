@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 
 import io.swagger.annotations.ApiModel;
@@ -30,7 +31,7 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
     private PlacementSettingsV4Response placement;
 
     @ApiModelProperty(CREDENTIAL_NAME)
-    private String credentialName;
+    private CredentialV4Response credential;
 
     private String cloudPlatform;
 
@@ -50,12 +51,12 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
         this.placement = placement;
     }
 
-    public String getCredentialName() {
-        return credentialName;
+    public CredentialV4Response getCredential() {
+        return credential;
     }
 
-    public void setCredentialName(String credentialName) {
-        this.credentialName = credentialName;
+    public void setCredential(CredentialV4Response credential) {
+        this.credential = credential;
     }
 
     public String getCloudPlatform() {

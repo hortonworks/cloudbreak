@@ -18,13 +18,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
@@ -35,19 +34,20 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -72,25 +72,23 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private KerberosService kerberosService;
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private BlueprintService blueprintService;
 
     @Inject
     private WorkspaceService workspaceService;
 
     @Inject
-    private UserService userService;
+    private RdsConfigService rdsConfigService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private ProxyConfigService proxyConfigService;
+
+    @Inject
+    private LdapConfigService ldapConfigService;
 
     @Override
     public Cluster convert(ClusterV4Request source) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Workspace workspace = workspaceService.getForCurrentUser();
 
         Cluster cluster = new Cluster();
         cluster.setName(source.getName());
@@ -101,8 +99,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         convertGateway(source, cluster);
 
         if (source.getKerberosName() != null) {
-            KerberosConfig kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getKerberosName(),
-                    restRequestThreadLocalService.getRequestedWorkspaceId());
+            KerberosConfig kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getKerberosName(), workspace.getId());
             cluster.setKerberosConfig(kerberosConfig);
         }
         cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
@@ -124,6 +121,8 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
         updateDatabases(source, cluster, workspace);
         extractAmbariAndHdpRepoConfig(cluster, source.getAmbari());
+        cluster.setProxyConfig(getProxyConfig(source.getProxyName(), workspace));
+        cluster.setLdapConfig(getLdap(source.getLdapName(), workspace));
         return cluster;
     }
 
@@ -196,5 +195,19 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             }
             cluster.setRdsConfigs(rdsConfigs);
         }
+    }
+
+    private ProxyConfig getProxyConfig(String proxyName, Workspace workspace) {
+        if (StringUtils.isNotBlank(proxyName)) {
+            return proxyConfigService.getByNameForWorkspace(proxyName, workspace);
+        }
+        return null;
+    }
+
+    private LdapConfig getLdap(String ldapName, Workspace workspace) {
+        if (ldapName != null) {
+            return ldapConfigService.getByNameForWorkspace(ldapName, workspace);
+        }
+        return null;
     }
 }

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -56,7 +56,7 @@ public class WorkspaceService {
     private WorkspaceModificationVerifierService verifierService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public Workspace create(User user, Workspace workspace) {
         try {
@@ -317,5 +317,11 @@ public class WorkspaceService {
     private void setupDeletionDateAndFlag(Workspace workspaceForDelete) {
         workspaceForDelete.setStatus(DELETED);
         workspaceForDelete.setDeletionTimestamp(Calendar.getInstance().getTimeInMillis());
+    }
+
+    public Workspace getForCurrentUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        return get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
     }
 }

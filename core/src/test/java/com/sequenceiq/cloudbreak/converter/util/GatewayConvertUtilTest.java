@@ -14,10 +14,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -27,10 +27,10 @@ public class GatewayConvertUtilTest {
     private static final String DEPRECATED_TOPOLOGY_NAME = "deprecated";
 
     @Mock
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @InjectMocks
-    private final GatewayConvertUtil underTest = new GatewayConvertUtil();
+    private GatewayConvertUtil underTest;
 
     @Test
     public void testSetMultipleTopologies() {
@@ -47,11 +47,11 @@ public class GatewayConvertUtilTest {
         source.setTopologies(Arrays.asList(topology1, topology2));
         Gateway result = new Gateway();
 
-        when(conversionService.convert(any(), any())).thenReturn(new GatewayTopology());
+        when(converterUtil.convert(any(), any())).thenReturn(new GatewayTopology());
 
         underTest.setTopologies(source, result);
 
-        verify(conversionService, times(2)).convert(any(), any());
+        verify(converterUtil, times(2)).convert(any(), any());
     }
 
     @Test

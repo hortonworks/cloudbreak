@@ -301,7 +301,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static StackEntity checkCredentialInStack(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
-        String credentialName = stack.getResponse().getCredential().getName();
+        String credentialName = stack.getResponse().getEnvironment().getCredential().getName();
         if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
             throw new TestFailException("Credential is not attached to cluster");
         }
