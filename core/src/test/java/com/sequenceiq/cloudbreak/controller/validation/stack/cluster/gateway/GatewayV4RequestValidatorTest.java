@@ -18,10 +18,9 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.conf.ConversionConfig;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
-import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {GatewayV4RequestValidator.class, ConversionConfig.class, ConverterUtil.class, GatewayConvertUtil.class})
+@ContextConfiguration(classes = {GatewayV4RequestValidator.class, ConversionConfig.class, ConverterUtil.class})
 public class GatewayV4RequestValidatorTest {
 
     @Inject

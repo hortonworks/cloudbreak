@@ -15,13 +15,9 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class NetworkV4RequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkV4Request, Network> {
-
-    @Inject
-    private TopologyService topologyService;
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;

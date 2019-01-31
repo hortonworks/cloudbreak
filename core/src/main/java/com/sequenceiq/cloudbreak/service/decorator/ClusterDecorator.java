@@ -12,15 +12,12 @@ import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -45,22 +42,10 @@ public class ClusterDecorator {
     private BlueprintService blueprintService;
 
     @Inject
-    private BlueprintValidator blueprintValidator;
-
-    @Inject
-    private ConversionService conversionService;
-
-    @Inject
-    private HostGroupDecorator hostGroupDecorator;
-
-    @Inject
     private RdsConfigService rdsConfigService;
 
     @Inject
     private LdapConfigService ldapConfigService;
-
-    @Inject
-    private LdapConfigValidator ldapConfigValidator;
 
     @Inject
     private ClusterProxyDecorator clusterProxyDecorator;

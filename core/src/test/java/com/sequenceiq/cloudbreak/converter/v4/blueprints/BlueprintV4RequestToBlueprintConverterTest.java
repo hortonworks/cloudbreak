@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +56,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint.json"));
-        assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
+        assertAllFieldsNotNull(result);
         Assert.assertEquals("{}", result.getTags().getValue());
         Assert.assertEquals("HDP", result.getStackType());
         Assert.assertEquals("2.3", result.getStackVersion());
@@ -66,7 +65,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
-        assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
+        assertAllFieldsNotNull(result);
         Assert.assertEquals("{}", result.getTags().getValue());
         Assert.assertEquals("HDP", result.getStackType());
         Assert.assertEquals("2.3", result.getStackVersion());
@@ -75,7 +74,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenInputJsonHasTagsFieldAndItHasMoreThanOneFieldInIt() {
         Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
-        assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
+        assertAllFieldsNotNull(result);
         Assert.assertTrue(result.getTags().getMap().size() > 1);
         Assert.assertEquals("HDP", result.getStackType());
         Assert.assertEquals("2.3", result.getStackVersion());

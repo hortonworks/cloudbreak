@@ -13,58 +13,40 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
     @InjectMocks
@@ -74,46 +56,10 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     private ConversionService conversionService;
 
     @Mock
-    private JsonNode jsonNode;
-
-    @Mock
-    private JsonNode nameJsonNode;
-
-    @Mock
-    private Iterator<JsonNode> mockIterator;
-
-    @Mock
-    private Map<String, HostGroup> hostGroupMap;
-
-    @Mock
-    private HostGroup hostGroup;
-
-    @Mock
-    private InstanceGroup instanceGroup;
-
-    @Mock
-    private InstanceMetaData instanceMetaData;
-
-    @Mock
-    private Iterator<JsonNode> mockComponentIterator;
-
-    @Mock
-    private AmbariViewProvider ambariViewProvider;
-
-    @Mock
-    private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Mock
     private StackUtil stackUtil;
 
     @Mock
     private StackService stackService;
-
-    @Mock
-    private RdsConfigService rdsConfigService;
-
-    @Mock
-    private ClusterComponentConfigProvider componentConfigProvider;
 
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
@@ -125,11 +71,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     private ConverterUtil converterUtil;
 
     @Before
-    public void setUp() throws CloudbreakException {
-        underTest = new ClusterToClusterV4ResponseConverter();
-        MockitoAnnotations.initMocks(this);
-        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
-        given(rdsConfigService.findByClusterId(anyLong())).willReturn(new HashSet<>());
+    public void setUp() {
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
                 .willReturn(new WorkspaceResourceV4Response());
@@ -139,7 +81,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvert() throws IOException {
         // GIVEN
-        mockAll();
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
         Cluster source = getSource();
@@ -147,7 +88,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
-        when(conversionService.convert(any(String.class), any())).thenAnswer(invocation -> new SecretV4Response(null, invocation.getArgument(0)));
         when(conversionService.convert(source.getProxyConfig(), ProxyV4Response.class)).thenReturn(new ProxyV4Response());
         // WHEN
         ClusterV4Response result = underTest.convert(source);
@@ -159,7 +99,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvertWithoutUpSinceField() throws IOException {
         // GIVEN
-        mockAll();
         getSource().setUpSince(null);
         // WHEN
         ClusterV4Response result = underTest.convert(getSource());
@@ -170,7 +109,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvertWithoutMasterComponent() throws IOException {
         // GIVEN
-        mockAll();
         // WHEN
         ClusterV4Response result = underTest.convert(getSource());
         // THEN
@@ -178,8 +116,11 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     }
 
     @Test
-    public void testExposedServices() throws IOException {
-        mockAll();
+    public void testExposedServices() {
+        Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponseMap = new HashMap<>();
+        exposedServiceResponseMap.put("topology1", getExpiosedServices());
+        given(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).willReturn(exposedServiceResponseMap);
+
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
         ClusterV4Response clusterResponse = underTest.convert(getSource());
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies = clusterResponse.getExposedServices();
@@ -202,28 +143,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         return cluster;
     }
 
-    private void mockAll() throws IOException {
-        when(ambariViewProvider.provideViewInformation(any(AmbariClient.class), any(Cluster.class))).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            return args[1];
-        });
-        given(jsonNode.iterator()).willReturn(mockIterator);
-        given(mockIterator.hasNext()).willReturn(true).willReturn(false);
-        given(mockIterator.next()).willReturn(jsonNode);
-        given(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Base.class))).willReturn(new DatabaseV4Request());
-        given(conversionService.convert(any(Gateway.class), eq(GatewayV4Request.class))).willReturn(new GatewayV4Request());
-        given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
-        given(instanceGroup.getNotDeletedInstanceMetaDataSet()).willReturn(Sets.newHashSet(instanceMetaData));
-        given(nameJsonNode.iterator()).willReturn(mockComponentIterator);
-        given(mockComponentIterator.hasNext()).willReturn(true).willReturn(false);
-        given(mockComponentIterator.next()).willReturn(nameJsonNode);
-        given(nameJsonNode.get(anyString())).willReturn(nameJsonNode);
-        given(nameJsonNode.asText()).willReturn("dummyName");
-        given(componentConfigProvider.getAmbariRepo(any(Set.class))).willReturn(null);
-        ProxyV4Response proxyV4Response = new ProxyV4Response();
-        proxyV4Response.setId(1L);
-        given(serviceEndpointCollector.getAmbariServerUrl(any(), anyString())).willReturn("http://ambari.com");
-        Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponseMap = new HashMap<>();
+    private List<ClusterExposedServiceV4Response> getExpiosedServices() {
         List<ClusterExposedServiceV4Response> clusterExposedServiceResponseList = new ArrayList<>();
         ClusterExposedServiceV4Response firstClusterExposedServiceV4Response = new ClusterExposedServiceV4Response();
         firstClusterExposedServiceV4Response.setOpen(true);
@@ -239,8 +159,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         secondClusterExposedServiceV4Response.setKnoxService("knoxService2");
         secondClusterExposedServiceV4Response.setDisplayName("displayName2");
         clusterExposedServiceResponseList.add(secondClusterExposedServiceV4Response);
-        exposedServiceResponseMap.put("topology1", clusterExposedServiceResponseList);
-        given(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).willReturn(exposedServiceResponseMap);
+        return clusterExposedServiceResponseList;
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {

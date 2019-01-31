@@ -57,9 +57,6 @@ public class UserProfileService {
     @Inject
     private WorkspaceService workspaceService;
 
-    @Inject
-    private CachedUserService cachedUserService;
-
     public UserProfile getOrCreateForLoggedInUser() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);

@@ -13,12 +13,10 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -48,19 +46,10 @@ public class ClusterDecoratorTest {
     private StackService stackService;
 
     @Mock
-    private ConversionService conversionService;
-
-    @Mock
-    private HostGroupDecorator hostGroupDecorator;
-
-    @Mock
     private RdsConfigService rdsConfigService;
 
     @Mock
     private LdapConfigService ldapConfigService;
-
-    @Mock
-    private LdapConfigValidator ldapConfigValidator;
 
     @Mock
     private ClusterService clusterService;

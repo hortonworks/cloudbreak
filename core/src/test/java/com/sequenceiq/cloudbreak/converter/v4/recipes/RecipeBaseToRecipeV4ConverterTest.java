@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.recipes;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +22,7 @@ public class RecipeBaseToRecipeV4ConverterTest extends AbstractJsonConverterTest
         // WHEN
         Recipe result = underTest.convert(getRequest("recipe.json"));
         // THEN
-        assertAllFieldsNotNull(result, Collections.singletonList("plugins"));
+        assertAllFieldsNotNull(result);
     }
 
     @Override

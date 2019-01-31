@@ -22,7 +22,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -46,9 +45,6 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private AmbariClientFactory ambariClientFactory;
-
-    @Inject
-    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Inject
     private KerberosConfigProvider kerberosConfigProvider;

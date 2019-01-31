@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -61,9 +60,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
 
     @Value("${cb.ambari.dp.username:dpapps}")
     private String dpUsername;
-
-    @Inject
-    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
