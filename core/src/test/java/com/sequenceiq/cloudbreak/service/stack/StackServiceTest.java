@@ -5,9 +5,9 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -72,21 +71,9 @@ public class StackServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String INSTANCE_ID = "instanceId";
-
-    private static final String INSTANCE_ID2 = "instanceId2";
-
-    private static final String INSTANCE_PUBLIC_IP = "2.2.2.2";
-
-    private static final String INSTANCE_PUBLIC_IP2 = "3.3.3.3";
-
     private static final String OWNER = "1234567";
 
-    private static final String USER_ID = OWNER;
-
     private static final String VARIANT_VALUE = "VARIANT_VALUE";
-
-    private static final String IMAGE_CATALOG = "IMAGE_CATALOG";
 
     private static final String STACK_NAME = "name";
 
@@ -115,16 +102,7 @@ public class StackServiceTest {
     private ReactorFlowManager flowManager;
 
     @Mock
-    private StackDownscaleValidatorService downscaleValidatorService;
-
-    @Mock
     private Stack stack;
-
-    @Mock
-    private InstanceMetaData instanceMetaData;
-
-    @Mock
-    private InstanceMetaData instanceMetaData2;
 
     @Mock
     private User user;

@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -58,7 +57,37 @@ public class StackCommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
 
     @Inject
-    private StackService stackService;
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Inject
+    private PermissionCheckingUtils permissionCheckingUtils;
+
+    @Inject
+    private CentralBlueprintUpdater centralBlueprintUpdater;
+
+    @Inject
+    private OperationRetryService operationRetryService;
+
+    @Inject
+    private ClusterCommonService clusterCommonService;
+
+    @Inject
+    private CloudParameterCache cloudParameterCache;
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private FileSystemValidator fileSystemValidator;
+
+    @Inject
+    private StackCreatorService stackCreatorService;
 
     @Inject
     private StackApiViewService stackApiViewService;
@@ -67,52 +96,19 @@ public class StackCommonService {
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private CloudParameterService parameterService;
-
-    @Inject
-    private FileSystemValidator fileSystemValidator;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
-    private StackCreatorService stackCreatorService;
-
-    @Inject
-    private ScalingHardLimitsService scalingHardLimitsService;
-
-    @Inject
     private WorkspaceService workspaceService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
-
-    @Inject
-    private CloudParameterCache cloudParameterCache;
-
-    @Inject
-    private ClusterCommonService clusterCommonService;
 
     @Inject
     private ClusterService clusterService;
 
     @Inject
-    private OperationRetryService operationRetryService;
-
-    @Inject
-    private CentralBlueprintUpdater centralBlueprintUpdater;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
-
-    @Inject
     private ConverterUtil converterUtil;
 
     @Inject
-    private UserService userService;
+    private StackService stackService;
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+    private UserService userService;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
         return stackCreatorService.createStack(cloudbreakUser, user, workspace, stackRequest);
@@ -122,28 +118,8 @@ public class StackCommonService {
         stackService.delete(name, workspaceId, forced, deleteDependencies, user);
     }
 
-    public Set<StackV4Response> getStacksInDefaultWorkspace() {
-        return stackService.retrieveStacksByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId());
-    }
-
     public StackV4Response get(Long id, Set<String> entries) {
         return stackService.getJsonById(id, entries);
-    }
-
-    public StackV4Response getStackFromDefaultWorkspace(String name, Set<String> entries) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return stackService.getStackByNameInWorkspace(name, entries, workspace);
-    }
-
-    public void deleteById(Long id, Boolean forced, Boolean deleteDependencies) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackService.delete(id, forced, deleteDependencies, user);
-    }
-
-    public void deleteInDefaultWorkspace(String name, Boolean forced, Boolean deleteDependencies) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackService.delete(name, restRequestThreadLocalService.getRequestedWorkspaceId(), forced, deleteDependencies, user);
     }
 
     public Set<StackViewV4Response> retrieveStacksByWorkspaceId(Long workspaceId, String environment, boolean onlyDatalakes) {
@@ -253,18 +229,6 @@ public class StackCommonService {
         operationRetryService.retry(stack);
     }
 
-    private void put(Stack stack, UpdateStackV4Request updateRequest) {
-        MDCBuilder.buildMdcContext(stack);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (updateRequest.getStatus() != null) {
-            stackService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
-        } else {
-            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-            validateHardLimits(scalingAdjustment);
-            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
-        }
-    }
-
     public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {
         TemplatePreparationObject templatePreparationObject = converterUtil.convert(stackRequest, TemplatePreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
@@ -294,27 +258,11 @@ public class StackCommonService {
         fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential, request.getCloudStorage(), null, null);
     }
 
-    public void deleteInstance(Long stackId, String instanceId) {
-        deleteInstance(stackId, instanceId, false);
-    }
-
-    public void deleteInstance(Long stackId, String instanceId, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(), WorkspaceResource.STACK,
-                Action.WRITE, user);
-        stackService.removeInstance(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceId, forced, user);
-    }
-
     public void deleteInstanceByNameInWorkspace(String name, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
-    }
-
-    public void deleteInstances(Long stackId, Set<String> instanceIds) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackService.removeInstances(stackId, restRequestThreadLocalService.getRequestedWorkspaceId(), instanceIds, user);
     }
 
     public void changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
@@ -329,10 +277,23 @@ public class StackCommonService {
         }
     }
 
+    private void put(Stack stack, UpdateStackV4Request updateRequest) {
+        MDCBuilder.buildMdcContext(stack);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        if (updateRequest.getStatus() != null) {
+            stackService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
+        } else {
+            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+            validateHardLimits(scalingAdjustment);
+            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
+        }
+    }
+
     private void validateHardLimits(Integer scalingAdjustment) {
         if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
                     scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
     }
+
 }
