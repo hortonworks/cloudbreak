@@ -7,7 +7,8 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ManagementPackDetailsEntity extends AbstractCloudbreakEntity<ManagementPackDetailsV4Request, ManagementPackDetailsV4Response, ManagementPackDetailsEntity> {
+public class ManagementPackDetailsEntity extends AbstractCloudbreakEntity<ManagementPackDetailsV4Request, ManagementPackDetailsV4Response,
+        ManagementPackDetailsEntity> {
 
     public ManagementPackDetailsEntity(TestContext testContext) {
         super(new ManagementPackDetailsV4Request(), testContext);

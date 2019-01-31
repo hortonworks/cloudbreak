@@ -107,7 +107,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setInstanceGroups(igMap);
 
         if (!userDefinedTags.isEmpty()) {
-            stackRequest.getTags().setUserDefined((TagsUtil.getTagsToCheck(userDefinedTags)));
+            stackRequest.getTags().setUserDefined(TagsUtil.getTagsToCheck(userDefinedTags));
         }
 
         // WHEN

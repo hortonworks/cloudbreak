@@ -32,10 +32,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -54,34 +54,32 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
-    private static final Long BLUEPRINT_ID = 1L;
-
     private static final String TEST_CREDENTIAL_NAME = "testCred";
+
+    private static final String TEST_BLUEPRINT_NAME = "testBp";
 
     private static final String TEST_BLUEPRINT_TEXT = "{}";
 
     private static final int GENERAL_TEST_QUANTITY = 2;
 
     private static final String TEST_VERSION = "2.6";
+
+    private static final String TEST_KERBEROS_NAME = "somename";
 
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
@@ -91,9 +89,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Mock
     private LdapConfigService ldapConfigService;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private RdsConfigService rdsConfigService;
@@ -114,19 +109,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private StackInfoService stackInfoService;
 
     @Mock
-    private SharedServiceConfigsViewProvider sharedServiceConfigsViewProvider;
-
-    @Mock
-    private SharedServiceConfigProvider sharedServiceConfigProvider;
-
-    @Mock
-    private FileSystemConfigService fileSystemConfigService;
-
-    @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Mock
-    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     @Mock
     private CloudStorageValidationUtil cloudStorageValidationUtil;
@@ -150,6 +133,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private Workspace workspace;
 
     @Mock
+    private EnvironmentSettingsV4Request environment;
+
+    @Mock
+    private Credential credential;
+
+    @Mock
     private ClusterV4Request cluster;
 
     @Mock
@@ -171,13 +160,18 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(source.getEnvironment()).thenReturn(environment);
+        when(environment.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);
         when(cluster.getAmbari()).thenReturn(ambari);
+        when(ambari.getBlueprintName()).thenReturn(TEST_BLUEPRINT_NAME);
+        when(blueprintService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
+        when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
     }
 
     @Test
@@ -194,7 +188,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenFlexSubscriptioDoesNotExistsThenEmptyOptionalShouldBeStored() {
+    public void testConvertWhenFlexSubscriptionDoesNotExistThenEmptyOptionalShouldBeStored() {
         when(source.getFlexId()).thenReturn(null);
 
         TemplatePreparationObject result = underTest.convert(source);
@@ -219,7 +213,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenFlexSubscriptionDoesNotExistsThenEmptyOptionalShouldBeStoredAsSmartsenseSubscriptionId() {
+    public void testConvertWhenFlexSubscriptionDoesNotExistThenEmptyOptionalShouldBeStoredAsSmartsenseSubscriptionId() {
         when(source.getFlexId()).thenReturn(null);
 
         TemplatePreparationObject result = underTest.convert(source);
@@ -228,7 +222,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenKerberosRequestIsNullInAmbariV2RequestThenEmptyKerberosShouldBeStored() {
+    public void testConvertWhenKerberosNameIsNullInAmbariThenEmptyKerberosShouldBeStored() {
         when(cluster.getKerberosName()).thenReturn(null);
 
         TemplatePreparationObject result = underTest.convert(source);
@@ -238,8 +232,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenKerberosRequestIsNotNullInAmbariV2RequestButSecurityFalseThenEmptyKerberosShouldBeStored() {
-        when(cluster.getKerberosName()).thenReturn("something");
+    public void testConvertWhenKerberosNameIsNotNullInAmbariButSecurityFalseThenEmptyKerberosShouldBeStored() {
+        when(cluster.getKerberosName()).thenReturn(TEST_KERBEROS_NAME);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -248,10 +242,10 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenKerberosRequestIsNotNullInAmbariV2RequestAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
+    public void testConvertWhenKerberosNameIsNotNullInAmbariAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
         KerberosConfig expected = new KerberosConfig();
-        when(cluster.getKerberosName()).thenReturn("somename");
-        when(kerberosService.getByNameForWorkspaceId(eq("somename"), anyLong())).thenReturn(expected);
+        when(cluster.getKerberosName()).thenReturn(TEST_KERBEROS_NAME);
+        when(kerberosService.getByNameForWorkspaceId(eq(TEST_KERBEROS_NAME), anyLong())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -262,10 +256,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenGatewayComingFromStackV2RequestConversion() {
+    public void testConvertWhenGatewayExistsInStack() {
         when(conversionService.convert(source, Gateway.class)).thenReturn(new Gateway());
         when(cluster.getGateway()).thenReturn(new GatewayV4Request());
-
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -283,7 +276,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenClusterHaveSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
+    public void testConvertWhenClusterHasSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getDatabases()).thenReturn(rdsConfigNames);
         long id = 0;
@@ -297,7 +290,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenStackV2RequestHasNoInstanceGroupV2RequestThenTheHostGroupViewParameterShouldContainsOnlyAnEmptySet() {
+    public void testConvertWhenStackHasNoInstanceGroupThenTheHostGroupViewParameterShouldContainOnlyAnEmptySet() {
         when(source.getInstanceGroups()).thenReturn(Collections.emptyList());
 
         TemplatePreparationObject result = underTest.convert(source);
@@ -306,13 +299,13 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenStackV2RequestContainsSomeInstanceGroupV2RequestThenTheSameAmountOfHostGroupViewShouldBeStored() {
-        List<InstanceGroupV4Request> instanceGroupV2Requests = createInstanceGroupV2Requests();
-        when(source.getInstanceGroups()).thenReturn(instanceGroupV2Requests);
+    public void testConvertWhenStackContainsSomeInstanceGroupThenTheSameAmountOfHostGroupViewShouldBeStored() {
+        List<InstanceGroupV4Request> instanceGroups = createInstanceGroups();
+        when(source.getInstanceGroups()).thenReturn(instanceGroups);
 
         TemplatePreparationObject result = underTest.convert(source);
 
-        assertEquals(instanceGroupV2Requests.size(), result.getHostgroupViews().size());
+        assertEquals(instanceGroups.size(), result.getHostgroupViews().size());
     }
 
     @Test
@@ -355,10 +348,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
         FileSystem fileSystem = new FileSystem();
-        Credential credential = new Credential();
         String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
-        when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
         when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential)).thenReturn(expected);
@@ -409,18 +400,19 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         return rdsConfigNames;
     }
 
-    private List<InstanceGroupV4Request> createInstanceGroupV2Requests() {
-        List<InstanceGroupV4Request> requests = new ArrayList<>(GENERAL_TEST_QUANTITY);
+    private List<InstanceGroupV4Request> createInstanceGroups() {
+        List<InstanceGroupV4Request> instanceGroups = new ArrayList<>(GENERAL_TEST_QUANTITY);
         for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
-            InstanceGroupV4Request request = new InstanceGroupV4Request();
-            InstanceTemplateV4Request templateV2Request = new InstanceTemplateV4Request();
-            request.setName(String.format("group-%d", i));
-            request.setTemplate(templateV2Request);
-            request.setType(InstanceGroupType.CORE);
-            request.setNodeCount(i);
-            requests.add(request);
+            InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
+            InstanceTemplateV4Request template = new InstanceTemplateV4Request();
+            template.setAttachedVolumes(Collections.EMPTY_SET);
+            instanceGroup.setName(String.format("group-%d", i));
+            instanceGroup.setTemplate(template);
+            instanceGroup.setType(InstanceGroupType.CORE);
+            instanceGroup.setNodeCount(i);
+            instanceGroups.add(instanceGroup);
         }
-        return requests;
+        return instanceGroups;
     }
 
 }

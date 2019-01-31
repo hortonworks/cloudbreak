@@ -23,7 +23,8 @@ public class ExistingSshKeySelectionTest extends AbstractCloudbreakIntegrationTe
         availabilityZone = StringUtils.hasText(availabilityZone) ? availabilityZone : itContext.getContextParam(CloudbreakV2Constants.AVAILABILTYZONE);
         // WHEN
         throw new TestFailException("Ater api refactor still unknown how to obtain paltform variant for request");
-        /*PlatformSshKeysV4Response cloudSshKeys = getCloudbreakClient().connectorV4Endpoint().getCloudSshKeys(workspaceId, credentialName, region, "", availabilityZone);
+        /*PlatformSshKeysV4Response cloudSshKeys = getCloudbreakClient().connectorV4Endpoint().getCloudSshKeys(workspaceId, credentialName, region, "",
+                availabilityZone);
         // THEN
         Set<PlatformSshKeyV4Response> regionKeys = cloudSshKeys.getSshKeys().get(region);
         Assert.assertNotNull(regionKeys, "keys cannot be null for " + region);
