@@ -5,12 +5,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,16 +24,19 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -42,6 +47,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -81,23 +87,24 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         underTest = new StackToStackV4ResponseConverter();
         MockitoAnnotations.initMocks(this);
         when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
-            "redhat6", "", "default", "default-id", new HashMap<>()));
+                "redhat6", "", "default", "default-id", new HashMap<>()));
         when(componentConfigProvider.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         when(componentConfigProvider.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         when(clusterComponentConfigProvider.getHDPRepo(anyLong())).thenReturn(new StackRepoDetails());
-        when(clusterComponentConfigProvider.getAmbariDatabase(anyLong())).thenReturn(new AmbariDatabase());
         when(clusterComponentConfigProvider.getAmbariRepo(anyLong())).thenReturn(new AmbariRepo());
     }
 
     @Test
-    public void testConvert() {
+    public void testConvert() throws CloudbreakImageNotFoundException {
 
         Stack source = getSource();
-        source.setCredential(null);
         // GIVEN
-        given(conversionService.convert(any(StackImageV4Response.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
+        given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
-        given(conversionService.convert(any(), eq(CredentialV4Response.class))).willReturn(new CredentialV4Response());
+        given(conversionService.convert(any(), eq(EnvironmentSettingsV4Response.class))).willReturn(new EnvironmentSettingsV4Response());
+        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
+        given(conversionService.convert(any(), eq(FlexSubscriptionV4Response.class))).willReturn(new FlexSubscriptionV4Response());
         given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
         given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
@@ -106,33 +113,19 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("terminated", "flexSubscription"));
+        assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure"));
     }
 
     @Test
-    public void testConvertWithoutCredential() {
-        Stack source = getSource();
-        source.setCredential(null);
-        // GIVEN
-        given(conversionService.convert(any(StackImageV4Response.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
-        given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
-        given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
-        given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
-        given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
-        given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
-        given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
-        // WHEN
-        StackV4Response result = underTest.convert(source);
-        // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("terminated", "credentialId", "cloudPlatform", "cloudbreakDetails"));
-    }
-
-    @Test
-    public void testConvertWithoutCluster() {
+    public void testConvertWithoutCluster() throws CloudbreakImageNotFoundException {
         Stack source = getSource();
         // GIVEN
         getSource().setCluster(null);
-        given(conversionService.convert(any(StackImageV4Response.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
+        given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(conversionService.convert(any(), eq(EnvironmentSettingsV4Response.class))).willReturn(new EnvironmentSettingsV4Response());
+        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
+        given(conversionService.convert(any(), eq(FlexSubscriptionV4Response.class))).willReturn(new FlexSubscriptionV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
         given(conversionService.convert(any(), eq(CredentialV4Response.class))).willReturn(new CredentialV4Response());
         given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
@@ -142,15 +135,21 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("terminated", "cluster"));
+        assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure"));
+
+        assertNull(result.getCluster());
     }
 
     @Test
-    public void testConvertWithoutNetwork() {
+    public void testConvertWithoutNetwork() throws CloudbreakImageNotFoundException {
         Stack source = getSource();
         // GIVEN
         getSource().setNetwork(null);
-        given(conversionService.convert(any(StackImageV4Response.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
+        given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(conversionService.convert(any(), eq(EnvironmentSettingsV4Response.class))).willReturn(new EnvironmentSettingsV4Response());
+        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
+        given(conversionService.convert(any(), eq(FlexSubscriptionV4Response.class))).willReturn(new FlexSubscriptionV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
         given(conversionService.convert(any(), eq(CredentialV4Response.class))).willReturn(new CredentialV4Response());
         given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
@@ -160,7 +159,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("terminated", "networkId", "network"));
+        assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure"));
 
         assertNull(result.getNetwork());
     }
@@ -190,11 +189,14 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
         stack.getStackAuthentication().setLoginUserName("cloudbreak");
         stack.setHostgroupNameAsHostname(false);
         stack.setClusterNameAsSubdomain(false);
+        stack.setParameters(Map.of(PlatformParametersConsts.TTL, String.valueOf(System.currentTimeMillis())));
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);
         stack.setResources(Collections.singleton(s3ArnResource));
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setName("env");
         stack.setEnvironment(environmentView);
+        stack.setTerminated(100L);
+        stack.setFlexSubscription(new FlexSubscription());
         return stack;
     }
 }

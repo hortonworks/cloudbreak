@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.Network
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -86,6 +88,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         convertComponentConfig(response, source);
         response.setTags(getTags(response, source.getTags()));
         addFlexSubscription(response, source);
+        response.setTimeToLive(getStackTimeToLive(source));
         return response;
     }
 
@@ -157,5 +160,14 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                         instanceGroupResponse.getMetadata().forEach(md -> md.setState(metaDataStates.get(md.getDiscoveryFQDN())));
                     });
         }
+    }
+
+    private Long getStackTimeToLive(Stack stack) {
+        Map<String, String> params = stack.getParameters();
+        Optional<String> optional = Optional.ofNullable(params.get(PlatformParametersConsts.TTL));
+        if (optional.isPresent()) {
+            return optional.map(Long::parseLong).get();
+        }
+        return null;
     }
 }

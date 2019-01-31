@@ -10,10 +10,10 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.Hardwa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -47,9 +46,6 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.STATUS_REASON)
     private String statusReason;
-
-    @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialV4Response credential;
 
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkV4Response network;
@@ -129,14 +125,6 @@ public class StackV4Response extends StackV4Base {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
-    }
-
-    public CredentialV4Response getCredential() {
-        return credential;
-    }
-
-    public void setCredential(CredentialV4Response credential) {
-        this.credential = credential;
     }
 
     public NetworkV4Response getNetwork() {
@@ -251,16 +239,16 @@ public class StackV4Response extends StackV4Base {
         this.environment = environment;
     }
 
-    public CustomDomainSettingsV4Response getCustomDomains() {
-        return customDomains;
-    }
-
     public TagsV4Response getTags() {
         return tags;
     }
 
     public void setTags(TagsV4Response tags) {
         this.tags = tags;
+    }
+
+    public CustomDomainSettingsV4Response getCustomDomains() {
+        return customDomains;
     }
 
     public void setCustomDomains(CustomDomainSettingsV4Response customDomains) {

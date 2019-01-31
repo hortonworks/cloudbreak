@@ -16,7 +16,9 @@
   },
   "instanceGroups": [],
   "cluster": {
-
+    "sharedService": {
+      "sharedClusterName": "shared-cluster-name"
+    }
   },
   "tags": {
 

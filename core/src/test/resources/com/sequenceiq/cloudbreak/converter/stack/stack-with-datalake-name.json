@@ -16,8 +16,8 @@
   },
   "instanceGroups": [],
   "cluster": {
-
   },
+  "datalakeName": "datalake-name",
   "tags": {
 
   }

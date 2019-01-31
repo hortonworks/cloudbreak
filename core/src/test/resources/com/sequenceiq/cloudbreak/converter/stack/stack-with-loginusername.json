@@ -1,49 +1,17 @@
 {
-  "cloudPlatform": "AWS",
   "name": "mystack",
-  "region": "eu-west-1",
-  "credentialId": 51,
-  "image": "aws-image",
-  "onFailureAction": "ROLLBACK",
-  "availabilityZone": "avZone",
+  "image": {
+    "catalog": "aws-catalog",
+    "id": "aws-image"
+  },
   "failurePolicy": {
     "id": 1,
     "threshold": 10,
     "adjustmentType": "EXACT"
   },
-  "stackAuthentication": {
+  "authentication": {
     "publicKey": "ssh-key",
     "loginUserName": "cloudbreak"
   },
-  "instanceGroups": [
-    {
-      "templateId": 1,
-      "nodeCount": 10,
-      "group": "gateway-group",
-      "type": "GATEWAY",
-      "id": 0,
-      "metadata": [
-        {
-          "privateIp": "10.0.0.1",
-          "publicIp": "52.53.54.55",
-          "instanceId": "instance",
-          "ambariServer": false,
-          "discoveryFQDN": "instance",
-          "instanceGroup": "gateway-group",
-          "instanceStatus": "REGISTERED"
-        }
-      ]
-    }
-  ],
-  "securityGroupId": 52,
-  "networkId": 53,
-  "parameters": {
-    "dedicatedInstances" : true
-  },
-  "consulServerCount": 1,
-  "created": 8000000,
-  "orchestrator": {
-    "type": "YARN"
-  },
-  "stackTemplate": "{}"
+  "instanceGroups": []
 }
