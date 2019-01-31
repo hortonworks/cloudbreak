@@ -8,12 +8,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
 
@@ -22,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.verification.Call;
@@ -151,13 +155,30 @@ public class SparkServer {
 
     public void shutdown() {
         stop();
-        deallocatePort();
+    }
+
+    public void customAwait(Service sparkservice) {
+        Field field = ReflectionUtils.findField(Service.class, "stopLatch");
+        ReflectionUtils.makeAccessible(field);
+        CountDownLatch latch = (CountDownLatch) ReflectionUtils.getField(field, sparkservice);
+        try {
+            LOGGER.info("Waiting for Spark to shutdown for 30 seconds...");
+            boolean result = latch.await(30, TimeUnit.SECONDS);
+            if (result) {
+                deallocatePort();
+            } else {
+                LOGGER.error("Was not able to release spark service");
+            }
+        } catch (InterruptedException e) {
+            LOGGER.warn("Interrupted by another thread");
+            Thread.currentThread().interrupt();
+        }
     }
 
     public void stop() {
         if (sparkService != null) {
             sparkService.stop();
-            sparkService.awaitStop();
+            customAwait(sparkService);
             LOGGER.info("spark server has stopped.");
         }
     }
