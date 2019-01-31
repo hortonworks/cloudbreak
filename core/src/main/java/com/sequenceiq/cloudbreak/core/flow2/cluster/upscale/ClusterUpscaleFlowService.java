@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static java.lang.String.format;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,15 +20,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -50,14 +52,14 @@ public class ClusterUpscaleFlowService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
-    public void upscalingClusterManager(long stackId) {
+    void upscalingClusterManager(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
+    void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
         int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
         boolean success = numOfFailedHosts == 0;
         if (success) {
@@ -72,7 +74,7 @@ public class ClusterUpscaleFlowService {
         }
     }
 
-    public void clusterUpscaleFailed(long stackId, Exception errorDetails) {
+    void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.info("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,
@@ -82,15 +84,16 @@ public class ClusterUpscaleFlowService {
 
     private int updateMetadata(StackView stackView, String hostGroupName) {
         LOGGER.debug("Start update metadata");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
-        Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), hostGroupName)
+                .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", stackView.getClusterView().getId(), hostGroupName)).get());
+        Set<HostMetadata> hostMetadata = hostMetadataService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         updateFailedHostMetaData(hostMetadata);
         int failedHosts = 0;
         for (HostMetadata hostMeta : hostMetadata) {
             if (hostGroup.getConstraint().getInstanceGroup() != null) {
                 stackService.updateMetaDataStatusIfFound(stackView.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
             }
-            hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
+            hostMetadataService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
             if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
                 failedHosts++;
             }
@@ -108,7 +111,7 @@ public class ClusterUpscaleFlowService {
         for (HostMetadata metaData : hostMetadata) {
             if (!successHosts.contains(metaData.getHostName())) {
                 metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                hostMetadataRepository.save(metaData);
+                hostMetadataService.save(metaData);
             }
         }
     }

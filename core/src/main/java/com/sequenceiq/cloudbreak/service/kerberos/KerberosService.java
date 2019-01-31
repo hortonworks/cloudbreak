@@ -64,4 +64,8 @@ public class KerberosService extends AbstractEnvironmentAwareService<KerberosCon
         return WorkspaceResource.KERBEROS_CONFIG;
     }
 
+    public KerberosConfig save(KerberosConfig kerberosConfig) {
+        return kerberosConfigRepository.save(kerberosConfig);
+    }
+
 }

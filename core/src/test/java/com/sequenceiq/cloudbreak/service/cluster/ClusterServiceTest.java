@@ -120,7 +120,7 @@ public class ClusterServiceTest {
         Set<HostMetadata> hostMetadata = Set.of(host1Metadata, host2Metadata);
         hostGroup1.setHostMetadata(hostMetadata);
 
-        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(hostGroupService.findHostGroupsInCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         clusterService.repairCluster(1L, List.of("hostGroup1"), false);
 
         verify(stack, never()).getInstanceMetaDataAsList();
@@ -148,7 +148,7 @@ public class ClusterServiceTest {
         Set<HostMetadata> hostMetadata = Set.of(host1Metadata);
         hostGroup1.setHostMetadata(hostMetadata);
 
-        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(hostGroupService.findHostGroupsInCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
 
         InstanceMetaData instance1md = new InstanceMetaData();
         instance1md.setInstanceId("instanceId1");

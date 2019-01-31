@@ -64,7 +64,7 @@ public class ComponentLocatorServiceTest {
         Set<String> hg1Components = set("RESOURCEMANAGER", "Service1", "HIVE_SERVER");
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
 
-        when(hostGroupService.getByCluster(nullable(Long.class))).thenReturn(ImmutableSet.of(hg1, hg2));
+        when(hostGroupService.findHostGroupsInCluster(nullable(Long.class))).thenReturn(ImmutableSet.of(hg1, hg2));
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
         when(blueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);

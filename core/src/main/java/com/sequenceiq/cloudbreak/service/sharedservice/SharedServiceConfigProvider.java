@@ -30,10 +30,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -53,7 +53,7 @@ public class SharedServiceConfigProvider {
     private DatalakeConfigProvider datalakeConfigProvider;
 
     @Inject
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private CredentialPrerequisiteService credentialPrerequisiteService;
@@ -62,7 +62,7 @@ public class SharedServiceConfigProvider {
         Objects.requireNonNull(requestedCluster);
         Stack stack = requestedCluster.getStack();
         if (stack.getDatalakeResourceId() != null) {
-            Optional<DatalakeResources> datalakeResources = datalakeResourcesRepository.findById(stack.getDatalakeResourceId());
+            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
                 setupLdap(requestedCluster, datalakeResource);
@@ -83,7 +83,7 @@ public class SharedServiceConfigProvider {
             Optional<DatalakeResources> datalakeResource = Optional.empty();
             if (!CollectionUtils.isEmpty(publicStack.getEnvironment().getDatalakeResources())
                     && publicStack.getEnvironment().getDatalakeResources().size() == 1) {
-                datalakeResource = datalakeResourcesRepository.findById(publicStack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
+                datalakeResource = datalakeResourcesService.findById(publicStack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
                 if (credentialPrerequisiteService.isCumulusCredential(publicStack.getCredential().getAttributes())) {
                     ambariClient = credentialPrerequisiteService.createCumulusAmbariClient(publicStack.getCredential().getAttributes());
                 }

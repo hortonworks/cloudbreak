@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -23,9 +24,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ScalingFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
@@ -43,9 +44,9 @@ public class InstanceTerminationService {
     private FlowMessageService flowMessageService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
-    public void instanceTermination(InstanceTerminationContext context) {
+    void instanceTermination(InstanceTerminationContext context) {
         Stack stack = context.getStack();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REMOVE_INSTANCE, "Removing instance");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE, UPDATE_IN_PROGRESS.name());
@@ -53,10 +54,10 @@ public class InstanceTerminationService {
         for (InstanceMetaData instanceMetaData : instanceMetaDataList) {
             String hostName = instanceMetaData.getDiscoveryFQDN();
             if (stack.getCluster() != null) {
-                HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
-                if (hostMetadata == null) {
+                Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), hostName);
+                if (!hostMetadata.isPresent()) {
                     LOGGER.debug("Nothing to remove since hostmetadata is null");
-                } else if (HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
+                } else if (HostMetadataState.HEALTHY.equals(hostMetadata.get().getHostMetadataState())) {
                     throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
                 }
             }
@@ -68,7 +69,7 @@ public class InstanceTerminationService {
         }
     }
 
-    public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) throws TransactionExecutionException {
+    void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) throws TransactionExecutionException {
         Stack stack = context.getStack();
         List<InstanceMetaData> instanceMetaDataList = context.getInstanceMetaDataList();
         for (InstanceMetaData instanceMetaData : instanceMetaDataList) {
@@ -76,10 +77,11 @@ public class InstanceTerminationService {
             InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupId(instanceMetaData.getInstanceGroup().getId());
             stackScalingService.updateRemovedResourcesState(stack, Collections.singleton(instanceId), instanceGroup);
             if (stack.getCluster() != null) {
-                HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
-                if (hostMetadata != null) {
-                    LOGGER.debug("Remove obsolete host: {}", hostMetadata.getHostName());
-                    stackScalingService.removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata);
+                Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(),
+                        instanceMetaData.getDiscoveryFQDN());
+                if (hostMetadata.isPresent()) {
+                    LOGGER.debug("Remove obsolete host: {}", hostMetadata.get().getHostName());
+                    stackScalingService.removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata.get());
                 }
             }
         }
@@ -88,7 +90,7 @@ public class InstanceTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
     }
 
-    public void handleInstanceTerminationError(long stackId, StackFailureEvent payload) {
+    void handleInstanceTerminationError(long stackId, StackFailureEvent payload) {
         Exception ex = payload.getException();
         LOGGER.info("Error during instance terminating flow:", ex);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instance termination failed. " + ex.getMessage());

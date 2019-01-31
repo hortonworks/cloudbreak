@@ -127,11 +127,9 @@ public class ClusterCommonService {
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), updateJson.getHostGroupAdjustment().getHostGroup());
-        if (hostGroup == null) {
-            throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
-                    updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
-        }
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), updateJson.getHostGroupAdjustment().getHostGroup())
+                .orElseThrow(() -> new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
+                        updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName())));
         blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, updateJson.getHostGroupAdjustment().getScalingAdjustment());
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }

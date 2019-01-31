@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Rule;
@@ -25,12 +26,11 @@ import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,13 +52,10 @@ public class ClusterContainerRunnerTest {
     private ContainerService containerService;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
-
-    @Mock
     private ClusterService clusterService;
 
     @Mock
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     @Mock
     private MockContainerOrchestrator mockContainerOrchestrator;
@@ -108,7 +105,7 @@ public class ClusterContainerRunnerTest {
         containers.add(ambariServer);
 
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
-        when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(TestUtil.hostGroup()));
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }
@@ -124,7 +121,7 @@ public class ClusterContainerRunnerTest {
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenReturn(cluster);
-        when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(TestUtil.hostGroup()));
 
         Set<Container> containers = new HashSet<>();
 

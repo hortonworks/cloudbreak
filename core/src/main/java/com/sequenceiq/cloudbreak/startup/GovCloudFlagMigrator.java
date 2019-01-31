@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.util.GovCloudFlagUtil;
 
 @Component
@@ -24,12 +24,12 @@ public class GovCloudFlagMigrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(GovCloudFlagMigrator.class);
 
     @Inject
-    private CredentialRepository credentialRepository;
+    private CredentialService credentialService;
 
     private final AtomicBoolean finished = new AtomicBoolean(false);
 
     public void run() {
-        Iterable<Credential> credentials = credentialRepository.findAll();
+        Iterable<Credential> credentials = credentialService.findAll();
         Set<Credential> modifiedCredentials = StreamSupport.stream(credentials.spliterator(), false)
                 .filter(credential -> credential.getAttributes() != null
                         && new Json(credential.getAttributes()).getValue(GOV_CLOUD_KEY) != null)
@@ -39,7 +39,7 @@ public class GovCloudFlagMigrator {
                     LOGGER.info("Credential {} updated with govCloud flag: {}.", credential.getName(), credential.getGovCloud());
                 })
                 .collect(Collectors.toSet());
-        credentialRepository.saveAll(modifiedCredentials);
+        credentialService.saveAll(modifiedCredentials);
         finished.set(true);
     }
 

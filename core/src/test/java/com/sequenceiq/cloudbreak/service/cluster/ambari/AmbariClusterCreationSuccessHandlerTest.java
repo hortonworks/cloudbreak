@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterCreationSuccessHandlerTest {
@@ -37,10 +37,10 @@ public class AmbariClusterCreationSuccessHandlerTest {
     private ClusterService clusterService;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @InjectMocks
     private final AmbariClusterCreationSuccessHandler underTest = new AmbariClusterCreationSuccessHandler();
@@ -56,9 +56,9 @@ public class AmbariClusterCreationSuccessHandlerTest {
         stack.getInstanceGroups().forEach(instanceGroup -> instanceMetaDataList.addAll(instanceGroup.getAllInstanceMetaData()));
 
         when(clusterService.updateCluster(cluster)).thenReturn(cluster);
-        when(instanceMetadataRepository.saveAll(anyCollection())).thenReturn(instanceMetaDataList);
-        when(hostMetadataRepository.findHostsInCluster(cluster.getId())).thenReturn(hostMetadataList);
-        when(hostMetadataRepository.saveAll(anyCollection())).thenReturn(hostMetadataList);
+        when(instanceMetaDataService.saveAll(anyCollection())).thenReturn(instanceMetaDataList);
+        when(hostMetadataService.findHostsInCluster(cluster.getId())).thenReturn(hostMetadataList);
+        when(hostMetadataService.saveAll(anyCollection())).thenReturn(hostMetadataList);
 
         underTest.handleClusterCreationSuccess(stack, cluster);
 
@@ -68,17 +68,17 @@ public class AmbariClusterCreationSuccessHandlerTest {
         assertNotNull(clusterCaptor.getValue().getUpSince());
 
         ArgumentCaptor<List<InstanceMetaData>> instanceMetadataCaptor = ArgumentCaptor.forClass(List.class);
-        verify(instanceMetadataRepository, times(1)).saveAll(instanceMetadataCaptor.capture());
+        verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataCaptor.capture());
         for (InstanceMetaData instanceMetaData : instanceMetadataCaptor.getValue()) {
             Assert.assertEquals(InstanceStatus.REGISTERED, instanceMetaData.getInstanceStatus());
         }
 
         ArgumentCaptor<List<HostMetadata>> hostMetadataCaptor = ArgumentCaptor.forClass(List.class);
-        verify(hostMetadataRepository, times(1)).saveAll(hostMetadataCaptor.capture());
+        verify(hostMetadataService, times(1)).saveAll(hostMetadataCaptor.capture());
         for (HostMetadata hostMetadata : hostMetadataCaptor.getValue()) {
             Assert.assertEquals(HostMetadataState.HEALTHY, hostMetadata.getHostMetadataState());
         }
 
-        verify(hostMetadataRepository, times(1)).findHostsInCluster(cluster.getId());
+        verify(hostMetadataService, times(1)).findHostsInCluster(cluster.getId());
     }
 }

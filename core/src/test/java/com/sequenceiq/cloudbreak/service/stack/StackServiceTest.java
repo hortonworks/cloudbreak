@@ -45,9 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -70,8 +68,6 @@ public class StackServiceTest {
     private static final Long DATALAKE_STACK_ID = 2L;
 
     private static final Long WORKSPACE_ID = 1L;
-
-    private static final String OWNER = "1234567";
 
     private static final String VARIANT_VALUE = "VARIANT_VALUE";
 
@@ -96,7 +92,7 @@ public class StackServiceTest {
     private StackRepository stackRepository;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private ReactorFlowManager flowManager;
@@ -130,9 +126,6 @@ public class StackServiceTest {
 
     @Mock
     private SecurityConfig securityConfig;
-
-    @Mock
-    private SecurityConfigRepository securityConfigRepository;
 
     @Mock
     private SaltSecurityConfigRepository saltSecurityConfigRepository;
@@ -768,7 +761,7 @@ public class StackServiceTest {
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setStack(stack);
-            verify(securityConfigRepository, times(1)).save(securityConfig);
+            verify(tlsSecurityService, times(1)).save(securityConfig);
         }
     }
 
@@ -790,7 +783,7 @@ public class StackServiceTest {
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setStack(stack);
-            verify(securityConfigRepository, times(1)).save(securityConfig);
+            verify(tlsSecurityService, times(1)).save(securityConfig);
 
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }

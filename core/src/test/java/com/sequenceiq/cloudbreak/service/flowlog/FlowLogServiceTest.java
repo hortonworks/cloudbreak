@@ -4,6 +4,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,7 +43,7 @@ public class FlowLogServiceTest {
     private void runUpdateLastFlowLogStatusTest(boolean failureEvent, StateStatus successful) throws Exception {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         WhiteboxImpl.invokeMethod(underTest, "updateLastFlowLogStatus", FLOW_ID, failureEvent);
 

@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
@@ -102,9 +101,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     @Inject
     private FlowRegister runningFlows;
-
-    @Inject
-    private FlowLogRepository flowLogRepository;
 
     @Inject
     private TransactionService transactionService;
@@ -190,7 +186,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     private void cancelRunningFlows(Long stackId) throws TransactionExecutionException {
-        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
         for (String id : flowIds) {
             String flowChainId = runningFlows.getFlowChainId(id);
@@ -219,7 +215,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restartFlow(String flowId) {
-        FlowLog flowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+        FlowLog flowLog = flowLogService.findFirstByFlowIdOrderByCreatedDesc(flowId);
         restartFlow(flowLog);
     }
 

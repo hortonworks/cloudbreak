@@ -16,12 +16,12 @@ import org.mockito.Mock;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 public class GovCloudFlagMigratorTest {
 
     @Mock
-    private CredentialRepository credentialRepository;
+    private CredentialService credentialService;
 
     @InjectMocks
     private GovCloudFlagMigrator underTest;
@@ -32,18 +32,18 @@ public class GovCloudFlagMigratorTest {
     @Before
     public void setup() {
         initMocks(this);
-        when(credentialRepository.saveAll(any())).thenReturn(Lists.newArrayList());
+        when(credentialService.saveAll(any())).thenReturn(Lists.newArrayList());
     }
 
     @Test
     public void testGovCloudFlagMigration() {
-        when(credentialRepository.findAll()).thenReturn(Lists.newArrayList(
+        when(credentialService.findAll()).thenReturn(Lists.newArrayList(
                 createCredential("cred1", true),
                 createCredential("cred2", false)));
 
         underTest.run();
 
-        verify(credentialRepository).saveAll(captor.capture());
+        verify(credentialService).saveAll(captor.capture());
         assertEquals(2, Lists.newArrayList(captor.getValue()).size());
         assertEquals(Boolean.TRUE, getGovCloudFlagFromCaptor("cred1"));
         assertEquals(Boolean.FALSE, getGovCloudFlagFromCaptor("cred2"));

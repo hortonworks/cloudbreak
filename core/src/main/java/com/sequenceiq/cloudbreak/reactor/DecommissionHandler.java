@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
@@ -102,7 +104,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
+                    .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", stack.getCluster().getId(), hostGroupName)).get());
             recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
         } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);

@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -33,7 +33,7 @@ public class TlsSecurityService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     public SecurityConfig generateSecurityKeys(Workspace workspace) {
         SecurityConfig securityConfig = new SecurityConfig();
@@ -47,6 +47,16 @@ public class TlsSecurityService {
         generateSaltPassword(saltSecurityConfig);
         generateSaltBootPassword(saltSecurityConfig);
         return securityConfig;
+    }
+
+    public SecurityConfig save(SecurityConfig securityConfig) {
+        return securityConfigRepository.save(securityConfig);
+    }
+
+    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
+        InstanceMetaData primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId)
+                .orElseThrow();
+        return buildTLSClientConfig(stackId, apiAddress, primaryGateway);
     }
 
     private void generateClientKeys(SecurityConfig securityConfig) {
@@ -86,9 +96,10 @@ public class TlsSecurityService {
         saltSecurityConfig.setSaltPassword(PasswordUtil.generatePassword());
     }
 
-    public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
+    GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
-        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
+        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId)
+                .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
@@ -100,7 +111,15 @@ public class TlsSecurityService {
                 new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())));
     }
 
-    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance) {
+    CertificateV4Response getCertificates(Long stackId) {
+        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId)
+                .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
+        String serverCert = instanceMetaDataService.getServerCertByStackId(stackId)
+                .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
+        return new CertificateV4Response(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
+    }
+
+    private String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
         if (securityConfig.isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();
@@ -108,30 +127,17 @@ public class TlsSecurityService {
         return gatewayIP;
     }
 
-    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
-        InstanceMetaData primaryGateway = instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
-        return buildTLSClientConfig(stackId, apiAddress, primaryGateway);
-    }
-
-    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
-        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
-        if (securityConfig == null) {
+    private HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
+        Optional<SecurityConfig> securityConfig = securityConfigRepository.findOneByStackId(stackId);
+        if (!securityConfig.isPresent()) {
             return new HttpClientConfig(apiAddress);
         } else {
             String serverCert = gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
-            String clientCertB64 = securityConfig.getClientCert();
-            String clientKeyB64 = securityConfig.getClientKey();
+            String clientCertB64 = securityConfig.get().getClientCert();
+            String clientKeyB64 = securityConfig.get().getClientKey();
             return new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }
-    }
-
-    public CertificateV4Response getCertificates(Long stackId) {
-        SecurityConfig securityConfig = Optional.ofNullable(securityConfigRepository.findOneByStackId(stackId))
-                .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
-        String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
-                .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
-        return new CertificateV4Response(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
     }
 
 }

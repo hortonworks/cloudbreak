@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
@@ -11,14 +13,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.controller.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
 public class StackRepairService {
@@ -28,10 +31,10 @@ public class StackRepairService {
     private FlowMessageService flowMessageService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private ReactorFlowManager reactorFlowManager;
@@ -54,8 +57,11 @@ public class StackRepairService {
     private UnhealthyInstances groupInstancesByHostGroups(Stack stack, Iterable<String> unhealthyInstanceIds) {
         UnhealthyInstances unhealthyInstances = new UnhealthyInstances();
         for (String instanceId : unhealthyInstanceIds) {
-            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
-            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
+            InstanceMetaData instanceMetaData = instanceMetaDataService.findByInstanceId(stack.getId(), instanceId)
+                    .orElseThrow(() -> NotFoundException.notFound("InstanceMetadata", format("%s, %s", stack.getId(), instanceId)).get());
+            HostMetadata hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())
+                    .orElseThrow(() -> NotFoundException.notFound("HostMetadata",
+                            format("%s, %s", stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())).get());
             String hostGroupName = hostMetadata.getHostGroup().getName();
             unhealthyInstances.addInstance(instanceId, hostGroupName);
         }

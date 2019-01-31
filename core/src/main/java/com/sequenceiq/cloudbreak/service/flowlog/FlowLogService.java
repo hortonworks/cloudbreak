@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
@@ -97,7 +98,8 @@ public class FlowLogService {
 
     public void updateLastFlowLogStatus(String flowId, boolean failureEvent) {
         StateStatus stateStatus = failureEvent ? StateStatus.FAILED : StateStatus.SUCCESSFUL;
-        FlowLog lastFlowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+        FlowLog lastFlowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId)
+                .orElseThrow(() -> NotFoundException.notFound("FlowLog", flowId).get());
         flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
     }
 
@@ -105,4 +107,13 @@ public class FlowLogService {
         Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         return !flowIds.isEmpty();
     }
+
+    public FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId) {
+        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId).orElseThrow(() -> NotFoundException.notFound("FlowLog", flowId).get());
+    }
+
+    public Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId) {
+        return flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+    }
+
 }

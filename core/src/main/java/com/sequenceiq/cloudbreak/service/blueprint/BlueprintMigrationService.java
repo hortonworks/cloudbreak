@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -20,13 +19,13 @@ public class BlueprintMigrationService {
     private static final String UNKNOWN = "UNKNOWN";
 
     @Inject
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
 
     @Inject
     private BlueprintUtils blueprintUtils;
 
     public void migrateBlueprints() {
-        Iterable<Blueprint> blueprints = blueprintRepository.findAll();
+        Iterable<Blueprint> blueprints = blueprintService.findAll();
         List<Blueprint> updatedBlueprints = new ArrayList<>();
         for (Blueprint bp : blueprints) {
             if (StringUtils.isEmpty(bp.getStackType()) || StringUtils.isEmpty(bp.getStackVersion())) {
@@ -44,7 +43,7 @@ public class BlueprintMigrationService {
             }
         }
         if (!updatedBlueprints.isEmpty()) {
-            blueprintRepository.saveAll(updatedBlueprints);
+            blueprintService.saveAll(updatedBlueprints);
         }
     }
 }

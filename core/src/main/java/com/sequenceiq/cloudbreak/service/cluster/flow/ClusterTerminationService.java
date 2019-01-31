@@ -21,10 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -40,15 +36,19 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
-import com.sequenceiq.cloudbreak.repository.ContainerRepository;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 
 @Component
 public class ClusterTerminationService {
@@ -61,7 +61,7 @@ public class ClusterTerminationService {
     private ClusterService clusterService;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
@@ -70,7 +70,7 @@ public class ClusterTerminationService {
     private ConstraintRepository constraintRepository;
 
     @Inject
-    private ContainerRepository containerRepository;
+    private ContainerService containerService;
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -117,12 +117,12 @@ public class ClusterTerminationService {
             try {
                 Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
-                Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
+                Set<Container> containers = containerService.findContainersInCluster(cluster.getId());
                 List<ContainerInfo> containerInfo = containers.stream()
                         .map(c -> new ContainerInfo(c.getContainerId(), c.getName(), c.getHost(), c.getImage())).collect(Collectors.toList());
                 containerOrchestrator.deleteContainer(containerInfo, credential);
                 transactionService.required(() -> {
-                    containerRepository.deleteAll(containers);
+                    containerService.deleteAll(containers);
                     deleteClusterHostGroupsWithItsMetadata(cluster);
                     return null;
                 });
@@ -164,7 +164,7 @@ public class ClusterTerminationService {
     }
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
-        Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
+        Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(cluster.getId());
         Collection<Constraint> constraintsToDelete = new LinkedList<>();
         for (HostGroup hg : hostGroups) {
             hg.getRecipes().clear();
@@ -173,7 +173,7 @@ public class ClusterTerminationService {
                 constraintsToDelete.add(constraint);
             }
         }
-        hostGroupRepository.deleteAll(hostGroups);
+        hostGroupService.deleteAll(hostGroups);
         constraintRepository.deleteAll(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -20,8 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CandidateUnhealthyInstancesSelectorTest {
@@ -30,7 +31,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
     private ClusterService clusterService;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private CandidateUnhealthyInstanceSelector undertest;
@@ -110,7 +111,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
     private InstanceMetaData setupInstanceMetaData(Long stackId, String privateIp, InstanceGroup group) {
         InstanceMetaData imd1 = mock(InstanceMetaData.class);
         when(imd1.getInstanceGroup()).thenReturn(group);
-        when(instanceMetaDataRepository.findHostInStack(stackId, privateIp)).thenReturn(imd1);
+        when(instanceMetaDataService.findHostInStack(stackId, privateIp)).thenReturn(Optional.of(imd1));
         return imd1;
     }
 }

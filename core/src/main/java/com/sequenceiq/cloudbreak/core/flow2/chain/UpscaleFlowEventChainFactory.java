@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
+import static java.lang.String.format;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
@@ -45,7 +47,8 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         flowEventChain.add(new StackScaleTriggerEvent(ADD_INSTANCES_EVENT.event(), event.getStackId(), event.getInstanceGroup(),
                 event.getAdjustment(), event.getHostNames()));
         if (ScalingType.isClusterUpScale(event.getScalingType()) && clusterView != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(clusterView.getId(), event.getInstanceGroup());
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(clusterView.getId(), event.getInstanceGroup())
+                    .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", clusterView.getId(), event.getInstanceGroup())).get());
             flowEventChain.add(new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(), stackView.getId(), hostGroup.getName(),
                     event.getAdjustment()));
         }

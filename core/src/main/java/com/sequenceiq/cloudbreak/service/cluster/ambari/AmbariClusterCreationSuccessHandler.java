@@ -18,9 +18,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
 public class AmbariClusterCreationSuccessHandler {
@@ -30,10 +30,10 @@ public class AmbariClusterCreationSuccessHandler {
     private ClusterService clusterService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     public void handleClusterCreationSuccess(Stack stack, Cluster cluster) {
         LOGGER.debug("Cluster created successfully. Cluster name: {}", cluster.getName());
@@ -51,12 +51,12 @@ public class AmbariClusterCreationSuccessHandler {
                 }
             }
         }
-        instanceMetadataRepository.saveAll(updatedInstances);
+        instanceMetaDataService.saveAll(updatedInstances);
         Collection<HostMetadata> hostMetadataList = new ArrayList<>();
-        for (HostMetadata host : hostMetadataRepository.findHostsInCluster(cluster.getId())) {
+        for (HostMetadata host : hostMetadataService.findHostsInCluster(cluster.getId())) {
             host.setHostMetadataState(HostMetadataState.HEALTHY);
             hostMetadataList.add(host);
         }
-        hostMetadataRepository.saveAll(hostMetadataList);
+        hostMetadataService.saveAll(hostMetadataList);
     }
 }

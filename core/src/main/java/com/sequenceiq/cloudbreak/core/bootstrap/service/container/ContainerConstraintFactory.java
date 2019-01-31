@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +20,8 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -26,9 +29,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint.Builder;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
 public class ContainerConstraintFactory {
@@ -46,10 +48,10 @@ public class ContainerConstraintFactory {
     private static final String HOSTNAME_SEPARATOR = "|";
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     public ContainerConstraint getAmbariServerDbConstraint(String gatewayHostname, String clusterName, String identifier) {
         Builder builder = new Builder()
@@ -64,7 +66,7 @@ public class ContainerConstraintFactory {
         return builder.build();
     }
 
-    public ContainerConstraint getAmbariServerConstraint(String dbHostname, String gatewayHostname, String cloudPlatform,
+    ContainerConstraint getAmbariServerConstraint(String dbHostname, String gatewayHostname, String cloudPlatform,
             String clusterName, String identifier) {
         String env = String.format("/usr/sbin/init systemd.setenv=POSTGRES_DB=%s systemd.setenv=CLOUD_PLATFORM=%s", dbHostname, cloudPlatform);
         Builder builder = new Builder()
@@ -83,7 +85,7 @@ public class ContainerConstraintFactory {
         return builder.build();
     }
 
-    public ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
+    ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
             HostGroup hostGroup, Integer adjustment, List<String> hostBlackList, String identifier) {
         String containerInstanceName;
         containerInstanceName = YARN.equals(hostGroup.getCluster().getStack().getOrchestrator().getType())
@@ -148,10 +150,11 @@ public class ContainerConstraintFactory {
     }
 
     private List<String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
+                .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", clusterId, hostGroupName)).get());
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
-            Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataRepository.findUnusedHostsInInstanceGroup(instanceGroupId);
+            Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId);
             List<String> hostNames = new ArrayList<>();
             for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {
                 hostNames.add(instanceMetaData.getDiscoveryFQDN());
@@ -166,7 +169,7 @@ public class ContainerConstraintFactory {
 
     private List<String> getHosts(Collection<String> candidateAddresses, InstanceGroup instanceGroup) {
         List<String> hosts = new ArrayList<>();
-        for (InstanceMetaData instanceMetaData : instanceMetaDataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())) {
+        for (InstanceMetaData instanceMetaData : instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroup.getId())) {
             String fqdn = instanceMetaData.getDiscoveryFQDN();
             if (candidateAddresses == null || candidateAddresses.contains(fqdn)) {
                 hosts.add(instanceMetaData.getDiscoveryFQDN());

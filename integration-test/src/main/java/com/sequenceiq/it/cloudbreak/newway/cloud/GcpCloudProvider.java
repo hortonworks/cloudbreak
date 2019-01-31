@@ -106,7 +106,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
         t.setAttachedVolumes(Set.of(volume));
 
         RootVolumeV4Request rootVolume = new RootVolumeV4Request();
-        rootVolume.setSize((Integer.parseInt(getTestParameter().getWithDefault("ROOT_VOLUME_SIZE", "100"))));
+        rootVolume.setSize(Integer.parseInt(getTestParameter().getWithDefault("ROOT_VOLUME_SIZE", "100")));
         t.setRootVolume(rootVolume);
 
         return t;

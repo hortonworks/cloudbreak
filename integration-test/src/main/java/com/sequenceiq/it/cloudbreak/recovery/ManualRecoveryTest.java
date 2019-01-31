@@ -52,8 +52,8 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertNotNull(instanceToDelete);
         RecoveryUtil.deleteInstance(cloudProviderParams, instanceToDelete);
 
-        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV4Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext)
-                - removedInstanceCount;
+        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV4Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword,
+                itContext) - removedInstanceCount;
 
 
         WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV4Endpoint, workspaceId, stackName, hostGroup, "UNHEALTHY");
@@ -72,7 +72,8 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
         CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
-        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV4Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext);
+        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV4Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword,
+                itContext);
         Assert.assertEquals(expectedNodeCountAmbari, actualNodeCountAmbari);
     }
 }

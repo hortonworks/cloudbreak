@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationTy
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.DataNodeUtils.sortByUsedSpace;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -66,7 +68,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -74,6 +75,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
@@ -85,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.DNDecommissionStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RSDecommissionStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -108,6 +111,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private HostGroupService hostGroupService;
+
+    @Inject
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
@@ -146,7 +152,7 @@ public class AmbariDecommissioner {
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
-    private ContainerRepository containerRepository;
+    private ContainerService containerService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -317,7 +323,8 @@ public class AmbariDecommissioner {
     private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment) {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
+                .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", cluster.getId(), hostGroupName)).get());
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
         List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
@@ -351,13 +358,11 @@ public class AmbariDecommissioner {
 
         Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
         for (InstanceMetaData instanceMetaData : instancesWithHostName) {
-            HostMetadata hostMetadata = hostGroupService.getHostMetadataByClusterAndHostName(stack.getCluster(), instanceMetaData.getDiscoveryFQDN());
-            if (hostMetadata != null) {
-                hostGroupWithInstances.put(hostMetadata.getHostGroup().getId(), hostMetadata);
-            }
+            Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
+            hostMetadata.ifPresent(hostMetadata1 -> hostGroupWithInstances.put(hostMetadata1.getHostGroup().getId(), hostMetadata1));
         }
 
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+        Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(cluster.getId());
         for (HostGroup hostGroup : hostGroups) {
             Collection<HostMetadata> removableHostsInHostGroup = hostGroupWithInstances.get(hostGroup.getId());
             if (removableHostsInHostGroup != null && !removableHostsInHostGroup.isEmpty()) {
@@ -381,11 +386,11 @@ public class AmbariDecommissioner {
     }
 
     private Map<String, HostMetadata> collectHostMetadata(Cluster cluster, String hostGroupName, Collection<String> hostNames) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
+                .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", cluster.getId(), hostGroupName)).get());
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-        Map<String, HostMetadata> hostMetadatas = hostsInHostGroup.stream().filter(hostMetadata -> hostNames.contains(hostMetadata.getHostName())).collect(
+        return hostsInHostGroup.stream().filter(hostMetadata -> hostNames.contains(hostMetadata.getHostName())).collect(
                 Collectors.toMap(HostMetadata::getHostName, hostMetadata -> hostMetadata));
-        return hostMetadatas;
     }
 
     private int getReplicationFactor(ServiceAndHostService ambariClient, String hostGroup) {
@@ -493,13 +498,13 @@ public class AmbariDecommissioner {
                 Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
                 ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
-                Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
+                Set<Container> containers = containerService.findContainersInCluster(stack.getCluster().getId());
                 List<ContainerInfo> containersToDelete = containers.stream()
                         .filter(input -> hostNames.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
                         .map(input -> new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage()))
                         .collect(Collectors.toList());
                 containerOrchestrator.deleteContainer(containersToDelete, credential);
-                containerRepository.deleteAll(containers);
+                containerService.deleteAll(containers);
                 return waitForHostsToLeave(stack, hostNames);
             } else if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());

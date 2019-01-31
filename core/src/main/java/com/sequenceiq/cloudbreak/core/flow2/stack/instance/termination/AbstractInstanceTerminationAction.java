@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,16 +21,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
@@ -39,7 +41,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     private StackService stackService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -72,7 +74,8 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (String instanceId : instanceIds) {
-            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
+            InstanceMetaData instanceMetaData = instanceMetaDataService.findByInstanceId(stack.getId(), instanceId)
+                    .orElseThrow(() -> NotFoundException.notFound("InstanceMetadata", format("%s, %s", stack.getId(), instanceId)).get());
             CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);
             instanceMetaDataList.add(instanceMetaData);
             cloudInstances.add(cloudInstance);

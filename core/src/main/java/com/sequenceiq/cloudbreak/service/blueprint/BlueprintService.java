@@ -83,6 +83,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
     }
 
+    public Iterable<Blueprint> findAll() {
+        return blueprintRepository.findAll();
+    }
+
+    public Iterable<Blueprint> saveAll(Iterable<Blueprint> blueprints) {
+        return blueprintRepository.saveAll(blueprints);
+    }
+
     public Blueprint create(Workspace workspace, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties, User user) {
         LOGGER.debug("Creating blueprint: Workspace: {} ({})", workspace.getId(), workspace.getName());
         Blueprint savedBlueprint;

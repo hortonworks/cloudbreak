@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -77,9 +76,6 @@ public class Flow2HandlerTest {
 
     @Mock
     private FlowLogService flowLogService;
-
-    @Mock
-    private FlowLogRepository flowLogRepository;
 
     @Mock
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
@@ -284,7 +280,7 @@ public class Flow2HandlerTest {
 
     @Test
     public void testCancelRunningFlows() throws TransactionExecutionException {
-        given(flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
+        given(flowLogService.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
         dummyEvent.setKey(Flow2Handler.FLOW_CANCEL);
@@ -297,7 +293,7 @@ public class Flow2HandlerTest {
     public void testRestartFlowNotRestartable() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL);
         flowLog.setFlowType(String.class);
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
         underTest.restartFlow(FLOW_ID);
 
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
@@ -310,7 +306,7 @@ public class Flow2HandlerTest {
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new StackEvent(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
 
         StackStartFlowConfig stackStartFlowConfig = new StackStartFlowConfig();
         ReflectionTestUtils.setField(stackStartFlowConfig, "defaultRestartAction", defaultRestartAction);
@@ -339,7 +335,7 @@ public class Flow2HandlerTest {
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new StackEvent(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
 
         StackStartFlowConfig stackStartFlowConfig = new StackStartFlowConfig();
 
@@ -362,7 +358,7 @@ public class Flow2HandlerTest {
         FlowLog flowLog = createFlowLog(null);
         Payload payload = new StackEvent(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
 
         StackStartFlowConfig stackStartFlowConfig = new StackStartFlowConfig();
 

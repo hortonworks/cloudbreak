@@ -136,9 +136,9 @@ public class StackUtil {
             if (orchestratorType != null && orchestratorType.containerOrchestrator()) {
                 result = ambariIp;
             } else {
-                InstanceMetaData gatewayInstance = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId);
-                if (gatewayInstance != null) {
-                    result = gatewayInstance.getPublicIpWrapper();
+                Optional<InstanceMetaData> gatewayInstance = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId);
+                if (gatewayInstance.isPresent()) {
+                    result = gatewayInstance.get().getPublicIpWrapper();
                 }
             }
         } catch (CloudbreakException ex) {

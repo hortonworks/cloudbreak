@@ -50,11 +50,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -70,8 +70,6 @@ import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 public class StackToTemplatePreparationObjectConverterTest {
 
     private static final Long TEST_CLUSTER_ID = 1L;
-
-    private static final String CLUSTER_OWNER = "owner";
 
     private static final String TEST_BLUEPRINT_TEXT = "{}";
 
@@ -148,7 +146,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private BlueprintViewProvider blueprintViewProvider;
 
     @Mock
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Before
     public void setUp() throws IOException {
@@ -351,7 +349,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
         when(sharedServiceConfigProvider.createSharedServiceConfigs(source, datalakeResources)).thenReturn(expected);
         when(source.getDatalakeResourceId()).thenReturn(1L);
-        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(datalakeResources);
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(datalakeResources);
 
         TemplatePreparationObject result = underTest.convert(source);
 

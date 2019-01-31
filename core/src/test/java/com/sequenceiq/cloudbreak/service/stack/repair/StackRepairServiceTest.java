@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -22,23 +23,23 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService.StackRepairFlowSubmitter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackRepairServiceTest {
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Mock
     private ExecutorService executorService;
@@ -112,13 +113,13 @@ public class StackRepairServiceTest {
         HostGroup hg1 = mock(HostGroup.class);
         when(hg1.getName()).thenReturn(hostGroupName);
         when(hmd1.getHostGroup()).thenReturn(hg1);
-        when(hostMetadataRepository.findHostInClusterByName(clusterId, privateIp)).thenReturn(hmd1);
+        when(hostMetadataService.findHostInClusterByName(clusterId, privateIp)).thenReturn(Optional.of(hmd1));
     }
 
     private void setupInstanceMetadata(Long stackId, String instanceId, String privateIp) {
         InstanceMetaData imd1 = mock(InstanceMetaData.class);
         when(imd1.getDiscoveryFQDN()).thenReturn(privateIp);
-        when(instanceMetaDataRepository.findByInstanceId(stackId, instanceId)).thenReturn(imd1);
+        when(instanceMetaDataService.findByInstanceId(stackId, instanceId)).thenReturn(Optional.of(imd1));
     }
 
     private static class StackRepairFlowSubmitterMatcher implements ArgumentMatcher<StackRepairFlowSubmitter> {

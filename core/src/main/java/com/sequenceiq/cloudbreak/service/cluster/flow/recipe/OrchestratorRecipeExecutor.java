@@ -165,7 +165,7 @@ class OrchestratorRecipeExecutor {
         if (!recipeExecutionFailureCollector.canProcessExecutionFailure(exception)) {
             return exception.getMessage();
         }
-        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
+        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroupService.findHostGroupsInCluster(stack.getCluster().getId()));
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors(exception, recipeMap,
                 instanceGroupService.findByStackId(stack.getId()));
         String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")

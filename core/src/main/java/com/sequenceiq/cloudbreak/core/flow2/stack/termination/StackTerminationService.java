@@ -9,48 +9,48 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
 public class StackTerminationService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationService.class);
 
     @Inject
-    private TerminationService terminationService;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private FlowMessageService flowMessageService;
-
-    @Inject
-    private StackUpdater stackUpdater;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private DependecyDeletionService dependecyDeletionService;
 
     @Inject
+    private TerminationService terminationService;
+
+    @Inject
+    private FlowMessageService flowMessageService;
+
+    @Inject
     private CloudbreakMetricService metricService;
 
     @Inject
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private ClusterService clusterService;
 
-    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
+    @Inject
+    private StackUpdater stackUpdater;
+
+    void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), true);
@@ -61,15 +61,12 @@ public class StackTerminationService {
             dependecyDeletionService.deleteDependencies(stack);
         }
         if (stack.getType() == StackType.DATALAKE) {
-            DatalakeResources datalakeResources = datalakeResourcesRepository.findByDatalakeStackId(stack.getId());
-            if (datalakeResources != null) {
-                datalakeResourcesRepository.delete(datalakeResources);
-            }
+            datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources -> datalakeResourcesService.delete(datalakeResources));
         }
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
-    public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
+    void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
         String stackUpdateMessage;
         Msg eventMessage;
         DetailedStackStatus status;
@@ -92,4 +89,5 @@ public class StackTerminationService {
         }
         flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
     }
+
 }

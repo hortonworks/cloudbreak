@@ -25,11 +25,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -76,7 +76,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private BlueprintViewProvider blueprintViewProvider;
 
     @Inject
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -109,7 +109,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
-                    .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
+                    .withHostgroups(hostGroupService.findHostGroupsInCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
@@ -130,7 +130,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     private Optional<DatalakeResources> getDataLakeResource(Stack source) {
         if (source.getDatalakeResourceId() != null) {
-            return datalakeResourcesRepository.findById(source.getDatalakeResourceId());
+            return datalakeResourcesService.findById(source.getDatalakeResourceId());
         }
         return Optional.empty();
     }

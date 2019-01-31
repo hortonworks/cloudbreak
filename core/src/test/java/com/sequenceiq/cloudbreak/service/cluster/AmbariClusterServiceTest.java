@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -86,6 +88,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private GatewayService gatewayService;
+
     @InjectMocks
     private ClusterService clusterService;
 
@@ -105,7 +110,6 @@ public class AmbariClusterServiceTest {
         when(clusterComponentConfigProvider.getHDPRepo(any(Long.class))).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
-        when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
@@ -121,6 +125,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     public void testRecreateSuccess() throws TransactionExecutionException {
+        when(blueprintService.getByNameForWorkspace(any(), any())).thenReturn(mock(Blueprint.class));
         clusterService.recreate(TestUtil.stack(), "bp-name", new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }

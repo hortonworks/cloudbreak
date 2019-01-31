@@ -72,10 +72,8 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
@@ -122,13 +120,13 @@ public class StackService {
     private StackDownscaleValidatorService downscaleValidatorService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private SecurityConfigRepository securityConfigRepository;
+    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
@@ -156,9 +154,6 @@ public class StackService {
 
     @Inject
     private StackViewRepository stackViewRepository;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private BlueprintValidator blueprintValidator;
@@ -389,7 +384,7 @@ public class StackService {
             LOGGER.debug("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList());
+            instanceMetaDataService.saveAll(savedStack.getInstanceMetaDataAsList());
             LOGGER.debug("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
@@ -399,7 +394,7 @@ public class StackService {
             securityConfig.setStack(savedStack);
             start = System.currentTimeMillis();
             saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
-            securityConfigRepository.save(securityConfig);
+            tlsSecurityService.save(securityConfig);
             LOGGER.debug("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             savedStack.setSecurityConfig(securityConfig);
 
@@ -497,12 +492,12 @@ public class StackService {
     }
 
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
-        InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
-        if (metaData == null) {
+        Optional<InstanceMetaData> metaData = instanceMetaDataService.findHostInStack(id, hostName);
+        if (!metaData.isPresent()) {
             LOGGER.debug("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
         } else {
-            metaData.setInstanceStatus(status);
-            instanceMetaDataRepository.save(metaData);
+            metaData.get().setInstanceStatus(status);
+            instanceMetaDataService.save(metaData.get());
         }
     }
 
@@ -632,10 +627,8 @@ public class StackService {
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
-        InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
-        if (metaData == null) {
-            throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
-        }
+        InstanceMetaData metaData = instanceMetaDataService.findByInstanceId(stack.getId(), instanceId)
+                .orElseThrow(() -> new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
         downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
         return metaData;
@@ -757,7 +750,7 @@ public class StackService {
                         instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
                         -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
             }
-            int removableHosts = instanceMetaDataRepository.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
+            int removableHosts = instanceMetaDataService.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
             if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
                         String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",

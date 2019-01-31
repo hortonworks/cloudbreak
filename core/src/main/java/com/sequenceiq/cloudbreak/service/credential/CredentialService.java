@@ -25,8 +25,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -41,11 +41,11 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
@@ -65,18 +65,23 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     private static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
 
-    @Resource
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    @Inject
+    private CredentialPrerequisiteService credentialPrerequisiteService;
+
+    @Inject
+    private EnvironmentViewService environmentViewService;
+
+    @Inject
+    private ServiceProviderCredentialAdapter credentialAdapter;
 
     @Inject
     private CredentialRepository credentialRepository;
 
     @Inject
-    private StackRepository stackRepository;
+    private CloudbreakMessagesService messagesService;
 
     @Inject
-    private ServiceProviderCredentialAdapter credentialAdapter;
+    private CredentialValidator credentialValidator;
 
     @Inject
     private UserProfileHandler userProfileHandler;
@@ -87,23 +92,15 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     @Inject
     private NotificationSender notificationSender;
 
-    @Inject
-    private CloudbreakMessagesService messagesService;
+    @Resource
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Inject
     private WorkspaceService workspaceService;
 
     @Inject
-    private CredentialValidator credentialValidator;
-
-    @Inject
-    private CredentialPrerequisiteService credentialPrerequisiteService;
-
-    @Inject
-    private EnvironmentViewRepository environmentViewRepository;
-
-    @Inject
-    private CredentialPropertyCollector credentialPropertyCollector;
+    private StackRepository stackRepository;
 
     @Inject
     private SecretService secretService;
@@ -113,8 +110,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     public Credential get(Long id, Workspace workspace) {
-        return Optional.ofNullable(credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(),
-                preferencesService.enabledPlatforms())).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
+        return credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(),
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
     }
 
     public Map<String, String> interactiveLogin(Long workspaceId, Credential credential) {
@@ -128,10 +125,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     public Credential updateByWorkspaceId(Long workspaceId, Credential credential) {
         User user = getLoggedInUser();
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
-        Credential original = Optional.ofNullable(
-                credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
-                        preferencesService.enabledPlatforms()))
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
+        Credential original = credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
@@ -159,16 +154,14 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     public Credential delete(Long id, Workspace workspace) {
-        Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(), preferencesService.enabledPlatforms()))
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
+        Credential credential = credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(id, workspace.getId(),
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_ID, id));
         return delete(credential, workspace);
     }
 
     public Credential delete(String name, Workspace workspace) {
-        Credential credential = Optional.ofNullable(
-                credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspace.getId(), preferencesService.enabledPlatforms()))
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
+        Credential credential = credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspace.getId(),
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         return delete(credential, workspace);
     }
 
@@ -200,11 +193,12 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     }
 
-    public Credential archiveCredential(Credential credential) {
-        credential.setName(generateArchiveName(credential.getName()));
-        credential.setArchived(true);
-        credential.setTopology(null);
-        return credentialRepository.save(credential);
+    public Iterable<Credential> findAll() {
+        return credentialRepository.findAll();
+    }
+
+    public Iterable<Credential> saveAll(Iterable<Credential> credentials) {
+        return credentialRepository.saveAll(credentials);
     }
 
     public CredentialPrerequisitesV4Response getPrerequisites(Long workspaceId, String cloudPlatform, String deploymentAddress) {
@@ -233,8 +227,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     public String initCodeGrantFlow(Long workspaceId, String name) {
         User user = getLoggedInUser();
-        Credential original = Optional.ofNullable(credentialRepository
-                .findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspaceId, preferencesService.enabledPlatforms()))
+        Credential original = credentialRepository
+                .findActiveByNameAndWorkspaceIdFilterByPlatforms(name, workspaceId, preferencesService.enabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         String originalAttributes = original.getAttributes();
         boolean codeGrantFlow = Boolean.valueOf(new Json(originalAttributes).getMap().get("codeGrantFlow").toString());
@@ -270,6 +264,13 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     @Override
     protected void prepareDeletion(Credential resource) {
         throw new UnsupportedOperationException("Credential deletion from database is not allowed, thus default deletion process is not supported!");
+    }
+
+    private Credential archiveCredential(Credential credential) {
+        credential.setName(generateArchiveName(credential.getName()));
+        credential.setArchived(true);
+        credential.setTopology(null);
+        return credentialRepository.save(credential);
     }
 
     private void validateDeploymentAddress(Credential credential) {
@@ -318,7 +319,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void checkEnvironmentsForDeletion(Credential credential) {
-        Set<EnvironmentView> environments = environmentViewRepository.findAllByCredentialId(credential.getId());
+        Set<EnvironmentView> environments = environmentViewService.findAllByCredentialId(credential.getId());
         if (!environments.isEmpty()) {
             String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
             String message = "Credential '%s' cannot be deleted because the following environments are using it: [%s].";

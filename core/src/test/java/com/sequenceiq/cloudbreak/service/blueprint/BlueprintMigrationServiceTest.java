@@ -17,7 +17,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintMigrationServiceTest {
@@ -25,7 +24,7 @@ public class BlueprintMigrationServiceTest {
     private BlueprintMigrationService underTest;
 
     @Mock
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
 
     @Mock
     private BlueprintUtils blueprintUtils;
@@ -40,7 +39,7 @@ public class BlueprintMigrationServiceTest {
         blueprints.add(createBlueprint(wrongBlueprintText));
         blueprints.add(createBlueprint(blueprintJson));
         blueprints.add(createBlueprint(blueprintJson));
-        Mockito.when(blueprintRepository.findAll()).thenReturn(blueprints);
+        Mockito.when(blueprintService.findAll()).thenReturn(blueprints);
         Mockito.when(blueprintUtils.getBlueprintStackName(Mockito.any()))
                 .thenReturn("HDP")
                 .thenReturn("")
@@ -53,7 +52,7 @@ public class BlueprintMigrationServiceTest {
         // WHEN
         underTest.migrateBlueprints();
         // THEN
-        Mockito.verify(blueprintRepository).saveAll(savedBlueprintsIterable.capture());
+        Mockito.verify(blueprintService).saveAll(savedBlueprintsIterable.capture());
         List<Blueprint> savedBlueprints = IteratorUtils.toList(savedBlueprintsIterable.getValue().iterator());
         Assert.assertEquals("HDP", savedBlueprints.get(0).getStackType());
         Assert.assertEquals("2.6", savedBlueprints.get(0).getStackVersion());
@@ -73,7 +72,7 @@ public class BlueprintMigrationServiceTest {
         blueprints.add(createBlueprint(blueprintJson, "HDP", "2.7"));
         blueprints.add(createBlueprint(blueprintJson));
         blueprints.add(createBlueprint(blueprintJson));
-        Mockito.when(blueprintRepository.findAll()).thenReturn(blueprints);
+        Mockito.when(blueprintService.findAll()).thenReturn(blueprints);
         Mockito.when(blueprintUtils.getBlueprintStackName(Mockito.any()))
                 .thenReturn("HDP")
                 .thenReturn("HDF");
@@ -84,7 +83,7 @@ public class BlueprintMigrationServiceTest {
         // WHEN
         underTest.migrateBlueprints();
         // THEN
-        Mockito.verify(blueprintRepository).saveAll(savedBlueprintsIterable.capture());
+        Mockito.verify(blueprintService).saveAll(savedBlueprintsIterable.capture());
         List<Blueprint> savedBlueprints = IteratorUtils.toList(savedBlueprintsIterable.getValue().iterator());
         Assert.assertEquals("HDP", savedBlueprints.get(0).getStackType());
         Assert.assertEquals("2.6", savedBlueprints.get(0).getStackVersion());

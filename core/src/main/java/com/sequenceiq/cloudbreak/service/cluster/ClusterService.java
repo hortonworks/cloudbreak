@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.R
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,10 +98,8 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
-import com.sequenceiq.cloudbreak.repository.GatewayRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -117,7 +116,9 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionS
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -147,13 +148,13 @@ public class ClusterService {
     private ClusterRepository clusterRepository;
 
     @Inject
-    private GatewayRepository gatewayRepository;
+    private GatewayService gatewayService;
 
     @Inject
     private FileSystemConfigService fileSystemConfigService;
 
     @Inject
-    private KerberosConfigRepository kerberosConfigRepository;
+    private KerberosService kerberosService;
 
     @Inject
     private ConstraintRepository constraintRepository;
@@ -234,7 +235,7 @@ public class ClusterService {
         LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
-            throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
+            throw new BadRequestException(format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
         return transactionService.required(() -> {
             setWorkspace(cluster, stack.getWorkspace());
@@ -261,7 +262,7 @@ public class ClusterService {
             LOGGER.debug("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             if (cluster.getKerberosConfig() != null) {
-                kerberosConfigRepository.save(cluster.getKerberosConfig());
+                kerberosService.save(cluster.getKerberosConfig());
             }
             cluster.setStack(stack);
             stack.setCluster(cluster);
@@ -298,12 +299,12 @@ public class ClusterService {
             long start = System.currentTimeMillis();
             savedCluster = clusterRepository.save(cluster);
             if (savedCluster.getGateway() != null) {
-                gatewayRepository.save(savedCluster.getGateway());
+                gatewayService.save(savedCluster.getGateway());
             }
             LOGGER.debug("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             clusterComponentConfigProvider.store(components, savedCluster);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+            String msg = format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
         }
         return savedCluster;
@@ -321,13 +322,13 @@ public class ClusterService {
             Gateway gateway = cluster.getGateway();
             if (gateway != null) {
                 gateway.setCluster(savedCluster);
-                gatewayRepository.save(gateway);
+                gatewayService.save(gateway);
             }
             List<ClusterComponent> store = clusterComponentConfigProvider.store(cluster.getComponents(), savedCluster);
             savedCluster.setComponents(new HashSet<>(store));
             LOGGER.info("Cluster object saved in {} ms with cluster id {}", System.currentTimeMillis() - start, cluster.getId());
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+            String msg = format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
         }
         return savedCluster;
@@ -404,9 +405,9 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
-                    HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
-                    if (hostGroup != null) {
-                        Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
+                    Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupEntry.getKey());
+                    if (hostGroup.isPresent()) {
+                        Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.get().getId()).stream()
                                 .map(HostMetadata::getHostName)
                                 .collect(Collectors.toSet());
                         hostGroupEntry.getValue().stream()
@@ -414,11 +415,11 @@ public class ClusterService {
                                 .forEach(hostName -> {
                                     HostMetadata hostMetadataEntry = new HostMetadata();
                                     hostMetadataEntry.setHostName(hostName);
-                                    hostMetadataEntry.setHostGroup(hostGroup);
+                                    hostMetadataEntry.setHostGroup(hostGroup.get());
                                     hostMetadataEntry.setHostMetadataState(hostMetadataState);
-                                    hostGroup.getHostMetadata().add(hostMetadataEntry);
+                                    hostGroup.get().getHostMetadata().add(hostMetadataEntry);
                                 });
-                        hostGroupService.save(hostGroup);
+                        hostGroupService.save(hostGroup.get());
                     }
                 }
                 return null;
@@ -433,7 +434,7 @@ public class ClusterService {
             AmbariClient ambariClient = getAmbariClient(stackId);
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
-                throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
+                throw new BadRequestException(format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
             }
             return clusterJson;
         } catch (HttpResponseException e) {
@@ -452,19 +453,19 @@ public class ClusterService {
             Stack stack = stackService.getById(stackId);
             Cluster cluster = stack.getCluster();
             if (cluster == null) {
-                throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
+                throw new BadRequestException(format("There is no cluster installed on stack '%s'.", stack.getName()));
             }
             StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(cluster.getId());
             String stackRepoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
             String osType = ambariRepositoryVersionService.getOsTypeForStackRepoDetails(repoDetails);
             if ("".equals(osType)) {
-                LOGGER.debug(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
+                LOGGER.debug(format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
                 return null;
             }
 
             String stackRepositoryJson = ambariClient.getLatestStackRepositoryAsJson(cluster.getName(), osType, stackRepoId);
             if (stackRepositoryJson == null) {
-                throw new BadRequestException(String.format("Stack Repository response coming from Ambari server was null "
+                throw new BadRequestException(format("Stack Repository response coming from Ambari server was null "
                         + "for cluster '%s' and repo url '%s'.", cluster.getName(), stackRepoId));
             }
             return stackRepositoryJson;
@@ -482,7 +483,7 @@ public class ClusterService {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
-            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
+            throw new BadRequestException(format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
         boolean downscaleRequest = validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
@@ -501,7 +502,7 @@ public class ClusterService {
     public void updateStatus(Stack stack, StatusRequest statusRequest) {
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
-            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
+            throw new BadRequestException(format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
         switch (statusRequest) {
             case SYNC:
@@ -543,10 +544,8 @@ public class ClusterService {
                 Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
                 Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
                 for (String failedNode : failedNodes) {
-                    HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
-                    if (hostMetadata == null) {
-                        throw new BadRequestException("No metadata information for the node: " + failedNode);
-                    }
+                    HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode)
+                            .orElseThrow(() -> new BadRequestException("No metadata information for the node: " + failedNode));
                     HostGroup hostGroup = hostMetadata.getHostGroup();
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
                         validateRepair(stack, hostMetadata, false);
@@ -614,7 +613,7 @@ public class ClusterService {
                 checkReattachSupportedOnProvider(inTransactionStack, repairWithReattach);
                 Cluster cluster = inTransactionStack.getCluster();
                 Set<String> instanceHostNames = getInstanceHostNames(hostGroupMode, inTransactionStack, nodeIds);
-                Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+                Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(cluster.getId());
                 for (HostGroup hg : hostGroups) {
                     List<String> nodesToRepair = new ArrayList<>();
                     if (hg.getRecoveryMode() == RecoveryMode.MANUAL && (!hostGroupMode || repairedHostGroups.contains(hg.getName()))) {
@@ -677,7 +676,7 @@ public class ClusterService {
     private void validateRepairNodeIdRequest(List<String> nodeIds, Set<String> instanceHostNames) {
         long distinctNodeIdCount = nodeIds.stream().distinct().count();
         if (distinctNodeIdCount != instanceHostNames.size()) {
-            throw new BadRequestException(String.format("Node ID list is not valid: [%s]", String.join(", ", nodeIds)));
+            throw new BadRequestException(format("Node ID list is not valid: [%s]", String.join(", ", nodeIds)));
         }
     }
 
@@ -714,7 +713,7 @@ public class ClusterService {
             LOGGER.debug(recoveryMessage);
             eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
         } else {
-            throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
+            throw new BadRequestException(format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
         }
     }
 
@@ -766,10 +765,10 @@ public class ClusterService {
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
-                        String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
+                        format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
             } else if (!stack.isAvailable() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
-                        String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
+                        format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
             } else {
                 updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
                 flowManager.triggerClusterStart(stack.getId());
@@ -785,13 +784,13 @@ public class ClusterService {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
-                    String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
+                    format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
         } else if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));
+                    format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));
         } else if (!stack.isStackReadyForStop() && !stack.isStopFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
+                    format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
         } else if (cluster.isAvailable() || cluster.isStopFailed()) {
             updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
             flowManager.triggerClusterStop(stack.getId());
@@ -868,10 +867,10 @@ public class ClusterService {
     }
 
     private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stackId, host.getHostName());
-        if (instanceMetaData != null) {
-            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
-            instanceMetadataRepository.save(instanceMetaData);
+        Optional<InstanceMetaData> instanceMetaData = instanceMetaDataRepository.findHostInStack(stackId, host.getHostName());
+        if (instanceMetaData.isPresent()) {
+            instanceMetaData.get().setInstanceStatus(InstanceStatus.REGISTERED);
+            instanceMetadataRepository.save(instanceMetaData.get());
         }
     }
 
@@ -919,13 +918,13 @@ public class ClusterService {
                 .filter(p -> !StringUtils.hasLength(p.getRight()))
                 .map(Pair::getLeft).collect(Collectors.toList());
         if (!missing.isEmpty()) {
-            throw new BadRequestException(String.format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
+            throw new BadRequestException(format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
         }
         KerberosConfig kerberosConfig = cluster.getKerberosConfig();
         kerberosConfig.setPassword(kerberosPassword);
         kerberosConfig.setPrincipal(kerberosPrincipal);
 
-        kerberosConfigRepository.save(kerberosConfig);
+        kerberosService.save(kerberosConfig);
     }
 
     private void checkBlueprintIdAndHostGroups(String blueprintName, Set<HostGroup> hostGroups) {
@@ -960,15 +959,15 @@ public class ClusterService {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Cluster cluster = getCluster(stack);
             if (cluster == null) {
-                throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
+                throw new BadRequestException(format("Cluster does not exist on stack with '%s' id.", stackId));
             }
             if (!stack.isAvailable()) {
-                throw new BadRequestException(String.format(
+                throw new BadRequestException(format(
                         "Stack '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
                         stackId, stack.getStatus()));
             }
             if (!cluster.isAvailable()) {
-                throw new BadRequestException(String.format(
+                throw new BadRequestException(format(
                         "Cluster '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
                         stackId, stack.getStatus()));
             }
@@ -979,7 +978,7 @@ public class ClusterService {
                         clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS,
                                 new Json(ambariRepoUpgrade), stack.getCluster()));
                     } catch (JsonProcessingException ignored) {
-                        throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                        throw new BadRequestException(format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
                     }
                 } else {
                     ClusterComponent component = clusterComponentConfigProvider.getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS);
@@ -991,7 +990,7 @@ public class ClusterService {
                         component.setAttributes(new Json(ambariRepo));
                         clusterComponentConfigProvider.store(component);
                     } catch (JsonProcessingException ignored) {
-                        throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                        throw new BadRequestException(format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
                     }
                 }
                 try {
@@ -1012,7 +1011,7 @@ public class ClusterService {
                     ClusterComponent clusterComp = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetailsUpdate), stack.getCluster());
                     clusterComponentConfigProvider.store(clusterComp);
                 } catch (JsonProcessingException ignored) {
-                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
+                    throw new BadRequestException(format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
                 }
             } else {
                 ClusterComponent component = clusterComponentConfigProvider.getComponent(stack.getCluster().getId(), ComponentType.HDP_REPO_DETAILS);
@@ -1026,7 +1025,7 @@ public class ClusterService {
                     component.setAttributes(new Json(stackRepoDetails));
                     clusterComponentConfigProvider.store(component);
                 } catch (JsonProcessingException ignored) {
-                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
+                    throw new BadRequestException(format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
                 }
             }
         }
@@ -1071,7 +1070,7 @@ public class ClusterService {
             for (Entry<String, String> entry : categories.entrySet()) {
                 if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !blueprintUtils.isSharedServiceReadyBlueprint(blueprint)) {
                     throw new BadRequestException(
-                            String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
+                            format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
                                     entry.getKey()));
                 }
             }
@@ -1083,7 +1082,7 @@ public class ClusterService {
     private void validateUnusedHosts(InstanceGroup instanceGroup, int scalingAdjustment) {
         Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(instanceGroup.getId());
         if (unusedHostsInInstanceGroup.size() < scalingAdjustment) {
-            throw new BadRequestException(String.format(
+            throw new BadRequestException(format(
                     "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
                     unusedHostsInInstanceGroup.size(), instanceGroup.getGroupName(), scalingAdjustment - unusedHostsInInstanceGroup.size()));
         }
@@ -1091,32 +1090,31 @@ public class ClusterService {
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         String hostGroup = hostGroupAdjustment.getHostGroup();
-        int hostsCount = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroup).getHostMetadata().size();
+        int hostsCount = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroup)
+                .orElseThrow(() -> NotFoundException.notFound("HostGroup", format("%s, %s", stack.getCluster().getId(), hostGroup)).get())
+                .getHostMetadata().size();
         int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
         Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
         if (validateNodeCount == null || validateNodeCount) {
             if (hostsCount <= adjustment) {
-                String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]", hostGroup, hostsCount, adjustment);
-                throw new BadRequestException(String.format("The host group must contain at least 1 host after the decommission: %s", errorMessage));
+                String errorMessage = format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]", hostGroup, hostsCount, adjustment);
+                throw new BadRequestException(format("The host group must contain at least 1 host after the decommission: %s", errorMessage));
             }
         } else if (hostsCount - adjustment < 0) {
-            throw new BadRequestException(String.format("There are not enough hosts in host group: %s to remove", hostGroup));
+            throw new BadRequestException(format("There are not enough hosts in host group: %s to remove", hostGroup));
         }
     }
 
     private HostGroup getHostGroup(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustment) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
-        if (hostGroup == null) {
-            throw new BadRequestException(String.format(
-                    "Invalid host group: cluster '%s' does not contain a host group named '%s'.",
-                    stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
-        }
-        return hostGroup;
+        return hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup())
+                .orElseThrow(() -> new BadRequestException(format("Invalid host group: cluster '%s' does not contain a host group named '%s'.",
+                        stack.getCluster().getName(), hostGroupAdjustment.getHostGroup())));
     }
 
     private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState) {
         boolean stateChanged = false;
-        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
+        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName)
+                .orElseThrow(() -> NotFoundException.notFound("HostMetadata", format("%s, %s", stack.getCluster().getId(), hostName)).get());
         HostMetadataState oldState = hostMetadata.getHostMetadataState();
         if (!oldState.equals(newState)) {
             stateChanged = true;
@@ -1131,7 +1129,7 @@ public class ClusterService {
     public Cluster getById(Long id) {
         Cluster cluster = clusterRepository.findOneWithLists(id);
         if (cluster == null) {
-            throw new NotFoundException(String.format("Cluster '%s' not found", id));
+            throw new NotFoundException(format("Cluster '%s' not found", id));
         }
         return cluster;
     }
@@ -1154,7 +1152,7 @@ public class ClusterService {
 
     private AmbariClient getAmbariClient(Stack stack) {
         if (stack.getAmbariIp() == null) {
-            throw new NotFoundException(String.format("Ambari server is not available for the stack.[id: %s]", stack.getId()));
+            throw new NotFoundException(format("Ambari server is not available for the stack.[id: %s]", stack.getId()));
         }
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(httpClientConfig, stack.getGatewayPort(), stack.getCluster());

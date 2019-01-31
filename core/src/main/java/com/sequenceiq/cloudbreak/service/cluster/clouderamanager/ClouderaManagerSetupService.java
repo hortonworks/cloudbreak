@@ -85,7 +85,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             ApiClient client = clouderaManagerClientFactory.getClient(stack, cluster);
             clusterService.updateCreationDateOnCluster(cluster);
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+            Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(cluster.getId());
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(hostGroups);
 
             String hostTemplate = cluster.getBlueprint().getBlueprintText();

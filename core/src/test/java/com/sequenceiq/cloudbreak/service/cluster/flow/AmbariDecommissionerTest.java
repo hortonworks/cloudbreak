@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class AmbariDecommissionerTest {
@@ -117,6 +119,9 @@ public class AmbariDecommissionerTest {
 
     @Mock
     private PollingService<AmbariClientPollerObject> ambariClientPollingService;
+
+    @Mock
+    private HostMetadataService hostMetadataService;
 
     @Test
     public void testSelectNodesWhenHasOneUnhealthyNodeAndShouldSelectOne() {
@@ -269,11 +274,11 @@ public class AmbariDecommissionerTest {
         when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
-        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
+        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).findHostGroupsInCluster(nullable(Long.class));
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                .when(hostMetadataService).findHostInClusterByName(any(), any());
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
@@ -333,11 +338,11 @@ public class AmbariDecommissionerTest {
         when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
-        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).findHostGroupsInCluster(nullable(Long.class));
+        doAnswer(invocation -> Optional.of(slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                .findFirst().get()))
+                .when(hostMetadataService).findHostInClusterByName(any(), any());
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
@@ -400,11 +405,11 @@ public class AmbariDecommissionerTest {
         when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
-        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).findHostGroupsInCluster(nullable(Long.class));
+        doAnswer(invocation -> Optional.of(slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                .findFirst().get()))
+                .when(hostMetadataService).findHostInClusterByName(any(), any());
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
@@ -466,11 +471,11 @@ public class AmbariDecommissionerTest {
         when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
-        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+        doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).findHostGroupsInCluster(nullable(Long.class));
+        doAnswer(invocation -> Optional.of(slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                .findFirst().get()))
+                .when(hostMetadataService).findHostInClusterByName(any(), any());
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));

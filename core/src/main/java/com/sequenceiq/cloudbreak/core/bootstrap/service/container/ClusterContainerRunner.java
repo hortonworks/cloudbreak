@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerConfigService;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -35,10 +36,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -53,7 +54,7 @@ public class ClusterContainerRunner {
     private StackService stackService;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     @Inject
     private ContainerConfigService containerConfigService;
@@ -122,7 +123,7 @@ public class ClusterContainerRunner {
             String ambariServerHost = ambariServerContainer.get(0).getHost();
 
             List<String> hostBlackList = new ArrayList<>();
-            for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
+            for (HostGroup hostGroup : hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())) {
                 ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, null, cloudPlatform, hostGroup,
                         null, hostBlackList, cluster.getId().toString());
                 List<ContainerInfo> containerInfos = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
@@ -152,15 +153,6 @@ public class ClusterContainerRunner {
         return gatewayHostname;
     }
 
-    private String getGatewayPrivateIp(Stack stack) {
-        String gatewayHostname = "";
-        if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-            InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-            gatewayHostname = gatewayInstance.getPrivateIp();
-        }
-        return gatewayHostname;
-    }
-
     private Map<String, List<Container>> addClusterContainers(Stack stack, String cloudPlatform, String hostGroupName, Integer adjustment)
             throws CloudbreakException, CloudbreakOrchestratorException {
 
@@ -176,7 +168,8 @@ public class ClusterContainerRunner {
             String ambariServerHost = existingContainers.stream()
                     .filter(input -> input.getImage().contains(AMBARI_SERVER.getName()))
                     .findFirst().get().getHost();
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
+                    .orElseThrow(() -> NotFoundException.notFound("HostGroup", cluster.getId()).get());
             String ambariAgentApp = existingContainers.stream()
                     .filter(input -> hostGroup.getHostNames().contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
                     .findFirst().get().getName();

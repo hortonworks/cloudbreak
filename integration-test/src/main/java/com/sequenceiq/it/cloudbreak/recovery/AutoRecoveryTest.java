@@ -49,14 +49,14 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
 
         RecoveryUtil.deleteInstance(cloudProviderParams, instanceToDelete);
 
-        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext)
-                - removedInstanceCount;
+        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword,
+                itContext) - removedInstanceCount;
 
         WaitResult waitResult = CloudbreakV3Util.waitForEvent(getCloudbreakClient(), workspaceId, stackResponse.getName(), "RECOVERY", "autorecovery requested",
-         RecoveryUtil.getCurentTimeStamp());
+        RecoveryUtil.getCurentTimeStamp());
 
         if (waitResult == WaitResult.TIMEOUT) {
-         Assert.fail("Timeout happened when waiting for the desired host state");
+            Assert.fail("Timeout happened when waiting for the desired host state");
         }
 //        WHEN: Cloudbreak automatically starts the recover
 //        THEN
@@ -64,7 +64,8 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
         CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
-        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext);
+        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword,
+                itContext);
         Assert.assertEquals(expectedNodeCountAmbari, actualNodeCountAmbari);
     }
 }

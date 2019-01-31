@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -31,12 +32,12 @@ public interface CredentialRepository extends WorkspaceResourceRepository<Creden
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     @Query("SELECT c FROM Credential c WHERE c.name= :name AND c.workspace.id= :workspaceId AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms)")
-    Credential findActiveByNameAndWorkspaceIdFilterByPlatforms(@Param("name") String name, @Param("workspaceId") Long workspaceId,
+    Optional<Credential> findActiveByNameAndWorkspaceIdFilterByPlatforms(@Param("name") String name, @Param("workspaceId") Long workspaceId,
                     @Param("cloudPlatforms") Collection<String> cloudPlatforms);
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     @Query("SELECT c FROM Credential c WHERE c.id= :id AND c.workspace.id= :workspaceId AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms)")
-    Credential findActiveByIdAndWorkspaceFilterByPlatforms(@Param("id") Long id, @Param("workspaceId") Long workspaceId,
+    Optional<Credential> findActiveByIdAndWorkspaceFilterByPlatforms(@Param("id") Long id, @Param("workspaceId") Long workspaceId,
                     @Param("cloudPlatforms") Collection<String> cloudPlatforms);
 
 }

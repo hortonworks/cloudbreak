@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -30,10 +31,10 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId")
-    InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
+    Optional<InstanceMetaData> findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
-    InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
+    Optional<InstanceMetaData> findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id= :instanceGroupId AND i.instanceStatus in ('CREATED', 'UNREGISTERED')")
     Set<InstanceMetaData> findUnusedHostsInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
@@ -61,8 +62,8 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     List<InstanceMetaData> findAllByInstanceGroup(InstanceGroup instanceGroup);
 
     @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY'")
-    String getServerCertByStackId(@Param("stackId") Long stackId);
+    Optional<String> getServerCertByStackId(@Param("stackId") Long stackId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceGroup.stack.id= :stackId")
-    InstanceMetaData getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
+    Optional<InstanceMetaData> getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
 }

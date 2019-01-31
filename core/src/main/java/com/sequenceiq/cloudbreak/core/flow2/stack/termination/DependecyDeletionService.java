@@ -72,7 +72,7 @@ public class DependecyDeletionService {
         if (stack.getCluster() != null) {
             Cluster cluster = stack.getCluster();
             deleteBlueprint(cluster.getBlueprint());
-            Set<HostGroup> hostGroupsInCluster = hostGroupService.getByCluster(cluster.getId());
+            Set<HostGroup> hostGroupsInCluster = hostGroupService.findHostGroupsInCluster(cluster.getId());
             for (HostGroup hostGroup : hostGroupsInCluster) {
                 hostGroup.getRecipes().forEach(this::deleteRecipe);
             }
@@ -92,7 +92,7 @@ public class DependecyDeletionService {
     private void deleteCredential(Credential credential) {
         try {
             if (credential != null) {
-                credentialService.archiveCredential(credential);
+                credentialService.delete(credential);
             }
         } catch (Exception ex) {
             LOGGER.debug("Could not delete credential {} which is associated with the stack: {}", credential, ex.getMessage());
