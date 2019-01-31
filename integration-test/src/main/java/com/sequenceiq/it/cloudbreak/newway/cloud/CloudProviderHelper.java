@@ -1,16 +1,25 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.CloudStorageParameters;
-import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
@@ -18,18 +27,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -241,33 +238,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return testParameter;
     }
 
-    protected Set<StorageLocationRequest> defaultDatalakeStorageLocations(CloudStorageTypePathPrefix type, String parameterToInsert) {
-        Set<StorageLocationRequest> request = new LinkedHashSet<>(2);
-        request.add(createLocation(
-                String.format("%s://%s/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
-                "hive-site",
-                "hive.metastore.warehouse.dir"));
-        request.add(createLocation(
-                String.format("%s://%s/apps/ranger/audit", type.getPrefix(), parameterToInsert),
-                "ranger-env",
-                "xasecure.audit.destination.hdfs.dir"));
-        return request;
-    }
-
-    protected CloudStorageRequest getCloudStorageForAttachedCluster(CloudStorageTypePathPrefix type, String parameterToInsert,
-                                                                    CloudStorageParameters emptyType) {
-        var request = new CloudStorageRequest();
-        var locations = new LinkedHashSet<StorageLocationRequest>(1);
-        locations.add(
-                createLocation(
-                        String.format("%s://%s/attached/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
-                        "hive-site",
-                        "hive.metastore.warehouse.dir"));
-        request.setLocations(locations);
-        type.setParameterForRequest(request, emptyType);
-        return request;
-    }
-
     protected StorageLocationRequest createLocation(String value, String propertyFile, String propertyName) {
         var location = new StorageLocationRequest();
         location.setValue(value);
@@ -279,16 +249,5 @@ public abstract class CloudProviderHelper extends CloudProvider {
     protected String getDatalakeBlueprintName() {
         String blueprintName = testParameter.get("datalakeBlueprintName");
         return blueprintName != null ? blueprintName : DEFAULT_DATALAKE_BLUEPRINT;
-    }
-
-    private int determineInstanceCount(String key) {
-        String instanceCount = testParameter.get(key);
-        int instanceCountInt;
-        try {
-            instanceCountInt = Integer.parseInt(instanceCount);
-        } catch (NumberFormatException e) {
-            instanceCountInt = 1;
-        }
-        return instanceCountInt;
     }
 }
