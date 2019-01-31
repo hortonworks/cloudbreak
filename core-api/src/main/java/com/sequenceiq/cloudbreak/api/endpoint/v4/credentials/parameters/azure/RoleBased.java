@@ -18,6 +18,9 @@ public class RoleBased implements Mappable {
     @ApiModelProperty(required = true)
     private String roleName;
 
+    @ApiModelProperty(hidden = true)
+    private String deploymentAddress;
+
     public String getRoleName() {
         return roleName;
     }
@@ -26,10 +29,19 @@ public class RoleBased implements Mappable {
         this.roleName = roleName;
     }
 
+    public String getDeploymentAddress() {
+        return deploymentAddress;
+    }
+
+    public void setDeploymentAddress(String deploymentAddress) {
+        this.deploymentAddress = deploymentAddress;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("roleName", roleName != null ? roleName : "");
+        map.put("deploymentAddress", deploymentAddress);
         return map;
     }
 
