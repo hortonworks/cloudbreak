@@ -74,7 +74,7 @@ public class StackImageUpdateActions {
         return new AbstractStackImageUpdateAction<>(ImageUpdateEvent.class) {
             @Override
             protected void doExecute(StackContext context, ImageUpdateEvent payload, Map<Object, Object> variables) {
-                CheckResult checkResult = getStackImageUpdateService().checkPackageVersions(context.getStack(), payload.getImage());
+                CheckResult checkResult = getStackImageUpdateService().comparePackageVersions(context.getStack(), payload.getImage());
                 if (checkResult.getStatus() == EventStatus.FAILED) {
                     throw new OperationException(checkResult.getMessage());
                 }

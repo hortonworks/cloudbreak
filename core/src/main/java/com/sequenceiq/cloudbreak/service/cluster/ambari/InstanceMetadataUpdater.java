@@ -84,7 +84,7 @@ public class InstanceMetadataUpdater {
         List<String> packagesWithMultipleVersions = collectPackagesWithMultipleVersions(instanceMetaDataSet);
         notifyIfPackagesHaveDifferentVersions(stack, packagesWithMultipleVersions);
 
-        Map<String, List<String>> instancesWithMissingPackageVersions = collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
+        Map<String, List<Package>> instancesWithMissingPackageVersions = collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
         notifyIfInstancesMissingPackageVersion(stack, instancesWithMissingPackageVersions);
     }
 
@@ -132,7 +132,7 @@ public class InstanceMetadataUpdater {
         }
     }
 
-    private void notifyIfInstancesMissingPackageVersion(Stack stack, Map<String, List<String>> instancesWithMissingPackageVersions) {
+    private void notifyIfInstancesMissingPackageVersion(Stack stack, Map<String, List<Package>> instancesWithMissingPackageVersions) {
         if (!instancesWithMissingPackageVersions.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
@@ -240,15 +240,17 @@ public class InstanceMetadataUpdater {
         }
     }
 
-    public Map<String, List<String>> collectInstancesWithMissingPackageVersions(Collection<InstanceMetaData> instanceMetaDatas) {
-        Map<String, List<String>> instancesWithMissingPackagVersions = new HashMap<>();
+    public Map<String, List<Package>> collectInstancesWithMissingPackageVersions(Collection<InstanceMetaData> instanceMetaDatas) {
+        Map<String, List<Package>> instancesWithMissingPackagVersions = new HashMap<>();
 
         for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
             try {
                 Image image = instanceMetaData.getImage().get(Image.class);
                 Set<String> packages = image.getPackageVersions().keySet();
-                List<String> missingPackageVersions = this.packages.stream().map(Package::getName).collect(Collectors.toList());
-                missingPackageVersions.removeAll(packages);
+                List<Package> missingPackageVersions = this.packages
+                        .stream()
+                        .filter(aPackage -> !packages.contains(aPackage.getName()))
+                        .collect(Collectors.toList());
                 if (!missingPackageVersions.isEmpty()) {
                     instancesWithMissingPackagVersions.put(instanceMetaData.getInstanceId(), missingPackageVersions);
                 }

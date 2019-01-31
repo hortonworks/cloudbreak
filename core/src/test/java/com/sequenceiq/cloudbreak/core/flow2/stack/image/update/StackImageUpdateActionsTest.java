@@ -228,11 +228,11 @@ public class StackImageUpdateActionsTest {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
-        when(stackImageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
+        when(stackImageUpdateService.comparePackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
 
         checkPackageVersionsAction.execute(stateContext);
 
-        verify(stackImageUpdateService, times(1)).checkPackageVersions(any(Stack.class), any(StatedImage.class));
+        verify(stackImageUpdateService, times(1)).comparePackageVersions(any(Stack.class), any(StatedImage.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event()), any(Event.class));
     }
 
@@ -241,12 +241,12 @@ public class StackImageUpdateActionsTest {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_PACKAGE_VERSIONS_STATE);
-        when(stackImageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed(""));
+        when(stackImageUpdateService.comparePackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed(""));
         checkPackageVersionsAction.setFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT);
 
         checkPackageVersionsAction.execute(stateContext);
 
-        verify(stackImageUpdateService, times(1)).checkPackageVersions(any(Stack.class), any(StatedImage.class));
+        verify(stackImageUpdateService, times(1)).comparePackageVersions(any(Stack.class), any(StatedImage.class));
         verify(eventBus, times(0)).notify(eq(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event()), any(Event.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event()), any(Event.class));
     }

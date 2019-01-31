@@ -188,26 +188,54 @@ public class StackImageUpdateService {
         return clusterStackType.orElseThrow(() ->  new CloudbreakServiceException("Could not determine stack type for cluster"));
     }
 
-    public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {
+    public CheckResult comparePackageVersions(Stack stack, StatedImage newImage)  {
+        CheckResult checkCurrentPackageVersions = checkPackageVersions(stack);
+        if (EventStatus.FAILED.equals(checkCurrentPackageVersions.getStatus())) {
+            return checkCurrentPackageVersions;
+        }
+
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
-
-        CheckResult instanceHaveMultipleVersionResult = packageVersionChecker.checkInstancesHaveMultiplePackageVersions(instanceMetaDataSet);
-        if (instanceHaveMultipleVersionResult.getStatus() == EventStatus.FAILED) {
-            return instanceHaveMultipleVersionResult;
-        }
-
-        CheckResult instancesHaveAllMandatoryPackageVersionResult = packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(instanceMetaDataSet);
-        if (instancesHaveAllMandatoryPackageVersionResult.getStatus() == EventStatus.FAILED) {
-            return instancesHaveAllMandatoryPackageVersionResult;
-        }
 
         CheckResult compareImageAndInstancesMandatoryPackageVersion =
                 packageVersionChecker.compareImageAndInstancesMandatoryPackageVersion(newImage, instanceMetaDataSet);
-        if (compareImageAndInstancesMandatoryPackageVersion.getStatus() == EventStatus.FAILED) {
+        if (EventStatus.FAILED.equals(compareImageAndInstancesMandatoryPackageVersion.getStatus())) {
             return compareImageAndInstancesMandatoryPackageVersion;
         }
 
         return CheckResult.ok();
+    }
+
+    public CheckResult checkPackageVersions(Stack stack) {
+        try {
+            StatedImage currentImage = getCurrentStatedImage(stack);
+            return checkPackageVersionsByCurrentImage(stack, currentImage);
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+                LOGGER.error(e.getMessage());
+                return CheckResult.failed(e.getMessage());
+        }
+    }
+
+    private CheckResult checkPackageVersionsByCurrentImage(Stack stack, StatedImage currentImage)  {
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+
+        CheckResult instanceHaveMultipleVersionResult = packageVersionChecker.checkInstancesHaveMultiplePackageVersions(instanceMetaDataSet);
+        if (EventStatus.FAILED.equals(instanceHaveMultipleVersionResult.getStatus())) {
+            return instanceHaveMultipleVersionResult;
+        }
+
+        CheckResult instancesHaveAllMandatoryPackageVersionResult = packageVersionChecker
+                .checkInstancesHaveAllMandatoryPackageVersion(currentImage.getImage().isPrewarmed(), instanceMetaDataSet);
+        if (EventStatus.FAILED.equals(instancesHaveAllMandatoryPackageVersionResult.getStatus())) {
+            return instancesHaveAllMandatoryPackageVersionResult;
+        }
+
+        return CheckResult.ok();
+    }
+
+    private StatedImage getCurrentStatedImage(Stack stack) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image currentImage = getCurrentImage(stack);
+        return imageCatalogService.getImage(currentImage.getImageCatalogUrl(),
+                currentImage.getImageCatalogName(), currentImage.getImageId());
     }
 
     public boolean isValidImage(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
@@ -216,7 +244,7 @@ public class StackImageUpdateService {
                 Image currentImage = getCurrentImage(stack);
                 StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
                 return isCloudPlatformMatches(stack, newImage) && isOsVersionsMatch(currentImage, newImage) && isStackMatchIfPrewarmed(stack, newImage)
-                        && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
+                        && comparePackageVersions(stack, newImage).getStatus() == EventStatus.OK;
             } catch (CloudbreakImageNotFoundException e) {
                 LOGGER.warn("Cloudbreak Image not found", e);
                 return false;

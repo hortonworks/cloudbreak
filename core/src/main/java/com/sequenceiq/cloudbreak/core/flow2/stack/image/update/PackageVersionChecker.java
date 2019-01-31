@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -74,8 +75,18 @@ public class PackageVersionChecker {
         return CheckResult.ok();
     }
 
-    public CheckResult checkInstancesHaveAllMandatoryPackageVersion(Set<InstanceMetaData> instanceMetaDataSet) {
-        Map<String, List<String>> instancesWithMissingPackageVersions = instanceMetadataUpdater.collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
+    public CheckResult checkInstancesHaveAllMandatoryPackageVersion(boolean prewarmed, Set<InstanceMetaData> instanceMetaDataSet) {
+        Predicate<Map.Entry<String, List<Package>>> packageVersionEntryPredicate = entry -> entry.getValue()
+                .stream()
+                .filter(packageVersion -> prewarmed || !packageVersion.isPrewarmed())
+                .findAny()
+                .isPresent();
+        Map<String, List<Package>> instancesWithMissingPackageVersions = instanceMetadataUpdater
+                .collectInstancesWithMissingPackageVersions(instanceMetaDataSet)
+                .entrySet()
+                .stream()
+                .filter(packageVersionEntryPredicate)
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
         if (!instancesWithMissingPackageVersions.isEmpty()) {
             String message = messagesService.getMessage(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
                     Collections.singletonList(instancesWithMissingPackageVersions.entrySet().stream()

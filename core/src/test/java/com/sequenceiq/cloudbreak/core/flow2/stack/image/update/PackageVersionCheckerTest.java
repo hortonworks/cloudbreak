@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
@@ -147,17 +149,32 @@ public class PackageVersionCheckerTest {
     public void checkInstancesHaveAllMandatoryPackageVersionOk() {
         when(instanceMetadataUpdater.collectInstancesWithMissingPackageVersions(anySet())).thenReturn(Collections.emptyMap());
 
-        CheckResult result = underTest.checkInstancesHaveAllMandatoryPackageVersion(Collections.emptySet());
+        CheckResult result = underTest.checkInstancesHaveAllMandatoryPackageVersion(true, Collections.emptySet());
+
+        assertEquals(EventStatus.OK, result.getStatus());
+    }
+
+    @Test
+    public void checkInstancesHaveAllMandatoryPackageVersionNotPrewarmOk() {
+        Map<String, List<InstanceMetadataUpdater.Package>> value = Maps.newHashMap();
+        InstanceMetadataUpdater.Package packageVersion = new InstanceMetadataUpdater.Package();
+        packageVersion.setPrewarmed(true);
+        value.put("instance1", Lists.newArrayList(packageVersion));
+        when(instanceMetadataUpdater.collectInstancesWithMissingPackageVersions(anySet())).thenReturn(value);
+
+        CheckResult result = underTest.checkInstancesHaveAllMandatoryPackageVersion(false, Collections.emptySet());
 
         assertEquals(EventStatus.OK, result.getStatus());
     }
 
     @Test
     public void checkInstancesHaveAllMandatoryPackageVersionNok() {
+        InstanceMetadataUpdater.Package packageVersion = new InstanceMetadataUpdater.Package();
+        packageVersion.setName("package");
         when(instanceMetadataUpdater.collectInstancesWithMissingPackageVersions(anySet()))
-                .thenReturn(Collections.singletonMap("instance", Collections.singletonList("package")));
+                .thenReturn(Collections.singletonMap("instance", Collections.singletonList(packageVersion)));
 
-        CheckResult result = underTest.checkInstancesHaveAllMandatoryPackageVersion(Collections.emptySet());
+        CheckResult result = underTest.checkInstancesHaveAllMandatoryPackageVersion(true, Collections.emptySet());
 
         assertEquals(EventStatus.FAILED, result.getStatus());
     }

@@ -25,10 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -37,11 +34,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 @Service
 public class MaintenanceModeValidationService {
@@ -49,13 +43,7 @@ public class MaintenanceModeValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceModeValidationService.class);
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
-
-    @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
 
     @Inject
     private ClusterService clusterService;
@@ -153,19 +141,9 @@ public class MaintenanceModeValidationService {
 
     public List<Warning> validateImageCatalog(Stack stack) {
         List<Warning> warnings = new ArrayList<>();
-        try {
-            Image image = componentConfigProvider.getImage(stack.getId());
-            StatedImage statedImage = imageCatalogService.getImage(image.getImageCatalogUrl(),
-                    image.getImageCatalogName(), image.getImageId());
-
-            if (!image.getPackageVersions().isEmpty()) {
-                CheckResult checkResult = stackImageUpdateService.checkPackageVersions(stack, statedImage);
-                if (checkResult.getStatus().equals(EventStatus.FAILED)) {
-                    warnings.add(new Warning(WarningType.IMAGE_INCOMPATIBILITY_WARNING, checkResult.getMessage()));
-                }
-            }
-        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            throw new CloudbreakServiceException("Image info could not be validated!", e);
+        CheckResult checkResult = stackImageUpdateService.checkPackageVersions(stack);
+        if (checkResult.getStatus().equals(EventStatus.FAILED)) {
+            warnings.add(new Warning(WarningType.IMAGE_INCOMPATIBILITY_WARNING, checkResult.getMessage()));
         }
         return warnings;
     }

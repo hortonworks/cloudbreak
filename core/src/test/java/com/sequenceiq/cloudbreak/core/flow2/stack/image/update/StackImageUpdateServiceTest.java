@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -37,7 +38,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 public class StackImageUpdateServiceTest {
@@ -50,9 +50,6 @@ public class StackImageUpdateServiceTest {
 
     @Mock
     private ImageService imageService;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private PackageVersionChecker packageVersionChecker;
@@ -84,7 +81,7 @@ public class StackImageUpdateServiceTest {
         image = new Image("asdf", "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions);
         statedImage = StatedImage.statedImage(image, "url", "name");
-        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.ok());
+        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyBoolean(), anySet())).thenReturn(CheckResult.ok());
         when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anySet())).thenReturn(CheckResult.ok());
         when(packageVersionChecker.compareImageAndInstancesMandatoryPackageVersion(any(StatedImage.class), anySet())).thenReturn(CheckResult.ok());
         when(messagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
