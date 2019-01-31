@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,12 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
@@ -72,6 +75,23 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     @Inject
     private ITProps itProps;
+
+    public static void main(String[] args) {
+        SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
+        springApp.setWebApplicationType(WebApplicationType.NONE);
+        try {
+            ConfigurableApplicationContext context = springApp.run(args);
+            LOG.info("Closing Spring test context.");
+            context.close();
+            LOG.info("test successfully run");
+        } catch (Exception e) {
+            LOG.error("Something went wrong during closing Spring Context.");
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            threadSet.stream().forEach(t -> LOG.info("Runnning threads: {}", t.getName()));
+            System.exit(1);
+        }
+        System.exit(0);
+    }
 
     @Override
     public void run(String... args) throws Exception {
@@ -191,12 +211,5 @@ public class IntegrationTestApp implements CommandLineRunner {
             result = YAML_PARSER;
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
-        springApp.setWebEnvironment(false);
-        springApp.run(args);
-        LOG.info("test successfully run");
     }
 }
