@@ -19,13 +19,13 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 public class ClusterCreationSetupServiceTest {
 
     @Mock
-    private ConversionService conversionService;
+    private ConverterUtil converterUtil;
 
     @Mock
     private ClusterDecorator clusterDecorator;
@@ -115,7 +115,7 @@ public class ClusterCreationSetupServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
-        when(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).thenReturn(cluster);
+        when(converterUtil.convert(any(ClusterV4Request.class), eq(Cluster.class))).thenReturn(cluster);
         when(clusterDecorator
                 .decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(component, imageComponent));
