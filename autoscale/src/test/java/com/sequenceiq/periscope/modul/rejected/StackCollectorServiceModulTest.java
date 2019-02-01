@@ -145,11 +145,11 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         cluster.setState(ClusterState.RUNNING);
 
         when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(1L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(2L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(3L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(4L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(5L))));
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(1L),
+                        autoscaleStackResponse(2L),
+                        autoscaleStackResponse(3L),
+                        autoscaleStackResponse(4L),
+                        autoscaleStackResponse(5L))));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(2L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(3L)).thenReturn(cluster);
@@ -173,11 +173,11 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         cluster.setState(ClusterState.RUNNING);
 
         when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(1L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(2L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(3L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(4L))),
-                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(5L))));
+                new AutoscaleStackV4Responses(List.of(autoscaleStackResponse(1L),
+                        autoscaleStackResponse(2L),
+                        autoscaleStackResponse(3L),
+                        autoscaleStackResponse(4L),
+                        autoscaleStackResponse(5L))));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(2L)).thenReturn(cluster);
         when(clusterService.findOneByStackId(3L)).thenReturn(cluster);
