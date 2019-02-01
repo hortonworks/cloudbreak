@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AM
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_UPSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.STOP_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.UPSCALE_AMBARI_PROGRESS_STATE;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_0_0;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.HostGroupAssociationBuilder.FQDN;
 import static java.util.Collections.singletonMap;
 
@@ -75,9 +74,6 @@ public class AmbariClusterModificationService implements ClusterModificationServ
 
     @Inject
     private CloudbreakEventService eventService;
-
-    @Inject
-    private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     @Inject
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
@@ -188,12 +184,6 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                     .collect(Collectors.toMap(association -> association.get(FQDN), association ->
                             association.get("rack") != null ? association.get("rack") : "/default-rack"));
             int upscaleRequestCode = ambariClient.addHostsAndRackInfoWithBlueprint(blueprintName, hostGroup.getName(), hostsWithRackInfo);
-            String ambariServerVersion = ambariClient.ambariServerVersion();
-            if (!ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(() -> ambariServerVersion, AMBARI_VERSION_2_7_0_0)) {
-                for (String host : hosts) {
-                    ambariClient.updateRack(host, hostsWithRackInfo.get(host));
-                }
-            }
             return singletonMap("UPSCALE_REQUEST", upscaleRequestCode);
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
