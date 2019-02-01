@@ -65,6 +65,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareImage(source, stackV2Request);
         prepareTags(source, stackV2Request);
         prepareDatalakeRequest(source, stackV2Request);
+        stackV2Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         return stackV2Request;
     }
 
@@ -101,7 +102,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         if (source.getCredential() != null) {
             environment.setCredentialName(source.getCredential().getName());
         }
-        environment.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         return environment;
     }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.PLACEMENT_SETTINGS;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
@@ -41,6 +44,11 @@ public class StackV4Request extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.TAGS)
     private TagsV4Request tags;
+
+    @NotNull
+    @ApiModelProperty(value = PLACEMENT_SETTINGS, required = true)
+    @Valid
+    private PlacementSettingsV4Request placement;
 
     @NotNull
     @Valid
@@ -169,5 +177,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setType(StackType type) {
         this.type = type;
+    }
+
+    public PlacementSettingsV4Request getPlacement() {
+        return placement;
+    }
+
+    public void setPlacement(PlacementSettingsV4Request placement) {
+        this.placement = placement;
     }
 }

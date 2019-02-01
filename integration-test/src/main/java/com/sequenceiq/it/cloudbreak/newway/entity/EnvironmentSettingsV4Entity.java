@@ -51,7 +51,6 @@ public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<Enviro
                 .withAvailabilityZone(EnvironmentEntity.AVAILABILITY_ZONE);
 
         return withName(getNameCreator().getRandomNameForMock())
-                .withPlacement(placementSettings)
                 .withCredentialName(credentialEntity.getName());
     }
 
@@ -63,16 +62,6 @@ public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<Enviro
 
     public EnvironmentSettingsV4Entity withCredentialName(String name) {
         getRequest().setCredentialName(name);
-        return this;
-    }
-
-    public EnvironmentSettingsV4Entity withPlacement(String key) {
-        PlacementSettingsEntity placementSettings = getTestContext().get(key);
-        return withPlacement(placementSettings);
-    }
-
-    public EnvironmentSettingsV4Entity withPlacement(PlacementSettingsEntity placementSettings) {
-        getRequest().setPlacement(placementSettings.getRequest());
         return this;
     }
 }

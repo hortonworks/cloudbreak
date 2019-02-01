@@ -4,12 +4,12 @@
     "catalog": "aws-catalog",
     "id": "aws-image"
   },
+  "placement": {
+    "availabilityZone": "avZone",
+    "region": "eu-west-1"
+  },
   "environment": {
-    "credentialName": "cred",
-    "placement": {
-      "availabilityZone": "avZone",
-      "region": "eu-west-1"
-    }
+    "credentialName": "cred"
   },
   "authentication": {
     "publicKey": "ssh-key dsfsdfsdfsdf"

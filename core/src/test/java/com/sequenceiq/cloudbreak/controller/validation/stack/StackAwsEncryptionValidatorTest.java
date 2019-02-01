@@ -108,7 +108,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
         when(subject.getEnvironment()).thenReturn(environmentSettingsRequest);
-        when(environmentSettingsRequest.getPlacement()).thenReturn(placementSettingsRequest);
+        when(subject.getPlacement()).thenReturn(placementSettingsRequest);
         when(subject.getCluster()).thenReturn(clusterRequest);
         when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
         when(ambariRequest.getBlueprintName()).thenReturn("dummy");

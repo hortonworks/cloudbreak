@@ -100,7 +100,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         var placement = new PlacementSettingsV4Request();
         placement.setRegion(region);
         placement.setAvailabilityZone(availabilityZone);
-        environment.setPlacement(placement);
+        stackRequest.setPlacement(placement);
         stackRequest.setEnvironment(environment);
         var network = new NetworkV4Request();
         stackRequest.setNetwork(network);
