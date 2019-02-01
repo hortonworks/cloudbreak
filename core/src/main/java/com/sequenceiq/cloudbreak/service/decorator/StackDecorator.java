@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.stack.ParameterValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -52,7 +50,6 @@ import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
-import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
@@ -61,9 +58,6 @@ public class StackDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
-
-    @Inject
-    private StackParameterService stackParameterService;
 
     @Inject
     private CredentialService credentialService;
@@ -94,9 +88,6 @@ public class StackDecorator {
 
     @Inject
     private CloudParameterCache cloudParameterCache;
-
-    @Inject
-    private List<ParameterValidator> parameterValidators;
 
     @Inject
     private SharedServiceValidator sharedServiceValidator;

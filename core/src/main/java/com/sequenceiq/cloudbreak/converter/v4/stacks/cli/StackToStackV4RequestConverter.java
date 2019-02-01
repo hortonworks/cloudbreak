@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
@@ -24,9 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -48,9 +47,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;

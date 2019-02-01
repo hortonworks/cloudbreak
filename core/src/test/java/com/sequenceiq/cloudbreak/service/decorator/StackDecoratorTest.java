@@ -12,14 +12,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -33,14 +33,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackV4RequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -49,9 +47,9 @@ import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvid
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
-import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
+@RunWith(MockitoJUnitRunner.class)
 public class StackDecoratorTest {
 
     private static final String MISCONFIGURED_STACK_FOR_SHARED_SERVICE = "Shared service stack should contains both Hive RDS and Ranger "
@@ -62,15 +60,6 @@ public class StackDecoratorTest {
 
     @InjectMocks
     private StackDecorator underTest;
-
-    @Mock
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Mock
-    private StackV4RequestValidator stackValidator;
-
-    @Mock
-    private StackParameterService stackParameterService;
 
     @Mock
     private CredentialService credentialService;
@@ -143,11 +132,6 @@ public class StackDecoratorTest {
 
     @Mock
     private SharedServiceValidator sharedServiceValidator;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     @Ignore

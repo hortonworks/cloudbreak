@@ -13,20 +13,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -65,10 +62,6 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     private static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
 
-    @Resource
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
-
     @Inject
     private CredentialRepository credentialRepository;
 
@@ -101,9 +94,6 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     @Inject
     private EnvironmentViewRepository environmentViewRepository;
-
-    @Inject
-    private CredentialPropertyCollector credentialPropertyCollector;
 
     @Inject
     private SecretService secretService;

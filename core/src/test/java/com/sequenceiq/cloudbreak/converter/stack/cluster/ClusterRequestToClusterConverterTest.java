@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -23,10 +25,9 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,9 +40,6 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private ConversionService conversionService;
 
     @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Mock
     private KerberosService kerberosService;
 
     @Mock
@@ -51,15 +49,15 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private WorkspaceService workspaceService;
 
     @Mock
-    private UserService userService;
+    private RdsConfigService rdsConfigService;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+    private Workspace workspace;
 
     @Before
     public void setUp() {
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(100L);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
     }
 
     @Test
@@ -82,7 +80,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterV4Request request = getRequest("cluster-with-cloud-storage.json");
 
         given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
-        given(kerberosService.getByNameForWorkspaceId("somename", 100L)).willReturn(new KerberosConfig());
+        given(kerberosService.getByNameForWorkspaceId(eq("somename"), anyLong())).willReturn(new KerberosConfig());
         given(conversionService.convert(request.getCloudStorage(), FileSystem.class)).willReturn(new FileSystem());
         given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
         // WHEN

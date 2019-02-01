@@ -95,7 +95,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -120,7 +119,6 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -180,9 +178,6 @@ public class ClusterService {
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private JsonHelper jsonHelper;
-
-    @Inject
     private GatewayConvertUtil gateWayUtil;
 
     @Inject
@@ -214,9 +209,6 @@ public class ClusterService {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
     private BlueprintUtils blueprintUtils;

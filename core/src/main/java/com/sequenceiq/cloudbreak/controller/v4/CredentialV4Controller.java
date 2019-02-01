@@ -18,9 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.Credentia
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.InteractiveCredentialV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
@@ -31,12 +29,6 @@ public class CredentialV4Controller extends NotificationController implements Cr
 
     @Inject
     private CredentialService credentialService;
-
-    @Inject
-    private CredentialValidator credentialValidator;
-
-    @Inject
-    private CredentialPropertyCollector credentialPropertyCollector;
 
     @Inject
     private ConverterUtil converterUtil;

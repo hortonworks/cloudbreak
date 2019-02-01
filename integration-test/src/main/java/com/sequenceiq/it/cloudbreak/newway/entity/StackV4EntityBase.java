@@ -230,11 +230,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withAmbariVersion(String version) {
-        getRequest().setAmbariVersion(version);
-        return this;
-    }
-
     public StackV4EntityBase<T> withGatewayPort(int port) {
         getRequest().setGatewayPort(port);
         return this;

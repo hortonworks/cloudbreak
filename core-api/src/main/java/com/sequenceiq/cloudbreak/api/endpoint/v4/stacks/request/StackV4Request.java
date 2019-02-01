@@ -36,12 +36,6 @@ public class StackV4Request extends StackV4Base {
     @ApiModelProperty(value = StackModelDescription.GENERAL_SETTINGS, required = true)
     private EnvironmentSettingsV4Request environment;
 
-    @ApiModelProperty(StackModelDescription.AMBARI_VERSION)
-    private String ambariVersion;
-
-    @ApiModelProperty(StackModelDescription.HDP_VERSION)
-    private String hdpVersion;
-
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettingsV4Request customDomain;
 
@@ -87,22 +81,6 @@ public class StackV4Request extends StackV4Base {
 
     public void setEnvironment(EnvironmentSettingsV4Request environment) {
         this.environment = environment;
-    }
-
-    public String getAmbariVersion() {
-        return ambariVersion;
-    }
-
-    public void setAmbariVersion(String ambariVersion) {
-        this.ambariVersion = ambariVersion;
-    }
-
-    public String getHdpVersion() {
-        return hdpVersion;
-    }
-
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
     }
 
     public CustomDomainSettingsV4Request getCustomDomain() {

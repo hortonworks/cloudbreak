@@ -21,12 +21,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExterna
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.Subscription;
-import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakePrerequisiteService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
@@ -43,16 +40,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private FileSystemSupportMatrixService fileSystemSupportMatrixService;
 
     @Inject
-    private DatalakePrerequisiteService datalakePrerequisiteService;
-
-    @Inject
     private RepositoryConfigValidationService validationService;
-
-    @Inject
-    private BlueprintService blueprintService;
-
-    @Inject
-    private ServiceEndpointCollector serviceEndpointCollector;
 
     @Inject
     private PreferencesService preferencesService;
