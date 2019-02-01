@@ -13,8 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -109,11 +112,18 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+    @Value("#{'${cb.aws.disabled.instance.types:}'.split(',')}")
+    private List<String> disabledInstanceTypes;
+
+    private final Predicate<VmType> enabledInstanceTypeFilter = vmt -> disabledInstanceTypes.stream()
+            .filter(it -> !it.isEmpty())
+            .noneMatch(di -> vmt.value().startsWith(di));
 
     private final Map<Region, Set<VmType>> vmTypes = new HashMap<>();
 
     private final Map<Region, VmType> defaultVmTypes = new HashMap<>();
+
+    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -156,10 +166,9 @@ public class AwsPlatformResources implements PlatformResources {
                     }
                 }
                 vmTypes.put(region(zvs.getZone()), regionVmTypes);
-                VmType vmType = vmTypeMap.get(zvs.getDefaultVmType());
-                if (vmType != null) {
-                    defaultVmTypes.put(region(zvs.getZone()), vmType);
-                }
+                Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
+                        .filter(enabledInstanceTypeFilter)
+                        .ifPresent(vmType -> defaultVmTypes.put(region(zvs.getZone()), vmType));
             }
         } catch (IOException e) {
             LOGGER.error("Cannot initialize platform parameters for aws", e);
@@ -356,7 +365,10 @@ public class AwsPlatformResources implements PlatformResources {
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
 
         for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
-            cloudVmResponses.put(availabilityZone.value(), vmTypes.get(region));
+            Set<VmType> types = vmTypes.get(region).stream()
+                    .filter(enabledInstanceTypeFilter)
+                    .collect(Collectors.toSet());
+            cloudVmResponses.put(availabilityZone.value(), types);
             defaultCloudVmResponses.put(availabilityZone.value(), defaultVmTypes.get(region));
         }
 

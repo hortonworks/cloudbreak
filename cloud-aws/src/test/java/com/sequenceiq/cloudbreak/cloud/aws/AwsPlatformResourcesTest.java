@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,17 +22,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.internal.SdkInternalList;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AvailabilityZone;
+import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
+import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
+import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
+import com.amazonaws.services.ec2.model.DescribeRegionsResult;
+import com.amazonaws.services.ec2.model.Region;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,9 +64,35 @@ public class AwsPlatformResourcesTest {
     @Mock
     private AmazonIdentityManagement amazonCFClient;
 
+    @Mock
+    private AmazonEC2Client amazonEC2Client;
+
+    @Mock
+    private DescribeRegionsResult describeRegionsResult;
+
+    @Mock
+    private DescribeAvailabilityZonesResult describeAvailabilityZonesResult;
+
+    @Mock
+    private Region region;
+
+    @Mock
+    private AvailabilityZone availabilityZone;
+
     @Before
     public void setUp() {
         Mockito.reset(awsClient);
+
+        when(awsClient.createAccess(any(CloudCredential.class))).thenReturn(amazonEC2Client);
+        when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
+        when(amazonEC2Client.describeAvailabilityZones(any(DescribeAvailabilityZonesRequest.class))).thenReturn(describeAvailabilityZonesResult);
+        when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
+        when(describeAvailabilityZonesResult.getAvailabilityZones()).thenReturn(Collections.singletonList(availabilityZone));
+        when(availabilityZone.getZoneName()).thenReturn("eu-central-1a");
+        when(region.getRegionName()).thenReturn("eu-central-1");
+
+        ReflectionTestUtils.setField(underTest, "vmTypes",
+                Collections.singletonMap(region("eu-central-1"), Collections.singleton(VmType.vmType("m5.2xlarge"))));
     }
 
     @Test
@@ -72,13 +107,13 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles because the user does not have enough permission.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), new HashMap<>());
 
         Assert.assertEquals(0, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
-    public void collectAccessConfigsWhenUserGetAmazonExceptionToGetInfoThenItShouldReturnEmptyList() throws Exception {
+    public void collectAccessConfigsWhenUserGetAmazonExceptionToGetInfoThenItShouldReturnEmptyList() {
         AmazonServiceException amazonServiceException = new AmazonServiceException("Amazon problem.");
         amazonServiceException.setStatusCode(404);
         amazonServiceException.setErrorMessage("Amazon problem.");
@@ -90,13 +125,13 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles from Amazon: Amazon problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals(0, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
-    public void collectAccessConfigsWhenUserGetServiceExceptionToGetInfoThenItShouldReturnEmptyList() throws Exception {
+    public void collectAccessConfigsWhenUserGetServiceExceptionToGetInfoThenItShouldReturnEmptyList() {
         BadRequestException badRequestException = new BadRequestException("BadRequestException problem.");
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
@@ -106,13 +141,13 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles from Amazon: BadRequestException problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals(0, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
-    public void collectAccessConfigsWhenWeGetBackInfoThenItShouldReturnListWithElements() throws Exception {
+    public void collectAccessConfigsWhenWeGetBackInfoThenItShouldReturnListWithElements() {
         ListInstanceProfilesResult listInstanceProfilesResult = new ListInstanceProfilesResult();
 
         Set<InstanceProfile> instanceProfileSet = new HashSet<>();
@@ -127,9 +162,45 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles()).thenReturn(listInstanceProfilesResult);
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals(4, cloudAccessConfigs.getCloudAccessConfigs().size());
+    }
+
+    @Test
+    public void testVirtualMachinesDisabledTypesEmpty() {
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
+
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+
+        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
+    }
+
+    @Test
+    public void testVirtualMachinesDisabledTypesContainsEmpty() {
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList(""));
+
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+
+        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
+    }
+
+    @Test
+    public void testVirtualMachinesOkStartWith() {
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5"));
+
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+
+        Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
+    }
+
+    @Test
+    public void testVirtualMachinesOkFullMatch() {
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5.2xlarge"));
+
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+
+        Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
     }
 
     private InstanceProfile instanceProfile(int i) {
@@ -138,10 +209,6 @@ public class AwsPlatformResourcesTest {
         instanceProfile.setCreateDate(new Date());
         instanceProfile.setInstanceProfileId(String.format("profilId-%s", i));
         instanceProfile.setInstanceProfileName(String.format("profilName-%s", i));
-        SdkInternalList<Role> roles = new SdkInternalList();
-        Role role = new Role();
-        role.setRoleName(String.format("roleArn-%s", i));
-        roles.add(role);
         return instanceProfile;
     }
 }
