@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -195,7 +196,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             case HEAT_STACK:
                 String heatStackId = resource.getName();
                 LOGGER.debug("Checking OpenStack Heat stack status of: {}", stackName);
-                Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
+                Stack heatStack = Optional.ofNullable(client.heat().stacks().getDetails(stackName, heatStackId))
+                        .orElseThrow(() -> new CloudConnectorException("Stack not found on provider by id: " + heatStackId));
                 result = utils.heatStatus(resource, heatStack);
                 break;
             case OPENSTACK_NETWORK:

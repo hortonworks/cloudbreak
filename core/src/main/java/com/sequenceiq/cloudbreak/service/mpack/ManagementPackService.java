@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -21,6 +23,9 @@ public class ManagementPackService extends AbstractWorkspaceAwareResourceService
 
     @Inject
     private ManagementPackRepository mpackRepository;
+
+    @Inject
+    private ManagementPackCreationValidator managementPackCreationValidator;
 
     /**
      * @param id id of mpack
@@ -49,6 +54,9 @@ public class ManagementPackService extends AbstractWorkspaceAwareResourceService
 
     @Override
     protected void prepareCreation(ManagementPack resource) {
-
+        ValidationResult validationResult = managementPackCreationValidator.validate(resource);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
     }
 }

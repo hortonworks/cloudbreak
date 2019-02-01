@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
@@ -10,10 +14,6 @@ import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
 
 public abstract class ResourceHelper<T extends CloudStorageParameters> {
 
@@ -70,6 +70,10 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
                 "hive-site",
                 "hive.metastore.warehouse.dir"));
         request.add(createLocation(
+                String.format("%s://%s/warehouse/tablespace/external/hive", type.getPrefix(), parameterToInsert),
+                "hive-site",
+                "hive.metastore.warehouse.external.dir"));
+        request.add(createLocation(
                 String.format("%s://%s/apps/ranger/audit", type.getPrefix(), parameterToInsert),
                 "ranger-env",
                 "xasecure.audit.destination.hdfs.dir"));
@@ -85,6 +89,11 @@ public abstract class ResourceHelper<T extends CloudStorageParameters> {
                         String.format("%s://%s/attached/apps/hive/warehouse", type.getPrefix(), parameterToInsert),
                         "hive-site",
                         "hive.metastore.warehouse.dir"));
+        locations.add(
+                createLocation(
+                        String.format("%s://%s/attached/warehouse/tablespace/external/hive", type.getPrefix(), parameterToInsert),
+                        "hive-site",
+                        "hive.metastore.warehouse.external.dir"));
         request.setLocations(locations);
         type.setParameterForRequest(request, cloudStorageParameterInstance);
         return request;

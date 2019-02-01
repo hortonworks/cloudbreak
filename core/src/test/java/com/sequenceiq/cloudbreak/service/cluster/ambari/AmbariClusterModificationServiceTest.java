@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.UPSCALE_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.HostGroupAssociationBuilder.FQDN;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -85,7 +86,6 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.ambariServerVersion()).thenReturn("2.6.3.0");
         when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
@@ -121,8 +121,7 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host2", "myrack");
 
         verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
-        verify(ambariClient, times(1)).updateRack("host1", "myrack");
-        verify(ambariClient, times(1)).updateRack("host2", "myrack");
+        verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
     @Test
@@ -132,7 +131,6 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.ambariServerVersion()).thenReturn("2.7.1.0");
         when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
@@ -168,7 +166,7 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host2", "myrack");
 
         verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
-        verify(ambariClient, never()).updateRack("host1", "myrack");
+        verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
     @Test
@@ -178,7 +176,6 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.ambariServerVersion()).thenReturn("2.7.1.0");
         when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
@@ -212,6 +209,6 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host2", "/default-rack");
 
         verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
-        verify(ambariClient, never()).updateRack("host1", "myrack");
+        verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 }
