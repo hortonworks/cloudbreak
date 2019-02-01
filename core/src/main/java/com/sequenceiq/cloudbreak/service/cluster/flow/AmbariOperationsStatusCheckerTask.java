@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.event.CloudbreakEventsJson;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
-import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
