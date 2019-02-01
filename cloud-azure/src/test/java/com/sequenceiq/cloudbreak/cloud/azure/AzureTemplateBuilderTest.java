@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
@@ -215,8 +216,8 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("publicIPAddress")));
-        assertThat(templateString, not(containsString("networkSecurityGroups")));
+        assertFalse(templateString.contains("publicIPAddress"));
+        assertFalse(templateString.contains("networkSecurityGroups"));
     }
 
     @Test
@@ -246,10 +247,10 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("publicIPAddress")));
-        assertThat(templateString, not(containsString("networkSecurityGroups")));
-        assertThat(templateString, containsString("testtagkey"));
-        assertThat(templateString, containsString("testtagvalue"));
+        assertFalse(templateString.contains("publicIPAddress"));
+        assertFalse(templateString.contains("networkSecurityGroups"));
+        assertTrue(templateString.contains("testtagkey"));
+        assertTrue(templateString.contains("testtagvalue"));
     }
 
     @Test
@@ -282,8 +283,8 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("publicIPAddress")));
-        assertThat(templateString, not(containsString("networkSecurityGroups")));
+        assertFalse(templateString.contains("publicIPAddress"));
+        assertFalse(templateString.contains("networkSecurityGroups"));
     }
 
     @Test
@@ -311,8 +312,8 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("publicIPAddress")));
-        assertThat(templateString, containsString("networkSecurityGroups"));
+        assertFalse(templateString.contains("publicIPAddress"));
+        assertTrue(templateString.contains("networkSecurityGroups"));
     }
 
     @Test
@@ -340,8 +341,8 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("publicIPAddress"));
-        assertThat(templateString, containsString("networkSecurityGroups"));
+        assertTrue(templateString.contains("publicIPAddress"));
+        assertTrue(templateString.contains("networkSecurityGroups"));
     }
 
     private String base64EncodedUserData(String data) {
@@ -371,7 +372,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
+        assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -397,7 +398,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"')));
+        assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -423,7 +424,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
+        assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -449,7 +450,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"')));
+        assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -477,8 +478,8 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
+        assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
+        assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -506,7 +507,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("resourceGroupName")));
+        assertFalse(templateString.contains("resourceGroupName"));
     }
 
     @Test
@@ -538,9 +539,9 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("existingVNETName"));
-        assertThat(templateString, containsString("existingSubnet"));
-        assertThat(templateString, containsString("existingResourceGroup"));
+        assertTrue(templateString.contains("existingVNETName"));
+        assertTrue(templateString.contains("existingSubnet"));
+        assertTrue(templateString.contains("existingResourceGroup"));
     }
 
     @Test
@@ -568,7 +569,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("existingSubnetName")));
+        assertFalse(templateString.contains("existingSubnetName"));
     }
 
     @Test
@@ -596,7 +597,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("virtualNetworkNamePrefix"));
+        assertTrue(templateString.contains("virtualNetworkNamePrefix"));
     }
 
     @Test
@@ -624,7 +625,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("subnet1Prefix"));
+        assertTrue(templateString.contains("subnet1Prefix"));
     }
 
     @Test
@@ -685,6 +686,8 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '0')]"));
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '1')]"));
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '2')]"));
+        assertTrue(templateString.contains("[concat('datadisk', 'm0', '0')]"));
+        assertTrue(templateString.contains("[concat('datadisk', 'm0', '1')]"));
     }
 
     private CloudCredential cloudCredential() {
