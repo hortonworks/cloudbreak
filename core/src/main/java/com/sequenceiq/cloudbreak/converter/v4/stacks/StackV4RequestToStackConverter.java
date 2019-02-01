@@ -135,7 +135,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         updateEnvironment(source, stack, workspace);
         updateCloudPlatformAndRelatedFields(source, stack, workspace);
         stack.setName(source.getName());
-        stack.setAvailabilityZone(source.getEnvironment().getPlacement().getAvailabilityZone());
+        stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
         stack.setOrchestrator(getOrchestrator());
     }
 
@@ -151,7 +151,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getEnvironment() != null) {
             updateEnvironment(source, stack, workspace);
             updateCloudPlatformAndRelatedFields(source, stack, workspace);
-            stack.setAvailabilityZone(source.getEnvironment().getPlacement().getAvailabilityZone());
+            stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
         }
         stack.setName(UUID.randomUUID().toString());
     }
@@ -163,7 +163,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private String getRegion(StackV4Request source, String cloudPlatform) {
-        if (isEmpty(source.getEnvironment().getPlacement().getRegion())) {
+        if (isEmpty(source.getPlacement().getRegion())) {
             Map<Platform, Region> regions = Maps.newHashMap();
             if (isNoneEmpty(defaultRegions)) {
                 for (String entry : defaultRegions.split(",")) {
@@ -179,7 +179,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 throw new BadRequestException("No default region is specified. Region cannot be empty.");
             }
         }
-        return source.getEnvironment().getPlacement().getRegion();
+        return source.getPlacement().getRegion();
     }
 
     private String determineCloudPlatform(StackV4Request source, Workspace workspace) {

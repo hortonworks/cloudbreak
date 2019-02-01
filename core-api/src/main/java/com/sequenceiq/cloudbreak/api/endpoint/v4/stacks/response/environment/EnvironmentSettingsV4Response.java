@@ -25,13 +25,13 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
     @ApiModelProperty(ENVIRONMENT)
     private String name;
 
+    @ApiModelProperty(CREDENTIAL_NAME)
+    private CredentialV4Response credential;
+
     @NotNull
     @ApiModelProperty(value = PLACEMENT_SETTINGS, required = true)
     @Valid
     private PlacementSettingsV4Response placement;
-
-    @ApiModelProperty(CREDENTIAL_NAME)
-    private CredentialV4Response credential;
 
     private String cloudPlatform;
 
@@ -41,14 +41,6 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public PlacementSettingsV4Response getPlacement() {
-        return placement;
-    }
-
-    public void setPlacement(PlacementSettingsV4Response placement) {
-        this.placement = placement;
     }
 
     public CredentialV4Response getCredential() {
@@ -65,5 +57,13 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public PlacementSettingsV4Response getPlacement() {
+        return placement;
+    }
+
+    public void setPlacement(PlacementSettingsV4Response placement) {
+        this.placement = placement;
     }
 }

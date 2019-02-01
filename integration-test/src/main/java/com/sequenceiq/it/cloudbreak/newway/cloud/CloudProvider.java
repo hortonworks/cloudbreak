@@ -65,7 +65,6 @@ public abstract class CloudProvider {
 
     public EnvironmentSettingsV4Request getEnvironmentSettings(String credentialName, PlacementSettingsV4Request placementSettingsV4Request) {
         EnvironmentSettingsV4Entity settingsV4Entity = new EnvironmentSettingsV4Entity().valid();
-        settingsV4Entity.getRequest().setPlacement(placementSettingsV4Request);
         settingsV4Entity.getRequest().setCredentialName(credentialName);
         return settingsV4Entity.getRequest();
     }

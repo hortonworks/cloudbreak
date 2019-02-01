@@ -55,7 +55,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         env.setCredentialName(credentialName);
         stackRequest.setEnvironment(env);
         PlacementSettingsV4Request ps = new PlacementSettingsV4Request();
-        stackRequest.getEnvironment().setPlacement(ps);
+        stackRequest.setPlacement(ps);
         ps.setRegion(region);
         ps.setAvailabilityZone(availabilityZone);
 

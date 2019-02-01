@@ -83,6 +83,10 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .withImageSettings("imageSettings");
     }
 
+    public StackV4EntityBase<T> withEnvironment(Class<EnvironmentSettingsV4Entity> clss) {
+        return withEnvironmentSettings(clss.getSimpleName());
+    }
+
     public StackV4EntityBase<T> withEnvironment(EnvironmentSettingsV4Entity environment) {
         getRequest().setEnvironment(environment.getRequest());
         return this;
@@ -94,6 +98,12 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
+    /**
+     * this is forbidden in newway.testcase
+     * @param environment
+     * @return
+     */
+    @Deprecated
     public StackV4EntityBase<T> withEnvironmentSettings(EnvironmentSettingsV4Request environment) {
         getRequest().setEnvironment(environment);
         return this;
@@ -254,6 +264,16 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .findFirst()
                 .get()
                 .getMetadata();
+    }
+
+    public StackV4EntityBase<T> withPlacement(String key) {
+        PlacementSettingsEntity placementSettings = getTestContext().get(key);
+        return withPlacement(placementSettings);
+    }
+
+    public StackV4EntityBase<T> withPlacement(PlacementSettingsEntity placementSettings) {
+        getRequest().setPlacement(placementSettings.getRequest());
+        return this;
     }
 
     @Override

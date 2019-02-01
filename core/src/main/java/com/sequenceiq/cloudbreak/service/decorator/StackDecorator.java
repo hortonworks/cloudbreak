@@ -180,7 +180,7 @@ public class StackDecorator {
                 Template template = instanceGroup.getTemplate();
                 if (template.getId() == null) {
                     template.setCloudPlatform(getCloudPlatform(subject, request, template.cloudPlatform()));
-                    PlacementSettingsV4Request placement = request.getEnvironment().getPlacement();
+                    PlacementSettingsV4Request placement = request.getPlacement();
                     templateValidator.validateTemplateRequest(credential, template, placement.getRegion(),
                             placement.getAvailabilityZone(), subject.getPlatformVariant());
                     template = templateDecorator.decorate(credential, template, placement.getRegion(),
