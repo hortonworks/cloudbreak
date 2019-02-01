@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -105,7 +106,7 @@ public class AmbariClusterServiceTest {
         when(clusterComponentConfigProvider.getHDPRepo(any(Long.class))).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
-        when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
+        when(blueprintService.getByNameForWorkspace(anyString(), any())).thenReturn(cluster.getBlueprint());
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
@@ -123,4 +124,5 @@ public class AmbariClusterServiceTest {
     public void testRecreateSuccess() throws TransactionExecutionException {
         clusterService.recreate(TestUtil.stack(), "bp-name", new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
+
 }
