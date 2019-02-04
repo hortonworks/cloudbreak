@@ -31,6 +31,12 @@
       "longitude": "2.333335326"
     },
     {
+      "name": "eu-north-1",
+      "displayName": "EU (Stockholm)",
+      "latitude": "59.329444",
+      "longitude": "18.068611"
+    },
+    {
       "name": "ap-northeast-2",
       "displayName": "Asia Pacific (Seoul)",
       "latitude": "37.5663491",
