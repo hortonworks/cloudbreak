@@ -99,9 +99,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     /**
-     * this is forbidden in newway.testcase
-     * @param environment
-     * @return
+     * @deprecated this is forbidden in newway.testcase
      */
     @Deprecated
     public StackV4EntityBase<T> withEnvironmentSettings(EnvironmentSettingsV4Request environment) {
