@@ -16,6 +16,14 @@
       ]
     },
     {
+      "name": "eu-north-1",
+      "zones": [
+        "eu-north-1a",
+        "eu-north-1b",
+        "eu-north-1c"
+      ]
+    },
+    {
       "name": "ap-northeast-1",
       "zones": [
         "ap-northeast-1a",
