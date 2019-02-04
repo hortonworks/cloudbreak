@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StructuredParametersQueryV4Request extends ParametersQueryV4Request {
+public class StructuredParametersQueryV4Request {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.STACK_NAME, required = true)

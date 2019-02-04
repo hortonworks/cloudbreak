@@ -10,14 +10,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.ParametersQueryV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DatalakePrerequisiteV4Request extends ParametersQueryV4Request {
+public class DatalakePrerequisiteV4Request {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.REQUEST, required = true)
