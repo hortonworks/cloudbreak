@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -98,9 +96,6 @@ public class ClusterV4RequestToClusterConverterTest {
         workspace.setId(100L);
         workspace.setName("TEST_WS_NAME");
         workspace.setDescription("TEST_WS_DESC");
-
-        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
-        User user = mock(User.class);
 
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
 
