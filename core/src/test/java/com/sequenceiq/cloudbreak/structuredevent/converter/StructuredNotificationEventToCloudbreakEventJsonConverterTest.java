@@ -36,7 +36,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
 
     public StructuredNotificationEventToCloudbreakEventJsonConverterTest(StructuredNotificationEvent source, List<String> additionalElementsToSkip) {
-        skippedFields = Lists.newArrayList("availabilityZone", "owner", "account");
+        skippedFields = Lists.newArrayList("availabilityZone");
         skippedFields.addAll(additionalElementsToSkip);
         this.source = source;
     }

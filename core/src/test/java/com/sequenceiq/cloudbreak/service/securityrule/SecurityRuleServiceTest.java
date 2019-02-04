@@ -24,6 +24,7 @@ public class SecurityRuleServiceTest {
     @Before
     public void setUp() {
         ReflectionTestUtils.setField(underTest, "gatewayPort", "9443");
+        ReflectionTestUtils.setField(underTest, "httpsPort", "443");
         ReflectionTestUtils.setField(underTest, "knoxPort", "8443");
         ReflectionTestUtils.setField(underTest, "sshPort", "22");
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Sets.newHashSet("0.0.0.0/0"));
@@ -45,7 +46,7 @@ public class SecurityRuleServiceTest {
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsDisabled() {
         SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
-        Assert.assertEquals(2, defaultSecurityRules.getGateway().size());
+        Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
