@@ -6,14 +6,9 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V3WorkspaceEventUrlParser extends RestUrlParser {
+public class V4WorkspaceUrlParser extends RestUrlParser {
 
-    public static final int RESOURCE_NAME_GROUP_NUMBER = 1;
-
-    public static final int RESOURCE_EVENT_GROUP_NUMBER = 2;
-
-    // /v3/workspaces/name/abcdabcd/addUsers
-    private static final Pattern PATTERN = Pattern.compile("v3/workspaces/name/([^\\d][^/]+)/([a-z|A-Z|-]+)");
+    private static final Pattern PATTERN = Pattern.compile("v4/workspaces");
 
     @Override
     public Pattern getPattern() {
@@ -27,7 +22,7 @@ public class V3WorkspaceEventUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceName(Matcher matcher) {
-        return matcher.group(RESOURCE_NAME_GROUP_NUMBER);
+        return null;
     }
 
     @Override
@@ -42,6 +37,7 @@ public class V3WorkspaceEventUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
+        return null;
     }
+
 }

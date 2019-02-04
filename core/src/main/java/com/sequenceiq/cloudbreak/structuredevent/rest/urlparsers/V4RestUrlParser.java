@@ -6,11 +6,13 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V1FlexDefaultAccountRestUrlParser extends RestUrlParser {
+public class V4RestUrlParser extends RestUrlParser {
 
-    public static final int RESOURCE_NAME_GROUP_NUMBER = 2;
+    public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
-    private static final Pattern PATTERN = Pattern.compile("v1/flexsubscriptions/(account|user)/setdefault/([^\\d][^/]+)");
+    public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
+
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]*)");
 
     @Override
     public Pattern getPattern() {
@@ -19,12 +21,12 @@ public class V1FlexDefaultAccountRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getWorkspaceId(Matcher matcher) {
-        return null;
+        return matcher.group(WORKSPACE_ID_GROUP_NUMBER);
     }
 
     @Override
     protected String getResourceName(Matcher matcher) {
-        return matcher.group(RESOURCE_NAME_GROUP_NUMBER);
+        return null;
     }
 
     @Override
@@ -34,11 +36,12 @@ public class V1FlexDefaultAccountRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return "flexsubscriptions";
+        return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return "setdefault";
+        return null;
     }
+
 }

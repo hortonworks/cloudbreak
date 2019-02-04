@@ -6,26 +6,21 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V3CredentialCodeGrantFlowParser extends RestUrlParser {
+public class V4WorkspaceNameUrlParser extends RestUrlParser {
 
-    private static final int WORKSPACE_ID_GROUP_NUMBER = 1;
+    public static final int RESOURCE_NAME_GROUP_NUMBER = 1;
 
-    private static final int RESOURCE_NAME_GROUP_NUMBER = 4;
-
-    private static final int RESOURCE_EVENT_GROUP_NUMBER = 3;
-
-    private static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
-
-    private static final Pattern PATTERN = Pattern.compile("v3/(\\d+)/([a-z|-]+)/codegrantflow/([a-z|-]+)/([^/]+)");
+    // Note: see WorkspaceV4Base for name pattern.
+    private static final Pattern PATTERN = Pattern.compile("v4/workspaces/([a-z][-a-z0-9]*[a-z0-9])");
 
     @Override
-    protected Pattern getPattern() {
+    public Pattern getPattern() {
         return PATTERN;
     }
 
     @Override
     protected String getWorkspaceId(Matcher matcher) {
-        return matcher.group(WORKSPACE_ID_GROUP_NUMBER);
+        return null;
     }
 
     @Override
@@ -40,11 +35,12 @@ public class V3CredentialCodeGrantFlowParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
+        return "workspaces";
     }
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
+        return null;
     }
+
 }
