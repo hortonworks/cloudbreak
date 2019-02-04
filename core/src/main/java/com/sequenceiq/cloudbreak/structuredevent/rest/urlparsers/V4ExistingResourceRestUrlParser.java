@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V3ExistingResourceRestUrlParser extends RestUrlParser {
+public class V4ExistingResourceRestUrlParser extends RestUrlParser {
 
     public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
@@ -14,7 +14,7 @@ public class V3ExistingResourceRestUrlParser extends RestUrlParser {
 
     public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
-    private static final Pattern PATTERN = Pattern.compile("v3/(\\d+)/([a-z|-]*)/([^/]+)");
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]*)/([^/]+)");
 
     @Override
     public Pattern getPattern() {
@@ -45,4 +45,5 @@ public class V3ExistingResourceRestUrlParser extends RestUrlParser {
     protected String getResourceEvent(Matcher matcher) {
         return null;
     }
+
 }

@@ -38,17 +38,36 @@ public class SecurityRuleServiceTest {
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
     }
 
     @Test
-    public void getDefaultSecurityRulesWhenKnoxIsDisabled() {
+    public void getDefaultSecurityRulesWhenKnoxIsDisabledAndNoHttpsPort() {
         SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+
         Assert.assertEquals(2, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "443"));
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
+    }
+
+    @Test
+    public void getDefaultSecurityRulesWhenKnoxIsDisabledAndHttpsPortIsSet() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "443");
+
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+
+        Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
+        Assert.assertEquals(1, defaultSecurityRules.getCore().size());
+
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
+        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
@@ -57,4 +76,5 @@ public class SecurityRuleServiceTest {
     private boolean containsServicePort(List<SecurityRuleV4Response> securityRulesResponses, String servicePort) {
         return securityRulesResponses.stream().anyMatch(securityRulesResponse -> securityRulesResponse.getPorts().contains(servicePort));
     }
+
 }

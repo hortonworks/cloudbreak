@@ -1,12 +1,12 @@
 {
   "name": "string",
+  "placement": {
+    "availabilityZone": "string",
+    "region": "string"
+  },
   "environment": {
     "name": "string",
-    "credentialName": "string",
-    "placement": {
-      "availabilityZone": "string",
-      "region": "string"
-    }
+    "credentialName": "string"
   },
   "platformVariant": "string",
   "ambariVersion": "string",

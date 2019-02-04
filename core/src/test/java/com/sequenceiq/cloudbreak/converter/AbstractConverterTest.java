@@ -41,7 +41,7 @@ public class AbstractConverterTest {
             }
             remainingFields.remove(field.getName());
         }
-        assertTrue("Field(s) \"" + String.join("\", \"", remainingFields) + "\" is not exists on class anymore.", remainingFields.isEmpty());
+        assertTrue("Field(s) \"" + String.join("\", \"", remainingFields) + "\" does not exist in class anymore.", remainingFields.isEmpty());
         LOGGER.info("Checked fields count: {}, skipped counts: {}", count, skippedCount);
         assertTrue("Field(s) \"" + String.join("\", \"", missing) + "\" is null.", missing.isEmpty());
     }
@@ -60,4 +60,5 @@ public class AbstractConverterTest {
         Field[] parentFields = obj.getClass().getSuperclass().getDeclaredFields();
         return ObjectArrays.concat(fields, parentFields, Field.class);
     }
+
 }
