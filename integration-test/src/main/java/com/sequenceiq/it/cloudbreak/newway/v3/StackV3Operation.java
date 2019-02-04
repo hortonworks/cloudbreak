@@ -76,7 +76,6 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
     }
 
     public static void stop(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackV3Operation stackOperation = (StackV3Operation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
@@ -87,7 +86,6 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
     }
 
     public static void sync(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackV3Operation stackOperation = (StackV3Operation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);

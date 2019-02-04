@@ -10,11 +10,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -58,12 +56,12 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
         Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
         if (scalingAdjustment < 0) {
-            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+//            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
             HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setHostGroup(instanceGroup);
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+//            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
 
             var stackScaleRequest = new StackScaleV4Request();
             stackScaleRequest.setGroup(hostGroupAdjustmentJson.getHostGroup());
@@ -73,12 +71,12 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
             getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest);
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
 
-            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-            updateStackJson.setWithClusterEvent(false);
-            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
-            instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
-            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+//            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//            updateStackJson.setWithClusterEvent(false);
+//            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
+//            instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
+//            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+//            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
             stackScaleRequest.setGroup(hostGroupAdjustmentJson.getHostGroup());
             stackScaleRequest.setDesiredCount(scalingAdjustment);
@@ -87,12 +85,12 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
             getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest);
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         } else {
-            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-            updateStackJson.setWithClusterEvent(false);
+//            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//            updateStackJson.setWithClusterEvent(false);
             InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+//            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
             var stackScaleRequest3 = new StackScaleV4Request();
             stackScaleRequest3.setGroup(instanceGroupAdjustmentJson.getInstanceGroup());
@@ -102,12 +100,12 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
             getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stackName, stackScaleRequest3);
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
 
-            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
-            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
-            hostGroupAdjustmentJson.setHostGroup(instanceGroup);
-            hostGroupAdjustmentJson.setWithStackUpdate(false);
-            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+//            UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
+//            HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
+//            hostGroupAdjustmentJson.setHostGroup(instanceGroup);
+//            hostGroupAdjustmentJson.setWithStackUpdate(false);
+//            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+//            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
 
             stackScaleRequest3.setGroup(instanceGroupAdjustmentJson.getInstanceGroup());
             stackScaleRequest3.setDesiredCount(scalingAdjustment);

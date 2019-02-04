@@ -86,7 +86,6 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
             igMap.add(instanceGroupRequest);
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_NAME);
-        String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         StackV4Request stackRequest = new StackV4Request();

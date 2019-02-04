@@ -38,7 +38,6 @@ public class WaitUtil {
             StackStatusV4Response statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
                     .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null && statusByNameInWorkspace.getStatus() != null) {
-                ret = Pair.of(statusByNameInWorkspace.getStatus(), statusByNameInWorkspace.getStatusReason());
                 builder.append("statusReason: ").append(statusByNameInWorkspace.getStatusReason());
             }
             throw new RuntimeException(builder.toString());

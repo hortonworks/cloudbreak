@@ -7,7 +7,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -38,12 +37,12 @@ public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTes
         int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, workspaceId, stackName, ambariUser, ambariPassword, itContext)
                 + scalingAdjustment;
         // WHEN
-        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-        updateStackJson.setWithClusterEvent(true);
+//        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//        updateStackJson.setWithClusterEvent(true);
         InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
         instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+//        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
         var stackScaleRequest = new StackScaleV4Request();
         stackScaleRequest.setDesiredCount(instanceGroupAdjustmentJson.getScalingAdjustment());

@@ -8,8 +8,6 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -37,12 +35,12 @@ public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
                 CloudbreakClient.class).stackV4Endpoint();
         int expectedNodeCount = ScalingUtil.getNodeCountStack(stackV1Endpoint, workspaceId, stackName) + scalingAdjustment;
         // WHEN
-        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-        updateStackJson.setWithClusterEvent(false);
-        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
-        instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
-        instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+//        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+//        updateStackJson.setWithClusterEvent(false);
+//        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
+//        instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
+//        instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+//        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         getCloudbreakClient().stackV4Endpoint().putCluster(workspaceId, stackName, new UpdateClusterV4Request());
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), workspaceId, stackName, "AVAILABLE");
         // THEN

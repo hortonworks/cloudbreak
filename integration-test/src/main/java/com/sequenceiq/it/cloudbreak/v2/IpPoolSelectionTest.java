@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformIpP
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
-import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 
 public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
     @Test
@@ -26,10 +25,10 @@ public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
         credentialName = StringUtils.hasText(credentialName) ? credentialName : itContext.getContextParam(CloudbreakV2Constants.CREDENTIAL_NAME);
         region = StringUtils.hasText(region) ? region : itContext.getContextParam(CloudbreakV2Constants.REGION);
         availabilityZone = StringUtils.hasText(availabilityZone) ? availabilityZone : itContext.getContextParam(CloudbreakV2Constants.AVAILABILTYZONE);
-        PlatformResourceParameters resourceRequestJson = new PlatformResourceParameters();
-        resourceRequestJson.setCredentialName(credentialName);
-        resourceRequestJson.setRegion(region);
-        resourceRequestJson.setAvailabilityZone(availabilityZone);
+//        PlatformResourceParameters resourceRequestJson = new PlatformResourceParameters();
+//        resourceRequestJson.setCredentialName(credentialName);
+//        resourceRequestJson.setRegion(region);
+//        resourceRequestJson.setAvailabilityZone(availabilityZone);
         String platformVariant = getCloudbreakClient().credentialV4Endpoint().get(workspaceId, credentialName).getCloudPlatform();
         // WHEN
         PlatformIpPoolsV4Response ipPoolsResponse = getCloudbreakClient().connectorV4Endpoint().getIpPoolsCredentialId(workspaceId, credentialName, region,

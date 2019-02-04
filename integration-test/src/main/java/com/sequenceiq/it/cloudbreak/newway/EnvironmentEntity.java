@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +24,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     public static final String EUROPE = "Europe";
 
-    public static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList(EUROPE));
+    public static final Set<String> VALID_REGION = Collections.singleton(EUROPE);
 
     public static final String AVAILABILITY_ZONE = "London";
 

@@ -15,16 +15,15 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -40,8 +39,8 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         credentialName = StringUtils.hasText(credentialName) ? credentialName : itContext.getContextParam(CloudbreakV2Constants.CREDENTIAL_NAME);
         region = StringUtils.hasText(region) ? region : itContext.getContextParam(CloudbreakV2Constants.REGION);
         availabilityZone = StringUtils.hasText(availabilityZone) ? availabilityZone : itContext.getContextParam(CloudbreakV2Constants.AVAILABILTYZONE);
-        imageCatalog = StringUtils.hasText(imageCatalog) ? imageCatalog : itContext.getContextParam(CloudbreakV2Constants.IMAGECATALOG);
-        imageId = StringUtils.hasText(imageId) ? imageId : itContext.getContextParam(CloudbreakV2Constants.IMAGEID);
+//        imageCatalog = StringUtils.hasText(imageCatalog) ? imageCatalog : itContext.getContextParam(CloudbreakV2Constants.IMAGECATALOG);
+//        imageId = StringUtils.hasText(imageId) ? imageId : itContext.getContextParam(CloudbreakV2Constants.IMAGEID);
         Map<String, InstanceGroupV4Request> instanceGroupV2RequestMap = itContext.getContextParam(CloudbreakV2Constants.INSTANCEGROUP_MAP, Map.class);
 
         Assert.assertTrue(StringUtils.hasText(credentialName), "Credential name is mandatory.");
@@ -59,11 +58,11 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         ps.setRegion(region);
         ps.setAvailabilityZone(availabilityZone);
 
-        if (StringUtils.hasText(imageCatalog) || StringUtils.hasText(imageId)) {
-            ImageSettingsV4Request is = new ImageSettingsV4Request();
-            is.setCatalog(imageCatalog);
-            is.setId(imageId);
-        }
+//        if (StringUtils.hasText(imageCatalog) || StringUtils.hasText(imageId)) {
+//            ImageSettingsV4Request is = new ImageSettingsV4Request();
+//            is.setCatalog(imageCatalog);
+//            is.setId(imageId);
+//        }
         stackRequest.setInstanceGroups(Lists.newArrayList(instanceGroupV2RequestMap.values()));
 
         itContext.putContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, stackRequest);

@@ -3,14 +3,15 @@ package com.sequenceiq.it.cloudbreak.newway.assertion;
 import static com.google.common.collect.Sets.newHashSet;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
@@ -52,7 +53,7 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
 
         InstanceGroupV4Request worker = getInstanceGroup(stackTemplate.getInstanceGroups(), HostGroupType.WORKER);
         SecurityRuleV4Request securityRuleRequest = worker.getSecurityGroup().getSecurityRules().get(0);
-        if (!"55,66,77".equals(securityRuleRequest.getPorts())) {
+        if (!Arrays.asList("55", "66", "77").equals(securityRuleRequest.getPorts())) {
             throw new IllegalArgumentException("Ports are mismatches!");
         }
 

@@ -19,7 +19,7 @@ public class StackDeleteInstanceAction implements ActionV2<StackEntity> {
         Boolean forced = testContext.getSelected("forced");
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .deleteInstance(client.getWorkspaceId(), entity.getName(), forced == null ? false : forced, instanceId);
+                .deleteInstance(client.getWorkspaceId(), entity.getName(), forced != null && forced, instanceId);
         return entity;
     }
 

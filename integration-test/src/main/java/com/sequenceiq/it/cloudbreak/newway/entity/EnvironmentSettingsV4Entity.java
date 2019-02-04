@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
-import static com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity.EUROPE;
-
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
@@ -9,7 +7,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnv
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -46,10 +43,6 @@ public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<Enviro
         if (credentialEntity == null) {
             throw new IllegalArgumentException("Credential is mandatory for EnvironmentSettings");
         }
-        PlacementSettingsEntity placementSettings = getTestContext().get(PlacementSettingsEntity.class)
-                .withRegion(EUROPE)
-                .withAvailabilityZone(EnvironmentEntity.AVAILABILITY_ZONE);
-
         return withName(getNameCreator().getRandomNameForMock())
                 .withCredentialName(credentialEntity.getName());
     }

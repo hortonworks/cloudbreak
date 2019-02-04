@@ -111,9 +111,9 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
         stackRepository.setEnableGplRepo(false);
         stackRepository.setMpacks(List.of());
         stackRepository.setOsType("redhat7");
-        var repo = new RepositoryV4Request();
-        repo.setVersion("2.6.5.0");
-        repo.setBaseUrl("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0");
+//        var repo = new RepositoryV4Request();
+//        repo.setVersion("2.6.5.0");
+//        repo.setBaseUrl("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0");
         stackRepository.setRepoId("HDP-2.6");
         stackRepository.setUtilsBaseURL("http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7");
         stackRepository.setUtilsRepoId("HDP-UTILS-1.1.0.22");
