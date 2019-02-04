@@ -1,16 +1,16 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.v4.filesystems;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StructuredParameterQueryV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.util.ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
+import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 
 public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
@@ -32,16 +32,16 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
     private static final String TEST_PROTOCOL = "http";
 
-    private ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter underTest;
+    private ConfigQueryEntryToFileSystemParameterV4ResponseConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter();
+        underTest = new ConfigQueryEntryToFileSystemParameterV4ResponseConverter();
     }
 
     @Test
     public void testConvertCheckAllPropertyPassedProperly() {
-        StructuredParameterQueryV4Response expected = new StructuredParameterQueryV4Response();
+        FileSystemParameterV4Response expected = new FileSystemParameterV4Response();
         expected.setDefaultPath(TEST_PATH_VALUE);
         expected.setProtocol(TEST_PROTOCOL);
         expected.setDescription(TEST_DESCRIPTION);
@@ -50,7 +50,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
         expected.setPropertyName(TEST_PROPERTY_NAME);
         expected.setRelatedServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
 
-        StructuredParameterQueryV4Response result = underTest.convert(createConfigQueryEntry());
+        FileSystemParameterV4Response result = underTest.convert(createConfigQueryEntry());
 
         assertEquals(expected, result);
     }
