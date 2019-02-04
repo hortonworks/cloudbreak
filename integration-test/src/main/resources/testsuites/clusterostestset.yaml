@@ -14,6 +14,7 @@ tests:
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       imageos: sles12
       instancegroupName: worker
+      awsInstanceType: m5.2xlarge
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
@@ -30,6 +31,7 @@ tests:
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       imageos: redhat7
       instancegroupName: worker
+      awsInstanceType: m5.2xlarge
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
@@ -41,11 +43,12 @@ tests:
   - name: "aws base image edw analytics on ubuntu"
     preserveOrder: true
     parameters:
-      clusterName: aws-ubuntu-edwan
+      clusterName: aws-ubuntu-datasci
       provider: aws
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       imageos: ubuntu16
       instancegroupName: worker
+      awsInstanceType: m5.2xlarge
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
