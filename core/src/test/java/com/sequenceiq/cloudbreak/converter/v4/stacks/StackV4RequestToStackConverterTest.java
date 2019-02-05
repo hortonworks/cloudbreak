@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -102,6 +104,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     @Mock
     private User user;
 
+    @Mock
+    private DatalakeResourcesService datalakeResourcesService;
+
     private Credential credential;
 
     @Before
@@ -133,7 +138,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         assertAllFieldsNotNull(
                 stack,
                 Arrays.asList("description", "cluster", "credential", "gatewayPort", "network", "securityConfig",
-                        "version", "created", "platformVariant", "cloudPlatform", "flexSubscription", "datalakeId",
+                        "version", "created", "platformVariant", "cloudPlatform", "flexSubscription",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environment", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
         assertEquals("eu-west-1", stack.getRegion());
@@ -189,47 +194,27 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         Stack result = underTest.convert(request);
 
         //THEN
-        Assert.assertNull(result.getDatalakeId());
+        Assert.assertNull(result.getDatalakeResourceId());
     }
 
     @Test
     public void testConvertSharedServicePreparateWhenThereIsNoDatalakeNameButSharedServiceIsNotNullThenThisDataShoudlBeTheDatalakeId() {
         Long expectedDataLakeId = 1L;
         StackV4Request request = getRequest("stack-with-shared-service.json");
-        Stack stack = new Stack();
-        stack.setId(expectedDataLakeId);
 
         //GIVEN
         given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(stackService.getByNameInWorkspace("shared-cluster-name", 1L)).willReturn(stack);
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
+        DatalakeResources datalakeResources = new DatalakeResources();
+        datalakeResources.setId(expectedDataLakeId);
+        given(datalakeResourcesService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(datalakeResources);
 
         //WHEN
         Stack result = underTest.convert(request);
 
         //THEN
-        assertEquals(expectedDataLakeId, result.getDatalakeId());
-    }
-
-    @Test
-    public void testConvertSharedServicePreparateWhenThereIsNoSharedServiceButDatalakeNameNotNullShouldBeSetAsDatalakeId() {
-        Long expectedDataLakeId = 1L;
-        StackV4Request request = getRequest("stack-with-datalake-name.json");
-        Stack stack = new Stack();
-        stack.setId(expectedDataLakeId);
-
-        //GIVEN
-        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
-        given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(stackService.getByNameInWorkspace("datalake-name", 1L)).willReturn(stack);
-        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
-
-        //WHEN
-        Stack result = underTest.convert(request);
-
-        //THEN
-        assertEquals(expectedDataLakeId, result.getDatalakeId());
+        assertEquals(expectedDataLakeId, result.getDatalakeResourceId());
     }
 
     @Override

@@ -74,7 +74,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest() {
+    public StackEntity aValidAttachedStackRequest(String datalakeClusterName) {
         throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
@@ -250,7 +250,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         throw new NotImplementedException("not implemented!");
     }
 

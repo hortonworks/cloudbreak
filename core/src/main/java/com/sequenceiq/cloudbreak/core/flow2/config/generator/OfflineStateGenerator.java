@@ -404,11 +404,6 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long countDatalakeStacksInEnvironment(Long environmentId) {
-            return null;
-        }
-
-        @Override
         public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
             return null;
         }

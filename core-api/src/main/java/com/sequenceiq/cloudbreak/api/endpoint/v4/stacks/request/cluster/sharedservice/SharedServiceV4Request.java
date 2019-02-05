@@ -17,13 +17,13 @@ public class SharedServiceV4Request implements JsonEntity {
 
     @ApiModelProperty(required = true)
     @NotEmpty
-    private String sharedClusterName;
+    private String datalakeName;
 
-    public String getSharedClusterName() {
-        return sharedClusterName;
+    public String getDatalakeName() {
+        return datalakeName;
     }
 
-    public void setSharedClusterName(String sharedClusterName) {
-        this.sharedClusterName = sharedClusterName;
+    public void setDatalakeName(String datalakeName) {
+        this.datalakeName = datalakeName;
     }
 }

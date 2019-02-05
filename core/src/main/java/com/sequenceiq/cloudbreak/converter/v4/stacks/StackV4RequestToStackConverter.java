@@ -50,8 +50,8 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -79,10 +79,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
-    private StackService stackService;
+    private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
-    private ProviderParameterCalculator providerParameterCalculator;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -109,7 +109,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
-        stack.setDatalakeId(getSharedClusterNameOrDatalakeName(source, workspace));
+        stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
@@ -216,15 +216,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return result;
     }
 
-    private Long getSharedClusterNameOrDatalakeName(StackV4Request source, Workspace workspace) {
-        String name = "";
-        if (!StringUtils.isEmpty(source.getDatalakeName())) {
-            name = source.getDatalakeName();
-        } else if (source.getCluster().getSharedService() != null) {
-            name = source.getCluster().getSharedService().getSharedClusterName();
-        }
-        if (!StringUtils.isEmpty(name)) {
-            return stackService.getByNameInWorkspace(name, workspace.getId()).getId();
+    private Long getDatalakeResourceId(StackV4Request source, Workspace workspace) {
+        if (source.getSharedService() != null && org.apache.commons.lang3.StringUtils.isNotBlank(source.getSharedService().getDatalakeName())) {
+            return datalakeResourcesService.getByNameForWorkspace(source.getSharedService().getDatalakeName(), workspace).getId();
         }
         return null;
     }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,9 +34,10 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 
 @Component
 public class StackToStackV4RequestConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Request> {
@@ -46,10 +48,10 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     private ComponentConfigProvider componentConfigProvider;
 
     @Inject
-    private StackService stackService;
+    private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
-    private ProviderParameterCalculator providerParameterCalculator;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Override
     public StackV4Request convert(Stack source) {
@@ -69,11 +71,14 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         return stackV2Request;
     }
 
-    private void prepareDatalakeRequest(Stack source, StackV4Request stackV2Request) {
-        if (source.getDatalakeId() != null) {
-            SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
-            sharedServiceRequest.setSharedClusterName(stackService.get(source.getDatalakeId()).getName());
-            stackV2Request.getCluster().setSharedService(sharedServiceRequest);
+    private void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
+        if (source.getDatalakeResourceId() != null) {
+            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.getDatalakeResourcesById(source.getDatalakeResourceId());
+            if (datalakeResources.isPresent()) {
+                SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
+                sharedServiceRequest.setDatalakeName(datalakeResources.get().getName());
+                stackRequest.setSharedService(sharedServiceRequest);
+            }
         }
     }
 

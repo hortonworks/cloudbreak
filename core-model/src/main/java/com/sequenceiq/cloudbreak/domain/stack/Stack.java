@@ -171,8 +171,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String uuid;
 
-    private Long datalakeId;
-
     private Long datalakeResourceId;
 
     @ManyToOne
@@ -616,14 +614,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.uuid = uuid;
     }
 
-    public Long getDatalakeId() {
-        return datalakeId;
-    }
-
-    public void setDatalakeId(Long datalakeId) {
-        this.datalakeId = datalakeId;
-    }
-
     public String getCustomDomain() {
         return customDomain;
     }
@@ -711,5 +701,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDatalakeResourceId(Long datalakeResourceId) {
         this.datalakeResourceId = datalakeResourceId;
+    }
+
+    public boolean isDatalake() {
+        return type == StackType.DATALAKE;
     }
 }

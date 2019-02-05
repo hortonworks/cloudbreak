@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetai
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.AttachedClusterInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
@@ -35,9 +37,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackToStackV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Response> {
@@ -55,6 +60,12 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
+
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     public StackV4Response convert(Stack source) {
@@ -89,6 +100,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setTags(getTags(response, source.getTags()));
         addFlexSubscription(response, source);
         response.setTimeToLive(getStackTimeToLive(source));
+        addSharedServiceResponse(source, response);
         return response;
     }
 
@@ -170,4 +182,28 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         }
         return null;
     }
+
+    private void addSharedServiceResponse(Stack stack, StackV4Response stackResponse) {
+        SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
+        if (stack.getDatalakeResourceId() != null) {
+            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.getDatalakeResourcesById(stack.getDatalakeResourceId());
+            if (datalakeResources.isPresent()) {
+                DatalakeResources datalakeResource = datalakeResources.get();
+                sharedServiceResponse.setSharedClusterId(datalakeResource.getDatalakeStackId());
+                sharedServiceResponse.setSharedClusterName(datalakeResource.getName());
+            }
+        } else {
+            DatalakeResources datalakeResources = datalakeResourcesService.getDatalakeResourcesByDatalakeStackId(stack.getId());
+            if (datalakeResources != null) {
+                for (Stack connectedStacks : stackService.findClustersConnectedToDatalakeByDatalakeResourceId(datalakeResources.getId())) {
+                    AttachedClusterInfoV4Response attachedClusterInfoResponse = new AttachedClusterInfoV4Response();
+                    attachedClusterInfoResponse.setId(connectedStacks.getId());
+                    attachedClusterInfoResponse.setName(connectedStacks.getName());
+                    sharedServiceResponse.getAttachedClusters().add(attachedClusterInfoResponse);
+                }
+            }
+        }
+        stackResponse.setSharedService(sharedServiceResponse);
+    }
+
 }

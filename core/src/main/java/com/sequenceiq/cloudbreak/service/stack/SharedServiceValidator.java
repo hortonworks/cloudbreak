@@ -25,7 +25,7 @@ public class SharedServiceValidator {
 
     public ValidationResult checkSharedServiceStackRequirements(StackV4Request request, Workspace workspace) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (request.getCluster().getSharedService() != null) {
+        if (request.getSharedService() != null) {
             checkCloudPlatform(request, workspace.getId(), resultBuilder);
             checkSharedServiceRequirements(request, workspace, resultBuilder);
         }
@@ -33,7 +33,7 @@ public class SharedServiceValidator {
     }
 
     private void checkCloudPlatform(StackV4Request request, Long workspaceId, ValidationResult.ValidationResultBuilder resultBuilder) {
-        StackView datalakeStack = stackViewService.findByName(request.getCluster().getSharedService().getSharedClusterName(), workspaceId);
+        StackView datalakeStack = stackViewService.findByName(request.getSharedService().getDatalakeName(), workspaceId);
         if (datalakeStack == null) {
             resultBuilder.error("Datalake stack with the requested name (in sharedService/sharedClusterName field) was not found.");
         } else {

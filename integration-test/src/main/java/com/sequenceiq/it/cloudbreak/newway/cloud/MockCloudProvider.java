@@ -69,7 +69,7 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest() {
+    public StackEntity aValidAttachedStackRequest(String datalakeName) {
         throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
@@ -97,7 +97,7 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         return null;
     }
 

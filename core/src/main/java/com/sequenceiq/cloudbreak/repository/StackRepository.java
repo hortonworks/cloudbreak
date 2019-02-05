@@ -62,7 +62,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s "
-            + "WHERE s.datalakeId= :id AND s.terminated = null AND s.stackStatus.status <> 'DELETE_IN_PROGRESS' "
+            + "WHERE s.datalakeResourceId= :id AND s.terminated = null AND s.stackStatus.status <> 'DELETE_IN_PROGRESS' "
             + "AND s.stackStatus.status <> 'REQUESTED' "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<Stack> findEphemeralClusters(@Param("id") Long id);
@@ -147,11 +147,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
     Long findWorkspaceIdById(@Param("id") Long id);
-
-    @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE s.environment.id = :envId AND s.datalakeId IS NOT NULL AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Long countDatalakeStacksInEnvironment(@Param("envId") Long environmentId);
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "

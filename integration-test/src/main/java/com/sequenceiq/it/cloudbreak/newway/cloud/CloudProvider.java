@@ -30,7 +30,7 @@ public abstract class CloudProvider {
 
     public abstract Stack aValidStackCreated();
 
-    public abstract StackEntity aValidAttachedStackRequest();
+    public abstract StackEntity aValidAttachedStackRequest(String datalakeName);
 
     public abstract AmbariV4Request ambariRequestWithBlueprintName(String bluePrintName);
 
@@ -102,7 +102,7 @@ public abstract class CloudProvider {
 
     public abstract Cluster aValidDatalakeCluster();
 
-    public abstract Cluster aValidAttachedCluster(String datalakeClusterName);
+    public abstract Cluster aValidAttachedCluster();
 
     public abstract InstanceTemplateV4Request template();
 

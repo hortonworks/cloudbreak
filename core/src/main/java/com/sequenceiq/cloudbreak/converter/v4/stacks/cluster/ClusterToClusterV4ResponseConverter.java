@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.AttachedClusterInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -33,11 +31,9 @@ import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -54,9 +50,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     @Inject
     private ServiceEndpointCollector serviceEndpointCollector;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -87,7 +80,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         convertKerberosConfig(source, clusterResponse);
         decorateResponseWithProxyConfig(source, clusterResponse);
         clusterResponse.setCloudStorage(getCloudStorage(source));
-        addSharedServiceResponse(source, clusterResponse);
         clusterResponse.setAmbari(getConversionService().convert(source, AmbariV4Response.class));
         clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs(), DatabaseV4Response.class));
         clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
@@ -121,22 +113,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
             return getConversionService().convert(source.getFileSystem(), CloudStorageV4Response.class);
         }
         return null;
-    }
-
-    private void addSharedServiceResponse(Cluster cluster, ClusterV4Response clusterResponse) {
-        SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        if (cluster.getStack().getDatalakeId() != null) {
-            sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
-            sharedServiceResponse.setSharedClusterName(stackService.getByIdWithTransaction(cluster.getStack().getDatalakeId()).getName());
-        } else {
-            for (Stack stack : stackService.findClustersConnectedToDatalake(cluster.getStack().getId())) {
-                AttachedClusterInfoV4Response attachedClusterInfoResponse = new AttachedClusterInfoV4Response();
-                attachedClusterInfoResponse.setId(stack.getId());
-                attachedClusterInfoResponse.setName(stack.getName());
-                sharedServiceResponse.getAttachedClusters().add(attachedClusterInfoResponse);
-            }
-        }
-        clusterResponse.setSharedService(sharedServiceResponse);
     }
 
     private void convertNullableProperties(Cluster source, ClusterV4Response clusterResponse) {
