@@ -247,7 +247,7 @@ public class ClusterCreationSetupService {
         }
         StackDescriptorV4Response stackDescriptorV4 = stackDescriptorMap.get(stackMajorVersion);
         if (stackDescriptorV4 != null) {
-            boolean hasDefaultStackRepoUrlForOsType = stackDescriptorV4.getRepo().getStack().containsKey(image.getOsType());
+            boolean hasDefaultStackRepoUrlForOsType = stackDescriptorV4.getRepository().getStack().containsKey(image.getOsType());
             boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptorV4.getAmbari().getRepository().containsKey(image.getOsType());
             boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptorV4.getMinAmbari().length()),
                     () -> stackDescriptorV4.getMinAmbari()) >= 0;

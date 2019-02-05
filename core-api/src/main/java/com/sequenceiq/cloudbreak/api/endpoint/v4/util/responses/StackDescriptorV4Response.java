@@ -12,7 +12,7 @@ public class StackDescriptorV4Response {
 
     private String minAmbari;
 
-    private StackRepoDetailsV4Response repo;
+    private StackRepoDetailsV4Response repository;
 
     private Map<String, List<ManagementPackV4Entry>> mpacks;
 
@@ -34,12 +34,12 @@ public class StackDescriptorV4Response {
         this.minAmbari = minAmbari;
     }
 
-    public StackRepoDetailsV4Response getRepo() {
-        return repo;
+    public StackRepoDetailsV4Response getRepository() {
+        return repository;
     }
 
-    public void setRepo(StackRepoDetailsV4Response repo) {
-        this.repo = repo;
+    public void setRepository(StackRepoDetailsV4Response repository) {
+        this.repository = repository;
     }
 
     public AmbariInfoV4Response getAmbari() {

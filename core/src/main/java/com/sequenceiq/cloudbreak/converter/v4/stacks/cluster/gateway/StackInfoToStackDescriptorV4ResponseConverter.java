@@ -27,7 +27,7 @@ public class StackInfoToStackDescriptorV4ResponseConverter extends AbstractConve
 
         stackDescriptorV4.setVersion(source.getVersion());
         stackDescriptorV4.setMinAmbari(source.getMinAmbari());
-        stackDescriptorV4.setRepo(defaultStackRepoDetailsToStackRepoDetailsV4Response(source.getRepo()));
+        stackDescriptorV4.setRepository(defaultStackRepoDetailsToStackRepoDetailsV4Response(source.getRepo()));
         if (source.getRepo().getMpacks() != null) {
             Map<String, List<ManagementPackV4Entry>> map = new HashMap<>();
             source.getRepo().getMpacks().forEach((key, value) -> {
