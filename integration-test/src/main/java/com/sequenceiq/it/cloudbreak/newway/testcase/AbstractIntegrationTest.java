@@ -159,7 +159,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void initializeDefaultBlueprints(TestContext testContext) {
         testContext
-                .given(BlueprintEntity.class)
+                .init(BlueprintEntity.class)
                 .when(new BlueprintGetListAction());
     }
 

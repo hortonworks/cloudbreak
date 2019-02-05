@@ -2,11 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class EnvironmentAction {
@@ -47,7 +44,7 @@ public class EnvironmentAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         environmentEntity.setResponseSimpleEnvSet(
-                (Set<SimpleEnvironmentV4Response>) client.getCloudbreakClient()
+                client.getCloudbreakClient()
                         .environmentV4Endpoint()
                         .list(client.getWorkspaceId()).getResponses());
         logJSON("Environment list response: ", environmentEntity.getResponse());

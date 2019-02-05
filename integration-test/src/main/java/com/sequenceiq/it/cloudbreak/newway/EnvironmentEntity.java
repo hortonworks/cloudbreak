@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     public static final String LONDON = "London";
 
-    private Set<SimpleEnvironmentV4Response> response;
+    private Collection<SimpleEnvironmentV4Response> response;
 
     private SimpleEnvironmentV4Response simpleResponse;
 
@@ -120,11 +121,11 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
         }
     }
 
-    public Set<SimpleEnvironmentV4Response> getResponseSimpleEnvSet() {
+    public Collection<SimpleEnvironmentV4Response> getResponseSimpleEnvSet() {
         return response;
     }
 
-    public void setResponseSimpleEnvSet(Set<SimpleEnvironmentV4Response> response) {
+    public void setResponseSimpleEnvSet(Collection<SimpleEnvironmentV4Response> response) {
         this.response = response;
     }
 
@@ -158,7 +159,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     @Override
     public int order() {
-        return 500;
+        return 600;
     }
 
     public String getCredentialName() {
