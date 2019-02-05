@@ -690,6 +690,48 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("[concat('datadisk', 'm0', '1')]"));
     }
 
+    @Test
+    public void buildTestAvailabilitySetInTemplate() {
+        //GIVEN
+        Network network = new Network(new Subnet("testSubnet"));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE);
+        Map<String, Object> asMap = new HashMap<>();
+        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
+        asMap.put("name", availabilitySetName);
+        asMap.put("faultDomainCount", 2);
+        asMap.put("updateDomainCount", 20);
+        gatewayGroup.putParameter("availabilitySet", asMap);
+        groups.add(gatewayGroup);
+
+        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE);
+        coreGroup.putParameter("availabilitySet", null);
+        groups.add(coreGroup);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertTrue(templateString.contains("\"gatewayAsName\": \"gateway-as\","));
+        assertFalse(templateString.contains("coreAsName"));
+        assertTrue(templateString.contains("'Microsoft.Compute/availabilitySets', 'gateway-as'"));
+        assertFalse(templateString.contains("'Microsoft.Compute/availabilitySets', 'core-as'"));
+    }
+
     private CloudCredential cloudCredential() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", "siq-haas");
