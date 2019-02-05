@@ -32,7 +32,7 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
 
     public InstanceTemplateV4Entity valid() {
         return withInstanceType("large")
-                .witAttachedVolume(getTestContext().get(VolumeV4Entity.class));
+                .witAttachedVolume(getTestContext().init(VolumeV4Entity.class));
     }
 
     public InstanceTemplateV4Entity withAttachedVolumes(Set<VolumeV4Request> volumes) {

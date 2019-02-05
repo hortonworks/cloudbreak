@@ -74,10 +74,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)

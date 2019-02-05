@@ -1,11 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
+import static com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity.EUROPE;
+
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -55,10 +58,9 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String region() {
-        String region = "eu-west-1";
         String regionParam = getTestParameter().get("mockRegion");
 
-        return regionParam == null ? region : regionParam;
+        return regionParam == null ? EUROPE : regionParam;
     }
 
     @Override
@@ -137,5 +139,10 @@ public class MockCloudProvider extends AbstractCloudProvider {
         var network = testContext.given(NetworkV2Entity.class);
         network.getRequest().setMock((MockNetworkV4Parameters) subnetProperties());
         return network;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.MOCK;
     }
 }

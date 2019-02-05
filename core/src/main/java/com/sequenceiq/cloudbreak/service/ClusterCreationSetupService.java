@@ -170,7 +170,8 @@ public class ClusterCreationSetupService {
             LOGGER.debug("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
 
-        Cluster cluster = converterUtil.convert(request, Cluster.class);
+        Cluster cluster = stack.getCluster();
+        stack.setCluster(null);
         cluster.setStack(stack);
         cluster.setWorkspace(stack.getWorkspace());
         LOGGER.debug("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);

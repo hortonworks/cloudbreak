@@ -25,7 +25,7 @@ public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleV4
     public SecurityRulesEntity valid() {
         return withSubnet("0.0.0.0/0")
                 .withProtocol("tcp")
-                .withPorts("22,443,8443,9443,8080");
+                .withPorts("22", "443", "8443", "9443", "8080");
     }
 
     public SecurityRulesEntity withSubnet(String subnet) {

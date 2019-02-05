@@ -160,4 +160,8 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
     public int order() {
         return 500;
     }
+
+    public String getCredentialName() {
+        return getRequest().getCredentialName();
+    }
 }

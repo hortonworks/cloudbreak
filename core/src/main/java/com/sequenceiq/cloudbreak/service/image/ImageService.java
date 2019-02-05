@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -111,9 +112,8 @@ public class ImageService {
     }
 
     //CHECKSTYLE:OFF
-    public StatedImage determineImageFromCatalog(Long workspaceId, String imageId, String platformString, String catalogName, Blueprint blueprint,
-            boolean useBaseImage, String requestedOs, User user) throws CloudbreakImageNotFoundException,
-            CloudbreakImageCatalogException {
+    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request image, String platformString,
+            Blueprint blueprint, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
         if (blueprint != null) {
@@ -126,11 +126,11 @@ public class ImageService {
             }
         }
         Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterType, clusterVersion);
-        if (!StringUtils.isEmpty(requestedOs)) {
-            operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(requestedOs)).collect(Collectors.toSet());
+        if (image != null && !StringUtils.isEmpty(image.getOs())) {
+            operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(image.getOs())).collect(Collectors.toSet());
         }
-        if (imageId != null) {
-            return imageCatalogService.getImageByCatalogName(workspaceId, imageId, catalogName);
+        if (image != null && image.getId() != null) {
+            return imageCatalogService.getImageByCatalogName(workspaceId, image.getId(), image.getCatalog());
         } else {
             if (useBaseImage) {
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
