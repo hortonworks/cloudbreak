@@ -7,11 +7,12 @@ class CommandBuilder
   def method_missing(m, *args, &block)
     tmp = CommandBuilder.new
     if (args.size > 0)
+      m = m.to_s.gsub("_", "-")
       CommandBuilder.cmd += "--" + m.to_s + " " + args.join("") + " "
     else
           CommandBuilder.cmd += m.to_s + " "
+          CommandBuilder.cmd = CommandBuilder.cmd.gsub("_", "-")
     end
-    CommandBuilder.cmd = CommandBuilder.cmd.gsub("_", "-")
     return tmp
   end
 
