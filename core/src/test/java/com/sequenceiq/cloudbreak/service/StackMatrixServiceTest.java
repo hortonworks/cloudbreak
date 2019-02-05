@@ -247,7 +247,7 @@ public class StackMatrixServiceTest {
         StackDescriptorV4Response stackDescriptorV4Response = new StackDescriptorV4Response();
         stackDescriptorV4Response.setMinAmbari(minAmbari);
         stackDescriptorV4Response.setVersion(version);
-        stackDescriptorV4Response.setRepo(getStackRepoDetailsResponse(version));
+        stackDescriptorV4Response.setRepository(getStackRepoDetailsResponse(version));
         return stackDescriptorV4Response;
     }
 
