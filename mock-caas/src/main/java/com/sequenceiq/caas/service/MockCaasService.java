@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -77,7 +78,7 @@ public class MockCaasService {
             caasUser.setName(userName);
             caasUser.setPreferredUsername(userName);
             caasUser.setTenantId(introspectResponse.getTenantName());
-            caasUser.setId(introspectResponse.getTenantName() + '#' + userName);
+            caasUser.setId(generateDeterministicUserId(introspectResponse.getTenantName() + '#' + userName));
             caasUsers.add(caasUser);
         }
         return caasUsers;
@@ -89,13 +90,17 @@ public class MockCaasService {
         caasUser.setName(introspectResponse.getSub());
         caasUser.setPreferredUsername(introspectResponse.getSub());
         caasUser.setTenantId(introspectResponse.getTenantName());
-        caasUser.setId(introspectResponse.getTenantName() + '#' + introspectResponse.getSub());
+        caasUser.setId(generateDeterministicUserId(introspectResponse.getTenantName() + '#' + introspectResponse.getSub()));
         LOGGER.info(format("Generated caas user: %s", jsonUtil.toJsonString(caasUser)));
         return caasUser;
     }
 
     public IntrospectResponse introSpect(@Nonnull IntrospectRequest encodedToken) {
         return introSpect(encodedToken.getToken());
+    }
+
+    private String generateDeterministicUserId(String tenantUser) {
+        return UUID.nameUUIDFromBytes(tenantUser.getBytes()).toString();
     }
 
     private IntrospectResponse introSpect(String encodedToken) throws AccessDeniedException {
