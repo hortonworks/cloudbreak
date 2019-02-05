@@ -116,13 +116,13 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
 
     @Override
     public MockInstanceTemplateV4Parameters createMock() {
+        if (mock == null) {
+            mock = new MockInstanceTemplateV4Parameters();
+        }
         return mock;
     }
 
     public void setMock(MockInstanceTemplateV4Parameters mock) {
-        if (mock == null) {
-            mock = new MockInstanceTemplateV4Parameters();
-        }
         this.mock = mock;
     }
 

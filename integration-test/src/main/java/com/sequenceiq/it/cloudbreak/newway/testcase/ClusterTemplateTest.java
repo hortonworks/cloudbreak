@@ -60,6 +60,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
     }
 

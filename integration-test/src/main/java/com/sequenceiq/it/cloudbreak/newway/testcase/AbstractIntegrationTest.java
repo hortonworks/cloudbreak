@@ -25,6 +25,8 @@ import org.testng.annotations.DataProvider;
 
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.Environment;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
@@ -103,6 +105,11 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return nameGenerator;
     }
 
+    protected void createDefaultEnvironment(TestContext testContext) {
+        testContext.given(EnvironmentEntity.class)
+                .when(Environment::post);
+    }
+
     protected void createDefaultCredential(TestContext testContext) {
         testContext.given(CredentialEntity.class)
                 .when(new CredentialCreateAction());
@@ -159,6 +166,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected void minimalSetupForClusterCreation(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }

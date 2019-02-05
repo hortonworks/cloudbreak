@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
@@ -27,4 +28,7 @@ public interface CloudProvider {
     NetworkV2Entity existingSubnet(TestContext testContext);
 
     String getSubnetCIDR();
+
+    CloudPlatform getCloudPlatform();
+
 }

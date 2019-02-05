@@ -16,10 +16,7 @@ public class KerberizedScaleTest extends AbstractIntegrationTest {
     public void beforeMethod(Object[] data) {
         TestContext testContext = (TestContext) data[0];
         LOGGER.info("All routes added: {}", testContext.getSparkServer().getSparkService().getPaths());
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -28,7 +25,7 @@ public class KerberizedScaleTest extends AbstractIntegrationTest {
         testContext.cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = "testContext", enabled = false)
     public void testScaling(TestContext testContext) {
 
     }

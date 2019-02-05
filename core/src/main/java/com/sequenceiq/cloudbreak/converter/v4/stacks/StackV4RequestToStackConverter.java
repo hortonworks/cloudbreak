@@ -95,10 +95,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
         Stack stack = new Stack();
 
-        if (source.getType() != StackType.TEMPLATE) {
-            convertAsStack(source, stack, workspace);
-        } else {
+        if (isTemplate(source)) {
             convertAsStackTemplate(source, stack, workspace);
+        } else {
+            convertAsStack(source, stack, workspace);
         }
 
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -129,6 +129,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setUuid(UUID.randomUUID().toString());
         stack.setType(source.getType());
         return stack;
+    }
+
+    private boolean isTemplate(StackV4Request source) {
+        return source.getType() == StackType.TEMPLATE;
     }
 
     private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace) {

@@ -11,9 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
@@ -27,14 +25,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackV4EntityBase.class);
 
     public StackV4EntityBase(String newId) {
         super(newId);
@@ -48,7 +45,9 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> valid() {
         String randomNameForMock = getNameCreator().getRandomNameForMock();
-        return withEnvironment(getTestContext().get(EnvironmentSettingsV4Entity.class))
+        return withName(randomNameForMock)
+                .withPlacement(getTestContext().init(PlacementSettingsEntity.class))
+                .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
                 .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
@@ -83,13 +82,32 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .withImageSettings("imageSettings");
     }
 
-    public StackV4EntityBase<T> withEnvironment(Class<EnvironmentSettingsV4Entity> clss) {
+    public StackV4EntityBase<T> withEnvironmentSettings(Class<EnvironmentSettingsV4Entity> clss) {
         return withEnvironmentSettings(clss.getSimpleName());
     }
 
-    public StackV4EntityBase<T> withEnvironment(EnvironmentSettingsV4Entity environment) {
+    public StackV4EntityBase<T> withEnvironmentSettings(EnvironmentSettingsV4Entity environment) {
         getRequest().setEnvironment(environment.getRequest());
         return this;
+    }
+
+    public StackV4EntityBase<T> withCloudPlatform(CloudPlatform cloudPlatform) {
+        getRequest().setCloudPlatform(cloudPlatform);
+        return this;
+    }
+
+    public StackV4EntityBase<T> withEnvironment(Class<EnvironmentEntity> environmentKey) {
+        return withEnvironment(environmentKey.getSimpleName());
+    }
+
+    public StackV4EntityBase<T> withEnvironment(String environmentKey) {
+        EnvironmentEntity env = getTestContext().get(environmentKey);
+        if (env == null) {
+            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+        }
+        return withEnvironmentSettings(getTestContext().init(EnvironmentSettingsV4Entity.class)
+//                .withCredentialName(env.getName())
+                .withName(env.getName()));
     }
 
     public StackV4EntityBase<T> withEnvironmentSettings(String environmentKey) {

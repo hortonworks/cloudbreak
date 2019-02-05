@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
@@ -21,6 +21,8 @@ import org.testng.annotations.Test;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.it.cloudbreak.newway.Environment;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
@@ -55,10 +57,7 @@ public class RecipeTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -72,6 +71,8 @@ public class RecipeTest extends AbstractIntegrationTest {
         LOGGER.debug("testing recipe execution for type: {}", type.name());
         String recipeName = creator.getRandomNameForMock();
         testContext
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
                 .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(type)
                 .when(Recipe.postV2())
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(hostGroup).withNodeCount(nodeCount).withRecipes(recipeName)

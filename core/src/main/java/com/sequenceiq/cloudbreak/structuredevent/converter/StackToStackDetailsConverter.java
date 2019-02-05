@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -9,9 +8,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -33,6 +32,9 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
     @Override
     public StackDetails convert(Stack source) {
         StackDetails stackDetails = new StackDetails();
@@ -49,9 +51,7 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         stackDetails.setStatus(source.getStatus().name());
         stackDetails.setDetailedStatus(source.getStackStatus().getDetailedStackStatus().name());
         stackDetails.setStatusReason(source.getStatusReason());
-        stackDetails.setInstanceGroups((List<InstanceGroupDetails>) getConversionService().convert(source.getInstanceGroups(),
-                TypeDescriptor.forObject(source.getInstanceGroups()),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(InstanceGroupDetails.class))));
+        stackDetails.setInstanceGroups(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupDetails.class));
         convertComponents(stackDetails, source);
         convertNetwork(stackDetails, source.getNetwork(), source.cloudPlatform());
         return stackDetails;

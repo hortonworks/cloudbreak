@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -115,9 +114,7 @@ public class ClusterCreationSetupServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
-        when(converterUtil.convert(any(ClusterV4Request.class), eq(Cluster.class))).thenReturn(cluster);
-        when(clusterDecorator
-                .decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
+        when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(component, imageComponent));
         String version = "3.0";
         when(blueprintUtils.getBlueprintStackVersion(any())).thenReturn(version);
@@ -139,6 +136,8 @@ public class ClusterCreationSetupServiceTest {
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(false);
         when(clusterService.save(any(Cluster.class))).thenReturn(cluster);
+
+        stack.setCluster(cluster);
     }
 
     @Test

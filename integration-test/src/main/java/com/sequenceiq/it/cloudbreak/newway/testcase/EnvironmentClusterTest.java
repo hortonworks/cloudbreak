@@ -49,18 +49,14 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        minimalSetupForClusterCreation(testContext);
     }
 
     @Test(dataProvider = "testContext")
     public void testCreateWlClusterDelete(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(EnvironmentSettingsV4Entity.class)
-                .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+        testContext.given(StackEntity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV2())
@@ -84,9 +80,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testWlClusterNotAttachResourceDetachDeleteOk(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(EnvironmentSettingsV4Entity.class)
-                .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+        testContext.given(StackEntity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV2())
                 .await(Status.AVAILABLE)
 
@@ -104,9 +99,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateWlClusterDeleteFails(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(EnvironmentSettingsV4Entity.class)
-                .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+        testContext.given(StackEntity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV2())
@@ -125,7 +119,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createEnvWithResources(testContext);
         testContext.given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV2())
@@ -143,9 +137,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testSameEnvironmentWithDifferentClusters(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV2())
                 .await(Status.AVAILABLE)
                 .given(StackEntity.class)
@@ -168,7 +161,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
                 .given(StackEntity.class).given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV2())
@@ -196,9 +189,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
-                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV2())
@@ -210,9 +202,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testClusterWithRdsWithoutEnvironment(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         testContext.given(EnvironmentEntity.class)
-                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV2(), key(FORBIDDEN_KEY))
@@ -224,9 +215,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testWlClusterChangeCred(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .given(EnvironmentSettingsV4Entity.class)
                 .given(StackEntity.class)
-                .withEnvironment(EnvironmentSettingsV4Entity.class)
+                .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV2())
                 .await(Status.AVAILABLE)
 
@@ -240,7 +230,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::changeCredential)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .validate();
-                checkCredentialAttachedToCluster(testContext);
+        checkCredentialAttachedToCluster(testContext);
     }
 
     @AfterMethod(alwaysRun = true)

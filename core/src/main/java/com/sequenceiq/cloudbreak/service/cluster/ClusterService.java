@@ -326,9 +326,10 @@ public class ClusterService {
     }
 
     private void saveAllHostGroupContraint(Cluster cluster) {
-        for (HostGroup hostGroup : cluster.getHostGroups()) {
-            constraintRepository.save(hostGroup.getConstraint());
-        }
+        cluster.getHostGroups().stream()
+                .map(HostGroup::getConstraint)
+                .filter(Objects::nonNull)
+                .forEach(it -> constraintRepository.save(it));
     }
 
     private boolean isMultipleGateway(Stack stack) {
