@@ -14,6 +14,7 @@ tests:
       blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       imageos: sles12
       instancegroupName: worker
+      awsInstanceType: m5.2xlarge
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
@@ -30,6 +31,7 @@ tests:
       blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       imageos: redhat7
       instancegroupName: worker
+      awsInstanceType: m5.2xlarge
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
