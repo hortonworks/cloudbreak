@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
 
@@ -17,8 +18,8 @@ public class ProviderParameterCalculator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderParameterCalculator.class);
 
     public Mappable get(ProviderParametersBase source) {
-        return getMappable(source, source.getCloudPlatform());
-
+        return getMappable(source, Optional.ofNullable(source.getCloudPlatform())
+                .orElseThrow(() -> new BadRequestException("CloudPlatform is a required field for ProviderParameter")));
     }
 
     private Mappable getMappable(ProviderParametersBase source, CloudPlatform cloudPlatform) {

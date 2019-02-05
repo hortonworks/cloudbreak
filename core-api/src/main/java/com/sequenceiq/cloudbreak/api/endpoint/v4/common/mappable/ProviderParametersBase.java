@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 public abstract class ProviderParametersBase {
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(required = true, allowableValues = "AWS, GCP, AZURE, OPENSTACK, CUMULUS_YARN, YARN")
     private CloudPlatform cloudPlatform;
 
     public CloudPlatform getCloudPlatform() {
@@ -26,4 +26,5 @@ public abstract class ProviderParametersBase {
     public abstract Mappable createYarn();
 
     public abstract Mappable createMock();
+
 }
