@@ -81,7 +81,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                         hostGroupName, hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames)));
                 // we need to update all ephemeral clusters that are connected to a datalake
                 if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())
-                        && !stackService.findClustersConnectedToDatalake(event.getStackId()).isEmpty()) {
+                        && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getStackId()).isEmpty()) {
                     flowChainTriggers.add(new EphemeralClustersUpgradeTriggerEvent(FlowChainTriggers.EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT,
                             event.getStackId(), event.accepted()));
                 }

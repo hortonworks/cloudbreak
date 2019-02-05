@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.Flex
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
@@ -94,6 +95,9 @@ public class StackV4Response extends StackV4Base {
     private CustomDomainSettingsV4Response customDomains;
 
     private CloudPlatform cloudPlatform;
+
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.SHARED_SERVICE_REQUEST)
+    private SharedServiceV4Response sharedService;
 
     public Long getId() {
         return id;
@@ -263,5 +267,13 @@ public class StackV4Response extends StackV4Base {
     @Override
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public SharedServiceV4Response getSharedService() {
+        return sharedService;
+    }
+
+    public void setSharedService(SharedServiceV4Response sharedService) {
+        this.sharedService = sharedService;
     }
 }

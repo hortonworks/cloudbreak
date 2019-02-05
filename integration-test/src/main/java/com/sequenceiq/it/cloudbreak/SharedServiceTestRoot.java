@@ -1,7 +1,16 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import java.util.Collections;
+
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AttachedClusterStackPostStrategy;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -14,13 +23,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.cloud.ResourceHelper;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
-import org.slf4j.Logger;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-
-import javax.annotation.Nonnull;
-import java.util.Collections;
 
 public abstract class SharedServiceTestRoot extends CloudbreakTest {
 
@@ -87,8 +89,9 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(DatalakeCluster.isCreatedWithName(getDatalakeClusterName()));
-        given(cloudProvider.aValidAttachedCluster(getDatalakeClusterName()), "an attached cluster request");
-        given(cloudProvider.aValidAttachedStackRequest().withName(getAttachedClusterName()).withUserDefinedTags(Collections.emptyMap()));
+        given(cloudProvider.aValidAttachedCluster(), "an attached cluster request");
+        given(cloudProvider.aValidAttachedStackRequest(getDatalakeClusterName())
+                .withName(getAttachedClusterName()).withUserDefinedTags(Collections.emptyMap()));
 
         when(Stack.post(new AttachedClusterStackPostStrategy()));
 

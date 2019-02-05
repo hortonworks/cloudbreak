@@ -72,7 +72,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
 
     @Before
     public void setUp() {
-        given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
+        given(stackService.findClustersConnectedToDatalakeByDatalakeResourceId(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
                 .willReturn(new WorkspaceResourceV4Response());
         given(blueprintService.isAmbariBlueprint(any())).willReturn(true);

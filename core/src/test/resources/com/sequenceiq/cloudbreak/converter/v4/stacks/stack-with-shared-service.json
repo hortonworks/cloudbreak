@@ -14,11 +14,11 @@
   "authentication": {
     "publicKey": "ssh-key dsfsdfsdfsdf"
   },
+  "sharedService": {
+    "datalakeName": "shared-cluster-name"
+  },
   "instanceGroups": [],
   "cluster": {
-    "sharedService": {
-      "sharedClusterName": "shared-cluster-name"
-    }
   },
   "tags": {
 

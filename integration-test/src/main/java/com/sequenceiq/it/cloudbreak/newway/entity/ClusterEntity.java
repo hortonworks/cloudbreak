@@ -5,7 +5,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
@@ -73,13 +72,6 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
         return this;
     }
 
-    public ClusterEntity withSharedService(String datalakeClusterName) {
-        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
-        sharedServiceRequest.setSharedClusterName(datalakeClusterName);
-        getRequest().setSharedService(sharedServiceRequest);
-        return this;
-    }
-
     public ClusterEntity withGateway(String key) {
         GatewayEntity gatewayEntity = getTestContext().get(key);
         getRequest().setGateway(gatewayEntity.getRequest());
@@ -90,6 +82,5 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
         getRequest().setKerberosName(kerberos);
         return this;
     }
-
 }
 

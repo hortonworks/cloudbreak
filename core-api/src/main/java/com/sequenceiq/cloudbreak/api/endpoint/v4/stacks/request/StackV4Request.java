@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -78,10 +80,10 @@ public class StackV4Request extends StackV4Base {
     @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
 
-    @ApiModelProperty
-    private String datalakeName;
-
     private StackType type;
+
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.SHARED_SERVICE_REQUEST)
+    private SharedServiceV4Request sharedService;
 
     public EnvironmentSettingsV4Request getEnvironment() {
         return environment;
@@ -155,14 +157,6 @@ public class StackV4Request extends StackV4Base {
         this.gatewayPort = gatewayPort;
     }
 
-    public String getDatalakeName() {
-        return datalakeName;
-    }
-
-    public void setDatalakeName(String datalakeName) {
-        this.datalakeName = datalakeName;
-    }
-
     public Long getFlexId() {
         return flexId;
     }
@@ -185,5 +179,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setPlacement(PlacementSettingsV4Request placement) {
         this.placement = placement;
+    }
+
+    public SharedServiceV4Request getSharedService() {
+        return sharedService;
+    }
+
+    public void setSharedService(SharedServiceV4Request sharedService) {
+        this.sharedService = sharedService;
     }
 }

@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -166,7 +167,9 @@ public class StackDecoratorTest {
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndAllSharedServiceRequirementMeetsThenEverythingShouldGoFine() {
-        when(request.getDatalakeName()).thenReturn("myDatalake");
+        SharedServiceV4Request sharedServiceV4Request = new SharedServiceV4Request();
+        sharedServiceV4Request.setDatalakeName("dlname");
+        when(request.getSharedService()).thenReturn(sharedServiceV4Request);
         when(clusterRequest.getDatabases()).thenReturn(Set.of("db1", "db2"));
 
         underTest.decorate(subject, request, user, workspace);

@@ -84,7 +84,7 @@ public class AmbariLdapServiceTest {
         stack.setCluster(cluster);
 
         ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
+        when(ambariClientFactory.getAmbariClient(any(Stack.class), any())).thenReturn(ambariClient);
     }
 
     @Test

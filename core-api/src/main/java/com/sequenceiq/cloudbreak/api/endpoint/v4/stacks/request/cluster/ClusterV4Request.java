@@ -8,12 +8,11 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -49,9 +48,6 @@ public class ClusterV4Request implements JsonEntity {
 
     @Valid
     private String kerberosName;
-
-    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
-    private SharedServiceV4Request sharedService;
 
     @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerV4Request customContainer;
@@ -121,14 +117,6 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setKerberosName(String kerberosName) {
         this.kerberosName = kerberosName;
-    }
-
-    public SharedServiceV4Request getSharedService() {
-        return sharedService;
-    }
-
-    public void setSharedService(SharedServiceV4Request sharedService) {
-        this.sharedService = sharedService;
     }
 
     public String getCustomQueue() {

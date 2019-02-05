@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
@@ -13,11 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
@@ -61,9 +60,6 @@ public class ClusterV4Response implements JsonEntity {
     private AmbariV4Response ambari;
 
     private GatewayV4Response gateway;
-
-    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
-    private SharedServiceV4Response sharedService;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes = new HashMap<>();
@@ -175,14 +171,6 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setGateway(GatewayV4Response gateway) {
         this.gateway = gateway;
-    }
-
-    public SharedServiceV4Response getSharedService() {
-        return sharedService;
-    }
-
-    public void setSharedService(SharedServiceV4Response sharedService) {
-        this.sharedService = sharedService;
     }
 
     public Map<String, Object> getAttributes() {

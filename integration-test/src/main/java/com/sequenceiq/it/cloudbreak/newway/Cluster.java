@@ -10,7 +10,6 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -84,13 +83,6 @@ public class Cluster extends Entity {
 
     public Cluster withCloudStorage(CloudStorageV4Request cloudStorage) {
         request.setCloudStorage(cloudStorage);
-        return this;
-    }
-
-    public Cluster withSharedService(String datalakeClusterName) {
-        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
-        sharedServiceRequest.setSharedClusterName(datalakeClusterName);
-        request.setSharedService(sharedServiceRequest);
         return this;
     }
 

@@ -259,9 +259,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         return Cluster.request()
-                .withSharedService(datalakeClusterName)
                 .withAmbariRequest(ambariRequestWithBlueprintName(getBlueprintName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
@@ -351,9 +350,10 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest() {
+    public StackEntity aValidAttachedStackRequest(String datalakeClusterName) {
         var request = new StackCreation(aValidStackRequest());
         request.setCreationStrategy(StackAction::determineNetworkAzureFromDatalakeStack);
+        request.withSharedService(datalakeClusterName);
         return request.getStack();
     }
 }

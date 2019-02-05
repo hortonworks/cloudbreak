@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -140,6 +142,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
 
     public void runClusterServices(Stack stack, Cluster cluster) {
         try {
@@ -352,13 +357,17 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Long datalakeId = stack.getDatalakeId();
-        if (datalakeId != null) {
-            Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeId);
-            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
+        Long datalakeResourceId = stack.getDatalakeResourceId();
+        if (datalakeResourceId != null) {
+            Optional<DatalakeResources> datalakeResource = datalakeResourcesService.getDatalakeResourcesById(datalakeResourceId);
+            if (datalakeResource.isPresent() && datalakeResource.get().getDatalakeStackId() != null) {
+                Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
+                Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeStackId);
+                String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
+                List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+                servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                        singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
+            }
         }
     }
 

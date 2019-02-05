@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Azu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -289,6 +290,13 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> withPlacement(PlacementSettingsEntity placementSettings) {
         getRequest().setPlacement(placementSettings.getRequest());
+        return this;
+    }
+
+    public StackV4EntityBase<T> withSharedService(String datalakeClusterName) {
+        SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
+        sharedServiceRequest.setDatalakeName(datalakeClusterName);
+        getRequest().setSharedService(sharedServiceRequest);
         return this;
     }
 

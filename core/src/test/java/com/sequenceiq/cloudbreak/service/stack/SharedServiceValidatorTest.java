@@ -116,9 +116,9 @@ public class SharedServiceValidatorTest {
         ClusterV4Request clusterRequest = new ClusterV4Request();
         clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
         clusterRequest.setLdapName(ldapName);
-        clusterRequest.setSharedService(new SharedServiceV4Request());
-        clusterRequest.getSharedService().setSharedClusterName(DATALAKE_NAME);
         StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setSharedService(new SharedServiceV4Request());
+        stackRequest.getSharedService().setDatalakeName(DATALAKE_NAME);
         stackRequest.setCluster(clusterRequest);
         stackRequest.setCloudPlatform(cloudPlatform);
         return stackRequest;

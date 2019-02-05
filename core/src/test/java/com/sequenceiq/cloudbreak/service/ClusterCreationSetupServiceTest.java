@@ -167,7 +167,7 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testIncorrectKerberosSettingForWorkloadCluster() {
-        stack.setDatalakeId(1L);
+        stack.setDatalakeResourceId(1L);
         clusterRequest.setKerberosName("attached_kerberos_which_not_allowed");
 
         assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));

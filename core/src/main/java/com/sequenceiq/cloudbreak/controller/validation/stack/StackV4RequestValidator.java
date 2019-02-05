@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
@@ -30,9 +29,11 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -65,16 +66,20 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     @Inject
     private PlatformParameterService platformParameterService;
 
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
+
     @Override
     public ValidationResult validate(StackV4Request subject) {
         ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         if (CollectionUtils.isEmpty(subject.getInstanceGroups())) {
             validationBuilder.error("Stack request must contain instance groups.");
         }
         validateTemplates(subject, validationBuilder);
-        validateSharedService(subject, validationBuilder);
-        validateEncryptionKey(subject, validationBuilder);
-        validateKerberos(subject.getCluster().getKerberosName(), validationBuilder);
+        validateSharedService(subject, validationBuilder, workspaceId);
+        validateEncryptionKey(subject, validationBuilder, workspaceId);
+        validateKerberos(subject.getCluster().getKerberosName(), validationBuilder, workspaceId);
         return validationBuilder.build();
     }
 
@@ -86,28 +91,32 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                 .ifPresent(resultBuilder::merge);
     }
 
-    private void validateSharedService(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
-        checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, validationBuilder);
-        SharedServiceV4Request sharedService = stackRequest.getCluster().getSharedService();
-        if (sharedService != null) {
-            try {
-                Stack stack = stackService.getByNameInWorkspace(sharedService.getSharedClusterName(), restRequestThreadLocalService.getRequestedWorkspaceId());
-                if (AVAILABLE.equals(stack.getStatus())) {
-                    Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId()));
-                    if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
-                        validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
-                                + "Please check Ambari before trying to attach cluster to datalake.");
-                    }
-                } else {
-                    validationBuilder.error("Unable to attach to datalake because it's infrastructure is not ready.");
-                }
-            } catch (NotFoundException e) {
+    private void validateSharedService(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
+        checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, validationBuilder, workspaceId);
+        SharedServiceV4Request sharedService = stackRequest.getSharedService();
+        if (sharedService != null && StringUtils.isNotBlank(sharedService.getDatalakeName())) {
+            DatalakeResources datalakeResources = datalakeResourcesService.getByNameForWorkspaceId(sharedService.getDatalakeName(), workspaceId);
+            Optional<Stack> stack = datalakeResources.getDatalakeStackId() == null ? Optional.empty()
+                    : stackService.findById(datalakeResources.getDatalakeStackId());
+            if (stack.isPresent() && AVAILABLE.equals(stack.get().getStatus())) {
+                validateAvailableDatalakeStack(validationBuilder, stack);
+            } else if (stack.isPresent() && !AVAILABLE.equals(stack.get().getStatus())) {
+                validationBuilder.error("Unable to attach to datalake because it's infrastructure is not ready.");
+            } else if (!stack.isPresent() && datalakeResources.getDatalakeStackId() != null) {
                 validationBuilder.error("Unable to attach to datalake because it doesn't exists.");
             }
         }
     }
 
-    private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
+    private void validateAvailableDatalakeStack(ValidationResultBuilder validationBuilder, Optional<Stack> stack) {
+        Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackIdWithoutAuth(stack.get().getId()));
+        if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
+            validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
+                    + "Please check Ambari before trying to attach cluster to datalake.");
+        }
+    }
+
+    private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
         stackRequest.getInstanceGroups().stream()
                 .filter(request -> isEncryptionTypeSetUp(request.getTemplate()))
                 .filter(request -> {
@@ -115,7 +124,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                     return EncryptionType.CUSTOM.equals(valueForTypeKey);
                 })
                 .forEach(request -> checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, stackRequest.getEnvironment().getCredentialName(),
-                        stackRequest.getPlacement().getRegion(), validationBuilder));
+                        stackRequest.getPlacement().getRegion(), validationBuilder, workspaceId));
     }
 
     private EncryptionType getEncryptionType(InstanceTemplateV4Request template) {
@@ -129,8 +138,8 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupV4Request instanceGroupRequest, String credentialName,
-            String region, ValidationResultBuilder validationBuilder) {
-        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region);
+            String region, ValidationResultBuilder validationBuilder, Long workspaceId) {
+        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region, workspaceId);
         if (keys.isPresent() && !keys.get().getCloudEncryptionKeys().isEmpty()) {
             if (getEncryptionKey(instanceGroupRequest.getTemplate()) == null) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
@@ -151,22 +160,20 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         return null;
     }
 
-    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String credentialName, String region) {
+    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String credentialName, String region, Long workspaceId) {
         try {
-            PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                    credentialName, region, null, null);
+            PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, null, null);
             return Optional.ofNullable(platformParameterService.getEncryptionKeys(request));
         } catch (RuntimeException ignore) {
             return Optional.empty();
         }
     }
 
-    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(stackRequest.getCluster().getAmbari().getBlueprintName(),
-                restRequestThreadLocalService.getRequestedWorkspaceId());
+    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(stackRequest.getCluster().getAmbari().getBlueprintName(), workspaceId);
         boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeBlueprint(blueprint);
         if (sharedServiceReadyBlueprint) {
-            Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getCluster());
+            Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getCluster(), workspaceId);
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least one %s "
                     + "rds/database configuration to the Cluster request";
             if (!databaseTypes.contains(DatabaseType.HIVE.name())) {
@@ -186,16 +193,16 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         return clusterRequest.getLdapName() == null;
     }
 
-    private Set<String> getGivenRdsTypes(ClusterV4Request clusterRequest) {
+    private Set<String> getGivenRdsTypes(ClusterV4Request clusterRequest, Long workspaceId) {
         return clusterRequest.getDatabases().stream().map(s ->
-                rdsConfigService.getByNameForWorkspaceId(s, restRequestThreadLocalService.getRequestedWorkspaceId()).getType()).collect(Collectors.toSet());
+                rdsConfigService.getByNameForWorkspaceId(s, workspaceId).getType()).collect(Collectors.toSet());
     }
 
-    private void validateKerberos(String kerberosName, ValidationResultBuilder validationBuilder) {
+    private void validateKerberos(String kerberosName, ValidationResultBuilder validationBuilder, Long workspaceId) {
         if (kerberosName != null && kerberosName.isEmpty()) {
             validationBuilder.error("kerberosName should not be empty. Should be either filled or null!");
         } else if (StringUtils.isNotEmpty(kerberosName)) {
-            kerberosService.getByNameForWorkspaceId(kerberosName, restRequestThreadLocalService.getRequestedWorkspaceId());
+            kerberosService.getByNameForWorkspaceId(kerberosName, workspaceId);
         }
     }
 

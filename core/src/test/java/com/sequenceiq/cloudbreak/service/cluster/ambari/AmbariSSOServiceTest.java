@@ -48,9 +48,7 @@ public class AmbariSSOServiceTest {
     @Before
     public void initTest() {
         ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
-        ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
+        when(ambariClientFactory.getAmbariClient(any(Stack.class), any())).thenReturn(ambariClient);
         ReflectionTestUtils.setField(ambariSSOService, "knoxPort", "8443");
     }
 

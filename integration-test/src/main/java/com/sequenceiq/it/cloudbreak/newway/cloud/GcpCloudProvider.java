@@ -67,7 +67,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest() {
+    public StackEntity aValidAttachedStackRequest(String datalakeName) {
         throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 
@@ -240,9 +240,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+    public Cluster aValidAttachedCluster() {
         return Cluster.request()
-                .withSharedService(datalakeClusterName)
                 .withAmbariRequest(ambariRequestWithBlueprintName(getBlueprintName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
