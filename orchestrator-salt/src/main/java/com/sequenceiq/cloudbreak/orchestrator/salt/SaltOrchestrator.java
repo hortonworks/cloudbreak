@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
@@ -288,6 +289,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException {
+        LOGGER.info("Tear down hosts: {},", privateIPsByFQDN);
+        LOGGER.info("Gateway config for tear down: {}", allGatewayConfigs);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         try (SaltConnector saltConnector = new SaltConnector(primaryGateway, restDebug)) {
             SaltStates.stopMinions(saltConnector, privateIPsByFQDN);
@@ -298,10 +301,24 @@ public class SaltOrchestrator implements HostOrchestrator {
         for (GatewayConfig gatewayConfig : allGatewayConfigs) {
             try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                 sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
+                removeDeadSaltMinions(gatewayConfig);
             } catch (Exception e) {
                 LOGGER.error("Error occurred during salt minion tear down", e);
                 throw new CloudbreakOrchestratorFailedException(e);
             }
+        }
+    }
+
+    private void removeDeadSaltMinions(GatewayConfig gateway) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
+            MinionStatusSaltResponse minionStatusSaltResponse = SaltStates.collectNodeStatus(saltConnector);
+            List<String> downNodes = minionStatusSaltResponse.downMinions();
+            if (downNodes != null && !downNodes.isEmpty()) {
+                saltConnector.wheel("key.delete", downNodes, Object.class);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during dead salt minions removal", e);
+            throw new CloudbreakOrchestratorFailedException(e);
         }
     }
 
@@ -376,9 +393,11 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private GatewayConfig getPrimaryGatewayConfig(List<GatewayConfig> allGatewayConfigs) throws CloudbreakOrchestratorFailedException {
-        Optional<GatewayConfig> gatewayConfig = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst();
-        if (gatewayConfig.isPresent()) {
-            return gatewayConfig.get();
+        Optional<GatewayConfig> gatewayConfigOptional = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst();
+        if (gatewayConfigOptional.isPresent()) {
+            GatewayConfig gatewayConfig = gatewayConfigOptional.get();
+            LOGGER.info("Primary gateway: {},", gatewayConfig);
+            return gatewayConfig;
         }
         throw new CloudbreakOrchestratorFailedException("No primary gateway specified");
     }
