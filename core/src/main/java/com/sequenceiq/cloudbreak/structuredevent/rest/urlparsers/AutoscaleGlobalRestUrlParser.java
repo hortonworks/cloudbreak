@@ -6,11 +6,11 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V4UserEventUrlParser extends RestUrlParser {
+public class AutoscaleGlobalRestUrlParser extends RestUrlParser {
 
     public static final int RESOURCE_EVENT_GROUP_NUMBER = 1;
 
-    private static final Pattern PATTERN = Pattern.compile("v4/users/([a-z_]+)");
+    private static final Pattern PATTERN = Pattern.compile("autoscale/(ambari|stack/all)");
 
     @Override
     public Pattern getPattern() {
@@ -34,7 +34,7 @@ public class V4UserEventUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return "users";
+        return "autoscale";
     }
 
     @Override

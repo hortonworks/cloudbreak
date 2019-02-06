@@ -6,9 +6,14 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V4WorkspaceUrlParser extends RestUrlParser {
+public class V4GlobalRestUrlParser extends RestUrlParser {
 
-    private static final Pattern PATTERN = Pattern.compile("v4/workspaces");
+    public static final int RESOURCE_TYPE_GROUP_NUMBER = 1;
+
+    // v4/user_profiles
+    // v4/users
+    // v4/workspaces
+    private static final Pattern PATTERN = Pattern.compile("v4/([a-z_]+)");
 
     @Override
     public Pattern getPattern() {
@@ -32,7 +37,7 @@ public class V4WorkspaceUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return "workspaces";
+        return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
 
     @Override

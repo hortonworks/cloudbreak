@@ -6,9 +6,15 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AutoscaleAmbariUrlParser extends RestUrlParser {
+public class AutoscaleStackResourceRestUrlParser extends RestUrlParser {
 
-    private static final Pattern PATTERN = Pattern.compile("autoscale/ambari");
+    public static final int RESOURCE_TYPE_GROUP_NUMBER = 1;
+
+    public static final int RESOURCE_ID_GROUP_NUMBER = 2;
+
+    public static final int RESOURCE_EVENT_GROUP_NUMBER = 3;
+
+    private static final Pattern PATTERN = Pattern.compile("autoscale/([a-z_]+)/(\\d+)(?:/(.+))?");
 
     @Override
     public Pattern getPattern() {
@@ -27,16 +33,17 @@ public class AutoscaleAmbariUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceId(Matcher matcher) {
-        return null;
+        return matcher.group(RESOURCE_ID_GROUP_NUMBER);
     }
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return "autoscale";
+        return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return "ambari";
+        return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
     }
+
 }

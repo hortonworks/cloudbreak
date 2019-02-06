@@ -1,18 +1,27 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class AutoscaleResourceOtherUrlParser extends RestUrlParser {
+public class V4ExistingResourceIdRestUrlParser extends RestUrlParser {
 
-    public static final int RESOURCE_TYPE_GROUP_NUMBER = 1;
+    public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
-    public static final int RESOURCE_ID_GROUP_NUMBER = 2;
+    public static final int RESOURCE_ID_GROUP_NUMBER = 3;
 
-    private static final Pattern PATTERN = Pattern.compile("autoscale/([a-z|-]+)/(\\d+)/(.+)");
+    public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
+
+    // v4/{workspaceId}/audits/{auditId}
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/(\\d+)");
+
+    @Override
+    protected List<String> parsedMethods() {
+        return List.of("DELETE", "GET");
+    }
 
     @Override
     public Pattern getPattern() {
@@ -21,7 +30,7 @@ public class AutoscaleResourceOtherUrlParser extends RestUrlParser {
 
     @Override
     protected String getWorkspaceId(Matcher matcher) {
-        return null;
+        return matcher.group(WORKSPACE_ID_GROUP_NUMBER);
     }
 
     @Override
@@ -43,4 +52,5 @@ public class AutoscaleResourceOtherUrlParser extends RestUrlParser {
     protected String getResourceEvent(Matcher matcher) {
         return null;
     }
+
 }
