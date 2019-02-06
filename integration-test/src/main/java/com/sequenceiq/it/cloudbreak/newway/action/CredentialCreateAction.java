@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class CredentialCreateAction implements ActionV2<CredentialEntity> {
+public class CredentialCreateAction implements Action<CredentialEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialCreateAction.class);
 
     @Override

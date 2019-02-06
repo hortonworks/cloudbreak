@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.LdapConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.LdapConfigV4Action;
@@ -53,31 +53,31 @@ public class LdapConfig extends LdapConfigEntity {
         return entity;
     }
 
-    public static Action<LdapConfig> post(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV4Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), LdapConfigV4Action::post);
     }
 
-    public static Action<LdapConfig> post() {
+    public static ResourceAction post() {
         return post(LDAPCONFIG);
     }
 
-    public static Action<LdapConfig> get(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV4Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), LdapConfigV4Action::get);
     }
 
-    public static Action<LdapConfig> get() {
+    public static ResourceAction get() {
         return get(LDAPCONFIG);
     }
 
-    public static Action<LdapConfig> getAll() {
-        return new Action<>(getNew(), LdapConfigV4Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), LdapConfigV4Action::getAll);
     }
 
-    public static Action<LdapConfig> delete(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV4Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), LdapConfigV4Action::delete);
     }
 
-    public static Action<LdapConfig> delete() {
+    public static ResourceAction delete() {
         return delete(LDAPCONFIG);
     }
 
@@ -107,7 +107,7 @@ public class LdapConfig extends LdapConfigEntity {
         return ldapConfig;
     }
 
-    public static ActionV2<LdapConfigEntity> postV2() {
+    public static Action<LdapConfigEntity> postV2() {
         return new LdapConfigPostAction();
     }
 

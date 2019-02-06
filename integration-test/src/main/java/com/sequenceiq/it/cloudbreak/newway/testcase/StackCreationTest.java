@@ -33,8 +33,8 @@ public class StackCreationTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testAttemptToCreateTwoRegularClusterWithTheSameName(TestContext testContext) {
         testContext.given(StackEntity.class)
-                .when(Stack.postV2())
-                .when(Stack.postV2(), key("badRequest"))
+                .when(Stack.postV4())
+                .when(Stack.postV4(), key("badRequest"))
                 .except(BadRequestException.class, key("badRequest"))
                 .validate();
     }

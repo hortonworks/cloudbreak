@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.ImageCatalogV3Action;
@@ -49,51 +49,51 @@ public class ImageCatalog extends ImageCatalogEntity {
         return imageCatalog;
     }
 
-    public static Action<ImageCatalog> post(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), ImageCatalogV3Action::post);
     }
 
-    public static Action<ImageCatalog> post() {
+    public static ResourceAction post() {
         return post(IMAGE_CATALOG);
     }
 
-    public static Action<ImageCatalog> get(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), ImageCatalogV3Action::get);
     }
 
-    public static Action<ImageCatalog> get() {
+    public static ResourceAction get() {
         return get(IMAGE_CATALOG);
     }
 
-    public static Action<ImageCatalog> getAll() {
-        return new Action<>(getNew(), ImageCatalogV3Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), ImageCatalogV3Action::getAll);
     }
 
-    public static Action<ImageCatalog> getImagesByProvider() {
-        return new Action<>(getNew(), ImageCatalogV3Action::getImagesByProvider);
+    public static ResourceAction getImagesByProvider() {
+        return new ResourceAction(getNew(), ImageCatalogV3Action::getImagesByProvider);
     }
 
-    public static Action<ImageCatalog> getImagesByProviderFromImageCatalog(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::getImagesByProviderFromImageCatalog);
+    public static ResourceAction getImagesByProviderFromImageCatalog(String key) {
+        return new ResourceAction(getTestContext(key), ImageCatalogV3Action::getImagesByProviderFromImageCatalog);
     }
 
-    public static Action<ImageCatalog> getImagesByProviderFromImageCatalog() {
+    public static ResourceAction getImagesByProviderFromImageCatalog() {
         return getImagesByProviderFromImageCatalog(IMAGE_CATALOG);
     }
 
-    public static Action<ImageCatalog> getRequestFromName(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::getRequestByName);
+    public static ResourceAction getRequestFromName(String key) {
+        return new ResourceAction(getTestContext(key), ImageCatalogV3Action::getRequestByName);
     }
 
-    public static Action<ImageCatalog> getRequestFromName() {
+    public static ResourceAction getRequestFromName() {
         return getRequestFromName(IMAGE_CATALOG);
     }
 
-    public static Action<ImageCatalog> delete(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), ImageCatalogV3Action::delete);
     }
 
-    public static Action<ImageCatalog> delete() {
+    public static ResourceAction delete() {
         return delete(IMAGE_CATALOG);
     }
 
@@ -101,11 +101,11 @@ public class ImageCatalog extends ImageCatalogEntity {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
 
-    public static Action<ImageCatalog> setDefault(String key) {
-        return new Action<>(getTestContext(key), ImageCatalogV3Action::putSetDefaultByName);
+    public static ResourceAction setDefault(String key) {
+        return new ResourceAction(getTestContext(key), ImageCatalogV3Action::putSetDefaultByName);
     }
 
-    public static Action<ImageCatalog> setDefault() {
+    public static ResourceAction setDefault() {
         return setDefault(IMAGE_CATALOG);
     }
 
@@ -123,7 +123,7 @@ public class ImageCatalog extends ImageCatalogEntity {
         return entity;
     }
 
-    public static ActionV2<ImageCatalogEntity> postV2() {
+    public static Action<ImageCatalogEntity> postV2() {
         return new ImageCatalogPostAction();
     }
 }

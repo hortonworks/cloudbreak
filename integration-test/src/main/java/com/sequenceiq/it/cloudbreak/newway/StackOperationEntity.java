@@ -26,16 +26,16 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleV4R
         return new StackOperationEntity();
     }
 
-    public static Action<StackOperationEntity> scale() {
-        return new Action<>(getTestContextStackOperation(), StackOperationEntity::scale);
+    public static ResourceAction<StackOperationEntity> scale() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackOperationEntity::scale);
     }
 
-    public static Action<StackOperationEntity> start() {
-        return new Action<>(getTestContextStackOperation(), StackOperationEntity::start);
+    public static ResourceAction<StackOperationEntity> start() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackOperationEntity::start);
     }
 
-    public static Action<StackOperationEntity> stop() {
-        return new Action<>(getTestContextStackOperation(), StackOperationEntity::stop);
+    public static ResourceAction<StackOperationEntity> stop() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackOperationEntity::stop);
     }
 
     public static Assertion<StackOperationEntity> assertThis(BiConsumer<StackOperationEntity, IntegrationTestContext> check) {

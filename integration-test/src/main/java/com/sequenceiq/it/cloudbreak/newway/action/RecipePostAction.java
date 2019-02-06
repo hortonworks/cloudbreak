@@ -10,7 +10,7 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static java.lang.String.format;
 
-public class RecipePostAction implements ActionV2<RecipeEntity> {
+public class RecipePostAction implements Action<RecipeEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipePostAction.class);
 

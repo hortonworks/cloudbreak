@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.RecipePostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.RecipeV4Action;
@@ -49,31 +49,31 @@ public class Recipe extends RecipeEntity {
         return entity;
     }
 
-    public static Action<Recipe> post(String key) {
-        return new Action<>(getTestContext(key), RecipeV4Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), RecipeV4Action::post);
     }
 
-    public static Action<Recipe> post() {
+    public static ResourceAction post() {
         return post(RECIPE);
     }
 
-    public static Action<Recipe> get(String key) {
-        return new Action<>(getTestContext(key), RecipeV4Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), RecipeV4Action::get);
     }
 
-    public static Action<Recipe> get() {
+    public static ResourceAction get() {
         return get(RECIPE);
     }
 
-    public static Action<Recipe> getAll() {
-        return new Action<>(getNew(), RecipeV4Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), RecipeV4Action::getAll);
     }
 
-    public static Action<Recipe> delete(String key) {
-        return new Action<>(getTestContext(key), RecipeV4Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), RecipeV4Action::delete);
     }
 
-    public static Action<Recipe> delete() {
+    public static ResourceAction delete() {
         return delete(RECIPE);
     }
 
@@ -81,7 +81,7 @@ public class Recipe extends RecipeEntity {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
 
-    public static ActionV2<RecipeEntity> postV2() {
+    public static Action<RecipeEntity> postV2() {
         return new RecipePostAction();
     }
 }

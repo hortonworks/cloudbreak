@@ -79,11 +79,11 @@ public class IpPool extends Entity {
         return new IpPool();
     }
 
-    private static Action<IpPool> get(String key) {
-        return new Action<>(getTestContext(key), IpPoolV4Action::get);
+    private static ResourceAction<IpPool> get(String key) {
+        return new ResourceAction<>(getTestContext(key), IpPoolV4Action::get);
     }
 
-    public static Action<IpPool> get() {
+    public static ResourceAction<IpPool> get() {
         return get(IPPOOL);
     }
 

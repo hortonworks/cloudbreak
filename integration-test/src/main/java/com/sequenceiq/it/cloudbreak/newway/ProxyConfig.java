@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.ProxyConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.ProxyV4Action;
@@ -54,31 +54,31 @@ public class ProxyConfig extends ProxyConfigEntity {
         return entity;
     }
 
-    public static Action<ProxyConfig> post(String key) {
-        return new Action<>(getTestContext(key), ProxyV4Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), ProxyV4Action::post);
     }
 
-    public static Action<ProxyConfig> post() {
+    public static ResourceAction post() {
         return post(PROXYCONFIG);
     }
 
-    public static Action<ProxyConfig> get(String key) {
-        return new Action<>(getTestContext(key), ProxyV4Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), ProxyV4Action::get);
     }
 
-    public static Action<ProxyConfig> get() {
+    public static ResourceAction get() {
         return get(PROXYCONFIG);
     }
 
-    public static Action<ProxyConfig> getAll() {
-        return new Action<>(getNew(), ProxyV4Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), ProxyV4Action::getAll);
     }
 
-    public static Action<ProxyConfig> delete(String key) {
-        return new Action<>(getTestContext(key), ProxyV4Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), ProxyV4Action::delete);
     }
 
-    public static Action<ProxyConfig> delete() {
+    public static ResourceAction delete() {
         return delete(PROXYCONFIG);
     }
 
@@ -100,7 +100,7 @@ public class ProxyConfig extends ProxyConfigEntity {
         return entity;
     }
 
-    public static ActionV2<ProxyConfigEntity> postV2() {
+    public static Action<ProxyConfigEntity> postV2() {
         return new ProxyConfigPostAction();
     }
 }

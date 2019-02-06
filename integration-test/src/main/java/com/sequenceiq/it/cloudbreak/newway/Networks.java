@@ -63,8 +63,8 @@ public class Networks extends Entity {
         return platformResourceParameters;
     }
 
-    public static Action<Networks> post() {
-        return new Action<>(getTestContext(NETWORKS), NetworksV3Action::getNetworks);
+    public static ResourceAction<Networks> post() {
+        return new ResourceAction<>(getTestContext(NETWORKS), NetworksV3Action::getNetworks);
     }
 
     private static Assertion<Networks> assertThis(BiConsumer<Networks, IntegrationTestContext> check) {

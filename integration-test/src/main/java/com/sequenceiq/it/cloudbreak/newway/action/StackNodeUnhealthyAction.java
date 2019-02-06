@@ -20,7 +20,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackNodeUnhealthyAction implements ActionV2<StackEntity> {
+public class StackNodeUnhealthyAction implements Action<StackEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackNodeUnhealthyAction.class);
 

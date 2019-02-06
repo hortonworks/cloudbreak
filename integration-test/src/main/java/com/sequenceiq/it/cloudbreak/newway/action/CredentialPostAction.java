@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class CredentialPostAction implements ActionV2<CredentialEntity> {
+public class CredentialPostAction implements Action<CredentialEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialPostAction.class);
 

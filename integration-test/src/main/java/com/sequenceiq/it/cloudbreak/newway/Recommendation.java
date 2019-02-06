@@ -26,11 +26,11 @@ public class Recommendation extends RecommendationEntity {
         return recommendation;
     }
 
-    public static Action<Recommendation> post(String key) {
-        return new Action<>(getTestContext(key), RecommendationV4Action::post);
+    public static ResourceAction<Recommendation> post(String key) {
+        return new ResourceAction<>(getTestContext(key), RecommendationV4Action::post);
     }
 
-    public static Action<Recommendation> post() {
+    public static ResourceAction<Recommendation> post() {
         return post(RECOMMENDATION);
     }
 

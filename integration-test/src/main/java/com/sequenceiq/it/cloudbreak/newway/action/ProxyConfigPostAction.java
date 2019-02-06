@@ -10,7 +10,7 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static java.lang.String.format;
 
-public class ProxyConfigPostAction implements ActionV2<ProxyConfigEntity> {
+public class ProxyConfigPostAction implements Action<ProxyConfigEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigPostAction.class);
 

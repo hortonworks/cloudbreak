@@ -47,13 +47,13 @@ public class GherkinTest extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void when(Action<?> action, String message) throws Exception {
+    protected void when(ResourceAction<?> resourceAction, String message) throws Exception {
         Log.log("When " + message);
-        itContext.putContextParam(RESULT, action.action(itContext));
+        itContext.putContextParam(RESULT, resourceAction.action(itContext));
     }
 
-    protected void when(Action<?> action) throws Exception {
-        when(action, EMPTY_MESSAGE);
+    protected void when(ResourceAction<?> resourceAction) throws Exception {
+        when(resourceAction, EMPTY_MESSAGE);
     }
 
     protected void then(Assertion<?> assertion, String message) {

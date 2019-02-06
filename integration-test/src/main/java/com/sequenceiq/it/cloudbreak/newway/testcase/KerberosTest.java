@@ -81,7 +81,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
                                 .withBlueprintName(blueprintName)))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .then(testData.getAssertions())
                 .validate();
@@ -103,7 +103,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
                                 .withBlueprintName(blueprintName)))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .validate();
     }
@@ -128,7 +128,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
                                 .withBlueprintName(blueprintName)))
-                .when(Stack.postV2(), key("badRequest"))
+                .when(Stack.postV4(), key("badRequest"))
                 .except(BadRequestException.class, key("badRequest"))
                 .validate();
     }

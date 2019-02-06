@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class BlueprintGetListAction implements ActionV2<BlueprintEntity> {
+public class BlueprintGetListAction implements Action<BlueprintEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintGetListAction.class);
 

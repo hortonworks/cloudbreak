@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.BlueprintPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.BlueprintV4Action;
@@ -37,31 +37,31 @@ public class Blueprint extends BlueprintEntity {
         return blueprint;
     }
 
-    public static Action<Blueprint> post(String key) {
-        return new Action<>(getTestContext(key), BlueprintV4Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), BlueprintV4Action::post);
     }
 
-    public static Action<Blueprint> post() {
+    public static ResourceAction post() {
         return post(BLUEPRINT);
     }
 
-    public static Action<Blueprint> get(String key) {
-        return new Action<>(getTestContext(key), BlueprintV4Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), BlueprintV4Action::get);
     }
 
-    public static Action<Blueprint> get() {
+    public static ResourceAction get() {
         return get(BLUEPRINT);
     }
 
-    public static Action<Blueprint> getAll() {
-        return new Action<>(getNew(), BlueprintV4Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), BlueprintV4Action::getAll);
     }
 
-    public static Action<Blueprint> delete(String key) {
-        return new Action<>(getTestContext(key), BlueprintV4Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), BlueprintV4Action::delete);
     }
 
-    public static Action<Blueprint> delete() {
+    public static ResourceAction delete() {
         return delete(BLUEPRINT);
     }
 
@@ -76,7 +76,7 @@ public class Blueprint extends BlueprintEntity {
         return entity;
     }
 
-    public static ActionV2<BlueprintEntity> postV2() {
+    public static Action<BlueprintEntity> postV2() {
         return new BlueprintPostAction();
     }
 

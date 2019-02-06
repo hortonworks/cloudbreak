@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class RdsConfigPostAction implements ActionV2<RdsConfigEntity> {
+public class RdsConfigPostAction implements Action<RdsConfigEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigPostAction.class);
 

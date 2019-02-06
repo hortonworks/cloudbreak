@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackDeleteAction implements ActionV2<StackEntity> {
+public class StackDeleteAction implements Action<StackEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeleteAction.class);
 

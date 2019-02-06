@@ -37,7 +37,7 @@ public class EncryptedClusterTests extends ClusterTests {
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(aValidStackRequestWithDifferentEncryptedTypes(cloudProvider).withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(

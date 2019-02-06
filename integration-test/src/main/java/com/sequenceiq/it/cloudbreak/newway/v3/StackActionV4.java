@@ -21,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackV3Action {
+public class StackActionV4 {
     private static final String VPC_ID_KEY = "vpcId";
 
     private static final String SUBNET_ID_KEY = "subnetId";
@@ -30,9 +30,9 @@ public class StackV3Action {
 
     private static final String RESOURCE_GROUP_NAME_KEY = "resourceGroupName";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackV3Action.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackActionV4.class);
 
-    private StackV3Action() {
+    private StackActionV4() {
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -68,10 +68,6 @@ public class StackV3Action {
         delete(integrationTestContext, (StackEntity) entity, Boolean.FALSE);
     }
 
-    public static void deleteWithForce(IntegrationTestContext integrationTestContext, Entity entity) {
-        delete(integrationTestContext, (StackEntity) entity, Boolean.TRUE);
-    }
-
     private static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, Boolean forced) {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
@@ -81,14 +77,7 @@ public class StackV3Action {
                 .delete(workspaceId, entity.getName(), forced, false);
     }
 
-    public static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, CloudbreakClient cloudbreakClient, Boolean forced) {
-        Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(" delete: " + entity.getName());
-        cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
-                .delete(workspaceId, entity.getName(), forced, false);
-    }
-
-    public static StackEntity deleteV2(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
+    public static StackEntity delete(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
         Log.log(LOGGER, " delete: " + entity.getName());
         cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
                 .delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false, false);

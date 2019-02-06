@@ -32,11 +32,11 @@ public class LdapTest extends LdapTestEntity {
         return ldapTestConnectionV4Request;
     }
 
-    public static Action<LdapTest> testConnect(String key) {
-        return new Action<>(getTestContext(key), LdapConfigV4Action::testConnect);
+    public static ResourceAction<LdapTest> testConnect(String key) {
+        return new ResourceAction<>(getTestContext(key), LdapConfigV4Action::testConnect);
     }
 
-    public static Action<LdapTest> testConnect() {
+    public static ResourceAction<LdapTest> testConnect() {
         return testConnect(LDAPTEST);
     }
 

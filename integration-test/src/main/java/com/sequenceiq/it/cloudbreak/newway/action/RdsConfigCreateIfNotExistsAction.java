@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class RdsConfigCreateIfNotExistsAction implements ActionV2<RdsConfigEntity> {
+public class RdsConfigCreateIfNotExistsAction implements Action<RdsConfigEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigCreateIfNotExistsAction.class);
 
     @Override

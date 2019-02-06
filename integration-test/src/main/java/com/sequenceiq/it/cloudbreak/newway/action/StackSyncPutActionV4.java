@@ -11,16 +11,16 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackStopAction implements ActionV2<StackEntity> {
+public class StackSyncPutActionV4 implements Action<StackEntity> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackStopAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackSyncPutActionV4.class);
 
     @Override
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, format(" Stack post request:%n"), entity.getRequest());
-        client.getCloudbreakClient().stackV4Endpoint().putStop(client.getWorkspaceId(), entity.getName());
-        logJSON(LOGGER, format(" Stack created  successfully:%n"), entity.getResponse());
+        logJSON(LOGGER, format(" Stack put request:%n"), entity.getRequest());
+        client.getCloudbreakClient().stackV4Endpoint().putSync(client.getWorkspaceId(), entity.getName());
+        logJSON(LOGGER, format(" Stack sync successfull:%n"), entity.getResponse());
         log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
         return entity;
     }

@@ -52,7 +52,7 @@ public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageC
         return getTestContextStackImageChange(IMAGE_CHANGE);
     }
 
-    public static Action<StackImageChangeEntity> changeImage() {
-        return new Action<>(getTestContextStackImageChange(), StackImageChangeEntity::changeImage);
+    public static ResourceAction<StackImageChangeEntity> changeImage() {
+        return new ResourceAction<>(getTestContextStackImageChange(), StackImageChangeEntity::changeImage);
     }
 }

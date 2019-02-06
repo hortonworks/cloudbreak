@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class LdapConfigCreateIfNotExistsAction implements ActionV2<LdapConfigEntity> {
+public class LdapConfigCreateIfNotExistsAction implements Action<LdapConfigEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigCreateIfNotExistsAction.class);
 
     @Override

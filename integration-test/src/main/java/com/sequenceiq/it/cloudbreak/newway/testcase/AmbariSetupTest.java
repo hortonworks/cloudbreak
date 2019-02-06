@@ -25,7 +25,7 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
         testContext
                 // create stack
                 .given(StackEntity.class)
-                .when(Stack.postV2(), key("stack-post"))
+                .when(Stack.postV4(), key("stack-post"))
                 .await(Status.AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").exactTimes(2).bodyContains("\"Users/active\": true"))
                 .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").exactTimes(2).bodyContains("\"Users/admin\": true"))

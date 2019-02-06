@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ImageCatalogPostAction implements ActionV2<ImageCatalogEntity> {
+public class ImageCatalogPostAction implements Action<ImageCatalogEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogPostAction.class);
 
