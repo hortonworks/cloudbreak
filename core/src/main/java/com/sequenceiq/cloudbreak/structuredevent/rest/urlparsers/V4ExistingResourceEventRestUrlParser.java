@@ -16,7 +16,15 @@ public class V4ExistingResourceEventRestUrlParser extends RestUrlParser {
 
     public static final int RESOURCE_EVENT_GROUP_NUMBER = 4;
 
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]*)/([^/]+)/([a-z_]+)");
+    // Irregular requests containing event followed by resource name at the end
+    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/\\d+/credentials/.+");
+
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([^/]+)/([a-z_]+)");
+
+    @Override
+    protected Pattern getAntiPattern() {
+        return ANTI_PATTERN;
+    }
 
     @Override
     public Pattern getPattern() {

@@ -1,20 +1,32 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class V4CredentialInitCodeGrantFlowOnExistingUrlParser extends RestUrlParser {
+public class V4EventRestUrlParser extends RestUrlParser {
 
     public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
-    public static final int RESOURCE_NAME_GROUP_NUMBER = 3;
-
     public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]*)/code_grant_flow/([^/]+)");
+    public static final int RESOURCE_EVENT_GROUP_NUMBER = 3;
+
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([a-z_]+)");
+
+    // POST is the norm. Irregular GET requests:
+    // v4/{workspaceId}/audits/zip
+    // v4/{workspaceId}/blueprints/recommendation
+    // v4/{workspaceId}/image_catalogs/images
+    // v4/{workspaceId}/connectors/{event}
+    // v4/{workspaceId}/file_systems/{event}
+    @Override
+    protected List<String> parsedMethods() {
+        return List.of("POST", "GET");
+    }
 
     @Override
     public Pattern getPattern() {
@@ -28,7 +40,7 @@ public class V4CredentialInitCodeGrantFlowOnExistingUrlParser extends RestUrlPar
 
     @Override
     protected String getResourceName(Matcher matcher) {
-        return matcher.group(RESOURCE_NAME_GROUP_NUMBER);
+        return null;
     }
 
     @Override
@@ -43,7 +55,7 @@ public class V4CredentialInitCodeGrantFlowOnExistingUrlParser extends RestUrlPar
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return null;
+        return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
     }
 
 }

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V4WorkspaceNameUrlParser extends RestUrlParser {
+public class V4WorkspaceNameRestUrlParser extends RestUrlParser {
 
     public static final int RESOURCE_NAME_GROUP_NUMBER = 1;
 

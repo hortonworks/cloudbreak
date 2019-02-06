@@ -6,11 +6,15 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
-public class V4UtilEventUrlParser extends RestUrlParser {
+public class V4GlobalEventRestUrlParser extends RestUrlParser {
 
-    public static final int RESOURCE_EVENT_GROUP_NUMBER = 1;
+    public static final int RESOURCE_TYPE_GROUP_NUMBER = 1;
 
-    private static final Pattern PATTERN = Pattern.compile("v4/utils/([a-z_]+)");
+    public static final int RESOURCE_EVENT_GROUP_NUMBER = 2;
+
+    // v4/users/{event}
+    // v4/utils/{event}
+    private static final Pattern PATTERN = Pattern.compile("v4/([a-z_]+)/([a-z_]+)");
 
     @Override
     public Pattern getPattern() {
@@ -34,7 +38,7 @@ public class V4UtilEventUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return "utils";
+        return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
 
     @Override
