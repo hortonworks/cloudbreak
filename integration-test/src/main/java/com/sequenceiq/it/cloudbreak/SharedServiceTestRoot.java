@@ -72,7 +72,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
                 .withInstanceGroups(cloudProvider.instanceGroups(HostGroupType.MASTER))
                 .withName(getDatalakeClusterName()));
 
-        when(Stack.post());
+        when(Stack.postV3());
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");

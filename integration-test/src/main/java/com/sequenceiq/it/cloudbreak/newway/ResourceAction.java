@@ -5,12 +5,12 @@ import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
 
-public class Action<T> {
+public class ResourceAction<T> {
     private final Function<IntegrationTestContext, T> entitySupplier;
 
     private final Strategy strategy;
 
-    public Action(Function<IntegrationTestContext, T> entitySupplier, Strategy strategy) {
+    public ResourceAction(Function<IntegrationTestContext, T> entitySupplier, Strategy strategy) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.strategy = Objects.requireNonNull(strategy);
     }

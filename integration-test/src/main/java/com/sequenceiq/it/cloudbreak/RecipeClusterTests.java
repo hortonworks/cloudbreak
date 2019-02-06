@@ -114,7 +114,7 @@ public class RecipeClusterTests extends CloudbreakTest {
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest().withInstanceGroups(cloudProvider.instanceGroups(RECIPE_NAMES)),  "a stack request");
-        when(Stack.post(), "post the stack request with recipes");
+        when(Stack.postV3(), "post the stack request with recipes");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -163,7 +163,7 @@ public class RecipeClusterTests extends CloudbreakTest {
                 "a cluster request");
         given(cloudProvider.aValidStackRequest().withInstanceGroups(cloudProvider.instanceGroups(invalidRecipe)).withName(INVALID_CLUSTER_NAME),
                 "a stack request");
-        when(Stack.post(), "post the stack request with an invalid recipe");
+        when(Stack.postV3(), "post the stack request with an invalid recipe");
         then(Stack.waitAndCheckClusterFailure(INVALID_RECIPE_NAME), "check cluster failed with given failure message");
     }
 

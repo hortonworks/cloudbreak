@@ -79,11 +79,11 @@ public class Gateway extends Entity {
         return new Gateway();
     }
 
-    public static Action<Gateway> get(String key) {
-        return new Action<>(getTestContext(key), GatewayV4Action::get);
+    public static ResourceAction<Gateway> get(String key) {
+        return new ResourceAction<>(getTestContext(key), GatewayV4Action::get);
     }
 
-    public static Action<Gateway> get() {
+    public static ResourceAction<Gateway> get() {
         return get(IPPOOL);
     }
 

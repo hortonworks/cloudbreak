@@ -46,9 +46,9 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         mockSpi(testContext);
         testContext
                 .given(StackEntity.class).valid().withName(clusterName)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
-                .when(Stack.stopV2())
+                .when(Stack.stop())
                 .await(Status.STOPPED)
                 .validate();
     }

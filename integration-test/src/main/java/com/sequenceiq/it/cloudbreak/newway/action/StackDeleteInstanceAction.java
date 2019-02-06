@@ -7,7 +7,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackDeleteInstanceAction implements ActionV2<StackEntity> {
+public class StackDeleteInstanceAction implements Action<StackEntity> {
 
     public static final String INSTANCE_ID = "SDA-instanceId";
 

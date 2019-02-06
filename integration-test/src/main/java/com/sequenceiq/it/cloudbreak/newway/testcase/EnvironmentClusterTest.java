@@ -38,7 +38,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
@@ -53,15 +53,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = "testContext")
-    public void testCreateWlClusterDelete(TestContext testContext) {
+    public void testDetachFromEnvWithDeletedCluster(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext.given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
-                .when(StackV3Action::deleteV2, withoutLogError())
+                .when(StackActionV4::delete, withoutLogError())
                 .await(Status.DELETE_COMPLETED)
 
                 .given(EnvironmentEntity.class)
@@ -82,7 +82,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createEnvWithResources(testContext);
         testContext.given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
 
                 .given(EnvironmentEntity.class)
@@ -103,7 +103,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
 
                 .deleteGiven(ProxyConfigEntity.class, ProxyConfig::delete, key(FORBIDDEN_KEY))
@@ -122,7 +122,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .given(EnvironmentEntity.class)
                 .withRdsConfigs(getRdsAsList(testContext))
@@ -139,11 +139,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .given(StackEntity.class)
                 .withName("int-same-env")
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .validate();
     }
@@ -164,11 +164,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .given(StackEntity.class)
                 .withName("it-same-env-rds")
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .validate();
     }
@@ -193,7 +193,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .validate();
     }
@@ -206,7 +206,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
-                .when(Stack.postV2(), key(FORBIDDEN_KEY))
+                .when(Stack.postV4(), key(FORBIDDEN_KEY))
                 .except(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -217,7 +217,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
 
                 .given(CredentialEntity.class)

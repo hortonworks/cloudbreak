@@ -59,12 +59,12 @@ public class RepositoryConfigs extends Entity {
         return repoConfigValidationV4Request;
     }
 
-    public static Action<RepositoryConfigs> post() {
+    public static ResourceAction<RepositoryConfigs> post() {
         return post(REPOSITORYCONFIGS);
     }
 
-    public static Action<RepositoryConfigs> post(String key) {
-        return new Action<>(getTestContext(key), RepositoryConfigsAction::post);
+    public static ResourceAction<RepositoryConfigs> post(String key) {
+        return new ResourceAction<>(getTestContext(key), RepositoryConfigsAction::post);
     }
 
     public static Assertion<RepositoryConfigs> assertThis(BiConsumer<RepositoryConfigs, IntegrationTestContext> check) {

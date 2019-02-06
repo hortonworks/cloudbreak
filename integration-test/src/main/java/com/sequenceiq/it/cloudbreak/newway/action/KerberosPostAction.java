@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class KerberosPostAction implements ActionV2<KerberosEntity> {
+public class KerberosPostAction implements Action<KerberosEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosPostAction.class);
 

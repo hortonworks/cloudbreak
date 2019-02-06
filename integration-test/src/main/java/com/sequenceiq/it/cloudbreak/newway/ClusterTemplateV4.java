@@ -26,31 +26,31 @@ public class ClusterTemplateV4 extends ClusterTemplateV4Entity {
         return clusterTemplateV4;
     }
 
-    public static Action<ClusterTemplateV4> post(String key) {
-        return new Action<>(getTestContext(key), ClusterTemplateV4Action::post);
+    public static ResourceAction<ClusterTemplateV4> post(String key) {
+        return new ResourceAction<>(getTestContext(key), ClusterTemplateV4Action::post);
     }
 
-    public static Action<ClusterTemplateV4> post() {
+    public static ResourceAction<ClusterTemplateV4> post() {
         return post(CLUSTER_TEMPLATE);
     }
 
-    public static Action<ClusterTemplateV4> get(String key) {
-        return new Action<>(getTestContext(key), ClusterTemplateV4Action::get);
+    public static ResourceAction<ClusterTemplateV4> get(String key) {
+        return new ResourceAction<>(getTestContext(key), ClusterTemplateV4Action::get);
     }
 
-    public static Action<ClusterTemplateV4> get() {
+    public static ResourceAction<ClusterTemplateV4> get() {
         return get(CLUSTER_TEMPLATE);
     }
 
-    public static Action<ClusterTemplateV4> getAll() {
-        return new Action<>(getNew(), ClusterTemplateV4Action::createInGiven);
+    public static ResourceAction<ClusterTemplateV4> getAll() {
+        return new ResourceAction<>(getNew(), ClusterTemplateV4Action::createInGiven);
     }
 
-    public static Action<ClusterTemplateV4> delete(String key) {
-        return new Action<>(getTestContext(key), ClusterTemplateV4Action::delete);
+    public static ResourceAction<ClusterTemplateV4> delete(String key) {
+        return new ResourceAction<>(getTestContext(key), ClusterTemplateV4Action::delete);
     }
 
-    public static Action<ClusterTemplateV4> delete() {
+    public static ResourceAction<ClusterTemplateV4> delete() {
         return delete(CLUSTER_TEMPLATE);
     }
 

@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.Action;
+import com.sequenceiq.it.cloudbreak.newway.ResourceAction;
 import com.sequenceiq.it.cloudbreak.newway.Assertion;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -99,20 +99,20 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
         return new StackV3Operation();
     }
 
-    public static Action<StackV3Operation> scale() {
-        return new Action<>(getTestContextStackOperation(), StackV3Operation::scale);
+    public static ResourceAction<StackV3Operation> scale() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackV3Operation::scale);
     }
 
-    public static Action<StackV3Operation> start() {
-        return new Action<>(getTestContextStackOperation(), StackV3Operation::start);
+    public static ResourceAction<StackV3Operation> start() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackV3Operation::start);
     }
 
-    public static Action<StackV3Operation> stop() {
-        return new Action<>(getTestContextStackOperation(), StackV3Operation::stop);
+    public static ResourceAction<StackV3Operation> stop() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackV3Operation::stop);
     }
 
-    public static Action<StackV3Operation> sync() {
-        return new Action<>(getTestContextStackOperation(), StackV3Operation::sync);
+    public static ResourceAction<StackV3Operation> sync() {
+        return new ResourceAction<>(getTestContextStackOperation(), StackV3Operation::sync);
     }
 
     public static Assertion<StackV3Operation> assertThis(BiConsumer<StackV3Operation, IntegrationTestContext> check) {

@@ -42,7 +42,7 @@ public class RecoveryItTest extends AbstractIntegrationTest {
         testContext
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(1)
                 .given(StackEntity.class).withName(stackName).replaceInstanceGroups(WORKER_ID)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .when(Stack.sync())
                 .await(Status.START_FAILED)

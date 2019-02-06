@@ -75,7 +75,7 @@ public class ProxyClusterTests extends CloudbreakTest {
                 .withProxyConfigName(VALID_PROXY_CONFIG), "a cluster request with proxy");
         given(cloudProvider.aValidStackRequest()
                 .withInstanceGroups(cloudProvider.instanceGroups(securityGroupId)),  "a stack request with given security group");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(

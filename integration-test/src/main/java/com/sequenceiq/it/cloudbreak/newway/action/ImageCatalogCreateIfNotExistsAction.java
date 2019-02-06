@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ImageCatalogCreateIfNotExistsAction implements ActionV2<ImageCatalogEntity> {
+public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 

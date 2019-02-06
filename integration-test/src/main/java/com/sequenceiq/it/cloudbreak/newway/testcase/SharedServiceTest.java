@@ -105,7 +105,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, blueprintName, cloudStorage()))
                 .capture(SharedServiceTest::rdsConfigNamesFromRequest, key(RDS_KEY))
                 .capture(SharedServiceTest::ldapNameFromRequest, key(LDAP_KEY))
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .verify(SharedServiceTest::rdsConfigNamesFromResponse, key(RDS_KEY))
                 .verify(SharedServiceTest::ldapNameFromResponse, key(LDAP_KEY))
@@ -134,7 +134,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(Blueprint.postV2())
                 .given(StackEntity.class)
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, blueprintName, cloudStorage))
-                .when(Stack.postV2(), key(BAD_REQUEST_KEY))
+                .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .except(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -156,7 +156,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, null, blueprintName, cloudStorage))
-                .when(Stack.postV2(), key(BAD_REQUEST_KEY))
+                .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .except(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -178,7 +178,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, null, ldapName, blueprintName, cloudStorage))
-                .when(Stack.postV2(), key(BAD_REQUEST_KEY))
+                .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .except(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -200,7 +200,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, rangerRdsName, ldapName, blueprintName, cloudStorage))
-                .when(Stack.postV2(), key(BAD_REQUEST_KEY))
+                .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .except(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -219,7 +219,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, null, ldapName, blueprintName, cloudStorage))
-                .when(Stack.postV2(), key(BAD_REQUEST_KEY))
+                .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .except(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -235,7 +235,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, null, null, blueprintName, cloudStorage))
-                .when(Stack.postV2(), key(BAD_REQUEST_KEY))
+                .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .except(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }

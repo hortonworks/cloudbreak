@@ -43,7 +43,7 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
         given(getCloudProvider().aValidStackRequest()
                 .withInstanceGroups(getCloudProvider().instanceGroups(HostGroupType.MASTER))
                 .withName(getDatalakeClusterName()));
-        when(Stack.post());
+        when(Stack.postV3());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(

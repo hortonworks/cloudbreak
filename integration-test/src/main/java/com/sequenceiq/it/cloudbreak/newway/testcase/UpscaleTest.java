@@ -61,7 +61,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
         int desiredWorkedCount = 15;
         int addedNodes = desiredWorkedCount - originalWorkedCount;
         testContext.given(StackEntity.class).withName(clusterName).withGatewayPort(testContext.getSparkServer().getPort())
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkedCount))
                 .await(StackEntity.class, Status.AVAILABLE)
@@ -89,7 +89,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
     public void testAmbariFailure(TestContext testContext) {
         mockAmbariBlueprintFail(testContext);
         testContext.given(StackEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.START_FAILED)
                 .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").atLeast(1))
                 .validate();

@@ -13,7 +13,7 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
@@ -101,19 +101,19 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 
-    public T when(Class<T> entityClass, ActionV2<T> action) {
+    public T when(Class<T> entityClass, Action<T> action) {
         return testContext.when(entityClass, action, emptyRunningParameter());
     }
 
-    public T when(ActionV2<T> action) {
+    public T when(Action<T> action) {
         return testContext.when((T) this, action, emptyRunningParameter());
     }
 
-    public T when(Class<T> entityClass, ActionV2<T> action, RunningParameter runningParameter) {
+    public T when(Class<T> entityClass, Action<T> action, RunningParameter runningParameter) {
         return testContext.when(entityClass, action, runningParameter);
     }
 
-    public T when(ActionV2<T> action, RunningParameter runningParameter) {
+    public T when(Action<T> action, RunningParameter runningParameter) {
         return testContext.when((T) this, action, runningParameter);
     }
 
@@ -212,7 +212,7 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         return creator;
     }
 
-    public <T extends CloudbreakEntity> T deleteGiven(Class<T> clss, ActionV2<T> action, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T deleteGiven(Class<T> clss, Action<T> action, RunningParameter runningParameter) {
         testContext.when((T) testContext.given(clss), action, runningParameter);
         return testContext.expect((T) testContext.given(clss), BadRequestException.class, runningParameter);
     }

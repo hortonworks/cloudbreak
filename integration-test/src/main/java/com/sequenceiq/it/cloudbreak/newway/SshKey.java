@@ -79,11 +79,11 @@ public class SshKey extends Entity {
         return new SshKey();
     }
 
-    public static Action<SshKey> get(String key) {
-        return new Action<>(getTestContext(key), SshKeyV4Action::post);
+    public static ResourceAction<SshKey> get(String key) {
+        return new ResourceAction<>(getTestContext(key), SshKeyV4Action::post);
     }
 
-    public static Action<SshKey> get() {
+    public static ResourceAction<SshKey> get() {
         return get(SSHKEY);
     }
 

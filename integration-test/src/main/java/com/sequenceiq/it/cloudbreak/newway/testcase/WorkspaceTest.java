@@ -58,7 +58,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAStackAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(StackEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV4())
                 .await(Status.AVAILABLE)
                 .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))

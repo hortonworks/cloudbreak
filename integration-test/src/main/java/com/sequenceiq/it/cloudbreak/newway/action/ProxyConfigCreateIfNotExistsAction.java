@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ProxyConfigCreateIfNotExistsAction implements ActionV2<ProxyConfigEntity> {
+public class ProxyConfigCreateIfNotExistsAction implements Action<ProxyConfigEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigCreateIfNotExistsAction.class);
 
     @Override

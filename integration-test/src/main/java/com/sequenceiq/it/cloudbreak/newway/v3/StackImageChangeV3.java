@@ -7,7 +7,7 @@ import javax.ws.rs.core.Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.Action;
+import com.sequenceiq.it.cloudbreak.newway.ResourceAction;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
@@ -60,7 +60,7 @@ public class StackImageChangeV3 extends AbstractCloudbreakEntity<StackImageChang
         return getTestContextStackImageChange(IMAGE_CHANGE);
     }
 
-    public static Action<StackImageChangeV3> changeImage() {
-        return new Action<>(getTestContextStackImageChange(), StackImageChangeV3::changeImage);
+    public static ResourceAction<StackImageChangeV3> changeImage() {
+        return new ResourceAction<>(getTestContextStackImageChange(), StackImageChangeV3::changeImage);
     }
 }

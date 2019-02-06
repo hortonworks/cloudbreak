@@ -51,19 +51,19 @@ public class Environment extends EnvironmentEntity {
         return entity;
     }
 
-    public static Action<Environment> post(String key) {
-        return new Action<>(getTestContext(key), EnvironmentAction::post);
+    public static ResourceAction<Environment> post(String key) {
+        return new ResourceAction<>(getTestContext(key), EnvironmentAction::post);
     }
 
-    public static Action<Environment> post() {
+    public static ResourceAction<Environment> post() {
         return post(ENVIRONMENT);
     }
 
-    public static Action<Environment> get(String key) {
-        return new Action<>(getTestContext(key), EnvironmentAction::get);
+    public static ResourceAction<Environment> get(String key) {
+        return new ResourceAction<>(getTestContext(key), EnvironmentAction::get);
     }
 
-    public static Action<Environment> get() {
+    public static ResourceAction<Environment> get() {
         return get(ENVIRONMENT);
     }
 
@@ -82,12 +82,12 @@ public class Environment extends EnvironmentEntity {
         return entity;
     }
 
-    public static Action<Environment> getAll() {
-        return new Action<>(getNew(), EnvironmentAction::list);
+    public static ResourceAction<Environment> getAll() {
+        return new ResourceAction<>(getNew(), EnvironmentAction::list);
     }
 
-    public static Action<Environment> putAttachResources(String key) {
-        return new Action<>(getTestContext(key), EnvironmentAction::putAttachResources);
+    public static ResourceAction<Environment> putAttachResources(String key) {
+        return new ResourceAction<>(getTestContext(key), EnvironmentAction::putAttachResources);
     }
 
     public static EnvironmentEntity putAttachResources(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {
@@ -102,8 +102,8 @@ public class Environment extends EnvironmentEntity {
         return entity;
     }
 
-    public static Action<Environment> putDetachResources(String key) {
-        return new Action<>(getTestContext(key), EnvironmentAction::putDetachResources);
+    public static ResourceAction<Environment> putDetachResources(String key) {
+        return new ResourceAction<>(getTestContext(key), EnvironmentAction::putDetachResources);
     }
 
     public static EnvironmentEntity putDetachResources(TestContext testContext, EnvironmentEntity entity, CloudbreakClient cloudbreakClient) {

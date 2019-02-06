@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.KerberosPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.KerberosV4Action;
@@ -37,31 +37,31 @@ public class Kerberos extends KerberosEntity {
         return blueprint;
     }
 
-    public static Action<Kerberos> post(String key) {
-        return new Action<>(getTestContext(key), KerberosV4Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContext(key), KerberosV4Action::post);
     }
 
-    public static Action<Kerberos> post() {
+    public static ResourceAction post() {
         return post(KERBEROS);
     }
 
-    public static Action<Kerberos> get(String key) {
-        return new Action<>(getTestContext(key), KerberosV4Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContext(key), KerberosV4Action::get);
     }
 
-    public static Action<Kerberos> get() {
+    public static ResourceAction get() {
         return get(KERBEROS);
     }
 
-    public static Action<Kerberos> getAll() {
-        return new Action<>(getNew(), KerberosV4Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), KerberosV4Action::getAll);
     }
 
-    public static Action<Kerberos> delete(String key) {
-        return new Action<>(getTestContext(key), KerberosV4Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContext(key), KerberosV4Action::delete);
     }
 
-    public static Action<Kerberos> delete() {
+    public static ResourceAction delete() {
         return delete(KERBEROS);
     }
 
@@ -76,7 +76,7 @@ public class Kerberos extends KerberosEntity {
         return entity;
     }
 
-    public static ActionV2<KerberosEntity> postV2() {
+    public static Action<KerberosEntity> postV2() {
         return new KerberosPostAction();
     }
 }

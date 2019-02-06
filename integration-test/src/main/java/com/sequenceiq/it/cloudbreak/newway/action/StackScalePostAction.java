@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackScalePostAction implements ActionV2<StackEntity> {
+public class StackScalePostAction implements Action<StackEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackScalePostAction.class);
 

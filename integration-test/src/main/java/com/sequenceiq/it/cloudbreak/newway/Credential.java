@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
@@ -54,51 +54,51 @@ public class Credential extends CredentialEntity {
         return credential;
     }
 
-    public static Action<Credential> post(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialV4Action::post);
+    public static ResourceAction post(String key) {
+        return new ResourceAction(getTestContextCredential(key), CredentialV4Action::post);
     }
 
-    public static Action<Credential> post() {
+    public static ResourceAction post() {
         return post(CREDENTIAL);
     }
 
-    public static Action<Credential> put(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialV4Action::put);
+    public static ResourceAction put(String key) {
+        return new ResourceAction(getTestContextCredential(key), CredentialV4Action::put);
     }
 
-    public static Action<Credential> put() {
+    public static ResourceAction put() {
         return put(CREDENTIAL);
     }
 
-    public static Action<Credential> get(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialV4Action::get);
+    public static ResourceAction get(String key) {
+        return new ResourceAction(getTestContextCredential(key), CredentialV4Action::get);
     }
 
-    public static Action<Credential> getWithRetryOnTimeout(int retryQuantity) {
+    public static ResourceAction getWithRetryOnTimeout(int retryQuantity) {
         return getWithRetryOnTimeout(CREDENTIAL, retryQuantity);
     }
 
-    public static Action<Credential> getWithRetryOnTimeout(String key, int retryQuantity) {
-        return new Action<>(getTestContextCredential(key), (testContext, entity) -> CredentialV4Action.get(testContext, entity, retryQuantity));
+    public static ResourceAction getWithRetryOnTimeout(String key, int retryQuantity) {
+        return new ResourceAction(getTestContextCredential(key), (testContext, entity) -> CredentialV4Action.get(testContext, entity, retryQuantity));
     }
 
-    public static Action<Credential> get() {
+    public static ResourceAction get() {
         return get(CREDENTIAL);
     }
 
-    public static Action<Credential> getAll() {
-        return new Action<>(getNew(), CredentialV4Action::getAll);
+    public static ResourceAction getAll() {
+        return new ResourceAction(getNew(), CredentialV4Action::getAll);
     }
 
-    public static Action<Credential> getAllWithRetryOnTimeout(int retryQuantity) {
-        return new Action<>(getNew(), (testContext, entity) -> CredentialV4Action.getAll(testContext, entity, retryQuantity));
+    public static ResourceAction getAllWithRetryOnTimeout(int retryQuantity) {
+        return new ResourceAction(getNew(), (testContext, entity) -> CredentialV4Action.getAll(testContext, entity, retryQuantity));
     }
 
-    public static Action<Credential> delete(String key) {
-        return new Action<>(getTestContextCredential(key), CredentialV4Action::delete);
+    public static ResourceAction delete(String key) {
+        return new ResourceAction(getTestContextCredential(key), CredentialV4Action::delete);
     }
 
-    public static Action<Credential> delete() {
+    public static ResourceAction delete() {
         return delete(CREDENTIAL);
     }
 
@@ -113,7 +113,7 @@ public class Credential extends CredentialEntity {
         return new Assertion<>(getTestContextCredential(GherkinTest.RESULT), check);
     }
 
-    public static ActionV2<CredentialEntity> postV2() {
+    public static Action<CredentialEntity> postV2() {
         return new CredentialPostAction();
     }
 

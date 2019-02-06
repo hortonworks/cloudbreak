@@ -30,7 +30,7 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.AwsKerberos;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
@@ -50,7 +50,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -77,7 +77,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName)
                 .withNetwork(AwsKerberos.getNetworkV2RequestForKerberosAws(getTestParameter())), "a stack request");
-        when(Stack.post());
+        when(Stack.postV3());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -100,7 +100,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 .withOs(os));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(
@@ -130,7 +130,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         );
         given(cloudProvider.aValidStackRequest().withName(clusterName), "a stack request");
 
-        when(Stack.post(), "post the stack request");
+        when(Stack.postV3(), "post the stack request");
 
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
@@ -235,7 +235,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
                 .withName(clusterName), "a stack is created");
-        when(Stack.delete(StackV3Action::deleteWithKerberos));
+        when(Stack.delete(StackActionV4::deleteWithKerberos));
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 

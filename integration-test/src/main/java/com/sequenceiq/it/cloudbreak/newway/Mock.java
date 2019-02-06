@@ -116,16 +116,16 @@ public class Mock extends SparkMockEntity {
         }
     }
 
-    public static Action<Mock> deleteStack() {
-        return new Action<>(getTestContextMock(), Mock::deleteStack);
+    public static ResourceAction<Mock> deleteStack() {
+        return new ResourceAction<>(getTestContextMock(), Mock::deleteStack);
     }
 
-    public static Action<Mock> deleteCredential() {
-        return new Action<>(getTestContextMock(), Mock::deleteCredential);
+    public static ResourceAction<Mock> deleteCredential() {
+        return new ResourceAction<>(getTestContextMock(), Mock::deleteCredential);
     }
 
-    public static Action<Mock> delete() {
-        return new Action<>(getTestContextMock(), Mock::deleteMock);
+    public static ResourceAction<Mock> delete() {
+        return new ResourceAction<>(getTestContextMock(), Mock::deleteMock);
     }
 
     private static void deleteMock(IntegrationTestContext integrationTestContext, Entity entity) {

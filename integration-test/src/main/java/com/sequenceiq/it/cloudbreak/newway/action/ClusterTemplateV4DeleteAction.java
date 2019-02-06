@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 
-public class ClusterTemplateV4DeleteAction implements ActionV2<ClusterTemplateEntity> {
+public class ClusterTemplateV4DeleteAction implements Action<ClusterTemplateEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4DeleteAction.class);
 

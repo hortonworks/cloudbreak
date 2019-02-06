@@ -32,16 +32,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.SshService;
 import com.sequenceiq.it.cloudbreak.SshUtil;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.StackDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.StackPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackStartAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackStopAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackSyncPutAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStartActionV4;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStopActionV4;
+import com.sequenceiq.it.cloudbreak.newway.action.StackSyncPutActionV4;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 public class Stack extends StackEntity {
 
@@ -72,64 +72,64 @@ public class Stack extends StackEntity {
 
     public static Stack created() {
         Stack stack = new Stack();
-        stack.setCreationStrategy(StackV3Action::createInGiven);
+        stack.setCreationStrategy(StackActionV4::createInGiven);
         return stack;
     }
 
-    public static ActionV2<StackEntity> postV2() {
+    public static Action<StackEntity> postV4() {
         return new StackPostAction();
     }
 
-    public static Action<Stack> post(String key) {
-        return new Action<>(getTestContextStack(key), new StackPostV3Strategy());
+    public static ResourceAction<Stack> postV3(String key) {
+        return new ResourceAction<>(getTestContextStack(key), new StackPostV3Strategy());
     }
 
-    public static Action<Stack> post(Strategy strategy) {
-        return new Action<>(getTestContextStack(STACK), strategy);
+    public static ResourceAction<Stack> post(Strategy strategy) {
+        return new ResourceAction<>(getTestContextStack(STACK), strategy);
     }
 
-    public static Action<Stack> post() {
-        return post(STACK);
+    public static ResourceAction<Stack> postV3() {
+        return postV3(STACK);
     }
 
-    public static Action<Stack> get(String key) {
-        return new Action<>(getTestContextStack(key), StackV3Action::get);
+    public static ResourceAction<Stack> get(String key) {
+        return new ResourceAction<>(getTestContextStack(key), StackActionV4::get);
     }
 
-    public static Action<Stack> get(Strategy strategy) {
-        return new Action<>(getTestContextStack(STACK), strategy);
+    public static ResourceAction<Stack> get(Strategy strategy) {
+        return new ResourceAction<>(getTestContextStack(STACK), strategy);
     }
 
-    public static Action<Stack> get() {
+    public static ResourceAction<Stack> get() {
         return get(STACK);
     }
 
-    public static Action<Stack> getAll() {
-        return new Action<>(getNewStack(), StackV3Action::getAll);
+    public static ResourceAction<Stack> getAll() {
+        return new ResourceAction<>(getNewStack(), StackActionV4::getAll);
     }
 
-    public static Action<Stack> delete(String key, Strategy strategy) {
-        return new Action<>(getTestContextStack(key), strategy);
+    public static ResourceAction<Stack> delete(String key, Strategy strategy) {
+        return new ResourceAction<>(getTestContextStack(key), strategy);
     }
 
-    public static ActionV2<StackEntity> deleteV2() {
+    public static Action<StackEntity> deleteV4() {
         return new StackDeleteAction();
     }
 
-    public static Action<Stack> delete(String key) {
-        return delete(key, StackV3Action::delete);
+    public static ResourceAction<Stack> delete(String key) {
+        return delete(key, StackActionV4::delete);
     }
 
-    public static Action<Stack> delete() {
+    public static ResourceAction<Stack> delete() {
         return delete(STACK);
     }
 
-    public static Action<Stack> delete(Strategy strategy) {
+    public static ResourceAction<Stack> delete(Strategy strategy) {
         return delete(STACK, strategy);
     }
 
-    public static Action<Stack> makeNodeUnhealthy(String hostgroup, int nodeCount) {
-        return new Action<>(getTestContextStack(STACK), new UnhealthyNodeStrategy(hostgroup, nodeCount));
+    public static ResourceAction<Stack> makeNodeUnhealthy(String hostgroup, int nodeCount) {
+        return new ResourceAction<>(getTestContextStack(STACK), new UnhealthyNodeStrategy(hostgroup, nodeCount));
     }
 
     public static Assertion<Stack> assertThis(BiConsumer<Stack, IntegrationTestContext> check) {
@@ -299,19 +299,19 @@ public class Stack extends StackEntity {
         return entity;
     }
 
-    public static Action<Stack> repair(String hostgroupName) {
-        return new Action<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
+    public static ResourceAction<Stack> repair(String hostgroupName) {
+        return new ResourceAction<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
     }
 
-    public static ActionV2<StackEntity> stopV2() {
-        return new StackStopAction();
+    public static Action<StackEntity> stop() {
+        return new StackStopActionV4();
     }
 
-    public static ActionV2<StackEntity> startV2() {
-        return new StackStartAction();
+    public static Action<StackEntity> start() {
+        return new StackStartActionV4();
     }
 
-    public static ActionV2<StackEntity> sync() {
-        return new StackSyncPutAction();
+    public static Action<StackEntity> sync() {
+        return new StackSyncPutActionV4();
     }
 }

@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 
-public class LaunchClusterFromTemplateAction implements ActionV2<ClusterTemplateEntity> {
+public class LaunchClusterFromTemplateAction implements Action<ClusterTemplateEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchClusterFromTemplateAction.class);
 

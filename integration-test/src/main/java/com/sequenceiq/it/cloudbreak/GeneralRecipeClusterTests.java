@@ -90,7 +90,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
                         BASH_RECIPE_NAMES.stream(), PYTHON_RECIPE_NAMES.stream()).collect(Collectors.toSet())))
                 .withName(getTestParameter().getWithDefault("openstackClusterName", "e2e-cluster-py-recipe")),
                 "a stack request");
-        when(Stack.post(), "post the stack request with recipes");
+        when(Stack.postV3(), "post the stack request with recipes");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(

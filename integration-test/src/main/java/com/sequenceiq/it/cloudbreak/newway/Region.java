@@ -52,19 +52,20 @@ public class Region extends Entity {
         return new Region();
     }
 
-    public static Action<Region> getPlatformRegions(String key) {
-        return new Action<>(getTestContextRegion(key), RegionV4Action::getRegionsByCredentialId);
+    public static ResourceAction<Region> getPlatformRegions(String key) {
+        return new ResourceAction<>(getTestContextRegion(key), RegionV4Action::getRegionsByCredentialId);
     }
 
-    public static Action<Region> getPlatformRegionsWithRetry(int retryQuantity) {
+    public static ResourceAction<Region> getPlatformRegionsWithRetry(int retryQuantity) {
         return getPlatformRegionsWithRetry(REGION, retryQuantity);
     }
 
-    public static Action<Region> getPlatformRegionsWithRetry(String key, int retryQuantity) {
-        return new Action<>(getTestContextRegion(key), (testContext, entity) -> RegionV4Action.getRegionsByCredentialId(testContext, entity, retryQuantity));
+    public static ResourceAction<Region> getPlatformRegionsWithRetry(String key, int retryQuantity) {
+        return new ResourceAction<>(getTestContextRegion(key), (testContext, entity)
+                -> RegionV4Action.getRegionsByCredentialId(testContext, entity, retryQuantity));
     }
 
-    public static Action<Region> getPlatformRegions() {
+    public static ResourceAction<Region> getPlatformRegions() {
         return getPlatformRegions(REGION);
     }
 

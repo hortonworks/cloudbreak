@@ -29,7 +29,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
@@ -92,19 +92,19 @@ public class TestContext implements ApplicationContextAware {
         model.startModel(sparkServer.getSparkService(), mockServerAddress);
     }
 
-    public <T extends CloudbreakEntity> T when(Class<T> entityClass, ActionV2<T> action) {
+    public <T extends CloudbreakEntity> T when(Class<T> entityClass, Action<T> action) {
         return when(entityClass, action, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T when(Class<T> entityClass, ActionV2<T> action, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T when(Class<T> entityClass, Action<T> action, RunningParameter runningParameter) {
         return when(getEntityFromEntityClass(entityClass, runningParameter), action, runningParameter);
     }
 
-    public <T extends CloudbreakEntity> T when(T entity, ActionV2<T> action) {
+    public <T extends CloudbreakEntity> T when(T entity, Action<T> action) {
         return when(entity, action, emptyRunningParameter());
     }
 
-    public <T extends CloudbreakEntity> T when(T entity, ActionV2<T> action, RunningParameter runningParameter) {
+    public <T extends CloudbreakEntity> T when(T entity, Action<T> action, RunningParameter runningParameter) {
         checkShutdown();
         String key = runningParameter.getKey();
         if (StringUtils.isEmpty(key)) {

@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 @Prototype
 public class StackEntity extends StackV4EntityBase<StackEntity> implements Purgable<StackV4Response> {
@@ -48,7 +48,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(StackV3Action::deleteV2, withoutLogError());
+        when(StackActionV4::delete, withoutLogError());
         await(Status.DELETE_COMPLETED);
     }
 
