@@ -20,11 +20,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Subscription;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
+import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
@@ -53,6 +56,12 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private NotificationSender notificationSender;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -103,5 +112,11 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         response.setPlatformSelectionDisabled(preferencesService.isPlatformSelectionDisabled());
         response.setPlatformEnablement(preferencesService.platformEnablement());
         return response;
+    }
+
+    @Override
+    public void postNotificationTest() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        notificationSender.sendTestNotification(cloudbreakUser.getUserId());
     }
 }

@@ -80,4 +80,12 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.GET, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "getDeploymentInfo")
     DeploymentPreferencesV4Response deployment();
+
+    @POST
+    @Path("notification_test")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.NOTIFICATION_TEST, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+            nickname = "postNotificationTest")
+    void postNotificationTest();
+
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventBaseV4;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.domain.Subscription;
@@ -39,5 +40,32 @@ public class HttpNotificationSender implements NotificationSender {
                 LOGGER.info("Could not send notification to the specified endpoint: '{}' Cause: {}", endpoint, ex.getMessage());
             }
         }
+    }
+
+    @Override
+    public void sendTestNotification(String userId) {
+        Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
+        for (Subscription subscription : subscriptions) {
+            String endpoint = subscription.getEndpoint();
+            LOGGER.debug("Sending test notification to the specified endpoint: '{}'", endpoint);
+            try {
+                restClient
+                        .target(endpoint)
+                        .request()
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                        .post(Entity.json(createTestNotification(userId)), String.class);
+            } catch (Exception ex) {
+                LOGGER.info("Could not send notification to the specified endpoint: '{}' Cause: {}", endpoint, ex.getMessage());
+            }
+        }
+    }
+
+    private CloudbreakEventBaseV4 createTestNotification(String userId) {
+        CloudbreakEventBaseV4 baseEvent = new CloudbreakEventBaseV4();
+        baseEvent.setEventType("TEST_NOTIFICATION");
+        baseEvent.setEventMessage("Test notification message.");
+        baseEvent.setEventTimestamp(System.currentTimeMillis());
+        baseEvent.setUserId(userId);
+        return baseEvent;
     }
 }
