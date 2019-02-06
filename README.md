@@ -152,7 +152,12 @@ IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle
 
 ### Import project
 
-Cloudbreak can be imported into IDEA as gradle project by specifying the cloudbreak repo root under Import Project. Once it is done, you need to import the proper code formatter by using the __File -> Import Settings...__ menu and selecting the `idea_settings.jar` located in the `config/idea` directory in Cloudbreak git repository. Optionally you should import inspection configs located in the same `config/idea` folder: Settings -> Editor -> Inspections -> Profile -> Import Profile.
+Cloudbreak can be imported into IDEA as gradle project by specifying the cloudbreak repo root under Import Project. Once it is done, you need to import the proper code formatter by using the __File -> Import Settings...__ menu and selecting the `idea_settings.jar` located in the `config/idea` directory in Cloudbreak git repository. 
+
+Also you need to import inspection settings called `inpsections.xml` located in `config/idea`:
+```
+IntelliJ IDEA -> Preferences -> Editor -> Inspections -> Settings icon -> Import Profile
+```
 
 ### Running cloudbreak in IDEA
 
