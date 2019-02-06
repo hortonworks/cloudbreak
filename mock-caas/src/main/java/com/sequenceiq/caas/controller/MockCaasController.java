@@ -1,6 +1,5 @@
 package com.sequenceiq.caas.controller;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.caas.model.CaasUserList;
 import com.sequenceiq.caas.service.MockCaasService;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.client.IntrospectRequest;
@@ -27,7 +27,7 @@ public class MockCaasController {
     private MockCaasService mockCaasService;
 
     @GetMapping("/caas/api/users")
-    public List<CaasUser> getUsers(HttpServletRequest httpServletRequest) {
+    public CaasUserList getUsers(HttpServletRequest httpServletRequest) {
         return mockCaasService.getUsers(httpServletRequest);
     }
 

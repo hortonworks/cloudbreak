@@ -28,6 +28,7 @@ import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.caas.model.CaasUserList;
 import com.sequenceiq.caas.util.JsonUtil;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.client.IntrospectRequest;
@@ -62,7 +63,7 @@ public class MockCaasService {
         throw new NotFoundException("Can not retrieve user from token");
     }
 
-    public List<CaasUser> getUsers(HttpServletRequest request) {
+    public CaasUserList getUsers(HttpServletRequest request) {
         String authenticationHeader = request.getHeader(AUTHORIZATION);
         String token;
         if (authenticationHeader.startsWith("Bearer ")) {
@@ -81,7 +82,7 @@ public class MockCaasService {
             caasUser.setId(generateDeterministicUserId(introspectResponse.getTenantName() + '#' + userName));
             caasUsers.add(caasUser);
         }
-        return caasUsers;
+        return new CaasUserList(caasUsers);
     }
 
     public CaasUser getUserInfo(@Nonnull HttpServletRequest request) {
