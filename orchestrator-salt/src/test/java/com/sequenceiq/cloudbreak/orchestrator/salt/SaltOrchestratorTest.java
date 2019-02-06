@@ -18,9 +18,11 @@ import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +39,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -47,6 +50,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
@@ -210,10 +215,23 @@ public class SaltOrchestratorTest {
 
         mockStatic(SaltStates.class);
         SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        List<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        minionStatus.setUp(upNodes);
+        List<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
+        minionStatus.setDown(downNodes);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
 
         saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
 
+        verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic();
+
         SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
     }
 

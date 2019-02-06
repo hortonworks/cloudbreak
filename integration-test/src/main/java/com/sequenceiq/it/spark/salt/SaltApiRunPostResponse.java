@@ -14,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.it.spark.ITResponse;
 
@@ -35,6 +37,9 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        if (request.body().contains("manage.status")) {
+            return minionStatuses();
+        }
         if (request.body().contains("grains.append")) {
             return grainsResponse();
         }
@@ -83,6 +88,28 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     protected Object stateHighState() {
         return responseFromJsonFile("saltapi/high_state_response.json");
+    }
+
+    protected Object minionStatuses() throws JsonProcessingException {
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        ArrayList<String> upList = new ArrayList<>();
+        minionStatus.setUp(upList);
+        ArrayList<String> downList = new ArrayList<>();
+        minionStatus.setDown(downList);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
+            if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
+                String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+                upList.add("host-" + privateIp.replace(".", "-"));
+            }
+        }
+        // intentional new ObjectMapper() -> .withGetterVisibility(Visibility.NONE) screws up serializing
+        return new ObjectMapper().writeValueAsString(minionStatusSaltResponse);
     }
 
     protected Object networkInterfaceIp() throws JsonProcessingException {
