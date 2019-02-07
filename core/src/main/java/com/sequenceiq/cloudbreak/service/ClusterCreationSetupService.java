@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari.StackRepositoryV4RequestToStackRepoDetailsConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -160,6 +161,10 @@ public class ClusterCreationSetupService {
     public Cluster prepare(ClusterV4Request request, Stack stack, Blueprint blueprint, User user, Workspace workspace) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
+        Cluster cluster = stack.getCluster();
+        stack.setCluster(null);
+
+        decorateHostGroupWithConstraint(stack, cluster);
 
         long start = System.currentTimeMillis();
 
@@ -170,8 +175,6 @@ public class ClusterCreationSetupService {
             LOGGER.debug("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
 
-        Cluster cluster = stack.getCluster();
-        stack.setCluster(null);
         cluster.setStack(stack);
         cluster.setWorkspace(stack.getWorkspace());
         LOGGER.debug("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -213,6 +216,19 @@ public class ClusterCreationSetupService {
         LOGGER.debug("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;
+    }
+
+    private void decorateHostGroupWithConstraint(Stack stack, Cluster cluster) {
+        stack.getInstanceGroups().forEach(ig -> {
+            cluster.getHostGroups().stream()
+                    .filter(hostGroup -> hostGroup.getName().equals(ig.getGroupName()))
+                    .findFirst()
+                    .ifPresent(hostGroup -> {
+                        Constraint constraint = new Constraint();
+                        constraint.setInstanceGroup(ig);
+                        hostGroup.setConstraint(constraint);
+                    });
+        });
     }
 
     private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack, Cluster cluster) {

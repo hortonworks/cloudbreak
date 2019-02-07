@@ -10,6 +10,8 @@ public class RunningParameter {
 
     private boolean logError = true;
 
+    private String expectedMessage;
+
     public String getWho() {
         return who;
     }
@@ -37,8 +39,17 @@ public class RunningParameter {
         return this;
     }
 
+    public RunningParameter withExpectedMessage(String message) {
+        expectedMessage = message;
+        return this;
+    }
+
     public String getKey() {
         return key;
+    }
+
+    public String getExpectedMessage() {
+        return expectedMessage;
     }
 
     public RunningParameter withKey(String key) {
@@ -68,5 +79,10 @@ public class RunningParameter {
     public static RunningParameter withoutLogError() {
         return new RunningParameter()
                 .withLogError(false);
+    }
+
+    public static RunningParameter expectedMessage(String message) {
+        return new RunningParameter()
+                .withExpectedMessage(message);
     }
 }

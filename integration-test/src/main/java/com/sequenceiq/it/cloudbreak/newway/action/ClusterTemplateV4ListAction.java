@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.action;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
-import java.util.Set;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class ClusterTemplateV4ListAction implements Action<ClusterTemplateEntity
     @Override
     public ClusterTemplateEntity action(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
         logJSON(LOGGER, " ClusterTemplateEntity get request:\n", entity.getRequest());
-        Set<ClusterTemplateViewV4Response> responses = (Set<ClusterTemplateViewV4Response>) client.getCloudbreakClient()
+        Collection<ClusterTemplateViewV4Response> responses = client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
                 .list(client.getWorkspaceId()).getResponses();
         entity.setResponses(ClusterTemplateUtil.getResponseFromViews(responses));

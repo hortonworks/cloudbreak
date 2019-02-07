@@ -48,7 +48,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         String randomNameForMock = getNameCreator().getRandomNameForMock();
         return withName(randomNameForMock)
                 .withPlacement(getTestContext().init(PlacementSettingsEntity.class))
-                .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
                 .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))

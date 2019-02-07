@@ -28,7 +28,7 @@ public class CheckClusterTemplateGetResponse implements AssertionV2<ClusterTempl
         ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
         if (clusterTemplateV4Response.getStackTemplate() == null) {
-            throw new IllegalArgumentException("STack template is empty");
+            throw new IllegalArgumentException("Stack template is empty");
         }
 
         if (!OTHER.equals(clusterTemplateV4Response.getType())) {
