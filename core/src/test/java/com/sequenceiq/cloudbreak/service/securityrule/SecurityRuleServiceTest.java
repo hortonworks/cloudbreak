@@ -24,6 +24,7 @@ public class SecurityRuleServiceTest {
     @Before
     public void setUp() {
         ReflectionTestUtils.setField(underTest, "gatewayPort", "9443");
+        ReflectionTestUtils.setField(underTest, "httpsPort", "443");
         ReflectionTestUtils.setField(underTest, "knoxPort", "8443");
         ReflectionTestUtils.setField(underTest, "sshPort", "22");
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Sets.newHashSet("0.0.0.0/0"));
@@ -44,14 +45,14 @@ public class SecurityRuleServiceTest {
     }
 
     @Test
-    public void getDefaultSecurityRulesWhenKnoxIsDisabledAndNoHttpsPort() {
-        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+    public void getDefaultSecurityRulesWhenKnoxIsEnabledAndKnoxPortIsSet() {
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(true);
 
-        Assert.assertEquals(2, defaultSecurityRules.getGateway().size());
+        Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
-        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
+        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
         Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
@@ -59,8 +60,6 @@ public class SecurityRuleServiceTest {
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsDisabledAndHttpsPortIsSet() {
-        ReflectionTestUtils.setField(underTest, "httpsPort", "443");
-
         SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
 
         Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
