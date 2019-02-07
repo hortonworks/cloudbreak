@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.PLACEMENT_SETTINGS;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -18,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -93,6 +97,11 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty
     private CustomDomainSettingsV4Response customDomains;
+
+    @NotNull
+    @ApiModelProperty(value = PLACEMENT_SETTINGS, required = true)
+    @Valid
+    private PlacementSettingsV4Response placement;
 
     private CloudPlatform cloudPlatform;
 
@@ -275,5 +284,13 @@ public class StackV4Response extends StackV4Base {
 
     public void setSharedService(SharedServiceV4Response sharedService) {
         this.sharedService = sharedService;
+    }
+
+    public PlacementSettingsV4Response getPlacement() {
+        return placement;
+    }
+
+    public void setPlacement(PlacementSettingsV4Response placement) {
+        this.placement = placement;
     }
 }
