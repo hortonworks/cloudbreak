@@ -210,7 +210,7 @@ public class StackCreatorService {
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-                prepareSharedServiceIfNeed(stackRequest, stack);
+                prepareSharedServiceIfNeed(stack);
                 return stack;
             });
         } catch (TransactionExecutionException e) {
@@ -272,14 +272,13 @@ public class StackCreatorService {
                 || blueprintService.isClouderaManagerBlueprint(blueprint);
     }
 
-    private Stack prepareSharedServiceIfNeed(StackV4Request stackRequest, Stack stack) {
+    private void prepareSharedServiceIfNeed(Stack stack) {
         if (credentialPrerequisiteService.isCumulusCredential(stack.getCredential().getAttributes())
                 || stack.getDatalakeResourceId() != null) {
             long start = System.currentTimeMillis();
             stack = sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
             LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stack.getName());
         }
-        return stack;
     }
 
     private void createClusterIfNeed(User user, Workspace workspace, StackV4Request stackRequest, Stack stack, String stackName, Blueprint blueprint)

@@ -38,8 +38,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
     }
 
     public InstanceGroupEntity valid() {
-        HostGroupType hostGroupType = MASTER;
-        return withHostGroup(hostGroupType);
+        return withHostGroup(MASTER);
     }
 
     public InstanceGroupEntity withHostGroup(HostGroupType hostGroupType) {
