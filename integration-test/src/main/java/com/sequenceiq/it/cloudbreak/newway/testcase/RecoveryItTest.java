@@ -8,7 +8,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
@@ -43,9 +42,9 @@ public class RecoveryItTest extends AbstractIntegrationTest {
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(1)
                 .given(StackEntity.class).withName(stackName).replaceInstanceGroups(WORKER_ID)
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(Stack.sync())
-                .await(Status.START_FAILED)
+                .await(STACK_FAILED)
                 .validate();
     }
 

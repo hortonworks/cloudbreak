@@ -14,7 +14,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -60,9 +59,9 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(StackActionV4::delete, withoutLogError())
-                .await(Status.DELETE_COMPLETED)
+                .await(STACK_DELETED)
 
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
@@ -83,7 +82,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
 
                 .given(EnvironmentEntity.class)
                 .when(Environment::putDetachResources)
@@ -104,7 +103,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
 
                 .deleteGiven(ProxyConfigEntity.class, ProxyConfig::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(LdapConfigEntity.class, LdapConfig::delete, key(FORBIDDEN_KEY))
@@ -123,7 +122,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .given(EnvironmentEntity.class)
                 .withRdsConfigs(getRdsAsList(testContext))
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -140,11 +139,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .given(StackEntity.class)
                 .withName("int-same-env")
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .validate();
     }
 
@@ -165,11 +164,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .given(StackEntity.class)
                 .withName("it-same-env-rds")
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .validate();
     }
 
@@ -194,7 +193,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withCluster(setResources(testContext, testContext.get(RdsConfigEntity.class).getName(),
                         null, null))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .validate();
     }
 
@@ -218,7 +217,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
 
                 .given(CredentialEntity.class)
                 .withName("int-change-cred-cl")

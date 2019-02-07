@@ -14,7 +14,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.StackPostAction;
@@ -46,11 +45,11 @@ public class UpscaleTest extends AbstractIntegrationTest {
         // GIVEN
         testContext.given(StackEntity.class)
                 .when(new StackPostAction())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(15))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(6))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .validate();
     }
 
@@ -62,9 +61,9 @@ public class UpscaleTest extends AbstractIntegrationTest {
         int addedNodes = desiredWorkedCount - originalWorkedCount;
         testContext.given(StackEntity.class).withName(clusterName).withGatewayPort(testContext.getSparkServer().getPort())
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkedCount))
-                .await(StackEntity.class, Status.AVAILABLE)
+                .await(StackEntity.class, STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/"))
                 .then(MockVerification.verify(HttpMethod.POST, MOCK_ROOT + "/cloud_instance_statuses").exactTimes(1))
                 .then(MockVerification.verify(HttpMethod.POST, MOCK_ROOT + "/cloud_metadata_statuses")
@@ -90,7 +89,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
         mockAmbariBlueprintFail(testContext);
         testContext.given(StackEntity.class)
                 .when(Stack.postV4())
-                .await(Status.START_FAILED)
+                .await(STACK_FAILED)
                 .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").atLeast(1))
                 .validate();
     }

@@ -20,7 +20,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -106,7 +105,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .capture(SharedServiceTest::rdsConfigNamesFromRequest, key(RDS_KEY))
                 .capture(SharedServiceTest::ldapNameFromRequest, key(LDAP_KEY))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .verify(SharedServiceTest::rdsConfigNamesFromResponse, key(RDS_KEY))
                 .verify(SharedServiceTest::ldapNameFromResponse, key(LDAP_KEY))
                 .then(SharedServiceTest::checkBlueprintTaggedWithSharedService)
@@ -243,6 +242,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     private CloudStorageV4Request cloudStorage() {
         AdlsCloudStorageV4Parameters adls = new AdlsCloudStorageV4Parameters();
         CloudStorageV4Request csr = new CloudStorageV4Request();
+        csr.setName("blabla");
+        csr.setType("ADLS");
         csr.setLocations(Set.of(storageLocation()));
         adls.setCredential("value");
         adls.setAccountName("some");

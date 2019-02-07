@@ -18,7 +18,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
@@ -82,7 +81,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                                 .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .then(testData.getAssertions())
                 .validate();
     }
@@ -104,7 +103,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                                 .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .validate();
     }
 
