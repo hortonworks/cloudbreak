@@ -8,7 +8,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.StackDeleteInstanceAction;
@@ -39,12 +38,12 @@ public class TerminationTest extends AbstractIntegrationTest {
                 .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(3)
                 .given(StackEntity.class).replaceInstanceGroups("ig")
                 .when(Stack.postV4(), key("stack-post"))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 //select an instance id
                 .select(s -> s.getInstanceId(HostGroupType.WORKER.getName()), key(StackDeleteInstanceAction.INSTANCE_ID))
                 .capture(s -> s.getInstanceMetaData(HostGroupType.WORKER.getName()).size() - 1, key("metadatasize"))
                 .when(new StackDeleteInstanceAction(), key("stack-delete-instance"))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .verify(s -> s.getInstanceMetaData(HostGroupType.WORKER.getName()).size(), key("metadatasize"))
                 .validate();
     }
@@ -56,10 +55,10 @@ public class TerminationTest extends AbstractIntegrationTest {
                 .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(2)
                 .given(StackEntity.class).replaceInstanceGroups("ig")
                 .when(Stack.postV4(), key("stack-post"))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .select(s -> s.getInstanceId("worker"), key(StackDeleteInstanceAction.INSTANCE_ID))
                 .when(new StackDeleteInstanceAction(), key("deleteInstance"))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .then(new AssertStatusReasonMessage<>("Node(s) could not be removed from the cluster: There is not enough node to downscale. "
                         + "Check the replication factor and the ApplicationMaster occupation."))
                 .validate();
@@ -71,12 +70,12 @@ public class TerminationTest extends AbstractIntegrationTest {
                 // create stack
                 .given(StackEntity.class)
                 .when(Stack.postV4(), key("stack-post"))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .select(s -> s.getInstanceId("worker"), key(StackDeleteInstanceAction.INSTANCE_ID))
                 .select(s -> true, key("forced"))
                 .capture(s -> s.getInstanceMetaData("worker").size() - 1, key("metadatasize"))
                 .when(new StackDeleteInstanceAction(), key("deleteInstance"))
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .verify(s -> s.getInstanceMetaData("worker").size(), key("metadatasize"))
                 .validate();
     }

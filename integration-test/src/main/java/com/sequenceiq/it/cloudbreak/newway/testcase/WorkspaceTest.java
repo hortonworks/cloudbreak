@@ -10,7 +10,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
@@ -59,7 +58,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(StackEntity.class)
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .except(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();

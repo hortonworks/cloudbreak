@@ -12,7 +12,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -47,9 +46,9 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         testContext
                 .given(StackEntity.class).valid().withName(clusterName)
                 .when(Stack.postV4())
-                .await(Status.AVAILABLE)
+                .await(STACK_AVAILABLE)
                 .when(Stack.stop())
-                .await(Status.STOPPED)
+                .await(STACK_STOPPED)
                 .validate();
     }
 

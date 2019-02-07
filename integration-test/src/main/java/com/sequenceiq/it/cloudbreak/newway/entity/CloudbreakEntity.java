@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ public interface CloudbreakEntity extends Orderable {
         return this;
     }
 
-    default CloudbreakEntity wait(Status desiredStatus, RunningParameter runningParameter) {
+    default CloudbreakEntity wait(Map<String, Status> desiredStatus, RunningParameter runningParameter) {
         LOGGER.warn("Did not wait: {}", getName());
         return this;
     }

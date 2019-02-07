@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.newway.finder.Finders.same;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -180,19 +181,19 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         return testContext.verify((T) this, attribute, runningParameter);
     }
 
-    public T await(Class<T> entityClass, Status statuses) {
+    public T await(Class<T> entityClass, Map<String, Status> statuses) {
         return await(entityClass, statuses, emptyRunningParameter());
     }
 
-    public T await(Class<T> entityClass, Status statuses, RunningParameter runningParameter) {
+    public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
         return testContext.await(entityClass, statuses, runningParameter);
     }
 
-    public T await(Status statuses) {
+    public T await(Map<String, Status> statuses) {
         return await(statuses, emptyRunningParameter());
     }
 
-    public T await(Status statuses, RunningParameter runningParameter) {
+    public T await(Map<String, Status> statuses, RunningParameter runningParameter) {
         return testContext.await((T) this, statuses, runningParameter);
     }
 
