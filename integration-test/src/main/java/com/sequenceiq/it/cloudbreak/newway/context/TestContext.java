@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.context;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.emptyRunningParameter;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -430,13 +431,18 @@ public class TestContext implements ApplicationContextAware {
         if (exception == null) {
             exceptionMap.put("expect", new RuntimeException("Expected an exception but cannot find with key: " + key));
         }
-        if (exception != null && !exception.getClass().equals(expectedException)) {
-            exceptionMap.put("expect", new RuntimeException(String.format("Expected exception (%s) is not match with the actual exception (%s).",
-                    expectedException, exception.getClass())));
+        if (exception != null && (!exception.getClass().equals(expectedException) || !isMessageEquals(exception, runningParameter))) {
+            exceptionMap.put("expect", new RuntimeException(
+                    String.format("Expected exception (%s) or message (%s) is not match with the actual exception (%s) or message(%s).",
+                    expectedException, runningParameter.getExpectedMessage(), exception.getClass(), getErrorMessage(exception))));
         } else {
             exceptionMap.remove(key);
         }
         return entity;
+    }
+
+    private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
+        return StringUtils.isEmpty(runningParameter.getExpectedMessage()) || getErrorMessage(exception).matches(runningParameter.getExpectedMessage());
     }
 
     public void handleExecptionsDuringTest() {
@@ -446,7 +452,7 @@ public class TestContext implements ApplicationContextAware {
             StringBuilder br = new StringBuilder("All Exceptions during test are logged before this message").append(System.lineSeparator());
             exceptionsDuringTest.forEach((msg, ex) -> {
                 LOGGER.error(msg, ex);
-                br.append(msg).append(": ").append(ex.getMessage()).append(System.lineSeparator());
+                br.append(msg).append(": ").append(getErrorMessage(ex)).append(System.lineSeparator());
             });
             exceptionsDuringTest.clear();
             Assert.fail(br.toString());

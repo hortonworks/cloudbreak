@@ -46,6 +46,11 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
     }
 
     @Override
+    public StackV4EntityBase<StackEntity> valid() {
+        return super.valid().withEnvironment(EnvironmentEntity.class);
+    }
+
+    @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         when(StackActionV4::delete, withoutLogError());

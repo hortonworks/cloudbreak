@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -100,7 +101,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         } else {
             convertAsStack(source, stack, workspace);
         }
-
+        updateCloudPlatformAndRelatedFields(source, stack, workspace);
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
         if (asMap != null) {
             Map<String, String> parameter = new HashMap<>();
@@ -128,6 +129,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());
         stack.setType(source.getType());
+        stack.setInputs(Json.silent(new StackInputs(source.getInputs(), new HashMap<>(), new HashMap<>())));
         return stack;
     }
 
@@ -138,7 +140,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace) {
         validateStackAuthentication(source);
         updateEnvironment(source, stack, workspace);
-        updateCloudPlatformAndRelatedFields(source, stack, workspace);
         stack.setName(source.getName());
         stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
         stack.setOrchestrator(getOrchestrator());
@@ -159,6 +160,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             updateCloudPlatformAndRelatedFields(source, stack, workspace);
             stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
         }
+        stack.setType(StackType.TEMPLATE);
         stack.setName(UUID.randomUUID().toString());
     }
 

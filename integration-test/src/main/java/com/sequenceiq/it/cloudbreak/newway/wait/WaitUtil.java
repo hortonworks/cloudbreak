@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.wait;
 
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
 import java.util.Optional;
@@ -47,7 +48,7 @@ public class WaitUtil {
             StackStatusV4Response statusByNameInWorkspace = cloudbreakClient.getCloudbreakClient()
                     .stackV4Endpoint().getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
             if (statusByNameInWorkspace != null) {
-                Object statusReason = statusByNameInWorkspace.getStatusReason();
+                Object statusReason = statusByNameInWorkspace.getClusterStatusReason();
                 if (statusReason != null) {
                     ret = Pair.of(statusByNameInWorkspace.getStatus(), statusByNameInWorkspace.getStatusReason());
                 }
@@ -58,7 +59,7 @@ public class WaitUtil {
 
     private WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, String stackName, Status desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
-        Status currentStatus = null;
+        Status currentStatus = CREATE_IN_PROGRESS;
 
         int retryCount = 0;
         while (!checkStatuses(currentStatus, desiredStatus) && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
@@ -67,7 +68,7 @@ public class WaitUtil {
             sleep();
             StackV4Endpoint stackV4Endpoint = cloudbreakClient.getCloudbreakClient().stackV4Endpoint();
             try {
-                var statusResult = Optional.ofNullable(stackV4Endpoint.getStatusByName(cloudbreakClient.getWorkspaceId(), stackName).getStatus());
+                var statusResult = Optional.ofNullable(stackV4Endpoint.getStatusByName(cloudbreakClient.getWorkspaceId(), stackName).getClusterStatus());
                 Status currStatus = DELETE_COMPLETED;
                 if (statusResult.isPresent()) {
                     currStatus = statusResult.get();
@@ -102,7 +103,7 @@ public class WaitUtil {
     }
 
     private boolean checkStatuses(Status currentStatus, Status desiredStatus) {
-        return desiredStatus != currentStatus;
+        return desiredStatus == currentStatus;
     }
 
     private boolean checkFailedStatuses(Status currentStatus) {
