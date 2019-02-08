@@ -39,6 +39,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
             providerParameterCalculator.parse(attributes.getMap(), instanceGroupResponse);
         }
         instanceGroupResponse.setNodeCount(source.getNodeCount());
+        instanceGroupResponse.setName(source.getGroupName());
         return instanceGroupResponse;
     }
 }

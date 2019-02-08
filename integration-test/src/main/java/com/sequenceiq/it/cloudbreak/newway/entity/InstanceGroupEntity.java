@@ -47,6 +47,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(getTestContext().init(SecurityGroupEntity.class))
                 .withType(hostGroupType.getInstanceGroupType())
+                .withName(hostGroupType.getName().toLowerCase())
                 .withTemplate(getCloudProvider().template(getTestContext()));
     }
 
@@ -72,6 +73,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(testContext.init(SecurityGroupEntity.class))
                 .withType(hostGroupType.getInstanceGroupType())
+                .withName(hostGroupType.getName().toLowerCase())
                 .withTemplate(entity.getCloudProvider().template(testContext));
     }
 
@@ -114,6 +116,11 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
 
     public InstanceGroupEntity withRecoveryMode(RecoveryMode recoveryMode) {
         getRequest().setRecoveryMode(recoveryMode);
+        return this;
+    }
+
+    public InstanceGroupEntity withName(String name) {
+        getRequest().setName(name);
         return this;
     }
 
