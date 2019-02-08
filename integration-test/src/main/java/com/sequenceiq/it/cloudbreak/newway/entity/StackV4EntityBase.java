@@ -106,7 +106,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
             throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
         }
         return withEnvironmentSettings(getTestContext().init(EnvironmentSettingsV4Entity.class)
-//                .withCredentialName(env.getName())
                 .withName(env.getName()));
     }
 

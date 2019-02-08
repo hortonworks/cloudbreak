@@ -60,7 +60,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -69,7 +69,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialEntity.class)
                 .when(Credential::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -79,7 +79,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(BlueprintEntity.class).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV2())
                 .when(Blueprint::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -89,7 +89,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(RecipeEntity.class)
                 .when(Recipe.postV2())
                 .when(Recipe::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -99,7 +99,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(LdapConfigEntity.class)
                 .when(LdapConfig.postV2())
                 .when(LdapConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -109,7 +109,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(ImageCatalogEntity.class)
                 .when(ImageCatalog.postV2())
                 .when(ImageCatalog::getByNameAndImages, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -119,7 +119,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(ImageCatalogEntity.class)
                 .when(ImageCatalog.postV2())
                 .when(ImageCatalog::getByNameWithoutImages, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -129,7 +129,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(ProxyConfigEntity.class)
                 .when(ProxyConfig.postV2())
                 .when(ProxyConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -139,7 +139,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(KerberosEntity.class)
                 .when(Kerberos.postV2())
                 .when(Kerberos::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .except(ForbiddenException.class, key(FORBIDDEN_KEY))
+                .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 

@@ -128,7 +128,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                                 .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -146,7 +146,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .when(Blueprint.postV2())
                 .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
                 .when(Kerberos.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -163,7 +163,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .when(Blueprint.postV2())
                 .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
                 .when(Kerberos.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
@@ -179,7 +179,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .when(Blueprint.postV2())
                 .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
                 .when(Kerberos.postV2(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 
