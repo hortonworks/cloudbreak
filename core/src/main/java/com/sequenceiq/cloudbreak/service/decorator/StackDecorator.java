@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -108,6 +109,10 @@ public class StackDecorator {
         LOGGER.debug("Domain was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         String credentialName = request.getEnvironment().getCredentialName();
+        if (Objects.isNull(credentialName)) {
+            EnvironmentView environment = environmentViewService.getByNameForWorkspace(request.getEnvironment().getName(), workspace);
+                credentialName = environment.getCredential().getName();
+        }
         if (credentialName != null) {
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
             if (subject.getInstanceGroups() == null) {
