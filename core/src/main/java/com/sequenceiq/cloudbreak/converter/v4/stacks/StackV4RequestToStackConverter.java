@@ -27,13 +27,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -130,6 +133,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setUuid(UUID.randomUUID().toString());
         stack.setType(source.getType());
         stack.setInputs(Json.silent(new StackInputs(source.getInputs(), new HashMap<>(), new HashMap<>())));
+        if (source.getImage() != null) {
+            stack.getComponents().add(getImageComponent(source, stack));
+        }
         return stack;
     }
 
@@ -171,6 +177,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private String getRegion(StackV4Request source, String cloudPlatform) {
+        if (source.getPlacement() == null) {
+            return null;
+        }
         if (isEmpty(source.getPlacement().getRegion())) {
             Map<Platform, Region> regions = Maps.newHashMap();
             if (isNoneEmpty(defaultRegions)) {
@@ -191,6 +200,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private String determineCloudPlatform(StackV4Request source, Workspace workspace) {
+        if (source.getCloudPlatform() != null) {
+            return source.getCloudPlatform().name();
+        }
         return StringUtils.isEmpty(source.getEnvironment().getName())
                 ? credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace).cloudPlatform()
                 : environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace).getCloudPlatform();
@@ -276,5 +288,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             cluster.setHostGroups(hostGroups);
             stack.setCluster(cluster);
         }
+    }
+
+    private com.sequenceiq.cloudbreak.domain.stack.Component getImageComponent(StackV4Request source, Stack stack) {
+        ImageSettingsV4Request imageSettings = source.getImage();
+        Image image = new Image(null, null, imageSettings.getOs(), null, null, imageSettings.getCatalog(), imageSettings.getId(), null);
+        return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), Json.silent(image), stack);
     }
 }

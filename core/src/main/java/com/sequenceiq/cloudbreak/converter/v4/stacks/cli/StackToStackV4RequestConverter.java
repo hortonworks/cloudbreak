@@ -69,6 +69,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareTags(source, stackV2Request);
         prepareDatalakeRequest(source, stackV2Request);
         stackV2Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
+        prepareInputs(source, stackV2Request);
         return stackV2Request;
     }
 

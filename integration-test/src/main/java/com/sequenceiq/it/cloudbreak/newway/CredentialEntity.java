@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider.CREDENTIAL_DEFAULT_DESCRIPTION;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.MockCloudProvider.MOCK_CAPITAL;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 import java.util.Collection;
 
@@ -38,7 +39,7 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
         credentialParameters.setMockEndpoint(getTestContext().getSparkServer().getEndpoint());
         return withName(getNameCreator().getRandomNameForMock())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
-                    .withMockParameters(credentialParameters)
+                .withMockParameters(credentialParameters)
                 .withCloudPlatform(MOCK_CAPITAL);
     }
 
@@ -110,11 +111,11 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
     }
 
     @Override
-    public void delete(CredentialV4Response entity, CloudbreakClient client) {
+    public void delete(TestContext testContext, CredentialV4Response entity, CloudbreakClient client) {
         try {
             client.getCloudbreakClient().credentialV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
     }
 

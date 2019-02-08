@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +60,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         ImageCatalogEntity imgCat = getTestContext().get(ImageCatalogEntity.class);
         getTestContext()
                 .given("network", NetworkV2Entity.class).withSubnetCIDR("10.10.0.0/16")
-                .given("securityRulesWorker", SecurityRulesEntity.class).withPorts("55,66,77").withProtocol("ftp").withSubnet("10.0.0.0/32")
+                .given("securityRulesWorker", SecurityRulesEntity.class).withPorts("55", "66", "77").withProtocol("ftp").withSubnet("10.0.0.0/32")
                 .given("securityGroupMaster", SecurityGroupEntity.class).withSecurityGroupIds("scgId1", "scgId2")
                 .given("securityGroupWorker", SecurityGroupEntity.class).withSecurityRules("securityRulesWorker")
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withRecipes("mock-test-recipe").withSecurityGroup("securityGroupMaster")
@@ -79,6 +80,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .withInstanceGroups("master", "worker", "compute")
                 .withCluster("cluster")
                 .withUserDefinedTags(Map.of("some-tag", "custom-tag"))
+                .withInputs(Map.of("some-input", "custom-input"))
                 .withImageSettings("imageSettings");
     }
 
@@ -106,7 +108,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
             throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
         }
         return withEnvironmentSettings(getTestContext().init(EnvironmentSettingsV4Entity.class)
-//                .withCredentialName(env.getName())
                 .withName(env.getName()));
     }
 
@@ -165,11 +166,12 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withImageId(String imageId) {
-        if (getRequest().getImage() == null) {
-            getRequest().setImage(new ImageSettingsV4Request());
+    public StackV4EntityBase<T> withInputs(Map<String, Object> inputs) {
+        if (inputs == null) {
+            getRequest().setInputs(Collections.emptyMap());
+        } else {
+            getRequest().setInputs(inputs);
         }
-        getRequest().getImage().setId(imageId);
         return this;
     }
 
