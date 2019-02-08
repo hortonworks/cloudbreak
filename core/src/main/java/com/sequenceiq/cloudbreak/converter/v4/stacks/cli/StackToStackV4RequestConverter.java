@@ -164,7 +164,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         }
     }
 
-
     private void prepareInputs(Stack source, StackV4Request stackV2Request) {
         try {
 
