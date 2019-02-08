@@ -77,6 +77,10 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("User defined tag is mismatch!");
         }
 
+        if (!"custom-input".equals(stackTemplate.getInputs().get("some-input"))) {
+            throw new IllegalArgumentException("Input is mismatch!");
+        }
+
         if (!"f6e778fc-7f17-4535-9021-515351df3691".equals(stackTemplate.getImage().getId())) {
             throw new IllegalArgumentException("Image ID is mismatch!");
         }
@@ -90,35 +94,35 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Blueprint name is mismatch!");
         }
 
-        if (!"2.6.2.2".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersion())) {
+        if (!"2.7.2.2".equals(stackTemplate.getCluster().getAmbari().getRepository().getVersion())) {
             throw new IllegalArgumentException("ambari repo version is mismatch!");
         }
 
-        if (!"http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2"
-                .equals(stackTemplate.getCluster().getAmbari().getStackRepository().getRepository().getBaseUrl())) {
+        if (!"http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.2.2"
+                .equals(stackTemplate.getCluster().getAmbari().getRepository().getBaseUrl())) {
             throw new IllegalArgumentException("ambari repo base url is mismatch!");
         }
 
         if (!"http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
-                .equals(stackTemplate.getCluster().getAmbari().getStackRepository().getRepository().getGpgKeyUrl())) {
+                .equals(stackTemplate.getCluster().getAmbari().getRepository().getGpgKeyUrl())) {
             throw new IllegalArgumentException("ambari repo gpg key is mismatch!");
         }
 
-        if (!"2.6".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersion())) {
-            throw new IllegalArgumentException("ambari repo version is mismatch!");
+        if (!"2.7".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersion())) {
+            throw new IllegalArgumentException("stack repo version is mismatch!");
         }
 
-        if (!"2.6.5.0-292".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersion())) {
-            throw new IllegalArgumentException("ambari repo version is mismatch!");
+        if (!"2.7.5.0-292".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getRepository().getVersion())) {
+            throw new IllegalArgumentException("stack repo repoVersion is mismatch!");
         }
 
         if (!"HDP".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getStack())) {
-            throw new IllegalArgumentException("ambari repo base url is mismatch!");
+            throw new IllegalArgumentException("stack repo stack is mismatch!");
         }
 
-        if (!"http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+        if (!"http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0/HDP-2.7.5.0-292.xml"
                 .equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersionDefinitionFileUrl())) {
-            throw new IllegalArgumentException("ambari repo gpg key is mismatch!");
+            throw new IllegalArgumentException("stack repo vdf-url is mismatch!");
         }
 
         if (!StringUtils.isEmpty(stackTemplate.getCluster().getAmbari().getPassword())) {

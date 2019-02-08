@@ -65,13 +65,13 @@ public class ManagementPackEntity extends AbstractCloudbreakEntity<ManagementPac
     }
 
     @Override
-    public void delete(ManagementPackV4Response entity, CloudbreakClient client) {
+    public void delete(TestContext testContext, ManagementPackV4Response entity, CloudbreakClient client) {
         client.getCloudbreakClient().managementPackV4Endpoint().deleteInWorkspace(client.getWorkspaceId(), entity.getName());
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        delete(getResponse(), cloudbreakClient);
+        delete(context, getResponse(), cloudbreakClient);
     }
 
     @Override

@@ -27,6 +27,7 @@ import com.sequenceiq.it.spark.ambari.AmbariViewResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.ambari.v2.AmbariCategorizedHostComponentStateResponse;
+import com.sequenceiq.it.spark.ambari.v2.AmbariRequestIdRespone;
 import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Service;
@@ -295,4 +296,15 @@ public class AmbariMock extends AbstractModelMock {
         dynamicRouteStack.get(CHECK, new AmbariCheckResponse());
     }
 
+    public void putConfigureSso() {
+        dynamicRouteStack.put("/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/sso-configuration", new AmbariRequestIdRespone(12));
+    }
+
+    public void postSyncLdap() {
+        dynamicRouteStack.post("/api/v1/ldap_sync_events", new EmptyAmbariResponse());
+    }
+
+    public void putConfigureLdap() {
+        dynamicRouteStack.put("/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/ldap-configuration", new AmbariRequestIdRespone(12));
+    }
 }

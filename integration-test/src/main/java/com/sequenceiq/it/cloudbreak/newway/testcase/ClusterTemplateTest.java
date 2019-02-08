@@ -118,6 +118,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "testContext")
     public void testLaunchClusterFromTemplateWithProperties(TestContext testContext) {
+        testContext.getModel().getAmbariMock().putConfigureLdap();
+        testContext.getModel().getAmbariMock().postSyncLdap();
+        testContext.getModel().getAmbariMock().putConfigureSso();
         testContext
                 .given(LdapConfigEntity.class).withName("mock-test-ldap")
                 .when(new LdapConfigCreateIfNotExistsAction())

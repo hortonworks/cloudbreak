@@ -42,6 +42,7 @@ import com.sequenceiq.it.cloudbreak.newway.log.Log;
 import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.newway.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.newway.wait.WaitUtilForMultipleStatuses;
+import com.sequenceiq.it.spark.DynamicRouteStack;
 
 @Prototype
 public class TestContext implements ApplicationContextAware {
@@ -401,7 +402,7 @@ public class TestContext implements ApplicationContextAware {
                 //TODO this needs better implementation
                 entryset.cleanUp(this, clients.get(getDefaultUser()));
             } catch (Exception e) {
-                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before");
+                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before, {}", getErrorMessage(e), e);
             }
         });
         shutdown();
@@ -499,6 +500,10 @@ public class TestContext implements ApplicationContextAware {
         sparkServer.shutdown();
         imageCatalogMockServerSetup.shutdown();
         shutdown = true;
+    }
+
+    public DynamicRouteStack dynamicRouteStack() {
+        return model.getAmbariMock().getDynamicRouteStack();
     }
 
     @Override
