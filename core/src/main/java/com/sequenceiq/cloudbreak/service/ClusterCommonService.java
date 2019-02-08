@@ -74,31 +74,24 @@ public class ClusterCommonService {
         UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
         if (userNamePasswordJson != null) {
             ambariUserNamePasswordChange(stackId, stack, userNamePasswordJson);
-        }
-
-        if (updateJson.getStatus() != null) {
+        } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
-        }
-
-        if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
+        } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
                 recreateCluster(stack, updateJson, user, workspace);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
-        }
-
-        if (updateJson.getHostGroupAdjustment() != null) {
+        } else if (updateJson.getHostGroupAdjustment() != null) {
             clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
-        }
-
-        if (Objects.nonNull(updateJson.getStackRepository())) {
+        } else if (Objects.nonNull(updateJson.getStackRepository())) {
             updateStackDetails(updateJson, stack);
+        } else {
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            throw new BadRequestException("Invalid update cluster request!");
         }
-        LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
-        throw new BadRequestException("Invalid update cluster request!");
     }
 
     private void updateStackDetails(UpdateClusterV4Request updateJson, Stack stack) {
