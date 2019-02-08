@@ -122,7 +122,7 @@ public class ClusterDecorator {
 
     private void prepareRds(Cluster subject, ClusterV4Request request, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
-        Optional.of(request.getDatabases())
+        Optional.ofNullable(request.getDatabases())
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(
                         rdsConfigService.getByNameForWorkspace(confName, stack.getWorkspace()))));
     }

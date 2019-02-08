@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -38,7 +41,10 @@ public class InstanceGroupV4RequestToHostGroupConverter extends AbstractConversi
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName(source.getName());
         hostGroup.setRecoveryMode(source.getRecoveryMode());
-        hostGroup.setRecipes(recipeService.getRecipesByNamesForWorkspace(workspace, source.getRecipeNames()));
+        Set<String> recipeNames = source.getRecipeNames();
+        if (!CollectionUtils.isEmpty(recipeNames)) {
+            hostGroup.setRecipes(recipeService.getRecipesByNamesForWorkspace(workspace, recipeNames));
+        }
         return hostGroup;
     }
 }

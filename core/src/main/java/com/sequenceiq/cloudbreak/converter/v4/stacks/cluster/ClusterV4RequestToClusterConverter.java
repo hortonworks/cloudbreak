@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
@@ -184,8 +185,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     }
 
     private void updateDatabases(ClusterV4Request source, Cluster cluster, Workspace workspace) {
-        if (!source.getDatabases().isEmpty()) {
-            Set<RDSConfig> rdsConfigs = rdsConfigService.findByNamesInWorkspace(source.getDatabases(), workspace.getId());
+        Set<String> databases = source.getDatabases();
+        if (!CollectionUtils.isEmpty(databases)) {
+            Set<RDSConfig> rdsConfigs = rdsConfigService.findByNamesInWorkspace(databases, workspace.getId());
             if (rdsConfigs.isEmpty()) {
                 throw new NotFoundException("RDS config names dont exists");
             }
