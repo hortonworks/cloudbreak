@@ -87,7 +87,7 @@ public interface CredentialV4Endpoint {
             nickname = "codeGrantFlowBasedCredentialInWorkspace", httpMethod = "GET")
     Response initCodeGrantFlow(@PathParam("workspaceId") Long workspaceId, @Valid CredentialV4Request credentialRequest);
 
-    @PUT
+    @GET
     @Path("code_grant_flow/{name}")
     @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW_ON_EXISTING, notes = Notes.CREDENTIAL_NOTES,
             nickname = "codeGrantFlowOnExistingCredentialInWorkspace", httpMethod = "GET")
