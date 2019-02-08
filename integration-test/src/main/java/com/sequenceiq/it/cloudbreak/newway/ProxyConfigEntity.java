@@ -83,4 +83,9 @@ public class ProxyConfigEntity extends AbstractCloudbreakEntity<ProxyV4Request, 
         getRequest().setUserName(serverUser);
         return this;
     }
+
+    @Override
+    public int order() {
+        return 500;
+    }
 }

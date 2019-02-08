@@ -197,11 +197,11 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         return testContext.await((T) this, statuses, runningParameter);
     }
 
-    public <E extends Exception> T except(Class<E> expectedException) {
-        return except(expectedException, emptyRunningParameter());
+    public <E extends Exception> T expect(Class<E> expectedException) {
+        return expect(expectedException, emptyRunningParameter());
     }
 
-    public <E extends Exception> T except(Class<E> expectedException, RunningParameter runningParameter) {
+    public <E extends Exception> T expect(Class<E> expectedException, RunningParameter runningParameter) {
         return testContext.expect((T) this, expectedException, runningParameter);
     }
 

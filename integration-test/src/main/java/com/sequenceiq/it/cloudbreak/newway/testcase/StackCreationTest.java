@@ -34,7 +34,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
         testContext.given(StackEntity.class)
                 .when(Stack.postV4())
                 .when(Stack.postV4(), key("badRequest"))
-                .except(BadRequestException.class, key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 

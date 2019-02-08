@@ -112,7 +112,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext.given("stackTemplate", StackTemplateEntity.class)
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction(), key("ENVIRONMENT_NULL"))
-                .except(BadRequestException.class, key("ENVIRONMENT_NULL").withExpectedMessage("The environment cannot be null."))
+                .expect(BadRequestException.class, key("ENVIRONMENT_NULL").withExpectedMessage("The environment cannot be null."))
                 .validate();
     }
 
@@ -150,7 +150,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateInvalidNameClusterTemplate(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withName(ILLEGAL_CT_NAME)
                 .when(new ClusterTemplateV4CreateAction(), key("illegalCtName"))
-                .except(BadRequestException.class, key("illegalCtName").withExpectedMessage("post.arg1.name: Illegal template name ;, error: "
+                .expect(BadRequestException.class, key("illegalCtName").withExpectedMessage("post.arg1.name: Illegal template name ;, error: "
                         + "The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon"))
                 .validate();
     }
@@ -170,7 +170,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateInvalidShortNameClusterTemplate(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withName("sh")
                 .when(new ClusterTemplateV4CreateAction(), key("illegalCtName"))
-                .except(BadRequestException.class, key("illegalCtName").withExpectedMessage("post.arg1.name: sh, error: "
+                .expect(BadRequestException.class, key("illegalCtName").withExpectedMessage("post.arg1.name: sh, error: "
                         + "The length of the cluster's name has to be in range of 5 to 40"))
                 .validate();
     }
@@ -184,7 +184,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction())
                 .when(new ClusterTemplateV4CreateAction(), key("againCtName"))
-                .except(BadRequestException.class, key("againCtName").withExpectedMessage("^clustertemplate already exists with name.*"))
+                .expect(BadRequestException.class, key("againCtName").withExpectedMessage("^clustertemplate already exists with name.*"))
                 .validate();
     }
 
@@ -195,7 +195,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .given(ClusterTemplateEntity.class).withDescription(invalidLongDescripton)
                 .when(new ClusterTemplateV4CreateAction(), key("longCtDescription"))
-                .except(BadRequestException.class, key("longCtDescription").withExpectedMessage("post.arg1.description: "
+                .expect(BadRequestException.class, key("longCtDescription").withExpectedMessage("post.arg1.description: "
                         + invalidLongDescripton + ", error: size must be between 0 and 1000"))
                 .validate();
     }
@@ -204,7 +204,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateEmptyStackTemplateClusterTemplateException(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withoutStackTemplate()
                 .when(new ClusterTemplateV4CreateAction(), key("emptyStack"))
-                .except(BadRequestException.class, key("emptyStack").withExpectedMessage("post.arg1.stackTemplate: null, error: must not be null"))
+                .expect(BadRequestException.class, key("emptyStack").withExpectedMessage("post.arg1.stackTemplate: null, error: must not be null"))
                 .validate();
     }
 
@@ -215,8 +215,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(new ClusterTemplateV4CreateAction(), key("nullTemplateName"))
                 .given(ClusterTemplateEntity.class).withName("")
                 .when(new ClusterTemplateV4CreateAction(), key("emptyTemplateName").withSkipOnFail(false))
-                .except(BadRequestException.class, key("nullTemplateName").withExpectedMessage("post.arg1.name: null, error: must not be null"))
-                .except(BadRequestException.class, key("emptyTemplateName")
+                .expect(BadRequestException.class, key("nullTemplateName").withExpectedMessage("post.arg1.name: null, error: must not be null"))
+                .expect(BadRequestException.class, key("emptyTemplateName")
                         .withExpectedMessage("post.arg1.name: , error: The length of the cluster's name has to be in range of 5 to 40"))
                 .validate();
     }
