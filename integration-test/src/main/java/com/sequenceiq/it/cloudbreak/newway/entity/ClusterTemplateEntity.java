@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
 import java.util.Collection;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
@@ -73,7 +75,11 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
 
     @Override
     public void delete(ClusterTemplateV4Response entity, CloudbreakClient client) {
-        client.getCloudbreakClient().clusterTemplateV4EndPoint().delete(client.getWorkspaceId(), entity.getName());
+        try {
+            client.getCloudbreakClient().clusterTemplateV4EndPoint().delete(client.getWorkspaceId(), entity.getName());
+        } catch (Exception e) {
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
+        }
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest.STACK_DELETED;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
             client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
             wait(STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
     }
 

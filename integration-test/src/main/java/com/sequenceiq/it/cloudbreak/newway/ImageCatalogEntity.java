@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -91,7 +92,7 @@ public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogV4R
         try {
             client.getCloudbreakClient().imageCatalogV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
     }
 

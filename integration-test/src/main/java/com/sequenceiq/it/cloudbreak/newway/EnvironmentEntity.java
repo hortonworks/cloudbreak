@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -153,7 +155,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
         try {
             client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), e.getMessage(), e);
+            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), getErrorMessage(e), e);
         }
     }
 

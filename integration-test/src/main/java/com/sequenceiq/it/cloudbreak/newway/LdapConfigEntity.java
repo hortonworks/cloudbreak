@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -174,7 +176,7 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, Ld
         try {
             client.getCloudbreakClient().ldapConfigV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
     }
 

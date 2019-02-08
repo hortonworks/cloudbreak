@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,7 +88,7 @@ public class RecipeEntity extends AbstractCloudbreakEntity<RecipeV4Request, Reci
         try {
             client.getCloudbreakClient().recipeV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), e.getMessage(), e);
+            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
     }
 

@@ -15,9 +15,9 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
     @Override
     public AmbariRepositoryV4Entity valid() {
-        return withVersion("2.6.2.2")
+        return withVersion("2.7.2.2")
                 .withGpgKeyUrl("http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins")
-                .withBaseUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2");
+                .withBaseUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.2.2");
     }
 
     public AmbariRepositoryV4Entity withVersion(String version) {
