@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -42,6 +43,9 @@ public class ClusterDecorator {
     private BlueprintService blueprintService;
 
     @Inject
+    private BlueprintValidator blueprintValidator;
+
+    @Inject
     private RdsConfigService rdsConfigService;
 
     @Inject
@@ -60,6 +64,7 @@ public class ClusterDecorator {
             @Nonnull Stack stack) {
         prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(blueprint), user);
         prepareClusterManagerVariant(cluster);
+        validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName());
         prepareLdap(cluster, request, user, workspace);
@@ -73,6 +78,12 @@ public class ClusterDecorator {
         }
     }
 
+    private void validateBlueprintIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
+        if (request.getAmbari().getValidateBlueprint()) {
+            blueprintValidator.validateBlueprintForStack(subject, subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
+        }
+    }
+
     private void prepareBlueprint(Cluster subject, ClusterV4Request request, Workspace workspace, Stack stack, Optional<Blueprint> blueprint, User user) {
         if (blueprint.isPresent()) {
             subject.setBlueprint(blueprint.get());
@@ -82,7 +93,7 @@ public class ClusterDecorator {
             throw new BadRequestException("Blueprint is not configured for the cluster!");
         }
         removeHaComponentsFromGatewayTopologies(subject);
-        subject.setTopologyValidation(false);
+        subject.setTopologyValidation(request.getAmbari().getValidateBlueprint());
     }
 
     private void prepareClusterManagerVariant(Cluster cluster) {

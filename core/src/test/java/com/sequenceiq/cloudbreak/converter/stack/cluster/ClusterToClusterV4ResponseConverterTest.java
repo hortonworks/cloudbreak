@@ -2,17 +2,14 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,9 +55,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     private StackUtil stackUtil;
 
     @Mock
-    private StackService stackService;
-
-    @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Mock
@@ -72,14 +65,13 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
 
     @Before
     public void setUp() {
-        given(stackService.findClustersConnectedToDatalakeByDatalakeResourceId(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
                 .willReturn(new WorkspaceResourceV4Response());
         given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
     }
 
     @Test
-    public void testConvert() throws IOException {
+    public void testConvert() {
         // GIVEN
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
@@ -97,7 +89,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     }
 
     @Test
-    public void testConvertWithoutUpSinceField() throws IOException {
+    public void testConvertWithoutUpSinceField() {
         // GIVEN
         getSource().setUpSince(null);
         // WHEN
@@ -107,7 +99,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     }
 
     @Test
-    public void testConvertWithoutMasterComponent() throws IOException {
+    public void testConvertWithoutMasterComponent() {
         // GIVEN
         // WHEN
         ClusterV4Response result = underTest.convert(getSource());

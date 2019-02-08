@@ -70,4 +70,8 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request
         return this;
     }
 
+    @Override
+    public int order() {
+        return 500;
+    }
 }
