@@ -149,6 +149,10 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         return testContext.given(clss);
     }
 
+    public <O extends CloudbreakEntity> O init(Class<O> clss) {
+        return testContext.init(clss);
+    }
+
     public <O> T select(Attribute<T, O> attribute) {
         return select(attribute, emptyRunningParameter());
     }

@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -64,9 +65,6 @@ public class ClusterDecoratorTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private ClusterV4Request request;
-
-    @Mock
     private Stack stack;
 
     @Mock
@@ -90,11 +88,16 @@ public class ClusterDecoratorTest {
                 .thenReturn(expectedClusterInstance);
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any())).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
-
-        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, new Workspace(), stack);
+        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(User.class), any(Workspace.class));
     }
 
+    private ClusterV4Request createClusterV4Request() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        AmbariV4Request ambariV4Request = new AmbariV4Request();
+        clusterV4Request.setAmbari(ambariV4Request);
+        return clusterV4Request;
+    }
 }

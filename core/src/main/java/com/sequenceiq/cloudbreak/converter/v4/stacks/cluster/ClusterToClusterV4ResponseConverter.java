@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
@@ -81,7 +83,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         decorateResponseWithProxyConfig(source, clusterResponse);
         clusterResponse.setCloudStorage(getCloudStorage(source));
         clusterResponse.setAmbari(getConversionService().convert(source, AmbariV4Response.class));
-        clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs(), DatabaseV4Response.class));
+        clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs().stream().filter(
+                rds -> ResourceStatus.USER_MANAGED.equals(rds.getStatus())).collect(Collectors.toList()), DatabaseV4Response.class));
         clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         return clusterResponse;
     }
