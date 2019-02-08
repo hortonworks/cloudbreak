@@ -122,6 +122,8 @@ public class AmbariMock extends AbstractModelMock {
         deleteClusterHostComponents();
         deleteAmbariClusterHost();
         getAmbariViews();
+        getAmbariClusterServicesRoot();
+        getAmbariServiceComponents();
     }
 
     public DynamicRouteStack getDynamicRouteStack() {
