@@ -26,15 +26,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 
 public class EnvironmentTest extends AbstractIntegrationTest {
     private static final String FORBIDDEN_KEY = "forbiddenPost";
@@ -111,7 +111,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvironmenWithRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
                 .withRdsConfigs(validRds)
@@ -185,7 +185,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateEnvWithExistingAndNotExistingRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
-        mixedRds.add(testContext.get(RdsConfigEntity.class).getName());
+        mixedRds.add(testContext.get(DatabaseEntity.class).getName());
         mixedRds.add("invalidRds");
         testContext
                 .init(EnvironmentEntity.class)
@@ -269,7 +269,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testDeleteEnvWithRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         testContext
                 .init(EnvironmentEntity.class)
                 .withRdsConfigs(validRds)
@@ -294,7 +294,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvAttachRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-rds-attach")
@@ -343,7 +343,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvDetachRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-rds-detach")
@@ -397,7 +397,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testAttachRdsToMoreEnvs(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         attachRdsToEnv(testContext, "int-rds-attach-envs", validRds);
         attachRdsToEnv(testContext, "int-rds-attach-envs2", validRds);
     }
@@ -424,7 +424,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testAttachRdsToNotExistEnv(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         testContext
                 .init(EnvironmentEntity.class)
                 .withName("int-no-env")
@@ -439,7 +439,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
         Set<String> notValidRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         notValidRds.add("not-existing-rds");
         testContext
                 .given(EnvironmentEntity.class)
@@ -568,7 +568,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         for (DatabaseV4Response rdsConfigResponse : rdsConfigResponseSet) {
             rdsConfigs.add(rdsConfigResponse.getName());
         }
-        if (!rdsConfigs.contains(testContext.get(RdsConfigEntity.class).getName())) {
+        if (!rdsConfigs.contains(testContext.get(DatabaseEntity.class).getName())) {
             throw new TestFailException("Rds is not attached to environment");
         }
         return environment;

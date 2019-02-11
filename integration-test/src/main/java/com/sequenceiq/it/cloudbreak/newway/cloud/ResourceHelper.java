@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 
 public abstract class ResourceHelper<T extends CloudStorageV4Parameters> {
 
@@ -39,9 +39,9 @@ public abstract class ResourceHelper<T extends CloudStorageV4Parameters> {
         return ldapName == null ? String.format("ldapconfig%s", postfix) : String.format("%s%s", ldapName, postfix);
     }
 
-    public abstract RdsConfig aValidHiveDatabase();
+    public abstract DatabaseEntity aValidHiveDatabase();
 
-    public abstract RdsConfig aValidRangerDatabase();
+    public abstract DatabaseEntity aValidRangerDatabase();
 
     public abstract CloudStorageV4Request getCloudStorageRequestForDatalake();
 

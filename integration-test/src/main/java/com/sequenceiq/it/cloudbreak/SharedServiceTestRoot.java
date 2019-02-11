@@ -16,12 +16,12 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.DatalakeCluster;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.cloud.ResourceHelper;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
 
 public abstract class SharedServiceTestRoot extends CloudbreakTest {
@@ -193,15 +193,15 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
 
     private void cleanUpRdsConfigs() throws Exception {
         given(CloudbreakClient.created());
-        when(RdsConfig.getAll());
-        then(RdsConfig.assertThis((rdsConfig, testContext) -> {
+        when(DatabaseEntity.getAll());
+        then(DatabaseEntity.assertThis((rdsConfig, testContext) -> {
             var responses = rdsConfig.getResponses();
             for (DatabaseV4Response response : responses) {
                 if (response.getName().equals(getTestParameter().get(hiveConfigNameKey))
                         || response.getName().equals(getTestParameter().get(rangerConfigNameKey))) {
                     try {
-                        given(RdsConfig.request().withName(response.getName()));
-                        when(RdsConfig.delete());
+                        given(DatabaseEntity.request().withName(response.getName()));
+                        when(DatabaseEntity.delete());
                     } catch (Exception e) {
                         logger.warn(String.format(CLEAN_UP_EXCEPTION_MESSAGE, e.getMessage()));
                     }
