@@ -18,7 +18,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
 
     private static final int MIN_TYPE_LENGTH = 3;
 
-    private static final int MAX_TYPE_LENGTH = 12;
+    private static final int MAX_TYPE_LENGTH = 16;
 
     private static final int MAX_CONNECTOR_JAR_URL_LENGTH = 150;
 

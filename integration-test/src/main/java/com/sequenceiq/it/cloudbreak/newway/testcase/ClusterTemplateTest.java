@@ -16,12 +16,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.ClusterTemplateGetAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ClusterTemplateV4CreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ClusterTemplateV4DeleteAction;
@@ -30,7 +28,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.DeleteClusterFromTemplateActio
 import com.sequenceiq.it.cloudbreak.newway.action.LaunchClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ManagementPackCreateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.RdsConfigCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateGetResponse;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreation;
@@ -40,6 +38,8 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ClusterTemplateTest extends AbstractIntegrationTest {
@@ -127,8 +127,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(new LdapConfigCreateIfNotExistsAction())
                 .given(RecipeEntity.class).withName("mock-test-recipe")
                 .when(Recipe.postV4())
-                .given(RdsConfigEntity.class).withName("mock-test-rds")
-                .when(new RdsConfigCreateIfNotExistsAction())
+                .given(DatabaseEntity.class).withName("mock-test-rds")
+                .when(new DatabaseCreateIfNotExistsAction())
                 .given("mpack", ManagementPackEntity.class).withName("mock-test-mpack")
                 .when(new ManagementPackCreateAction())
                 .given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
