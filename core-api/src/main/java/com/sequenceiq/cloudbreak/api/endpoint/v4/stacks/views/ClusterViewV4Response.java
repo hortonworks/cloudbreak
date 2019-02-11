@@ -31,6 +31,9 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE)
     private SharedServiceV4Response sharedServiceResponse;
 
+    @ApiModelProperty(ClusterModelDescription.KERBEROSCONFIG_NAME)
+    private String kerberosName;
+
     public Status getStatus() {
         return status;
     }
@@ -78,4 +81,13 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     public void setSharedServiceResponse(SharedServiceV4Response sharedServiceResponse) {
         this.sharedServiceResponse = sharedServiceResponse;
     }
+
+    public String getKerberosName() {
+        return kerberosName;
+    }
+
+    public void setKerberosName(String kerberosName) {
+        this.kerberosName = kerberosName;
+    }
+
 }
