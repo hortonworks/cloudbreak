@@ -23,8 +23,6 @@ import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
@@ -33,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 
 public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
@@ -102,7 +101,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_DL))
                 .when(Stack.postV4())
                 .deleteGiven(LdapConfigEntity.class, LdapConfig::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(RdsConfigEntity.class, RdsConfig::delete, key(FORBIDDEN_KEY))
+                .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
                 .validate();
@@ -216,12 +215,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     private Set<String> createDatalakeResources(TestContext testContext, String hiveDb, String rangerDb) {
         createDefaultLdapConfig(testContext);
         testContext
-                .given(RdsConfigEntity.class)
+                .given(DatabaseEntity.class)
                 .withName(hiveDb)
-                .when(RdsConfig::post)
+                .when(DatabaseEntity.post())
                 .withName(rangerDb)
                 .withType("RANGER")
-                .when(RdsConfig::post);
+                .when(DatabaseEntity.post());
         Set<String> rdsSet = new HashSet<>();
         rdsSet.add(hiveDb);
         rdsSet.add(rangerDb);
@@ -233,7 +232,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     private Set<String> getRdsAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(RdsConfigEntity.class).getName()));
+        return new HashSet<>(Collections.singletonList(testContext.get(DatabaseEntity.class).getName()));
     }
 
     private ClusterEntity setResources(TestContext testContext, Set<String> rdsConfigs, String ldapName, String proxyName, String bpName) {

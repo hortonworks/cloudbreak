@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = RDSConfigJsonValidator.class)
 public @interface ValidRDSConfigJson {
 
-    String message() default "RDS configuration contains one or more invalid data.";
+    String message() default "Database configuration contains one or more invalid data.";
 
     Class<?>[] groups() default {};
 

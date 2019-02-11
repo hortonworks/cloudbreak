@@ -30,19 +30,18 @@ import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.BlueprintGetListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.proxy.ProxyConfigCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.RdsConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
@@ -144,20 +143,10 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected Set<String> createDefaultRdsConfig(TestContext testContext) {
         testContext
-                .given(RdsConfigEntity.class)
-                .when(new RdsConfigCreateIfNotExistsAction());
+                .given(DatabaseEntity.class)
+                .when(new DatabaseCreateIfNotExistsAction());
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
-        return validRds;
-    }
-
-    protected Set<String> createRangerRdsConfig(TestContext testContext) {
-        testContext
-                .given(RdsConfigEntity.class)
-                .withType("Ranger")
-                .when(RdsConfig::post);
-        Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RdsConfigEntity.class).getName());
+        validRds.add(testContext.get(DatabaseEntity.class).getName());
         return validRds;
     }
 
