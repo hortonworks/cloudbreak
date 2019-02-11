@@ -6,8 +6,8 @@ import static com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Storage;
@@ -27,15 +27,15 @@ public class GcpResourceHelper extends ResourceHelper<GcsCloudStorageV4Parameter
     }
 
     @Override
-    public RdsConfig aValidHiveDatabase() {
-        var hive = RdsConfig.isCreated(HIVE_RDS_ENTITY_ID);
+    public DatabaseEntity aValidHiveDatabase() {
+        var hive = DatabaseEntity.isCreated(HIVE_RDS_ENTITY_ID);
         hive.setRequest(createRdsRequestWithProperties(Hive.CONFIG_NAME, Hive.USER_NAME_KEY, Hive.PASSWORD_KEY, Hive.CONNECTION_URL_KEY, HIVE));
         return hive;
     }
 
     @Override
-    public RdsConfig aValidRangerDatabase() {
-        var ranger = RdsConfig.isCreated(RANGER_RDS_ENTITY_ID);
+    public DatabaseEntity aValidRangerDatabase() {
+        var ranger = DatabaseEntity.isCreated(RANGER_RDS_ENTITY_ID);
         ranger.setRequest(createRdsRequestWithProperties(Ranger.CONFIG_NAME, Ranger.USER_NAME_KEY, Ranger.PASSWORD_KEY, Ranger.CONNECTION_URL_KEY, RANGER));
         return ranger;
     }
