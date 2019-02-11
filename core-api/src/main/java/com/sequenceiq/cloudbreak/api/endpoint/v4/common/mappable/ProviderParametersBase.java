@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class ProviderParametersBase {
 
+    @JsonIgnore
     @ApiModelProperty(hidden = true)
     private CloudPlatform cloudPlatform;
 
@@ -26,4 +29,5 @@ public abstract class ProviderParametersBase {
     public abstract Mappable createYarn();
 
     public abstract Mappable createMock();
+
 }
