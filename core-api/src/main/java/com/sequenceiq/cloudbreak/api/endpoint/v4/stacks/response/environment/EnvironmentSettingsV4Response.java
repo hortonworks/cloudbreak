@@ -48,4 +48,5 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
+
 }

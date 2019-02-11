@@ -2,31 +2,22 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.STACK_ID;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.CredentialViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class StackViewV4Response implements JsonEntity {
+
     @ApiModelProperty(STACK_ID)
     private Long id;
 
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
-
-    @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
-    private String cloudPlatform;
-
-    @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
-    private String platformVariant;
-
-    @ApiModelProperty(StackModelDescription.CREDENTIAL)
-    private CredentialViewV4Response credential;
 
     @ApiModelProperty(StackModelDescription.HDP_VERSION)
     private String hdpVersion;
@@ -50,7 +41,7 @@ public class StackViewV4Response implements JsonEntity {
     private UserViewV4Response user;
 
     @ApiModelProperty(StackModelDescription.ENVIRONMENT)
-    private String environment;
+    private EnvironmentSettingsV4Response environment;
 
     public Long getId() {
         return id;
@@ -66,30 +57,6 @@ public class StackViewV4Response implements JsonEntity {
 
     public void setCluster(ClusterViewV4Response cluster) {
         this.cluster = cluster;
-    }
-
-    public String getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
-    }
-
-    public String getPlatformVariant() {
-        return platformVariant;
-    }
-
-    public void setPlatformVariant(String platformVariant) {
-        this.platformVariant = platformVariant;
-    }
-
-    public CredentialViewV4Response getCredential() {
-        return credential;
-    }
-
-    public void setCredential(CredentialViewV4Response credential) {
-        this.credential = credential;
     }
 
     public Status getStatus() {
@@ -132,11 +99,11 @@ public class StackViewV4Response implements JsonEntity {
         this.name = name;
     }
 
-    public String getEnvironment() {
+    public EnvironmentSettingsV4Response getEnvironment() {
         return environment;
     }
 
-    public void setEnvironment(String environment) {
+    public void setEnvironment(EnvironmentSettingsV4Response environment) {
         this.environment = environment;
     }
 
@@ -155,4 +122,5 @@ public class StackViewV4Response implements JsonEntity {
     public void setTerminated(Long terminated) {
         this.terminated = terminated;
     }
+
 }
