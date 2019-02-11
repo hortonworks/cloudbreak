@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
@@ -102,8 +101,6 @@ public class StackV4Response extends StackV4Base {
     @ApiModelProperty(value = PLACEMENT_SETTINGS, required = true)
     @Valid
     private PlacementSettingsV4Response placement;
-
-    private CloudPlatform cloudPlatform;
 
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Response sharedService;
@@ -266,16 +263,6 @@ public class StackV4Response extends StackV4Base {
 
     public void setCustomDomains(CustomDomainSettingsV4Response customDomains) {
         this.customDomains = customDomains;
-    }
-
-    @Override
-    public CloudPlatform getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    @Override
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
     public SharedServiceV4Response getSharedService() {
