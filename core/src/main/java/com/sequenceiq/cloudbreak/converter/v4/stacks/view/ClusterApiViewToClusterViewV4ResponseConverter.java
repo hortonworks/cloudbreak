@@ -31,6 +31,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterViewResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
         addSharedServiceResponse(source, clusterViewResponse);
+        clusterViewResponse.setKerberosName(getKerberosName(source));
         return clusterViewResponse;
     }
 
@@ -54,6 +55,10 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
             sharedServiceResponse.setSharedClusterName(stackService.getByIdWithTransaction(cluster.getStack().getDatalakeId()).getName());
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
+    }
+
+    private String getKerberosName(ClusterApiView source) {
+        return source.getKerberosConfig() != null ? source.getKerberosConfig().getName() : null;
     }
 
 }
