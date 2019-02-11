@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.CredentialViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
@@ -22,19 +22,16 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         StackViewV4Response stackViewResponse = new StackViewV4Response();
         stackViewResponse.setId(source.getId());
         stackViewResponse.setName(source.getName());
-        stackViewResponse.setCredential(getConversionService().convert(source.getCredential(), CredentialViewV4Response.class));
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(getConversionService().convert(source.getCluster(), ClusterViewV4Response.class));
         }
         addNodeCount(source, stackViewResponse);
-        stackViewResponse.setCloudPlatform(source.getCloudPlatform());
-        stackViewResponse.setPlatformVariant(source.getPlatformVariant());
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());
         stackViewResponse.setTerminated(source.getTerminated());
         addUser(source, stackViewResponse);
         if (source.getEnvironment() != null) {
-            stackViewResponse.setEnvironment(source.getEnvironment().getName());
+            stackViewResponse.setEnvironment(getConversionService().convert(source.getEnvironment(), EnvironmentSettingsV4Response.class));
         }
         return stackViewResponse;
     }
