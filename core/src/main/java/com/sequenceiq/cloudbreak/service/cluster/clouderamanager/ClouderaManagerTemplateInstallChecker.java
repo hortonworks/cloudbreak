@@ -14,12 +14,12 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 
 @Service
-public class ClouderaManagerTemplateInstallChecker extends ClusterBasedStatusCheckerTask<ClouderaManagerTemplateInstallPollerObject> {
+public class ClouderaManagerTemplateInstallChecker extends ClusterBasedStatusCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallChecker.class);
 
     @Override
-    public boolean checkStatus(ClouderaManagerTemplateInstallPollerObject pollerObject) {
+    public boolean checkStatus(ClouderaManagerCommandPollerObject pollerObject) {
         LOGGER.debug("Check if command with id " + pollerObject.getId() + " is still running for " + pollerObject.getStack().getAmbariIp());
         ApiClient apiClient = pollerObject.getApiClient();
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(apiClient);
@@ -44,13 +44,13 @@ public class ClouderaManagerTemplateInstallChecker extends ClusterBasedStatusChe
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerTemplateInstallPollerObject clouderaManagerPollerObject) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Template install timed out with this command id: "
                 + clouderaManagerPollerObject.getId());
     }
 
     @Override
-    public String successMessage(ClouderaManagerTemplateInstallPollerObject clouderaManagerPollerObject) {
+    public String successMessage(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {
         return String.format("Template installation success for stack '%s'", clouderaManagerPollerObject.getStack().getId());
     }
 }

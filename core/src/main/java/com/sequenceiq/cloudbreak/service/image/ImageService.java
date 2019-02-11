@@ -117,7 +117,7 @@ public class ImageService {
             CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
-        if (blueprint != null) {
+        if (blueprint != null && blueprintUtils.isAmbariBlueprint(blueprint.getBlueprintText())) {
             try {
                 JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
                 clusterType = blueprintUtils.getBlueprintStackName(root);

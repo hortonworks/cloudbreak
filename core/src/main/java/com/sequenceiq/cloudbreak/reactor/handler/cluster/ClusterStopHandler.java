@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -18,13 +18,13 @@ import reactor.bus.EventBus;
 @Component
 public class ClusterStopHandler implements ReactorEventHandler<ClusterStopRequest> {
     @Inject
-    private AmbariClusterConnector ambariClusterConnector;
-
-    @Inject
     private StackService stackService;
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ClusterApiConnectors apiConnectors;
 
     @Override
     public String selector() {
@@ -37,7 +37,7 @@ public class ClusterStopHandler implements ReactorEventHandler<ClusterStopReques
         ClusterStopResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            ambariClusterConnector.stopCluster(stack);
+            apiConnectors.getConnector(stack.getCluster().getVariant()).stopCluster(stack);
             result = new ClusterStopResult(request);
         } catch (Exception e) {
             result = new ClusterStopResult(e.getMessage(), e, request);
