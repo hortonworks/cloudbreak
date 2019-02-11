@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -89,7 +91,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setStatus(source.getStatus());
         response.setTerminated(source.getTerminated());
         response.setStatusReason(source.getStatusReason());
-        response.setInstanceGroups(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class));
+        response.setInstanceGroups(getInstanceGroups(source));
         response.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Response.class));
         response.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Response.class));
         providerParameterCalculator.parse(new HashMap<>(source.getParameters()), response);
@@ -103,6 +105,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         addFlexSubscription(response, source);
         response.setTimeToLive(getStackTimeToLive(source));
         addSharedServiceResponse(source, response);
+
         return response;
     }
 
@@ -151,6 +154,16 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                 LOGGER.warn("Flex subscription could not be added to stack response.", ex);
             }
         }
+    }
+
+    private List<InstanceGroupV4Response> getInstanceGroups(Stack stack) {
+        var instanceGroups = new LinkedList<InstanceGroupV4Response>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            var instanceGroupRequest = getConversionService().convert(instanceGroup, InstanceGroupV4Response.class);
+            collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupRequest);
+            instanceGroups.add(instanceGroupRequest);
+        }
+        return instanceGroups;
     }
 
     private void collectInformationsFromActualHostgroup(Cluster cluster, InstanceGroup instanceGroup, InstanceGroupV4Response instanceGroupResponse) {
