@@ -26,10 +26,13 @@ public class ClouderaManagerPollingServiceProvider {
     private PollingService<ClouderaManagerPollerObject> clouderaManagerPollerService;
 
     @Inject
-    private PollingService<ClouderaManagerTemplateInstallPollerObject> clouderaManagerTemplateInstallPollerService;
+    private PollingService<ClouderaManagerCommandPollerObject> clouderaManagerCommandPollerObjectPollingService;
 
     @Inject
     private ClouderaManagerStartupListenerTask clouderaManagerStartupListenerTask;
+
+    @Inject
+    private ClouderaManagerStopListenerTask clouderaManagerStopListenerTask;
 
     @Inject
     private ClouderaManagerHostStatusChecker clouderaManagerHostStatusChecker;
@@ -59,11 +62,21 @@ public class ClouderaManagerPollingServiceProvider {
 
     public PollingResult templateInstallCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getAmbariIp());
-        ClouderaManagerTemplateInstallPollerObject clouderaManagerTemplateInstallPollerObject =
-                new ClouderaManagerTemplateInstallPollerObject(stack, apiClient, commandId);
-        return clouderaManagerTemplateInstallPollerService.pollWithTimeoutSingleFailure(
+        ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject =
+                new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
                 clouderaManagerTemplateInstallChecker,
-                clouderaManagerTemplateInstallPollerObject,
+                clouderaManagerCommandPollerObject,
+                POLL_INTERVAL,
+                MAX_ATTEMPT);
+    }
+
+    public PollingResult stopPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager services to stop. [Server address: {}]", stack.getAmbariIp());
+        ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
+                clouderaManagerStopListenerTask,
+                clouderaManagerPollerObject,
                 POLL_INTERVAL,
                 MAX_ATTEMPT);
     }
