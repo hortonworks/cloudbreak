@@ -32,6 +32,9 @@ public class ClouderaManagerPollingServiceProvider {
     private ClouderaManagerStartupListenerTask clouderaManagerStartupListenerTask;
 
     @Inject
+    private ClouderaManagerServiceStartListenerTask clouderaManagerServiceStartListenerTask;
+
+    @Inject
     private ClouderaManagerStopListenerTask clouderaManagerStopListenerTask;
 
     @Inject
@@ -76,6 +79,16 @@ public class ClouderaManagerPollingServiceProvider {
         ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
         return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
                 clouderaManagerStopListenerTask,
+                clouderaManagerPollerObject,
+                POLL_INTERVAL,
+                MAX_ATTEMPT);
+    }
+
+    public PollingResult startPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager services to start. [Server address: {}]", stack.getAmbariIp());
+        ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
+                clouderaManagerServiceStartListenerTask,
                 clouderaManagerPollerObject,
                 POLL_INTERVAL,
                 MAX_ATTEMPT);

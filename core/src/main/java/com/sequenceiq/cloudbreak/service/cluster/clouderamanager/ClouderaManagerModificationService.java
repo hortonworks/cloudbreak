@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.clouderamanager;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STARTED;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STARTING;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STOPPED;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STOPPING;
 
@@ -67,7 +69,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (isExited(pollingResult)) {
                 throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
             } else if (isTimeout(pollingResult)) {
-                throw new CloudbreakException("Timeout while stopping Ambari services.");
+                throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
             }
             eventService
                     .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
@@ -80,6 +82,53 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public int startCluster(Stack stack) throws CloudbreakException {
-        return 0;
+        Cluster cluster = stack.getCluster();
+        ApiClient client = clouderaManagerClientFactory.getClient(stack, cluster);
+        try {
+            startClouderaManager(stack, client);
+            startAgents(stack, client);
+            return startServices(stack, client).getId().intValue();
+        } catch (ApiException e) {
+            LOGGER.info("Couldn't start Cloudera Manager services", e);
+            throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private ApiCommand startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        ClustersResourceApi apiInstance = new ClustersResourceApi(client);
+        String clusterName = cluster.getName();
+        LOGGER.debug("Starting all services for cluster.");
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                        cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTING.code()));
+        ApiCommand apiCommand = apiInstance.startCommand(clusterName);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingService(stack, client, apiCommand.getId());
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
+        } else if (isTimeout(pollingResult)) {
+            throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
+        }
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                        cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTED.code()));
+        return apiCommand;
+    }
+
+    private void startAgents(Stack stack, ApiClient client) {
+        LOGGER.debug("Starting Cloudera Manager agents on the hosts.");
+        PollingResult hostsJoinedResult = clouderaManagerPollingServiceProvider.hostsPollingService(stack, client);
+        if (isExited(hostsJoinedResult)) {
+            throw new CancellationException("Cluster was terminated while starting Cloudera Manager agents.");
+        }
+    }
+
+    private void startClouderaManager(Stack stack, ApiClient client) throws CloudbreakException {
+        PollingResult healthCheckResult = clouderaManagerPollingServiceProvider.clouderaManagerStartupPollerObjectPollingService(stack, client);
+        if (isExited(healthCheckResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for Cloudera Manager to start.");
+        } else if (isTimeout(healthCheckResult)) {
+            throw new CloudbreakException("Cloudera Manager server was not restarted properly.");
+        }
     }
 }
