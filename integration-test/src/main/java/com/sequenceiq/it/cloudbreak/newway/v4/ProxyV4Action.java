@@ -10,7 +10,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 
 public class ProxyV4Action {
     private ProxyV4Action() {

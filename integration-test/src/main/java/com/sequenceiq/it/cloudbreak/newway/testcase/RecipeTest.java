@@ -23,11 +23,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.Recipe;
-import com.sequenceiq.it.cloudbreak.newway.RecipeEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.StackScalePostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -66,7 +66,7 @@ public class RecipeTest extends AbstractIntegrationTest {
         String recipeName = creator.getRandomNameForMock();
         testContext
                 .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(type)
-                .when(Recipe.postV2())
+                .when(Recipe.postV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(Stack.postV4())
@@ -80,7 +80,7 @@ public class RecipeTest extends AbstractIntegrationTest {
         String recipeName = creator.getRandomNameForMock();
         testContext
                 .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
-                .when(Recipe.postV2())
+                .when(Recipe.postV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(Stack.postV4())
@@ -111,7 +111,7 @@ public class RecipeTest extends AbstractIntegrationTest {
         String recipeName = creator.getRandomNameForMock();
         testContext
                 .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL)
-                .when(Recipe.postV2())
+                .when(Recipe.postV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(Stack.postV4())
@@ -128,7 +128,7 @@ public class RecipeTest extends AbstractIntegrationTest {
         String recipeName = creator.getRandomNameForMock();
         testContext
                 .given(RecipeEntity.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
-                .when(Recipe.postV2())
+                .when(Recipe.postV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class).withHostGroup(COMPUTE).withNodeCount(NODE_COUNT).withRecipes(recipeName)
                 .given(StackEntity.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(Stack.postV4())

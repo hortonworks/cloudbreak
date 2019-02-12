@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Recipe;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 
 public class RecipeTests extends CloudbreakTest {
     private static final String VALID_RECIPE_NAME = "valid-recipe";
