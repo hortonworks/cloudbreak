@@ -26,4 +26,8 @@ public class ResourceUtil {
         Resource resource = applicationContext.getResource(resourceLocation);
         return StreamUtils.copyToByteArray(resource.getInputStream());
     }
+
+    public static String readResourceAsString(ResourceLoader applicationContext, String resourceLocation) throws IOException {
+        return new String(readResource(applicationContext, resourceLocation));
+    }
 }
