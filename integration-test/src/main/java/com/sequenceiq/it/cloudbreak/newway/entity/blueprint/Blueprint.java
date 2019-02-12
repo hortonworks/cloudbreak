@@ -1,11 +1,20 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.blueprint;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.Assertion;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
+import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.ResourceAction;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.BlueprintPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintDeleteAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintGetAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintGetListAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.BlueprintV4Action;
 
@@ -76,8 +85,24 @@ public class Blueprint extends BlueprintEntity {
         return entity;
     }
 
-    public static Action<BlueprintEntity> postV2() {
+    public static Action<BlueprintEntity> postV4() {
         return new BlueprintPostAction();
+    }
+
+    public static Action<BlueprintEntity> listV4() {
+        return new BlueprintGetListAction();
+    }
+
+    public static Action<BlueprintEntity> getV4() {
+        return new BlueprintGetAction();
+    }
+
+    public static Action<BlueprintEntity> deleteV4() {
+        return new BlueprintDeleteAction();
+    }
+
+    public static Action<BlueprintEntity> requestV4() {
+        return new BlueprintRequestAction();
     }
 
     @Override
