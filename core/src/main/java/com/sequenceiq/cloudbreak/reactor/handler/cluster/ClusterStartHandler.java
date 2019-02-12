@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -18,7 +18,7 @@ import reactor.bus.EventBus;
 @Component
 public class ClusterStartHandler implements ReactorEventHandler<ClusterStartRequest> {
     @Inject
-    private AmbariClusterConnector ambariClusterConnector;
+    private ClusterApiConnectors apiConnectors;
 
     @Inject
     private StackService stackService;
@@ -37,7 +37,7 @@ public class ClusterStartHandler implements ReactorEventHandler<ClusterStartRequ
         ClusterStartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            int requestId = ambariClusterConnector.startCluster(stack);
+            int requestId = apiConnectors.getConnector(stack.getCluster().getVariant()).startCluster(stack);
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {
             result = new ClusterStartResult(e.getMessage(), e, request);
