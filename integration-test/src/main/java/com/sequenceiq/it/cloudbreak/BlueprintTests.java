@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;

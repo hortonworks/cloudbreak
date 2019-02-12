@@ -15,4 +15,8 @@ public class RandomNameCreator {
     public String getRandomNameForMock() {
         return "mock-" + generator.next().replaceAll("_", "-");
     }
+
+    public String getInvalidRandomNameForMock() {
+        return "mock-?!;" + generator.next().replaceAll("_", "-");
+    }
 }
