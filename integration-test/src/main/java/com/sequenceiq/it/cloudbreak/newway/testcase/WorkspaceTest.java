@@ -10,8 +10,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -77,7 +77,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateABlueprintAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(BlueprintEntity.class).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV2())
+                .when(Blueprint.postV4())
                 .when(Blueprint::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
