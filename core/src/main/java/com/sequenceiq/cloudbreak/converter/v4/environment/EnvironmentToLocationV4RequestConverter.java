@@ -11,7 +11,7 @@ public class EnvironmentToLocationV4RequestConverter extends AbstractConversionS
     @Override
     public LocationV4Request convert(Environment source) {
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName(source.getLocation());
+        locationRequest.setName(source.getLocation());
         locationRequest.setLatitude(source.getLatitude());
         locationRequest.setLongitude(source.getLongitude());
         return locationRequest;
