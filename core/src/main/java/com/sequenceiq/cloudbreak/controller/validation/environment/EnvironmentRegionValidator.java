@@ -28,10 +28,10 @@ public class EnvironmentRegionValidator {
     public ValidationResultBuilder validateLocation(LocationV4Request location, Set<String> requestedRegions,
             Environment environment, ValidationResultBuilder resultBuilder) {
         String cloudPlatform = environment.getCloudPlatform();
-        if (!requestedRegions.contains(location.getLocationName())
+        if (!requestedRegions.contains(location.getName())
                 && !requestedRegions.isEmpty()) {
             if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
-                resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", location.getLocationName(),
+                resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", location.getName(),
                         requestedRegions.stream().collect(Collectors.joining(", "))));
             }
         }

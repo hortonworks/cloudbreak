@@ -61,7 +61,7 @@ public class EnvironmentUtils {
         EnvironmentEditV4Request editRequest = new EnvironmentEditV4Request();
         editRequest.setDescription(description);
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName(location);
+        locationRequest.setName(location);
         locationRequest.setLongitude(1D);
         locationRequest.setLatitude(2D);
         editRequest.setLocation(locationRequest);

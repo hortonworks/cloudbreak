@@ -101,7 +101,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     public EnvironmentEntity withLocation(String location) {
         LocationV4Request locationV4Request = new LocationV4Request();
-        locationV4Request.setLocationName(location);
+        locationV4Request.setName(location);
         getRequest().setLocation(locationV4Request);
         return this;
     }
