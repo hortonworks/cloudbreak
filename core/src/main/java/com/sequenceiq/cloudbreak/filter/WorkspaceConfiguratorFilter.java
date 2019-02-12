@@ -27,7 +27,7 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceConfiguratorFilter.class);
 
-    private final Pattern v3ResourcePattern = Pattern.compile(".*\\/v3\\/(\\d*)\\/.*");
+    private final Pattern v4ResourcePattern = Pattern.compile(".*\\/v4\\/(\\d*)\\/.*");
 
     private final CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
@@ -48,15 +48,15 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        Matcher v3ResourceMatcher = v3ResourcePattern.matcher(requestURI);
+        Matcher v4ResourceMatcher = v4ResourcePattern.matcher(requestURI);
 
-        if (v3ResourceMatcher.matches()) {
-            String workspaceIdString = v3ResourceMatcher.group(1);
+        if (v4ResourceMatcher.matches()) {
+            String workspaceIdString = v4ResourceMatcher.group(1);
             try {
                 Long workspaceId = Long.valueOf(workspaceIdString);
                 restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
             } catch (NumberFormatException e) {
-                LOGGER.info(String.format("WorkspaceID couldn't be parsed from the V3 request URI: %s", requestURI), e);
+                LOGGER.info(String.format("WorkspaceID couldn't be parsed from the V4 request URI: %s", requestURI), e);
             }
         } else {
             CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
