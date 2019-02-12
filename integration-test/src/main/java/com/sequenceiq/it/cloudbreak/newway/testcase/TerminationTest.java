@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.StackDeleteInstanceAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackDeleteInstanceAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertStatusReasonMessage;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
