@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -17,7 +17,7 @@ public interface CloudProvider {
 //
 //    String region();
 
-    ImageCatalogEntity imageCatalog(ImageCatalogEntity imageCatalog);
+    ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog);
 
     InstanceTemplateV4Entity template(InstanceTemplateV4Entity template);
 

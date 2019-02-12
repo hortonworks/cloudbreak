@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -84,8 +84,8 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Image ID is mismatch!");
         }
 
-        ImageCatalogEntity imageCatalogEntity = testContext.get(ImageCatalogEntity.class);
-        if (!imageCatalogEntity.getName().equals(stackTemplate.getImage().getCatalog())) {
+        ImageCatalogDto imageCatalogDto = testContext.get(ImageCatalogDto.class);
+        if (!imageCatalogDto.getName().equals(stackTemplate.getImage().getCatalog())) {
             throw new IllegalArgumentException("Image catalog name is mismatch!");
         }
 

@@ -8,17 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 
-public class ImageCatalogPostAction implements Action<ImageCatalogDto> {
+public class ImageCatalogPostWithoutNameLoggingAction implements Action<ImageCatalogDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogPostAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogPostWithoutNameLoggingAction.class);
 
     @Override
     public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, format(" Image catalog post request:%n"), entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()

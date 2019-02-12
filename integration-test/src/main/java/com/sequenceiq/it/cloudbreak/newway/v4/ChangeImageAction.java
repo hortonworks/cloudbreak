@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 
 public class ChangeImageAction implements Action<StackEntity> {
 
@@ -29,8 +29,8 @@ public class ChangeImageAction implements Action<StackEntity> {
 
     @Override
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
-        ImageCatalogEntity imageCatalogEntity = testContext.get(ImageCatalogEntity.class);
-        request.setImageCatalogName(imageCatalogEntity.getName());
+        ImageCatalogDto imageCatalogDto = testContext.get(ImageCatalogDto.class);
+        request.setImageCatalogName(imageCatalogDto.getName());
 
         logJSON(" Enable Maintenance Mode post request:\n", request);
 

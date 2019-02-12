@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -71,7 +71,7 @@ public class CloudProviderProxy implements CloudProvider {
 //    }
 
     @Override
-    public ImageCatalogEntity imageCatalog(ImageCatalogEntity imageCatalog) {
+    public ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog) {
         return delegate.imageCatalog(imageCatalog);
     }
 
