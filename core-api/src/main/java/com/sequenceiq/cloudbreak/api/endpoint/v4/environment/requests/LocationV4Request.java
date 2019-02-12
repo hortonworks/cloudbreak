@@ -13,21 +13,13 @@ import io.swagger.annotations.ApiModelProperty;
 public class LocationV4Request {
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LOCATION)
-    private @NotNull String locationName;
+    private @NotNull String name;
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LATITUDE)
     private Double latitude;
 
     @ApiModelProperty(EnvironmentRequestModelDescription.LONGITUDE)
     private Double longitude;
-
-    public String getLocationName() {
-        return locationName;
-    }
-
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
-    }
 
     public Double getLatitude() {
         return latitude;
@@ -45,7 +37,15 @@ public class LocationV4Request {
         this.longitude = longitude;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public boolean isEmpty() {
-        return StringUtils.isEmpty(locationName) && latitude == null && longitude == null;
+        return StringUtils.isEmpty(name) && latitude == null && longitude == null;
     }
 }

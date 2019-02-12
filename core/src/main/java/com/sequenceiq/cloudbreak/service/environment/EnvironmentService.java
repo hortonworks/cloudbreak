@@ -292,15 +292,15 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     private void setLocation(Environment environment, LocationV4Request requestedLocation, CloudRegions cloudRegions) {
         if (requestedLocation != null) {
-            Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getLocationName()));
+            Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getName()));
             if (coordinate != null) {
-                environment.setLocation(requestedLocation.getLocationName());
+                environment.setLocation(requestedLocation.getName());
                 environment.setLocationDisplayName(coordinate.getDisplayName());
                 environment.setLatitude(coordinate.getLatitude());
                 environment.setLongitude(coordinate.getLongitude());
             } else if (requestedLocation.getLatitude() != null && requestedLocation.getLongitude() != null) {
-                environment.setLocation(requestedLocation.getLocationName());
-                environment.setLocationDisplayName(requestedLocation.getLocationName());
+                environment.setLocation(requestedLocation.getName());
+                environment.setLocationDisplayName(requestedLocation.getName());
                 environment.setLatitude(requestedLocation.getLatitude());
                 environment.setLongitude(requestedLocation.getLongitude());
             } else {

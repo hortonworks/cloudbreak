@@ -224,7 +224,7 @@ public class EnvironmentServiceTest {
         credentialRequest.setName("IgnoredCredRequestName");
         environmentV4Request.setCredential(credentialRequest);
         LocationV4Request locationV4Request = new LocationV4Request();
-        locationV4Request.setLocationName("region1");
+        locationV4Request.setName("region1");
         environmentV4Request.setLocation(locationV4Request);
 
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
@@ -246,7 +246,7 @@ public class EnvironmentServiceTest {
         credentialRequest.setName("CredRequestName");
         environmentV4Request.setCredential(credentialRequest);
         LocationV4Request locationV4Request = new LocationV4Request();
-        locationV4Request.setLocationName("region1");
+        locationV4Request.setName("region1");
         environmentV4Request.setLocation(locationV4Request);
 
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
@@ -271,7 +271,7 @@ public class EnvironmentServiceTest {
         environmentV4Request.setCredential(credentialRequest);
         environmentV4Request.setRegions(Set.of("region1", "region2"));
         LocationV4Request locationV4Request = new LocationV4Request();
-        locationV4Request.setLocationName("region1");
+        locationV4Request.setName("region1");
         environmentV4Request.setLocation(locationV4Request);
 
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
@@ -684,7 +684,7 @@ public class EnvironmentServiceTest {
         String newLocation = region3;
         EnvironmentEditV4Request editRequest = new EnvironmentEditV4Request();
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName(newLocation);
+        locationRequest.setName(newLocation);
         editRequest.setLocation(locationRequest);
 
         Environment environment = EnvironmentUtils.getEnvironment(region1, Set.of(region1, region2, region3));
