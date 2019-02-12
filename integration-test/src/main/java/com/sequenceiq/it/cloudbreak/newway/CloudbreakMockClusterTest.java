@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterSuite;
@@ -53,18 +52,18 @@ public class CloudbreakMockClusterTest extends CloudbreakTest {
             LOGGER.info("Could not remove image catalog, possibly it is not exist", e);
         }
 
-        given(Mock.imageCatalogServiceIsStarted());
         given(CloudbreakClient.created());
-        given(ImageCatalog.request()
-                .withName(VALID_IMAGECATALOG_NAME), "an imagecatalog request and set as default"
-        );
-        when(ImageCatalog.post());
-        when(ImageCatalog.setDefault());
-        then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> {
-                    Assert.assertEquals(imageCatalog.getResponse().getName(), VALID_IMAGECATALOG_NAME);
-                    Assert.assertEquals(imageCatalog.getResponse().isUsedAsDefault(), true);
-                }), "check imagecatalog is created and set as default");
+//        given(Mock.imageCatalogServiceIsStarted());
+//        given(ImageCatalog.request()
+//                .withName(VALID_IMAGECATALOG_NAME), "an imagecatalog request and set as default"
+//        );
+//        when(ImageCatalog.post());
+//        when(ImageCatalog.setDefault());
+//        then(ImageCatalog.assertThis(
+//                (imageCatalog, t) -> {
+//                    Assert.assertEquals(imageCatalog.getResponse().getName(), VALID_IMAGECATALOG_NAME);
+//                    Assert.assertEquals(imageCatalog.getResponse().isUsedAsDefault(), true);
+//                }), "check imagecatalog is created and set as default");
     }
 
     private void mockSetup(ITestContext context) {
@@ -99,9 +98,9 @@ public class CloudbreakMockClusterTest extends CloudbreakTest {
 
     private void deleteImageCatalog() throws Exception {
         given(CloudbreakClient.created());
-        given(ImageCatalog.request()
-                .withName(VALID_IMAGECATALOG_NAME), "an imagecatalog request and set as default"
-        );
-        when(ImageCatalog.delete());
+//        given(ImageCatalog.request()
+//                .withName(VALID_IMAGECATALOG_NAME), "an imagecatalog request and set as default"
+//        );
+//        when(ImageCatalog.delete());
     }
 }

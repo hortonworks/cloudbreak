@@ -6,16 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogEntity> {
+public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 
     @Override
-    public ImageCatalogEntity action(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient client) throws Exception {
+    public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient client) throws Exception {
         LOGGER.info("Create Imagecatalog with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

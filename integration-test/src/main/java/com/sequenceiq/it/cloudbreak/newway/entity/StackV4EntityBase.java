@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -67,7 +66,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     public StackV4EntityBase<T> withEveryProperties() {
-        ImageCatalogEntity imgCat = getTestContext().get(ImageCatalogEntity.class);
+        ImageCatalogDto imgCat = getTestContext().get(ImageCatalogDto.class);
         getTestContext()
                 .given("network", NetworkV2Entity.class).withSubnetCIDR("10.10.0.0/16")
                 .given("securityRulesWorker", SecurityRulesEntity.class).withPorts("55", "66", "77").withProtocol("ftp").withSubnet("10.0.0.0/32")

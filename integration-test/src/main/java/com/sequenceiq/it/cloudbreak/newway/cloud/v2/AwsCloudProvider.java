@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyB
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -29,7 +29,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     private static final String KEY_BASED_CREDENTIAL = "key";
 
     @Override
-    public ImageCatalogEntity imageCatalog(ImageCatalogEntity imageCatalog) {
+    public ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog) {
         return imageCatalog.withName("cloudbreak-default").withUrl(null);
     }
 

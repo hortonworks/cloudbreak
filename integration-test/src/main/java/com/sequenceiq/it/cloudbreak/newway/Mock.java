@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import static com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity.IMAGE_CATALOG_URL;
+import static com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto.IMAGE_CATALOG_URL;
 
 import java.io.File;
 import java.io.FileOutputStream;

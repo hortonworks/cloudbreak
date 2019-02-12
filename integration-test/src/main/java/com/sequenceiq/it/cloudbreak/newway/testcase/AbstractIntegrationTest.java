@@ -26,7 +26,6 @@ import org.testng.annotations.DataProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetListAction;
@@ -39,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
 import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
@@ -129,9 +129,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
-                .given(ImageCatalogEntity.class)
+                .given(ImageCatalogDto.class)
                 .when(new ImageCatalogCreateIfNotExistsAction())
-                .when(ImageCatalogEntity::putSetDefaultByName);
+                .when(ImageCatalogDto::putSetDefaultByName);
     }
 
     protected Set<String> createDefaultProxyConfig(TestContext testContext) {
