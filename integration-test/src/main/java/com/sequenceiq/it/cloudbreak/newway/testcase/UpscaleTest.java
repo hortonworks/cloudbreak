@@ -16,8 +16,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.StackPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.StackScalePostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 

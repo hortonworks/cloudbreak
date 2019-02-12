@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -425,16 +426,32 @@ public class TestContext implements ApplicationContextAware {
         String key = getKey(entity.getClass(), runningParameter);
         Exception exception = exceptionMap.get(key);
         if (exception == null) {
-            exceptionMap.put("expect", new RuntimeException("Expected an exception but cannot find with key: " + key));
-        }
-        if (exception != null && (!exception.getClass().equals(expectedException) || !isMessageEquals(exception, runningParameter))) {
-            exceptionMap.put("expect", new RuntimeException(
-                    String.format("Expected exception (%s) or message (%s) is not match with the actual exception (%s) or message(%s).",
-                    expectedException, runningParameter.getExpectedMessage(), exception.getClass(), getErrorMessage(exception))));
+            String message = "Expected an exception but cannot find with key: " + key;
+            exceptionMap.put("expect", new RuntimeException(message));
+            Assert.fail(message);
         } else {
-            exceptionMap.remove(key);
+            if (!exception.getClass().equals(expectedException)) {
+                String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
+                        expectedException, exception.getClass());
+                exceptionMap.put("expect", new RuntimeException(message));
+                Assert.fail(message);
+            } else if (!isMessageEquals(exception, runningParameter)) {
+                String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
+                        runningParameter.getExpectedMessage(), getErrorMessage(exception));
+                exceptionMap.put("expect", new RuntimeException(message));
+                Assert.fail(message);
+            } else {
+                runExceptionConsumer(runningParameter.getExceptionConsumer(), exception);
+                exceptionMap.remove(key);
+            }
         }
         return entity;
+    }
+
+    private void runExceptionConsumer(Consumer<Exception> exceptionConsumer, Exception exception) {
+        if (exceptionConsumer != null) {
+            exceptionConsumer.accept(exception);
+        }
     }
 
     private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {

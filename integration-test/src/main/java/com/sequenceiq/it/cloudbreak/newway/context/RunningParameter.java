@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.context;
 
+import java.util.function.Consumer;
+
 public class RunningParameter {
 
     private String who;
@@ -11,6 +13,8 @@ public class RunningParameter {
     private boolean logError = true;
 
     private String expectedMessage;
+
+    private Consumer<Exception> exceptionConsumer;
 
     public String getWho() {
         return who;
@@ -42,6 +46,15 @@ public class RunningParameter {
     public RunningParameter withExpectedMessage(String message) {
         expectedMessage = message;
         return this;
+    }
+
+    public RunningParameter withExceptionConsumer(Consumer<Exception> exceptionConsumer) {
+        this.exceptionConsumer = exceptionConsumer;
+        return this;
+    }
+
+    public Consumer<Exception> getExceptionConsumer() {
+        return exceptionConsumer;
     }
 
     public String getKey() {
@@ -84,5 +97,10 @@ public class RunningParameter {
     public static RunningParameter expectedMessage(String message) {
         return new RunningParameter()
                 .withExpectedMessage(message);
+    }
+
+    public static RunningParameter exceptionConsumer(Consumer<Exception> exceptionConsumer) {
+        return new RunningParameter()
+                .withExceptionConsumer(exceptionConsumer);
     }
 }

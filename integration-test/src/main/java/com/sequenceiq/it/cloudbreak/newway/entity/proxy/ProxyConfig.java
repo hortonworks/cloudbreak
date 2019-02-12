@@ -1,12 +1,17 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.proxy;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.Assertion;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
+import com.sequenceiq.it.cloudbreak.newway.ResourceAction;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.ProxyConfigPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.proxy.ProxyConfigDeleteAction;
+import com.sequenceiq.it.cloudbreak.newway.action.proxy.ProxyConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.ProxyV4Action;
 
@@ -54,31 +59,31 @@ public class ProxyConfig extends ProxyConfigEntity {
         return entity;
     }
 
-    public static ResourceAction post(String key) {
-        return new ResourceAction(getTestContext(key), ProxyV4Action::post);
+    public static ResourceAction<ProxyConfig> post(String key) {
+        return new ResourceAction<>(getTestContext(key), ProxyV4Action::post);
     }
 
-    public static ResourceAction post() {
+    public static ResourceAction<ProxyConfig> post() {
         return post(PROXYCONFIG);
     }
 
-    public static ResourceAction get(String key) {
-        return new ResourceAction(getTestContext(key), ProxyV4Action::get);
+    public static ResourceAction<ProxyConfig> get(String key) {
+        return new ResourceAction<>(getTestContext(key), ProxyV4Action::get);
     }
 
-    public static ResourceAction get() {
+    public static ResourceAction<ProxyConfig> get() {
         return get(PROXYCONFIG);
     }
 
-    public static ResourceAction getAll() {
-        return new ResourceAction(getNew(), ProxyV4Action::getAll);
+    public static ResourceAction<ProxyConfig> getAll() {
+        return new ResourceAction<>(getNew(), ProxyV4Action::getAll);
     }
 
-    public static ResourceAction delete(String key) {
-        return new ResourceAction(getTestContext(key), ProxyV4Action::delete);
+    public static ResourceAction<ProxyConfig> delete(String key) {
+        return new ResourceAction<>(getTestContext(key), ProxyV4Action::delete);
     }
 
-    public static ResourceAction delete() {
+    public static ResourceAction<ProxyConfig> delete() {
         return delete(PROXYCONFIG);
     }
 
@@ -100,7 +105,11 @@ public class ProxyConfig extends ProxyConfigEntity {
         return entity;
     }
 
-    public static Action<ProxyConfigEntity> postV2() {
+    public static Action<ProxyConfigEntity> postV4() {
         return new ProxyConfigPostAction();
+    }
+
+    public static Action<ProxyConfigEntity> deleteV4() {
+        return new ProxyConfigDeleteAction();
     }
 }

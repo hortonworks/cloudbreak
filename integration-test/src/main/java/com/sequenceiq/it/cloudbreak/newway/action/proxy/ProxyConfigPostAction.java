@@ -1,7 +1,8 @@
-package com.sequenceiq.it.cloudbreak.newway.action;
+package com.sequenceiq.it.cloudbreak.newway.action.proxy;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +18,13 @@ public class ProxyConfigPostAction implements Action<ProxyConfigEntity> {
     @Override
     public ProxyConfigEntity action(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, format(" Proxy config post request:%n"), entity.getRequest());
+        logJSON(LOGGER, " Proxy config post request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
                         .proxyConfigV4Endpoint()
                         .post(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, format(" Image config created  successfully:%n"), entity.getResponse());
+        logJSON(LOGGER, " Proxy config was created successfully:\n", entity.getResponse());
         log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-
         return entity;
     }
 

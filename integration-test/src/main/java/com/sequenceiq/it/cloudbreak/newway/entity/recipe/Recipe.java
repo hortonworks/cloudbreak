@@ -1,11 +1,15 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.recipe;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.Assertion;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
+import com.sequenceiq.it.cloudbreak.newway.ResourceAction;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.RecipePostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipePostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.RecipeV4Action;
 
@@ -49,31 +53,31 @@ public class Recipe extends RecipeEntity {
         return entity;
     }
 
-    public static ResourceAction post(String key) {
-        return new ResourceAction(getTestContext(key), RecipeV4Action::post);
+    public static ResourceAction<Recipe> post(String key) {
+        return new ResourceAction<>(getTestContext(key), RecipeV4Action::post);
     }
 
-    public static ResourceAction post() {
+    public static ResourceAction<Recipe> post() {
         return post(RECIPE);
     }
 
-    public static ResourceAction get(String key) {
-        return new ResourceAction(getTestContext(key), RecipeV4Action::get);
+    public static ResourceAction<Recipe> get(String key) {
+        return new ResourceAction<>(getTestContext(key), RecipeV4Action::get);
     }
 
-    public static ResourceAction get() {
+    public static ResourceAction<Recipe> get() {
         return get(RECIPE);
     }
 
-    public static ResourceAction getAll() {
-        return new ResourceAction(getNew(), RecipeV4Action::getAll);
+    public static ResourceAction<Recipe> getAll() {
+        return new ResourceAction<>(getNew(), RecipeV4Action::getAll);
     }
 
-    public static ResourceAction delete(String key) {
-        return new ResourceAction(getTestContext(key), RecipeV4Action::delete);
+    public static ResourceAction<Recipe> delete(String key) {
+        return new ResourceAction<>(getTestContext(key), RecipeV4Action::delete);
     }
 
-    public static ResourceAction delete() {
+    public static ResourceAction<Recipe> delete() {
         return delete(RECIPE);
     }
 
@@ -81,7 +85,7 @@ public class Recipe extends RecipeEntity {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
 
-    public static Action<RecipeEntity> postV2() {
+    public static Action<RecipeEntity> postV4() {
         return new RecipePostAction();
     }
 }

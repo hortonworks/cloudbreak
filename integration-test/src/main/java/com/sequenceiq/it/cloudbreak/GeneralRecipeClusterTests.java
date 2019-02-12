@@ -19,7 +19,7 @@ import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.Recipe;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;

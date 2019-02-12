@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.LdapConfigPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.LdapConfigV4Action;
 
