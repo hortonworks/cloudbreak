@@ -21,10 +21,10 @@ import com.sequenceiq.it.cloudbreak.newway.Kerberos;
 import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.ProxyConfig;
-import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.Recipe;
-import com.sequenceiq.it.cloudbreak.newway.RecipeEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -87,7 +87,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateARecipeAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(RecipeEntity.class)
-                .when(Recipe.postV2())
+                .when(Recipe.postV4())
                 .when(Recipe::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -127,7 +127,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAProxyConfigAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(ProxyConfigEntity.class)
-                .when(ProxyConfig.postV2())
+                .when(ProxyConfig.postV4())
                 .when(ProxyConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();

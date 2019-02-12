@@ -1,9 +1,10 @@
-package com.sequenceiq.it.cloudbreak.newway.action;
+package com.sequenceiq.it.cloudbreak.newway.action.stack;
 
 import java.util.Collections;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class StackRefreshAction implements Action<StackEntity> {

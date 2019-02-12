@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.action;
+package com.sequenceiq.it.cloudbreak.newway.action.stack;
 
 import static com.sequenceiq.it.cloudbreak.newway.CloudbreakTest.SECONDARY_REFRESH_TOKEN;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -36,12 +37,12 @@ public class StackNodeUnhealthyAction implements Action<StackEntity> {
     @Override
     public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, format(" Stack unhealthy request:%n"), entity.getRequest());
+        logJSON(LOGGER, " Stack unhealthy request:\n", entity.getRequest());
         FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(entity)));
         CloudbreakClient autoscaleClient = testContext.as(Actor::secondUser).getCloudbreakClient(SECONDARY_REFRESH_TOKEN);
         autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(entity.getResponse().getId()), failureReport);
-            logJSON(LOGGER, format(" Stack unhealthy was successful:%n"), entity.getResponse());
+            logJSON(LOGGER, " Stack unhealthy was successful:\n", entity.getResponse());
             log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
             return entity;
 

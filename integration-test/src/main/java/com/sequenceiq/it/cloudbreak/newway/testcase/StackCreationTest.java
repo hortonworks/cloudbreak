@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.StackPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class StackCreationTest extends AbstractIntegrationTest {
