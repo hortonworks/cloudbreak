@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 public class HttpNotificationSender implements NotificationSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
 
+    private static final String TEST_NOTIFICATION_TYPE = "TEST_NOTIFICATION";
+
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
@@ -62,10 +64,11 @@ public class HttpNotificationSender implements NotificationSender {
 
     private CloudbreakEventBaseV4 createTestNotification(String userId) {
         CloudbreakEventBaseV4 baseEvent = new CloudbreakEventBaseV4();
-        baseEvent.setEventType("TEST_NOTIFICATION");
+        baseEvent.setEventType(TEST_NOTIFICATION_TYPE);
         baseEvent.setEventMessage("Test notification message.");
         baseEvent.setEventTimestamp(System.currentTimeMillis());
         baseEvent.setUserId(userId);
+        baseEvent.setNotificationType(TEST_NOTIFICATION_TYPE);
         return baseEvent;
     }
 }
