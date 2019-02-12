@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 
 @Component
-public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionServiceAwareConverter<Images, ImagesV4Response> {
+public class ImagesToImagesV4ResponseConverter extends AbstractConversionServiceAwareConverter<Images, ImagesV4Response> {
 
     @Inject
     private DefaultHDPEntries defaultHDPEntries;
@@ -102,7 +102,7 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
             if (utilRepo != null) {
                 repoJson.setUtil(utilRepo);
             }
-            json.setRepo(repoJson);
+            json.setRepository(repoJson);
             json.setVersion(info.getVersion());
             Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
             for (Map.Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
@@ -138,7 +138,7 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
     private StackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType) {
         StackDetailsV4Response json = new StackDetailsV4Response();
         json.setVersion(stackDetails.getVersion());
-        json.setRepo(convertStackRepoDetailsToJson(stackDetails.getRepo()));
+        json.setRepository(convertStackRepoDetailsToJson(stackDetails.getRepo()));
         Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
         mpacks.put(osType, stackDetails.getMpackList().stream().map(mp -> {
             ManagementPackV4Entry mpackEntry = new ManagementPackV4Entry();
@@ -148,7 +148,7 @@ public class ImagesToImagesV4ResponseJsonConverter extends AbstractConversionSer
         json.setMpacks(mpacks);
         if (!stackDetails.getMpackList().isEmpty()) {
             // Backward compatibility for the previous version of UI
-            json.getRepo().getStack().put(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG,
+            json.getRepository().getStack().put(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG,
                     stackDetails.getMpackList().get(0).getMpackUrl());
         }
         return json;

@@ -10,11 +10,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackDetailsV4Response implements JsonEntity {
-    @JsonProperty("version")
+    @JsonProperty
     private String version;
 
-    @JsonProperty("repo")
-    private StackRepoDetailsV4Response repo;
+    @JsonProperty
+    private StackRepoDetailsV4Response repository;
 
     private Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
 
@@ -26,12 +26,12 @@ public class StackDetailsV4Response implements JsonEntity {
         this.version = version;
     }
 
-    public StackRepoDetailsV4Response getRepo() {
-        return repo;
+    public StackRepoDetailsV4Response getRepository() {
+        return repository;
     }
 
-    public void setRepo(StackRepoDetailsV4Response repo) {
-        this.repo = repo;
+    public void setRepository(StackRepoDetailsV4Response repository) {
+        this.repository = repository;
     }
 
     public Map<String, List<ManagementPackV4Entry>> getMpacks() {
