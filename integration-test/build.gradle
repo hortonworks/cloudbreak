@@ -96,6 +96,7 @@ dependencies {
     exclude group: "velocity"
   }
   compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+  compile group: 'com.cloudera.api.swagger',      name: 'cloudera-manager-api-swagger',   version: '6.1.0'
   runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
   runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
