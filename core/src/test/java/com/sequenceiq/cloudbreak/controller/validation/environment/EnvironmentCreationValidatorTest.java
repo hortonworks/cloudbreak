@@ -83,7 +83,7 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setKerberoses(Set.of("kdc1", "kdc2"));
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName("region1");
+        locationRequest.setName("region1");
         environmentRequest.setLocation(locationRequest);
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
 
@@ -113,7 +113,7 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setDatabases(Collections.emptySet());
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName("region1");
+        locationRequest.setName("region1");
         environmentRequest.setLocation(locationRequest);
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(false);
         // WHEN
@@ -141,7 +141,7 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setDatabases(Collections.emptySet());
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName("region1");
+        locationRequest.setName("region1");
         locationRequest.setLatitude(1.1);
         locationRequest.setLongitude(-1.1);
         environmentRequest.setLocation(locationRequest);
@@ -194,7 +194,7 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setDatabases(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Set.of("region1", "region2"));
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName("region1");
+        locationRequest.setName("region1");
         environmentRequest.setLocation(locationRequest);
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         // WHEN
@@ -238,7 +238,7 @@ public class EnvironmentCreationValidatorTest {
         environmentRequest.setDatabases(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
-        locationRequest.setLocationName("region1");
+        locationRequest.setName("region1");
         locationRequest.setLatitude(1.1);
         locationRequest.setLongitude(-1.1);
         environmentRequest.setLocation(locationRequest);
