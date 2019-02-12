@@ -20,8 +20,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         CloudbreakEventV4Response cloudbreakEvent = new CloudbreakEventV4Response();
         if (source.getNotificationDetails() != null) {
             NotificationDetails notificationDetails = source.getNotificationDetails();
-            cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
-            cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
+            setTypesAndMessage(cloudbreakEvent, notificationDetails);
             cloudbreakEvent.setCloud(notificationDetails.getCloud());
             cloudbreakEvent.setRegion(notificationDetails.getRegion());
             cloudbreakEvent.setAvailabilityZone(notificationDetails.getAvailabiltyZone());
@@ -40,11 +39,13 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         } else if (source.getLdapNotificationDetails() != null) {
             LdapNotificationDetails notificationDetails = source.getLdapNotificationDetails();
             cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
+            cloudbreakEvent.setNotificationType(notificationDetails.getNotificationType());
             cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
             cloudbreakEvent.setLdapDetails(notificationDetails.getLdapDetails());
         } else if (source.getRdsNotificationDetails() != null) {
             RdsNotificationDetails notificationDetails = source.getRdsNotificationDetails();
             cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
+            cloudbreakEvent.setNotificationType(notificationDetails.getNotificationType());
             cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
             cloudbreakEvent.setRdsDetails(notificationDetails.getRdsDetails());
         }
@@ -63,5 +64,11 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         }
 
         return cloudbreakEvent;
+    }
+
+    private void setTypesAndMessage(CloudbreakEventV4Response cloudbreakEvent, NotificationDetails notificationDetails) {
+        cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
+        cloudbreakEvent.setNotificationType(notificationDetails.getNotificationType());
+        cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
     }
 }
