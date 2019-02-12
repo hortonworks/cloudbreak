@@ -510,6 +510,7 @@ public class ModelDescriptions {
         public static final String TYPE = "type of the event";
         public static final String TIMESTAMP = "timestamp of the event";
         public static final String MESSAGE = "message of the event";
+        public static final String NOTIFICATION_TYPE = "Type of the notification to be identifiable by the UI";
     }
 
     public static class NetworkModelDescription {

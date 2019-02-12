@@ -21,6 +21,9 @@ public class CloudbreakEventBaseV4 implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.USER_ID)
     private String userId;
 
+    @ApiModelProperty(ModelDescriptions.EventModelDescription.NOTIFICATION_TYPE)
+    private String notificationType;
+
     public String getEventType() {
         return eventType;
     }
@@ -51,5 +54,13 @@ public class CloudbreakEventBaseV4 implements JsonEntity {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(String notificationType) {
+        this.notificationType = notificationType;
     }
 }
