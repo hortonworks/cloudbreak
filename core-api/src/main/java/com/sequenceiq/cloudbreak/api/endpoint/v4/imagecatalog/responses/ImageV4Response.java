@@ -36,8 +36,8 @@ public class ImageV4Response implements JsonEntity {
     @JsonProperty("version")
     private String version;
 
-    @JsonProperty("repo")
-    private Map<String, String> repo;
+    @JsonProperty("repository")
+    private Map<String, String> repository;
 
     @JsonProperty("images")
     private Map<String, Map<String, String>> imageSetsByProvider;
@@ -116,12 +116,12 @@ public class ImageV4Response implements JsonEntity {
         this.defaultImage = defaultImage;
     }
 
-    public Map<String, String> getRepo() {
-        return repo;
+    public Map<String, String> getRepository() {
+        return repository;
     }
 
-    public void setRepo(Map<String, String> repo) {
-        this.repo = repo;
+    public void setRepository(Map<String, String> repository) {
+        this.repository = repository;
     }
 
     public Map<String, Map<String, String>> getImageSetsByProvider() {
