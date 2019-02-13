@@ -24,6 +24,9 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
         clusterTemplateViewV4Response.setNodeCount(source.getFullNodeCount());
         clusterTemplateViewV4Response.setStackType(source.getStackTemplate().getCluster().getBlueprint().getStackType());
         clusterTemplateViewV4Response.setStackVersion(source.getStackTemplate().getCluster().getBlueprint().getStackVersion());
+        if (source.getStackTemplate().getEnvironment() != null) {
+            clusterTemplateViewV4Response.setEnvironmentName(source.getStackTemplate().getEnvironment().getName());
+        }
         return clusterTemplateViewV4Response;
     }
 }
