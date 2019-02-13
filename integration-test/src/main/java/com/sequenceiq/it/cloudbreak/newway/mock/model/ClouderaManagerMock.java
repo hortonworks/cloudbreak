@@ -1,16 +1,21 @@
 package com.sequenceiq.it.cloudbreak.newway.mock.model;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiEcho;
+import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.cloudbreak.newway.mock.AbstractModelMock;
 import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.spark.DynamicRouteStack;
+import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Service;
 
@@ -28,6 +33,12 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     public static final String COMMANDS_COMMAND = API_ROOT + "/commands/:commandId";
 
+    public static final String COMMANDS_STOP = API_ROOT + "/clusters/:cluster/commands/stop";
+
+    public static final String COMMANDS_START = API_ROOT + "/clusters/:cluster/commands/start";
+
+    public static final String HOSTS = API_ROOT + "/hosts";
+
     private DynamicRouteStack dynamicRouteStack;
 
     public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel) {
@@ -42,6 +53,9 @@ public class ClouderaManagerMock extends AbstractModelMock {
         postUser();
         postImportClusterTemplate();
         getCommand();
+        postStopCommand();
+        getHosts();
+        postStartCommand();
     }
 
     private void getEcho() {
@@ -80,5 +94,30 @@ public class ClouderaManagerMock extends AbstractModelMock {
     private void getCommand() {
         dynamicRouteStack.get(COMMANDS_COMMAND,
                 (request, response) -> new ApiCommand().id(new BigDecimal(request.params("commandId"))).active(Boolean.FALSE).success(Boolean.TRUE));
+    }
+
+    private void postStopCommand() {
+        dynamicRouteStack.post(COMMANDS_STOP,
+                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Stop"));
+    }
+
+    private void postStartCommand() {
+        dynamicRouteStack.post(COMMANDS_START,
+                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Start"));
+    }
+
+    private void getHosts() {
+        dynamicRouteStack.get(HOSTS, (request, response, model) -> {
+            Map<String, CloudVmMetaDataStatus> instanceMap = model.getInstanceMap();
+            ApiHostList apiHostList = new ApiHostList();
+            for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
+                ApiHost apiHost = new ApiHost()
+                        .hostId(entry.getValue().getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
+                        .hostname(HostNameUtil.generateHostNameByIp(entry.getValue().getMetaData().getPrivateIp()))
+                        .ipAddress(entry.getValue().getMetaData().getPrivateIp());
+                apiHostList.addItemsItem(apiHost);
+            }
+            return apiHostList;
+        });
     }
 }
