@@ -58,6 +58,10 @@ public class RestUrlParserTest {
 
     private static final String PATH_V_4 = "v4";
 
+    private static final String PATH_CREDENTIALS = "credentials";
+
+    private static final String PATH_CODE_GRANT_FLOW = "code_grant_flow";
+
     private static final String ID_REGEX = "\\d+";
 
     private static final String SLASH = "/";
@@ -152,16 +156,21 @@ public class RestUrlParserTest {
         String[] parts = methodPath.substring(1).split(SLASH);
         String resourceEvent = null;
         if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
-                && !RESOURCE_NAME.equals(parts[parts.length - 1])) {
+                && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])) {
             // Skip v4/{workspaceId}/audits/{auditId}
             // Skip v4/{workspaceId}/blueprints/{name} and similars
+            // Skip v4/{workspaceId}/credentials/code_grant_flow/init
+            // Skip v4/{workspaceId}/credentials/code_grant_flow/init/{name}
+            // Skip v4/{workspaceId}/credentials/code_grant_flow/authorization/{cloudPlatform}
             // Match v4/{workspaceId}/audits/zip and similars
             // Match v4/{workspaceId}/blueprints/{name}/parameters and similars
             resourceEvent = parts[parts.length - 1];
-        } else if ((parts.length == 5 || parts.length == 6) && PATH_V_4.equals(parts[0]) && "credentials".equals(parts[2])) {
-            // Match v4/{workspaceId}/credentials/prerequisites/{cloudPlatform} and similars
+        } else if ((parts.length == 5 || parts.length == 6) && PATH_V_4.equals(parts[0]) && PATH_CREDENTIALS.equals(parts[2])) {
+            // Match v4/{workspaceId}/credentials/prerequisites/{cloudPlatform}
+            // Match v4/{workspaceId}/credentials/code_grant_flow/init
+            // Match v4/{workspaceId}/credentials/code_grant_flow/init/{name}
             // Match v4/{workspaceId}/credentials/code_grant_flow/authorization/{cloudPlatform}
-            resourceEvent = parts.length == 5 ? parts[3] : String.join(SLASH, parts[3], parts[4]);
+            resourceEvent = parts.length == 5 && !PATH_CODE_GRANT_FLOW.equals(parts[3]) ? parts[3] : String.join(SLASH, parts[3], parts[4]);
         } else if (parts.length == 3 && PATH_V_4.equals(parts[0]) && !parts[1].matches(ID_REGEX) && !WORKSPACE_NAME.equals(parts[2])) {
             // Skip v4/workspaces/{name}
             // Match v4/users/evict and similars
@@ -180,7 +189,7 @@ public class RestUrlParserTest {
         if (resourceEvent == null) {
             assertNull("params must not contain resource event", params.get(RESOURCE_EVENT));
         } else {
-            assertEquals("params should contain resource type", resourceEvent, params.get(RESOURCE_EVENT));
+            assertEquals("params should contain resource event", resourceEvent, params.get(RESOURCE_EVENT));
         }
     }
 
