@@ -82,7 +82,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
                     Map<String, String> repoJson = new HashMap<>();
                     repoJson.put("baseurl", ambariRepo.getBaseUrl());
                     repoJson.put("gpgkey", ambariRepo.getGpgKeyUrl());
-                    imgJson.setRepo(repoJson);
+                    imgJson.setRepository(repoJson);
                     return imgJson;
                 })
                 .collect(Collectors.toList());
@@ -128,9 +128,9 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         json.setDefaultImage(source.isDefaultImage());
         json.setPackageVersions(source.getPackageVersions());
         if (source.getRepo() != null) {
-            json.setRepo(new HashMap<>(source.getRepo()));
+            json.setRepository(new HashMap<>(source.getRepo()));
         } else {
-            json.setRepo(new HashMap<>());
+            json.setRepository(new HashMap<>());
         }
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
     }
