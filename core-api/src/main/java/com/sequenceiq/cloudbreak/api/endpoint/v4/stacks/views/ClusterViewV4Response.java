@@ -3,12 +3,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.AmbariViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,11 +18,8 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(ClusterModelDescription.SECURE)
     private boolean secure;
 
-    @ApiModelProperty(StackModelDescription.AMBARI_IP)
-    private String ambariServerIp;
-
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintV4ViewResponse blueprint;
+    @ApiModelProperty
+    private AmbariViewV4Response ambari;
 
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupViewV4Response> hostGroups = new HashSet<>();
@@ -42,14 +38,6 @@ public class ClusterViewV4Response extends CompactViewV4Response {
         this.status = status;
     }
 
-    public String getAmbariServerIp() {
-        return ambariServerIp;
-    }
-
-    public void setAmbariServerIp(String ambariServerIp) {
-        this.ambariServerIp = ambariServerIp;
-    }
-
     public boolean isSecure() {
         return secure;
     }
@@ -64,14 +52,6 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     public void setHostGroups(Set<HostGroupViewV4Response> hostGroups) {
         this.hostGroups = hostGroups;
-    }
-
-    public BlueprintV4ViewResponse getBlueprint() {
-        return blueprint;
-    }
-
-    public void setBlueprint(BlueprintV4ViewResponse blueprint) {
-        this.blueprint = blueprint;
     }
 
     public SharedServiceV4Response getSharedServiceResponse() {
@@ -90,4 +70,11 @@ public class ClusterViewV4Response extends CompactViewV4Response {
         this.kerberosName = kerberosName;
     }
 
+    public AmbariViewV4Response getAmbari() {
+        return ambari;
+    }
+
+    public void setAmbari(AmbariViewV4Response ambari) {
+        this.ambari = ambari;
+    }
 }
