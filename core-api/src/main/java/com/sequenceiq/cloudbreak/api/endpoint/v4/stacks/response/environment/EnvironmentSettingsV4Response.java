@@ -23,8 +23,6 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
     @ApiModelProperty(CREDENTIAL_NAME)
     private CredentialV4Response credential;
 
-    private String cloudPlatform;
-
     public String getName() {
         return name;
     }
@@ -39,14 +37,6 @@ public class EnvironmentSettingsV4Response implements JsonEntity {
 
     public void setCredential(CredentialV4Response credential) {
         this.credential = credential;
-    }
-
-    public String getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
 }
