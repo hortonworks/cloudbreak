@@ -38,8 +38,13 @@ base:
     - match: grain
     - postgresql.postgre
 
+  'roles:manager_agent':
+    - match: grain
+    - cloudera-manager.repo
+
   'roles:manager_server':
     - match: grain
+    - cloudera-manager.repo
     - cloudera-manager.database
     - gateway.init
 

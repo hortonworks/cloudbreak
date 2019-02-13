@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
@@ -98,9 +98,9 @@ public class StackMatrixService {
     }
 
     private StackDescriptorV4Response getStackDescriptor(StackInfo stackInfo) {
-        Map<String, AmbariInfo> ambariInfoEntries = defaultAmbariRepoService.getEntries();
+        Map<String, RepositoryInfo> ambariInfoEntries = defaultAmbariRepoService.getEntries();
         StackDescriptorV4Response stackDescriptorV4 = converterUtil.convert(stackInfo, StackDescriptorV4Response.class);
-        AmbariInfo ambariInfo = ambariInfoEntries.getOrDefault(stackDescriptorV4.getMinAmbari(), new AmbariInfo());
+        RepositoryInfo ambariInfo = ambariInfoEntries.getOrDefault(stackDescriptorV4.getMinAmbari(), new RepositoryInfo());
         AmbariInfoV4Response ambariInfoJson = converterUtil.convert(ambariInfo, AmbariInfoV4Response.class);
         stackDescriptorV4.setAmbari(ambariInfoJson);
         return stackDescriptorV4;

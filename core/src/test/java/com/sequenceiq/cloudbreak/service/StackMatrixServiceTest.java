@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
@@ -81,7 +81,7 @@ public class StackMatrixServiceTest {
     @Test
     public void getStackMatrixWithoutAmbari() {
         setupStackEntries();
-        when(converterUtil.convert(any(AmbariInfo.class), eq(AmbariInfoV4Response.class))).thenReturn(new AmbariInfoV4Response());
+        when(converterUtil.convert(any(RepositoryInfo.class), eq(AmbariInfoV4Response.class))).thenReturn(new AmbariInfoV4Response());
 
         StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
 
@@ -140,42 +140,42 @@ public class StackMatrixServiceTest {
     }
 
     private void setupAmbariEntries() {
-        Map<String, AmbariInfo> ambariEntries = new HashMap<>();
+        Map<String, RepositoryInfo> ambariEntries = new HashMap<>();
 
-        AmbariInfo twoFiveAmbariInfo = getAmbariInfo("2.5.0.0");
+        RepositoryInfo twoFiveAmbariInfo = getAmbariInfo("2.5.0.0");
         ambariEntries.put("2.5", twoFiveAmbariInfo);
         when(converterUtil.convert(twoFiveAmbariInfo, AmbariInfoV4Response.class)).thenReturn(getAmbariInfoResponse("2.5.0.0"));
 
-        AmbariInfo twoSixAmbariInfo = getAmbariInfo("2.6.1.0");
+        RepositoryInfo twoSixAmbariInfo = getAmbariInfo("2.6.1.0");
         ambariEntries.put("2.6", twoSixAmbariInfo);
         when(converterUtil.convert(twoSixAmbariInfo, AmbariInfoV4Response.class)).thenReturn(getAmbariInfoResponse("2.6.1.0"));
 
-        AmbariInfo twoSevenAmbariInfo = getAmbariInfo("2.7.0.3");
+        RepositoryInfo twoSevenAmbariInfo = getAmbariInfo("2.7.0.3");
         ambariEntries.put("2.7", twoSevenAmbariInfo);
         when(converterUtil.convert(twoSevenAmbariInfo, AmbariInfoV4Response.class)).thenReturn(getAmbariInfoResponse("2.7.0.3"));
 
         when(defaultAmbariRepoService.getEntries()).thenReturn(ambariEntries);
     }
 
-    private AmbariInfo getAmbariInfo(String version) {
-        AmbariInfo twoFiveAmbariInfo = new AmbariInfo();
+    private RepositoryInfo getAmbariInfo(String version) {
+        RepositoryInfo twoFiveAmbariInfo = new RepositoryInfo();
         twoFiveAmbariInfo.setVersion(version);
         twoFiveAmbariInfo.setRepo(getAmbariRepo(version));
         return twoFiveAmbariInfo;
     }
 
-    private Map<String, AmbariRepoDetails> getAmbariRepo(String version) {
-        Map<String, AmbariRepoDetails> ambariRepo = new HashMap<>();
+    private Map<String, RepositoryDetails> getAmbariRepo(String version) {
+        Map<String, RepositoryDetails> ambariRepo = new HashMap<>();
 
-        AmbariRepoDetails redhat6RepoDetails = new AmbariRepoDetails();
-        redhat6RepoDetails.setBaseurl("http://redhat6-base/" + version);
-        redhat6RepoDetails.setGpgkey("http://redhat6-gpg/" + version);
-        ambariRepo.put("redhat6", redhat6RepoDetails);
+        RepositoryDetails redhat6RepositoryDetails = new RepositoryDetails();
+        redhat6RepositoryDetails.setBaseurl("http://redhat6-base/" + version);
+        redhat6RepositoryDetails.setGpgkey("http://redhat6-gpg/" + version);
+        ambariRepo.put("redhat6", redhat6RepositoryDetails);
 
-        AmbariRepoDetails redhat7RepoDetails = new AmbariRepoDetails();
-        redhat7RepoDetails.setBaseurl("http://redhat7-base/" + version);
-        redhat7RepoDetails.setGpgkey("http://redhat7-gpg/" + version);
-        ambariRepo.put("redhat7", redhat7RepoDetails);
+        RepositoryDetails redhat7RepositoryDetails = new RepositoryDetails();
+        redhat7RepositoryDetails.setBaseurl("http://redhat7-base/" + version);
+        redhat7RepositoryDetails.setGpgkey("http://redhat7-gpg/" + version);
+        ambariRepo.put("redhat7", redhat7RepositoryDetails);
 
         return ambariRepo;
     }
