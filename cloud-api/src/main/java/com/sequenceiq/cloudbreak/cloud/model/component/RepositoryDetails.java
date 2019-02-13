@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
-public class AmbariRepoDetails {
+public class RepositoryDetails {
 
     private String baseurl;
 

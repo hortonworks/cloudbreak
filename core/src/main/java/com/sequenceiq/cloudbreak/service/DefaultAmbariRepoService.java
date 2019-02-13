@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 
 @Service
 @ConfigurationProperties("cb.ambari")
@@ -28,20 +28,20 @@ public class DefaultAmbariRepoService {
     @Inject
     private StackMatrixService stackMatrixService;
 
-    private Map<String, AmbariInfo> entries = new HashMap<>();
+    private Map<String, RepositoryInfo> entries = new HashMap<>();
 
     public AmbariRepo getDefault(String osType) {
-        for (Entry<String, AmbariInfo> ambariEntry : entries.entrySet()) {
-            AmbariInfo ambariInfo = ambariEntry.getValue();
-            if (ambariInfo.getRepo().get(osType) == null) {
-                LOGGER.info("Missing Ambari ({}) repo information for os: {}", ambariInfo.getVersion(), osType);
+        for (Entry<String, RepositoryInfo> ambariEntry : entries.entrySet()) {
+            RepositoryInfo repositoryInfo = ambariEntry.getValue();
+            if (repositoryInfo.getRepo().get(osType) == null) {
+                LOGGER.info("Missing Ambari ({}) repo information for os: {}", repositoryInfo.getVersion(), osType);
                 continue;
             }
             AmbariRepo ambariRepo = new AmbariRepo();
             ambariRepo.setPredefined(Boolean.FALSE);
-            ambariRepo.setVersion(ambariInfo.getVersion());
-            ambariRepo.setBaseUrl(ambariInfo.getRepo().get(osType).getBaseurl());
-            ambariRepo.setGpgKeyUrl(ambariInfo.getRepo().get(osType).getGpgkey());
+            ambariRepo.setVersion(repositoryInfo.getVersion());
+            ambariRepo.setBaseUrl(repositoryInfo.getRepo().get(osType).getBaseurl());
+            ambariRepo.setGpgKeyUrl(repositoryInfo.getRepo().get(osType).getGpgkey());
             return ambariRepo;
         }
         return null;
@@ -89,11 +89,11 @@ public class DefaultAmbariRepoService {
         return null;
     }
 
-    public Map<String, AmbariInfo> getEntries() {
+    public Map<String, RepositoryInfo> getEntries() {
         return entries;
     }
 
-    public void setEntries(Map<String, AmbariInfo> entries) {
+    public void setEntries(Map<String, RepositoryInfo> entries) {
         this.entries = entries;
     }
 }

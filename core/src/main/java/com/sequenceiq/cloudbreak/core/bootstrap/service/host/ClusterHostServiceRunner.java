@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -62,6 +63,8 @@ import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -146,6 +149,12 @@ public class ClusterHostServiceRunner {
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    private DefaultClouderaManagerRepoService clouderaManagerRepoService;
+
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
+
     public void runClusterServices(Stack stack, Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -224,6 +233,7 @@ public class ClusterHostServiceRunner {
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (blueprintService.isClouderaManagerBlueprint(cluster.getBlueprint())) {
+            decoratePillarWithClouderaManagerRepo(stack.getId(), servicePillar);
             decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         } else {
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
@@ -324,6 +334,17 @@ public class ClusterHostServiceRunner {
         RdsView rdsView = new RdsView(rdsConfigService.resolveVaultValues(clouderaManagerRdsConfig));
         servicePillar.put("cloudera-manager-database",
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
+    }
+
+    private void decoratePillarWithClouderaManagerRepo(Long stackId, Map<String, SaltPillarProperties> servicePillar)
+            throws CloudbreakOrchestratorFailedException {
+        try {
+            String osType = componentConfigProvider.getImage(stackId).getOsType();
+            servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
+                    singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepoService.getDefault(osType)))));
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new CloudbreakOrchestratorFailedException("Cannot determine image of stack, thus osType and repository informations cannot be provided.");
+        }
     }
 
     private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)

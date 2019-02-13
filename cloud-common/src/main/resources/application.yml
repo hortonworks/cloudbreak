@@ -219,6 +219,26 @@ cb:
     db: ranger
     port: 5432
 
+  clouderamanager:
+    entries:
+      6.1:
+        version: 6.1.0
+        repo:
+          redhat6:
+            baseurl: https://archive.cloudera.com/cm6/6.1.0/redhat6/yum/
+            gpgkey: https://archive.cloudera.com/cm6/6.1.0/redhat6/yum/RPM-GPG-KEY-cloudera
+          redhat7:
+            baseurl: https://archive.cloudera.com/cm6/6.1.0/redhat7/yum/
+            gpgkey: https://archive.cloudera.com/cm6/6.1.0/redhat7/yum/RPM-GPG-KEY-cloudera
+          amazonlinux2:
+            baseurl: https://archive.cloudera.com/cm6/6.1.0/redhat7/yum/
+            gpgkey: https://archive.cloudera.com/cm6/6.1.0/redhat7/yum/RPM-GPG-KEY-cloudera
+          sles12:
+            baseurl: https://archive.cloudera.com/cm6/6.1.0/sles12/yum/
+            gpgkey: https://archive.cloudera.com/cm6/6.1.0/sles12/yum/RPM-GPG-KEY-cloudera
+          ubuntu16:
+            baseurl: https://archive.cloudera.com/cm6/6.1.0/ubuntu1604/apt/
+
   ambari:
     entries:
       2.6:

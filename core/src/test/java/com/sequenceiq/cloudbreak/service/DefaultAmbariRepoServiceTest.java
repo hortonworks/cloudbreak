@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultAmbariRepoServiceTest {
@@ -35,7 +35,7 @@ public class DefaultAmbariRepoServiceTest {
 
     @Before
     public void init() {
-        Map<String, AmbariInfo> entries = new HashMap<>();
+        Map<String, RepositoryInfo> entries = new HashMap<>();
 
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         Map<String, StackDescriptorV4Response> hdpMap = new HashMap<>();
@@ -68,15 +68,15 @@ public class DefaultAmbariRepoServiceTest {
 
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
 
-        AmbariInfo ambariInfo26 = new AmbariInfo();
-        ambariInfo26.setVersion("2.6");
-        ambariInfo26.setRepo(getAmbariRepo("2.6"));
-        entries.put("2.6", ambariInfo26);
+        RepositoryInfo repositoryInfo26 = new RepositoryInfo();
+        repositoryInfo26.setVersion("2.6");
+        repositoryInfo26.setRepo(getAmbariRepo("2.6"));
+        entries.put("2.6", repositoryInfo26);
 
-        AmbariInfo ambariInfo27 = new AmbariInfo();
-        ambariInfo27.setVersion("2.7");
-        ambariInfo27.setRepo(getAmbariRepo("2.7"));
-        entries.put("2.7", ambariInfo27);
+        RepositoryInfo repositoryInfo27 = new RepositoryInfo();
+        repositoryInfo27.setVersion("2.7");
+        repositoryInfo27.setRepo(getAmbariRepo("2.7"));
+        entries.put("2.7", repositoryInfo27);
         defaultAmbariRepoService.setEntries(entries);
     }
 
@@ -96,18 +96,18 @@ public class DefaultAmbariRepoServiceTest {
         return ambariRepo;
     }
 
-    private Map<String, AmbariRepoDetails> getAmbariRepo(String version) {
-        Map<String, AmbariRepoDetails> ambariRepo = new HashMap<>();
+    private Map<String, RepositoryDetails> getAmbariRepo(String version) {
+        Map<String, RepositoryDetails> ambariRepo = new HashMap<>();
 
-        AmbariRepoDetails redhat6RepoDetails = new AmbariRepoDetails();
-        redhat6RepoDetails.setBaseurl("http://redhat6-base/" + version);
-        redhat6RepoDetails.setGpgkey("http://redhat6-gpg/" + version);
-        ambariRepo.put("redhat6", redhat6RepoDetails);
+        RepositoryDetails redhat6RepositoryDetails = new RepositoryDetails();
+        redhat6RepositoryDetails.setBaseurl("http://redhat6-base/" + version);
+        redhat6RepositoryDetails.setGpgkey("http://redhat6-gpg/" + version);
+        ambariRepo.put("redhat6", redhat6RepositoryDetails);
 
-        AmbariRepoDetails redhat7RepoDetails = new AmbariRepoDetails();
-        redhat7RepoDetails.setBaseurl("http://redhat7-base/" + version);
-        redhat7RepoDetails.setGpgkey("http://redhat7-gpg/" + version);
-        ambariRepo.put("redhat7", redhat7RepoDetails);
+        RepositoryDetails redhat7RepositoryDetails = new RepositoryDetails();
+        redhat7RepositoryDetails.setBaseurl("http://redhat7-base/" + version);
+        redhat7RepositoryDetails.setGpgkey("http://redhat7-gpg/" + version);
+        ambariRepo.put("redhat7", redhat7RepositoryDetails);
 
         return ambariRepo;
     }
