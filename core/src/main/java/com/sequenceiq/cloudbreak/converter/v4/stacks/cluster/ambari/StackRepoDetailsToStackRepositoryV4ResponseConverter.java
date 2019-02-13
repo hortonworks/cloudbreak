@@ -35,8 +35,9 @@ public class StackRepoDetailsToStackRepositoryV4ResponseConverter
         StackRepositoryV4Response stackRepositoryV4Response = new StackRepositoryV4Response();
 
         Map<String, String> stack = source.getStack();
-        stackRepositoryV4Response.setRepoId(stack.get(StackRepoDetails.REPO_ID_TAG));
-        stackRepositoryV4Response.setStack(stack.get(StackRepoDetails.REPO_ID_TAG));
+        String repoId = stack.get(StackRepoDetails.REPO_ID_TAG);
+        stackRepositoryV4Response.setRepoId(repoId);
+        stackRepositoryV4Response.setStack(getStackFromRepoId(repoId));
         updateRepository(source, stackRepositoryV4Response);
         stackRepositoryV4Response.setVersionDefinitionFileUrl(stack.get(StackRepoDetails.CUSTOM_VDF_REPO_KEY));
 
@@ -61,6 +62,16 @@ public class StackRepoDetailsToStackRepositoryV4ResponseConverter
             stackDefaultMpack.ifPresent(mp -> stackRepositoryV4Response.setMpackUrl(mp.getMpackUrl()));
         }
         return stackRepositoryV4Response;
+    }
+
+    private String getStackFromRepoId(String repoId) {
+        String versionDelimiter = "-";
+        String stackIdentifier = repoId;
+        if (stackIdentifier.contains(versionDelimiter)) {
+            int lastIndexOfDelimiter = stackIdentifier.lastIndexOf(versionDelimiter);
+            stackIdentifier = stackIdentifier.substring(0, lastIndexOfDelimiter);
+        }
+        return stackIdentifier;
     }
 
     private void updateRepository(StackRepoDetails source, StackRepositoryV4Response response) {
