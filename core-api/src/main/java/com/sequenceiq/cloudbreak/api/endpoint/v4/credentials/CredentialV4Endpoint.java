@@ -81,14 +81,14 @@ public interface CredentialV4Endpoint {
     CredentialPrerequisitesV4Response getPrerequisitesForCloudPlatform(@PathParam("workspaceId") Long workspaceId, @PathParam("cloudPlatform") String platform,
             @QueryParam("deploymentAddress") String deploymentAddress);
 
-    @POST
-    @Path("code_grant_flow")
+    @GET
+    @Path("code_grant_flow/init")
     @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW, notes = Notes.CREDENTIAL_NOTES,
             nickname = "codeGrantFlowBasedCredentialInWorkspace", httpMethod = "GET")
     Response initCodeGrantFlow(@PathParam("workspaceId") Long workspaceId, @Valid CredentialV4Request credentialRequest);
 
     @GET
-    @Path("code_grant_flow/{name}")
+    @Path("code_grant_flow/init/{name}")
     @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW_ON_EXISTING, notes = Notes.CREDENTIAL_NOTES,
             nickname = "codeGrantFlowOnExistingCredentialInWorkspace", httpMethod = "GET")
     Response initCodeGrantFlowOnExisting(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
