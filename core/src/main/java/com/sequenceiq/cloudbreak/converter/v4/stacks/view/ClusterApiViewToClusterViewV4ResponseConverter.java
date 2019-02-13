@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.AmbariViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
@@ -25,11 +26,13 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
     @Override
     public ClusterViewV4Response convert(ClusterApiView source) {
         ClusterViewV4Response clusterViewResponse = super.convert(source);
-        clusterViewResponse.setAmbariServerIp(source.getAmbariIp());
+        AmbariViewV4Response ambari = new AmbariViewV4Response();
+        ambari.setServerIp(source.getAmbariIp());
+        ambari.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
+        clusterViewResponse.setAmbari(ambari);
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setSecure(source.getKerberosConfig() != null);
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterViewResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
         addSharedServiceResponse(source, clusterViewResponse);
         clusterViewResponse.setKerberosName(getKerberosName(source));
         return clusterViewResponse;

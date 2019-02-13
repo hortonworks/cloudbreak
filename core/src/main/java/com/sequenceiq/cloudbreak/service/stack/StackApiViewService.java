@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,8 +8,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -69,8 +68,7 @@ public class StackApiViewService {
                 stackViewResponses = stackViewResponses
                         .stream()
                         .filter(stackViewResponse ->
-                                Optional.ofNullable((Boolean) stackViewResponse.getCluster().getBlueprint().getTags().get("shared_services_ready"))
-                                        .orElse(false))
+                                Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getBlueprint().getTags().get("shared_services_ready")))
                         .collect(Collectors.toSet());
             }
             return stackViewResponses;
