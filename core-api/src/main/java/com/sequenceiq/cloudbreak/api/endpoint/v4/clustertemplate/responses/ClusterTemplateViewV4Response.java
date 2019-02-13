@@ -36,6 +36,9 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_VERSION)
     private String stackVersion;
 
+    @ApiModelProperty
+    private String environmentName;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -90,5 +93,13 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 }
