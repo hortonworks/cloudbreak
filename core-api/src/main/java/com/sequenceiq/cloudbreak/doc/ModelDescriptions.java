@@ -456,6 +456,7 @@ public class ModelDescriptions {
         public static final String PURGE = "if true, management pack will be installed with '--purge' flag";
         public static final String PURGE_LIST = "if provided, management pack will be installed with '--purgeList' option with this values";
         public static final String FORCE = "if true, management pack will be installed with '--force' flag";
+        public static final String IGNORE_WARNING = "if true, then we dont validate the url";
         public static final String STACK_DEFAULT = "if true, the management pack is mandatory for the stack";
         public static final String PREINSTALLED = "if true, the management pack is already installed on the instances";
     }
