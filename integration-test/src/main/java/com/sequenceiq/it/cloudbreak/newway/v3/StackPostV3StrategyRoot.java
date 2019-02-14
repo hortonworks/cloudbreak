@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.newway.ClusterGateway;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.Strategy;
 
@@ -76,12 +75,12 @@ public abstract class StackPostV3StrategyRoot implements Strategy {
     }
 
     protected void setKerberosIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
-        var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
-        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getKerberosName() == null;
-        if (kerberos != null && updateKerberos) {
-            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
-        }
+//        var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
+//        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
+//                && stackEntity.getRequest().getCluster().getKerberosName() == null;
+//        if (kerberos != null && updateKerberos) {
+//            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
+//        }
     }
 
     protected void setGatewayIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {

@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -128,6 +130,17 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.setCustomHostname(source.getCustomDomain().getHostname());
             stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
             stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
+        } else if (!StringUtils.isEmpty(source.getCluster().getKerberosName())) {
+            KerberosConfig kerberosConfig = stack.getCluster().getKerberosConfig();
+            if (kerberosConfig == null) {
+                throw new BadRequestException("Cluster should be converted before custom domain is updated by kerberos config");
+            }
+            if (kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY) {
+                if (StringUtils.isEmpty(kerberosConfig.getRealm())) {
+                    throw new BadRequestException("Realm cannot be null in case of ACTIVE_DIRECTORY");
+                }
+                stack.setCustomDomain(kerberosConfig.getRealm().toLowerCase());
+            }
         }
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());

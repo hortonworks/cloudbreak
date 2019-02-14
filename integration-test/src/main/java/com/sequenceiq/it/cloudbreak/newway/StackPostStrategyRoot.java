@@ -63,12 +63,12 @@ public abstract class StackPostStrategyRoot implements Strategy {
     }
 
     protected void setKerberosIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
-        var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
-        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getKerberosName() == null;
-        if (kerberos != null && updateKerberos) {
-            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
-        }
+//        var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
+//        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
+//                && stackEntity.getRequest().getCluster().getKerberosName() == null;
+//        if (kerberos != null && updateKerberos) {
+//            stackEntity.getRequest().getCluster().setKerberosName(kerberos.getRequest().getName());
+//        }
     }
 
     protected void setGatewayIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
