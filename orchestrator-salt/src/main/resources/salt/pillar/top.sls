@@ -41,6 +41,7 @@ base:
   'roles:manager_server':
     - match: grain
     - cloudera-manager.database
+    - gateway.init
 
   'roles:ambari_server*':
     - match: grain
