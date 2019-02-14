@@ -78,6 +78,16 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
         return this;
     }
 
+    public ClusterEntity withKerberosKey(String kerberos) {
+        KerberosEntity kerberosEntity = getTestContext().get(kerberos);
+        getRequest().setKerberosName(kerberosEntity.getName());
+        return this;
+    }
+
+    public ClusterEntity withKerberos() {
+        return withKerberosKey(KerberosEntity.class.getSimpleName());
+    }
+
     public ClusterEntity withKerberos(String kerberos) {
         getRequest().setKerberosName(kerberos);
         return this;

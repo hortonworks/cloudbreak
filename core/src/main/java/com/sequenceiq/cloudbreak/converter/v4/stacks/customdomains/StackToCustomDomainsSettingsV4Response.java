@@ -15,6 +15,6 @@ public class StackToCustomDomainsSettingsV4Response extends AbstractConversionSe
         response.setHostname(source.getCustomHostname());
         response.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
         response.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
-        return null;
+        return response;
     }
 }
