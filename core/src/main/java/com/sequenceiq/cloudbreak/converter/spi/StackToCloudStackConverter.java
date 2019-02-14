@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.VolumeUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;

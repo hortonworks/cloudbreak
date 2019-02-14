@@ -12,11 +12,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ReinstallV4Reque
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 public class ReinstallV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<ReinstallV4Request, UpdateClusterV4Request> {
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -43,8 +43,8 @@ public class ReinstallV4RequestToUpdateClusterV4RequestConverter extends Abstrac
         updateStackJson.setKerberosPrincipal(source.getKerberosPrincipal());
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        Blueprint blueprint = blueprintService.getByNameForWorkspace(source.getBlueprintName(), workspace);
-        updateStackJson.setBlueprintName(blueprint.getName());
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(source.getBlueprintName(), workspace);
+        updateStackJson.setBlueprintName(clusterDefinition.getName());
         updateStackJson.setStackRepository(source.getStackRepository());
         Set<HostGroupV4Request> hostgroups = new HashSet<>();
         for (InstanceGroupV4Request instanceGroup : source.getInstanceGroups()) {

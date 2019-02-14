@@ -15,12 +15,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class BlueprintV4RequestToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintV4Request, Blueprint> {
+public class BlueprintV4RequestToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintV4Request, ClusterDefinition> {
 
     private static final String JSON_PARSE_EXCEPTION_MESSAGE = "Invalid Blueprint: Failed to parse JSON.";
 
@@ -36,53 +36,53 @@ public class BlueprintV4RequestToBlueprintConverter extends AbstractConversionSe
     private JsonHelper jsonHelper;
 
     @Inject
-    private BlueprintUtils blueprintUtils;
+    private AmbariBlueprintUtils ambariBlueprintUtils;
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
-    public Blueprint convert(BlueprintV4Request json) {
-        Blueprint blueprint = new Blueprint();
+    public ClusterDefinition convert(BlueprintV4Request json) {
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
         if (StringUtils.isNoneEmpty(json.getUrl())) {
             String sourceUrl = json.getUrl().trim();
             try {
                 String urlText = URLUtils.readUrl(sourceUrl);
                 jsonHelper.createJsonFromString(urlText);
-                blueprint.setBlueprintText(urlText);
+                clusterDefinition.setClusterDefinitionText(urlText);
             } catch (IOException | CloudbreakApiException e) {
                 throw new BadRequestException(String.format("Cannot download ambari validation from: %s", sourceUrl), e);
             }
         } else {
-            blueprint.setBlueprintText(json.getAmbariBlueprint());
+            clusterDefinition.setClusterDefinitionText(json.getAmbariBlueprint());
         }
         try {
-            JsonNode blueprintJson = JsonUtil.readTree(blueprint.getBlueprintText());
-            if (blueprintUtils.isAmbariBlueprint(blueprintJson)) {
-                validateBlueprint(blueprintJson);
-                validateBlueprintStackVersion(blueprintJson);
-                blueprint.setAmbariName(blueprintUtils.getBlueprintName(blueprintJson));
-                blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintJson));
-                blueprint.setStackType(blueprintUtils.getBlueprintStackName(blueprintJson));
-                blueprint.setStackVersion(blueprintUtils.getBlueprintStackVersion(blueprintJson));
+            JsonNode clusterDefinitionJson = JsonUtil.readTree(clusterDefinition.getClusterDefinitionText());
+            if (ambariBlueprintUtils.isAmbariBlueprint(clusterDefinitionJson)) {
+                validateBlueprint(clusterDefinitionJson);
+                validateBlueprintStackVersion(clusterDefinitionJson);
+                clusterDefinition.setStackName(ambariBlueprintUtils.getBlueprintName(clusterDefinitionJson));
+                clusterDefinition.setHostGroupCount(ambariBlueprintUtils.countHostGroups(clusterDefinitionJson));
+                clusterDefinition.setStackType(ambariBlueprintUtils.getBlueprintStackName(clusterDefinitionJson));
+                clusterDefinition.setStackVersion(ambariBlueprintUtils.getBlueprintStackVersion(clusterDefinitionJson));
             } else {
-                blueprint.setAmbariName(blueprintUtils.getCDHDisplayName(blueprintJson));
-                blueprint.setHostGroupCount(blueprintUtils.countHostTemplates(blueprintJson));
-                blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
-                blueprint.setStackType("CDH");
+                clusterDefinition.setStackName(ambariBlueprintUtils.getCDHDisplayName(clusterDefinitionJson));
+                clusterDefinition.setHostGroupCount(ambariBlueprintUtils.countHostTemplates(clusterDefinitionJson));
+                clusterDefinition.setStackVersion(ambariBlueprintUtils.getCDHStackVersion(clusterDefinitionJson));
+                clusterDefinition.setStackType("CDH");
             }
         } catch (IOException e) {
             throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
         }
-        blueprint.setName(getNameByItsAvailability(json.getName()));
-        blueprint.setDescription(json.getDescription());
-        blueprint.setStatus(ResourceStatus.USER_MANAGED);
-        blueprint.setTags(createJsonFromTagsMap(json.getTags()));
-        return blueprint;
+        clusterDefinition.setName(getNameByItsAvailability(json.getName()));
+        clusterDefinition.setDescription(json.getDescription());
+        clusterDefinition.setStatus(ResourceStatus.USER_MANAGED);
+        clusterDefinition.setTags(createJsonFromTagsMap(json.getTags()));
+        return clusterDefinition;
     }
 
     private void validateBlueprintStackVersion(JsonNode blueprintJson) {
-        String stackVersion = blueprintUtils.getBlueprintStackVersion(blueprintJson);
+        String stackVersion = ambariBlueprintUtils.getBlueprintStackVersion(blueprintJson);
         if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]+")) {
             throw new BadRequestException(String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR format eg.: 2.6",
                     stackVersion));
@@ -116,7 +116,7 @@ public class BlueprintV4RequestToBlueprintConverter extends AbstractConversionSe
             JsonNode hostGroupName = hostGroup.path("name");
             if (isTextPropertyMissing(hostGroupName)) {
                 throw new BadRequestException("Validation error: one of the 'host_groups' has no name.");
-            } else if (!blueprintUtils.isValidHostGroupName(hostGroupName.asText())) {
+            } else if (!ambariBlueprintUtils.isValidHostGroupName(hostGroupName.asText())) {
                 throw new BadRequestException(String.format("Validation error: '%s' is not a valid host group name. Host group name "
                         + "must be alphanumeric with underscores ('_').", hostGroupName.asText()));
             }

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint.Builder;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.VolumeUtils;
 
 @Component
 public class ContainerConstraintFactory {

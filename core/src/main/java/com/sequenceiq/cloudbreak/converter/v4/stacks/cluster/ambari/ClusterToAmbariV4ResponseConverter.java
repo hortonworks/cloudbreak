@@ -42,7 +42,7 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
     @Override
     public AmbariV4Response convert(Cluster source) {
         AmbariV4Response response = new AmbariV4Response();
-        response.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4Response.class));
+        response.setBlueprint(getConversionService().convert(source.getClusterDefinition(), BlueprintV4Response.class));
         response.setConfigStrategy(source.getConfigStrategy());
         convertDpSecrets(source, response);
         response.setExtendedBlueprintText(getExtendedBlueprintText(source));
@@ -76,8 +76,8 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
     }
 
     private String getExtendedBlueprintText(Cluster source) {
-        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
-            String fromVault = source.getExtendedBlueprintText();
+        if (StringUtils.isNoneEmpty(source.getExtendedClusterDefinitionText()) && !disableShowBlueprint) {
+            String fromVault = source.getExtendedClusterDefinitionText();
             return anonymize(fromVault);
         }
 

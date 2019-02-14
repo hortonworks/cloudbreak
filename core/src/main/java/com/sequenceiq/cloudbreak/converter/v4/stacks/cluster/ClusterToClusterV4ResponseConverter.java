@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -54,7 +54,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -68,7 +68,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setStatusReason(source.getStatusReason());
         setUptime(source, clusterResponse);
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        if (blueprintService.isAmbariBlueprint(source.getBlueprint())) {
+        if (clusterDefinitionService.isAmbariBlueprint(source.getClusterDefinition())) {
             String ambariIp = stackUtil.extractAmbariIp(source.getStack());
             Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
                     serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);

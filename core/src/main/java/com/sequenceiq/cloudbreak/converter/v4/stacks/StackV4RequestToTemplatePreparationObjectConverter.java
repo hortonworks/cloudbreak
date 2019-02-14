@@ -17,12 +17,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
-import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.clusterdefinition.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
@@ -49,14 +49,14 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
+import com.sequenceiq.cloudbreak.template.model.ClusterDefinitionStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
@@ -76,7 +76,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private CredentialService credentialService;
@@ -127,12 +127,13 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             LdapConfig ldapConfig = getLdapConfig(source, workspace);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
-            Blueprint blueprint = getBlueprint(source, workspace);
-            String blueprintText = blueprint.getBlueprintText();
-            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
+            ClusterDefinition clusterDefinition = getClusterDefinition(source, workspace);
+            String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+            ClusterDefinitionStackInfo clusterDefinitionStackInfo = stackInfoService.blueprintStackInfo(clusterDefinitionText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
-            BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
+            ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView(clusterDefinition.getClusterDefinitionText(),
+                    clusterDefinitionStackInfo.getVersion(), clusterDefinitionStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user, cloudbreakUser.getEmail());
             String bindDn = null;
             String bindPassword = null;
@@ -149,8 +150,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway, gatewaySignKey)
-                    .withBlueprintView(blueprintView)
-                    .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
+                    .withClusterDefinitionView(clusterDefinitionView)
+                    .withStackRepoDetailsHdpVersion(clusterDefinitionStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscription(smartsenseSubscription)
@@ -164,7 +165,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     AmbariClient datalakeAmbariClient = ambariClientFactory.getAmbariClient(datalakeResource, credential);
                     SharedServiceConfigsView sharedServiceConfigsView = datalakeConfigProvider.createSharedServiceConfigView(datalakeResource);
                     Map<String, String> blueprintConfigParams =
-                            datalakeConfigProvider.getBlueprintConfigParameters(datalakeResource, blueprint, datalakeAmbariClient);
+                            datalakeConfigProvider.getBlueprintConfigParameters(datalakeResource, clusterDefinition, datalakeAmbariClient);
                     Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(source, datalakeResource);
                     builder.withSharedServiceConfigs(sharedServiceConfigsView)
                             .withFixInputs((Map) additionalParams)
@@ -174,7 +175,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 }
             }
             return builder.build();
-        } catch (BlueprintProcessingException | IOException e) {
+        } catch (ClusterDefinitionProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
@@ -188,8 +189,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         return credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace);
     }
 
-    private Blueprint getBlueprint(StackV4Request source, Workspace workspace) {
-        return blueprintService.getByNameForWorkspace(source.getCluster().getAmbari().getBlueprintName(), workspace);
+    private ClusterDefinition getClusterDefinition(StackV4Request source, Workspace workspace) {
+        return clusterDefinitionService.getByNameForWorkspace(source.getCluster().getAmbari().getBlueprintName(), workspace);
     }
 
     private Optional<FlexSubscription> getFlexSubscription(StackV4Request source) {

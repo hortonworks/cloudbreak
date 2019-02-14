@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
-import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.clusterdefinition.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -67,8 +67,8 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -135,7 +135,7 @@ public class ClusterHostServiceRunner {
     private RecipeEngine recipeEngine;
 
     @Inject
-    private BlueprintPortConfigCollector blueprintPortConfigCollector;
+    private AmbariBlueprintPortConfigCollector ambariBlueprintPortConfigCollector;
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
@@ -144,7 +144,7 @@ public class ClusterHostServiceRunner {
     private ServiceProviderConnectorAdapter connector;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
@@ -163,7 +163,7 @@ public class ClusterHostServiceRunner {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            boolean clouderaManager = blueprintService.isClouderaManagerBlueprint(cluster.getBlueprint());
+            boolean clouderaManager = clusterDefinitionService.isClouderaManagerBlueprint(cluster.getClusterDefinition());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel, clouderaManager);
             recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
@@ -232,17 +232,17 @@ public class ClusterHostServiceRunner {
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
-        if (blueprintService.isClouderaManagerBlueprint(cluster.getBlueprint())) {
+        if (clusterDefinitionService.isClouderaManagerBlueprint(cluster.getClusterDefinition())) {
             decoratePillarWithClouderaManagerRepo(stack.getId(), servicePillar);
             decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         } else {
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
             if (ambariRepo != null) {
                 Map<String, Object> ambariRepoMap = ambariRepo.asMap();
-                String blueprintText = cluster.getBlueprint().getBlueprintText();
-                Json blueprint = new Json(blueprintText);
-                ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
-                ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
+                String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
+                Json clusterDefinition = new Json(clusterDefinitionText);
+                ambariRepoMap.put("stack_version", clusterDefinition.getValue("Blueprints.stack_version"));
+                ambariRepoMap.put("stack_type", clusterDefinition.getValue("Blueprints.stack_name").toString().toLowerCase());
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
                 boolean setupLdapAndSsoOnApi = ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
                 servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
@@ -417,15 +417,15 @@ public class ClusterHostServiceRunner {
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
-            if (cluster.getBlueprint() != null) {
-                Map<String, Integer> servicePorts = blueprintPortConfigCollector.getServicePorts(cluster.getBlueprint());
+            if (cluster.getClusterDefinition() != null) {
+                Map<String, Integer> servicePorts = ambariBlueprintPortConfigCollector.getServicePorts(cluster.getClusterDefinition());
                 gateway.put("ports", servicePorts);
             }
         }
 
         gateway.put("kerberos", cluster.getKerberosConfig() != null);
 
-        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
+        if (clusterDefinitionService.isAmbariBlueprint(cluster.getClusterDefinition())) {
             Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
 
             List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());

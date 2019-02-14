@@ -6,17 +6,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 
 @Component
 public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "ranger";
 
-    private static final String[] PATH = {BlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties"};
+    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties"};
 
     private static final String[] CONFIGURATIONS = {"db_user", "db_password", "db_name", "db_host"};
 
@@ -30,15 +30,15 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     private String rangerDbPort;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
-    private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            String blueprintText = blueprint.getBlueprintText();
-            BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
+    private boolean isRdsConfigNeedForRangerAdmin(ClusterDefinition clusterDefinition) {
+        if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+            String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+            AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(clusterDefinitionText);
             return blueprintProcessor.isComponentExistsInBlueprint("RANGER_ADMIN")
                     && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
                     && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
@@ -72,7 +72,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
-        return isRdsConfigNeedForRangerAdmin(blueprint);
+    protected boolean isRdsConfigNeeded(ClusterDefinition clusterDefinition) {
+        return isRdsConfigNeedForRangerAdmin(clusterDefinition);
     }
 }

@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 
 public class RecipeTestUtil {
@@ -52,8 +52,8 @@ public class RecipeTestUtil {
         return generalClusterConfigs;
     }
 
-    public static BlueprintView generalBlueprintView(String blueprintText, String version, String type) {
-        return new BlueprintView(blueprintText, version, type);
+    public static ClusterDefinitionView generalBlueprintView(String blueprintText, String version, String type) {
+        return new ClusterDefinitionView(blueprintText, version, type);
     }
 
     public static AmbariDatabase generalAmbariDatabase() {

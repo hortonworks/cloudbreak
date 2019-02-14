@@ -7,20 +7,20 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 
 @Service
 public class AmbariHaComponentFilter {
 
-    public Set<String> getHaComponents(BlueprintTextProcessor blueprintTextProcessor) {
-        Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
+    public Set<String> getHaComponents(AmbariBlueprintTextProcessor ambariBlueprintTextProcessor) {
+        Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
         Set<String> haComponents = ExposedService.filterSupportedKnoxServices().stream()
                 .map(ExposedService::getServiceName)
                 .filter(component -> isComponentPresentMoreThanOneHostGroup(componentsByHostGroup, component))
                 .collect(Collectors.toSet());
 
 
-        removeDisabledHaServices(haComponents, blueprintTextProcessor);
+        removeDisabledHaServices(haComponents, ambariBlueprintTextProcessor);
         return haComponents;
     }
 
@@ -32,8 +32,8 @@ public class AmbariHaComponentFilter {
         return occurrences > 1L;
     }
 
-    private void removeDisabledHaServices(Set<String> haServices, BlueprintTextProcessor blueprintTextProcessor) {
-        Map<String, Map<String, String>> configurations = blueprintTextProcessor.getConfigurationEntries();
+    private void removeDisabledHaServices(Set<String> haServices, AmbariBlueprintTextProcessor ambariBlueprintTextProcessor) {
+        Map<String, Map<String, String>> configurations = ambariBlueprintTextProcessor.getConfigurationEntries();
         removeComponentIfHaDisabled(haServices, configurations, "hdfs-site", "dfs.ha.automatic-failover.enabled",
                 ExposedService.NAMENODE.getServiceName());
         removeComponentIfHaDisabled(haServices, configurations, "yarn-site", "yarn.resourcemanager.ha.enabled",

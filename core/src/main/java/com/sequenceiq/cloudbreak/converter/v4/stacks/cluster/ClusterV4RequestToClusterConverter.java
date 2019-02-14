@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -68,7 +68,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private KerberosService kerberosService;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -103,7 +103,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setDpAmbariUser(dpUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
-        cluster.setBlueprint(getBlueprint(source.getAmbari(), workspace));
+        cluster.setClusterDefinition(getClusterDefinition(source.getAmbari(), workspace));
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystem.class));
         }
@@ -172,15 +172,15 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         }
     }
 
-    private Blueprint getBlueprint(AmbariV4Request ambariV2Request, Workspace workspace) {
-        Blueprint blueprint = null;
+    private ClusterDefinition getClusterDefinition(AmbariV4Request ambariV2Request, Workspace workspace) {
+        ClusterDefinition clusterDefinition = null;
         if (!StringUtils.isEmpty(ambariV2Request.getBlueprintName())) {
-            blueprint = blueprintService.getByNameForWorkspace(ambariV2Request.getBlueprintName(), workspace);
-            if (blueprint == null) {
+            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(ambariV2Request.getBlueprintName(), workspace);
+            if (clusterDefinition == null) {
                 throw new NotFoundException("Blueprint does not exists by name: " + ambariV2Request.getBlueprintName());
             }
         }
-        return blueprint;
+        return clusterDefinition;
     }
 
     private void updateDatabases(ClusterV4Request source, Cluster cluster, Workspace workspace) {

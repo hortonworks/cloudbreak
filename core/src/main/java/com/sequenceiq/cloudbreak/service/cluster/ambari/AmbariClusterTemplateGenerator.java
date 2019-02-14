@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.services.ClusterService;
-import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.clusterdefinition.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -29,7 +29,7 @@ public class AmbariClusterTemplateGenerator {
 
     String generateClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings,
             ClusterService ambariClient) throws CloudbreakException {
-        String blueprintName = cluster.getBlueprint().getAmbariName();
+        String blueprintName = cluster.getClusterDefinition().getStackName();
         String configStrategy = cluster.getConfigStrategy().name();
         String clusterTemplate;
 

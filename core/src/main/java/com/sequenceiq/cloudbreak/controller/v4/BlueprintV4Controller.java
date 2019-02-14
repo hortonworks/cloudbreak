@@ -17,19 +17,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.Recommenda
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.view.ClusterDefinitionView;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-@WorkspaceEntityType(Blueprint.class)
+@WorkspaceEntityType(ClusterDefinition.class)
 public class BlueprintV4Controller extends NotificationController implements BlueprintV4Endpoint {
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private PlatformParameterService platformParameterService;
@@ -39,41 +39,41 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public BlueprintV4ViewResponses list(Long workspaceId) {
-        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspace(workspaceId);
+        Set<ClusterDefinitionView> allAvailableViewInWorkspace = clusterDefinitionService.getAllAvailableViewInWorkspace(workspaceId);
         return new BlueprintV4ViewResponses(converterUtil.convertAllAsSet(allAvailableViewInWorkspace, BlueprintV4ViewResponse.class));
     }
 
     @Override
     public BlueprintV4Response get(Long workspaceId, String name) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
-        return converterUtil.convert(blueprint, BlueprintV4Response.class);
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(name, workspaceId);
+        return converterUtil.convert(clusterDefinition, BlueprintV4Response.class);
     }
 
     @Override
     public BlueprintV4Response post(Long workspaceId, BlueprintV4Request request) {
-        Blueprint blueprint = blueprintService.createForLoggedInUser(
-                converterUtil.convert(request, Blueprint.class), workspaceId);
+        ClusterDefinition clusterDefinition = clusterDefinitionService.createForLoggedInUser(
+                converterUtil.convert(request, ClusterDefinition.class), workspaceId);
         notify(ResourceEvent.BLUEPRINT_CREATED);
-        return converterUtil.convert(blueprint, BlueprintV4Response.class);
+        return converterUtil.convert(clusterDefinition, BlueprintV4Response.class);
     }
 
     @Override
     public BlueprintV4Response delete(Long workspaceId, String name) {
-        Blueprint deleted = blueprintService.deleteByNameFromWorkspace(name, workspaceId);
+        ClusterDefinition deleted = clusterDefinitionService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return converterUtil.convert(deleted, BlueprintV4Response.class);
     }
 
     @Override
     public BlueprintV4Request getRequest(Long workspaceId, String name) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
-        return converterUtil.convert(blueprint, BlueprintV4Request.class);
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(name, workspaceId);
+        return converterUtil.convert(clusterDefinition, BlueprintV4Request.class);
     }
 
     @Override
     public ParametersQueryV4Response getParameters(Long workspaceId, String name) {
         ParametersQueryV4Response parametersQueryV4Response = new ParametersQueryV4Response();
-        parametersQueryV4Response.setCustom(blueprintService.queryCustomParametersMap(name, workspaceId));
+        parametersQueryV4Response.setCustom(clusterDefinitionService.queryCustomParametersMap(name, workspaceId));
         return parametersQueryV4Response;
     }
 

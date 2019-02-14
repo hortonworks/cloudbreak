@@ -55,7 +55,7 @@ public class AmbariClusterStatusUpdater {
         } else if (cluster != null && cluster.getAmbariIp() != null) {
             Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
-            String blueprintName = cluster.getBlueprint().getAmbariName();
+            String blueprintName = cluster.getClusterDefinition().getStackName();
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
             ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClient, blueprintName);

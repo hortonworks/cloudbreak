@@ -16,7 +16,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -155,9 +155,9 @@ public class AmbariClusterStatusUpdaterTest {
         cluster.setAmbariIp("10.0.0.1");
         cluster.setId(TEST_CLUSTER_ID);
         cluster.setStatus(clusterStatus);
-        Blueprint blueprint = new Blueprint();
-        blueprint.setAmbariName(TEST_BLUEPRINT);
-        cluster.setBlueprint(blueprint);
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setStackName(TEST_BLUEPRINT);
+        cluster.setClusterDefinition(clusterDefinition);
         stack.setCluster(cluster);
         return stack;
     }

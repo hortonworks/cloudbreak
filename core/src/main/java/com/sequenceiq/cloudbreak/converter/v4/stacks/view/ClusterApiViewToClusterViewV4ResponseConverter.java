@@ -28,7 +28,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         ClusterViewV4Response clusterViewResponse = super.convert(source);
         AmbariViewV4Response ambari = new AmbariViewV4Response();
         ambari.setServerIp(source.getAmbariIp());
-        ambari.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
+        ambari.setBlueprint(getConversionService().convert(source.getClusterDefinition(), BlueprintV4ViewResponse.class));
         clusterViewResponse.setAmbari(ambari);
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setSecure(source.getKerberosConfig() != null);
