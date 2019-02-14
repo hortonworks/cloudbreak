@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.DeleteClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.LaunchClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ManagementPackCreateAction;

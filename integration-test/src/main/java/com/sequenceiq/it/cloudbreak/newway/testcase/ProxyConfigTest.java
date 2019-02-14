@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.exceptionConsumer;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -76,7 +77,8 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
                     return entity;
-                });
+                })
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -114,7 +116,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(name))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("The length of the name has to be in range of 4 to 100"));
                 }).withKey(name))
                 .validate();
     }
@@ -132,7 +134,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(SHORT_PROXY_NAME))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("The length of the name has to be in range of 4 to 100"));
                 }).withKey(SHORT_PROXY_NAME))
                 .validate();
     }
@@ -149,7 +151,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(INVALID_PROXY_NAME))
-                .expect(UnknownFormatConversionException.class, key(INVALID_PROXY_NAME))
+                .expect(UnknownFormatConversionException.class, exceptionConsumer(e -> {
+                    assertThat(getErrorMessage(e), containsString("Conversion = '|'"));
+                }).withKey(INVALID_PROXY_NAME))
                 .validate();
     }
 
@@ -167,7 +171,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(key))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("The length of the name has to be in range of 4 to 100"));
                 }).withKey(key))
                 .validate();
     }
@@ -187,7 +191,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTPS)
                 .when(ProxyConfig.postV4(), key(name))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("The length of the description cannot be longer than 1000 character"));
                 }).withKey(name))
                 .validate();
     }
@@ -207,7 +211,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(key))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("The length of the server host has to be in range of 1 to 255"));
                 }).withKey(key))
                 .validate();
     }
@@ -227,7 +231,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(key))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("Server port is required"));
                 }).withKey(key))
                 .validate();
     }
@@ -275,7 +279,6 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                     return entity;
                 }, key(name))
 
-
                 .given(name, ProxyConfigEntity.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
@@ -286,7 +289,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(name))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), containsString("HTTP 400 Bad Request"));
+                    assertThat(getErrorMessage(e), containsString("proxy already exists with name"));
                 }).withKey(name))
                 .validate();
     }

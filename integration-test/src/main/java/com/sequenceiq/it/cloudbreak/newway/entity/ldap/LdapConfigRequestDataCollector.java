@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.ldap;
 
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.ADMIN_GROUP;
 import static com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Ldap.BIND_DN;
@@ -25,6 +25,8 @@ import javax.validation.constraints.NotEmpty;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class LdapConfigRequestDataCollector {
 

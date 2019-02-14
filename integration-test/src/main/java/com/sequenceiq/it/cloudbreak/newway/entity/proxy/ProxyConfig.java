@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.ProxyV4Action;
 
 public class ProxyConfig extends ProxyConfigEntity {
-    private static final String PROXYCONFIG = "PROXYCONFIG";
+    private static final String PROXYCONFIG = "PROXY_CONFIG";
 
     private final ProxyV4Request proxyV4Request = new ProxyV4Request();
 

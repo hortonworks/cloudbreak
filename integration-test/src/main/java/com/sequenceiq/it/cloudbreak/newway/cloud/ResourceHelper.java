@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.C
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
