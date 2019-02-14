@@ -1,0 +1,88 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.8.3
+    steps:
+      - checkout
+      - run:
+          name: git fetch
+          command: git fetch --tags
+      - run:
+          name: run circleci make goal
+          command: make circleci
+      - run:
+          name: download deps
+          command: make deps
+      - run:
+          name: echo version
+          command: make echo_version
+      - run:
+          name: build
+          command: make build
+      - run:
+          name: echo version after build
+          command: make echo_version
+      - run:
+          name: tar linux
+          command: tar -czvf cbd-linux.tgz -C build/Linux cbd
+      - run:
+          name: tar darwin  
+          command: tar -czvf cbd-darwin.tgz -C build/Darwin cbd
+      - run:
+          name: run tests
+          command: make tests
+      - store_artifacts:
+          path: ~/project
+      - store_artifacts:
+          path: cbd-linux.tgz
+      - store_artifacts:
+          path: build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build
+
+  upload-snapshot:
+    machine: true
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: upload tagged
+          command: make upload-tagged
+      - run:
+          name: upload snapshot
+          command: make upload-snapshot
+
+  release:
+    machine: true
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: upload tagged
+          command: make upload-tagged
+      - run:
+          name: release
+          command: make release
+
+workflows:
+  version: 2
+  build_and_upload:
+    jobs:
+      - build
+      - upload-snapshot:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
+      - release:
+          filters:
+            branches:
+              only: release
+          requires:
+            - build

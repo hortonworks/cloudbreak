@@ -115,7 +115,7 @@ install-test:
 	docker build -f Dockerfile.installtest -t cbd:delme .
 	docker run --rm cbd:delme cbd --version
 
-prepare-release: build
+prepare-release:
 	rm -rf release && mkdir release
 
 	cp $(ARTIFACTS) build/Linux/
