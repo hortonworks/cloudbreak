@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.utils.ModelConverterUtils;
-import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.GeneralClusterConfigsView;
 import com.sequenceiq.cloudbreak.template.views.HdfConfigView;
@@ -42,7 +42,7 @@ public class TemplateModelContextBuilder {
 
     private GeneralClusterConfigsView generalClusterConfigsView;
 
-    private BlueprintView blueprintView;
+    private ClusterDefinitionView clusterDefinitionView;
 
     private Set<String> components = new HashSet<>();
 
@@ -89,8 +89,8 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withBlueprintView(BlueprintView blueprintView) {
-        this.blueprintView = blueprintView;
+    public TemplateModelContextBuilder withBlueprintView(ClusterDefinitionView clusterDefinitionView) {
+        this.clusterDefinitionView = clusterDefinitionView;
         return this;
     }
 
@@ -154,7 +154,7 @@ public class TemplateModelContextBuilder {
         blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
         blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(createAdjustedFileSystemConfig()));
         blueprintTemplateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
+        blueprintTemplateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), clusterDefinitionView);
         blueprintTemplateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
         ModelConverterUtils.deepMerge(blueprintTemplateModelContext, ModelConverterUtils.convert(customInputs));

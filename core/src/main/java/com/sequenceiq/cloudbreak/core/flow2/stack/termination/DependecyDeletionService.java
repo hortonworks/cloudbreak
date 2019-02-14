@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -42,7 +42,7 @@ public class DependecyDeletionService {
     private CredentialService credentialService;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private RecipeService recipeService;
@@ -71,7 +71,7 @@ public class DependecyDeletionService {
         }
         if (stack.getCluster() != null) {
             Cluster cluster = stack.getCluster();
-            deleteBlueprint(cluster.getBlueprint());
+            deleteBlueprint(cluster.getClusterDefinition());
             Set<HostGroup> hostGroupsInCluster = hostGroupService.getByCluster(cluster.getId());
             for (HostGroup hostGroup : hostGroupsInCluster) {
                 hostGroup.getRecipes().forEach(this::deleteRecipe);
@@ -119,13 +119,13 @@ public class DependecyDeletionService {
         }
     }
 
-    private void deleteBlueprint(Blueprint blueprint) {
+    private void deleteBlueprint(ClusterDefinition clusterDefinition) {
         try {
-            if (blueprint != null) {
-                blueprintService.delete(blueprint);
+            if (clusterDefinition != null) {
+                clusterDefinitionService.delete(clusterDefinition);
             }
         } catch (Exception ex) {
-            LOGGER.debug("Could not delete validation {} which is associated with the stack: {}", blueprint, ex.getMessage());
+            LOGGER.debug("Could not delete validation {} which is associated with the stack: {}", clusterDefinition, ex.getMessage());
         }
     }
 

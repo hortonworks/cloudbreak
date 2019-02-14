@@ -36,7 +36,7 @@ public class StackToStatusConverterTest extends AbstractEntityConverterTest<Stac
     @Override
     public Stack createSource() {
         Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        Cluster cluster = TestUtil.cluster(TestUtil.clusterDefinition(), stack, 1L);
         stack.setCluster(cluster);
         return stack;
     }

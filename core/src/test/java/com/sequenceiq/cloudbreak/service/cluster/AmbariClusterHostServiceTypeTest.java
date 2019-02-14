@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
@@ -87,7 +87,7 @@ public class AmbariClusterHostServiceTypeTest {
     private StatusToPollGroupConverter statusToPollGroupConverter;
 
     @Mock
-    private BlueprintValidator blueprintValidator;
+    private AmbariBlueprintValidator ambariBlueprintValidator;
 
     private Stack stack;
 
@@ -96,16 +96,17 @@ public class AmbariClusterHostServiceTypeTest {
     @Before
     public void setUp() {
         stack = TestUtil.stack();
-        cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        cluster = TestUtil.cluster(TestUtil.clusterDefinition(), stack, 1L);
         stack.setCluster(cluster);
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp", "/tmp"));
+        given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp",
+                "/tmp"));
     }
 
     @Test
     public void testStopWhenAwsHasEphemeralVolume() {
-        cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
+        cluster = TestUtil.cluster(TestUtil.clusterDefinition(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
         cluster.getStack().setCloudPlatform("AWS");
         stack = TestUtil.setEphemeral(cluster.getStack());
         cluster.setStatus(Status.AVAILABLE);
@@ -122,7 +123,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Test
     public void testStopWhenAwsHasSpotInstances() {
-        cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
+        cluster = TestUtil.cluster(TestUtil.clusterDefinition(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
         cluster.getStack().setCloudPlatform("AWS");
         stack = TestUtil.setSpotInstances(cluster.getStack());
         cluster.setStatus(Status.AVAILABLE);
@@ -215,7 +216,8 @@ public class AmbariClusterHostServiceTypeTest {
         underTest.updateHosts(stack.getId(), json);
 
         verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
-        verify(blueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, json.getScalingAdjustment());
+        verify(ambariBlueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getClusterDefinition(), hostGroup,
+                json.getScalingAdjustment());
     }
 
     @Test
@@ -236,7 +238,8 @@ public class AmbariClusterHostServiceTypeTest {
         underTest.updateHosts(stack.getId(), json);
 
         verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
-        verify(blueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, json.getScalingAdjustment());
+        verify(ambariBlueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getClusterDefinition(), hostGroup,
+                json.getScalingAdjustment());
     }
 
     @Test
@@ -257,7 +260,8 @@ public class AmbariClusterHostServiceTypeTest {
         underTest.updateHosts(stack.getId(), json);
 
         verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
-        verify(blueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, json.getScalingAdjustment());
+        verify(ambariBlueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getClusterDefinition(), hostGroup,
+                json.getScalingAdjustment());
     }
 
     @Test
@@ -279,7 +283,8 @@ public class AmbariClusterHostServiceTypeTest {
         underTest.updateHosts(stack.getId(), json);
 
         verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
-        verify(blueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, json.getScalingAdjustment());
+        verify(ambariBlueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getClusterDefinition(), hostGroup,
+                json.getScalingAdjustment());
     }
 
     @Test
@@ -300,6 +305,7 @@ public class AmbariClusterHostServiceTypeTest {
         underTest.updateHosts(stack.getId(), json);
 
         verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
-        verify(blueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, json.getScalingAdjustment());
+        verify(ambariBlueprintValidator, times(1)).validateHostGroupScalingRequest(stack.getCluster().getClusterDefinition(), hostGroup,
+                json.getScalingAdjustment());
     }
 }

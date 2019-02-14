@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -72,7 +72,7 @@ public class ImageService {
     private ConversionService conversionService;
 
     @Inject
-    private BlueprintUtils blueprintUtils;
+    private AmbariBlueprintUtils ambariBlueprintUtils;
 
     @Inject
     private StackMatrixService stackMatrixService;
@@ -113,14 +113,14 @@ public class ImageService {
 
     //CHECKSTYLE:OFF
     public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request image, String platformString,
-            Blueprint blueprint, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+            ClusterDefinition clusterDefinition, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
-        if (blueprint != null && blueprintUtils.isAmbariBlueprint(blueprint.getBlueprintText())) {
+        if (clusterDefinition != null && ambariBlueprintUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText())) {
             try {
-                JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-                clusterType = blueprintUtils.getBlueprintStackName(root);
-                clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
+                JsonNode root = JsonUtil.readTree(clusterDefinition.getClusterDefinitionText());
+                clusterType = ambariBlueprintUtils.getBlueprintStackName(root);
+                clusterVersion = ambariBlueprintUtils.getBlueprintStackVersion(root);
             } catch (IOException ex) {
                 LOGGER.warn("Can not initiate default hdp info: ", ex);
             }

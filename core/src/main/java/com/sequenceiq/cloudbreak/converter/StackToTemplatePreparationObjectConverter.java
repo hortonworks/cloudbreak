@@ -10,10 +10,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintViewProvider;
-import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintViewProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.nifi.HdfConfigProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
-import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -73,7 +73,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
 
     @Inject
-    private BlueprintViewProvider blueprintViewProvider;
+    private AmbariBlueprintViewProvider ambariBlueprintViewProvider;
 
     @Inject
     private DatalakeResourcesRepository datalakeResourcesRepository;
@@ -88,8 +88,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
+            String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
+            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, clusterDefinitionText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             Optional<DatalakeResources> dataLakeResource = getDataLakeResource(source);
             StackInputs stackInputs = getStackInputs(source);
@@ -113,7 +113,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withGateway(gateway, gatewaySignKey)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
-                    .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
+                    .withClusterDefinitionView(ambariBlueprintViewProvider.getBlueprintView(cluster.getClusterDefinition()))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))
@@ -123,7 +123,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withKerberosConfig(cluster.getKerberosConfig())
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .build();
-        } catch (BlueprintProcessingException | IOException e) {
+        } catch (ClusterDefinitionProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

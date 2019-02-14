@@ -21,11 +21,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
@@ -41,7 +41,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     private JsonHelper jsonHelper;
 
     @Spy
-    private final BlueprintUtils blueprintUtils = new BlueprintUtils();
+    private final AmbariBlueprintUtils ambariBlueprintUtils = new AmbariBlueprintUtils();
 
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -49,13 +49,13 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(2).when(blueprintUtils).countHostGroups(any());
-        doReturn("bpname").when(blueprintUtils).getBlueprintName(any());
+        doReturn(2).when(ambariBlueprintUtils).countHostGroups(any());
+        doReturn("bpname").when(ambariBlueprintUtils).getBlueprintName(any());
     }
 
     @Test
     public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
-        Blueprint result = underTest.convert(getRequest("blueprint.json"));
+        ClusterDefinition result = underTest.convert(getRequest("blueprint.json"));
         assertAllFieldsNotNull(result);
         Assert.assertEquals("{}", result.getTags().getValue());
         Assert.assertEquals("HDP", result.getStackType());
@@ -64,7 +64,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
-        Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
+        ClusterDefinition result = underTest.convert(getRequest("blueprint-empty-tags.json"));
         assertAllFieldsNotNull(result);
         Assert.assertEquals("{}", result.getTags().getValue());
         Assert.assertEquals("HDP", result.getStackType());
@@ -73,7 +73,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testConvertWhenInputJsonHasTagsFieldAndItHasMoreThanOneFieldInIt() {
-        Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
+        ClusterDefinition result = underTest.convert(getRequest("blueprint-filled-tags.json"));
         assertAllFieldsNotNull(result);
         Assert.assertTrue(result.getTags().getMap().size() > 1);
         Assert.assertEquals("HDP", result.getStackType());
@@ -97,9 +97,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setUrl("");
 
-        Blueprint result = underTest.convert(request);
+        ClusterDefinition result = underTest.convert(request);
 
-        Assert.assertEquals(request.getAmbariBlueprint(), result.getBlueprintText());
+        Assert.assertEquals(request.getAmbariBlueprint(), result.getClusterDefinitionText());
         Assert.assertEquals("HDP", result.getStackType());
         Assert.assertEquals("2.3", result.getStackVersion());
     }
@@ -110,7 +110,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setName(name);
 
-        Blueprint result = underTest.convert(request);
+        ClusterDefinition result = underTest.convert(request);
 
         Assert.assertEquals(name, result.getName());
         Assert.assertEquals("HDP", result.getStackType());
@@ -124,7 +124,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setName(null);
         when(missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT)).thenReturn(generatedName);
 
-        Blueprint result = underTest.convert(request);
+        ClusterDefinition result = underTest.convert(request);
 
         Assert.assertEquals(generatedName, result.getName());
         Assert.assertEquals("HDP", result.getStackType());
@@ -135,7 +135,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     public void testConvertWhenUnableToObtainTheBlueprintNameFromTheProvidedBlueprintTextThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(blueprintUtils).getBlueprintName(any());
+        }).when(ambariBlueprintUtils).getBlueprintName(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
@@ -146,7 +146,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     public void testConvertWhenUnableToObtainHostGroupCountThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(blueprintUtils).countHostGroups(any());
+        }).when(ambariBlueprintUtils).countHostGroups(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
@@ -157,7 +157,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     public void testConvertWhenUnableToObtainTheStackTypeFromTheProvidedBlueprintTextThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(blueprintUtils).getBlueprintStackName(any());
+        }).when(ambariBlueprintUtils).getBlueprintStackName(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
@@ -168,7 +168,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     public void testConvertWhenUnableToObtainTheStackVersionFromTheProvidedBlueprintTextThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(blueprintUtils).getBlueprintStackVersion(any());
+        }).when(ambariBlueprintUtils).getBlueprintStackVersion(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
@@ -195,7 +195,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
     @Test
     public void testWithInvalidUnderscoreInHostgroupName() {
-        Blueprint result = underTest.convert(getRequest("blueprint-hostgroup-name-with-underscore.json"));
+        ClusterDefinition result = underTest.convert(getRequest("blueprint-hostgroup-name-with-underscore.json"));
         assertNotNull(result);
     }
 

@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 
 @Component
 public class AmbariRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -15,7 +15,7 @@ public class AmbariRdsConfigProvider extends AbstractRdsConfigProvider {
     private static final String PILLAR_KEY = "ambari";
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Value("${cb.ambari.database.port:5432}")
     private String port;
@@ -52,7 +52,7 @@ public class AmbariRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
-        return blueprintService.isAmbariBlueprint(blueprint);
+    protected boolean isRdsConfigNeeded(ClusterDefinition clusterDefinition) {
+        return clusterDefinitionService.isAmbariBlueprint(clusterDefinition);
     }
 }

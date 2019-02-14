@@ -21,7 +21,7 @@ public class ClouderaClusterTemplateGenerator {
 
     public String generateClusterTemplate(String masterFQDN, Cluster cluster,
             Map<String, List<Map<String, String>>> hostGroupMappings, Set<RDSConfig> rdsConfigs) throws IOException {
-        ObjectNode hostTemplateJson = (ObjectNode) JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
+        ObjectNode hostTemplateJson = (ObjectNode) JsonUtil.readTree(cluster.getClusterDefinition().getClusterDefinitionText());
         Map<String, String> hosts = new HashMap<>();
         hostGroupMappings.forEach((hostGroup, hostAttributes) -> hostAttributes.forEach(
                 attr -> hosts.put(attr.get(ClouderaHostGroupAssociationBuilder.FQDN), hostGroup)));

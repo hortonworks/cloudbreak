@@ -69,9 +69,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime",
-                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant", "description"));
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig",
+                "extendedClusterDefinitionText", "environment", "variant", "description"));
     }
 
     @Test
@@ -86,8 +86,8 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfig", "extendedClusterDefinitionText",
                 "environment", "variant", "description"));
     }
 
@@ -98,9 +98,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterV4Request clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime",
-                "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment", "variant", "description"));
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig",
+                "extendedClusterDefinitionText", "gateway", "environment", "variant", "description"));
         assertNull(result.getGateway());
     }
 

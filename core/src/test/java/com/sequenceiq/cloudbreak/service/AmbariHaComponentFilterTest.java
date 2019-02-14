@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 
 public class AmbariHaComponentFilterTest {
 
@@ -18,7 +18,7 @@ public class AmbariHaComponentFilterTest {
     @Test
     public void testGetHaComponents() {
         String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
-        Set<String> haComponents = underTest.getHaComponents(new BlueprintTextProcessor(blueprintText));
+        Set<String> haComponents = underTest.getHaComponents(new AmbariBlueprintTextProcessor(blueprintText));
 
         assertEquals(2L, haComponents.size());
         assertTrue(haComponents.contains(ExposedService.ATLAS.getServiceName()));

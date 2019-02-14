@@ -22,7 +22,7 @@ public class ClusterToAmbariV4RequestRequestConverter extends AbstractConversion
     @Override
     public AmbariV4Request convert(Cluster source) {
         AmbariV4Request ambariRequest = new AmbariV4Request();
-        ambariRequest.setBlueprintName(source.getBlueprint().getName());
+        ambariRequest.setBlueprintName(source.getClusterDefinition().getName());
         prepareRepoDetails(source, ambariRequest);
         ambariRequest.setConfigStrategy(null);
         ambariRequest.setPassword("");

@@ -23,7 +23,7 @@ public class StackDeletionBasedExitCriteriaTest {
     @Test
     public void exitNeededScenariosTest() {
         Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        Cluster cluster = TestUtil.cluster(TestUtil.clusterDefinition(), stack, 1L);
         stack.setCluster(cluster);
         StackDeletionBasedExitCriteriaModel exitCriteriaModel = new StackDeletionBasedExitCriteriaModel(1L);
 

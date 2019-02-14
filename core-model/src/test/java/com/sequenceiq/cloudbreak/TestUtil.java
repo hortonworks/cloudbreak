@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceSt
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -101,7 +101,7 @@ public class TestUtil {
 
     private static final String DUMMY_NAME = "dummyName";
 
-    private static AtomicLong uniqueId = new AtomicLong(0L);
+    private static final AtomicLong UNIQUE_ID = new AtomicLong(0L);
 
     private TestUtil() {
     }
@@ -393,29 +393,29 @@ public class TestUtil {
     }
 
     public static Cluster cluster() {
-        return cluster(blueprint(), stack(AVAILABLE, gcpCredential()), 0L);
+        return cluster(clusterDefinition(), stack(AVAILABLE, gcpCredential()), 0L);
     }
 
     public static List<Cluster> generateCluster(int count) {
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            clusters.add(cluster(blueprint(), stack(AVAILABLE, gcpCredential()), (long) i));
+            clusters.add(cluster(clusterDefinition(), stack(AVAILABLE, gcpCredential()), (long) i));
         }
         return clusters;
     }
 
-    public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
-        return cluster(blueprint, stack, id, null);
+    public static Cluster cluster(ClusterDefinition clusterDefinition, Stack stack, Long id) {
+        return cluster(clusterDefinition, stack, id, null);
     }
 
-    public static Cluster cluster(Blueprint blueprint, Stack stack, Long id, KerberosConfig kerberosConfig) {
+    public static Cluster cluster(ClusterDefinition clusterDefinition, Stack stack, Long id, KerberosConfig kerberosConfig) {
         Cluster cluster = new Cluster();
         cluster.setAmbariIp("50.51.52.100");
         cluster.setStack(stack);
         cluster.setId(id);
         cluster.setName("dummyCluster");
         cluster.setAmbariIp("10.0.0.1");
-        cluster.setBlueprint(blueprint);
+        cluster.setClusterDefinition(clusterDefinition);
         cluster.setUpSince(new Date().getTime());
         cluster.setStatus(AVAILABLE);
         cluster.setStatusReason("statusReason");
@@ -484,7 +484,7 @@ public class TestUtil {
         Constraint constraint = new Constraint();
         constraint.setInstanceGroup(instanceGroup);
         hostGroup.setConstraint(constraint);
-        hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
+        hostGroup.setCluster(cluster(clusterDefinition(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;
     }
@@ -613,27 +613,27 @@ public class TestUtil {
         return config;
     }
 
-    public static Blueprint blueprint(String name) {
-        return blueprint(name, "{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
+    public static ClusterDefinition clusterDefinition(String name) {
+        return clusterDefinition(name, "{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
     }
 
-    public static Blueprint blueprint(Long id, String name, String blueprintText) {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setId(id);
-        blueprint.setBlueprintText(blueprintText);
-        blueprint.setName(name);
-        blueprint.setAmbariName("multi-node-yarn");
-        blueprint.setStatus(ResourceStatus.DEFAULT);
-        blueprint.setTags(getEmptyJson());
-        return blueprint;
+    public static ClusterDefinition clusterDefinition(Long id, String name, String blueprintText) {
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setId(id);
+        clusterDefinition.setClusterDefinitionText(blueprintText);
+        clusterDefinition.setName(name);
+        clusterDefinition.setStackName("multi-node-yarn");
+        clusterDefinition.setStatus(ResourceStatus.DEFAULT);
+        clusterDefinition.setTags(getEmptyJson());
+        return clusterDefinition;
     }
 
-    public static Blueprint blueprint(String name, String blueprintText) {
-        return blueprint(1L, name, blueprintText);
+    public static ClusterDefinition clusterDefinition(String name, String clusterDefinitionText) {
+        return clusterDefinition(1L, name, clusterDefinitionText);
     }
 
-    public static Blueprint blueprint() {
-        return blueprint("multi-node-yarn");
+    public static ClusterDefinition clusterDefinition() {
+        return clusterDefinition("multi-node-yarn");
     }
 
     public static FailurePolicy failurePolicy() {
@@ -810,7 +810,7 @@ public class TestUtil {
     }
 
     public static Long generateUniqueId() {
-        return uniqueId.incrementAndGet();
+        return UNIQUE_ID.incrementAndGet();
     }
 
     public static void setSecretField(Class<?> clazz, String fieldName, Object target, String raw, String secret) {
