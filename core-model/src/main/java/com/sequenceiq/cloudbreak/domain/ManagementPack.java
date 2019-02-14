@@ -37,6 +37,8 @@ public class ManagementPack implements ProvisionEntity, WorkspaceAwareResource {
 
     private boolean force;
 
+    private boolean ignoreValidation;
+
     @ManyToOne
     private Workspace workspace;
 
@@ -94,6 +96,14 @@ public class ManagementPack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setForce(boolean force) {
         this.force = force;
+    }
+
+    public boolean isIgnoreValidation() {
+        return ignoreValidation;
+    }
+
+    public void setIgnoreValidation(boolean ignoreValidation) {
+        this.ignoreValidation = ignoreValidation;
     }
 
     public Workspace getWorkspace() {
