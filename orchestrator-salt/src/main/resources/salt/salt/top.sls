@@ -82,6 +82,10 @@ base:
     - nginx.init
 {% endif %}
 
+  'roles:manager_server':
+    - match: grain
+    - nginx.init
+
   'roles:ambari_server_standby':
     - match: grain
     - ambari.server-stop
