@@ -35,12 +35,12 @@ import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
-import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.clusterdefinition.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.sharedservice.SharedServiceConfigsViewProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
@@ -67,9 +67,9 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
+import com.sequenceiq.cloudbreak.template.model.ClusterDefinitionStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
 
 public class StackRequestToTemplatePreparationObjectConverterTest {
 
@@ -102,7 +102,7 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Mock
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Mock
     private CredentialService credentialService;
@@ -159,10 +159,10 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     private AmbariV2Request ambari;
 
     @Mock
-    private Blueprint blueprint;
+    private ClusterDefinition clusterDefinition;
 
     @Mock
-    private BlueprintStackInfo blueprintStackInfo;
+    private ClusterDefinitionStackInfo clusterDefinitionStackInfo;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -179,9 +179,9 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
         when(source.getCluster()).thenReturn(cluster);
         when(cluster.getAmbari()).thenReturn(ambari);
         when(ambari.getBlueprintId()).thenReturn(BLUEPRINT_ID);
-        when(blueprintService.get(BLUEPRINT_ID)).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
+        when(clusterDefinitionService.get(BLUEPRINT_ID)).thenReturn(clusterDefinition);
+        when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(clusterDefinitionStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
@@ -326,20 +326,20 @@ public class StackRequestToTemplatePreparationObjectConverterTest {
     public void testConvertWhenProvidingDataThenBlueprintWithExpectedDataShouldBeStored() {
         String stackVersion = TEST_VERSION;
         String stackType = "HDP";
-        when(blueprintStackInfo.getVersion()).thenReturn(stackVersion);
-        when(blueprintStackInfo.getType()).thenReturn(stackType);
-        BlueprintView expected = new BlueprintView(TEST_BLUEPRINT_TEXT, stackVersion, stackType);
+        when(clusterDefinitionStackInfo.getVersion()).thenReturn(stackVersion);
+        when(clusterDefinitionStackInfo.getType()).thenReturn(stackType);
+        ClusterDefinitionView expected = new ClusterDefinitionView(TEST_BLUEPRINT_TEXT, stackVersion, stackType);
 
         TemplatePreparationObject result = underTest.convert(source);
 
-        assertEquals(expected, result.getBlueprintView());
+        assertEquals(expected, result.getClusterDefinitionView());
     }
 
     @Test
     public void testConvertWhenObtainingBlueprintStackInfoThenItsVersionShouldBeStoredAsStackRepoDetailsHdpVersion() {
         String expected = TEST_VERSION;
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
-        when(blueprintStackInfo.getVersion()).thenReturn(expected);
+        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(clusterDefinitionStackInfo);
+        when(clusterDefinitionStackInfo.getVersion()).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 

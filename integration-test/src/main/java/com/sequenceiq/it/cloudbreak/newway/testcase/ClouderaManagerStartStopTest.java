@@ -9,7 +9,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -26,7 +26,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     @Test(dataProvider = "testContext")
     public void testCreateNewRegularCluster(TestContext testContext) {
         mockSpi(testContext);
-        String name = testContext.get(BlueprintEntity.class).getRequest().getName();
+        String name = testContext.get(ClusterDefinitionEntity.class).getRequest().getName();
         testContext
                 .given("cm", AmbariEntity.class).withBlueprintName(name).withValidateBlueprint(Boolean.FALSE)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")

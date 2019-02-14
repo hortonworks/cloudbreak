@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -150,7 +150,7 @@ public class StackService {
     private ReactorFlowManager flowManager;
 
     @Inject
-    private BlueprintValidator blueprintValidator;
+    private AmbariBlueprintValidator ambariBlueprintValidator;
 
     @Inject
     private NetworkConfigurationValidator networkConfigurationValidator;
@@ -516,7 +516,8 @@ public class StackService {
     }
 
     public void removeInstance(Long stackId, Long workspaceId, String instanceId, User user) {
-        removeInstance(stackId, workspaceId, instanceId, false, user);
+        removeInstance(stackId, workspaceId, instanceId, false,
+                user);
     }
 
     public void removeInstance(Long stackId, Long workspaceId, String instanceId, boolean forced, User user) {
@@ -771,7 +772,8 @@ public class StackService {
             networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
         }
         if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
+            ambariBlueprintValidator.validateBlueprintForStack(stackValidation.getClusterDefinition(), stackValidation.getHostGroups(),
+                    stackValidation.getInstanceGroups());
         }
     }
 
@@ -837,14 +839,14 @@ public class StackService {
     }
 
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
-        Blueprint blueprint = stack.getCluster().getBlueprint();
+        ClusterDefinition clusterDefinition = stack.getCluster().getClusterDefinition();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
                 .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
-        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
+        ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup.get(), adjustment);
     }
 
     private void validateStackStatus(Stack stack) {

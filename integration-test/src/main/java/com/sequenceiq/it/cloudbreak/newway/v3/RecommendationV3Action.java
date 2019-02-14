@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.ClusterDefinition;
+import com.sequenceiq.it.cloudbreak.newway.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -28,7 +28,7 @@ public class RecommendationV3Action {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
-        Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
+        ClusterDefinition blueprint = integrationTestContext.getContextParam(ClusterDefinitionEntity.CLUSTER_DEFINITION, ClusterDefinition.class);
         if (blueprint != null && blueprint.getResponse() != null) {
             recommendationEntity.getRequest().setBlueprintId(blueprint.getResponse().getId());
         }

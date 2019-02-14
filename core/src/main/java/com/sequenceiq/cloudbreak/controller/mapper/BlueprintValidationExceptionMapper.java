@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidationException;
+import com.sequenceiq.cloudbreak.template.validation.ClusterDefinitionValidationException;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.Response.Status;
 
 @Component
-public class BlueprintValidationExceptionMapper extends BaseExceptionMapper<BlueprintValidationException> {
+public class BlueprintValidationExceptionMapper extends BaseExceptionMapper<ClusterDefinitionValidationException> {
 
     @Override
     Status getResponseStatus() {
@@ -14,8 +14,8 @@ public class BlueprintValidationExceptionMapper extends BaseExceptionMapper<Blue
     }
 
     @Override
-    Class<BlueprintValidationException> getExceptionType() {
-        return BlueprintValidationException.class;
+    Class<ClusterDefinitionValidationException> getExceptionType() {
+        return ClusterDefinitionValidationException.class;
     }
 
 }

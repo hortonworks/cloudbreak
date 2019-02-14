@@ -146,7 +146,7 @@ public class ClusterTerminationService {
         if (fs != null) {
             deleteFileSystemResources(stackId, fs);
         }
-        cluster.setBlueprint(null);
+        cluster.setClusterDefinition(null);
         cluster.setStack(null);
         cluster.setLdapConfig(null);
         cluster.setRdsConfigs(new HashSet<>());

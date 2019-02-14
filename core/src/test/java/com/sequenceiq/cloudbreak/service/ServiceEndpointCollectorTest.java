@@ -39,13 +39,13 @@ import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopologyJsonToExposedServicesConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,8 +54,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,13 +66,13 @@ public class ServiceEndpointCollectorTest {
     private static final String GATEWAY_PATH = "gateway-path";
 
     @Mock
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Mock
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Mock
-    private BlueprintValidator mockBpValidator;
+    private AmbariBlueprintValidator mockBpValidator;
 
     @Mock
     private StackServiceComponentDescriptors mockStackDescriptors;
@@ -206,35 +206,35 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetKnoxServices() {
-        when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
+        when(clusterDefinitionService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new ClusterDefinition());
+        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
+        when(ambariBlueprintProcessorFactory.get(any())).thenReturn(ambariBlueprintTextProcessor);
+        when(ambariBlueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
+        when(ambariBlueprintTextProcessor.getStackName()).thenReturn("HDF");
+        when(ambariBlueprintTextProcessor.getStackVersion()).thenReturn("3.1");
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(0L, exposedServiceResponses.size());
 
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
+        when(ambariBlueprintTextProcessor.getStackName()).thenReturn("HDF");
+        when(ambariBlueprintTextProcessor.getStackVersion()).thenReturn("3.2");
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(1L, exposedServiceResponses.size());
 
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        when(ambariBlueprintTextProcessor.getStackName()).thenReturn("HDP");
+        when(ambariBlueprintTextProcessor.getStackVersion()).thenReturn("2.6");
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(1L, exposedServiceResponses.size());
     }
 
     @Test
     public void testGetKnoxServicesWithLivyServerAndResourceManagerV2() {
-        when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER",
+        when(clusterDefinitionService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new ClusterDefinition());
+        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
+        when(ambariBlueprintProcessorFactory.get(any())).thenReturn(ambariBlueprintTextProcessor);
+        when(ambariBlueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER",
                 "SPARK2_JOBHISTORYSERVER", "LOGSEARCH_SERVER")));
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        when(ambariBlueprintTextProcessor.getStackName()).thenReturn("HDP");
+        when(ambariBlueprintTextProcessor.getStackVersion()).thenReturn("2.6");
 
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
 
@@ -243,7 +243,7 @@ public class ServiceEndpointCollectorTest {
                 .findFirst()
                 .isPresent());
 
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
+        when(ambariBlueprintTextProcessor.getStackVersion()).thenReturn("3.0");
 
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
 
@@ -285,14 +285,14 @@ public class ServiceEndpointCollectorTest {
         stack.setOrchestrator(orchestrator);
         cluster.setStack(stack);
         cluster.setGateway(gateway);
-        Blueprint blueprint = new Blueprint();
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
         try {
             String testBlueprint = FileReaderUtils.readFileFromClasspath("defaults/blueprints/hdp26-data-science-spark2-text.bp");
-            blueprint.setBlueprintText(testBlueprint);
+            clusterDefinition.setClusterDefinitionText(testBlueprint);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        cluster.setBlueprint(blueprint);
+        cluster.setClusterDefinition(clusterDefinition);
         return cluster;
     }
 }

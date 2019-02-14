@@ -23,7 +23,7 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     @BeforeSuite
     public void getAllBlueprints() throws Exception {
         given(CloudbreakClient.created());
-        when(Blueprint.getAll());
+        when(ClusterDefinition.getAll());
     }
 
     @BeforeClass

@@ -6,20 +6,20 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 
 @Component
 public class BlueprintToBlueprintRequestConverter
-        extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintRequest> {
+        extends AbstractConversionServiceAwareConverter<ClusterDefinition, BlueprintRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintRequestConverter.class);
 
     @Override
-    public BlueprintRequest convert(Blueprint source) {
+    public BlueprintRequest convert(ClusterDefinition source) {
         BlueprintRequest blueprintRequest = new BlueprintRequest();
         blueprintRequest.setName("");
         blueprintRequest.setDescription(source.getDescription());
-        blueprintRequest.setAmbariBlueprint(source.getBlueprintText());
+        blueprintRequest.setAmbariBlueprint(source.getClusterDefinitionText());
         return blueprintRequest;
     }
 

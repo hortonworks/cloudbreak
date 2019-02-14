@@ -20,7 +20,7 @@ public class RecommendationAction {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
 
-        Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
+        ClusterDefinition blueprint = integrationTestContext.getContextParam(ClusterDefinitionEntity.CLUSTER_DEFINITION, ClusterDefinition.class);
         if (blueprint != null && blueprint.getResponse() != null) {
             recommendationEntity.getRequest().setBlueprintId(blueprint.getResponse().getId());
         }

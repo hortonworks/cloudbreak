@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 public class StackValidationRequestToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private NetworkService networkService;
@@ -146,7 +146,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
     }
 
     private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
-        Set<Blueprint> blueprintsInWorkspace = blueprintService.getAllAvailableInWorkspace(workspace);
+        Set<ClusterDefinition> blueprintsInWorkspace = clusterDefinitionService.getAllAvailableInWorkspace(workspace);
         if (stackValidationRequest.getBlueprintId() == null
                 && stackValidationRequest.getBlueprintName() == null
                 && stackValidationRequest.getBlueprint() == null) {
@@ -157,9 +157,9 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         } else if (stackValidationRequest.getBlueprintName() != null) {
             selectBlueprint(blueprintsInWorkspace, stackValidation, bp -> bp.getName().equals(stackValidationRequest.getBlueprintName()));
         } else if (stackValidationRequest.getBlueprint() != null) {
-            stackValidation.setBlueprint(conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class));
+            stackValidation.setClusterDefinition(conversionService.convert(stackValidationRequest.getBlueprint(), ClusterDefinition.class));
         }
-        if (stackValidation.getBlueprint() == null) {
+        if (stackValidation.getClusterDefinition() == null) {
             throw new NotFoundException(String.format("Blueprint could not be validated by id: %d, name: %s or bp text",
                     stackValidationRequest.getBlueprintId(),
                     stackValidationRequest.getBlueprintName()));
@@ -187,10 +187,10 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         return hostGroups;
     }
 
-    private void selectBlueprint(Set<Blueprint> blueprints, StackValidation stackValidation, Predicate<Blueprint> predicate) {
-        blueprints.stream()
+    private void selectBlueprint(Set<ClusterDefinition> clusterDefinitions, StackValidation stackValidation, Predicate<ClusterDefinition> predicate) {
+        clusterDefinitions.stream()
                 .filter(predicate)
-                .findFirst().ifPresent(stackValidation::setBlueprint);
+                .findFirst().ifPresent(stackValidation::setClusterDefinition);
     }
 
     private Set<InstanceGroup> convertInstanceGroups(Set<InstanceGroupRequest> instanceGroupRequests) {

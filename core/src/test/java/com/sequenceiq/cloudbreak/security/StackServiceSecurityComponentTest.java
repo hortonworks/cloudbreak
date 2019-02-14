@@ -15,7 +15,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -144,7 +144,7 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
         private ReactorFlowManager flowManager;
 
         @MockBean
-        private BlueprintValidator blueprintValidator;
+        private AmbariBlueprintValidator ambariBlueprintValidator;
 
         @MockBean
         private NetworkConfigurationValidator networkConfigurationValidator;

@@ -23,14 +23,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
-import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.BlueprintGetListAction;
+import com.sequenceiq.it.cloudbreak.newway.action.ClusterDefinitionGetListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.LdapConfigCreateIfNotExistsAction;
@@ -152,8 +152,8 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void initializeDefaultBlueprints(TestContext testContext) {
         testContext
-                .given(BlueprintEntity.class)
-                .when(new BlueprintGetListAction());
+                .given(ClusterDefinitionEntity.class)
+                .when(new ClusterDefinitionGetListAction());
     }
 
     protected void minimalSetupForClusterCreation(TestContext testContext) {
