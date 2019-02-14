@@ -19,6 +19,7 @@ public class ManagementPackToManagementPackResponseConverter extends AbstractCon
         mpackResponse.setDescription(source.getDescription());
         mpackResponse.setMpackUrl(source.getMpackUrl());
         mpackResponse.setPurge(source.isPurge());
+        mpackResponse.setIgnoreValidation(source.isIgnoreValidation());
         if (StringUtils.hasLength(source.getPurgeList())) {
             mpackResponse.setPurgeList(Arrays.asList(source.getPurgeList().split(",")));
         }

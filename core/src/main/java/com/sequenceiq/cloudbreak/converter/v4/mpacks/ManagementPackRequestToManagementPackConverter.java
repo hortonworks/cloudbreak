@@ -28,6 +28,7 @@ public class ManagementPackRequestToManagementPackConverter extends AbstractConv
         mpack.setDescription(source.getDescription());
         mpack.setMpackUrl(source.getMpackUrl());
         mpack.setPurge(source.isPurge());
+        mpack.setIgnoreValidation(source.isIgnoreValidation());
         mpack.setPurgeList(String.join(",", source.getPurgeList()));
         mpack.setForce(source.isForce());
         return mpack;

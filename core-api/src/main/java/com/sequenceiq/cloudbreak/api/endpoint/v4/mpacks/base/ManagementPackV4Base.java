@@ -40,6 +40,9 @@ public abstract class ManagementPackV4Base implements JsonEntity {
     @ApiModelProperty(MpackDetailsDescription.FORCE)
     private boolean force;
 
+    @ApiModelProperty(MpackDetailsDescription.IGNORE_WARNING)
+    private boolean ignoreValidation;
+
     public String getName() {
         return name;
     }
@@ -86,5 +89,13 @@ public abstract class ManagementPackV4Base implements JsonEntity {
 
     public void setForce(boolean force) {
         this.force = force;
+    }
+
+    public boolean isIgnoreValidation() {
+        return ignoreValidation;
+    }
+
+    public void setIgnoreValidation(boolean ignoreValidation) {
+        this.ignoreValidation = ignoreValidation;
     }
 }
