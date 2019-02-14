@@ -13,11 +13,11 @@ import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 public class UpdateAmbariRequestToUpdateClusterRequestConverter extends AbstractConversionServiceAwareConverter<ReinstallRequestV2, UpdateClusterJson> {
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -44,8 +44,8 @@ public class UpdateAmbariRequestToUpdateClusterRequestConverter extends Abstract
         updateStackJson.setKerberosPrincipal(source.getKerberosPrincipal());
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        Blueprint blueprint = blueprintService.getByNameForWorkspace(source.getBlueprintName(), workspace);
-        updateStackJson.setBlueprintId(blueprint.getId());
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(source.getBlueprintName(), workspace);
+        updateStackJson.setBlueprintId(clusterDefinition.getId());
         updateStackJson.setAmbariStackDetails(source.getAmbariStackDetails());
         Set<HostGroupRequest> hostgroups = new HashSet<>();
         for (InstanceGroupV2Request instanceGroupV2Request : source.getInstanceGroups()) {

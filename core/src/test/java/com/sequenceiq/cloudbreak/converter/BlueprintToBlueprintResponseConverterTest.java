@@ -6,11 +6,11 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
-public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
+public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityConverterTest<ClusterDefinition> {
 
     private static final JsonToString JSON_TO_STRING = new JsonToString();
 
@@ -24,7 +24,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
 
     @Test
     public void testConvertContainsEmptyMapInTagsProperty() throws JsonProcessingException {
-        Blueprint source = createSource();
+        ClusterDefinition source = createSource();
         source.setTags(new Json(""));
         BlueprintResponse result = underTest.convert(source);
         Assert.assertTrue(result.getTags().isEmpty());
@@ -34,7 +34,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
     public void testConvertContainsExpectedSingleKeyValuePairInTagsProperty() {
         String key = "name";
         String name = "greg";
-        Blueprint source = createSource();
+        ClusterDefinition source = createSource();
         source.setTags(new JsonToString().convertToEntityAttribute(String.format("{\"%s\":\"%s\"}", key, name)));
 
         BlueprintResponse result = underTest.convert(source);
@@ -51,7 +51,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         String nameValue = "test";
         String ageKey = "address";
         String ageValue = "something else";
-        Blueprint source = createSource();
+        ClusterDefinition source = createSource();
         source.setTags(JSON_TO_STRING.convertToEntityAttribute(String.format("{\"%s\":\"%s\", \"%s\":\"%s\"}", nameKey, nameValue, ageKey, ageValue)));
 
         BlueprintResponse result = underTest.convert(source);
@@ -71,7 +71,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         String nameValue = "test";
         String intKey = "number";
         Integer intValue = 11;
-        Blueprint source = createSource();
+        ClusterDefinition source = createSource();
         source.setTags(JSON_TO_STRING.convertToEntityAttribute(String.format("{\"%s\":\"%s\", \"%s\":%d}", nameKey, nameValue, intKey, intValue)));
 
         BlueprintResponse result = underTest.convert(source);
@@ -87,7 +87,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
 
     @Test
     public void testConvertWhereEveryDataHasTransferredCorrectlyToResponseAndEntityDescriptionIsNullThenResultDescriptionShouldBeEmpty() {
-        Blueprint source = createSource();
+        ClusterDefinition source = createSource();
         source.setDescription(null);
         source.setTags(JSON_TO_STRING.convertToEntityAttribute("{}"));
 
@@ -102,12 +102,12 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
+        Assert.assertEquals(source.getClusterDefinitionText(), result.getAmbariBlueprint());
     }
 
     @Test
     public void testConvertWhereEveryDataHasTransferredCorrectlyToResponseAndEntityDescriptionIsNotNullThenResultDescriptionShouldBeEmpty() {
-        Blueprint source = createSource();
+        ClusterDefinition source = createSource();
         source.setDescription("some description");
         source.setTags(JSON_TO_STRING.convertToEntityAttribute("{}"));
 
@@ -121,11 +121,11 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         Assert.assertEquals(source.getStatus(), result.getStatus());
         Assert.assertNotNull(result.getTags());
         Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintText(), result.getAmbariBlueprint());
+        Assert.assertEquals(source.getClusterDefinitionText(), result.getAmbariBlueprint());
     }
 
     @Override
-    public Blueprint createSource() {
-        return TestUtil.blueprint();
+    public ClusterDefinition createSource() {
+        return TestUtil.clusterDefinition();
     }
 }

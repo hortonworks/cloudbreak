@@ -25,10 +25,10 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -137,10 +137,10 @@ public class SharedServiceConfigProvider {
         return datalakeId;
     }
 
-    public ConfigsResponse retrieveOutputs(Stack datalake, Blueprint blueprint, String stackName) {
+    public ConfigsResponse retrieveOutputs(Stack datalake, ClusterDefinition clusterDefinition, String stackName) {
         AmbariClient ambariClient = ambariClientFactory.getAmbariClient(datalake, datalake.getCluster());
-        String blueprintText = blueprint.getBlueprintText();
-        Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(blueprintText);
+        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+        Set<String> datalakeProperties = centralBlueprintParameterQueryService.queryDatalakeParameters(clusterDefinitionText);
         addDatalakeRequiredProperties(datalakeProperties);
         Map<String, Object> results = new HashMap<>();
         if (datalake.getAmbariIp() != null) {

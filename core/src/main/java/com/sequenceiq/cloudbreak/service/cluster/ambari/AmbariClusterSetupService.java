@@ -29,7 +29,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -147,7 +147,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), stack.getOrchestrator(), ambariClient);
             String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
             addBlueprint(stack.getId(), ambariClient, blueprintText, cluster.getTopologyValidation());
-            cluster.setExtendedBlueprintText(blueprintText);
+            cluster.setExtendedClusterDefinitionText(blueprintText);
             clusterService.updateCluster(cluster);
             PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
             clusterConnectorPollingResultChecker

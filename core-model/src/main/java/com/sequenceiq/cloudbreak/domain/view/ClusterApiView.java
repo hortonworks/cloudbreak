@@ -32,7 +32,7 @@ public class ClusterApiView extends CompactView {
     private Set<HostGroupView> hostGroups = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    private BlueprintView blueprint;
+    private ClusterDefinitionView blueprint;
 
     private String ambariIp;
 
@@ -79,11 +79,11 @@ public class ClusterApiView extends CompactView {
         this.hostGroups = hostGroups;
     }
 
-    public BlueprintView getBlueprint() {
+    public ClusterDefinitionView getBlueprint() {
         return blueprint;
     }
 
-    public void setBlueprint(BlueprintView blueprint) {
+    public void setBlueprint(ClusterDefinitionView blueprint) {
         this.blueprint = blueprint;
     }
 

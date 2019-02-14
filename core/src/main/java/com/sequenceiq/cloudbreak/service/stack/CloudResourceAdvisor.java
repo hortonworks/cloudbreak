@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -27,11 +27,11 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 
 @Service
 public class CloudResourceAdvisor {
@@ -41,10 +41,10 @@ public class CloudResourceAdvisor {
     private CloudParameterService cloudParameterService;
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
@@ -62,9 +62,9 @@ public class CloudResourceAdvisor {
         LOGGER.debug("Advising resources for blueprintId: {}, blueprintName: {}, provider: {} and region: {}.",
                 blueprintId, blueprintName, cloudPlatform, region);
 
-        Blueprint blueprint = getBlueprint(blueprintName, blueprintId, user, workspace);
-        String blueprintText = blueprint.getBlueprintText();
-        Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
+        ClusterDefinition clusterDefinition = getBlueprint(blueprintName, blueprintId, user, workspace);
+        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+        Map<String, Set<String>> componentsByHostGroup = ambariBlueprintProcessorFactory.get(clusterDefinitionText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
 
@@ -103,14 +103,14 @@ public class CloudResourceAdvisor {
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
-    private Blueprint getBlueprint(String blueprintName, Long blueprintId, User user, Workspace workspace) {
-        Blueprint bp;
+    private ClusterDefinition getBlueprint(String blueprintName, Long blueprintId, User user, Workspace workspace) {
+        ClusterDefinition bp;
         if (blueprintId != null) {
             LOGGER.debug("Try to get validation by id: {}.", blueprintId);
-            bp = blueprintService.get(blueprintId);
+            bp = clusterDefinitionService.get(blueprintId);
         } else {
             LOGGER.debug("Try to get validation by name: {}.", blueprintName);
-            bp = blueprintService.getByNameForWorkspace(blueprintName, workspace);
+            bp = clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace);
         }
         return bp;
     }

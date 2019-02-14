@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.domain.stack;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
@@ -15,7 +15,7 @@ public class StackValidation implements ProvisionEntity {
 
     private Set<InstanceGroup> instanceGroups;
 
-    private Blueprint blueprint;
+    private ClusterDefinition clusterDefinition;
 
     private Network network;
 
@@ -39,12 +39,12 @@ public class StackValidation implements ProvisionEntity {
         this.instanceGroups = instanceGroups;
     }
 
-    public Blueprint getBlueprint() {
-        return blueprint;
+    public ClusterDefinition getClusterDefinition() {
+        return clusterDefinition;
     }
 
-    public void setBlueprint(Blueprint blueprint) {
-        this.blueprint = blueprint;
+    public void setClusterDefinition(ClusterDefinition clusterDefinition) {
+        this.clusterDefinition = clusterDefinition;
     }
 
     public Network getNetwork() {
