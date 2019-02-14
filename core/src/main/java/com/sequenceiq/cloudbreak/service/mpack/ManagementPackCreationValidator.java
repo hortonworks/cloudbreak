@@ -35,17 +35,19 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
     @Override
     public ValidationResult validate(ManagementPack subject) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        WebTarget target = client.target(subject.getMpackUrl());
-        try (Response response = target.request().head()) {
-            if (response.getStatusInfo() != null) {
-                if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
-                    resultBuilder.error(String.format("The URL is invalid! Response code was ['%s'].", response.getStatus()));
+        if (!subject.isIgnoreValidation()) {
+            WebTarget target = client.target(subject.getMpackUrl());
+            try (Response response = target.request().head()) {
+                if (response.getStatusInfo() != null) {
+                    if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
+                        resultBuilder.error(String.format("The URL is invalid! Response code was ['%s'].", response.getStatus()));
+                    }
                 }
-            }
-            if (response.getMediaType() != null) {
-                if (!isMediaTypeValid(response.getMediaType())) {
-                    resultBuilder.error(String.format("Media type ['%s'] is invalid. It should be ['%s' or '%s'].", response.getMediaType(),
-                            MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_X_TAR, MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_OCTET_STREAM));
+                if (response.getMediaType() != null) {
+                    if (!isMediaTypeValid(response.getMediaType())) {
+                        resultBuilder.error(String.format("Media type ['%s'] is invalid. It should be ['%s' or '%s'].", response.getMediaType(),
+                                MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_X_TAR, MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_OCTET_STREAM));
+                    }
                 }
             }
         }
