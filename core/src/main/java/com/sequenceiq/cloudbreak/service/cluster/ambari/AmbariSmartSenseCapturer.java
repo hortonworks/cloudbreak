@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
+import com.sequenceiq.cloudbreak.clusterdefinition.SmartsenseConfigurationLocator;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 

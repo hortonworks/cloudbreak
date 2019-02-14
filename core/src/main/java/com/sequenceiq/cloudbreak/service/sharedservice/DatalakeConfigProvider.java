@@ -18,8 +18,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -188,12 +188,13 @@ public class DatalakeConfigProvider {
     }
 
     public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, Stack workloadCluster, AmbariClient datalakeAmbari) {
-        return getBlueprintConfigParameters(datalakeResources, workloadCluster.getCluster().getBlueprint(), datalakeAmbari);
+        return getBlueprintConfigParameters(datalakeResources, workloadCluster.getCluster().getClusterDefinition(), datalakeAmbari);
     }
 
-    public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, Blueprint workloadBlueprint, AmbariClient datalakeAmbari) {
+    public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, ClusterDefinition workloadClusterDefinition,
+            AmbariClient datalakeAmbari) {
         Map<String, String> blueprintConfigParameters = new HashMap<>();
-        blueprintConfigParameters.putAll(getWorkloadClusterParametersFromDatalake(workloadBlueprint, datalakeAmbari));
+        blueprintConfigParameters.putAll(getWorkloadClusterParametersFromDatalake(workloadClusterDefinition, datalakeAmbari));
         for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {
             blueprintConfigParameters.putAll((Map) serviceDescriptor.getBlueprintParams().getMap());
             blueprintConfigParameters.putAll((Map) serviceDescriptor.getBlueprintSecretParams().getMap());
@@ -229,8 +230,9 @@ public class DatalakeConfigProvider {
         return result;
     }
 
-    private Map<String, String> getWorkloadClusterParametersFromDatalake(Blueprint workloadBlueprint, AmbariClient datalakeAmbari) {
-        Set<String> workloadBlueprintParamKeys = centralBlueprintParameterQueryService.queryDatalakeParameters(workloadBlueprint.getBlueprintText());
+    private Map<String, String> getWorkloadClusterParametersFromDatalake(ClusterDefinition workloadClusterDefinition, AmbariClient datalakeAmbari) {
+        Set<String> workloadBlueprintParamKeys =
+                centralBlueprintParameterQueryService.queryDatalakeParameters(workloadClusterDefinition.getClusterDefinitionText());
         return !CollectionUtils.isEmpty(workloadBlueprintParamKeys) ? datalakeAmbari.getConfigValuesByConfigIds(Lists.newArrayList(workloadBlueprintParamKeys))
                 : Map.of();
     }

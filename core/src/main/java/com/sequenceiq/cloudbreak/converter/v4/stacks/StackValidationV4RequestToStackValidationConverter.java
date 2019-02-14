@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 public class StackValidationV4RequestToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationV4Request, StackValidation> {
 
     @Inject
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
     private NetworkService networkService;
@@ -131,12 +131,12 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
     }
 
     private void validateBlueprint(StackValidationV4Request stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
-        Set<Blueprint> blueprintsInWorkspace = blueprintService.getAllAvailableInWorkspace(workspace);
+        Set<ClusterDefinition> allAvailableInWorkspace = clusterDefinitionService.getAllAvailableInWorkspace(workspace);
         if (stackValidationRequest.getBlueprintName() == null) {
             throw new BadRequestException("Blueprint is not configured for the validation request!");
         }
         if (stackValidationRequest.getBlueprintName() != null) {
-            selectBlueprint(blueprintsInWorkspace, stackValidation, bp -> bp.getName().equals(stackValidationRequest.getBlueprintName()));
+            selectBlueprint(allAvailableInWorkspace, stackValidation, bp -> bp.getName().equals(stackValidationRequest.getBlueprintName()));
         }
     }
 
@@ -158,9 +158,9 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         return hostGroups;
     }
 
-    private void selectBlueprint(Set<Blueprint> blueprints, StackValidation stackValidation, Predicate<Blueprint> predicate) {
-        blueprints.stream()
+    private void selectBlueprint(Set<ClusterDefinition> clusterDefinitions, StackValidation stackValidation, Predicate<ClusterDefinition> predicate) {
+        clusterDefinitions.stream()
                 .filter(predicate)
-                .findFirst().ifPresent(stackValidation::setBlueprint);
+                .findFirst().ifPresent(stackValidation::setClusterDefinition);
     }
 }

@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Actio
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.WRITE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ALL;
-import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.BLUEPRINT;
+import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.CLUSTER_DEFINITION;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.CREDENTIAL;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.FLEXSUBSCRIPTION;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.IMAGECATALOG;
@@ -25,8 +25,8 @@ public enum WorkspacePermissions {
     ALL_READ(ALL, READ, "Read all resources in an workspace."),
     ALL_WRITE(ALL, WRITE, "Write/delete all resources in an workspace."),
 
-    BLUEPRINT_READ(BLUEPRINT, READ, "Read blueprints in an workspace."),
-    BLUEPRINT_WRITE(BLUEPRINT, WRITE, "Write blueprints in an workspace."),
+    BLUEPRINT_READ(CLUSTER_DEFINITION, READ, "Read blueprints in an workspace."),
+    BLUEPRINT_WRITE(CLUSTER_DEFINITION, WRITE, "Write blueprints in an workspace."),
 
     IMAGECATALOG_READ(IMAGECATALOG, READ, "Read image catalogs in an workspace."),
     IMAGECATALOG_WRITE(IMAGECATALOG, WRITE, "Write image catalogs in an workspace."),

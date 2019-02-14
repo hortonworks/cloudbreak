@@ -29,6 +29,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -42,7 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -78,7 +79,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private String variant;
 
     @ManyToOne
-    private Blueprint blueprint;
+    @JoinColumn(name = "blueprint_id")
+    private ClusterDefinition clusterDefinition;
 
     @Column(nullable = false)
     private String name;
@@ -138,8 +140,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Convert(converter = SecretToString.class)
     @SecretValue
-    @Column(nullable = false)
-    private Secret extendedBlueprintText = Secret.EMPTY;
+    @Column(name = "extendedBlueprintText", nullable = false)
+    private Secret extendedClusterDefinitionText = Secret.EMPTY;
 
     @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private Gateway gateway;
@@ -233,12 +235,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.variant = variant;
     }
 
-    public Blueprint getBlueprint() {
-        return blueprint;
+    public ClusterDefinition getClusterDefinition() {
+        return clusterDefinition;
     }
 
-    public void setBlueprint(Blueprint blueprint) {
-        this.blueprint = blueprint;
+    public void setClusterDefinition(ClusterDefinition clusterDefinition) {
+        this.clusterDefinition = clusterDefinition;
     }
 
     public String getName() {
@@ -549,12 +551,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.proxyConfig = proxyConfig;
     }
 
-    public String getExtendedBlueprintText() {
-        return extendedBlueprintText.getRaw();
+    public String getExtendedClusterDefinitionText() {
+        return extendedClusterDefinitionText.getRaw();
     }
 
-    public void setExtendedBlueprintText(String extendedBlueprintText) {
-        this.extendedBlueprintText = new Secret(extendedBlueprintText);
+    public void setExtendedClusterDefinitionText(String extendedClusterDefinitionText) {
+        this.extendedClusterDefinitionText = new Secret(extendedClusterDefinitionText);
     }
 
     @Override

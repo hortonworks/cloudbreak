@@ -173,7 +173,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
 
     private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, HostGroup hostGroup) {
         try {
-            String blueprintName = stack.getCluster().getBlueprint().getAmbariName();
+            String blueprintName = stack.getCluster().getClusterDefinition().getStackName();
             // In case If we changed the blueprintName field we need to query the validation name information from ambari
             Map<String, String> blueprintsMap = ambariClient.getBlueprintsMap();
             if (!blueprintsMap.entrySet().isEmpty()) {

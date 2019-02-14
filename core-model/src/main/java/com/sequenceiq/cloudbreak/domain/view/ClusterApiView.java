@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -32,7 +33,8 @@ public class ClusterApiView extends CompactView {
     private Set<HostGroupView> hostGroups = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    private BlueprintView blueprint;
+    @JoinColumn(name = "blueprint_id")
+    private ClusterDefinitionView clusterDefinition;
 
     private String ambariIp;
 
@@ -79,12 +81,12 @@ public class ClusterApiView extends CompactView {
         this.hostGroups = hostGroups;
     }
 
-    public BlueprintView getBlueprint() {
-        return blueprint;
+    public ClusterDefinitionView getClusterDefinition() {
+        return clusterDefinition;
     }
 
-    public void setBlueprint(BlueprintView blueprint) {
-        this.blueprint = blueprint;
+    public void setClusterDefinition(ClusterDefinitionView clusterDefinition) {
+        this.clusterDefinition = clusterDefinition;
     }
 
     public String getAmbariIp() {

@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Actio
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.WRITE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.getName;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ALL;
-import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.BLUEPRINT;
+import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.CLUSTER_DEFINITION;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.WORKSPACE;
 
 import java.util.Set;
@@ -47,13 +47,13 @@ public class WorkspacePermissionAuthorizerTest {
     @Parameterized.Parameters(name = "[{index}] Permission set: {0}, resource: {1}, action: {2}, expected output: {3}")
     public static Object[][] data() {
         return new Object[][]{
-                {Set.of(getName(BLUEPRINT, READ)), BLUEPRINT, WRITE, false},
+                {Set.of(getName(CLUSTER_DEFINITION, READ)), CLUSTER_DEFINITION, WRITE, false},
                 {Set.of(getName(WORKSPACE, MANAGE)), WORKSPACE, WRITE, false},
                 {Set.of(getName(WORKSPACE, INVITE)), WORKSPACE, WRITE, false},
                 {Set.of(getName(WORKSPACE, INVITE)), WORKSPACE, MANAGE, false},
-                {Set.of(getName(ALL, READ)), BLUEPRINT, READ, true},
-                {Set.of(getName(ALL, WRITE)), BLUEPRINT, INVITE, true},
-                {Set.of(getName(BLUEPRINT, READ)), BLUEPRINT, READ, true},
+                {Set.of(getName(ALL, READ)), CLUSTER_DEFINITION, READ, true},
+                {Set.of(getName(ALL, WRITE)), CLUSTER_DEFINITION, INVITE, true},
+                {Set.of(getName(CLUSTER_DEFINITION, READ)), CLUSTER_DEFINITION, READ, true},
                 {Set.of(getName(WORKSPACE, INVITE)), WORKSPACE, INVITE, true},
                 {Set.of(getName(WORKSPACE, MANAGE)), WORKSPACE, INVITE, true},
                 {Set.of(getName(WORKSPACE, MANAGE), getName(WORKSPACE, INVITE)), WORKSPACE, MANAGE, true},

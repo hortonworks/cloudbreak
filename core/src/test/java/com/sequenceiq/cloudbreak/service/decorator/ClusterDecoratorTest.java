@@ -17,15 +17,15 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -38,10 +38,10 @@ public class ClusterDecoratorTest {
     private ClusterDecorator underTest;
 
     @Mock
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Mock
-    private BlueprintValidator blueprintValidator;
+    private AmbariBlueprintValidator ambariBlueprintValidator;
 
     @Mock
     private StackService stackService;
@@ -81,14 +81,14 @@ public class ClusterDecoratorTest {
     @Test
     public void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
         Cluster expectedClusterInstance = new Cluster();
-        Blueprint blueprint = new Blueprint();
-        String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
-        blueprint.setBlueprintText(blueprintText);
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        String clusterDefinitionText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
+        clusterDefinition.setClusterDefinitionText(clusterDefinitionText);
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any())).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
-        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
+        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), clusterDefinition, user, new Workspace(), stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(User.class), any(Workspace.class));

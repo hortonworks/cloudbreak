@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
@@ -60,10 +60,10 @@ public class ClusterCreationSetupServiceTest {
     private ComponentConfigProvider componentConfigProvider;
 
     @Mock
-    private BlueprintUtils blueprintUtils;
+    private AmbariBlueprintUtils ambariBlueprintUtils;
 
     @Mock
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Mock
     private DefaultHDPEntries defaultHDPEntries;
@@ -84,7 +84,7 @@ public class ClusterCreationSetupServiceTest {
 
     private Stack stack;
 
-    private Blueprint blueprint;
+    private ClusterDefinition clusterDefinition;
 
     private User user;
 
@@ -100,8 +100,8 @@ public class ClusterCreationSetupServiceTest {
         stack = new Stack();
         stack.setId(1L);
         stack.setWorkspace(workspace);
-        blueprint = new Blueprint();
-        blueprint.setBlueprintText("{}");
+        clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setClusterDefinitionText("{}");
         user = new User();
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "asf");
@@ -117,8 +117,8 @@ public class ClusterCreationSetupServiceTest {
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(component, imageComponent));
         String version = "3.0";
-        when(blueprintUtils.getBlueprintStackVersion(any())).thenReturn(version);
-        when(blueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
+        when(ambariBlueprintUtils.getBlueprintStackVersion(any())).thenReturn(version);
+        when(ambariBlueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
         DefaultHDPInfo defaultHDPInfo = new DefaultHDPInfo();
         DefaultStackRepoDetails stackRepoDetails = new DefaultStackRepoDetails();
         stackRepoDetails.setHdpVersion(version);
@@ -142,7 +142,7 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testDomainIsSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        underTest.prepare(clusterRequest, stack, blueprint, user, workspace);
+        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
 
         assertEquals(cluster.getKerberosConfig().getDomain(), stack.getCustomDomain());
     }
@@ -151,7 +151,7 @@ public class ClusterCreationSetupServiceTest {
     public void testMissingKerberosConfig() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.setKerberosConfig(null);
 
-        underTest.prepare(clusterRequest, stack, blueprint, user, workspace);
+        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
 
         assertNull(stack.getCustomDomain());
     }
@@ -160,7 +160,7 @@ public class ClusterCreationSetupServiceTest {
     public void testMissingDomain() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.getKerberosConfig().setDomain(null);
 
-        underTest.prepare(clusterRequest, stack, blueprint, user, workspace);
+        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
 
         assertNull(stack.getCustomDomain());
     }

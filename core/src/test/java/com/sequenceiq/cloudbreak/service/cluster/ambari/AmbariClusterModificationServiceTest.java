@@ -120,7 +120,7 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host1", "myrack");
         rackMap.put("host2", "myrack");
 
-        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getClusterDefinition().getName()), eq(hostGroup.getName()), eq(rackMap));
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
@@ -165,7 +165,7 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host1", "myrack");
         rackMap.put("host2", "myrack");
 
-        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getClusterDefinition().getName()), eq(hostGroup.getName()), eq(rackMap));
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
@@ -208,7 +208,7 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host1", "/default-rack");
         rackMap.put("host2", "/default-rack");
 
-        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getClusterDefinition().getName()), eq(hostGroup.getName()), eq(rackMap));
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 }

@@ -22,7 +22,7 @@ import org.powermock.reflect.Whitebox;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
-import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.clusterdefinition.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 
 @Component
 public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateClusterV4Request> {
@@ -30,8 +30,8 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends Abstra
         Cluster oneByStackId = clusterService.findOneByStackId(source.getStackId());
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup != null) {
-            String blueprintText = oneByStackId.getBlueprint().getBlueprintText();
-            boolean dataNodeComponentInHostGroup = new BlueprintTextProcessor(blueprintText).isComponentExistsInHostGroup("DATANODE", hostGroup.getName());
+            String blueprintText = oneByStackId.getClusterDefinition().getClusterDefinitionText();
+            boolean dataNodeComponentInHostGroup = new AmbariBlueprintTextProcessor(blueprintText).isComponentExistsInHostGroup("DATANODE", hostGroup.getName());
             HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setValidateNodeCount(dataNodeComponentInHostGroup);

@@ -29,17 +29,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,7 +58,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Mock
-    private BlueprintService blueprintService;
+    private ClusterDefinitionService clusterDefinitionService;
 
     @Mock
     private ConverterUtil converterUtil;
@@ -67,7 +67,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     public void setUp() {
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
                 .willReturn(new WorkspaceResourceV4Response());
-        given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
+        given(clusterDefinitionService.isAmbariBlueprint(any())).willReturn(true);
     }
 
     @Test
@@ -124,8 +124,8 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Override
     public Cluster createSource() {
         Stack stack = TestUtil.stack();
-        Blueprint blueprint = TestUtil.blueprint();
-        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
+        ClusterDefinition clusterDefinition = TestUtil.clusterDefinition();
+        Cluster cluster = TestUtil.cluster(clusterDefinition, stack, 1L);
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setName("test");
         cluster.setProxyConfig(proxyConfig);
