@@ -132,6 +132,10 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
+    public StackV4EntityBase<T> withCluster() {
+        return withCluster(ClusterEntity.class.getSimpleName());
+    }
+
     public StackV4EntityBase<T> withCluster(String key) {
         ClusterEntity clusterEntity = getTestContext().get(key);
         return withCluster(clusterEntity);

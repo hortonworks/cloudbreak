@@ -10,24 +10,25 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
-import com.sequenceiq.it.cloudbreak.newway.Kerberos;
-import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.KerberosPostAction;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.KerberosEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class WorkspaceTest extends AbstractIntegrationTest {
 
@@ -137,10 +138,16 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(KerberosEntity.class)
-                .when(Kerberos.postV2())
-                .when(Kerberos::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(KerberosPostAction.create())
+                .when(this::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
+    private KerberosEntity getByName(TestContext testContext, KerberosEntity entity, CloudbreakClient cloudbreakClient) {
+        entity.setResponse(
+                cloudbreakClient.getCloudbreakClient().kerberosConfigV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
+        );
+        return entity;
+    }
 }

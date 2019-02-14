@@ -5,8 +5,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.it.cloudbreak.newway.Kerberos;
-import com.sequenceiq.it.cloudbreak.newway.KerberosEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class AwsKerberos {
@@ -54,8 +53,7 @@ public class AwsKerberos {
     }
 
     public static KerberosEntity kerberosOnAws(TestParameter testParameter) {
-        return Kerberos.isCreated()
-                .withRequest(getKerberosRequest(testParameter)).withName(KERBEROS_CLOUDY);
+        return new KerberosEntity(null);
     }
 
     private static KerberosV4Request getKerberosRequest(TestParameter testParameter) {
