@@ -1,4 +1,4 @@
-export DOCKER_IMAGE = hortonworks/datalake
+export DOCKER_IMAGE = hortonworks/cloudbreak-datalake
 
 dockerhub:
 	./deploy.sh $(VERSION)
