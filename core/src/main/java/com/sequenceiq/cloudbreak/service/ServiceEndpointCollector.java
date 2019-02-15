@@ -80,7 +80,7 @@ public class ServiceEndpointCollector {
                     // when knox gateway is enabled, but ambari is not exposed, there is no available ambari URL
                     return ambariUrl.orElse("");
                 }
-                return String.format("https://%s/", ambariIp);
+                return String.format("https://%s/ambari/", ambariIp);
             }
         }
         return null;
