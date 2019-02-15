@@ -34,3 +34,6 @@ build-cloudbreak-dockerhub:
 
 build-autoscale-dockerhub:
 	 make -C docker-autoscale dockerhub
+
+build-datalake-dockerhub:
+	 make -C docker-datalake dockerhub
