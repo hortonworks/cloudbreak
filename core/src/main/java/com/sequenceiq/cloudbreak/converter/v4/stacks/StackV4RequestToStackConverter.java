@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParamet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -113,6 +114,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             asMap.forEach((key, value) -> parameter.put(key, value.toString()));
             stack.setParameters(parameter);
         }
+        setTimeToLive(source, stack);
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
         stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
@@ -150,6 +152,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.getComponents().add(getImageComponent(source, stack));
         }
         return stack;
+    }
+
+    private void setTimeToLive(StackV4Request source, Stack stack) {
+        if (source.getTimeToLive() != null) {
+            stack.getParameters().put(PlatformParametersConsts.TTL, source.getTimeToLive().toString());
+        }
     }
 
     private boolean isTemplate(StackV4Request source) {
