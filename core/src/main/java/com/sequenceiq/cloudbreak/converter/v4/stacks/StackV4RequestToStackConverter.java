@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -168,7 +170,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         validateStackAuthentication(source);
         updateEnvironment(source, stack, workspace);
         stack.setName(source.getName());
-        stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
+        stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
     }
 
@@ -195,6 +197,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Orchestrator orchestrator = new Orchestrator();
         orchestrator.setType("SALT");
         return orchestrator;
+    }
+
+    private String getAvailabilityZone(Optional<PlacementSettingsV4Request> placement) {
+        return placement.map(PlacementSettingsV4Request::getAvailabilityZone).orElse(null);
     }
 
     private String getRegion(StackV4Request source, String cloudPlatform) {

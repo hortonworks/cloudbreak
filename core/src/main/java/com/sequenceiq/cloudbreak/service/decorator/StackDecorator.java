@@ -186,10 +186,10 @@ public class StackDecorator {
                 if (template.getId() == null) {
                     template.setCloudPlatform(getCloudPlatform(subject, request, template.cloudPlatform()));
                     PlacementSettingsV4Request placement = request.getPlacement();
-                    templateValidator.validateTemplateRequest(credential, template, placement.getRegion(),
-                            placement.getAvailabilityZone(), subject.getPlatformVariant());
-                    template = templateDecorator.decorate(credential, template, placement.getRegion(),
-                            placement.getAvailabilityZone(), subject.getPlatformVariant());
+                    templateValidator.validateTemplateRequest(credential, template, placement != null ? placement.getRegion() : null,
+                            placement != null ? placement.getAvailabilityZone() : null, subject.getPlatformVariant());
+                    template = templateDecorator.decorate(credential, template, placement != null ? placement.getRegion() : null,
+                            placement != null ? placement.getAvailabilityZone() : null, subject.getPlatformVariant());
                     template = templateService.create(user, template, subject.getWorkspace());
                 }
                 instanceGroup.setTemplate(template);

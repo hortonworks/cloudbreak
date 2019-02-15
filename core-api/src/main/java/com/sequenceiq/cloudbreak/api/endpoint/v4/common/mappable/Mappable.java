@@ -50,7 +50,8 @@ public interface Mappable {
 
     default void putIfValueNotNull(Map<String, Object> parameters, String key, Object value) {
         if (value != null) {
-            parameters.put(key, value.toString());
+            parameters.put(key, value);
         }
     }
+
 }

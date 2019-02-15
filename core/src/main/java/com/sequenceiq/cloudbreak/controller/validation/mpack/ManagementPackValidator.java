@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.mpack;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,8 +29,8 @@ public class ManagementPackValidator {
             return;
         }
         String mpackUrl = stackDetails.getMpackUrl();
-        List<ManagementPackDetailsV4Request> mpackList = stackDetails.getMpacks();
-        Map<String, ManagementPackDetailsV4Request> mpackDetailsMap = stackDetails.getMpacks().stream()
+        List<ManagementPackDetailsV4Request> mpackList = stackDetails.getMpacks() != null ? stackDetails.getMpacks() : Collections.emptyList();
+        Map<String, ManagementPackDetailsV4Request> mpackDetailsMap = mpackList.stream()
                 .collect(Collectors.toMap(ManagementPackDetailsV4Request::getName, mp -> mp, (mp1, mp2) -> mp1));
         if (mpackDetailsMap.size() != mpackList.size()) {
             throw new BadRequestException("Mpack list contains entries with the same name");

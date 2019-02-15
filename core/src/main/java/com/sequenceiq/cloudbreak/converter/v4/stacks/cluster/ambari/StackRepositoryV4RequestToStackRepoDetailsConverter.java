@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,7 +71,7 @@ public class StackRepositoryV4RequestToStackRepoDetailsConverter extends Abstrac
             stack.put(StackRepoDetails.CUSTOM_VDF_REPO_KEY, source.getVersionDefinitionFileUrl());
         }
 
-        if (!source.getMpacks().isEmpty()) {
+        if (isNotEmpty(source.getMpacks())) {
             repo.setMpacks(source.getMpacks().stream().map(rmpack -> converterUtil.convert(rmpack, ManagementPackComponent.class))
                     .collect(Collectors.toList()));
         }
