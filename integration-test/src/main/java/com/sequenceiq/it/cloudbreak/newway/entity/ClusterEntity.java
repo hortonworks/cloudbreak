@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 
 @Prototype
 public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, ClusterV4Response, ClusterEntity> {
@@ -79,13 +80,13 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
     }
 
     public ClusterEntity withKerberosKey(String kerberos) {
-        KerberosEntity kerberosEntity = getTestContext().get(kerberos);
+        KerberosTestDto kerberosEntity = getTestContext().get(kerberos);
         getRequest().setKerberosName(kerberosEntity.getName());
         return this;
     }
 
     public ClusterEntity withKerberos() {
-        return withKerberosKey(KerberosEntity.class.getSimpleName());
+        return withKerberosKey(KerberosTestDto.class.getSimpleName());
     }
 
     public ClusterEntity withKerberos(String kerberos) {
