@@ -1,8 +1,7 @@
-package com.sequenceiq.it.cloudbreak.newway.entity;
+package com.sequenceiq.it.cloudbreak.newway.entity.kerberos;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
@@ -11,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class KerberosEntity extends AbstractCloudbreakEntity<KerberosV4Request, KerberosV4Response, KerberosEntity> {
+public class KerberosTestDto extends AbstractCloudbreakEntity<KerberosV4Request, KerberosV4Response, KerberosTestDto> {
 
     public static final String DEFAULT_MASTERKEY = "masterkey";
 
@@ -19,7 +18,7 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosV4Request, 
 
     public static final String DEFAULT_ADMIN_PASSWORD = "password";
 
-    public KerberosEntity(TestContext testContext) {
+    public KerberosTestDto(TestContext testContext) {
         super(new KerberosV4Request(), testContext);
     }
 
@@ -34,36 +33,38 @@ public class KerberosEntity extends AbstractCloudbreakEntity<KerberosV4Request, 
     }
 
     @Override
-    public KerberosEntity valid() {
+    public KerberosTestDto valid() {
         return withName(getNameCreator().getRandomNameForMock());
     }
 
-    public KerberosEntity withRequest(KerberosV4Request request) {
+    public KerberosTestDto withRequest(KerberosV4Request request) {
         setRequest(request);
         return this;
     }
 
-    public KerberosEntity withName(String name) {
+    public KerberosTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
     }
 
-    public KerberosEntity withActiveDirectoryDescriptor(ActiveDirectoryKerberosDescriptor activeDirectoryDescriptor) {
-        getRequest().setActiveDirectory(activeDirectoryDescriptor);
+    public KerberosTestDto withActiveDirectoryDescriptor() {
+        getRequest().setActiveDirectory(getTestContext().get(ActiveDirectoryKerberosDescriptorTestDto.class).getRequest());
         return this;
     }
 
-    public KerberosEntity withDefaultAD() {
-        ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
-        activeDirectory.setTcpAllowed(true);
-        activeDirectory.setPrincipal("admin/principal");
-        activeDirectory.setPassword("kerberosPassword");
-        activeDirectory.setUrl("someurl.com");
-        activeDirectory.setAdminUrl("admin.url.com");
-        activeDirectory.setRealm("REALM.EXAMPLE.COM");
-        activeDirectory.setLdapUrl("otherurl.com");
-        activeDirectory.setContainerDn("{}");
-        return  withActiveDirectoryDescriptor(activeDirectory);
+    public KerberosTestDto withActiveDirectoryDescriptor(ActiveDirectoryKerberosDescriptorTestDto activeDirectoryDescriptor) {
+        getRequest().setActiveDirectory(activeDirectoryDescriptor.getRequest());
+        return this;
+    }
+
+    public KerberosTestDto withFreeIPADescriptor() {
+        getRequest().setFreeIpa(getTestContext().get(FreeIPAKerberosDescriptorTestDto.class).getRequest());
+        return this;
+    }
+
+    public KerberosTestDto withFreeIPADescriptor(FreeIPAKerberosDescriptorTestDto freeIPADescriptor) {
+        getRequest().setFreeIpa(freeIPADescriptor.getRequest());
+        return this;
     }
 }

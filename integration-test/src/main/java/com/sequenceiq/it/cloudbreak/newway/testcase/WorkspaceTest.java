@@ -20,11 +20,11 @@ import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.KerberosPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
@@ -137,14 +137,14 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = DATA_PROVIDER, enabled = false)
     public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(KerberosEntity.class)
-                .when(KerberosPostAction.create())
+                .given(KerberosTestDto.class)
+                .when(KerberosTestAction::post)
                 .when(this::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
 
-    private KerberosEntity getByName(TestContext testContext, KerberosEntity entity, CloudbreakClient cloudbreakClient) {
+    private KerberosTestDto getByName(TestContext testContext, KerberosTestDto entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
                 cloudbreakClient.getCloudbreakClient().kerberosConfigV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );

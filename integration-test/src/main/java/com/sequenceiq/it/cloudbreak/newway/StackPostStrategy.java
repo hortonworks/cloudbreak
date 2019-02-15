@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.KerberosEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 
 public class StackPostStrategy implements Strategy {
 
@@ -61,7 +61,7 @@ public class StackPostStrategy implements Strategy {
             stackEntity.getRequest().setGatewayPort(gatewayPort);
         }
 
-        KerberosEntity kerberos = new KerberosEntity(null);
+        KerberosTestDto kerberos = new KerberosTestDto(null);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
                 && stackEntity.getRequest().getCluster().getKerberosName() == null;
         if (kerberos != null && updateKerberos) {
