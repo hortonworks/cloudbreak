@@ -22,6 +22,7 @@ springBoot {
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
   systemProperty 'spring.config.location', System.properties['spring.config.location']
+  systemProperty 'spring.config.additional-location', System.properties['spring.config.additional-location']
   if (project.hasProperty('jvmArgs')) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
