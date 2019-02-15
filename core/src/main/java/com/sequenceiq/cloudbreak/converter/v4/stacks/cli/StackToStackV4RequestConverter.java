@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -70,6 +72,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareDatalakeRequest(source, stackV2Request);
         stackV2Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         prepareInputs(source, stackV2Request);
+        stackV2Request.setTimeToLive(getStackTimeToLive(source));
         return stackV2Request;
     }
 
@@ -162,6 +165,15 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         } catch (IOException e) {
             stackV2Request.setTags(null);
         }
+    }
+
+    private Long getStackTimeToLive(Stack stack) {
+        Map<String, String> params = stack.getParameters();
+        Optional<String> optional = Optional.ofNullable(params.get(PlatformParametersConsts.TTL));
+        if (optional.isPresent()) {
+            return optional.map(Long::parseLong).get();
+        }
+        return null;
     }
 
     private void prepareInputs(Stack source, StackV4Request stackV2Request) {
