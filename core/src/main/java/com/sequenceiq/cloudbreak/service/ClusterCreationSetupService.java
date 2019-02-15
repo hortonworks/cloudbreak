@@ -6,9 +6,11 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryV
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -322,7 +324,7 @@ public class ClusterCreationSetupService {
                 StackRepoDetails repo = createStackRepoDetails(stackRepoDetails, osType);
                 Optional<String> vdfUrl = getVDFUrlByOsType(osType, stackRepoDetails);
                 vdfUrl.ifPresent(s -> stackRepoDetails.getStack().put(CUSTOM_VDF_REPO_KEY, s));
-                if (ambariStackDetails != null) {
+                if (ambariStackDetails != null && ambariStackDetails.getMpacks() != null) {
                     repo.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
                             rmpack -> converterUtil.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
                 }
@@ -356,9 +358,7 @@ public class ClusterCreationSetupService {
         repo.setEnableGplRepo(stackRepoDetails.isEnableGplRepo());
         repo.setVerify(stackRepoDetails.isVerify());
         List<ManagementPackComponent> mpacks = stackRepoDetails.getMpacks().get(osType);
-        if (mpacks != null) {
-            repo.setMpacks(mpacks);
-        }
+        repo.setMpacks(Objects.requireNonNullElseGet(mpacks, LinkedList::new));
         return repo;
     }
 

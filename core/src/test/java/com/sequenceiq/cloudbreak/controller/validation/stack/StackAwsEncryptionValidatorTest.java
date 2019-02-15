@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,13 +36,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -95,8 +100,17 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     @Mock
     private PlatformParameterService platformParameterService;
 
+    @Mock
+    private CredentialService credentialService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
     @InjectMocks
     private StackV4RequestValidator underTest;
+
+    @Mock
+    private Credential credential;
 
     public StackAwsEncryptionValidatorTest() {
         super(LoggerFactory.getLogger(StackAwsEncryptionValidatorTest.class));
@@ -111,9 +125,14 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(subject.getPlacement()).thenReturn(placementSettingsRequest);
         when(subject.getCluster()).thenReturn(clusterRequest);
         when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
+        String credentialName = "someCred";
         when(ambariRequest.getBlueprintName()).thenReturn("dummy");
-        when(platformParameterService.getPlatformResourceRequest(anyLong(), eq(null), eq(null), eq(null), eq(null)))
+        when(credential.cloudPlatform()).thenReturn("AWS");
+        when(credentialService.getByNameForWorkspaceId(any(), any())).thenReturn(credential);
+        when(platformParameterService.getPlatformResourceRequest(anyLong(), anyString(), eq(null), eq(null), eq(null)))
                 .thenReturn(platformResourceRequest);
+        when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(mock(CloudRegions.class));
     }
 
     @Test

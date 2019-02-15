@@ -49,9 +49,8 @@ public class StackV4Request extends StackV4Base {
     @ApiModelProperty(StackModelDescription.TAGS)
     private TagsV4Request tags;
 
-    @NotNull
-    @ApiModelProperty(value = PLACEMENT_SETTINGS, required = true)
     @Valid
+    @ApiModelProperty(value = PLACEMENT_SETTINGS)
     private PlacementSettingsV4Request placement;
 
     @NotNull

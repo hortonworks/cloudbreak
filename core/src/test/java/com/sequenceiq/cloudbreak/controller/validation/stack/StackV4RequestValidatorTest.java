@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,20 +28,28 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -57,6 +64,10 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     private static final String TEST_LDAP_NAME = "ldap";
 
     private static final String TEST_BP_NAME = "testBpName";
+
+    private static final String CREDENTIAL_NAME = "someCred";
+
+    private static final String ENVIRONMENT_NAME = "someEnvironment";
 
     private static final String RDS_ERROR_MESSAGE_FORMAT = "For a Datalake cluster (since you have selected a datalake ready blueprint) "
             + "you should provide at least one %s rds/database configuration to the Cluster request";
@@ -82,6 +93,21 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     @Mock
     private RdsConfigService rdsConfigService;
 
+    @Mock
+    private CredentialService credentialService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
+    @Mock
+    private PlatformParameterService platformParameterService;
+
+    @Mock
+    private Credential credential;
+
+    @Mock
+    private CloudRegions cloudRegions;
+
     public StackV4RequestValidatorTest() {
         super(LoggerFactory.getLogger(StackV4RequestValidatorTest.class));
     }
@@ -89,6 +115,9 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     @Before
     public void setUp() {
         when(blueprintService.getByNameForWorkspaceId(anyString(), eq(WORKSPACE_ID))).thenReturn(blueprint);
+        when(credential.cloudPlatform()).thenReturn("AWS");
+        when(credentialService.getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID)).thenReturn(credential);
+        when(environmentService.get(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(new DetailedEnvironmentV4Response());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
     }
 
@@ -235,14 +264,145 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
         verify(blueprintService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
     }
 
-    private StackV4Request stackRequestWithInstanceAndHostGroups(Set<String> instanceGroups, Set<String> hostGroups) {
-        List<InstanceGroupV4Request> instanceGroupList = instanceGroups.stream()
-                .map(ig -> getInstanceGroupV4Request(new InstanceTemplateV4Request(), ig))
-                .collect(Collectors.toList());
+    @Test
+    public void testWhenOnlyCredentialNameExistsOnEnvAndTheRelatedPlatformHasRegionAndPlatformRequestExistsThenNoValidationError() {
+        when(cloudRegions.areRegionsSupported()).thenReturn(true);
+        when(platformParameterService.getRegionsByCredential(any(PlatformResourceRequest.class))).thenReturn(cloudRegions);
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(CREDENTIAL_NAME);
+        request.getEnvironment().setName(null);
+        request.setPlacement(new PlacementSettingsV4Request());
 
-        ClusterV4Request clusterRequest = new ClusterV4Request();
-        clusterRequest.setAmbari(getAmbariV4Request());
-        return getStackV4Request(instanceGroupList, clusterRequest);
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertValidationErrorIsEmpty(validationResult.getErrors());
+
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(credentialService, times(1)).getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID);
+        verify(environmentService, times(0)).get(anyString(), anyLong());
+    }
+
+    @Test
+    public void testWhenOnlyCredentialNameExistsOnEnvAndTheRelatedPlatformHasNoRegionAndPlatformRequestExistsThenNoValidationError() {
+        when(cloudRegions.areRegionsSupported()).thenReturn(false);
+        when(platformParameterService.getRegionsByCredential(any(PlatformResourceRequest.class))).thenReturn(cloudRegions);
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(CREDENTIAL_NAME);
+        request.getEnvironment().setName(null);
+        request.setPlacement(new PlacementSettingsV4Request());
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertValidationErrorIsEmpty(validationResult.getErrors());
+
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(credentialService, times(1)).getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID);
+        verify(environmentService, times(0)).get(anyString(), anyLong());
+    }
+
+    @Test
+    public void testWhenOnlyEnvironmentNameExistsOnEnvAndTheRelatedPlatformHasNoRegionAndPlatformRequestExistsThenNoValidationError() {
+        DetailedEnvironmentV4Response environmentV4Response = new DetailedEnvironmentV4Response();
+        environmentV4Response.setCredentialName(CREDENTIAL_NAME);
+        when(cloudRegions.areRegionsSupported()).thenReturn(false);
+        when(platformParameterService.getRegionsByCredential(any(PlatformResourceRequest.class))).thenReturn(cloudRegions);
+        when(environmentService.get(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environmentV4Response);
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(null);
+        request.getEnvironment().setName(ENVIRONMENT_NAME);
+        request.setPlacement(new PlacementSettingsV4Request());
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertValidationErrorIsEmpty(validationResult.getErrors());
+
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(credentialService, times(1)).getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID);
+        verify(environmentService, times(1)).get(anyString(), anyLong());
+        verify(environmentService, times(1)).get(ENVIRONMENT_NAME, WORKSPACE_ID);
+    }
+
+    @Test
+    public void testWhenOnlyCredentialNameExistsOnEnvAndTheRelatedPlatformHasRegionAndPlatformRequestDoesNotExistsThenNoValidationError() {
+        when(cloudRegions.areRegionsSupported()).thenReturn(true);
+        when(platformParameterService.getRegionsByCredential(any(PlatformResourceRequest.class))).thenReturn(cloudRegions);
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(CREDENTIAL_NAME);
+        request.getEnvironment().setName(null);
+        request.setPlacement(null);
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertEquals(1L, validationResult.getErrors().size());
+
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(credentialService, times(1)).getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID);
+        verify(environmentService, times(0)).get(anyString(), anyLong());
+    }
+
+    @Test
+    public void testWhenOnlyEnvironmentNameExistsOnEnvAndTheRelatedPlatformHasRegionAndPlatformRequestDoesNotExistsThenNoValidationError() {
+        DetailedEnvironmentV4Response environmentV4Response = new DetailedEnvironmentV4Response();
+        environmentV4Response.setCredentialName(CREDENTIAL_NAME);
+        when(cloudRegions.areRegionsSupported()).thenReturn(true);
+        when(platformParameterService.getRegionsByCredential(any(PlatformResourceRequest.class))).thenReturn(cloudRegions);
+        when(environmentService.get(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environmentV4Response);
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(null);
+        request.getEnvironment().setName(ENVIRONMENT_NAME);
+        request.setPlacement(null);
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertEquals(1L, validationResult.getErrors().size());
+
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(credentialService, times(1)).getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID);
+        verify(environmentService, times(1)).get(anyString(), anyLong());
+        verify(environmentService, times(1)).get(ENVIRONMENT_NAME, WORKSPACE_ID);
+    }
+
+    @Test
+    public void testWhenOnlyEnvironmentNameExistsOnEnvAndTheRelatedPlatformHasRegionAndPlatformRequestExistsThenNoValidationError() {
+        DetailedEnvironmentV4Response environmentV4Response = new DetailedEnvironmentV4Response();
+        environmentV4Response.setCredentialName(CREDENTIAL_NAME);
+        when(cloudRegions.areRegionsSupported()).thenReturn(true);
+        when(platformParameterService.getRegionsByCredential(any(PlatformResourceRequest.class))).thenReturn(cloudRegions);
+        when(environmentService.get(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environmentV4Response);
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(null);
+        request.getEnvironment().setName(ENVIRONMENT_NAME);
+        request.setPlacement(new PlacementSettingsV4Request());
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertValidationErrorIsEmpty(validationResult.getErrors());
+
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(credentialService, times(1)).getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID);
+        verify(environmentService, times(1)).get(anyString(), anyLong());
+        verify(environmentService, times(1)).get(ENVIRONMENT_NAME, WORKSPACE_ID);
+    }
+
+    @Test
+    public void testWhenNorCredentialNameOrEnvironmentNameGivenInEnvironmentThenValidationError() {
+        StackV4Request request = stackRequest();
+        request.getEnvironment().setCredentialName(null);
+        request.getEnvironment().setName(null);
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertEquals(1L, validationResult.getErrors().size());
+
+        verify(platformParameterService, times(0)).getRegionsByCredential(any(PlatformResourceRequest.class));
+        verify(credentialService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(environmentService, times(0)).get(anyString(), anyLong());
     }
 
     private StackV4Request stackRequest() {
@@ -290,6 +450,10 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
         StackV4Request stackRequest = new StackV4Request();
         stackRequest.setCluster(clusterRequest);
         stackRequest.setInstanceGroups(instanceGroupRequests);
+        EnvironmentSettingsV4Request env = new EnvironmentSettingsV4Request();
+        env.setCredentialName(CREDENTIAL_NAME);
+        stackRequest.setEnvironment(env);
+        stackRequest.setPlacement(new PlacementSettingsV4Request());
         return stackRequest;
     }
 
@@ -299,9 +463,4 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
         return rds;
     }
 
-    private DatabaseV4Request rdsConfigRequest(DatabaseType type) {
-        DatabaseV4Request request = new DatabaseV4Request();
-        request.setType(type.name());
-        return request;
-    }
 }

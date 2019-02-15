@@ -261,6 +261,19 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         checkCredentialAttachedToCluster(testContext);
     }
 
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testClusterWithEmptyEnvironmentRequest(TestContext testContext) {
+        testContext
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+                .given("invalidEnvironmentSettingsRequest", EnvironmentSettingsV4Entity.class).withName(null).withCredentialName(null)
+                .given(StackEntity.class)
+                .withEnvironmentSettings("invalidEnvironmentSettingsRequest")
+                .when(Stack.postV4(), key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest").withExpectedMessage(".*CredentialName or EnvironmentName is mandatory"))
+                .validate();
+    }
+
     private void createEnvWithResources(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(createDefaultRdsConfig(testContext))
