@@ -113,7 +113,7 @@ public class ServiceEndpointCollectorTest {
         cluster.setGateway(null);
 
         String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
-        assertEquals("https://127.0.0.1/ambari/", result);
+        assertEquals("https://127.0.0.1/", result);
     }
 
     @Test
