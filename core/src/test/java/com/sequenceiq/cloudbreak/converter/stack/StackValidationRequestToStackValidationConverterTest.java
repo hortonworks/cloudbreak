@@ -29,13 +29,13 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -49,7 +49,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     public ExpectedException expectedEx = ExpectedException.none();
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private NetworkService networkService;
@@ -127,7 +127,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
         StackValidation result = underTest.convert(validationRequest);
 
-        assertEquals(bpName, result.getClusterDefinition().getName());
+        assertEquals(bpName, result.getBlueprint().getName());
     }
 
     @Test
@@ -144,7 +144,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
         StackValidation result = underTest.convert(validationRequest);
 
-        assertEquals(bpName, result.getClusterDefinition().getName());
+        assertEquals(bpName, result.getBlueprint().getName());
     }
 
     @Test
@@ -162,7 +162,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
         StackValidation result = underTest.convert(validationRequest);
 
-        assertEquals("Cluster definition ID overrides cluster definition name", bpName, result.getClusterDefinition().getName());
+        assertEquals("Blueprint ID overrides blueprint name", bpName, result.getBlueprint().getName());
     }
 
     @Test
@@ -171,7 +171,7 @@ public class StackValidationRequestToStackValidationConverterTest {
         validationRequest.setBlueprint(new BlueprintRequest());
 
         when(credentialService.get(any(), eq(workspace))).thenReturn(credential);
-        when(conversionService.convert(any(), eq(ClusterDefinition.class))).thenReturn(TestUtil.clusterDefinition(bpName));
+        when(conversionService.convert(any(), eq(Blueprint.class))).thenReturn(TestUtil.blueprint(bpName));
 
         Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
         platformParametersMap.put(Platform.platform("GCP"), parameters);
@@ -180,7 +180,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
         StackValidation result = underTest.convert(validationRequest);
 
-        assertEquals(bpName, result.getClusterDefinition().getName());
+        assertEquals(bpName, result.getBlueprint().getName());
     }
 
     @Test
@@ -226,10 +226,10 @@ public class StackValidationRequestToStackValidationConverterTest {
     }
 
     private void mockBlueprintsInWorkspace() {
-        Set<ClusterDefinition> clusterDefinitions = new HashSet<>();
-        clusterDefinitions.add(TestUtil.clusterDefinition(1L, bpName, "{}"));
-        clusterDefinitions.add(TestUtil.clusterDefinition(2L, bpName2, "{}"));
-        when(clusterDefinitionService.getAllAvailableInWorkspace(any())).thenReturn(clusterDefinitions);
+        Set<Blueprint> blueprints = new HashSet<>();
+        blueprints.add(TestUtil.blueprint(1L, bpName, "{}"));
+        blueprints.add(TestUtil.blueprint(2L, bpName2, "{}"));
+        when(blueprintService.getAllAvailableInWorkspace(any())).thenReturn(blueprints);
     }
 
     private void mockUserRelated() {

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -62,7 +62,7 @@ public class SharedServiceConfigProviderTest {
     private LdapConfig ldapConfig;
 
     @Mock
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     @Mock
     private Json newInputs;
@@ -280,7 +280,7 @@ public class SharedServiceConfigProviderTest {
     private Cluster createBarelyConfiguredRequestedCluster() {
         Cluster requestedCluster = new Cluster();
         requestedCluster.setRdsConfigs(new LinkedHashSet<>());
-        requestedCluster.setClusterDefinition(clusterDefinition);
+        requestedCluster.setBlueprint(blueprint);
         requestedCluster.setStack(publicStack);
         return requestedCluster;
     }

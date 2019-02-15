@@ -29,16 +29,16 @@ import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Service
 public class ServiceEndpointCollector {
@@ -49,22 +49,22 @@ public class ServiceEndpointCollector {
     private String knoxPort;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName, Workspace workspace) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace);
-        return getKnoxServices(clusterDefinition);
+        Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, workspace);
+        return getKnoxServices(blueprint);
     }
 
     public Collection<ExposedServiceResponse> getKnoxServices(Long workspaceId, String blueprintName) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(blueprintName, workspaceId);
-        return getKnoxServices(clusterDefinition);
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
+        return getKnoxServices(blueprint);
     }
 
     public String getAmbariServerUrl(Cluster cluster, String ambariIp) {
@@ -87,11 +87,11 @@ public class ServiceEndpointCollector {
     }
 
     public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
-        if (cluster.getClusterDefinition() != null) {
-            String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
-            if (StringUtils.isNotEmpty(clusterDefinitionText)) {
-                AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = new AmbariBlueprintProcessorFactory().get(clusterDefinitionText);
-                Collection<ExposedService> knownExposedServices = getExposedServices(ambariBlueprintTextProcessor, Collections.emptySet());
+        if (cluster.getBlueprint() != null) {
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            if (StringUtils.isNotEmpty(blueprintText)) {
+                BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(blueprintText);
+                Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
                 Gateway gateway = cluster.getGateway();
                 Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
                 if (gateway != null) {
@@ -122,11 +122,11 @@ public class ServiceEndpointCollector {
         return Collections.emptyMap();
     }
 
-    private Collection<ExposedService> getExposedServices(AmbariBlueprintTextProcessor ambariBlueprintTextProcessor, Set<String> removableComponents) {
-        Set<String> blueprintComponents = ambariBlueprintTextProcessor.getAllComponents();
+    private Collection<ExposedService> getExposedServices(BlueprintTextProcessor blueprintTextProcessor, Set<String> removableComponents) {
+        Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
         blueprintComponents.removeAll(removableComponents);
-        String stackName = ambariBlueprintTextProcessor.getStackName();
-        String stackVersion = ambariBlueprintTextProcessor.getStackVersion();
+        String stackName = blueprintTextProcessor.getStackName();
+        String stackVersion = blueprintTextProcessor.getStackVersion();
         VersionComparator versionComparator = new VersionComparator();
         if ("HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0) {
             return Collections.emptyList();
@@ -145,12 +145,12 @@ public class ServiceEndpointCollector {
                 ExposedService.LOGSEARCH);
     }
 
-    private Collection<ExposedServiceResponse> getKnoxServices(ClusterDefinition clusterDefinition) {
-        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = ambariBlueprintProcessorFactory.get(clusterDefinitionText);
-        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(ambariBlueprintTextProcessor);
+    private Collection<ExposedServiceResponse> getKnoxServices(Blueprint blueprint) {
+        String blueprintText = blueprint.getBlueprintText();
+        BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
         haComponents.remove(ExposedService.RANGER.getServiceName());
-        return ExposedServiceResponse.fromExposedServices(getExposedServices(ambariBlueprintTextProcessor, haComponents));
+        return ExposedServiceResponse.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {

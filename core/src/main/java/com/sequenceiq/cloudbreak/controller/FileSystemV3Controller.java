@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
@@ -36,7 +36,7 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
     private WorkspaceService workspaceService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -48,7 +48,7 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(Long workspaceId, StructuredParametersQueryRequest structuredParametersQueryRequest) {
         Workspace workspace = getWorkspace(workspaceId);
-        Set<ConfigQueryEntry> entries = clusterDefinitionService.queryFileSystemParameters(
+        Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),
                 structuredParametersQueryRequest.getStorageName(),

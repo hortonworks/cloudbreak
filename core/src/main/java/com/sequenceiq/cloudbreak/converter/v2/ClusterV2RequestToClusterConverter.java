@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -65,7 +65,7 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
     private LdapConfigService ldapConfigService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private GatewayConvertUtil gatewayConvertUtil;
@@ -97,7 +97,7 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
         }
         AmbariV2Request ambariRequest = source.getAmbari();
         if (ambariRequest != null) {
-            cluster.setClusterDefinition(getBlueprint(ambariRequest, workspace));
+            cluster.setBlueprint(getBlueprint(ambariRequest, workspace));
             cluster.setConfigStrategy(ambariRequest.getConfigStrategy());
             if (ambariRequest.getGateway() != null) {
                 Gateway gateway = getConversionService().convert(ambariRequest.getGateway(), Gateway.class);
@@ -142,14 +142,14 @@ public class ClusterV2RequestToClusterConverter extends AbstractConversionServic
         return null;
     }
 
-    private ClusterDefinition getBlueprint(AmbariV2Request ambariV2Request, Workspace workspace) {
-        ClusterDefinition clusterDefinition = null;
+    private Blueprint getBlueprint(AmbariV2Request ambariV2Request, Workspace workspace) {
+        Blueprint blueprint = null;
         if (!StringUtils.isEmpty(ambariV2Request.getBlueprintName())) {
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(ambariV2Request.getBlueprintName(), workspace);
-            if (clusterDefinition == null) {
+            blueprint = blueprintService.getByNameForWorkspace(ambariV2Request.getBlueprintName(), workspace);
+            if (blueprint == null) {
                 throw new NotFoundException("Blueprint does not exists by name: " + ambariV2Request.getBlueprintName());
             }
         }
-        return clusterDefinition;
+        return blueprint;
     }
 }

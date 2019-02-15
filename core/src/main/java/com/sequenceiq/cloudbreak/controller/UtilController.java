@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -54,7 +54,7 @@ public class UtilController implements UtilEndpoint {
     private StackMatrixService stackMatrixService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private ServiceEndpointCollector serviceEndpointCollector;
@@ -133,7 +133,7 @@ public class UtilController implements UtilEndpoint {
     public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        Set<String> strings = clusterDefinitionService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), workspace);
+        Set<String> strings = blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), workspace);
         Map<String, String> result = new HashMap<>();
         for (String customParameter : strings) {
             result.put(customParameter, "");
@@ -147,7 +147,7 @@ public class UtilController implements UtilEndpoint {
     public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        Set<ConfigQueryEntry> entries = clusterDefinitionService.queryFileSystemParameters(
+        Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),
                 structuredParametersQueryRequest.getStorageName(),

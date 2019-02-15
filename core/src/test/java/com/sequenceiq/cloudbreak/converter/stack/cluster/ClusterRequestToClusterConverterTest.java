@@ -58,7 +58,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(getRequest("cluster.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
                 "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant"));
     }
@@ -73,7 +73,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(getRequest("cluster-with-file-system.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
                 "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "environment", "variant"));
     }
@@ -85,7 +85,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterRequest clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
                 "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway", "environment", "variant"));
         assertNull(result.getGateway());

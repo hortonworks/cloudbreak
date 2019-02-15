@@ -22,14 +22,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -56,10 +56,10 @@ public class AmbariClusterServiceTest {
     private StackService stackService;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private BlueprintValidator blueprintValidator;
 
     @Mock
     private ClusterTerminationService clusterTerminationService;
@@ -93,8 +93,8 @@ public class AmbariClusterServiceTest {
     public void setup() throws CloudbreakException, TransactionExecutionException {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
-        cluster.setClusterDefinition(new ClusterDefinition());
-        cluster.getClusterDefinition().setId(1L);
+        cluster.setBlueprint(new Blueprint());
+        cluster.getBlueprint().setId(1L);
         Stack stack = new Stack();
         stack.setOrchestrator(new Orchestrator());
         stack.setCluster(cluster);
@@ -105,7 +105,7 @@ public class AmbariClusterServiceTest {
         when(clusterComponentConfigProvider.getHDPRepo(any(Long.class))).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
-        when(clusterDefinitionService.get(any(Long.class))).thenReturn(cluster.getClusterDefinition());
+        when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 

@@ -22,11 +22,11 @@ import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -37,11 +37,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Component
 public class ClusterDecorator {
@@ -49,10 +49,10 @@ public class ClusterDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDecorator.class);
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private BlueprintValidator blueprintValidator;
 
     @Inject
     private ConversionService conversionService;
@@ -81,9 +81,9 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
-    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, ClusterDefinition clusterDefinition, User user, Workspace workspace,
+    public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterRequest request, Blueprint blueprint, User user, Workspace workspace,
             @Nonnull Stack stack) {
-        prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(clusterDefinition), user);
+        prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(blueprint), user);
         prepareClusterManagerVariant(cluster);
         prepareHostGroups(stack, cluster, request.getHostGroups(), workspace, user);
         validateBlueprintIfRequired(cluster, request, stack);
@@ -106,22 +106,22 @@ public class ClusterDecorator {
 
     private void validateBlueprintIfRequired(Cluster subject, ClusterRequest request, Stack stack) {
         if (request.getValidateBlueprint()) {
-            ambariBlueprintValidator.validateBlueprintForStack(subject, subject.getClusterDefinition(), subject.getHostGroups(), stack.getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(subject, subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
         }
     }
 
-    private void prepareBlueprint(Cluster subject, ClusterRequest request, Workspace workspace, Stack stack, Optional<ClusterDefinition> blueprint, User user) {
+    private void prepareBlueprint(Cluster subject, ClusterRequest request, Workspace workspace, Stack stack, Optional<Blueprint> blueprint, User user) {
         if (blueprint.isPresent()) {
-            subject.setClusterDefinition(blueprint.get());
+            subject.setBlueprint(blueprint.get());
         } else {
             if (request.getBlueprintId() != null) {
-                subject.setClusterDefinition(clusterDefinitionService.get(request.getBlueprintId()));
+                subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
             } else if (request.getBlueprint() != null) {
-                ClusterDefinition newClusterDefinition = conversionService.convert(request.getBlueprint(), ClusterDefinition.class);
-                newClusterDefinition = clusterDefinitionService.create(workspace, newClusterDefinition, new ArrayList<>(), user);
-                subject.setClusterDefinition(newClusterDefinition);
+                Blueprint newBlueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
+                newBlueprint = blueprintService.create(workspace, newBlueprint, new ArrayList<>(), user);
+                subject.setBlueprint(newBlueprint);
             } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
-                subject.setClusterDefinition(clusterDefinitionService.getByNameForWorkspace(request.getBlueprintName(), workspace));
+                subject.setBlueprint(blueprintService.getByNameForWorkspace(request.getBlueprintName(), workspace));
             } else {
                 throw new BadRequestException("Blueprint is not configured for the cluster!");
             }
@@ -131,7 +131,7 @@ public class ClusterDecorator {
     }
 
     private void prepareClusterManagerVariant(Cluster cluster) {
-        if (clusterDefinitionService.isAmbariBlueprint(cluster.getClusterDefinition())) {
+        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
             cluster.setVariant("AMBARI");
         } else {
             cluster.setVariant("CLOUDERA_MANAGER");
@@ -140,8 +140,8 @@ public class ClusterDecorator {
 
     // because KNOX does not support them
     private void removeHaComponentsFromGatewayTopologies(Cluster subject) {
-        String clusterDefinitionText = subject.getClusterDefinition().getClusterDefinitionText();
-        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new AmbariBlueprintTextProcessor(clusterDefinitionText));
+        String blueprintText = subject.getBlueprint().getBlueprintText();
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(blueprintText));
         Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
                 .filter(es -> haComponents.contains(es.getServiceName())
                         && !ExposedService.RANGER.getServiceName().equalsIgnoreCase(es.getServiceName()))

@@ -62,12 +62,12 @@ public class UptimeNotifier {
         } else {
             notification.setCloud(stack.getCredential().cloudPlatform());
         }
-        if (stack.getCluster() == null || stack.getCluster().getClusterDefinition() == null) {
+        if (stack.getCluster() == null || stack.getCluster().getBlueprint() == null) {
             notification.setBlueprintId(null);
             notification.setBlueprintName("null");
         } else {
-            notification.setBlueprintId(stack.getCluster().getClusterDefinition().getId());
-            notification.setBlueprintName(stack.getCluster().getClusterDefinition().getStackName());
+            notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
+            notification.setBlueprintName(stack.getCluster().getBlueprint().getAmbariName());
             notification.setClusterName(stack.getCluster().getName());
             notification.setClusterId(stack.getCluster().getId());
             notification.setClusterStatus(stack.getCluster().getStatus());

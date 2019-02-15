@@ -22,11 +22,11 @@ import com.sequenceiq.cloudbreak.api.model.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.users.UserNamePasswordJson;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -60,7 +60,7 @@ public class ClusterCommonService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private BlueprintValidator blueprintValidator;
 
     @Inject
     private StackService stackService;
@@ -134,13 +134,13 @@ public class ClusterCommonService {
                     stack.getStatus()));
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
-        ClusterDefinition clusterDefinition = stack.getCluster().getClusterDefinition();
+        Blueprint blueprint = stack.getCluster().getBlueprint();
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), updateJson.getHostGroupAdjustment().getHostGroup());
         if (hostGroup == null) {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup, updateJson.getHostGroupAdjustment().getScalingAdjustment());
+        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, updateJson.getHostGroupAdjustment().getScalingAdjustment());
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 

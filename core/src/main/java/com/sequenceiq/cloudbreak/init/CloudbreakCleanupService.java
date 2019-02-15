@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.AmbariBlueprintMigrationService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintMigrationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
@@ -92,7 +92,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private GovCloudFlagMigrator govCloudFlagMigrator;
 
     @Inject
-    private AmbariBlueprintMigrationService ambariBlueprintMigrationService;
+    private BlueprintMigrationService blueprintMigrationService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -108,7 +108,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         } catch (TransactionExecutionException e) {
             LOGGER.info("Unable to start node properly", e);
         }
-        ambariBlueprintMigrationService.migrateBlueprints();
+        blueprintMigrationService.migrateBlueprints();
         govCloudFlagMigrator.run();
     }
 

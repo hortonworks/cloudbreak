@@ -14,7 +14,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
@@ -66,7 +66,7 @@ public class StructuredFlowEventFactory {
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
                 clusterDetails = conversionService.convert(cluster, ClusterDetails.class);
-                blueprintDetails = conversionService.convert(cluster.getClusterDefinition(), BlueprintDetails.class);
+                blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
             }
         }
         return exception != null
@@ -98,10 +98,10 @@ public class StructuredFlowEventFactory {
                 notificationDetails.setClusterId(cluster.getId());
                 notificationDetails.setClusterName(cluster.getName());
                 notificationDetails.setClusterStatus(cluster.getStatus().name());
-                ClusterDefinition clusterDefinition = cluster.getClusterDefinition();
-                if (clusterDefinition != null) {
-                    notificationDetails.setBlueprintId(clusterDefinition.getId());
-                    notificationDetails.setBlueprintName(clusterDefinition.getStackName());
+                Blueprint blueprint = cluster.getBlueprint();
+                if (blueprint != null) {
+                    notificationDetails.setBlueprintId(blueprint.getId());
+                    notificationDetails.setBlueprintName(blueprint.getAmbariName());
                 }
             }
         } catch (AccessDeniedException e) {

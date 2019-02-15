@@ -88,8 +88,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(hostGroups);
 
-            String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
-            cluster.setExtendedClusterDefinitionText(clusterDefinitionText);
+            String hostTemplate = cluster.getBlueprint().getBlueprintText();
+            cluster.setExtendedBlueprintText(hostTemplate);
             clusterService.updateCluster(cluster);
 
             Set<RDSConfig> rdsConfigs = postgresConfigService.createRdsConfigIfNeeded(stack, cluster);

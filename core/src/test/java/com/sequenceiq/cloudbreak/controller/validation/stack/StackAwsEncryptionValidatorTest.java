@@ -36,11 +36,11 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateRequestValidator;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -81,10 +81,10 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private ClusterRequest clusterRequest;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     @Mock
     private Json blueprintTags;
@@ -106,7 +106,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
         when(subject.getClusterRequest()).thenReturn(clusterRequest);
         when(clusterRequest.getBlueprintName()).thenReturn("dummy");
-        when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(clusterDefinition);
+        when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
         when(clusterRequest.getHostGroups()).thenReturn(Set.of(new HostGroupRequest()));
     }
 

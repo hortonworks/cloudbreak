@@ -18,12 +18,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.init.clusterdefinition.ClusterDefinitionLoaderService;
+import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -33,14 +33,14 @@ public class BlueprintController extends NotificationController implements Bluep
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
 
     @Autowired
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
     @Autowired
-    private ClusterDefinitionLoaderService clusterDefinitionLoaderService;
+    private BlueprintLoaderService blueprintLoaderService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -53,12 +53,12 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public BlueprintResponse get(Long id) {
-        return conversionService.convert(clusterDefinitionService.get(id), BlueprintResponse.class);
+        return conversionService.convert(blueprintService.get(id), BlueprintResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        ClusterDefinition deleted = clusterDefinitionService.delete(id);
+        Blueprint deleted = blueprintService.delete(id);
         notify(ResourceEvent.RECIPE_DELETED);
         conversionService.convert(deleted, BlueprintResponse.class);
     }
@@ -104,8 +104,8 @@ public class BlueprintController extends NotificationController implements Bluep
 
     @Override
     public BlueprintRequest getRequestfromId(Long id) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.get(id);
-        return conversionService.convert(clusterDefinition, BlueprintRequest.class);
+        Blueprint blueprint = blueprintService.get(id);
+        return conversionService.convert(blueprint, BlueprintRequest.class);
     }
 
     @Override
@@ -116,30 +116,30 @@ public class BlueprintController extends NotificationController implements Bluep
     private BlueprintResponse getBlueprintResponse(String name) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return conversionService.convert(clusterDefinitionService.getByNameForWorkspace(name, workspace), BlueprintResponse.class);
+        return conversionService.convert(blueprintService.getByNameForWorkspace(name, workspace), BlueprintResponse.class);
     }
 
     private Set<BlueprintResponse> listForUsersDefaultWorkspace() {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        return clusterDefinitionService.getAllAvailableInWorkspace(workspace).stream()
+        return blueprintService.getAllAvailableInWorkspace(workspace).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintResponse.class))
                 .collect(Collectors.toSet());
     }
 
     private void deleteInDefaultWorkspace(String name) {
-        executeAndNotify(identityUser -> clusterDefinitionService.deleteByNameFromWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId()),
+        executeAndNotify(identityUser -> blueprintService.deleteByNameFromWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId()),
                 ResourceEvent.BLUEPRINT_DELETED);
     }
 
     private BlueprintResponse createInWorkspace(BlueprintRequest request, User user, Workspace workspace) {
-        ClusterDefinition clusterDefinition = conversionService.convert(request, ClusterDefinition.class);
-        clusterDefinition = clusterDefinitionService.create(clusterDefinition, workspace, user);
-        return notifyAndReturn(clusterDefinition, ResourceEvent.BLUEPRINT_CREATED);
+        Blueprint blueprint = conversionService.convert(request, Blueprint.class);
+        blueprint = blueprintService.create(blueprint, workspace, user);
+        return notifyAndReturn(blueprint, ResourceEvent.BLUEPRINT_CREATED);
     }
 
-    private BlueprintResponse notifyAndReturn(ClusterDefinition clusterDefinition, ResourceEvent resourceEvent) {
+    private BlueprintResponse notifyAndReturn(Blueprint blueprint, ResourceEvent resourceEvent) {
         notify(resourceEvent);
-        return conversionService.convert(clusterDefinition, BlueprintResponse.class);
+        return conversionService.convert(blueprint, BlueprintResponse.class);
     }
 }

@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -88,7 +88,7 @@ public class ClusterV2RequestToClusterConverterTest {
     private LdapConfigService ldapConfigService;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private GatewayConvertUtil gatewayConvertUtil;
@@ -203,9 +203,9 @@ public class ClusterV2RequestToClusterConverterTest {
 
         Cluster actual = underTest.convert(source);
 
-        assertThat(actual.getClusterDefinition(), is(nullValue()));
+        assertThat(actual.getBlueprint(), is(nullValue()));
 
-        verify(clusterDefinitionService, times(0)).getByNameForWorkspace(anyString(), eq(workspace));
+        verify(blueprintService, times(0)).getByNameForWorkspace(anyString(), eq(workspace));
     }
 
     @Test
@@ -218,7 +218,7 @@ public class ClusterV2RequestToClusterConverterTest {
         ambariV2Request.setBlueprintName(blueprintName);
         source.setAmbari(ambariV2Request);
 
-        when(clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(null);
+        when(blueprintService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("Blueprint does not exists by name: bp-name");
@@ -230,8 +230,8 @@ public class ClusterV2RequestToClusterConverterTest {
     public void testConvertWheBlueprintExists() {
         String blueprintName = "bp-name";
 
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setName(blueprintName);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(blueprintName);
 
         ClusterV2Request source = new ClusterV2Request();
 
@@ -239,13 +239,13 @@ public class ClusterV2RequestToClusterConverterTest {
         ambariV2Request.setBlueprintName(blueprintName);
         source.setAmbari(ambariV2Request);
 
-        when(clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(clusterDefinition);
+        when(blueprintService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(blueprint);
 
         Cluster actual = underTest.convert(source);
 
-        assertThat(actual.getClusterDefinition(), is(clusterDefinition));
+        assertThat(actual.getBlueprint(), is(blueprint));
 
-        verify(clusterDefinitionService, times(1)).getByNameForWorkspace(blueprintName, workspace);
+        verify(blueprintService, times(1)).getByNameForWorkspace(blueprintName, workspace);
     }
 
     @Test

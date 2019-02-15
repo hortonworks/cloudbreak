@@ -5,15 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<ClusterDefinition, BlueprintResponse> {
+public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintResponseConverter.class);
 
     @Override
-    public BlueprintResponse convert(ClusterDefinition entity) {
+    public BlueprintResponse convert(Blueprint entity) {
         BlueprintResponse blueprintJson = new BlueprintResponse();
         blueprintJson.setId(entity.getId());
         blueprintJson.setName(entity.getName());
@@ -21,7 +21,7 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
-        blueprintJson.setAmbariBlueprint(entity.getClusterDefinitionText());
+        blueprintJson.setAmbariBlueprint(entity.getBlueprintText());
         return blueprintJson;
     }
 

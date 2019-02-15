@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -42,7 +42,7 @@ public abstract class AbstractRdsConfigProvider {
     private ClusterService clusterService;
 
     public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
-        if (isRdsConfigNeeded(cluster.getClusterDefinition())) {
+        if (isRdsConfigNeeded(cluster.getBlueprint())) {
             Set<RDSConfig> rdsConfigs = createPostgresRdsConfigIfNeeded(stack, cluster);
             RDSConfig rdsConfig = rdsConfigs.stream().filter(rdsConfig1 -> rdsConfig1.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
@@ -61,7 +61,7 @@ public abstract class AbstractRdsConfigProvider {
     public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
         Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(cluster.getId());
         rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
-        if (isRdsConfigNeeded(cluster.getClusterDefinition())
+        if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
             LOGGER.debug("Creating postgres RDSConfig for {}", getRdsType().name());
             rdsConfigs = createPostgresRdsConf(stack, cluster, rdsConfigs, getDbUser(), getDbPort(), getDb());
@@ -114,6 +114,6 @@ public abstract class AbstractRdsConfigProvider {
 
     protected abstract RdsType getRdsType();
 
-    protected abstract boolean isRdsConfigNeeded(ClusterDefinition clusterDefinition);
+    protected abstract boolean isRdsConfigNeeded(Blueprint blueprint);
 
 }

@@ -20,22 +20,22 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
-@WorkspaceEntityType(ClusterDefinition.class)
+@WorkspaceEntityType(Blueprint.class)
 public class BlueprintV3Controller extends NotificationController implements BlueprintV3Endpoint {
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     @Named("conversionService")
@@ -53,42 +53,42 @@ public class BlueprintV3Controller extends NotificationController implements Blu
     @Override
     public Set<BlueprintViewResponse> listByWorkspace(Long workspaceId) {
         Workspace workspace = getWorkspace(workspaceId);
-        return clusterDefinitionService.getAllAvailableViewInWorkspace(workspace).stream()
+        return blueprintService.getAllAvailableViewInWorkspace(workspace).stream()
                 .map(blueprint -> conversionService.convert(blueprint, BlueprintViewResponse.class))
                 .collect(Collectors.toSet());
     }
 
     @Override
     public BlueprintResponse getByNameInWorkspace(Long workspaceId, String name) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(name, workspaceId);
-        return conversionService.convert(clusterDefinition, BlueprintResponse.class);
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
+        return conversionService.convert(blueprint, BlueprintResponse.class);
     }
 
     @Override
     public BlueprintResponse createInWorkspace(Long workspaceId, BlueprintRequest request) {
-        ClusterDefinition clusterDefinition = conversionService.convert(request, ClusterDefinition.class);
+        Blueprint blueprint = conversionService.convert(request, Blueprint.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        clusterDefinition = clusterDefinitionService.create(clusterDefinition, workspaceId, user);
+        blueprint = blueprintService.create(blueprint, workspaceId, user);
         notify(ResourceEvent.BLUEPRINT_CREATED);
-        return conversionService.convert(clusterDefinition, BlueprintResponse.class);
+        return conversionService.convert(blueprint, BlueprintResponse.class);
     }
 
     @Override
     public BlueprintResponse deleteInWorkspace(Long workspaceId, String name) {
-        ClusterDefinition deleted = clusterDefinitionService.deleteByNameFromWorkspace(name, workspaceId);
+        Blueprint deleted = blueprintService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return conversionService.convert(deleted, BlueprintResponse.class);
     }
 
     @Override
     public BlueprintRequest getRequestFromName(Long workspaceId, String name) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(name, workspaceId);
-        return conversionService.convert(clusterDefinition, BlueprintRequest.class);
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
+        return conversionService.convert(blueprint, BlueprintRequest.class);
     }
 
     @Override
     public ParametersQueryResponse getCustomParameters(Long workspaceId, String name) {
-        Set<String> customParameters = clusterDefinitionService.queryCustomParameters(name, getWorkspace(workspaceId));
+        Set<String> customParameters = blueprintService.queryCustomParameters(name, getWorkspace(workspaceId));
         Map<String, String> result = new HashMap<>();
         for (String customParameter : customParameters) {
             result.put(customParameter, "");

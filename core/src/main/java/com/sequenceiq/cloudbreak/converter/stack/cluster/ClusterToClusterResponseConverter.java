@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -83,7 +83,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     private ConversionService conversionService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
@@ -99,8 +99,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setName(source.getName());
         clusterResponse.setStatus(source.getStatus());
         clusterResponse.setStatusReason(source.getStatusReason());
-        if (source.getClusterDefinition() != null) {
-            clusterResponse.setBlueprintId(source.getClusterDefinition().getId());
+        if (source.getBlueprint() != null) {
+            clusterResponse.setBlueprintId(source.getBlueprint().getId());
         }
         setUptime(source, clusterResponse);
         Set<RDSConfig> rdsConfigs = source.getRdsConfigs();
@@ -117,7 +117,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setDpAmbariPassword(conversionService.convert(source.getDpAmbariPasswordSecret(), SecretResponse.class));
         }
 
-        if (clusterDefinitionService.isAmbariBlueprint(source.getClusterDefinition())) {
+        if (blueprintService.isAmbariBlueprint(source.getBlueprint())) {
             Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies =
                     serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);
             clusterResponse.setClusterExposedServicesForTopologies(clusterExposedServicesForTopologies);
@@ -127,7 +127,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         setExtendedBlueprintText(source, clusterResponse);
         convertRdsConfigs(source, clusterResponse);
         clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
-        clusterResponse.setBlueprint(getConversionService().convert(source.getClusterDefinition(), BlueprintResponse.class));
+        clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
         convertCustomQueue(source, clusterResponse);
         convertNullableProperties(source, clusterResponse);
         convertContainerConfig(source, clusterResponse);
@@ -151,8 +151,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
-        if (StringUtils.isNoneEmpty(source.getExtendedClusterDefinitionText()) && !disableShowBlueprint) {
-            String fromVault = source.getExtendedClusterDefinitionText();
+        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
+            String fromVault = source.getExtendedBlueprintText();
             clusterResponse.setExtendedBlueprintText(anonymize(fromVault));
         }
     }

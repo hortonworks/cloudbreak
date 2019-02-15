@@ -31,7 +31,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.SecretResponse;
@@ -41,11 +40,11 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -59,7 +58,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -119,7 +118,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Before
     public void setUp() throws CloudbreakException {
@@ -130,9 +129,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceResponse.class)))
                 .willReturn(new WorkspaceResourceResponse());
-        given(conversionService.convert(any(ClusterDefinition.class), eq(BlueprintResponse.class)))
-                .willReturn(new BlueprintResponse());
-        given(clusterDefinitionService.isAmbariBlueprint(any())).willReturn(true);
+        given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
     }
 
     @Test
@@ -152,8 +149,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // THEN
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "userName", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
-                "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers", "extendedBlueprintText", "ambariRepoDetailsJson",
-                "ambariDatabaseDetails", "creationFinished", "kerberosResponse", "fileSystemResponse"));
+                "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers", "extendedBlueprintText",
+                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosResponse", "fileSystemResponse"));
     }
 
     @Test
@@ -192,7 +189,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     public void testConvertWhenExtendedBlueprintTextIsNotNull() throws IOException {
         // GIVEN
         mockAll();
-        getSource().setExtendedClusterDefinitionText("extendedBlueprintText");
+        getSource().setExtendedBlueprintText("extendedBlueprintText");
         // WHEN
         ClusterResponse clusterResponse = underTest.convert(getSource());
         // THEN
@@ -214,8 +211,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     @Override
     public Cluster createSource() {
         Stack stack = TestUtil.stack();
-        ClusterDefinition clusterDefinition = TestUtil.clusterDefinition();
-        Cluster cluster = TestUtil.cluster(clusterDefinition, stack, 1L);
+        Blueprint blueprint = TestUtil.blueprint();
+        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setName("test");
         cluster.setProxyConfig(proxyConfig);
