@@ -5,9 +5,9 @@ import java.io.IOException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
@@ -20,7 +20,7 @@ public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
         testContext.given(BlueprintEntity.class)
                 .withName(getNameGenerator().getRandomNameForMock())
                 .withAmbariBlueprint(ResourceUtil.readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp"))
-                .when(Blueprint.postV2());
+                .when(Blueprint.postV4());
     }
 
     @AfterMethod(alwaysRun = true)
