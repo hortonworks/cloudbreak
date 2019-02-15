@@ -6,9 +6,7 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.witho
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -121,7 +119,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "testContext")
     public void testDatalakeChangeCredentialFails(TestContext testContext) {
-        Map<String, Object> parameters = new HashMap<>();
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb3", "rangerdb3");
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)

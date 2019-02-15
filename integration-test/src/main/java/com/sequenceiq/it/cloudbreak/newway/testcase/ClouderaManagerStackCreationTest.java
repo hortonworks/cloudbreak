@@ -2,12 +2,12 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 
 public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTest {
     @Test(dataProvider = "testContext")
