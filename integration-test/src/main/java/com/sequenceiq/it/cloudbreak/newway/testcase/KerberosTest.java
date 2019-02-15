@@ -23,18 +23,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerbero
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
-import com.sequenceiq.it.cloudbreak.newway.action.KerberosPostAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 
 import spark.Route;
 
@@ -67,18 +67,16 @@ public class KerberosTest extends AbstractIntegrationTest {
         KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
+                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
-                .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
-                .when(KerberosPostAction.create())
-                .given("master", InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
+                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .when(KerberosTestAction::post)
+                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(StackEntity.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
-                        .valid()
                         .withKerberos(request.getName())
                         .withAmbari(new AmbariEntity(testContext)
-                                .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
@@ -91,16 +89,14 @@ public class KerberosTest extends AbstractIntegrationTest {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext
-                .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
+                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
-                .given("master", InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
+                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(StackEntity.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
-                        .valid()
                         .withKerberos(null)
                         .withAmbari(new AmbariEntity(testContext)
-                                .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
@@ -114,18 +110,16 @@ public class KerberosTest extends AbstractIntegrationTest {
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
+                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
-                .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
-                .when(KerberosPostAction.create())
-                .given("master", InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
+                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .when(KerberosTestAction::post)
+                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(StackEntity.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
-                        .valid()
                         .withKerberos("")
                         .withAmbari(new AmbariEntity(testContext)
-                                .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
@@ -142,10 +136,10 @@ public class KerberosTest extends AbstractIntegrationTest {
         request.getAmbariDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
+                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
-                .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
-                .when(KerberosPostAction.create(), key("badRequest"))
+                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
@@ -159,10 +153,10 @@ public class KerberosTest extends AbstractIntegrationTest {
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
+                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
-                .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
-                .when(KerberosPostAction.create(), key("badRequest"))
+                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
@@ -175,10 +169,10 @@ public class KerberosTest extends AbstractIntegrationTest {
         request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).valid().withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
+                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
-                .given(KerberosEntity.class).valid().withRequest(request).withName(request.getName())
-                .when(KerberosPostAction.create(), key("badRequest"))
+                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }

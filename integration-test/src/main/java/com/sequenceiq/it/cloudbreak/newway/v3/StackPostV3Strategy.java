@@ -22,9 +22,9 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.KerberosEntity;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.Strategy;
+import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 
 public class StackPostV3Strategy implements Strategy {
 
@@ -69,7 +69,7 @@ public class StackPostV3Strategy implements Strategy {
             }
         }
 
-        KerberosEntity kerberos = new KerberosEntity(null);
+        KerberosTestDto kerberos = new KerberosTestDto(null);
         boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
                 && stackEntity.getRequest().getCluster().getKerberosName() == null;
         if (kerberos != null && updateKerberos) {
