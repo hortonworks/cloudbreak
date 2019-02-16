@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackPostAction;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 import spark.Route;
@@ -29,7 +30,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         LOGGER.info("All routes added: {}", testContext.getSparkServer().getSparkService().getPaths());
         minimalSetupForClusterCreation(testContext);
     }
@@ -40,7 +41,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
         testContext.cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testStackScaling(TestContext testContext) throws Exception {
         // GIVEN
         testContext.given(StackEntity.class)
@@ -53,8 +54,8 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
-    public void testUpscale(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testUpscale(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForMock();
         int originalWorkedCount = 1;
         int desiredWorkedCount = 15;
@@ -84,8 +85,8 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
-    public void testAmbariFailure(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testAmbariFailure(MockedTestContext testContext) {
         mockAmbariBlueprintFail(testContext);
         testContext.given(StackEntity.class)
                 .when(Stack.postV4())
@@ -94,7 +95,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void mockAmbariBlueprintFail(TestContext testContext) {
+    private void mockAmbariBlueprintFail(MockedTestContext testContext) {
         Route customResponse2 = (request, response) -> {
             response.type("text/plain");
             response.status(400);

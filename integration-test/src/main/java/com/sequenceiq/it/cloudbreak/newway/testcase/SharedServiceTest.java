@@ -47,8 +47,6 @@ import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 
 public class SharedServiceTest extends AbstractIntegrationTest {
 
-    private static final String TEST_CONTEXT = "testContext";
-
     private static final String SHARED_SERVICE_TAG = "shared_services_ready";
 
     private static final String VALID_DL_BP = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDP\",\"stack_version\":\"2.6\"},\"settings\""
@@ -80,7 +78,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeCluster(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForMock();
         String rangerRdsName = creator.getRandomNameForMock();
@@ -114,7 +112,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInBlueprint(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForMock();
         String rangerRdsName = creator.getRandomNameForMock();
@@ -137,7 +135,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithoutLdap(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForMock();
         String rangerRdsName = creator.getRandomNameForMock();
@@ -159,7 +157,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsHive(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
@@ -181,7 +179,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsRanger(TestContext testContext) {
         String rangerRdsName = creator.getRandomNameForMock();
         String ldapName = creator.getRandomNameForMock();
@@ -203,7 +201,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithoutRds(TestContext testContext) {
         String ldapName = creator.getRandomNameForMock();
         String blueprintName = creator.getRandomNameForMock();
@@ -222,7 +220,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithoutRdsAndLdap(TestContext testContext) {
         String blueprintName = creator.getRandomNameForMock();
         CloudStorageV4Request cloudStorage = cloudStorage();

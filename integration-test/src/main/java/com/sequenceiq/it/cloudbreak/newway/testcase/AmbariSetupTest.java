@@ -19,7 +19,7 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
         minimalSetupForClusterCreation((TestContext) data[0]);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void verifyCallsAgainstAmbariUserCreation(TestContext testContext) {
         testContext
                 // create stack

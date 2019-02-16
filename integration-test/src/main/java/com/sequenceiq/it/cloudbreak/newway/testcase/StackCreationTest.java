@@ -24,7 +24,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
         minimalSetupForClusterCreation(testContext);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateNewRegularCluster(TestContext testContext) {
         testContext.given(StackEntity.class)
                 .when(new StackPostAction())
@@ -32,7 +32,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateNewRegularClusterWithDatabase(TestContext testContext) {
         String databaseName = getNameGenerator().getRandomNameForMock();
         String clusterName = getNameGenerator().getRandomNameForMock();
@@ -56,7 +56,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAttemptToCreateTwoRegularClusterWithTheSameName(TestContext testContext) {
         testContext.given(StackEntity.class)
                 .when(Stack.postV4())

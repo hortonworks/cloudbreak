@@ -20,8 +20,6 @@ import com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock;
 
 public class KerberizedStackCreation extends AbstractIntegrationTest {
 
-    private static final String TEST_CONTEXT = "testContext";
-
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         minimalSetupForClusterCreation((TestContext) data[0]);
@@ -32,7 +30,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithoutDomainAndWithRealm(TestContext testContext) {
         testContext
                 .given(ActiveDirectoryKerberosDescriptorTestDto.class).withDomain(null).withRealm("realm.addomain.com")
@@ -47,7 +45,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithDomainAndWithRealm(TestContext testContext) {
         testContext
                 .given(ActiveDirectoryKerberosDescriptorTestDto.class).withDomain("custom.addomain.com").withRealm("realm.addomain.com")
@@ -62,7 +60,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithoutDomainAndWithRealm(TestContext testContext) {
         testContext
                 .given(FreeIPAKerberosDescriptorTestDto.class).withDomain(null).withRealm("realm.freeiparealm.com")
@@ -77,7 +75,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithDomainAndWithRealm(TestContext testContext) {
         testContext
                 .given(FreeIPAKerberosDescriptorTestDto.class).withDomain("custom.freeipadomain.com").withRealm("realm.freeiparealm.com")

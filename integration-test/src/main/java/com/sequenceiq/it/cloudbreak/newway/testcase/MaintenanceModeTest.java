@@ -29,7 +29,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testMaintenanceMode(TestContext testContext) {
         testContext
                 .given(StackEntity.class)

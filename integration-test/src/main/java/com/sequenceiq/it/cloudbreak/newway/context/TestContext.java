@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.junit.Assert;
@@ -28,45 +27,37 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceSt
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.config.SparkServer;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.newway.finder.Capture;
 import com.sequenceiq.it.cloudbreak.newway.finder.Finder;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
-import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
-import com.sequenceiq.it.cloudbreak.newway.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.newway.wait.WaitUtilForMultipleStatuses;
-import com.sequenceiq.it.spark.DynamicRouteStack;
 
-@Prototype
-public class TestContext implements ApplicationContextAware {
+public abstract class TestContext implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestContext.class);
+
+    private ApplicationContext applicationContext;
 
     private Map<String, CloudbreakEntity> resources = new LinkedHashMap<>();
 
     private Map<String, CloudbreakClient> clients = new HashMap<>();
 
-    private Map<String, String> statuses = new HashMap<>();
-
     private Map<String, Exception> exceptionMap = new HashMap<>();
+
+    private boolean shutdown;
+
+    private Map<String, String> statuses = new HashMap<>();
 
     private Map<String, Object> selections = new HashMap<>();
 
     private Map<String, Capture> captures = new HashMap<>();
-
-    @Value("${integrationtest.testsuite.cleanUpOnFailure:true}")
-    private boolean cleanUpOnFailure;
-
-    @Value("${mock.server.address:localhost}")
-    private String mockServerAddress;
 
     @Inject
     private WaitUtilForMultipleStatuses waitUtil;
@@ -74,24 +65,32 @@ public class TestContext implements ApplicationContextAware {
     @Inject
     private TestParameter testParameter;
 
-    @Inject
-    private SparkServer sparkServer;
+    @Value("${integrationtest.testsuite.cleanUpOnFailure:true}")
+    private boolean cleanUpOnFailure;
 
-    @Inject
-    private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
+    public Map<String, CloudbreakEntity> getResources() {
+        return resources;
+    }
 
-    private DefaultModel model;
+    public Map<String, CloudbreakClient> getClients() {
+        return clients;
+    }
 
-    private boolean shutdown;
+    public Map<String, Exception> getExceptionMap() {
+        return exceptionMap;
+    }
 
-    private ApplicationContext applicationContext;
+    public void setShutdown(boolean shutdown) {
+        this.shutdown = shutdown;
+    }
 
-    @PostConstruct
-    private void init() {
-        sparkServer.initSparkService(9750, 9900);
-        imageCatalogMockServerSetup.configureImgCatalogMock();
-        model = new DefaultModel();
-        model.startModel(sparkServer.getSparkService(), mockServerAddress);
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     public <T extends CloudbreakEntity> T when(Class<T> entityClass, Action<T> action) {
@@ -192,7 +191,7 @@ public class TestContext implements ApplicationContextAware {
         return this;
     }
 
-    private String getDefaultUser() {
+    protected String getDefaultUser() {
         return testParameter.get(CloudbreakTest.REFRESH_TOKEN);
     }
 
@@ -389,38 +388,6 @@ public class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    public void cleanupTestContextEntity() {
-        checkShutdown();
-        handleExecptionsDuringTest();
-        if (!cleanUpOnFailure && !exceptionMap.isEmpty()) {
-            LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
-            return;
-        }
-        List<CloudbreakEntity> entities = new ArrayList<>(resources.values());
-
-        entities.stream().sorted(new CompareByOrder()).forEach(entryset -> {
-            try {
-                //TODO this needs better implementation
-                entryset.cleanUp(this, clients.get(getDefaultUser()));
-            } catch (Exception e) {
-                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before, {}", getErrorMessage(e), e);
-            }
-        });
-        shutdown();
-    }
-
-    public DefaultModel getModel() {
-        return model;
-    }
-
-    public SparkServer getSparkServer() {
-        return sparkServer;
-    }
-
-    public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
-        return imageCatalogMockServerSetup;
-    }
-
     public <E extends Exception, T extends CloudbreakEntity> T expect(T entity, Class<E> expectedException, RunningParameter runningParameter) {
         checkShutdown();
         String key = getKey(entity.getClass(), runningParameter);
@@ -507,24 +474,33 @@ public class TestContext implements ApplicationContextAware {
         return key;
     }
 
-    private void checkShutdown() {
+    protected void checkShutdown() {
         if (shutdown) {
-            throw new IllegalStateException("Cannot access this TestContext anymore because of it is shutted down.");
+            throw new IllegalStateException("Cannot access this MockedTestContext anymore because of it is shutted down.");
         }
     }
 
+    public void cleanupTestContextEntity() {
+        checkShutdown();
+        handleExecptionsDuringTest();
+        if (!cleanUpOnFailure && !getExceptionMap().isEmpty()) {
+            LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
+            return;
+        }
+        List<CloudbreakEntity> entities = new ArrayList<>(getResources().values());
+
+        entities.stream().sorted(new CompareByOrder()).forEach(entryset -> {
+            try {
+                //TODO this needs better implementation
+                entryset.cleanUp(this, getClients().get(getDefaultUser()));
+            } catch (Exception e) {
+                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before, {}", getErrorMessage(e), e);
+            }
+        });
+        shutdown();
+    }
+
     public void shutdown() {
-        sparkServer.shutdown();
-        imageCatalogMockServerSetup.shutdown();
-        shutdown = true;
-    }
-
-    public DynamicRouteStack dynamicRouteStack() {
-        return model.getAmbariMock().getDynamicRouteStack();
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+        setShutdown(true);
     }
 }

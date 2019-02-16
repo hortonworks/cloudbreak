@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.verification.Call;
 
@@ -162,7 +163,8 @@ public class MockVerification implements AssertionV2<StackEntity> {
 
     @Override
     public StackEntity doAssertion(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) throws Exception {
-        Map<Call, Response> requestResponseMap = testContext.getSparkServer().getRequestResponseMap();
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+        Map<Call, Response> requestResponseMap = mockedTestContext.getSparkServer().getRequestResponseMap();
         int matchesCount = getTimesMatched(requestResponseMap);
         logVerify();
         checkExactTimes(matchesCount);

@@ -50,7 +50,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateBlueprint(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForMock();
         List<String> keys = Arrays.asList("key_1", "key_2", "key_3");
@@ -71,7 +71,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateBlueprintWithInvalidCharacterName(TestContext testContext) {
         String blueprintName = getNameGenerator().getInvalidRandomNameForMock();
         testContext.given(BlueprintEntity.class)
@@ -84,7 +84,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateBlueprintWithInvalidJson(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext.given(BlueprintEntity.class)
@@ -97,7 +97,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testListBlueprint(TestContext testContext) {
         testContext.given(BlueprintEntity.class)
                 .when(Blueprint.listV4())
@@ -105,7 +105,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testGetSpecificBlueprint(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext.given(BlueprintEntity.class)
@@ -120,7 +120,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDeleteSpecificBlueprint(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext.given(BlueprintEntity.class)
@@ -145,7 +145,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
         return entity;
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testRequestSpecificBlueprintRequest(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext.given(BlueprintEntity.class)

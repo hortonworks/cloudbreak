@@ -39,8 +39,6 @@ public class RecipeTest extends AbstractIntegrationTest {
 
     private static final String INSTANCE_GROUP_ID = "ig";
 
-    private static final String TEST_CONTEXT = "testContext";
-
     private static final String HIGHSTATE = "state.highstate";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeTest.class);
@@ -75,7 +73,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testRecipePreTerminationRecipeHasGotHighStateOnCluster(TestContext testContext) {
         String recipeName = creator.getRandomNameForMock();
         testContext
@@ -92,7 +90,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT, description = "Post Ambari start recipes executed when LDAP config is present, because later the LDAP sync is "
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, description = "Post Ambari start recipes executed when LDAP config is present, because later the LDAP sync is "
             + "hooked for this salt state in the top.sls")
     public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(TestContext testContext) {
         String ldapName = creator.getRandomNameForMock();
@@ -106,7 +104,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(TestContext testContext) {
         String recipeName = creator.getRandomNameForMock();
         testContext
@@ -122,7 +120,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
             TestContext testContext) {
         String recipeName = creator.getRandomNameForMock();

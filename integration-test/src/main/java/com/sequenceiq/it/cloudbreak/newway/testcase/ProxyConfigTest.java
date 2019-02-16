@@ -23,8 +23,6 @@ import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ProxyConfigTest extends AbstractIntegrationTest {
 
-    private static final String TEST_CONTEXT = "testContext";
-
     private static final String INVALID_PROXY_NAME = "a-@#$%|:&*;";
 
     private static final String SHORT_PROXY_NAME = "abc";
@@ -59,7 +57,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateValidProxy(TestContext testContext) {
         String name = randomNameCreator.getRandomNameForMock();
         testContext
@@ -79,7 +77,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 });
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateValidHttpsProxy(TestContext testContext) {
         String name = randomNameCreator.getRandomNameForMock();
         testContext
@@ -100,7 +98,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithTooLongName(TestContext testContext) {
         String name = longStringGeneratorUtil.stringGenerator(101);
         testContext
@@ -119,7 +117,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithShortName(TestContext testContext) {
         testContext
                 .given(ProxyConfigEntity.class)
@@ -137,7 +135,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithInvalidName(TestContext testContext) {
         testContext
                 .given(ProxyConfigEntity.class)
@@ -153,7 +151,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithoutName(TestContext testContext) {
         String key = "noname";
         testContext
@@ -172,7 +170,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyLongDesc(TestContext testContext) {
         String name = randomNameCreator.getRandomNameForMock();
         String longDescription = longStringGeneratorUtil.stringGenerator(1001);
@@ -192,7 +190,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithoutHost(TestContext testContext) {
         String name = randomNameCreator.getRandomNameForMock();
         String key = "nohost";
@@ -212,7 +210,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithoutPort(TestContext testContext) {
         String name = randomNameCreator.getRandomNameForMock();
         String key = "noport";
@@ -232,7 +230,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDeleteCreateAgain(TestContext testContext) {
         String name = randomNameCreator.getRandomNameForMock();
         testContext
@@ -255,7 +253,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateProxyWithSameName(TestContext testContext) {
 
         String name = randomNameCreator.getRandomNameForMock();
