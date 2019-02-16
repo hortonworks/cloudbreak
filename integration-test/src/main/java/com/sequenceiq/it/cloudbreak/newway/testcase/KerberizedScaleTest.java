@@ -6,6 +6,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class KerberizedScaleTest extends AbstractIntegrationTest {
@@ -14,7 +15,7 @@ public class KerberizedScaleTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         LOGGER.info("All routes added: {}", testContext.getSparkServer().getSparkService().getPaths());
         minimalSetupForClusterCreation(testContext);
     }
@@ -25,8 +26,8 @@ public class KerberizedScaleTest extends AbstractIntegrationTest {
         testContext.cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext", enabled = false)
-    public void testScaling(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    public void testScaling(MockedTestContext testContext) {
 
     }
 }

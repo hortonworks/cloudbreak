@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
@@ -23,8 +23,8 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
 
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
 
-    @Test(dataProvider = "testContext")
-    public void testCreateNewRegularCluster(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testCreateNewRegularCluster(MockedTestContext testContext) {
         mockSpi(testContext);
         String name = testContext.get(BlueprintEntity.class).getRequest().getName();
         testContext
@@ -40,7 +40,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
                 .validate();
     }
 
-    private void mockSpi(TestContext testContext) {
+    private void mockSpi(MockedTestContext testContext) {
         StatefulRoute okState = (request, response, model) -> {
             String resultJson = gson().toJson(new CloudVmInstanceStatuses(model.getInstanceMap()).createCloudVmInstanceStatuses());
             response.body(resultJson);

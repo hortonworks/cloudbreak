@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
@@ -36,7 +37,8 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
 
     public CredentialEntity valid() {
         MockCredentialV4Parameters credentialParameters = new MockCredentialV4Parameters();
-        credentialParameters.setMockEndpoint(getTestContext().getSparkServer().getEndpoint());
+        MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
+        credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
         return withName(getNameCreator().getRandomNameForMock())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withMockParameters(credentialParameters)

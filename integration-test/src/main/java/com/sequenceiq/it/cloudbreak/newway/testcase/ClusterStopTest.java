@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
@@ -22,8 +23,6 @@ import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
 import spark.Route;
 
 public class ClusterStopTest extends AbstractIntegrationTest {
-
-    private static final String TEST_CONTEXT = "testContext";
 
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
 
@@ -38,8 +37,8 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    public void testClusterStop(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testClusterStop(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForMock();
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);
@@ -52,7 +51,7 @@ public class ClusterStopTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void mockAmbari(TestContext testContext, String clusterName) {
+    private void mockAmbari(MockedTestContext testContext, String clusterName) {
         Route passAmbari = (request, response) -> {
             response.type(TEXT_PLAIN);
             response.status(OK.getStatusCode());
@@ -64,7 +63,7 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().getDynamicRouteStack().put(format("/api/v1/clusters/%s/*", clusterName), passAmbari);
     }
 
-    private void mockSpi(TestContext testContext) {
+    private void mockSpi(MockedTestContext testContext) {
         StatefulRoute okState = (request, response, model) -> {
             String resultJson = gson().toJson(new CloudVmInstanceStatuses(model.getInstanceMap()).createCloudVmInstanceStatuses());
             response.body(resultJson);

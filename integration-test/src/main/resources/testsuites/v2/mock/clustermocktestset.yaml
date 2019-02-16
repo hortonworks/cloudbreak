@@ -14,3 +14,4 @@ tests:
       - com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.EnvironmentClusterTest
       - com.sequenceiq.it.cloudbreak.newway.testcase.ClusterTemplateTest
+      - com.sequenceiq.it.cloudbreak.newway.testcase.ManagementPackTest

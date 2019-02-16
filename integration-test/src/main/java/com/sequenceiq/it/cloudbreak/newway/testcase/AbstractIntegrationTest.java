@@ -24,22 +24,24 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintGetListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintGetListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.proxy.ProxyConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
+import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
@@ -54,6 +56,10 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected static final Map<String, Status> STACK_FAILED = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.CREATE_FAILED);
 
     protected static final Map<String, Status> STACK_STOPPED = Map.of("status", Status.STOPPED, "clusterStatus", Status.STOPPED);
+
+    protected static final String TEST_CONTEXT_WITH_MOCK = "testContextWithMock";
+
+    protected static final String TEST_CONTEXT = "testContextWithoutMock";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
@@ -97,9 +103,14 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     }
 
-    @DataProvider
-    public Object[][] testContext() {
-        return new Object[][]{{applicationContext.getBean(TestContext.class)}};
+    @DataProvider(name = TEST_CONTEXT_WITH_MOCK)
+    public Object[][] testContextWithMock() {
+        return new Object[][]{{applicationContext.getBean(MockedTestContext.class)}};
+    }
+
+    @DataProvider(name = TEST_CONTEXT)
+    public Object[][] testContextWithoutMock() {
+        return new Object[][]{{applicationContext.getBean(SparklessTestContext.class)}};
     }
 
     public RandomNameCreator getNameGenerator() {

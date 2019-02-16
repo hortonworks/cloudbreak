@@ -28,8 +28,6 @@ import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class DatabaseTest extends AbstractIntegrationTest {
 
-    private static final String TEST_CONTEXT = "testContext";
-
     private static final String DB_TYPE_PROVIDER = "databaseTypeTestProvider";
 
     private static final String INVALID_ATTRIBUTE_PROVIDER = "databaseInvalidAttirbutesTestProvider";
@@ -58,7 +56,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDeleteCreate(TestContext testContext) {
         String databaseName = getNameGenerator().getRandomNameForMock();
         testContext
@@ -76,7 +74,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateTwice(TestContext testContext) {
         String databaseName = getNameGenerator().getRandomNameForMock();
         testContext
@@ -140,7 +138,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatabaseTestConnectionWithNonExistingDbName(TestContext testContext) {
         testContext
                 .given(DatabaseTestEntity.class)

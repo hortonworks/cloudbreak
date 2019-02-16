@@ -31,7 +31,7 @@ public class TerminationTest extends AbstractIntegrationTest {
         testContext.cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testInstanceTermination(TestContext testContext) {
         testContext
                 // create stack
@@ -48,7 +48,7 @@ public class TerminationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testInstanceTerminationReplicationError(TestContext testContext) {
         testContext
                 // create stack
@@ -64,7 +64,7 @@ public class TerminationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testInstanceTerminationForced(TestContext testContext) {
         testContext
                 // create stack

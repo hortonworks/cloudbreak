@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, T> {
@@ -47,12 +48,13 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> valid() {
         String randomNameForMock = getNameCreator().getRandomNameForMock();
+        MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
         return withName(randomNameForMock)
                 .withPlacement(getTestContext().init(PlacementSettingsEntity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
                 .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
-                .withGatewayPort(getTestContext().getSparkServer().getPort())
+                .withGatewayPort(mockedTestContext.getSparkServer().getPort())
                 .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
     }
 

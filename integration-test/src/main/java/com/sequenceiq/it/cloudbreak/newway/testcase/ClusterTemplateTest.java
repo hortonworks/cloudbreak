@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateGetResp
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreation;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreationWithProperties;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
@@ -63,7 +64,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testClusterTemplateCreateAndGetAndDelete(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
@@ -80,7 +81,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testClusterTemplateWithType(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
@@ -94,7 +95,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testLaunchClusterFromTemplate(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
@@ -108,7 +109,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateClusterTemplateWithoutEnvironment(TestContext testContext) {
         testContext.given("stackTemplate", StackTemplateEntity.class)
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
@@ -117,8 +118,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
-    public void testLaunchClusterFromTemplateWithProperties(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testLaunchClusterFromTemplateWithProperties(MockedTestContext testContext) {
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureSso();
@@ -147,7 +148,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateInvalidNameClusterTemplate(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withName(ILLEGAL_CT_NAME)
                 .when(new ClusterTemplateV4CreateAction(), key("illegalCtName"))
@@ -156,7 +157,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateSpecialNameClusterTemplate(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
@@ -167,7 +168,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateInvalidShortNameClusterTemplate(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withName("sh")
                 .when(new ClusterTemplateV4CreateAction(), key("illegalCtName"))
@@ -176,7 +177,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateAgainClusterTemplate(TestContext testContext) {
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
@@ -189,7 +190,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateLongDescriptionClusterTemplate(TestContext testContext) {
         String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
         testContext.given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
@@ -201,7 +202,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEmptyStackTemplateClusterTemplateException(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withoutStackTemplate()
                 .when(new ClusterTemplateV4CreateAction(), key("emptyStack"))
@@ -209,7 +210,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEmptyClusterTemplateNameException(TestContext testContext) {
         testContext
                 .given(ClusterTemplateEntity.class).withName(null)

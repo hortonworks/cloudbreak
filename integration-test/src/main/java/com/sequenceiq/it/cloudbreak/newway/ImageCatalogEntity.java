@@ -9,6 +9,7 @@ import java.util.Collection;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -46,8 +47,9 @@ public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogV4R
     }
 
     public ImageCatalogEntity valid() {
+        MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
         return withName(getNameCreator().getRandomNameForMock())
-                .withUrl(getTestContext().getImageCatalogMockServerSetup().getImageCatalogUrl());
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl());
     }
 
     public ImagesV4Response getResponseByProvider() {

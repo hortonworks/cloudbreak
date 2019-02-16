@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
@@ -33,8 +34,6 @@ import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 public class WorkspaceTest extends AbstractIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceTest.class);
-
-    private static final String DATA_PROVIDER = "testContext";
 
     private static final String FORBIDDEN_KEY = "forbiddenGetByName";
 
@@ -54,8 +53,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
-    public void testCreateAStackAndGetOtherUser(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    public void testCreateAStackAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(StackEntity.class)
                 .when(Stack.postV4())
@@ -65,7 +64,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateACredentialAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(CredentialEntity.class)
@@ -74,7 +73,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateABlueprintAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(BlueprintEntity.class).withAmbariBlueprint(BLUEPRINT_TEXT)
@@ -84,7 +83,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateARecipeAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(RecipeEntity.class)
@@ -94,7 +93,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(LdapConfigEntity.class)
@@ -104,7 +103,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnImageCatalogWithImagesAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(ImageCatalogEntity.class)
@@ -114,7 +113,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnImageCatalogWithoutImagesAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(ImageCatalogEntity.class)
@@ -124,7 +123,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAProxyConfigAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(ProxyConfigEntity.class)
@@ -134,7 +133,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(KerberosTestDto.class)

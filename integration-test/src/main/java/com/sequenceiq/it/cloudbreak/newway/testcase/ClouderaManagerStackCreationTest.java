@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 
 public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTest {
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateNewRegularCluster(TestContext testContext) {
         String name = testContext.get(BlueprintEntity.class).getRequest().getName();
         testContext

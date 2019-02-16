@@ -52,7 +52,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeDelete(TestContext testContext) {
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb", "rangerdb");
         testContext.given(EnvironmentEntity.class)
@@ -82,7 +82,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeDeleteFails(TestContext testContext) {
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb1", "rangerdb1");
         testContext.given(EnvironmentEntity.class)
@@ -105,7 +105,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentWithDifferentDatalakes(TestContext testContext) {
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb2", "rangerdb2");
         testContext.given(EnvironmentEntity.class)
@@ -117,7 +117,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         createDatalake(testContext, rdsList, "dl-cluster-same-env2", BP_NAME_DL);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatalakeChangeCredentialFails(TestContext testContext) {
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb3", "rangerdb3");
         testContext.given(EnvironmentEntity.class)
@@ -137,7 +137,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatalakeDetachFails(TestContext testContext) {
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb4", "rangerdb4");
         testContext.given(EnvironmentEntity.class)
@@ -154,7 +154,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
         Set<String> rdsList = createDatalakeResources(testContext, "hivedb5", "rangerdb5");
         testContext.given(EnvironmentEntity.class)
@@ -174,7 +174,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 createDatalake(testContext, rdsList, "dl-wl-same-env", BP_NAME_DL);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeWithoutResourcesFails(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .withRegions(VALID_REGION)

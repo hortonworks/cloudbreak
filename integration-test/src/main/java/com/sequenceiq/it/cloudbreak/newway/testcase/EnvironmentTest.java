@@ -64,7 +64,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironment(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
@@ -75,7 +75,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmenWithProxy(TestContext testContext) {
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
@@ -90,7 +90,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmenWithLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
@@ -105,7 +105,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmenWithRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -120,7 +120,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentInvalidRegion(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -130,7 +130,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentNoRegion(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -140,7 +140,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentNotExistCredential(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -150,7 +150,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentNotExistProxy(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -160,7 +160,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentNotExistLdap(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -170,7 +170,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentNotExistRds(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -180,7 +180,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvWithExistingAndNotExistingRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         mixedRds.add(testContext.get(DatabaseEntity.class).getName());
@@ -193,7 +193,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvWithExistingAndNotExistingProxy(TestContext testContext) {
         createDefaultProxyConfig(testContext);
         mixedProxy.add(testContext.get(ProxyConfigEntity.class).getName());
@@ -206,7 +206,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvWithExistingAndNotExistingLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         mixedLdap.add(testContext.get(LdapConfigEntity.class).getName());
@@ -219,7 +219,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDeleteEnvironment(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -231,7 +231,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDeleteEnvWithProxy(TestContext testContext) {
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
@@ -247,7 +247,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDeleteEnvWithLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
@@ -263,7 +263,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDeleteEnvWithRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -279,7 +279,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDeleteEnvironmentNotExist(TestContext testContext) {
         testContext
                 .init(EnvironmentEntity.class)
@@ -288,7 +288,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvAttachRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -305,7 +305,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvAttachLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
@@ -321,7 +321,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvAttachProxy(TestContext testContext) {
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
@@ -337,7 +337,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvDetachRds(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -355,7 +355,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvDetachLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
@@ -373,7 +373,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvDetachProxy(TestContext testContext) {
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
@@ -391,7 +391,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAttachRdsToMoreEnvs(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -400,7 +400,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         attachRdsToEnv(testContext, "int-rds-attach-envs2", validRds);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAttachLdapToMoreEnvs(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
@@ -409,7 +409,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         attachLdapToEnv(testContext, "int-ldap-attach-envs2", validLdap);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAttachProxyToMoreEnvs(TestContext testContext) {
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
@@ -418,7 +418,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         attachProxyToEnv(testContext, "int-proxy-attach-envs2", validProxy);
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAttachRdsToNotExistEnv(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -432,7 +432,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testRdsAttachDetachOther(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -455,7 +455,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentChangeCredWithCredName(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
@@ -472,7 +472,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentChangeCredWithCredRequest(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
@@ -489,7 +489,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentChangeCredForSame(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)
@@ -500,7 +500,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvironmentChangeCredNotExistingName(TestContext testContext) {
         testContext
                 .given(EnvironmentEntity.class)

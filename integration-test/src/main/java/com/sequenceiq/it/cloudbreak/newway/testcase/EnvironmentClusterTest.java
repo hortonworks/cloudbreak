@@ -61,7 +61,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDetachFromEnvWithDeletedCluster(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext.given(StackEntity.class)
@@ -86,7 +86,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testWlClusterNotAttachResourceDetachDeleteOk(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext.given(StackEntity.class)
@@ -105,7 +105,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateWlClusterDeleteFails(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext.given(StackEntity.class)
@@ -123,7 +123,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateWlClusterDetachFails(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext
@@ -142,7 +142,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentWithDifferentClusters(TestContext testContext) {
         String newStack = "newStack";
         testContext.given(EnvironmentEntity.class)
@@ -157,7 +157,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentAttachRdsToDifferentClusters(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
@@ -186,7 +186,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testReuseRdsWithDifferentClustersInDifferentEnvs(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = Set.of(testContext.get(DatabaseEntity.class).getName());
@@ -226,7 +226,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testClusterWithRdsWithoutEnvironment(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         testContext.given(EnvironmentEntity.class)
@@ -239,7 +239,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "testContext")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testWlClusterChangeCred(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)

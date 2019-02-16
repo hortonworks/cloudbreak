@@ -28,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -39,8 +40,6 @@ import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import spark.Route;
 
 public class KerberosTest extends AbstractIntegrationTest {
-
-    private static final String TEST_CONTEXT = "testContext";
 
     private static final String LDAP_SYNC_PATH = "/api/v1/ldap_sync_events";
 
@@ -62,7 +61,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = "dataProviderForTest")
-    public void testClusterCreationWithValidKerberos(TestContext testContext, String blueprintName, KerberosTestData testData) {
+    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData) {
         mockAmbariBlueprintPassLdapSync(testContext);
         KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
@@ -84,8 +83,8 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    public void testClusterCreationAttemptWithKerberosConfigWithoutName(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext
@@ -103,8 +102,8 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
@@ -126,8 +125,8 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
@@ -144,8 +143,8 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
@@ -161,8 +160,8 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(TestContext testContext) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
         String blueprintName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
@@ -187,7 +186,7 @@ public class KerberosTest extends AbstractIntegrationTest {
         };
     }
 
-    private void mockAmbariBlueprintPassLdapSync(TestContext testContext) {
+    private void mockAmbariBlueprintPassLdapSync(MockedTestContext testContext) {
         Route customResponse2 = (request, response) -> {
             if (LDAP_SYNC_PATH.equals(request.url())) {
                 response.type(TEXT_PLAIN);
