@@ -25,7 +25,7 @@ echo "Starting the Datalake application..."
 
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
-  DL_JAVA_OPTS="$DL_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
+  DATALAKE_JAVA_OPTS="$DATALAKE_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 fi
 
-eval "(java $DL_JAVA_OPTS -jar /datalake.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
+eval "(java $DATALAKE_JAVA_OPTS -jar /datalake.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
