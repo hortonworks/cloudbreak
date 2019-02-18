@@ -23,15 +23,15 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
@@ -67,7 +67,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
+                        testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(StackActionV4::delete, withoutLogError())
@@ -98,8 +98,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::putDetachResources)
                 .given(DatabaseEntity.class)
                 .when(DatabaseEntity::delete)
-                .given(LdapConfigEntity.class)
-                .when(LdapConfig::delete)
+                .given(LdapConfigTestDto.class)
+                .when(LdapConfigTestAction.deleteV4())
                 .given(ProxyConfigEntity.class)
                 .when(ProxyConfig::delete)
                 .validate();
@@ -111,12 +111,12 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
+                        testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
                 .deleteGiven(ProxyConfigEntity.class, ProxyConfig::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(LdapConfigEntity.class, LdapConfig::delete, key(FORBIDDEN_KEY))
+                .deleteGiven(LdapConfigTestDto.class, LdapConfigTestAction.deleteV4(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
@@ -130,7 +130,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(StackEntity.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        testContext.get(LdapConfigEntity.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
+                        testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .given(EnvironmentEntity.class)
@@ -286,7 +286,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private Set<String> getLdapAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(LdapConfigEntity.class).getName()));
+        return new HashSet<>(Collections.singletonList(testContext.get(LdapConfigTestDto.class).getName()));
     }
 
     private ClusterEntity setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {

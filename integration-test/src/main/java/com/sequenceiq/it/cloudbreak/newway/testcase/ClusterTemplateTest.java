@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.DeleteClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.LaunchClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ManagementPackCreateAction;
@@ -124,7 +124,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureSso();
         testContext
-                .given(LdapConfigEntity.class).withName("mock-test-ldap")
+                .given(LdapConfigTestDto.class).withName("mock-test-ldap")
                 .when(new LdapConfigCreateIfNotExistsAction())
                 .given(RecipeEntity.class).withName("mock-test-recipe")
                 .when(Recipe.postV4())

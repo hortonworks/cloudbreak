@@ -6,15 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class LdapConfigCreateIfNotExistsAction implements Action<LdapConfigEntity> {
+public class LdapConfigCreateIfNotExistsAction implements Action<LdapConfigTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigCreateIfNotExistsAction.class);
 
     @Override
-    public LdapConfigEntity action(TestContext testContext, LdapConfigEntity entity, CloudbreakClient client) throws Exception {
+    public LdapConfigTestDto action(TestContext testContext, LdapConfigTestDto entity, CloudbreakClient client) throws Exception {
         LOGGER.info("Create LdapConfig with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

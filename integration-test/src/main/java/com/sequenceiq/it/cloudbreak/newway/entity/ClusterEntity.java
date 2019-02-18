@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 
 @Prototype
 public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, ClusterV4Response, ClusterEntity> {
@@ -38,6 +39,11 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
         return this;
     }
 
+    public ClusterEntity withAmbari() {
+        AmbariEntity ambari = getTestContext().get(AmbariEntity.class);
+        return withAmbari(ambari);
+    }
+
     public ClusterEntity withAmbari(String key) {
         AmbariEntity ambari = getTestContext().get(key);
         return withAmbari(ambari);
@@ -45,6 +51,12 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
 
     public ClusterEntity withAmbari(AmbariEntity ambariRequest) {
         getRequest().setAmbari(ambariRequest.getRequest());
+        return this;
+    }
+
+    public ClusterEntity withLdapConfig() {
+        LdapConfigTestDto ldap = getTestContext().get(LdapConfigTestDto.class);
+        getRequest().setLdapName(ldap.getName());
         return this;
     }
 

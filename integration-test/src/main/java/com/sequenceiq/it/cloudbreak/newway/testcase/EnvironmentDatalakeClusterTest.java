@@ -19,10 +19,9 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
@@ -30,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 
 public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
@@ -66,7 +66,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(StackEntity.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_DL))
+                .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
                 .when(Stack.postV4())
                 .when(Stack.deleteV4(), withoutLogError())
                 .await(AbstractIntegrationTest.STACK_DELETED)
@@ -96,9 +96,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(StackEntity.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_DL))
+                .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
                 .when(Stack.postV4())
-                .deleteGiven(LdapConfigEntity.class, LdapConfig::delete, key(FORBIDDEN_KEY))
+                .deleteGiven(LdapConfigTestDto.class, LdapConfigTestAction.deleteV4(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
@@ -168,7 +168,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, getRdsAsList(testContext),
-                        testContext.get(LdapConfigEntity.class).getName(), null, BP_NAME_WL))
+                        testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_WL))
                 .when(Stack.postV4())
                 .validate();
                 createDatalake(testContext, rdsList, "dl-wl-same-env", BP_NAME_DL);
@@ -204,7 +204,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, rdsList, testContext.get(LdapConfigEntity.class).getName(), null, bpName))
+                .withCluster(setResources(testContext, rdsList, testContext.get(LdapConfigTestDto.class).getName(), null, bpName))
                 .when(Stack.postV4())
                 .validate();
     }
@@ -225,7 +225,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     private Set<String> getLdapAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(LdapConfigEntity.class).getName()));
+        return new HashSet<>(Collections.singletonList(testContext.get(LdapConfigTestDto.class).getName()));
     }
 
     private Set<String> getRdsAsList(TestContext testContext) {

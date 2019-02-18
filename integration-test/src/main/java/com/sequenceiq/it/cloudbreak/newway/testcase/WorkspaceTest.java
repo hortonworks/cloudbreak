@@ -16,16 +16,16 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalog;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
@@ -96,9 +96,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(LdapConfigEntity.class)
-                .when(LdapConfig.postV2())
-                .when(LdapConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .given(LdapConfigTestDto.class)
+                .when(LdapConfigTestAction.postV4())
+                .when(LdapConfigTestAction::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }

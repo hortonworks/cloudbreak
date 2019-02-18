@@ -85,6 +85,12 @@ public class AmbariMock extends AbstractModelMock {
 
     public static final String HOSTS = AMBARI_API_ROOT + "/hosts";
 
+    public static final String LDAP_SYNC_EVENTS = "/api/v1/ldap_sync_events";
+
+    public static final String LDAP_CONFIGURATION = "/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/ldap-configuration";
+
+    public static final String SSO_CONFIGURATION = "/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/sso-configuration";
+
     private DynamicRouteStack dynamicRouteStack;
 
     public AmbariMock(Service sparkService, DefaultModel defaultModel) {
@@ -297,14 +303,14 @@ public class AmbariMock extends AbstractModelMock {
     }
 
     public void putConfigureSso() {
-        dynamicRouteStack.put("/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/sso-configuration", new AmbariRequestIdRespone(12));
+        dynamicRouteStack.put(SSO_CONFIGURATION, new AmbariRequestIdRespone(12));
     }
 
     public void postSyncLdap() {
-        dynamicRouteStack.post("/api/v1/ldap_sync_events", new EmptyAmbariResponse());
+        dynamicRouteStack.post(LDAP_SYNC_EVENTS, new EmptyAmbariResponse());
     }
 
     public void putConfigureLdap() {
-        dynamicRouteStack.put("/api/v1/services/AMBARI/components/AMBARI_SERVER/configurations/ldap-configuration", new AmbariRequestIdRespone(12));
+        dynamicRouteStack.put(LDAP_CONFIGURATION, new AmbariRequestIdRespone(12));
     }
 }

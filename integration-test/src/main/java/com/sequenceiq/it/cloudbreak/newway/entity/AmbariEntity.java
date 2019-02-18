@@ -62,6 +62,11 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
         return this;
     }
 
+    public AmbariEntity withAmbariRepoDetails() {
+        AmbariRepositoryV4Entity ambariRepo = getTestContext().get(AmbariRepositoryV4Entity.class);
+        return withAmbariRepoDetails(ambariRepo);
+    }
+
     public AmbariEntity withAmbariRepoDetails(String key) {
         AmbariRepositoryV4Entity ambariRepo = getTestContext().get(key);
         return withAmbariRepoDetails(ambariRepo);

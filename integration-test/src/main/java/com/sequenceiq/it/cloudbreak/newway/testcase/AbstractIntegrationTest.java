@@ -28,7 +28,6 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogCreateIfNotExistsAction;
@@ -43,6 +42,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
@@ -145,10 +145,10 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {
         testContext
-                .given(LdapConfigEntity.class)
+                .given(LdapConfigTestDto.class)
                 .when(new LdapConfigCreateIfNotExistsAction());
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         return validLdap;
     }
 
