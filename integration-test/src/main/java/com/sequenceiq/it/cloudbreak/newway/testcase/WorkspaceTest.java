@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
@@ -41,6 +42,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
             + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\","
             + "\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
             + "\"cardinality\":\"1\"}]}";
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -97,8 +101,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(LdapConfigTestDto.class)
-                .when(LdapConfigTestAction.postV4())
-                .when(LdapConfigTestAction::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(ldapConfigTestClient.post())
+                .when(ldapConfigTestClient::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }

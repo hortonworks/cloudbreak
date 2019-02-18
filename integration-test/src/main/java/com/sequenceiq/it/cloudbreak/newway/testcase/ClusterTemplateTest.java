@@ -18,10 +18,11 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
-import com.sequenceiq.it.cloudbreak.newway.action.DeleteClusterFromTemplateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.LaunchClusterFromTemplateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.ManagementPackCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.DeleteClusterFromTemplateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.LaunchClusterFromTemplateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.managementpack.ManagementPackCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateGetAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4CreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4DeleteAction;
@@ -50,6 +51,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     private static final String ILLEGAL_CT_NAME = "Illegal template name ;";
 
     private static final String INVALID_SHORT_CT_NAME = "";
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
@@ -125,7 +129,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().putConfigureSso();
         testContext
                 .given(LdapConfigTestDto.class).withName("mock-test-ldap")
-                .when(new LdapConfigCreateIfNotExistsAction())
+                .when(ldapConfigTestClient.createIfNotExists())
                 .given(RecipeEntity.class).withName("mock-test-recipe")
                 .when(Recipe.postV4())
                 .given(DatabaseEntity.class).withName("mock-test-rds")

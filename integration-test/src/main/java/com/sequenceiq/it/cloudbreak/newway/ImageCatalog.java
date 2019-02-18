@@ -6,7 +6,7 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.ImageCatalogPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.ImageCatalogV3Action;
 

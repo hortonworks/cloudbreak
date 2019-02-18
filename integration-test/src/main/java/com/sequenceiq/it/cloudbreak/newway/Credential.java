@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.CredentialPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 

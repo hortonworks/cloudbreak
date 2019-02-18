@@ -28,7 +28,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
-import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;

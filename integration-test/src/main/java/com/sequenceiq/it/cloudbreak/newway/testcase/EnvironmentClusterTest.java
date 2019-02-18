@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.AfterMethod;
@@ -25,7 +26,7 @@ import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -41,6 +42,9 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
     private static final String BP_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @Override
     protected void minimalSetupForClusterCreation(TestContext testContext) {
@@ -99,7 +103,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(DatabaseEntity.class)
                 .when(DatabaseEntity::delete)
                 .given(LdapConfigTestDto.class)
-                .when(LdapConfigTestAction.deleteV4())
+                .when(ldapConfigTestClient.delete())
                 .given(ProxyConfigEntity.class)
                 .when(ProxyConfig::delete)
                 .validate();
@@ -116,7 +120,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
 
                 .deleteGiven(ProxyConfigEntity.class, ProxyConfig::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(LdapConfigTestDto.class, LdapConfigTestAction.deleteV4(), key(FORBIDDEN_KEY))
+                .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
