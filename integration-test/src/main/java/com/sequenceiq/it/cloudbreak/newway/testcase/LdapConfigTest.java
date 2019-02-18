@@ -17,7 +17,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
@@ -28,6 +28,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
 
     @Inject
     private LongStringGeneratorUtil longStringGenerator;
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -46,7 +49,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class)
                 .valid()
                 .withName(name)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -63,7 +66,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(name)
                 .withDirectoryType(DirectoryType.ACTIVE_DIRECTORY)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -79,7 +82,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class)
                 .valid()
                 .withName("")
-                .when(LdapConfigTestAction.postV4(), key(key))
+                .when(ldapConfigTestClient.post(), key(key))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
                     assertThat(getErrorMessage(e), containsString("The length of the ldap config's name has to be in range of 1 to 100"));
                 }).withKey(key))
@@ -92,7 +95,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class)
                 .valid()
                 .withName(INVALID_LDAP_NAME)
-                .when(LdapConfigTestAction.postV4(), key(INVALID_LDAP_NAME))
+                .when(ldapConfigTestClient.post(), key(INVALID_LDAP_NAME))
                 .expect(UnknownFormatConversionException.class, exceptionConsumer(e -> {
                     assertThat(getErrorMessage(e), containsString("Conversion = '|'"));
                 }).withKey(INVALID_LDAP_NAME))
@@ -106,7 +109,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class)
                 .valid()
                 .withName(longName)
-                .when(LdapConfigTestAction.postV4(), key(longName))
+                .when(ldapConfigTestClient.post(), key(longName))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
                     assertThat(getErrorMessage(e), containsString("The length of the ldap config's name has to be in range of 1 to 100"));
                 }).withKey(longName))
@@ -122,7 +125,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(name)
                 .withDescription(longDesc)
-                .when(LdapConfigTestAction.postV4(), key(longDesc))
+                .when(ldapConfigTestClient.post(), key(longDesc))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
                     assertThat(getErrorMessage(e), containsString("The length of the ldap config's description has to be in range of 0 to 1000"));
                 }).withKey(longDesc))
@@ -136,9 +139,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(name, LdapConfigTestDto.class)
                 .valid()
                 .withName(name)
-                .when(LdapConfigTestAction.postV4(), key(name))
-                .when(LdapConfigTestAction.deleteV4(), key(name))
-                .when(LdapConfigTestAction.postV4(), key(name))
+                .when(ldapConfigTestClient.post(), key(name))
+                .when(ldapConfigTestClient.delete(), key(name))
+                .when(ldapConfigTestClient.post(), key(name))
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -154,7 +157,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(name, LdapConfigTestDto.class)
                 .valid()
                 .withName(name)
-                .when(LdapConfigTestAction.postV4(), key(name))
+                .when(ldapConfigTestClient.post(), key(name))
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -164,7 +167,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(name, LdapConfigTestDto.class)
                 .valid()
                 .withName(name)
-                .when(LdapConfigTestAction.postV4(), key(name))
+                .when(ldapConfigTestClient.post(), key(name))
                 .expect(BadRequestException.class, exceptionConsumer(e -> {
                     assertThat(getErrorMessage(e), containsString("dap already exists with name"));
                 }).withKey(name))

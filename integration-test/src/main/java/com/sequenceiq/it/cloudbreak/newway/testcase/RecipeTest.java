@@ -23,9 +23,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
@@ -44,6 +44,9 @@ public class RecipeTest extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeTest.class);
 
     private static final String RECIPE_CONTENT = Base64.encodeBase64String("#!/bin/bash\necho ALMAA".getBytes());
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @Inject
     private RandomNameCreator creator;
@@ -96,7 +99,7 @@ public class RecipeTest extends AbstractIntegrationTest {
         String ldapName = creator.getRandomNameForMock();
         testContext
                 .given(LdapConfigTestDto.class).withName(ldapName)
-                .when(LdapConfigTestAction.deleteV4())
+                .when(ldapConfigTestClient.delete())
                 .given(StackEntity.class).withCluster(new ClusterEntity(testContext).valid().withLdapConfigName(ldapName))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)

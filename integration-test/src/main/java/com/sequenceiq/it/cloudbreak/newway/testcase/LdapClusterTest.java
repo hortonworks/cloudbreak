@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.http.HttpMethod;
@@ -12,8 +13,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
@@ -23,6 +24,9 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock;
 
 public class LdapClusterTest extends AbstractIntegrationTest {
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -39,7 +43,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext.given(LdapConfigTestDto.class)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(AmbariRepositoryV4Entity.class)
                 .given(AmbariEntity.class).withAmbariRepoDetails()
                 .given(ClusterEntity.class).withLdapConfig().withAmbari()
@@ -60,14 +64,14 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         String ldapName = getNameGenerator().getRandomNameForMock();
 
         testContext.given(LdapConfigTestDto.class).withName(ldapName)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(AmbariRepositoryV4Entity.class)
                 .given(AmbariEntity.class).withAmbariRepoDetails()
                 .given(ClusterEntity.class).withLdapConfig().withAmbari()
                 .given(StackEntity.class).withCluster().withName(stackName)
                 .when(Stack.postV4())
                 .given(LdapConfigTestDto.class)
-                .when(LdapConfigTestAction.deleteV4(), key("deleteFail"))
+                .when(ldapConfigTestClient.delete(), key("deleteFail"))
                 .expect(BadRequestException.class, expectedMessage(String.format("LDAP config '%s' cannot be deleted "
                         + "because there are clusters associated with it: \\[%s\\].", ldapName, stackName)).withKey("deleteFail"))
                 .validate();
