@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.ExposedService.AMBARI;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ATLAS;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.BEACON_SERVER;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.HIVE_SERVER;
+import static com.sequenceiq.cloudbreak.api.model.ExposedService.NAMENODE;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.WEBHDFS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,9 +16,10 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,8 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
@@ -38,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -47,13 +50,15 @@ import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopology
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -77,6 +82,9 @@ public class ServiceEndpointCollectorTest {
 
     @Spy
     private AmbariHaComponentFilter ambariHaComponentFilter;
+
+    @Mock
+    private ComponentLocatorService componentLocatorService;
 
     @InjectMocks
     private final ServiceEndpointCollector underTest = new ServiceEndpointCollector();
@@ -115,10 +123,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetAmbariServerUrlWithNoAmbariInTopologies() {
-        Cluster cluster = clusterkWithOrchestrator("ANY");
-        GatewayTopology topology1 = gatewayTopology("topology1", ATLAS, ATLAS);
-        GatewayTopology topology2 = gatewayTopology("topology2", BEACON_SERVER, HIVE_SERVER);
-        cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS, ATLAS},
+                new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
         String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
         assertEquals("", result);
@@ -126,11 +132,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetAmbariServerUrlWithAmbariPresentInTopologiesWithCentralGateway() {
-        Cluster cluster = clusterkWithOrchestrator("ANY");
-        GatewayTopology topology1 = gatewayTopology("topology1", AMBARI, ATLAS);
-        GatewayTopology topology2 = gatewayTopology("topology2", BEACON_SERVER, HIVE_SERVER);
-        cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
-        cluster.getGateway().setGatewayType(GatewayType.CENTRAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
+                new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.CENTRAL);
 
         String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
         assertEquals("/gateway-path/topology1/ambari/", result);
@@ -138,11 +141,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetAmbariServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
-        Cluster cluster = clusterkWithOrchestrator("ANY");
-        GatewayTopology topology1 = gatewayTopology("topology1", AMBARI, ATLAS);
-        GatewayTopology topology2 = gatewayTopology("topology2", BEACON_SERVER, HIVE_SERVER);
-        cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
-        cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
+                new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
         String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
         assertEquals("https://127.0.0.1:8443/gateway-path/topology1/ambari/", result);
@@ -150,19 +150,16 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServices() {
-        Cluster cluster = clusterkWithOrchestrator("ANY");
-        GatewayTopology topology1 = gatewayTopology("topology1", AMBARI, ATLAS);
-        topology1.setGateway(cluster.getGateway());
-        GatewayTopology topology2 = gatewayTopology("topology2", BEACON_SERVER, HIVE_SERVER, WEBHDFS);
-        topology2.setGateway(cluster.getGateway());
-        cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
-        cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
+                new ExposedService[]{BEACON_SERVER, HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
+
+        mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE", "SPARK_JOBHISTORYSERVER", "HIVE_SERVER"), "HDP", "2.6");
 
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
 
         assertEquals(2L, clusterExposedServicesMap.keySet().size());
-        Collection<ClusterExposedServiceResponse> topology2ClusterExposedServiceResponses = clusterExposedServicesMap.get(topology2.getTopologyName());
+        Collection<ClusterExposedServiceResponse> topology2ClusterExposedServiceResponses = clusterExposedServicesMap.get("topology2");
         Optional<ClusterExposedServiceResponse> webHDFS =
                 topology2ClusterExposedServiceResponses.stream().filter(service -> "WEBHDFS".equals(service.getKnoxService())).findFirst();
         if (webHDFS.isPresent()) {
@@ -204,21 +201,18 @@ public class ServiceEndpointCollectorTest {
     @Test
     public void testGetKnoxServices() {
         when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("HIVE", "PIG")));
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
+        mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDF", "3.1");
+
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(0L, exposedServiceResponses.size());
 
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
+        mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDF", "3.2");
+
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(1L, exposedServiceResponses.size());
 
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDP", "2.6");
+
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(1L, exposedServiceResponses.size());
     }
@@ -226,15 +220,13 @@ public class ServiceEndpointCollectorTest {
     @Test
     public void testGetKnoxServicesWithLivyServer() {
         when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER")));
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        mockBlueprintTextProcessor(Sets.newHashSet("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "2.6");
+
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(2L, exposedServiceResponses.size());
 
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
+        mockBlueprintTextProcessor(Sets.newHashSet("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "3.0");
+
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(3L, exposedServiceResponses.size());
     }
@@ -242,21 +234,17 @@ public class ServiceEndpointCollectorTest {
     @Test
     public void testGetKnoxServicesWithLivyServerAndResourceManagerV2() {
         when(blueprintService.getByNameForWorkspace(any(), any(Workspace.class))).thenReturn(new Blueprint());
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER")));
-        when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
+        mockBlueprintTextProcessor(Sets.newHashSet("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "2.6");
+
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(3L, exposedServiceResponses.size());
         assertFalse(exposedServiceResponses
                 .stream()
-                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
-                    || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER"))
-                .findFirst()
-                .isPresent());
+                .anyMatch(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
+                    || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")));
 
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("3.0");
+        mockBlueprintTextProcessor(Sets.newHashSet("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "3.0");
+
         exposedServiceResponses = underTest.getKnoxServices("blueprint", workspace);
         assertEquals(5L, exposedServiceResponses.size());
         assertTrue(exposedServiceResponses
@@ -264,6 +252,50 @@ public class ServiceEndpointCollectorTest {
                 .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
                         || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER"))
                 .count() == 2);
+    }
+
+    @Test
+    public void testGetHdfsUIUrlInHDP26() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, NAMENODE}, new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE"), "HDP", "2.6");
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+
+        Map<String, Collection<ClusterExposedServiceResponse>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+        assertEquals(3L, exposedServiceResponses.get("topology1").size());
+        assertTrue(exposedServiceResponses.values()
+                .stream()
+                .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
+                        .anyMatch(clusterExposedService -> StringUtils.equals(clusterExposedService.getKnoxService(), "HDFSUI")
+                                && !clusterExposedService.getServiceUrl().contains("?host=http://10.0.0.1:50070"))));
+    }
+
+    @Test
+    public void testGetHdfsUIUrlInHDP30() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, NAMENODE}, new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE"), "HDP", "3.0");
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+
+        Map<String, Collection<ClusterExposedServiceResponse>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+        assertEquals(3L, exposedServiceResponses.get("topology1").size());
+        assertTrue(exposedServiceResponses.values()
+                .stream()
+                .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
+                        .anyMatch(clusterExposedService -> StringUtils.equals(clusterExposedService.getKnoxService(), "HDFSUI")
+                            && clusterExposedService.getServiceUrl().contains("?host=http://10.0.0.1:50070"))));
+    }
+
+    private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.getAllComponents()).thenReturn(components);
+        when(blueprintTextProcessor.getStackName()).thenReturn(stackName);
+        when(blueprintTextProcessor.getStackVersion()).thenReturn(stackVersion);
+    }
+
+    private void mockComponentLocator(List<String> privateIps) {
+        Map<String, List<String>> componentPrivateIps = Maps.newHashMap();
+        componentPrivateIps.put("NAMENODE", privateIps);
+        when(componentLocatorService.getComponentPrivateIp(any(), any(), any())).thenReturn(componentPrivateIps);
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
@@ -299,6 +331,17 @@ public class ServiceEndpointCollectorTest {
             throw new RuntimeException(e);
         }
         cluster.setBlueprint(blueprint);
+        return cluster;
+    }
+
+    private Cluster createClusterWithComponents(ExposedService[] topology1Services, ExposedService[] topology2Services, GatewayType gatewayType) {
+        Cluster cluster = clusterkWithOrchestrator("ANY");
+        GatewayTopology topology1 = gatewayTopology("topology1", topology1Services);
+        topology1.setGateway(cluster.getGateway());
+        GatewayTopology topology2 = gatewayTopology("topology2", topology2Services);
+        topology2.setGateway(cluster.getGateway());
+        cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
+        cluster.getGateway().setGatewayType(gatewayType);
         return cluster;
     }
 }

@@ -29,15 +29,16 @@ import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
 public class ServiceEndpointCollector {
@@ -54,6 +55,9 @@ public class ServiceEndpointCollector {
 
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
+
+    @Inject
+    private ComponentLocatorService componentLocatorService;
 
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName, Workspace workspace) {
         Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, workspace);
@@ -86,10 +90,12 @@ public class ServiceEndpointCollector {
 
     public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
         if (cluster.getBlueprint() != null && StringUtils.isNotEmpty(cluster.getBlueprint().getBlueprintText())) {
-            BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(cluster.getBlueprint().getBlueprintText());
+            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(cluster.getBlueprint().getBlueprintText());
             Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
             Gateway gateway = cluster.getGateway();
             Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
+            Map<String, List<String>> privateIps = componentLocatorService.getComponentPrivateIp(cluster.getId(), blueprintTextProcessor,
+                    knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
             if (gateway != null) {
                 for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
                     List<ClusterExposedServiceResponse> clusterExposedServiceResponses = new ArrayList<>();
@@ -104,7 +110,7 @@ public class ServiceEndpointCollector {
                         clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
                         clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());
                         Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
-                                gateway, gatewayTopology.getTopologyName());
+                                gateway, gatewayTopology.getTopologyName(), blueprintTextProcessor.getStackVersion(), privateIps);
                         serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
                         clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
                         clusterExposedServiceResponses.add(clusterExposedServiceResponse);
@@ -157,10 +163,14 @@ public class ServiceEndpointCollector {
         return Stream.empty();
     }
 
-    private Optional<String> getServiceUrlForService(ExposedService exposedService, String ambariIp, Gateway gateway, String topologyName) {
+    private Optional<String> getServiceUrlForService(ExposedService exposedService, String ambariIp, Gateway gateway,
+            String topologyName, String stackVersion, Map<String, List<String>> privateIps) {
         if (hasKnoxUrl(exposedService) && ambariIp != null) {
+            VersionComparator versionComparator = new VersionComparator();
             if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
                 return getHiveJdbcUrl(gateway, ambariIp);
+            } else if (ExposedService.NAMENODE.equals(exposedService) && versionComparator.compare(() -> stackVersion, () -> "2.6") > 0) {
+                return getHdfsUIUrl(gateway, ambariIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
             } else {
                 String url = GatewayType.CENTRAL == gateway.getGatewayType()
                         ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
@@ -187,6 +197,10 @@ public class ServiceEndpointCollector {
         return getGatewayTopology(ExposedService.HIVE_SERVER, gateway);
     }
 
+    private Optional<GatewayTopology> getGatewayTopologyWithNameNode(Gateway gateway) {
+        return getGatewayTopology(ExposedService.NAMENODE, gateway);
+    }
+
     private Optional<GatewayTopology> getGatewayTopology(ExposedService exposedService, Gateway gateway) {
         return gateway.getTopologies().stream()
                 .filter(gt -> getExposedServiceStream(gt)
@@ -202,6 +216,11 @@ public class ServiceEndpointCollector {
                 : String.format("https://%s:%s/%s/%s/ambari/", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
     }
 
+    private Optional<String> getHdfsUIUrl(Gateway gateway, String ambariIp, String nameNodePrivateIp) {
+        return getGatewayTopologyWithNameNode(gateway)
+                .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(ambariIp, gt, nameNodePrivateIp));
+    }
+
     private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp) {
         return getGatewayTopologyWithHive(gateway)
                 .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt));
@@ -211,5 +230,12 @@ public class ServiceEndpointCollector {
         Gateway gateway = gt.getGateway();
         return String.format("jdbc:hive2://%s:%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
                 + "transportMode=http;httpPath=%s/%s/hive", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
+    }
+
+    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String ambariIp, GatewayTopology gt, String nameNodePrivateIp) {
+        Gateway gateway = gt.getGateway();
+        String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName(),
+                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getDefaultPort());
+        return url;
     }
 }
