@@ -33,9 +33,9 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -65,6 +65,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     private static final String LDAP_KEY = "ldapConfigName";
 
     @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
+
+    @Inject
     private RandomNameCreator creator;
 
     @BeforeMethod
@@ -92,7 +95,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(RANGER, DatabaseEntity.class).withRequest(rangerRds).withName(rangerRdsName)
                 .when(DatabaseEntity.post())
                 .given(LdapConfigTestDto.class).withRequest(ldapRequest(ldapName)).withName(ldapName)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
@@ -125,7 +128,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(RANGER, DatabaseEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(DatabaseEntity.post())
                 .given(LdapConfigTestDto.class).withName(ldapName)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV4())
                 .init(StackEntity.class)
@@ -169,7 +172,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
@@ -191,7 +194,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackEntity.class)
                 .withInstanceGroups(MASTER.name())
@@ -210,7 +213,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(BlueprintEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withAmbariBlueprint(VALID_DL_BP)
                 .when(Blueprint.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
-                .when(LdapConfigTestAction.postV4())
+                .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackEntity.class)
                 .withInstanceGroups(MASTER.name())

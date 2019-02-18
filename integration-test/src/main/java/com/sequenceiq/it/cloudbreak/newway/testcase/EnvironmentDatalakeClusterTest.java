@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.AfterMethod;
@@ -21,7 +22,7 @@ import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
@@ -42,6 +43,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     private static final String BP_NAME_DL = "HDP 3.1 - Data Lake: Apache Ranger, Apache Hive Metastore";
 
     private static final String BP_NAME_WL = "Data Science: Apache Spark 2, Apache Zeppelin";
+
+    @Inject
+    private LdapConfigTestClient ldapConfigTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -98,7 +102,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
                 .when(Stack.postV4())
-                .deleteGiven(LdapConfigTestDto.class, LdapConfigTestAction.deleteV4(), key(FORBIDDEN_KEY))
+                .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))

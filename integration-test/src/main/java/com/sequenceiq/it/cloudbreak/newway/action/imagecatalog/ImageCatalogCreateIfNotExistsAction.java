@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.action;
+package com.sequenceiq.it.cloudbreak.newway.action.imagecatalog;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogEntity> {
