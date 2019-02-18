@@ -17,7 +17,14 @@ management:
     prometheus:
       enabled: true
 
-dl:
+datalake:
   structuredevent:
     rest:
       enabled: false
+  db.env:
+    user: postgres
+    pass:
+    db: datalakedb
+    schema: public
+    cert.file: database.crt
+    ssl: false

@@ -32,7 +32,7 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${info.app.version:}")
     private String applicationVersion;
 
-    @Value("${dl.structuredevent.rest.enabled:false}")
+    @Value("${datalake.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
     @Inject
