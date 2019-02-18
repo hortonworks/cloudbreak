@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.ldap;
 
 import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
@@ -11,22 +11,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, LdapV4Response, LdapConfigEntity> implements Purgable<LdapV4Response> {
-    public static final String LDAP_CONFIG = "LDAP_CONFIG";
+@Prototype
+public class LdapConfigTestDto extends AbstractCloudbreakEntity<LdapV4Request, LdapV4Response, LdapConfigTestDto> implements Purgable<LdapV4Response> {
 
-    public LdapConfigEntity(String newId) {
-        super(newId);
-        setRequest(new LdapV4Request());
-    }
-
-    public LdapConfigEntity() {
-        this(LDAP_CONFIG);
-    }
-
-    public LdapConfigEntity(TestContext testContext) {
+    public LdapConfigTestDto(TestContext testContext) {
         super(new LdapV4Request(), testContext);
     }
 
@@ -40,7 +34,11 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, Ld
         }
     }
 
-    public LdapConfigEntity valid() {
+    public String getName() {
+        return getRequest().getName();
+    }
+
+    public LdapConfigTestDto valid() {
         return withName(getNameCreator().getRandomNameForMock())
                 .withBindPassword("bindPassword")
                 .withAdminGroup("group")
@@ -61,98 +59,98 @@ public class LdapConfigEntity extends AbstractCloudbreakEntity<LdapV4Request, Ld
                 .withUserDnPattern("userDnPattern");
     }
 
-    public LdapConfigEntity withRequest(LdapV4Request request) {
+    public LdapConfigTestDto withRequest(LdapV4Request request) {
         setRequest(request);
         return this;
     }
 
-    public LdapConfigEntity withName(String name) {
+    public LdapConfigTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
     }
 
-    public LdapConfigEntity withUserDnPattern(String userDnPattern) {
+    public LdapConfigTestDto withUserDnPattern(String userDnPattern) {
         getRequest().setUserDnPattern(userDnPattern);
         return this;
     }
 
-    public LdapConfigEntity withBindPassword(String bindPassword) {
+    public LdapConfigTestDto withBindPassword(String bindPassword) {
         getRequest().setBindPassword(bindPassword);
         return this;
     }
 
-    public LdapConfigEntity withAdminGroup(String adminGroup) {
+    public LdapConfigTestDto withAdminGroup(String adminGroup) {
         getRequest().setAdminGroup(adminGroup);
         return this;
     }
 
-    public LdapConfigEntity withBindDn(String bindDn) {
+    public LdapConfigTestDto withBindDn(String bindDn) {
         getRequest().setBindDn(bindDn);
         return this;
     }
 
-    public LdapConfigEntity withDescription(String description) {
+    public LdapConfigTestDto withDescription(String description) {
         getRequest().setDescription(description);
         return this;
     }
 
-    public LdapConfigEntity withDirectoryType(DirectoryType directoryType) {
+    public LdapConfigTestDto withDirectoryType(DirectoryType directoryType) {
         getRequest().setDirectoryType(directoryType);
         return this;
     }
 
-    public LdapConfigEntity withDomain(String domain) {
+    public LdapConfigTestDto withDomain(String domain) {
         getRequest().setDomain(domain);
         return this;
     }
 
-    public LdapConfigEntity withGroupMemberAttribute(String groupMemberAttribute) {
+    public LdapConfigTestDto withGroupMemberAttribute(String groupMemberAttribute) {
         getRequest().setGroupMemberAttribute(groupMemberAttribute);
         return this;
     }
 
-    public LdapConfigEntity withGroupNameAttribute(String groupNameAttribute) {
+    public LdapConfigTestDto withGroupNameAttribute(String groupNameAttribute) {
         getRequest().setGroupNameAttribute(groupNameAttribute);
         return this;
     }
 
-    public LdapConfigEntity withGroupObjectClass(String groupObjectClass) {
+    public LdapConfigTestDto withGroupObjectClass(String groupObjectClass) {
         getRequest().setGroupObjectClass(groupObjectClass);
         return this;
     }
 
-    public LdapConfigEntity withGroupSearchBase(String groupSearchBase) {
+    public LdapConfigTestDto withGroupSearchBase(String groupSearchBase) {
         getRequest().setGroupSearchBase(groupSearchBase);
         return this;
     }
 
-    public LdapConfigEntity withProtocol(String protocol) {
+    public LdapConfigTestDto withProtocol(String protocol) {
         getRequest().setProtocol(protocol);
         return this;
     }
 
-    public LdapConfigEntity withServerPort(Integer serverPort) {
+    public LdapConfigTestDto withServerPort(Integer serverPort) {
         getRequest().setPort(serverPort);
         return this;
     }
 
-    public LdapConfigEntity withServerHost(String serverHost) {
+    public LdapConfigTestDto withServerHost(String serverHost) {
         getRequest().setHost(serverHost);
         return this;
     }
 
-    public LdapConfigEntity withUserNameAttribute(String userNameAttribute) {
+    public LdapConfigTestDto withUserNameAttribute(String userNameAttribute) {
         getRequest().setUserNameAttribute(userNameAttribute);
         return this;
     }
 
-    public LdapConfigEntity withUserObjectClass(String userObjectClass) {
+    public LdapConfigTestDto withUserObjectClass(String userObjectClass) {
         getRequest().setUserObjectClass(userObjectClass);
         return this;
     }
 
-    public LdapConfigEntity withUserSearchBase(String userSearchBase) {
+    public LdapConfigTestDto withUserSearchBase(String userSearchBase) {
         getRequest().setUserSearchBase(userSearchBase);
         return this;
     }

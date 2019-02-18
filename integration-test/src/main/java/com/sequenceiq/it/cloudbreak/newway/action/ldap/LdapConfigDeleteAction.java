@@ -12,21 +12,20 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 
-public class LdapConfigPostAction implements Action<LdapConfigTestDto> {
+public class LdapConfigDeleteAction implements Action<LdapConfigTestDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigPostAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigDeleteAction.class);
 
     @Override
     public LdapConfigTestDto action(TestContext testContext, LdapConfigTestDto entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Ldap post request:\n", entity.getRequest());
+        logJSON(LOGGER, " LDAP config delete request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
                         .ldapConfigV4Endpoint()
-                        .post(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, " Ldap was created successfully:\n", entity.getResponse());
+                        .delete(client.getWorkspaceId(), entity.getName()));
+        logJSON(LOGGER, " LDAP config was deleted successfully:\n", entity.getResponse());
         log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-
         return entity;
     }
 

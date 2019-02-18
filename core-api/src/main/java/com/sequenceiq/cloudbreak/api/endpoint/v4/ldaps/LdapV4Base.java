@@ -29,7 +29,7 @@ public abstract class LdapV4Base implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @Size(max = 1000)
+    @Size(max = 1000, message = "The length of the ldap config's description has to be in range of 0 to 1000")
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 

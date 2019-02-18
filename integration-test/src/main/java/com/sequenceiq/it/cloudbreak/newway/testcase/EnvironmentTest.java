@@ -27,7 +27,7 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -94,7 +94,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvironmenWithLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
                 .withLdapConfigs(validLdap)
@@ -209,7 +209,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateEnvWithExistingAndNotExistingLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
-        mixedLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        mixedLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         mixedLdap.add("invalidLdap");
         testContext
                 .init(EnvironmentEntity.class)
@@ -251,7 +251,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testDeleteEnvWithLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         testContext
                 .init(EnvironmentEntity.class)
                 .withLdapConfigs(validLdap)
@@ -309,7 +309,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvAttachLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-ldap-attach")
@@ -359,7 +359,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvDetachLdap(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         testContext
                 .given(EnvironmentEntity.class)
                 .withName("int-ldap-detach")
@@ -404,7 +404,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testAttachLdapToMoreEnvs(TestContext testContext) {
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigEntity.class).getName());
+        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
         attachLdapToEnv(testContext, "int-ldap-attach-envs", validLdap);
         attachLdapToEnv(testContext, "int-ldap-attach-envs2", validLdap);
     }
@@ -601,7 +601,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
             ldapConfigs.add(ldapV4Response.getName());
         }
-        if (!ldapConfigs.contains(testContext.get(LdapConfigEntity.class).getName())) {
+        if (!ldapConfigs.contains(testContext.get(LdapConfigTestDto.class).getName())) {
             throw new TestFailException("Ldap is not attached to environment");
         }
         return environment;

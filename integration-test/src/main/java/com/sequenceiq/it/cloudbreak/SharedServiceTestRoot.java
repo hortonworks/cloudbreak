@@ -10,12 +10,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.it.cloudbreak.newway.AttachedClusterStackPostStrategy;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.DatalakeCluster;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
@@ -66,7 +64,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(resourceHelper.aValidHiveDatabase());
         given(resourceHelper.aValidRangerDatabase());
-        given(resourceHelper.aValidLdap());
+//        given(resourceHelper.aValidLdap());
         given(cloudProvider.aValidDatalakeCluster(), "a datalake cluster request");
         given(cloudProvider.aValidStackRequest()
                 .withInstanceGroups(cloudProvider.instanceGroups(HostGroupType.MASTER))
@@ -174,21 +172,21 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
     }
 
     private void cleanUpLdap() throws Exception {
-        given(CloudbreakClient.created());
-        when(LdapConfig.getAll());
-        then(LdapConfig.assertThis((ldapConfig, testContext) -> {
-            var responses = ldapConfig.getResponses();
-            for (LdapV4Response response : responses) {
-                if (response.getName().equals(resourceHelper.getLdapConfigName())) {
-                    try {
-                        given(LdapConfig.request().withName(response.getName()));
-                        when(LdapConfig.delete());
-                    } catch (Exception e) {
-                        logger.warn(String.format(CLEAN_UP_EXCEPTION_MESSAGE, e.getMessage()));
-                    }
-                }
-            }
-        }));
+//        given(CloudbreakClient.created());
+//        when(LdapConfig.getAll());
+//        then(LdapConfig.assertThis((ldapConfig, testContext) -> {
+//            var responses = ldapConfig.getResponses();
+//            for (LdapV4Response response : responses) {
+//                if (response.getName().equals(resourceHelper.getLdapConfigName())) {
+//                    try {
+//                        given(LdapConfig.request().withName(response.getName()));
+//                        when(LdapConfig.delete());
+//                    } catch (Exception e) {
+//                        logger.warn(String.format(CLEAN_UP_EXCEPTION_MESSAGE, e.getMessage()));
+//                    }
+//                }
+//            }
+//        }));
     }
 
     private void cleanUpRdsConfigs() throws Exception {

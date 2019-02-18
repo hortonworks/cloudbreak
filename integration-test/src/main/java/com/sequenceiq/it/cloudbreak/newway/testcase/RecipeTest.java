@@ -20,18 +20,18 @@ import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 
 public class RecipeTest extends AbstractIntegrationTest {
 
@@ -95,8 +95,8 @@ public class RecipeTest extends AbstractIntegrationTest {
     public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(TestContext testContext) {
         String ldapName = creator.getRandomNameForMock();
         testContext
-                .given(LdapConfigEntity.class).withName(ldapName)
-                .when(LdapConfig.postV2())
+                .given(LdapConfigTestDto.class).withName(ldapName)
+                .when(LdapConfigTestAction.deleteV4())
                 .given(StackEntity.class).withCluster(new ClusterEntity(testContext).valid().withLdapConfigName(ldapName))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)

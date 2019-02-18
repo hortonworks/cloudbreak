@@ -37,7 +37,7 @@ public class SharedServiceAwsTest extends SharedServiceTestRoot {
         given(getCloudProvider().aValidCredential());
         given(getResourceHelper().aValidHiveDatabase());
         given(getResourceHelper().aValidRangerDatabase());
-        given(getResourceHelper().aValidLdap());
+//        given(getResourceHelper().aValidLdap());
         given(AccessConfigEntity.isGot());
         given(getCloudProvider().aValidDatalakeCluster(), "a datalake cluster request");
         given(getCloudProvider().aValidStackRequest()

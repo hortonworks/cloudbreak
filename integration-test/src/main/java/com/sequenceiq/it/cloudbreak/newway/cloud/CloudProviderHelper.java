@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
-import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
