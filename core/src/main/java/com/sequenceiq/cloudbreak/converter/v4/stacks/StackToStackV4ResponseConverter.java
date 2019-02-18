@@ -93,7 +93,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setStatusReason(source.getStatusReason());
         response.setInstanceGroups(getInstanceGroups(source));
         response.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Response.class));
-        response.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Response.class));
+        response.setNetwork(getConversionService().convert(source, NetworkV4Response.class));
         providerParameterCalculator.parse(new HashMap<>(source.getParameters()), response);
         response.setCreated(source.getCreated());
         response.setGatewayPort(source.getGatewayPort());
