@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -79,7 +80,7 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     public Set<String> collectNodes(ApplyResponse applyResponse) {
         Set<String> set = new HashSet<>();
-        for (Map<String, Object> stringObjectMap : applyResponse.getResult()) {
+        for (Map<String, JsonNode> stringObjectMap : applyResponse.getResult()) {
             set.addAll(stringObjectMap.entrySet().stream().map(Entry::getKey).collect(Collectors.toList()));
         }
         return set;
@@ -89,6 +90,10 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
         Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(node -> getShortHostName(node.getHostname()), Node::getPrivateIp));
         Set<String> nodesTarget = nodes.stream().map(node -> hostNames.get(getShortHostName(node))).collect(Collectors.toSet());
         return target.stream().filter(t -> !nodesTarget.contains(t)).collect(Collectors.toSet());
+    }
+
+    protected Set<Node> getAllNode() {
+        return allNode;
     }
 
     private String getShortHostName(String hostName) {

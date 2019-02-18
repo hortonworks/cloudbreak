@@ -7,10 +7,11 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SaltJobFailedException;
 
 public interface SaltJobRunner {
 
-    String submit(SaltConnector saltConnector);
+    String submit(SaltConnector saltConnector) throws SaltJobFailedException;
 
     Set<String> getTarget();
 

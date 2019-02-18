@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
@@ -175,9 +176,10 @@ public class InstanceMetadataUpdater {
             Map<String, Map<String, String>> packageVersionsByNameByHost) throws CloudbreakOrchestratorFailedException {
         List<Package> packagesWithGrain = packages.stream().filter(pkg -> StringUtils.isNotBlank(pkg.getGrain())).collect(Collectors.toList());
         for (Package packageWithGrain : packagesWithGrain) {
-            Map<String, String> versionsByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, packageWithGrain.getGrain());
-            for (Entry<String, String> entry : versionsByHost.entrySet()) {
-                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>()).put(packageWithGrain.getName(), entry.getValue());
+            Map<String, JsonNode> versionsByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, packageWithGrain.getGrain());
+            for (Entry<String, JsonNode> entry : versionsByHost.entrySet()) {
+                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
+                        .put(packageWithGrain.getName(), entry.getValue().textValue());
             }
         }
     }
