@@ -19,8 +19,8 @@ RUN apt-get update --no-install-recommends && apt-get install -y zip procps
 ADD ${REPO_URL}/com/sequenceiq/datalake/$VERSION/datalake-$VERSION.jar /datalake.jar
 
 # extract schema files
-RUN ( unzip datalake.jar schema/* -d / ) || \
-    ( unzip datalake.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
+#RUN ( unzip datalake.jar schema/* -d / ) || \
+#    ( unzip datalake.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
 
 # Install starter script for the Datalake application
 COPY bootstrap/start_datalake_app.sh /
