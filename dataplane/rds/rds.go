@@ -276,7 +276,7 @@ func ListAllRds(c *cli.Context) error {
 }
 
 func listAllRdsImpl(rdsClient rdsClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := rdsClient.ListDatabasesByWorkspace(v4db.NewListDatabasesByWorkspaceParams().WithWorkspaceID(workspaceID))
+	resp, err := rdsClient.ListDatabasesByWorkspace(v4db.NewListDatabasesByWorkspaceParams().WithWorkspaceID(workspaceID).WithAttachGlobal(&(&types.B{B: true}).B))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
