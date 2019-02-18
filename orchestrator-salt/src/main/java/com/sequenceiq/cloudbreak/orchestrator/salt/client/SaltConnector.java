@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.util.JaxRSUtil;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class SaltConnector implements Closeable {
 
@@ -148,7 +149,11 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt run has been executed. fun: {}", fun);
+        try {
+            LOGGER.info("Salt run has been executed. fun: {}, response: {}", fun, JsonUtil.writeValueAsString(responseEntity));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Can not read response from salt", e);
+        }
         return responseEntity;
     }
 

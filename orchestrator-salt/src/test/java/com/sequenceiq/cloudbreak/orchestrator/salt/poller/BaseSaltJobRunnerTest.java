@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -106,7 +109,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectNodesTest() {
+    public void collectNodesTest() throws IOException {
         Set<Node> allNode = allNodeWithPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override
@@ -115,11 +118,12 @@ public class BaseSaltJobRunnerTest {
             }
         };
         ApplyResponse applyResponse = new ApplyResponse();
-        List<Map<String, Object>> resultList = new ArrayList<>();
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("host-10-0-0-1.example.com", "10.0.0.1");
-        resultMap.put("host-10-0-0-2.example.com", "10.0.0.2");
-        resultMap.put("host-10-0-0-3.example.com", "10.0.0.3");
+        List<Map<String, JsonNode>> resultList = new ArrayList<>();
+        Map<String, JsonNode> resultMap = new HashMap<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        resultMap.put("host-10-0-0-1.example.com", objectMapper.valueToTree("10.0.0.1"));
+        resultMap.put("host-10-0-0-2.example.com", objectMapper.valueToTree("10.0.0.2"));
+        resultMap.put("host-10-0-0-3.example.com", objectMapper.valueToTree("10.0.0.3"));
         resultList.add(resultMap);
         applyResponse.setResult(resultList);
         Set<String> collectedNodes = baseSaltJobRunner.collectNodes(applyResponse);

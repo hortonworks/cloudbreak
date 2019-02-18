@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
@@ -86,12 +88,13 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void highstateTest() {
+    public void highstateTest() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
         String jobId = "1";
         ApplyResponse response = new ApplyResponse();
-        List<Map<String, Object>> result = new ArrayList<>();
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("jid", jobId);
+        List<Map<String, JsonNode>> result = new ArrayList<>();
+        Map<String, JsonNode> resultMap = new HashMap<>();
+        resultMap.put("jid", objectMapper.readTree(jobId));
         result.add(resultMap);
         response.setResult(result);
         when(saltConnector.run(any(), eq("state.highstate"), any(), eq(ApplyResponse.class))).thenReturn(response);

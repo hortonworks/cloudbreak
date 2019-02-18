@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
@@ -177,10 +178,14 @@ public class SaltStates {
         return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
     }
 
-    public static Map<String, String> getGrains(SaltConnector sc, String grain) {
-        CommandExecutionResponse resp = sc.run(Glob.ALL, "grains.get", LOCAL, CommandExecutionResponse.class, grain);
-        List<Map<String, String>> result = resp.getResult();
-        return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+    public static Map<String, JsonNode> getGrains(SaltConnector sc, String grain) {
+        return getGrains(sc, Glob.ALL, grain);
+    }
+
+    public static Map<String, JsonNode> getGrains(SaltConnector sc, Target<String> target, String grain) {
+        ApplyResponse resp = sc.run(target, "grains.get", LOCAL, ApplyResponse.class, grain);
+        Iterable<Map<String, JsonNode>> result = resp.getResult();
+        return result.iterator().hasNext() ? result.iterator().next() : new HashMap<>();
     }
 
     private static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
