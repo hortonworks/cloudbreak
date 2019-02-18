@@ -58,8 +58,8 @@ public class ComponentLocatorServiceTest {
         cluster = new Cluster();
         cluster.setBlueprint(new Blueprint());
 
-        HostGroup hg1 = createHostGroup("hg1", 0L, "myhost1");
-        HostGroup hg2 = createHostGroup("hg2", 1L, "myhost2");
+        HostGroup hg1 = createHostGroup("hg1", 0L, "myhost1", "10.0.140.69");
+        HostGroup hg2 = createHostGroup("hg2", 1L, "myhost2", "10.0.140.70");
 
         Set<String> hg1Components = set("RESOURCEMANAGER", "Service1", "HIVE_SERVER");
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
@@ -70,7 +70,7 @@ public class ComponentLocatorServiceTest {
         when(blueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);
     }
 
-    private HostGroup createHostGroup(String name, Long id, String hostname) {
+    private HostGroup createHostGroup(String name, Long id, String hostname, String privateIp) {
         HostGroup hg = new HostGroup();
         hg.setName(name);
         Constraint constraint = new Constraint();
@@ -82,6 +82,7 @@ public class ComponentLocatorServiceTest {
 
         InstanceMetaData im = new InstanceMetaData();
         im.setDiscoveryFQDN(hostname);
+        im.setPrivateIp(privateIp);
         ig.setInstanceMetaData(ImmutableSet.of(im));
 
         return hg;
@@ -101,6 +102,20 @@ public class ComponentLocatorServiceTest {
         expected.put("NAMENODE", ImmutableList.of("myhost2"));
 
         Map<String, List<String>> result = underTest.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
+        Assert.assertEquals(3L, result.size());
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void getComponentPrivateIp() {
+
+        Map<String, List<String>> expected = Maps.newHashMap();
+        expected.put("RESOURCEMANAGER", ImmutableList.of("10.0.140.69"));
+        expected.put("HIVE_SERVER", ImmutableList.of("10.0.140.69"));
+        expected.put("NAMENODE", ImmutableList.of("10.0.140.70"));
+
+        Map<String, List<String>> result = underTest.getComponentPrivateIp(cluster.getId(), blueprintProcessor,
+                new HashSet<>(ExposedService.getAllServiceName()));
         Assert.assertEquals(3L, result.size());
         Assert.assertEquals(expected, result);
     }
