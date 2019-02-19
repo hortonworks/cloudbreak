@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
 
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)

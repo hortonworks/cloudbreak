@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.AmbariViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -11,6 +12,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClusterViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(ClusterModelDescription.STATUS)
     private Status status;

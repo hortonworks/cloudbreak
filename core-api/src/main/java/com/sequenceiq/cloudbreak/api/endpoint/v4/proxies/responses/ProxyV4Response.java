@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = ModelDescriptions.ProxyConfigModelDescription.DESCRIPTION)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProxyV4Response extends ProxyV4Base {
 
     @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG_ID)

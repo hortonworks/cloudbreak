@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = ModelDescriptions.RecipeModelDescription.DESCRIPTION)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RecipeV4Response extends RecipeV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
