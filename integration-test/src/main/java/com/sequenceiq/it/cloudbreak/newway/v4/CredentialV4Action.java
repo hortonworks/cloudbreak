@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.Credentia
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
@@ -25,33 +25,33 @@ public class CredentialV4Action {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" post "
-                .concat(credentialEntity.getName())
+                .concat(credentialTestDto.getName())
                 .concat(" private credential. "));
-        credentialEntity.setResponse(
+        credentialTestDto.setResponse(
                 client.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .post(workspaceId, credentialEntity.getRequest()));
+                        .post(workspaceId, credentialTestDto.getRequest()));
     }
 
     public static void put(IntegrationTestContext integrationTestContext, Entity entity) {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" put "
-                .concat(credentialEntity.getName())
+                .concat(credentialTestDto.getName())
                 .concat(" private credential. "));
-        credentialEntity.setResponse(
+        credentialTestDto.setResponse(
                 client.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .put(workspaceId, credentialEntity.getRequest()));
+                        .put(workspaceId, credentialTestDto.getRequest()));
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -59,31 +59,31 @@ public class CredentialV4Action {
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) throws IOException {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get "
-                .concat(credentialEntity.getName())
+                .concat(credentialTestDto.getName())
                 .concat(" private credential. "));
-        credentialEntity.setResponse(retry(() -> client.getCloudbreakClient()
+        credentialTestDto.setResponse(retry(() -> client.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .get(workspaceId, credentialEntity.getName()), retryQuantity));
-        Log.logJSON(" get credential response: ", credentialEntity.getResponse());
+                        .get(workspaceId, credentialTestDto.getName()), retryQuantity));
+        Log.logJSON(" get credential response: ", credentialTestDto.getResponse());
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity, CloudbreakClient client) throws IOException {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get "
-                .concat(credentialEntity.getName())
+                .concat(credentialTestDto.getName())
                 .concat(" private credential. "));
-        credentialEntity.setResponse(
+        credentialTestDto.setResponse(
                 client.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .get(workspaceId, credentialEntity.getName()));
-        Log.logJSON(" get credential response: ", credentialEntity.getResponse());
+                        .get(workspaceId, credentialTestDto.getName()));
+        Log.logJSON(" get credential response: ", credentialTestDto.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -91,25 +91,25 @@ public class CredentialV4Action {
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity, int retryQuantity) {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all private credential. ");
-        credentialEntity.setResponses((Set<CredentialV4Response>) retry(() -> client.getCloudbreakClient()
+        credentialTestDto.setResponses((Set<CredentialV4Response>) retry(() -> client.getCloudbreakClient()
                         .credentialV4Endpoint()
                         .list(workspaceId), retryQuantity).getResponses());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity, CloudbreakClient client) {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete "
-                .concat(credentialEntity.getName())
+                .concat(credentialTestDto.getName())
                 .concat(" private credential. "));
         client.getCloudbreakClient().credentialV4Endpoint()
-                .delete(workspaceId, credentialEntity.getName());
+                .delete(workspaceId, credentialTestDto.getName());
     }
 
     public static void safeDelete(IntegrationTestContext integrationTestContext, Entity entity, CloudbreakClient client) {
@@ -122,17 +122,17 @@ public class CredentialV4Action {
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(LOGGER, " delete %s private credential. ", credentialEntity.getName());
+        Log.log(LOGGER, " delete %s private credential. ", credentialTestDto.getName());
         client.getCloudbreakClient().credentialV4Endpoint()
-                .delete(workspaceId, credentialEntity.getName());
+                .delete(workspaceId, credentialTestDto.getName());
     }
 
-    public static CredentialEntity deleteV2(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
+    public static CredentialTestDto deleteV2(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) {
         Log.log(LOGGER, "Delete %s credential. ", entity.getName());
         cloudbreakClient.getCloudbreakClient().credentialV4Endpoint()
                 .delete(cloudbreakClient.getWorkspaceId(), entity.getName());

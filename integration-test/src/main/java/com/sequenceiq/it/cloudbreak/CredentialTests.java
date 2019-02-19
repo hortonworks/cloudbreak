@@ -1,13 +1,11 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -17,11 +15,14 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.Credential;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class CredentialTests extends CloudbreakTest {
 
@@ -124,7 +125,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(credentialName)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is created.");
-        when(Credential.post(), credentialName + " credential request has been posted.");
+        when(Credential.postV1(), credentialName + " credential request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, priority = 2, groups = "credentials")
@@ -134,7 +135,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(EMPTY_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), EMPTY_CRED_NAME + " credential with no parameters request.");
-        when(Credential.post(), EMPTY_CRED_NAME + " credential with no parameters request has been posted.");
+        when(Credential.postV1(), EMPTY_CRED_NAME + " credential with no parameters request has been posted.");
     }
 
     @Test(priority = 3, groups = "credentials")
@@ -145,7 +146,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), EMPTY_CRED_NAME + " credential with no parameters request.");
         try {
-            when(Credential.post(), EMPTY_CRED_NAME + " credential with no parameters request has been posted.");
+            when(Credential.postV1(), EMPTY_CRED_NAME + " credential with no parameters request has been posted.");
         } catch (BadRequestException badrequestExp) {
             try (Response response = badrequestExp.getResponse()) {
                 String exceptionMessage = response.readEntity(String.class);
@@ -169,7 +170,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(INVALID_SHORT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), "0 char credential name request.");
-        when(Credential.post(), "0 char credential name request has been posted.");
+        when(Credential.postV1(), "0 char credential name request has been posted.");
     }
 
     //"The length of the credential's name has to be in range of 1 to 100"
@@ -182,7 +183,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(invalidLongName + cloudProvider.getPlatform().toLowerCase())
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), invalidLongName + " credential name request.");
-        when(Credential.post(), invalidLongName + " credential name request has been posted.");
+        when(Credential.postV1(), invalidLongName + " credential name request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = "credentials")
@@ -194,7 +195,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(credentialName)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential name request.");
-        when(Credential.post(), credentialName + " credential name request has been posted.");
+        when(Credential.postV1(), credentialName + " credential name request has been posted.");
     }
 
     //BUG-95609 - Won't fix issue
@@ -210,7 +211,7 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(credentialName)
                 .withDescription(invalidLongDescripton)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential description request.");
-        when(Credential.post(), credentialName + " credential description request has been posted.");
+        when(Credential.postV1(), credentialName + " credential description request has been posted.");
     }
 
     @Test(expectedExceptions = ForbiddenException.class, priority = 8, groups = "credentials")

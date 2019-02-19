@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
@@ -57,8 +57,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public CredentialEntity aValidCredential(boolean create) {
-        CredentialEntity credential = create ? Credential.created() : Credential.request();
+    public CredentialTestDto aValidCredential(boolean create) {
+        CredentialTestDto credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)

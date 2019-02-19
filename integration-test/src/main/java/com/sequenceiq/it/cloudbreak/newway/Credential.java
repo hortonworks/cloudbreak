@@ -4,12 +4,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialPostAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 
-public class Credential extends CredentialEntity {
+public class Credential extends CredentialTestDto {
 
     Credential() {
     }
@@ -54,12 +53,12 @@ public class Credential extends CredentialEntity {
         return credential;
     }
 
-    public static ResourceAction post(String key) {
+    public static ResourceAction postV1(String key) {
         return new ResourceAction(getTestContextCredential(key), CredentialV4Action::post);
     }
 
-    public static ResourceAction post() {
-        return post(CREDENTIAL);
+    public static ResourceAction postV1() {
+        return postV1(CREDENTIAL);
     }
 
     public static ResourceAction put(String key) {
@@ -102,7 +101,7 @@ public class Credential extends CredentialEntity {
         return delete(CREDENTIAL);
     }
 
-    public static CredentialEntity delete(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
+    public static CredentialTestDto delete(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
                 cloudbreakClient.getCloudbreakClient().credentialV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName())
         );
@@ -113,11 +112,7 @@ public class Credential extends CredentialEntity {
         return new Assertion<>(getTestContextCredential(GherkinTest.RESULT), check);
     }
 
-    public static Action<CredentialEntity> postV2() {
-        return new CredentialPostAction();
-    }
-
-    public static CredentialEntity getByName(TestContext testContext, CredentialEntity entity, CloudbreakClient cloudbreakClient) {
+    public static CredentialTestDto getByName(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
                 cloudbreakClient.getCloudbreakClient().credentialV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
         );

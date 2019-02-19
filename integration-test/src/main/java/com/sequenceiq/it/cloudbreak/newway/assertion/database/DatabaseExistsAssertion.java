@@ -1,6 +1,7 @@
-package com.sequenceiq.it.cloudbreak.newway.assertion;
+package com.sequenceiq.it.cloudbreak.newway.assertion.database;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 

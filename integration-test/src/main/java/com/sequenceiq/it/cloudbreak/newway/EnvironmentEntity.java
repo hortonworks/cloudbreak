@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedE
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
 @Prototype
 public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Request, DetailedEnvironmentV4Response, EnvironmentEntity>
@@ -59,7 +60,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
                 .withDescription("Description for environment")
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
-                .withCredentialName(getTestContext().get(CredentialEntity.class).getName());
+                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName());
     }
 
     public EnvironmentEntity withName(String name) {
@@ -69,8 +70,8 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
     }
 
     public EnvironmentEntity withCredential(String key) {
-        CredentialEntity credentialEntity = getTestContext().get(key);
-        getRequest().setCredential(credentialEntity.getRequest());
+        CredentialTestDto credentialTestDto = getTestContext().get(key);
+        getRequest().setCredential(credentialTestDto.getRequest());
         return this;
     }
 

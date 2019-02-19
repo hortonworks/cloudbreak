@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.action.managementpack;
+package com.sequenceiq.it.cloudbreak.newway.action.mpack;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
@@ -11,19 +11,19 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
 
-public class ManagementPackDeleteAction implements Action<ManagementPackEntity> {
+public class ManagementPackCreateAction implements Action<ManagementPackEntity> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPackDeleteAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPackCreateAction.class);
 
     @Override
     public ManagementPackEntity action(TestContext testContext, ManagementPackEntity entity, CloudbreakClient client) throws Exception {
         log(LOGGER, "ManagementPack name: " + entity.getName());
-        log(LOGGER, " ManagementPack delete request");
+        logJSON(LOGGER, " ManagementPack post request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
                         .managementPackV4Endpoint()
-                        .deleteInWorkspace(client.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " ManagementPack deleted successfully:\n", entity.getResponse());
+                        .createInWorkspace(client.getWorkspaceId(), entity.getRequest()));
+        logJSON(LOGGER, " ManagementPack created  successfully:\n", entity.getResponse());
         log(LOGGER, "ManagementPack ID: " + entity.getResponse().getId());
 
         return entity;

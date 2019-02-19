@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.credential;
 
 import static com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider.CREDENTIAL_DEFAULT_DESCRIPTION;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.MockCloudProvider.MOCK_CAPITAL;
@@ -15,27 +15,31 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
+import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 
 @Prototype
-public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Request, CredentialV4Response, CredentialEntity>
+public class CredentialTestDto extends AbstractCloudbreakEntity<CredentialV4Request, CredentialV4Response, CredentialTestDto>
         implements Purgable<CredentialV4Response> {
 
     public static final String CREDENTIAL = "CREDENTIAL";
 
-    public CredentialEntity(TestContext testContext) {
+    public CredentialTestDto(TestContext testContext) {
         super(new CredentialV4Request(), testContext);
     }
 
-    public CredentialEntity() {
+    public CredentialTestDto() {
         super(CREDENTIAL);
         setRequest(new CredentialV4Request());
     }
 
-    public CredentialEntity valid() {
+    public CredentialTestDto valid() {
         MockCredentialV4Parameters credentialParameters = new MockCredentialV4Parameters();
         MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
         credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
@@ -45,53 +49,53 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
                 .withCloudPlatform(MOCK_CAPITAL);
     }
 
-    public CredentialEntity withName(String name) {
+    public CredentialTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
     }
 
-    public CredentialEntity withDescription(String description) {
+    public CredentialTestDto withDescription(String description) {
         getRequest().setDescription(description);
         return this;
     }
 
-    public CredentialEntity withCloudPlatform(String cloudPlatform) {
+    public CredentialTestDto withCloudPlatform(String cloudPlatform) {
         getRequest().setCloudPlatform(cloudPlatform);
         return this;
     }
 
-    public CredentialEntity withAwsParameters(AwsCredentialV4Parameters awsParameters) {
+    public CredentialTestDto withAwsParameters(AwsCredentialV4Parameters awsParameters) {
         getRequest().setAws(awsParameters);
         return this;
     }
 
-    public CredentialEntity withGcpParameters(GcpCredentialV4Parameters gcpParameters) {
+    public CredentialTestDto withGcpParameters(GcpCredentialV4Parameters gcpParameters) {
         getRequest().setGcp(gcpParameters);
         return this;
     }
 
-    public CredentialEntity withAzureParameters(AzureCredentialV4Parameters azureParameters) {
+    public CredentialTestDto withAzureParameters(AzureCredentialV4Parameters azureParameters) {
         getRequest().setAzure(azureParameters);
         return this;
     }
 
-    public CredentialEntity withOpenstackParameters(OpenstackCredentialV4Parameters openstackParameters) {
+    public CredentialTestDto withOpenstackParameters(OpenstackCredentialV4Parameters openstackParameters) {
         getRequest().setOpenstack(openstackParameters);
         return this;
     }
 
-    public CredentialEntity withYarnParameters(YarnCredentialV4Parameters yarnParameters) {
+    public CredentialTestDto withYarnParameters(YarnCredentialV4Parameters yarnParameters) {
         getRequest().setYarn(yarnParameters);
         return this;
     }
 
-    public CredentialEntity withCumulusParameters(CumulusYarnCredentialV4Parameters cumulusParameters) {
+    public CredentialTestDto withCumulusParameters(CumulusYarnCredentialV4Parameters cumulusParameters) {
         getRequest().setCumulus(cumulusParameters);
         return this;
     }
 
-    public CredentialEntity withMockParameters(MockCredentialV4Parameters mockParameters) {
+    public CredentialTestDto withMockParameters(MockCredentialV4Parameters mockParameters) {
         getRequest().setMock(mockParameters);
         return this;
     }
@@ -116,7 +120,7 @@ public class CredentialEntity extends AbstractCloudbreakEntity<CredentialV4Reque
     public void delete(TestContext testContext, CredentialV4Response entity, CloudbreakClient client) {
         try {
             client.getCloudbreakClient().credentialV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
-        } catch (Exception e) {
+        } catch (ProxyMethodInvocationException e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
     }

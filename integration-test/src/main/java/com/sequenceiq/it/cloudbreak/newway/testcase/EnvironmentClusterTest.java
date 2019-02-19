@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
@@ -125,7 +125,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .deleteGiven(ProxyConfigEntity.class, ProxyConfig::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
+                .deleteGiven(CredentialTestDto.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -254,10 +254,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-
-                .given(NEW_CREDENTIAL_KEY, CredentialEntity.class)
+                .given(NEW_CREDENTIAL_KEY, CredentialTestDto.class)
                 .withName("int-change-cred-cl")
-
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)

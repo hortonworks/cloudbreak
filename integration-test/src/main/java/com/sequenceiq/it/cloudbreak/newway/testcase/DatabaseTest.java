@@ -19,9 +19,9 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.it.cloudbreak.newway.assertion.DatabaseExistsAssertion;
-import com.sequenceiq.it.cloudbreak.newway.assertion.DatabaseTestAccessDeniedAssertion;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseExistsAssertion;
+import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseTestAccessDeniedAssertion;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestEntity;

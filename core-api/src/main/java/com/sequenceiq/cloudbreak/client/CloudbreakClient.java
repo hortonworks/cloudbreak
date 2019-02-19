@@ -156,7 +156,7 @@ public class CloudbreakClient {
         return getEndpoint(ManagementPackV4Endpoint.class);
     }
 
-    public KubernetesV4Endpoint kubernetesConfigV3Endpoint() {
+    public KubernetesV4Endpoint kubernetesV4Endpoint() {
         return getEndpoint(KubernetesV4Endpoint.class);
     }
 
