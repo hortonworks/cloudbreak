@@ -58,7 +58,7 @@ public class CredentialTestAction {
         logJSON(LOGGER, " Credential delete request:\n", entity.getRequest());
         entity.setResponse(
                 client.getCloudbreakClient()
-                        .credentialV4Endpoint()
+                        .credentialV4Endpoint() 
                         .delete(client.getWorkspaceId(), entity.getName()));
         logJSON(LOGGER, " Credential deleted successfully:\n", entity.getResponse());
         return entity;
