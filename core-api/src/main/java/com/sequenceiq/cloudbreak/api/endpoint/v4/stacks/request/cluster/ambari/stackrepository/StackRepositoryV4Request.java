@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,10 +27,12 @@ public class StackRepositoryV4Request implements JsonEntity {
     @ApiModelProperty
     private RepositoryV4Request repository;
 
-    @ApiModelProperty(StackRepositoryDescription.STACK)
+    @NotNull
+    @ApiModelProperty(value = StackRepositoryDescription.STACK, required = true)
     private String stack;
 
-    @ApiModelProperty(StackRepositoryDescription.VERSION)
+    @NotNull
+    @ApiModelProperty(value = StackRepositoryDescription.VERSION, required = true)
     @Pattern(regexp = "(^[0-9]+\\.[0-9]+$)",
             message = "Valid stack version is in MAJOR.MINOR format eg.: 2.6")
     private String version;
