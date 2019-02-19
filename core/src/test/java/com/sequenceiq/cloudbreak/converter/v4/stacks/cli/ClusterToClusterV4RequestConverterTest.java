@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -170,6 +171,14 @@ public class ClusterToClusterV4RequestConverterTest {
         ClusterV4Request result = underTest.convert(cluster);
 
         assertEquals(1L, result.getDatabases().size());
+    }
+
+    @Test
+    public void testConvertSettingExecutorTypeToNull() {
+        ClusterV4Request result = underTest.convert(cluster);
+
+        assertNotNull(result);
+        assertNull(result.getExecutorType());
     }
 
 }

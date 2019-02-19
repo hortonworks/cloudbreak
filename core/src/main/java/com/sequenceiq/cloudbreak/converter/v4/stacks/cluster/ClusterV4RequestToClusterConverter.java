@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
@@ -92,7 +91,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setStatus(REQUESTED);
         cluster.setUserName(source.getAmbari().getUserName());
         cluster.setPassword(source.getAmbari().getPassword());
-        cluster.setExecutorType(ExecutorType.CONTAINER);
+        cluster.setExecutorType(source.getExecutorType());
         convertGateway(source, cluster);
 
         if (source.getKerberosName() != null) {
