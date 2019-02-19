@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.ClusterRepairAction;
 import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
@@ -28,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.spark.DynamicRouteStack;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestResponse;
 import com.sequenceiq.it.spark.ambari.AmbariGetHostComponentsReponse;
@@ -72,28 +72,28 @@ public class RepairTest extends AbstractIntegrationTest {
         String ambariRdsName = getNameGenerator().getRandomNameForResource();
         createEnvWithResources(testContext, ambariRdsName);
         testContext
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withName(clusterName)
                 .withCluster(getCluster(testContext, null, ambariRdsName))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE);
-        StackEntity stackEntity = testContext.get(StackEntity.class);
+        StackTestDto stackEntity = testContext.get(StackTestDto.class);
         InstanceMetaDataV4Response instanceMetaData = stackEntity.getInstanceMetaData(HostGroupType.MASTER.getName()).stream().findFirst().get();
         String hostName = instanceMetaData.getDiscoveryFQDN();
         String publicIp = instanceMetaData.getPublicIp();
         addAmbariMocks(testContext, clusterName, hostName, publicIp);
 
         testContext
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(ClusterRepairAction.valid())
-                .await(StackEntity.class, STACK_AVAILABLE);
+                .await(StackTestDto.class, STACK_AVAILABLE);
 
         AmbariPathResolver ambariPathResolver = new AmbariPathResolver(clusterName, hostName);
         assertGetClusterComponentCalls(stackEntity, AMBARI_CLUSTER_COMPONENTS, components, ambariPathResolver);
         assertSetComponentStateCalls(stackEntity, AMBARI_HOST_COMPONENTS, components, "INSTALLED", 2, ambariPathResolver);
         assertSetComponentStateCalls(stackEntity, AMBARI_HOST_COMPONENTS, components, "INIT", 1, ambariPathResolver);
         assertSetComponentStateCalls(stackEntity, AMBARI_HOST_COMPONENTS, components, "STARTED", 1, ambariPathResolver);
-        testContext.given(StackEntity.class)
+        testContext.given(StackTestDto.class)
                 .then(MockVerification.verify(HttpMethod.GET, ambariPathResolver.resolve(AMBARI_HOST_COMPONENTS)).exactTimes(2))
                 .then(MockVerification.verify(HttpMethod.PUT, ambariPathResolver.resolve(AMBARI_HOST_COMPONENTS)).exactTimes(4))
                 .then(MockVerification.verify(HttpMethod.POST, ambariPathResolver.resolve(AMBARI_KERBEROS_CREDENTIAL)).exactTimes(0))
@@ -111,22 +111,22 @@ public class RepairTest extends AbstractIntegrationTest {
         testContext
                 .given(KerberosTestDto.class).valid().withRequest(kerberosRequest).withName(kerberosRequest.getName())
                 .when(KerberosTestAction::post)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withName(clusterName)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(getCluster(testContext, kerberosRequest.getName(), ambariRdsName))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE);
-        StackEntity stackEntity = testContext.get(StackEntity.class);
+        StackTestDto stackEntity = testContext.get(StackTestDto.class);
         InstanceMetaDataV4Response instanceMetaData = stackEntity.getInstanceMetaData(HostGroupType.MASTER.getName()).stream().findFirst().get();
         String hostName = instanceMetaData.getDiscoveryFQDN();
         String publicIp = instanceMetaData.getPublicIp();
         addAmbariMocks(testContext, clusterName, hostName, publicIp);
 
         testContext
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(ClusterRepairAction.valid())
-                .await(StackEntity.class, STACK_AVAILABLE);
+                .await(StackTestDto.class, STACK_AVAILABLE);
 
         AmbariPathResolver ambariPathResolver = new AmbariPathResolver(clusterName, hostName);
         assertGetClusterComponentCalls(stackEntity, AMBARI_CLUSTER_COMPONENTS, components, ambariPathResolver);
@@ -141,11 +141,11 @@ public class RepairTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void assertGetClusterComponentCalls(StackEntity stackEntity, String path, Set<String> components, AmbariPathResolver ambariPathResolver) {
+    private void assertGetClusterComponentCalls(StackTestDto stackEntity, String path, Set<String> components, AmbariPathResolver ambariPathResolver) {
         components.forEach(component -> stackEntity.then(MockVerification.verify(HttpMethod.GET, ambariPathResolver.resolveComponent(path, component))));
     }
 
-    private void assertSetComponentStateCalls(StackEntity stackEntity, String path, Set<String> components, String expectedState, int times,
+    private void assertSetComponentStateCalls(StackTestDto stackEntity, String path, Set<String> components, String expectedState, int times,
             AmbariPathResolver ambariPathResolver) {
         MockVerification mockVerification = MockVerification.verify(HttpMethod.PUT, ambariPathResolver.resolve(path))
                 .bodyContains(expectedState);

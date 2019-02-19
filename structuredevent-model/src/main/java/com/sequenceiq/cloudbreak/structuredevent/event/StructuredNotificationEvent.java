@@ -11,6 +11,7 @@ public class StructuredNotificationEvent extends StructuredEvent {
     private RdsNotificationDetails rdsNotificationDetails;
 
     public StructuredNotificationEvent() {
+        super(StructuredNotificationEvent.class.getSimpleName());
     }
 
     public StructuredNotificationEvent(OperationDetails operation, NotificationDetails notificationDetails) {

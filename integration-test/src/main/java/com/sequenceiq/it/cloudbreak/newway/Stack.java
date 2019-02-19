@@ -33,17 +33,14 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.SshService;
 import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackDeleteAction;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackStartActionV4;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackStopActionV4;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackSyncPutActionV4;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
-public class Stack extends StackEntity {
+public class Stack extends StackTestDto {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stack.class);
 
@@ -59,7 +56,7 @@ public class Stack extends StackEntity {
     }
 
     public static Function<IntegrationTestContext, Stack> getTestContextStack() {
-        return getTestContextStack(StackEntity.STACK);
+        return getTestContextStack(StackTestDto.STACK);
     }
 
     static Function<IntegrationTestContext, Stack> getNewStack() {
@@ -76,8 +73,8 @@ public class Stack extends StackEntity {
         return stack;
     }
 
-    public static Action<StackEntity> postV4() {
-        return new StackPostAction();
+    public static Action<StackTestDto> postV4() {
+        return StackTestAction::create;
     }
 
     public static ResourceAction<Stack> postV3(String key) {
@@ -112,8 +109,8 @@ public class Stack extends StackEntity {
         return new ResourceAction<>(getTestContextStack(key), strategy);
     }
 
-    public static Action<StackEntity> deleteV4() {
-        return new StackDeleteAction();
+    public static Action<StackTestDto> deleteV4() {
+        return StackTestAction::delete;
     }
 
     public static ResourceAction<Stack> delete(String key) {
@@ -292,7 +289,7 @@ public class Stack extends StackEntity {
         });
     }
 
-    public static StackEntity getByName(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
+    public static StackTestDto getByName(TestContext testContext, StackTestDto entity, CloudbreakClient cloudbreakClient) {
         entity.setResponse(
                 cloudbreakClient.getCloudbreakClient().stackV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getRequest().getName(), new HashSet<>())
         );
@@ -301,17 +298,5 @@ public class Stack extends StackEntity {
 
     public static ResourceAction<Stack> repair(String hostgroupName) {
         return new ResourceAction<>(getTestContextStack(), new RepairNodeStrategy(hostgroupName));
-    }
-
-    public static Action<StackEntity> stop() {
-        return new StackStopActionV4();
-    }
-
-    public static Action<StackEntity> start() {
-        return new StackStartActionV4();
-    }
-
-    public static Action<StackEntity> sync() {
-        return new StackSyncPutActionV4();
     }
 }

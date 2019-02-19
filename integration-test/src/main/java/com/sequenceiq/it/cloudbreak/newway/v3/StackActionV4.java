@@ -17,7 +17,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.DatalakeCluster;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
@@ -36,24 +36,24 @@ public class StackActionV4 {
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        StackEntity stackEntity = (StackEntity) entity;
+        StackTestDto stackTestDto = (StackTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(" get stack " + stackEntity.getName());
-        stackEntity.setResponse(
+        Log.log(" get stack " + stackTestDto.getName());
+        stackTestDto.setResponse(
                 client.getCloudbreakClient().stackV4Endpoint()
-                        .get(workspaceId, stackEntity.getName(), null));
-        Log.logJSON(" stack get response: ", stackEntity.getResponse());
+                        .get(workspaceId, stackTestDto.getName(), null));
+        Log.logJSON(" stack get response: ", stackTestDto.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackEntity stackEntity = (StackEntity) entity;
+        StackTestDto stackTestDto = (StackTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all stack");
-        stackEntity.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV4Endpoint()
+        stackTestDto.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV4Endpoint()
                 .list(workspaceId, null, false).getResponses()));
     }
 
@@ -65,10 +65,10 @@ public class StackActionV4 {
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        delete(integrationTestContext, (StackEntity) entity, Boolean.FALSE);
+        delete(integrationTestContext, (StackTestDto) entity, Boolean.FALSE);
     }
 
-    private static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, Boolean forced) {
+    private static void delete(IntegrationTestContext integrationTestContext, StackTestDto entity, Boolean forced) {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
@@ -77,7 +77,7 @@ public class StackActionV4 {
                 .delete(workspaceId, entity.getName(), forced, false);
     }
 
-    public static StackEntity delete(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
+    public static StackTestDto delete(TestContext testContext, StackTestDto entity, CloudbreakClient cloudbreakClient) {
         Log.log(LOGGER, " delete: " + entity.getName());
         cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
                 .delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false, false);
@@ -85,13 +85,13 @@ public class StackActionV4 {
     }
 
     public static void deleteWithKerberos(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackEntity stackEntity = (StackEntity) entity;
+        StackTestDto stackTestDto = (StackTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        Log.log(" delete: " + stackEntity.getName());
+        Log.log(" delete: " + stackTestDto.getName());
         client.getCloudbreakClient().stackV4Endpoint()
-                .deleteWithKerberos(workspaceId, stackEntity.getName(), true, false);
+                .deleteWithKerberos(workspaceId, stackTestDto.getName(), true, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -105,7 +105,7 @@ public class StackActionV4 {
     }
 
     public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
-        var stackEntity = (StackEntity) entity;
+        var stackEntity = (StackTestDto) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
             prepareNetworkParam(stackEntity);
@@ -117,7 +117,7 @@ public class StackActionV4 {
     }
 
     public static void determineNetworkAzureFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
-        var stackEntity = (StackEntity) entity;
+        var stackEntity = (StackTestDto) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
             prepareNetworkParam(stackEntity);
@@ -129,10 +129,10 @@ public class StackActionV4 {
         }
     }
 
-    private static void prepareNetworkParam(StackEntity stackEntity) {
-        if (stackEntity.getRequest().getNetwork() == null) {
+    private static void prepareNetworkParam(StackTestDto stackTestDto) {
+        if (stackTestDto.getRequest().getNetwork() == null) {
             var network = new NetworkV4Request();
-            stackEntity.getRequest().setNetwork(network);
+            stackTestDto.getRequest().setNetwork(network);
         }
     }
 

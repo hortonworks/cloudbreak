@@ -15,9 +15,9 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetByNameAction;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -62,7 +62,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAStackAndGetOtherUser(MockedTestContext testContext) {
         testContext
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))

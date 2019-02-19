@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize(using = StructuredEventDeserializer.class)
 public abstract class StructuredEvent implements Serializable {
 
     public static final String TYPE_FIELD = "type";
@@ -14,6 +16,10 @@ public abstract class StructuredEvent implements Serializable {
     private OperationDetails operation;
 
     public StructuredEvent() {
+    }
+
+    public StructuredEvent(String type) {
+        this.type = type;
     }
 
     public StructuredEvent(String type, OperationDetails operation) {

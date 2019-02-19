@@ -24,7 +24,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplat
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.DeleteClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.LaunchClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.mpack.ManagementPackCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateGetResponse;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreation;
@@ -35,7 +35,7 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
@@ -145,8 +145,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(Recipe.postV4())
                 .given(DatabaseEntity.class).withName("mock-test-rds")
                 .when(new DatabaseCreateIfNotExistsAction())
-                .given("mpack", ManagementPackEntity.class).withName("mock-test-mpack")
-                .when(new ManagementPackCreateAction())
+                .given("mpack", MPackTestDto.class).withName("mock-test-mpack")
+                .when(MpackTestAction::create)
                 .given("environment", EnvironmentEntity.class).withRegions(VALID_REGION).withLocation(LONDON)
                 .when(Environment::post)
                 .given("stackTemplate", StackTemplateEntity.class).withEnvironment("environment").withEveryProperties()

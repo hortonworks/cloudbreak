@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackRepositoryEntity;
@@ -20,14 +20,14 @@ public class UpdateStackDataAction implements Action<StackRepositoryEntity> {
 
     @Override
     public StackRepositoryEntity action(TestContext testContext, StackRepositoryEntity entity, CloudbreakClient client) throws Exception {
-        StackEntity stackEntity = testContext.get(StackEntity.class);
+        StackTestDto stackTestDto = testContext.get(StackTestDto.class);
         request.setStackRepository(entity.getRequest());
 
         logJSON(" Enable Maintenance Mode post request:\n", request);
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .putCluster(client.getWorkspaceId(), stackEntity.getName(), request);
+                .putCluster(client.getWorkspaceId(), stackTestDto.getName(), request);
 
         return entity;
     }

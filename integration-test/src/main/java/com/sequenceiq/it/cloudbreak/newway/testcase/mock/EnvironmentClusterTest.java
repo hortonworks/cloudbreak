@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -72,7 +72,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDetachFromEnvWithDeletedCluster(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
+        testContext.given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
@@ -97,7 +97,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testWlClusterNotAttachResourceDetachDeleteOk(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
+        testContext.given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
@@ -116,7 +116,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateWlClusterDeleteFails(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackEntity.class)
+        testContext.given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
@@ -135,7 +135,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testCreateWlClusterDetachFails(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
@@ -155,11 +155,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         String newStack = "newStack";
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .given(newStack, StackEntity.class)
+                .given(newStack, StackTestDto.class)
                 .when(Stack.postV4(), key(newStack))
                 .await(STACK_AVAILABLE, key(newStack))
                 .validate();
@@ -177,15 +177,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
-                .given(StackEntity.class).given(EnvironmentSettingsV4Entity.class)
-                .given(StackEntity.class)
+                .given(StackTestDto.class).given(EnvironmentSettingsV4Entity.class)
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         null, null))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
-                .given(newStack, StackEntity.class)
+                .given(newStack, StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         null, null))
@@ -206,7 +206,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         null, null))
@@ -218,7 +218,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
-                .given(newStack, StackEntity.class)
+                .given(newStack, StackTestDto.class)
                 .withEnvironment(newEnv)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         null, null))
@@ -238,7 +238,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testClusterWithRdsWithoutEnvironment(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         testContext.given(EnvironmentEntity.class)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
                         null, null))
@@ -251,7 +251,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testWlClusterChangeCred(MockedTestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
@@ -273,7 +273,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
                 .given("invalidEnvironmentSettingsRequest", EnvironmentSettingsV4Entity.class).withName(null).withCredentialName(null)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withEnvironmentSettings("invalidEnvironmentSettingsRequest")
                 .when(Stack.postV4(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest").withExpectedMessage(".*CredentialName or EnvironmentName is mandatory"))
@@ -289,8 +289,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private void checkCredentialAttachedToCluster(TestContext testContext) {
-        testContext.given(StackEntity.class)
-                .withName(testContext.get(StackEntity.class).getName())
+        testContext.given(StackTestDto.class)
+                .withName(testContext.get(StackTestDto.class).getName())
                 .when(Stack::getByName)
                 .then(EnvironmentClusterTest::checkNewCredentialInStack)
                 .validate();
@@ -327,7 +327,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return cluster;
     }
 
-    private static StackEntity checkNewCredentialInStack(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
+    private static StackTestDto checkNewCredentialInStack(TestContext testContext, StackTestDto stack, CloudbreakClient cloudbreakClient) {
         String credentialName = stack.getResponse().getEnvironment().getCredential().getName();
         if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
             throw new TestFailException("Credential is not attached to cluster");
