@@ -28,11 +28,11 @@ import com.google.common.base.Charsets;
 public class DatabaseMigrationConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationConfig.class);
 
-    private static final String DEFAULT_SCHEMA_LOCATION = "/schema";
+    private static final String DEFAULT_SCHEMA_LOCATION_IN_CONTAINER = "/schema";
 
     private static final String SCHEMA_IN_CONTAINER = "container";
 
-    private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "core/src/main/resources/schema";
+    private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "datalake/src/main/resources/schema";
 
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
 
@@ -85,7 +85,7 @@ public class DatabaseMigrationConfig {
     public FileMigrationLoader upMigrationLoader() {
         String schemaLoc = schemaLocation;
         if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
-            schemaLoc = DEFAULT_SCHEMA_LOCATION;
+            schemaLoc = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
         }
         schemaLoc += UP_OPERATION_SUBFOLDER;
         LOGGER.info("Creating up operation migration loader for location: '{}'.....", schemaLoc);
@@ -99,7 +99,7 @@ public class DatabaseMigrationConfig {
     public FileMigrationLoader pendingMigrationLoader() {
         String schemaLoc = schemaLocation;
         if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
-            schemaLoc = DEFAULT_SCHEMA_LOCATION;
+            schemaLoc = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
         }
         schemaLoc += PENDING_OPERATION_SUBFOLDER;
         LOGGER.info("Creating pending operation migration loader for location: '{}'.....", schemaLoc);
