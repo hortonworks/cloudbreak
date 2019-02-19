@@ -23,14 +23,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
@@ -462,9 +462,9 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
 
-                .given("int-env-change-cred", CredentialEntity.class)
+                .given("int-env-change-cred", CredentialTestDto.class)
                 .withName("int-env-change-cred")
-                .when(new CredentialCreateAction())
+                .when(CredentialTestAction::create)
 
                 .given(EnvironmentEntity.class)
                 .withCredentialName("int-env-change-cred")
@@ -479,7 +479,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
 
-                .given("int-change-cred", CredentialEntity.class)
+                .given("int-change-cred", CredentialTestDto.class)
                 .withName("int-change-cred")
 
                 .given(EnvironmentEntity.class)
@@ -495,7 +495,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentEntity.class)
                 .when(Environment::post)
-                .withCredentialName(testContext.get(CredentialEntity.class).getName())
+                .withCredentialName(testContext.get(CredentialTestDto.class).getName())
                 .then(Environment::changeCredential)
                 .then(EnvironmentTest::checkCredentialAttachedToEnv)
                 .validate();
@@ -555,7 +555,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     protected static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
-        if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
+        if (!credentialName.equals(testContext.get(CredentialTestDto.class).getName())) {
             throw new TestFailException("Credential is not attached to environment");
         }
         return environment;

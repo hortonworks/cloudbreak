@@ -104,7 +104,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
                 .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsField()), "OpenStack V3 credential request.");
-        when(Credential.post(), "OpenStack V3 credential request has been posted.");
+        when(Credential.postV1(), "OpenStack V3 credential request has been posted.");
         then(Credential.assertThis(
                 (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_OSV3_CRED_NAME)),
                 VALID_OSV3_CRED_NAME + " should be the name of the new credential."
@@ -119,7 +119,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
                 .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsInvalidUser()), "OpenStack user is not valid credential request.");
-        when(Credential.post(), "OpenStack user is not valid credential request has been posted.");
+        when(Credential.postV1(), "OpenStack user is not valid credential request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "os" })
@@ -131,7 +131,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
                 .withOpenstackParameters(openstackCloudProvider.openstackCredentialDetailsInvalidEndpoint()),
                 "OpenStack endpoint is not valid credential request.");
-        when(Credential.post(), "OpenStack endpoint is not valid credential request has been posted.");
+        when(Credential.postV1(), "OpenStack endpoint is not valid credential request has been posted.");
     }
 
     @Test(groups = { "credentials", "os" })
@@ -161,7 +161,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
                 .withAwsParameters(awsCloudProvider.awsCredentialDetailsKey()), "AWS key based credential request.");
-        when(Credential.post(), "AWS key based credential request has been posted.");
+        when(Credential.postV1(), "AWS key based credential request has been posted.");
         then(Credential.assertThis(
                 (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_AWSKEY_CRED_NAME)),
                 VALID_AWSKEY_CRED_NAME + " should be the name of the new credential."
@@ -176,7 +176,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
                 .withAwsParameters(awsCloudProvider.awsCredentialDetailsInvalidAccessKey()), "AWS credential with not valid Access Key request.");
-        when(Credential.post(), "AWS credential with not valid Access Key request has been posted.");
+        when(Credential.postV1(), "AWS credential with not valid Access Key request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "aws" })
@@ -187,7 +187,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
                 .withAwsParameters(awsCloudProvider.awsCredentialDetailsInvalidSecretKey()), "AWS credential with not valid Secret Key request.");
-        when(Credential.post(), "AWS credential with not valid Secret Key request has been posted.");
+        when(Credential.postV1(), "AWS credential with not valid Secret Key request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "aws" })
@@ -198,7 +198,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AwsCloudProvider.AWS_CAPITAL)
                 .withAwsParameters(awsCloudProvider.awsCredentialDetailsInvalidArn()), "AWS credential with not valid Role ARN request.");
-        when(Credential.post(), "AWS credential with not valid Role ARN request has been posted.");
+        when(Credential.postV1(), "AWS credential with not valid Role ARN request has been posted.");
     }
 
     @Test(groups = { "credentials", "aws" })
@@ -251,7 +251,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
                 .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidSecretKey()), "Azure credential with not valid Secret Key request.");
-        when(Credential.post(), "Azure credential with not valid Secret Key request has been posted.");
+        when(Credential.postV1(), "Azure credential with not valid Secret Key request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "azure" })
@@ -262,7 +262,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
                 .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidAccessKey()), "Azure credential with not valid Access Key request.");
-        when(Credential.post(), "Azure credential with not valid Access Key request has been posted.");
+        when(Credential.postV1(), "Azure credential with not valid Access Key request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "azure" })
@@ -273,7 +273,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
                 .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidTenantID()), "Azure credential with not valid Tenant ID request.");
-        when(Credential.post(), "Azure credential with not valid Tenant ID request has been posted.");
+        when(Credential.postV1(), "Azure credential with not valid Tenant ID request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "azure" })
@@ -285,7 +285,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withCloudPlatform(AzureCloudProvider.AZURE_CAPITAL)
                 .withAzureParameters(azureCloudProvider.azureCredentialDetailsInvalidSubscriptionID()),
                 "Azure credential with not valid Subscription ID request.");
-        when(Credential.post(), "Azure credential with not valid Subscription ID request has been posted.");
+        when(Credential.postV1(), "Azure credential with not valid Subscription ID request has been posted.");
     }
 
     @Test(groups = { "credentials", "azure" })
@@ -316,7 +316,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
                 .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsJson()), "GCP Json credential request.");
-        when(Credential.post(), "GCP Json credential request has been posted.");
+        when(Credential.postV1(), "GCP Json credential request has been posted.");
         then(Credential.assertThis(
                 (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_GCPJSON_CRED_NAME)),
                 VALID_GCPJSON_CRED_NAME + " should be the name of the new credential."
@@ -331,7 +331,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
                 .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsEmptyP12File()), "GCP credential with no P12 file request.");
-        when(Credential.post(), "GCP credential with no P12 file request has been posted.");
+        when(Credential.postV1(), "GCP credential with no P12 file request has been posted.");
     }
 
     @Test(expectedExceptions = BadRequestException.class, groups = { "credentials", "gcp" })
@@ -342,7 +342,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
                 .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsEmptyProjectId()), "GCP credential with no Project ID request.");
-        when(Credential.post(), "GCP credential with no Project ID request has been posted.");
+        when(Credential.postV1(), "GCP credential with no Project ID request has been posted.");
     }
 
     // BUG-96615
@@ -355,7 +355,7 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(GcpCloudProvider.GCP_CAPITAL)
                 .withGcpParameters(gcpCloudProvider.gcpCredentialDetailsEmptyServiceAccount()), "GCP credential with no Service Account request.");
-        when(Credential.post(), "GCP credential with no Service Account request has been posted.");
+        when(Credential.postV1(), "GCP credential with no Service Account request has been posted.");
     }
 
     @Test(groups = { "credentials", "gcp" })

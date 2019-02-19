@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.action.managementpack;
+package com.sequenceiq.it.cloudbreak.newway.action.mpack;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;

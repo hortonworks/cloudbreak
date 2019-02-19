@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class PostCredentialWithNameFromMockStrategy implements Strategy {
@@ -12,7 +13,7 @@ public class PostCredentialWithNameFromMockStrategy implements Strategy {
 
     @Override
     public void doAction(IntegrationTestContext integrationTestContext, Entity entity) {
-        CredentialEntity credentialEntity = (CredentialEntity) entity;
+        CredentialTestDto credentialTestDto = (CredentialTestDto) entity;
         CloudbreakClient client;
         Mock mock;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -23,18 +24,18 @@ public class PostCredentialWithNameFromMockStrategy implements Strategy {
         MockCredentialV4Parameters credentialParameters = new MockCredentialV4Parameters();
         credentialParameters.setMockEndpoint(mock.getEndpoint());
 
-        credentialEntity = credentialEntity.withName(credentialEntity.getName() + credentialPort).withMockParameters(credentialParameters);
+        credentialTestDto = credentialTestDto.withName(credentialTestDto.getName() + credentialPort).withMockParameters(credentialParameters);
         Log.log(" post "
-                .concat(credentialEntity.getName())
+                .concat(credentialTestDto.getName())
                 .concat(" private credential. "));
         try {
-            credentialEntity.setResponse(
+            credentialTestDto.setResponse(
                     client.getCloudbreakClient()
                             .credentialV4Endpoint()
-                            .post(1L, credentialEntity.getRequest()));
+                            .post(1L, credentialTestDto.getRequest()));
         } catch (Exception e) {
             LOGGER.info("Creation of credential has failed, using existing if it is possible", e);
         }
-        mock.setCredentialName(credentialEntity.getName());
+        mock.setCredentialName(credentialTestDto.getName());
     }
 }

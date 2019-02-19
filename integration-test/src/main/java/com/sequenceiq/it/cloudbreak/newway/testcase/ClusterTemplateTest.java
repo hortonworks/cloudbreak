@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplat
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.DeleteClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.LaunchClusterFromTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.managementpack.ManagementPackCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.mpack.ManagementPackCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateGetResponse;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreation;

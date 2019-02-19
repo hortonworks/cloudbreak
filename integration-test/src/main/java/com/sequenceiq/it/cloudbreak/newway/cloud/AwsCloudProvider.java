@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
@@ -69,7 +69,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public CredentialEntity aValidCredential(boolean create) {
+    public CredentialTestDto aValidCredential(boolean create) {
         String credentialType = getTestParameter().get("awsCredentialType");
         AwsCredentialV4Parameters parameters;
         if (KEY_BASED_CREDENTIAL.equals(credentialType)) {
@@ -77,7 +77,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
         } else {
             parameters = awsCredentialDetailsArn();
         }
-        CredentialEntity credential = create ? Credential.created() : Credential.request();
+        CredentialTestDto credential = create ? Credential.created() : Credential.request();
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)

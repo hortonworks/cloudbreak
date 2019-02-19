@@ -43,14 +43,14 @@ public interface KubernetesV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KubernetesConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "createKubernetesConfigInWorkspace")
-    KubernetesV4Response post(@PathParam("workspaceId") Long workspaceId, KubernetesV4Request request);
+    KubernetesV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid KubernetesV4Request request);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KubernetesConfigOpDescription.PUT_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "putKubernetesConfigInWorkspace")
-    KubernetesV4Response put(@PathParam("workspaceId") Long workspaceId, KubernetesV4Request request);
+    KubernetesV4Response put(@PathParam("workspaceId") Long workspaceId, @Valid KubernetesV4Request request);
 
     @GET
     @Path("{name}")

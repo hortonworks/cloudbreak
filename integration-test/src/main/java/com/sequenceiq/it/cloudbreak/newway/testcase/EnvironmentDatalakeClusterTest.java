@@ -17,7 +17,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
@@ -105,7 +105,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Stack.postV4())
                 .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(CredentialEntity.class, Credential::delete, key(FORBIDDEN_KEY))
+                .deleteGiven(CredentialTestDto.class, Credential::delete, key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -132,7 +132,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
         createDatalake(testContext, rdsList, "dl-changecred", BP_NAME_DL);
         testContext
-                .given("newCred", CredentialEntity.class).withDescription("Change credential")
+                .given("newCred", CredentialTestDto.class).withDescription("Change credential")
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)

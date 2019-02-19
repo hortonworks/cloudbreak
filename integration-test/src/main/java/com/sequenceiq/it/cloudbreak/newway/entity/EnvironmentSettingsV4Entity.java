@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedE
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -39,12 +39,12 @@ public class EnvironmentSettingsV4Entity extends AbstractCloudbreakEntity<Enviro
 
     @Override
     public EnvironmentSettingsV4Entity valid() {
-        CredentialEntity credentialEntity = getTestContext().get(CredentialEntity.class);
-        if (credentialEntity == null) {
+        CredentialTestDto credentialTestDto = getTestContext().get(CredentialTestDto.class);
+        if (credentialTestDto == null) {
             throw new IllegalArgumentException("Credential is mandatory for EnvironmentSettings");
         }
         return withName(getNameCreator().getRandomNameForMock())
-                .withCredentialName(credentialEntity.getName());
+                .withCredentialName(credentialTestDto.getName());
     }
 
     public EnvironmentSettingsV4Entity withName(String name) {

@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.EntityCreationStrategy;
 import com.sequenceiq.it.cloudbreak.newway.PostCredentialWithNameFromMockStrategy;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
@@ -59,9 +59,9 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public CredentialEntity aValidCredential(boolean create) {
-        CredentialEntity credential = create ? Credential.created() : Credential.request();
-        credential = new EntityCreationStrategy<CredentialEntity>().setCreationStrategy(credential, new PostCredentialWithNameFromMockStrategy());
+    public CredentialTestDto aValidCredential(boolean create) {
+        CredentialTestDto credential = create ? Credential.created() : Credential.request();
+        credential = new EntityCreationStrategy<CredentialTestDto>().setCreationStrategy(credential, new PostCredentialWithNameFromMockStrategy());
         return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)

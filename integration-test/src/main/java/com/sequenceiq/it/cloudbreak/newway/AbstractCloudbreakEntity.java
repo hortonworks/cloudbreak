@@ -217,8 +217,8 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         return creator;
     }
 
-    public <T extends CloudbreakEntity> T deleteGiven(Class<T> clss, Action<T> action, RunningParameter runningParameter) {
-        testContext.when((T) testContext.given(clss), action, runningParameter);
-        return testContext.expect((T) testContext.given(clss), BadRequestException.class, runningParameter);
+    public <T extends CloudbreakEntity> T deleteGiven(Class<T> clazz, Action<T> action, RunningParameter runningParameter) {
+        testContext.when((T) testContext.given(clazz), action, runningParameter);
+        return testContext.expect((T) testContext.given(clazz), BadRequestException.class, runningParameter);
     }
 }

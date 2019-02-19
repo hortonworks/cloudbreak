@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
@@ -24,9 +24,9 @@ public abstract class CloudProvider {
 
     public abstract StackEntity aValidStackRequest();
 
-    public abstract CredentialEntity aValidCredential();
+    public abstract CredentialTestDto aValidCredential();
 
-    public abstract CredentialEntity aValidCredential(boolean create);
+    public abstract CredentialTestDto aValidCredential(boolean create);
 
     public abstract Stack aValidStackCreated();
 

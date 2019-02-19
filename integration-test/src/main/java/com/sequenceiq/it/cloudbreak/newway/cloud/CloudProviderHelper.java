@@ -12,7 +12,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
@@ -99,7 +99,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     @Override
-    public CredentialEntity aValidCredential() {
+    public CredentialTestDto aValidCredential() {
         return aValidCredential(true);
     }
 
