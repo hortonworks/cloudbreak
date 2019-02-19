@@ -38,13 +38,13 @@ public class ReinstallV4RequestToUpdateClusterV4RequestConverter extends Abstrac
     @Override
     public UpdateClusterV4Request convert(ReinstallV4Request source) {
         UpdateClusterV4Request updateStackJson = new UpdateClusterV4Request();
-        updateStackJson.setValidateBlueprint(true);
+        updateStackJson.setValidateClusterDefinition(true);
         updateStackJson.setKerberosPassword(source.getKerberosPassword());
         updateStackJson.setKerberosPrincipal(source.getKerberosPrincipal());
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(source.getBlueprintName(), workspace);
-        updateStackJson.setBlueprintName(clusterDefinition.getName());
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(source.getClusterDefinition(), workspace);
+        updateStackJson.setClusterDefinitionName(clusterDefinition.getName());
         updateStackJson.setStackRepository(source.getStackRepository());
         Set<HostGroupV4Request> hostgroups = new HashSet<>();
         for (InstanceGroupV4Request instanceGroup : source.getInstanceGroups()) {

@@ -617,10 +617,10 @@ public class TestUtil {
         return clusterDefinition(name, "{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
     }
 
-    public static ClusterDefinition clusterDefinition(Long id, String name, String blueprintText) {
+    public static ClusterDefinition clusterDefinition(Long id, String name, String clusterDefinitionText) {
         ClusterDefinition clusterDefinition = new ClusterDefinition();
         clusterDefinition.setId(id);
-        clusterDefinition.setClusterDefinitionText(blueprintText);
+        clusterDefinition.setClusterDefinitionText(clusterDefinitionText);
         clusterDefinition.setName(name);
         clusterDefinition.setStackName("multi-node-yarn");
         clusterDefinition.setStatus(ResourceStatus.DEFAULT);
@@ -877,8 +877,8 @@ public class TestUtil {
         notification.setNotification(message);
         notification.setNotificationType(type);
         notification.setCloud(GCP);
-        notification.setBlueprintName("blueprintName");
-        notification.setBlueprintId(1L);
+        notification.setClusterDefinitionName("clusterDefinitionName");
+        notification.setClusterDefinitionId(1L);
         notification.setStackStatus(AVAILABLE.name());
         notification.setNodeCount(1);
         notification.setClusterStatus(AVAILABLE.name());

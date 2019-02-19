@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.stackrepository.StackRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterDefinitionModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
@@ -28,8 +28,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AmbariV4Response implements JsonEntity {
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
-    private BlueprintV4Response blueprint;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION)
+    private ClusterDefinitionV4Response clusterDefinition;
 
     @ApiModelProperty(StackModelDescription.AMBARI_IP)
     private String serverIp;
@@ -65,17 +65,17 @@ public class AmbariV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
     private SecretV4Response securityMasterKey;
 
-    @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)
+    @ApiModelProperty(ClusterDefinitionModelDescription.CLUSTER_DEFINITION)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
-    private String extendedBlueprintText;
+    private String extendedClusterDefinitionText;
 
-    public BlueprintV4Response getBlueprint() {
-        return blueprint;
+    public ClusterDefinitionV4Response getClusterDefinition() {
+        return clusterDefinition;
     }
 
-    public void setBlueprint(BlueprintV4Response blueprint) {
-        this.blueprint = blueprint;
+    public void setClusterDefinition(ClusterDefinitionV4Response clusterDefinition) {
+        this.clusterDefinition = clusterDefinition;
     }
 
     public String getServerIp() {
@@ -158,11 +158,11 @@ public class AmbariV4Response implements JsonEntity {
         this.securityMasterKey = securityMasterKey;
     }
 
-    public String getExtendedBlueprintText() {
-        return extendedBlueprintText;
+    public String getExtendedClusterDefinitionText() {
+        return extendedClusterDefinitionText;
     }
 
-    public void setExtendedBlueprintText(String extendedBlueprintText) {
-        this.extendedBlueprintText = extendedBlueprintText;
+    public void setExtendedClusterDefinitionText(String extendedClusterDefinitionText) {
+        this.extendedClusterDefinitionText = extendedClusterDefinitionText;
     }
 }

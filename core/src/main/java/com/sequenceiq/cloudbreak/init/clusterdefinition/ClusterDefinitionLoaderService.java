@@ -28,88 +28,89 @@ public class ClusterDefinitionLoaderService {
     @Inject
     private DefaultAmbariBlueprintCache defaultAmbariBlueprintCache;
 
-    public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<ClusterDefinition> clusterDefinitions) {
+    public boolean addingDefaultClusterDefinitionsAreNecessaryForTheUser(Collection<ClusterDefinition> clusterDefinitions) {
         Map<String, ClusterDefinition> defaultBlueprints = defaultAmbariBlueprintCache.defaultBlueprints();
         for (ClusterDefinition clusterDefinitionFromDatabase : clusterDefinitions) {
             ClusterDefinition defaultClusterDefinition = defaultBlueprints.get(clusterDefinitionFromDatabase.getName());
-            if (mustUpdateTheExistingBlueprint(clusterDefinitionFromDatabase, defaultClusterDefinition)) {
+            if (mustUpdateTheExistingClusterDefinition(clusterDefinitionFromDatabase, defaultClusterDefinition)) {
                 return true;
             }
         }
-        if (isNewUserOrDeletedEveryDefaultBlueprint(clusterDefinitions)) {
+        if (isNewUserOrDeletedEveryDefaultClusterDefinition(clusterDefinitions)) {
             return true;
         }
-        return defaultBlueprintDoesNotExistInTheDatabase(clusterDefinitions);
+        return defaultClusterDefinitionDoesNotExistInTheDatabase(clusterDefinitions);
     }
 
-    public Set<ClusterDefinition> loadBlueprintsForTheWorkspace(Set<ClusterDefinition> clusterDefinitions, Workspace workspace,
+    public Set<ClusterDefinition> loadClusterDEfinitionsForTheWorkspace(Set<ClusterDefinition> clusterDefinitions, Workspace workspace,
             BiFunction<Iterable<ClusterDefinition>, Workspace, Iterable<ClusterDefinition>> saveMethod) {
-        Set<ClusterDefinition> clusterDefinitionsWhichShouldBeUpdate = updateDefaultBlueprints(clusterDefinitions, workspace);
-        Set<ClusterDefinition> clusterDefinitionsWhichAreMissing = addMissingBlueprints(clusterDefinitions, workspace);
+        Set<ClusterDefinition> clusterDefinitionsWhichShouldBeUpdate = updateDefaultClusterDefinitions(clusterDefinitions, workspace);
+        Set<ClusterDefinition> clusterDefinitionsWhichAreMissing = addMissingClusterDefinitions(clusterDefinitions, workspace);
         try {
             clusterDefinitionsWhichAreMissing.addAll(clusterDefinitionsWhichShouldBeUpdate);
             if (!clusterDefinitionsWhichAreMissing.isEmpty()) {
-                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(clusterDefinitions, clusterDefinitionsWhichAreMissing, workspace,
+                return Sets.newHashSet(getResultSetFromUpdateAndOriginalClusterDefinitions(clusterDefinitions, clusterDefinitionsWhichAreMissing, workspace,
                         saveMethod));
             }
         } catch (Exception e) {
-            LOGGER.info("Blueprints {} is not available for {} workspace.", collectNames(clusterDefinitionsWhichAreMissing), workspace.getId());
+            LOGGER.info("Cluster definitions {} is not available for {} workspace.", collectNames(clusterDefinitionsWhichAreMissing), workspace.getId());
         }
         return clusterDefinitions;
     }
 
-    private Iterable<ClusterDefinition> getResultSetFromUpdateAndOriginalBlueprints(Iterable<ClusterDefinition> clusterDefinitions,
+    private Iterable<ClusterDefinition> getResultSetFromUpdateAndOriginalClusterDefinitions(Iterable<ClusterDefinition> clusterDefinitions,
             Iterable<ClusterDefinition> clusterDefinitionsWhichAreMissing, Workspace workspace, BiFunction<Iterable<ClusterDefinition>, Workspace,
             Iterable<ClusterDefinition>> saveMethod) {
         LOGGER.debug("Updating cluster definitions which should be modified.");
-        Iterable<ClusterDefinition> savedBlueprints = saveMethod.apply(clusterDefinitionsWhichAreMissing, workspace);
+        Iterable<ClusterDefinition> savedClusterDefinitions = saveMethod.apply(clusterDefinitionsWhichAreMissing, workspace);
         LOGGER.debug("Finished to update cluster definitions which should be modified.");
-        Map<String, ClusterDefinition> resultBlueprints = new HashMap<>();
+        Map<String, ClusterDefinition> resultClusterDefinitions = new HashMap<>();
         for (ClusterDefinition clusterDefinition : clusterDefinitions) {
-            resultBlueprints.put(clusterDefinition.getName(), clusterDefinition);
+            resultClusterDefinitions.put(clusterDefinition.getName(), clusterDefinition);
         }
-        for (ClusterDefinition savedClusterDefinition : savedBlueprints) {
-            resultBlueprints.put(savedClusterDefinition.getName(), savedClusterDefinition);
+        for (ClusterDefinition savedClusterDefinition : savedClusterDefinitions) {
+            resultClusterDefinitions.put(savedClusterDefinition.getName(), savedClusterDefinition);
         }
-        return resultBlueprints.values();
+        return resultClusterDefinitions.values();
     }
 
     private Set<String> collectNames(Collection<ClusterDefinition> failedToUpdate) {
         return failedToUpdate.stream().map(ClusterDefinition::getName).collect(Collectors.toSet());
     }
 
-    private Set<ClusterDefinition> addMissingBlueprints(Iterable<ClusterDefinition> clusterDefinitions, Workspace workspace) {
+    private Set<ClusterDefinition> addMissingClusterDefinitions(Iterable<ClusterDefinition> clusterDefinitions, Workspace workspace) {
         Set<ClusterDefinition> resultList = new HashSet<>();
         LOGGER.debug("Adding default cluster definitions which are missing for the user.");
-        for (Entry<String, ClusterDefinition> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(clusterDefinitions).entrySet()) {
-            LOGGER.debug("Default Blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
-                    diffBlueprint.getKey(), workspace.getId());
-            resultList.add(setupBlueprint(diffBlueprint.getValue(), workspace));
+        for (Entry<String, ClusterDefinition> diffClusterDefinition : collectDeviationOfExistingAndDefaultClusterDefinitions(clusterDefinitions).entrySet()) {
+            LOGGER.debug("Default cluster definition '{}' needs to be added for the '{}' workspace because the default validation missing.",
+                    diffClusterDefinition.getKey(), workspace.getId());
+            resultList.add(setupClusterDefinition(diffClusterDefinition.getValue(), workspace));
         }
         LOGGER.debug("Finished to add default cluster definitions which are missing for the user.");
         return resultList;
     }
 
-    private Set<ClusterDefinition> updateDefaultBlueprints(Iterable<ClusterDefinition> clusterDefinitions, Workspace workspace) {
+    private Set<ClusterDefinition> updateDefaultClusterDefinitions(Iterable<ClusterDefinition> clusterDefinitions, Workspace workspace) {
         Set<ClusterDefinition> resultList = new HashSet<>();
         LOGGER.debug("Updating default cluster definitions which are contains text modifications.");
         Map<String, ClusterDefinition> defaultBlueprints = defaultAmbariBlueprintCache.defaultBlueprints();
         for (ClusterDefinition clusterDefinitionFromDatabase : clusterDefinitions) {
             ClusterDefinition defaultClusterDefinition = defaultBlueprints.get(clusterDefinitionFromDatabase.getName());
-            if (defaultBlueprintExistInTheCache(defaultClusterDefinition)
-                    && (defaultBlueprintNotSameAsNewTexts(clusterDefinitionFromDatabase, defaultClusterDefinition.getClusterDefinitionText())
-                    || defaultBlueprintContainsNewDescription(clusterDefinitionFromDatabase, defaultClusterDefinition))) {
+            if (defaultClusterDefinitionExistInTheCache(defaultClusterDefinition)
+                    && (defaultClusterDefinitionNotSameAsNewTexts(clusterDefinitionFromDatabase, defaultClusterDefinition.getClusterDefinitionText())
+                    || defaultClusterDefinitionContainsNewDescription(clusterDefinitionFromDatabase, defaultClusterDefinition))) {
                 LOGGER.debug("Default cluster definition '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         clusterDefinitionFromDatabase.getName(), workspace.getId());
-                resultList.add(prepareBlueprint(clusterDefinitionFromDatabase, defaultClusterDefinition, workspace));
+                resultList.add(prepareClusterDefinition(clusterDefinitionFromDatabase, defaultClusterDefinition, workspace));
             }
         }
         LOGGER.debug("Finished to Update default cluster definitions which are contains text modifications.");
         return resultList;
     }
 
-    private ClusterDefinition prepareBlueprint(ClusterDefinition clusterDefinitionFromDatabase, ClusterDefinition newClusterDefinition, Workspace workspace) {
-        setupBlueprint(clusterDefinitionFromDatabase, workspace);
+    private ClusterDefinition prepareClusterDefinition(ClusterDefinition clusterDefinitionFromDatabase, ClusterDefinition newClusterDefinition,
+            Workspace workspace) {
+        setupClusterDefinition(clusterDefinitionFromDatabase, workspace);
         clusterDefinitionFromDatabase.setClusterDefinitionText(newClusterDefinition.getClusterDefinitionText());
         clusterDefinitionFromDatabase.setDescription(newClusterDefinition.getDescription());
         clusterDefinitionFromDatabase.setHostGroupCount(newClusterDefinition.getHostGroupCount());
@@ -119,65 +120,65 @@ public class ClusterDefinitionLoaderService {
         return clusterDefinitionFromDatabase;
     }
 
-    private ClusterDefinition setupBlueprint(ClusterDefinition clusterDefinition, Workspace workspace) {
+    private ClusterDefinition setupClusterDefinition(ClusterDefinition clusterDefinition, Workspace workspace) {
         clusterDefinition.setWorkspace(workspace);
         clusterDefinition.setStatus(DEFAULT);
         return clusterDefinition;
     }
 
-    private Map<String, ClusterDefinition> collectDeviationOfExistingBlueprintsAndDefaultBlueprints(Iterable<ClusterDefinition> clusterDefinitions) {
-        LOGGER.debug("Collecting Blueprints which are missing from the defaults.");
+    private Map<String, ClusterDefinition> collectDeviationOfExistingAndDefaultClusterDefinitions(Iterable<ClusterDefinition> clusterDefinitions) {
+        LOGGER.debug("Collecting cluster definitions which are missing from the defaults.");
         Map<String, ClusterDefinition> diff = new HashMap<>();
-        for (Entry<String, ClusterDefinition> stringBlueprintEntry : defaultAmbariBlueprintCache.defaultBlueprints().entrySet()) {
+        for (Entry<String, ClusterDefinition> stringClusterDefinitionEntry : defaultAmbariBlueprintCache.defaultBlueprints().entrySet()) {
             boolean contains = false;
             for (ClusterDefinition clusterDefinition : clusterDefinitions) {
-                if (isRegisteregBlueprintAndDefaultBlueprintIsTheSame(stringBlueprintEntry, clusterDefinition)) {
+                if (isRegisteregClusterDefinitionAndDefaultIsTheSame(stringClusterDefinitionEntry, clusterDefinition)) {
                     contains = true;
                     break;
                 }
             }
             if (!contains) {
-                diff.put(stringBlueprintEntry.getKey(), stringBlueprintEntry.getValue());
+                diff.put(stringClusterDefinitionEntry.getKey(), stringClusterDefinitionEntry.getValue());
             }
         }
         LOGGER.debug("Finished to collect the default cluster definitions which are missing: {}.", diff);
         return diff;
     }
 
-    private boolean isRegisteregBlueprintAndDefaultBlueprintIsTheSame(Entry<String, ClusterDefinition> stringBlueprintEntry,
+    private boolean isRegisteregClusterDefinitionAndDefaultIsTheSame(Entry<String, ClusterDefinition> stringClusterDefinitionEntry,
             ClusterDefinition clusterDefinition) {
-        return clusterDefinition.getName().equals(stringBlueprintEntry.getKey()) && isDefaultBlueprint(clusterDefinition);
+        return clusterDefinition.getName().equals(stringClusterDefinitionEntry.getKey()) && isDefaultClusterDefinition(clusterDefinition);
     }
 
-    private boolean isDefaultBlueprint(ClusterDefinition bp) {
-        return DEFAULT.equals(bp.getStatus());
+    private boolean isDefaultClusterDefinition(ClusterDefinition cd) {
+        return DEFAULT.equals(cd.getStatus());
     }
 
-    private boolean defaultBlueprintNotSameAsNewTexts(ClusterDefinition clusterDefinitionFromDatabase, String defaultBlueprintText) {
+    private boolean defaultClusterDefinitionNotSameAsNewTexts(ClusterDefinition clusterDefinitionFromDatabase, String clusterDefinitionsText) {
         String clusterDefinitionText = clusterDefinitionFromDatabase.getClusterDefinitionText();
-        return clusterDefinitionText == null || !clusterDefinitionText.equals(defaultBlueprintText);
+        return clusterDefinitionText == null || !clusterDefinitionText.equals(clusterDefinitionsText);
     }
 
-    private boolean defaultBlueprintContainsNewDescription(ClusterDefinition bp, ClusterDefinition clusterDefinition) {
-        return !bp.getDescription().equals(clusterDefinition.getDescription());
+    private boolean defaultClusterDefinitionContainsNewDescription(ClusterDefinition cd, ClusterDefinition clusterDefinition) {
+        return !cd.getDescription().equals(clusterDefinition.getDescription());
     }
 
-    private boolean isNewUserOrDeletedEveryDefaultBlueprint(Collection<ClusterDefinition> clusterDefinitions) {
+    private boolean isNewUserOrDeletedEveryDefaultClusterDefinition(Collection<ClusterDefinition> clusterDefinitions) {
         return clusterDefinitions.isEmpty();
     }
 
-    private boolean mustUpdateTheExistingBlueprint(ClusterDefinition clusterDefinitionFromDatabase, ClusterDefinition defaultClusterDefinition) {
-        return isDefaultBlueprint(clusterDefinitionFromDatabase)
-                && defaultBlueprintExistInTheCache(defaultClusterDefinition)
-                && (defaultBlueprintNotSameAsNewTexts(clusterDefinitionFromDatabase, defaultClusterDefinition.getClusterDefinitionText())
-                || defaultBlueprintContainsNewDescription(clusterDefinitionFromDatabase, defaultClusterDefinition));
+    private boolean mustUpdateTheExistingClusterDefinition(ClusterDefinition clusterDefinitionFromDatabase, ClusterDefinition defaultClusterDefinition) {
+        return isDefaultClusterDefinition(clusterDefinitionFromDatabase)
+                && defaultClusterDefinitionExistInTheCache(defaultClusterDefinition)
+                && (defaultClusterDefinitionNotSameAsNewTexts(clusterDefinitionFromDatabase, defaultClusterDefinition.getClusterDefinitionText())
+                || defaultClusterDefinitionContainsNewDescription(clusterDefinitionFromDatabase, defaultClusterDefinition));
     }
 
-    private boolean defaultBlueprintDoesNotExistInTheDatabase(Iterable<ClusterDefinition> clusterDefinitions) {
-        return !collectDeviationOfExistingBlueprintsAndDefaultBlueprints(clusterDefinitions).isEmpty();
+    private boolean defaultClusterDefinitionDoesNotExistInTheDatabase(Iterable<ClusterDefinition> clusterDefinitions) {
+        return !collectDeviationOfExistingAndDefaultClusterDefinitions(clusterDefinitions).isEmpty();
     }
 
-    private boolean defaultBlueprintExistInTheCache(ClusterDefinition actualDefaultClusterDefinition) {
+    private boolean defaultClusterDefinitionExistInTheCache(ClusterDefinition actualDefaultClusterDefinition) {
         return actualDefaultClusterDefinition != null;
     }
 }

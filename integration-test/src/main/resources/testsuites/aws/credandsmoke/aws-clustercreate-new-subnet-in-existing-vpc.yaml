@@ -1,7 +1,7 @@
 name: Aws_cluster_create_on_vpc
 parameters:
   cloudProvider: AWS
-  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+  clusterDefinitionName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init

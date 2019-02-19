@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.ClusterDefinitionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
@@ -58,7 +58,7 @@ public class CloudbreakIdentityClient {
     private static final List<Class<?>> ENDPOINTS = Arrays.asList(
             AuditEventV4Endpoint.class,
             AutoscaleV4Endpoint.class,
-            BlueprintV4Endpoint.class,
+            ClusterDefinitionV4Endpoint.class,
             EventV4Endpoint.class,
             ClusterTemplateV4Endpoint.class,
             CredentialV4Endpoint.class,
@@ -135,8 +135,8 @@ public class CloudbreakIdentityClient {
         return getEndpoint(AutoscaleV4Endpoint.class);
     }
 
-    public BlueprintV4Endpoint blueprintV4Endpoint() {
-        return getEndpoint(BlueprintV4Endpoint.class);
+    public ClusterDefinitionV4Endpoint clusterDefinitionV4Endpoint() {
+        return getEndpoint(ClusterDefinitionV4Endpoint.class);
     }
 
     public EventV4Endpoint eventV3Endpoint() {

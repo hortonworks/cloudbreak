@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.common.type;
 public enum ResourceEvent {
     WORKSPACE_CREATED("resource.workspace.created"),
     WORKSPACE_DELETED("resource.workspace.deleted"),
-    BLUEPRINT_CREATED("resource.clusterdefinition.created"),
-    BLUEPRINT_DELETED("resource.clusterdefinition.deleted"),
+    CLUSTER_DEFINITION_CREATED("resource.clusterdefinition.created"),
+    CLUSTER_DEFINITION_DELETED("resource.clusterdefinition.deleted"),
     CREDENTIAL_CREATED("resource.credential.created"),
     CREDENTIAL_MODIFIED("resource.credential.modified"),
     CREDENTIAL_DELETED("resource.credential.deleted"),

@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.BEACON_SE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.HIVE_SERVER;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.NAMENODE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.WEBHDFS;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -60,10 +59,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -297,11 +294,11 @@ public class ServiceEndpointCollectorTest {
     }
 
     private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("aBlueprint");
-        when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        when(blueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setClusterDefinitionText("aBlueprint");
+        when(clusterDefinitionService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(clusterDefinition);
+        AmbariBlueprintTextProcessor blueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
+        when(ambariBlueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(components);
         when(blueprintTextProcessor.getStackName()).thenReturn(stackName);
         when(blueprintTextProcessor.getStackVersion()).thenReturn(stackVersion);

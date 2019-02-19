@@ -83,14 +83,16 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
-    @Parameters({"blueprintName", "enableGateway"})
-    public void ambariParameters(@Optional("") String blueprintName, @Optional("true") boolean enableGateway) {
+    @Parameters({"clusterDefinitionName", "enableGateway"})
+    public void ambariParameters(@Optional("") String clusterDefinitionName, @Optional("true") boolean enableGateway) {
         IntegrationTestContext itContext = getItContext();
-        blueprintName = StringUtils.hasText(blueprintName) ? blueprintName : itContext.getContextParam(CloudbreakV2Constants.BLUEPRINT_NAME);
+        clusterDefinitionName = StringUtils.hasText(clusterDefinitionName)
+                ? clusterDefinitionName
+                : itContext.getContextParam(CloudbreakV2Constants.CLUSTER_DEFINITION_NAME);
 
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password is mandatory.");
-        Assert.assertNotNull(blueprintName, "blueprint name is mandatory.");
+        Assert.assertNotNull(clusterDefinitionName, "cluster definition name is mandatory.");
 
         StackV4Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
         ClusterV4Request clusterV2Request = new ClusterV4Request();
@@ -98,7 +100,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         stackV2Request.setCluster(clusterV2Request);
         AmbariV4Request ambariV2Request = new AmbariV4Request();
         clusterV2Request.setAmbari(ambariV2Request);
-        ambariV2Request.setBlueprintName(blueprintName);
+        ambariV2Request.setClusterDefinitionName(clusterDefinitionName);
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         if (enableGateway) {

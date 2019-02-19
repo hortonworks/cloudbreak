@@ -12,7 +12,7 @@ tests:
     parameters:
       clusterName: gcp-prewarm-edwetl
       provider: gcp
-      blueprintName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
+      clusterDefinitionName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
       image: hdp
       instancegroupName: worker
     classes:
@@ -28,7 +28,7 @@ tests:
     parameters:
       clusterName: encrypted-gcp-prewarm-datasci
       provider: gcp
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:

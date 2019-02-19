@@ -52,20 +52,20 @@ public class HadoopConfigurationServiceTest {
     @Test
     public void testAdditionalCriteriaWhenTrue() {
         TemplatePreparationObject source = Builder.builder()
-                .withClusterDefinitionView(new ClusterDefinitionView("blueprintText", "2.5", "HDP"))
+                .withClusterDefinitionView(new ClusterDefinitionView("clusterDefinitionText", "2.5", "HDP"))
                 .build();
 
-        boolean actual = underTest.specialCondition(source, "blueprintText");
+        boolean actual = underTest.specialCondition(source, "clusterDefinitionText");
         Assert.assertTrue(actual);
     }
 
     @Test
     public void testAdditionalCriteriaWhenFalse() {
         TemplatePreparationObject source = Builder.builder()
-                .withClusterDefinitionView(new ClusterDefinitionView("blueprintText", "2.5", "HDF"))
+                .withClusterDefinitionView(new ClusterDefinitionView("clusterDefinitionText", "2.5", "HDF"))
                 .build();
 
-        boolean actual = underTest.specialCondition(source, "blueprintText");
+        boolean actual = underTest.specialCondition(source, "clusterDefinitionText");
         Assert.assertFalse(actual);
     }
 

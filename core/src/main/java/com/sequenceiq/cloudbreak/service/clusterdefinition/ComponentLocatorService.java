@@ -32,7 +32,8 @@ public class ComponentLocatorService {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
     }
 
-    public Map<String, List<String>> getComponentPrivateIp(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor, Collection<String> componentNames) {
+    public Map<String, List<String>> getComponentPrivateIp(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor,
+            Collection<String> componentNames) {
         return getComponentAttribute(clusterId, blueprintTextProcessor, componentNames, InstanceMetaData::getPrivateIp);
     }
 
@@ -48,8 +49,8 @@ public class ComponentLocatorService {
         return result;
     }
 
-    private Map<String, List<String>> getComponentAttribute(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor, Collection<String> componentNames,
-            Function<InstanceMetaData, String> getterFunction) {
+    private Map<String, List<String>> getComponentAttribute(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor,
+            Collection<String> componentNames, Function<InstanceMetaData, String> getterFunction) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(clusterId)) {
             Set<String> hgComponents = blueprintTextProcessor.getComponentsInHostGroup(hg.getName());

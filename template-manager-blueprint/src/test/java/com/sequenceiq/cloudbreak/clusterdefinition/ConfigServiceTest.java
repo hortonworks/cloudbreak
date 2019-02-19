@@ -301,7 +301,6 @@ public class ConfigServiceTest {
 
         String hostGroupName = "hostGroup";
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
-        String blueprintText = "blueprintText";
 
         AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
 
@@ -378,7 +377,6 @@ public class ConfigServiceTest {
 
         String hostGroupName = "hostGroup";
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
-        String blueprintText = "blueprintText";
 
         AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
 

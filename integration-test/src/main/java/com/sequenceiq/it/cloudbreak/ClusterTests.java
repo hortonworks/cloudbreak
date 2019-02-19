@@ -39,11 +39,11 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     private static final int DESIRED_NO = 2;
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -61,13 +61,13 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateHdfCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    public void testCreateHdfCluster(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(AwsKerberos.kerberosOnAws(getTestParameter()));
         given(Cluster.request()
                         .withKerberos(AwsKerberos.KERBEROS_CLOUDY)
-                        .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, blueprintName, getTestParameter())),
+                        .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, clusterDefinitionName, getTestParameter())),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -88,12 +88,12 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(dataProvider = "providernameblueprintimageos", priority = 10)
-    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os)
+    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String os)
             throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -111,11 +111,11 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewClusterWithKnox(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    public void testCreateNewClusterWithKnox(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -241,13 +241,13 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     @DataProvider(name = "providernameblueprintimageos")
     public Object[][] providerAndImageOs() {
-        String blueprint = getTestParameter().get("blueprintName");
+        String clusterDefinition = getTestParameter().get("clusterDefinitionName");
         String provider = getTestParameter().get("provider").toLowerCase();
         String imageOs = getTestParameter().get("imageos");
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         String clusterName = getTestParameter().get("clusterName");
         return new Object[][]{
-                {cloudProvider, clusterName, blueprint, imageOs}
+                {cloudProvider, clusterName, clusterDefinition, imageOs}
         };
     }
 

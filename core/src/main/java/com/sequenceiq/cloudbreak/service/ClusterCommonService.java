@@ -77,7 +77,7 @@ public class ClusterCommonService {
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
-        } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
+        } else if (updateJson.getClusterDefinitionName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
                 recreateCluster(stack, updateJson, user, workspace);
@@ -141,7 +141,7 @@ public class ClusterCommonService {
         if (stackDetails != null) {
             stackRepoDetails = converterUtil.convert(stackDetails, StackRepoDetails.class);
         }
-        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), stackRepoDetails,
+        clusterService.recreate(stack, updateCluster.getClusterDefinitionName(), hostGroups, updateCluster.getValidateClusterDefinition(), stackRepoDetails,
                 updateCluster.getKerberosPassword(), updateCluster.getKerberosPrincipal());
     }
 

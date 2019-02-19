@@ -23,8 +23,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AmbariV4Request implements JsonEntity {
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
-    private String blueprintName;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_NAME)
+    private String clusterDefinitionName;
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
@@ -38,8 +38,8 @@ public class AmbariV4Request implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
-    private Boolean validateBlueprint = Boolean.TRUE;
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_CLUSTER_DEFINITION)
+    private Boolean validateClusterDefinition = Boolean.TRUE;
 
     @ApiModelProperty(ClusterModelDescription.VALIDATE_REPOSITORIES)
     private Boolean validateRepositories = Boolean.FALSE;
@@ -60,12 +60,12 @@ public class AmbariV4Request implements JsonEntity {
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     private String securityMasterKey;
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getClusterDefinitionName() {
+        return clusterDefinitionName;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setClusterDefinitionName(String clusterDefinitionName) {
+        this.clusterDefinitionName = clusterDefinitionName;
     }
 
     public String getUserName() {
@@ -84,12 +84,12 @@ public class AmbariV4Request implements JsonEntity {
         this.password = password;
     }
 
-    public Boolean getValidateBlueprint() {
-        return validateBlueprint;
+    public Boolean getValidateClusterDefinition() {
+        return validateClusterDefinition;
     }
 
-    public void setValidateBlueprint(Boolean validateBlueprint) {
-        this.validateBlueprint = validateBlueprint;
+    public void setValidateClusterDefinition(Boolean validateClusterDefinition) {
+        this.validateClusterDefinition = validateClusterDefinition;
     }
 
     public Boolean getValidateRepositories() {

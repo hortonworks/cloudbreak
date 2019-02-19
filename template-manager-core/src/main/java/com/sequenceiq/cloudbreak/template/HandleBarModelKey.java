@@ -13,7 +13,7 @@ public enum HandleBarModelKey {
     FILESYSTEMCONFIGS("fileSystemConfigs"),
     SHAREDSERVICE("sharedService"),
     DATALAKE("datalake"),
-    BLUEPRINT("blueprint"),
+    CLUSTER_DEFINITION("clusterdefinition"),
     HDF("hdf"),
     GENERAL("general"),
     STACK_VERSION("stack_version");

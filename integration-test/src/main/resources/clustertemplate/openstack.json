@@ -112,10 +112,10 @@
         "rdsConfigNames": [],
         "executorType": "DEFAULT",
         "ambari": {
-            "blueprintName": "Data Science: Apache Spark 2, Apache Zeppelin",
+            "clusterDefinitionName": "Data Science: Apache Spark 2, Apache Zeppelin",
             "userName": "admin",
             "password": "",
-            "validateBlueprint": false,
+            "validateClusterDefinition": false,
             "validateRepositories": false,
             "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
             "ambariSecurityMasterKey": ""

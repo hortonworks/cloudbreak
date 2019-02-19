@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.AmbariViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.AmbariViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Response;
@@ -28,7 +28,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         ClusterViewV4Response clusterViewResponse = super.convert(source);
         AmbariViewV4Response ambari = new AmbariViewV4Response();
         ambari.setServerIp(source.getAmbariIp());
-        ambari.setBlueprint(getConversionService().convert(source.getClusterDefinition(), BlueprintV4ViewResponse.class));
+        ambari.setClusterDefinition(getConversionService().convert(source.getClusterDefinition(), ClusterDefinitionV4ViewResponse.class));
         clusterViewResponse.setAmbari(ambari);
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setSecure(source.getKerberosConfig() != null);

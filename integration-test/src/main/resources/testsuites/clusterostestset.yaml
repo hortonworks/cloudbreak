@@ -11,7 +11,7 @@ tests:
     parameters:
       clusterName: aws-suse-datasci
       provider: aws
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       imageos: sles12
       instancegroupName: worker
       awsInstanceType: m5.2xlarge
@@ -28,7 +28,7 @@ tests:
     parameters:
       clusterName: aws-redhat7-datasci
       provider: aws
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       imageos: redhat7
       instancegroupName: worker
       awsInstanceType: m5.2xlarge

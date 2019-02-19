@@ -74,7 +74,7 @@ import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
+import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -135,7 +135,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     private EnvironmentDetachValidator environmentDetachValidator;
 
     @Inject
-    private DatalakeConfigProvider datalakeConfigProvider;
+    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
@@ -467,9 +467,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                     Map<String, Map<String, String>> serviceSecretParamMap = isEmpty(registerDatalakeRequest.getRangerAdminPassword())
                             ? new HashMap<>() : Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE, Map.ofEntries(
                             Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, registerDatalakeRequest.getRangerAdminPassword()))));
-                    DatalakeResources datalakeResources = datalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, envView, datalakeAmbariUrl,
-                            ambariUrl.getHost(), ambariUrl.getHost(), ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig, rdssConfigs,
-                            environment.getWorkspace());
+                    DatalakeResources datalakeResources = ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(environmentName, envView,
+                            datalakeAmbariUrl, ambariUrl.getHost(), ambariUrl.getHost(), ambariClient, serviceSecretParamMap, ldapConfig, kerberosConfig,
+                            rdssConfigs, environment.getWorkspace());
                     environment.getDatalakeResources().add(datalakeResources);
                     return conversionService.convert(environmentRepository.save(environment), DetailedEnvironmentV4Response.class);
                 } catch (MalformedURLException ex) {

@@ -29,12 +29,12 @@ public class UpdateClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.USERNAME_PASSWORD)
     private UserNamePasswordV4Request userNamePassword;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
-    private String blueprintName;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_ID)
+    private String clusterDefinitionName;
 
     @TransformGetterType
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
-    private Boolean validateBlueprint = Boolean.TRUE;
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_CLUSTER_DEFINITION)
+    private Boolean validateClusterDefinition = Boolean.TRUE;
 
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupV4Request> hostgroups;
@@ -74,20 +74,20 @@ public class UpdateClusterV4Request implements JsonEntity {
         this.userNamePassword = userNamePassword;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getClusterDefinitionName() {
+        return clusterDefinitionName;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setClusterDefinitionName(String clusterDefinitionName) {
+        this.clusterDefinitionName = clusterDefinitionName;
     }
 
-    public Boolean getValidateBlueprint() {
-        return validateBlueprint;
+    public Boolean getValidateClusterDefinition() {
+        return validateClusterDefinition;
     }
 
-    public void setValidateBlueprint(Boolean validateBlueprint) {
-        this.validateBlueprint = validateBlueprint;
+    public void setValidateClusterDefinition(Boolean validateClusterDefinition) {
+        this.validateClusterDefinition = validateClusterDefinition;
     }
 
     public Set<HostGroupV4Request> getHostgroups() {

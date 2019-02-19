@@ -86,7 +86,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private ClusterDefinition clusterDefinition;
 
     @Mock
-    private Json blueprintTags;
+    private Json clusterDefinitionTags;
 
     @Mock
     private PlatformResourceRequest platformResourceRequest;
@@ -126,7 +126,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(subject.getCluster()).thenReturn(clusterRequest);
         when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
         String credentialName = "someCred";
-        when(ambariRequest.getBlueprintName()).thenReturn("dummy");
+        when(ambariRequest.getClusterDefinitionName()).thenReturn("dummy");
         when(credential.cloudPlatform()).thenReturn("AWS");
         when(credentialService.getByNameForWorkspaceId(any(), any())).thenReturn(credential);
         when(platformParameterService.getPlatformResourceRequest(anyLong(), anyString(), eq(null), eq(null), eq(null)))

@@ -96,24 +96,24 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void init() {
         validationRequest = new StackValidationV4Request();
         mockUserRelated();
-        mockBlueprintsInWorkspace();
+        mockClusterDefinitionsInWorkspace();
     }
 
     @Test
-    public void invalidBlueprintValidationRequest() {
+    public void invalidClusterDefinitionValidationRequest() {
         validationRequest = new StackValidationV4Request();
         Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         expectedEx.expect(BadRequestException.class);
-        expectedEx.expectMessage("Blueprint is not configured for the validation request!");
+        expectedEx.expectMessage("Cluster definition is not configured for the validation request!");
         underTest.convert(validationRequest);
     }
 
     @Test
-    public void validBlueprintByName() {
+    public void validClusterDefinitionByName() {
         validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintName(bpName);
+        validationRequest.setClusterDefinitionName(bpName);
         validationRequest.setCredentialName("credName");
 
         when(credentialService.getByNameForWorkspace(validationRequest.getCredentialName(), workspace)).thenReturn(credential);
@@ -132,7 +132,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void convertShouldUseEnvironmentCredentialWhenItisGiven() {
         // GIVEN
         validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintName(bpName);
+        validationRequest.setClusterDefinitionName(bpName);
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setName("env");
         environmentView.setCredential(credential);
@@ -153,7 +153,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void convertShouldThrowAccessDeniedExceptinWhenNoEnvironmentAndCredentialAreGiven() {
         // GIVEN
         validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintName(bpName);
+        validationRequest.setClusterDefinitionName(bpName);
         expectedEx.expect(BadRequestException.class);
         expectedEx.expectMessage("Credential is not configured for the validation request!");
         // WHEN
@@ -161,7 +161,7 @@ public class StackValidationRequestToStackValidationConverterTest {
         // THEN expected exception should be thrown
     }
 
-    private void mockBlueprintsInWorkspace() {
+    private void mockClusterDefinitionsInWorkspace() {
         Set<ClusterDefinition> clusterDefinitions = new HashSet<>();
         clusterDefinitions.add(TestUtil.clusterDefinition(1L, bpName, "{}"));
         clusterDefinitions.add(TestUtil.clusterDefinition(2L, bpName2, "{}"));

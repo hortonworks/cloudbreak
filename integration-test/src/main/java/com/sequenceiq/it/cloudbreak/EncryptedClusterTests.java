@@ -27,11 +27,11 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 public class EncryptedClusterTests extends ClusterTests {
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")

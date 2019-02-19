@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_BLUEPRINT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLUSTER_DEFINITION;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLI;
 
 import java.util.HashMap;
@@ -37,7 +37,7 @@ public class PreferencesService {
     public Set<FeatureSwitchV4> getFeatureSwitches() {
         Set<FeatureSwitchV4> featureSwitchV4s = Sets.newHashSet();
         if (disableShowBlueprint) {
-            featureSwitchV4s.add(DISABLE_SHOW_BLUEPRINT);
+            featureSwitchV4s.add(DISABLE_SHOW_CLUSTER_DEFINITION);
         }
         if (disableShowCli) {
             featureSwitchV4s.add(DISABLE_SHOW_CLI);

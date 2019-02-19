@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if {{{#eq blueprint.version '2.5'}}}true{{{else}}}false{{{/eq}}}; then
-    echo "The blueprint\'s version if 2.5"
+if {{{#eq clusterdefinition.version '2.5'}}}true{{{else}}}false{{{/eq}}}; then
+    echo "The cluster definition\'s version if 2.5"
 else
-    echo "The blueprint\'s version is not 2.5!"
+    echo "The cluster definition\'s version is not 2.5!"
 fi

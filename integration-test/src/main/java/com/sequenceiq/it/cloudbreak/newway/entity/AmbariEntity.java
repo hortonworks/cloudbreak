@@ -20,15 +20,16 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
     }
 
     public AmbariEntity valid() {
-        String blueprintName = getTestParameter().getWithDefault(CommonCloudParameters.BLUEPRINT_NAME, CommonCloudParameters.DEFAULT_BLUEPRINT_NAME);
+        String clusterDefinitionName = getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
+                CommonCloudParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
         return withUserName("admin")
                 .withPassword("Admin123")
-                .withBlueprintName(blueprintName)
+                .withClusterDefinitionName(clusterDefinitionName)
                 .withValidateRepositories(true);
     }
 
-    public AmbariEntity withBlueprintName(String blueprintName) {
-        getRequest().setBlueprintName(blueprintName);
+    public AmbariEntity withClusterDefinitionName(String clusterDefinitionName) {
+        getRequest().setClusterDefinitionName(clusterDefinitionName);
         return this;
     }
 
@@ -42,8 +43,8 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
         return this;
     }
 
-    public AmbariEntity withValidateBlueprint(Boolean validateBlueprint) {
-        getRequest().setValidateBlueprint(validateBlueprint);
+    public AmbariEntity withValidateClusterDefinition(Boolean validateClusterDefinition) {
+        getRequest().setValidateClusterDefinition(validateClusterDefinition);
         return this;
     }
 
@@ -86,5 +87,4 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
         getRequest().setSecurityMasterKey(ambariSecurityMasterKey);
         return this;
     }
-
 }

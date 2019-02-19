@@ -2,7 +2,7 @@
 name: Native OpenStack full smoketest
 parameters:
   cloudProvider: OPENSTACK
-  blueprintName: multi-node-hdfs-yarn
+  clusterDefinitionName: multi-node-hdfs-yarn
 
 tests:
   - name: init

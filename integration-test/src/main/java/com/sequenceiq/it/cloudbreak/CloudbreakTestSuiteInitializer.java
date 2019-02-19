@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.ClusterDefinitionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -99,10 +99,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({"cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
+    @Parameters({"cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "clusterDefinitionName",
             "stackName", "networkName", "securityGroupName"})
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
-            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
+            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String clusterDefinitionName,
             @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         String cbServerRoot = cloudbreakServer + cbRootContextPath;
@@ -136,7 +136,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient, workspaceId);
         }
         putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
-                .blueprintV4Endpoint(), blueprintName, workspaceId);
+                .clusterDefinitionV4Endpoint(), clusterDefinitionName, workspaceId);
         putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
                 .credentialV4Endpoint(), cloudProvider, credentialName, workspaceId);
         putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
@@ -157,14 +157,14 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     }
 
-    private void putBlueprintToContextIfExist(BlueprintV4Endpoint endpoint, String blueprintName, Long workspaceId) {
+    private void putBlueprintToContextIfExist(ClusterDefinitionV4Endpoint endpoint, String clusterDefinitionName, Long workspaceId) {
         endpoint.list(workspaceId);
-        if (StringUtils.isEmpty(blueprintName)) {
-            blueprintName = defaultBlueprintName;
+        if (StringUtils.isEmpty(clusterDefinitionName)) {
+            clusterDefinitionName = defaultBlueprintName;
         }
-        if (StringUtils.hasLength(blueprintName)) {
-            String resourceName = endpoint.get(workspaceId, blueprintName).getName();
-            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_NAME, resourceName);
+        if (StringUtils.hasLength(clusterDefinitionName)) {
+            String resourceName = endpoint.get(workspaceId, clusterDefinitionName).getName();
+            itContext.putContextParam(CloudbreakITContextConstants.CLUSTER_DEFINITION_NAME, resourceName);
         }
     }
 
@@ -239,8 +239,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
             cleanUpService.deleteCredential(workspaceId, cloudbreakClient,
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class));
-            cleanUpService.deleteBlueprint(workspaceId, cloudbreakClient,
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID, Long.class));
+            cleanUpService.deleteClusterDefinition(workspaceId, cloudbreakClient,
+                    itContext.getCleanUpParameter(CloudbreakITContextConstants.CLUSTER_DEFINITION_ID, Long.class));
             cleanUpService.deleteRdsConfigs(workspaceId, cloudbreakClient,
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID, Long.class));
 

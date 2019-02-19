@@ -32,7 +32,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "autotesting-os-cluster";
 
-    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String NETWORK_DEFAULT_NAME = "autotesting-os-net";
 
@@ -128,8 +128,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getBlueprintName() {
-        return getTestParameter().getWithDefault("openstackBlueprintName", BLUEPRINT_DEFAULT_NAME);
+    public String getClusterDefinitionName() {
+        return getTestParameter().getWithDefault("openstackClusterDefinitionName", CLUSTER_DEFINITION_DEFAULT_NAME);
 
     }
 
@@ -230,8 +230,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
-        var ambari = ambariRequestWithBlueprintName(blueprintName);
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
+        var ambari = ambariRequestWithBlueprintName(clusterDefinitionName);
         var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);

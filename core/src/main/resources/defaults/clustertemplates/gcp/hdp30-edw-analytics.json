@@ -8,8 +8,8 @@
     "type": "TEMPLATE",
     "cluster": {
       "ambari": {
-        "blueprintName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-        "validateBlueprint": false,
+        "clusterDefinitionName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
+        "validateClusterDefinition": false,
         "stackRepository": {
           "stack": "HDP",
           "version": "3.0",

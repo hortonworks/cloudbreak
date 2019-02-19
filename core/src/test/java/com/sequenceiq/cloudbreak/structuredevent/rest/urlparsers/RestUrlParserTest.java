@@ -158,12 +158,12 @@ public class RestUrlParserTest {
         if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
                 && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])) {
             // Skip v4/{workspaceId}/audits/{auditId}
-            // Skip v4/{workspaceId}/blueprints/{name} and similars
+            // Skip v4/{workspaceId}/clusterdefinitions/{name} and similars
             // Skip v4/{workspaceId}/credentials/code_grant_flow/init
             // Skip v4/{workspaceId}/credentials/code_grant_flow/init/{name}
             // Skip v4/{workspaceId}/credentials/code_grant_flow/authorization/{cloudPlatform}
             // Match v4/{workspaceId}/audits/zip and similars
-            // Match v4/{workspaceId}/blueprints/{name}/parameters and similars
+            // Match v4/{workspaceId}/clusterdefinitions/{name}/parameters and similars
             resourceEvent = parts[parts.length - 1];
         } else if ((parts.length == 5 || parts.length == 6) && PATH_V_4.equals(parts[0]) && PATH_CREDENTIALS.equals(parts[2])) {
             // Match v4/{workspaceId}/credentials/prerequisites/{cloudPlatform}

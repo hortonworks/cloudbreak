@@ -12,7 +12,7 @@ tests:
       provider: openstack
       openstackClusterName: autotesting-openstack
       openstackCredentialName: autotesting-clusters-os
-      openstackBlueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      openstackClusterDefinitionName: "Data Science: Apache Spark 2, Apache Zeppelin"
       openstackVcpId: f955d535-8a7a-456f-a90a-430d45f1c92b
       openstackSubnetId: 7a2c4679-1312-4cf6-91a5-76a2c1e3faa8
       networkingOption: self-service
@@ -26,7 +26,7 @@ tests:
       provider: aws
       awsClusterName: autotesting-aws
       awsCredentialName: autotesting-clusters-aws
-      awsBlueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      awsClusterDefinitionName: "Data Science: Apache Spark 2, Apache Zeppelin"
       awsRegion: eu-central-1
       awsAvailabilityZone: eu-central-1b
       awsVcpId: vpc-e623b28d
@@ -40,7 +40,7 @@ tests:
       provider: azure
       azureClusterName: autotesting-azure
       azureCredentialName: autotesting-clusters-azure
-      azureBlueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      azureClusterDefinitionName: "Data Science: Apache Spark 2, Apache Zeppelin"
       azureRegion: "North Europe"
       azureVcpId: aszegedi
       azureSubnetId: default
@@ -55,7 +55,7 @@ tests:
       provider: gcp
       gcpClusterName: autotesting-gcp
       gcpCredentialName: autotesting-clusters-gcp
-      gcpBlueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      gcpClusterDefinitionName: "Data Science: Apache Spark 2, Apache Zeppelin"
       gcpRegion: europe-west1
       gcpAvailabilityZone: europe-west1-b
       gcpVcpId: aszegedi

@@ -2,7 +2,7 @@ name: Gcp_simple_smoketest_cred_tags
 parameters:
   cloudProvider: GCP
   gcpAppName: its-gcp-credandsmoke-cred-tags
-  blueprintName: hdp-small-default
+  clusterDefinitionName: hdp-small-default
 
 tests:
   - name: init

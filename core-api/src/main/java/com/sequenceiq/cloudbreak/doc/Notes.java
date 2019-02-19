@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.doc;
 
 public class Notes {
 
-    public static final String BLUEPRINT_NOTES = "Ambari Blueprints are a declarative "
-            + "definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout "
-            + "and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints "
+    public static final String CLUSTER_DEFINITION_NOTES = "Cluster definitions are a declarative "
+            + "definition of a Hadoop cluster. With a cluster definition, you specify a stack, the component layout "
+            + "and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in cluster definitions "
             + "can be associated to different templates, thus you can spin up a highly available cluster "
             + "running on different instance types. This will give you the option to group your "
             + "Hadoop services based on resource needs (e.g. high I/O, CPU or memory) "
@@ -28,7 +28,7 @@ public class Notes {
             + "Stacks support a wide range of resources, allowing you to build a highly available, reliable, "
             + "and scalable infrastructure for your application needs.";
     public static final String CLUSTER_NOTES = "Clusters are materialised Hadoop services on a given infrastructure. "
-            + "They are built based on a Blueprint (running the components and services specified) and on "
+            + "They are built based on a cluster definition (running the components and services specified) and on "
             + "a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual"
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
     public static final String GATEWAY_NOTES = "Gateway is an Apache Knox Gateway, which is an Application Gateway for interacting with REST APIs and"
@@ -47,9 +47,9 @@ public class Notes {
     public static final String AMBARI_NOTES = "Ambari is used to provision the Hadoop clusters.";
     public static final String MAINTENANCE_NOTES = "Setting maintenance mode for the cluster in order to be able to update Ambari and/or the Hadoop stack.";
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
-            + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
+            + "(e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users";
     public static final String USER_PROFILE_NOTES = "Users can be invited under an account by the administrator, and all resources "
-            + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
+            + "(e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users";
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
     public static final String DATABASE_NOTES = "A Database Configuration describe a connection to an external Relational Database Service "
             + "that can be used as the Hive Metastore.";

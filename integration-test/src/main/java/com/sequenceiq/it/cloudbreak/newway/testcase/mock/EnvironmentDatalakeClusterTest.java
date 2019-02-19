@@ -55,7 +55,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        initializeDefaultClusterDefinitions(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -244,12 +244,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         return new HashSet<>(Collections.singletonList(testContext.get(DatabaseEntity.class).getName()));
     }
 
-    private ClusterEntity setResources(TestContext testContext, Set<String> rdsConfigs, String ldapName, String proxyName, String bpName) {
+    private ClusterEntity setResources(TestContext testContext, Set<String> rdsConfigs, String ldapName, String proxyName, String cdName) {
 
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(rdsConfigs)
-                .withAmbari(testContext.given(AmbariEntity.class).withBlueprintName(bpName));
+                .withAmbari(testContext.given(AmbariEntity.class).withClusterDefinitionName(cdName));
         if (rdsConfigs != null) {
             cluster.withRdsConfigNames(rdsConfigs);
         }
