@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidAmbariStack {
 
-    String message() default "HDP version is not valid. Only " + StackRepositoryV4Validator.MIN_HDP_VERSION + " and later versions are supported";
+    String message() default "The StackRepositoryV4Request is invalid";
 
     Class<?>[] groups() default { };
 
