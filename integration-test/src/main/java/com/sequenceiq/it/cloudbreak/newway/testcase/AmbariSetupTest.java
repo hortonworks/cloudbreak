@@ -8,7 +8,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -24,7 +24,7 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
     public void verifyCallsAgainstAmbariUserCreation(TestContext testContext) {
         testContext
                 // create stack
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(Stack.postV4(), key("stack-post"))
                 .await(STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users").exactTimes(2).bodyContains("\"Users/active\": true"))

@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleV4Request, Response, StackOperationEntity> {
@@ -63,7 +64,7 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleV4R
     public static void start(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" start " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putStart(client.getWorkspaceId(), stack.getRequest().getName());
@@ -72,7 +73,7 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleV4R
     public static void stop(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" stop " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putStop(client.getWorkspaceId(), stack.getRequest().getName());
@@ -82,7 +83,7 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleV4R
         StackOperationEntity stackOperation = (StackOperationEntity) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" scale " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putScaling(client.getWorkspaceId(), stack.getRequest().getName(), stackOperation.getRequest());

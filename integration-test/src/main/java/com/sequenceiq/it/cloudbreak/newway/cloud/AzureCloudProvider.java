@@ -21,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
@@ -350,7 +350,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest(String datalakeClusterName) {
+    public StackTestDto aValidAttachedStackRequest(String datalakeClusterName) {
         var request = new StackCreation(aValidStackRequest());
         request.setCreationStrategy(StackAction::determineNetworkAzureFromDatalakeStack);
         request.withSharedService(datalakeClusterName);

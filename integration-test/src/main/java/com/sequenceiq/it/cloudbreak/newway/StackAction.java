@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackAction {
@@ -28,43 +29,43 @@ public class StackAction {
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        StackEntity stackEntity = (StackEntity) entity;
+        StackTestDto stackTestDto = (StackTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" get stack " + stackEntity.getName());
-        stackEntity.setResponse(
+        Log.log(" get stack " + stackTestDto.getName());
+        stackTestDto.setResponse(
                 client.getCloudbreakClient().stackV4Endpoint()
-                        .get(integrationTestContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class), stackEntity.getName(),
+                        .get(integrationTestContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class), stackTestDto.getName(),
                                 Collections.emptySet()));
-        Log.logJSON(" stack get response: ", stackEntity.getResponse());
+        Log.logJSON(" stack get response: ", stackTestDto.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
-        StackEntity stackEntity = (StackEntity) entity;
+        StackTestDto stackTestDto = (StackTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Log.log(" get all stack");
-        stackEntity.setResponses(new HashSet<>(stackEntity.getAll(client)));
+        stackTestDto.setResponses(new HashSet<>(stackTestDto.getAll(client)));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        delete(integrationTestContext, (StackEntity) entity, Boolean.FALSE);
+        delete(integrationTestContext, (StackTestDto) entity, Boolean.FALSE);
     }
 
     public static void deleteWithForce(IntegrationTestContext integrationTestContext, Entity entity) {
-        delete(integrationTestContext, (StackEntity) entity, Boolean.TRUE);
+        delete(integrationTestContext, (StackTestDto) entity, Boolean.TRUE);
     }
 
-    private static void delete(IntegrationTestContext integrationTestContext, StackEntity entity, Boolean forced) {
-        StackEntity stackEntity = entity;
+    private static void delete(IntegrationTestContext integrationTestContext, StackTestDto entity, Boolean forced) {
+        StackTestDto stackTestDto = entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" delete: " + stackEntity.getName());
+        Log.log(" delete: " + stackTestDto.getName());
         client.getCloudbreakClient().stackV4Endpoint()
-                .delete(stackEntity.getResponse().getId(), stackEntity.getName(), forced, false);
+                .delete(stackTestDto.getResponse().getId(), stackTestDto.getName(), forced, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
@@ -78,7 +79,7 @@ public class StackAction {
     }
 
     public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
-        var stackEntity = (StackEntity) entity;
+        var stackEntity = (StackTestDto) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
             prepareNetworkParam(stackEntity);
@@ -90,7 +91,7 @@ public class StackAction {
     }
 
     public static void determineNetworkAzureFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
-        var stackEntity = (StackEntity) entity;
+        var stackEntity = (StackTestDto) entity;
         var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
         if (isDatalakeExistAndHasNetwork(datalakeStack)) {
             prepareNetworkParam(stackEntity);
@@ -102,10 +103,10 @@ public class StackAction {
         }
     }
 
-    private static void prepareNetworkParam(StackEntity stackEntity) {
-        if (stackEntity.getRequest().getNetwork() == null) {
+    private static void prepareNetworkParam(StackTestDto stackTestDto) {
+        if (stackTestDto.getRequest().getNetwork() == null) {
             var network = new NetworkV4Request();
-            stackEntity.getRequest().setNetwork(network);
+            stackTestDto.getRequest().setNetwork(network);
         }
     }
 

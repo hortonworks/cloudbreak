@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerber
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
@@ -71,7 +71,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post)
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
                         .withKerberos(request.getName())
@@ -92,7 +92,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
                 .when(Blueprint.postV4())
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
                         .withKerberos(null)
@@ -116,7 +116,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post)
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
                         .withKerberos("")
@@ -209,8 +209,8 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         ACTIVE_DIRECTORY {
             @Override
-            public List<AssertionV2<StackEntity>> getAssertions() {
-                List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+            public List<AssertionV2<StackTestDto>> getAssertions() {
+                List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
                 verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getPassword()).exactTimes(0));
                 verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getPrincipal()).exactTimes(0));
                 verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getUrl()).exactTimes(1));
@@ -251,8 +251,8 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         MIT {
             @Override
-            public List<AssertionV2<StackEntity>> getAssertions() {
-                List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+            public List<AssertionV2<StackTestDto>> getAssertions() {
+                List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
                 verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getRealm().toUpperCase()).exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getPassword()).exactTimes(0));
                 verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getAdminUrl()).exactTimes(1));
@@ -282,8 +282,8 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         AMBARI_DESCRIPTOR {
             @Override
-            public List<AssertionV2<StackEntity>> getAssertions() {
-                List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+            public List<AssertionV2<StackTestDto>> getAssertions() {
+                List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
                 verifications.add(blueprintPostToAmbariContains("kdc_type").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains("mit-kdc").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains("kdc_hosts").exactTimes(1));
@@ -316,8 +316,8 @@ public class KerberosTest extends AbstractIntegrationTest {
 
         FREEIPA {
             @Override
-            public List<AssertionV2<StackEntity>> getAssertions() {
-                List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+            public List<AssertionV2<StackTestDto>> getAssertions() {
+                List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
                 verifications.add(blueprintPostToAmbariContains("kdc_type").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains("ipa").exactTimes(1));
                 verifications.add(blueprintPostToAmbariContains(getRequest().getFreeIpa().getUrl()).exactTimes(1));
@@ -343,7 +343,7 @@ public class KerberosTest extends AbstractIntegrationTest {
             }
         };
 
-        public abstract List<AssertionV2<StackEntity>> getAssertions();
+        public abstract List<AssertionV2<StackTestDto>> getAssertions();
 
         public abstract KerberosV4Request getRequest();
 

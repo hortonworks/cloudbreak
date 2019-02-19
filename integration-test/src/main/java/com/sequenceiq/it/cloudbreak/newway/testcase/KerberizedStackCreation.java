@@ -8,7 +8,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -38,7 +38,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class).withActiveDirectoryDescriptor()
                 .when(KerberosTestAction::post)
                 .given(ClusterEntity.class).withKerberos()
-                .given(StackEntity.class).withCluster()
+                .given(StackTestDto.class).withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("realm.addomain.com"))
@@ -53,7 +53,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class).withActiveDirectoryDescriptor()
                 .when(KerberosTestAction::post)
                 .given(ClusterEntity.class).withKerberos()
-                .given(StackEntity.class).withCluster()
+                .given(StackTestDto.class).withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("custom.addomain.com"))
@@ -68,7 +68,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class).withFreeIPADescriptor()
                 .when(KerberosTestAction::post)
                 .given(ClusterEntity.class).withKerberos()
-                .given(StackEntity.class).withCluster()
+                .given(StackTestDto.class).withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("realm.freeiparealm.com"))
@@ -83,7 +83,7 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class).withFreeIPADescriptor()
                 .when(KerberosTestAction::post)
                 .given(ClusterEntity.class).withKerberos()
-                .given(StackEntity.class).withCluster()
+                .given(StackTestDto.class).withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("custom.freeipadomain.com"))

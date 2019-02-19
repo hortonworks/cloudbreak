@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public abstract class StackPostStrategyRoot implements Strategy {
 
@@ -15,40 +16,40 @@ public abstract class StackPostStrategyRoot implements Strategy {
 
     protected static final String NETWORK_ID_KEY = "networkId";
 
-    protected void postStackAndSetRequestForEntity(IntegrationTestContext context, CloudbreakClient client, StackEntity stackEntity) throws Exception {
-        log(" Name:\n" + stackEntity.getRequest().getName());
-        logJSON(" Stack post request:\n", stackEntity.getRequest());
-        stackEntity.setResponse(
+    protected void postStackAndSetRequestForEntity(IntegrationTestContext context, CloudbreakClient client, StackTestDto stackTestDto) throws Exception {
+        log(" Name:\n" + stackTestDto.getRequest().getName());
+        logJSON(" Stack post request:\n", stackTestDto.getRequest());
+        stackTestDto.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .post(client.getWorkspaceId(), stackEntity.getRequest()));
-        logJSON(" Stack post response:\n", stackEntity.getResponse());
-        log(" ID:\n" + stackEntity.getResponse().getId());
+                        .post(client.getWorkspaceId(), stackTestDto.getRequest()));
+        logJSON(" Stack post response:\n", stackTestDto.getResponse());
+        log(" ID:\n" + stackTestDto.getResponse().getId());
     }
 
-    protected void setImageSettingsIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
+    protected void setImageSettingsIfNeeded(StackTestDto stackTestDto, IntegrationTestContext integrationTestContext) {
         var imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
-            stackEntity.getRequest().setImage(imageSettings.getRequest());
+            stackTestDto.getRequest().setImage(imageSettings.getRequest());
         }
     }
 
-    protected void setHostGroupIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
+    protected void setHostGroupIfNeeded(StackTestDto stackTestDto, IntegrationTestContext integrationTestContext) {
         var hostGroups = HostGroups.getTestContextHostGroups().apply(integrationTestContext);
         if (hostGroups != null) {
-            stackEntity.getRequest().setInstanceGroups(hostGroups.getRequest());
+            stackTestDto.getRequest().setInstanceGroups(hostGroups.getRequest());
         }
     }
 
-    protected Credential setCredentialIfNeededAndReturnIt(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
+    protected Credential setCredentialIfNeededAndReturnIt(StackTestDto stackTestDto, IntegrationTestContext integrationTestContext) {
         var credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && stackEntity.getRequest().getEnvironment().getCredentialName() == null) {
-            stackEntity.getRequest().getEnvironment().setCredentialName(credential.getName());
+        if (credential != null && stackTestDto.getRequest().getEnvironment().getCredentialName() == null) {
+            stackTestDto.getRequest().getEnvironment().setCredentialName(credential.getName());
         }
         return credential;
     }
 
-    protected void setClusterIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext, Credential credential) {
+    protected void setClusterIfNeeded(StackTestDto stackTestDto, IntegrationTestContext integrationTestContext, Credential credential) {
         var cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
         if (cluster != null) {
             if (cluster.getRequest().getCloudStorage().getS3() != null && isEmpty(cluster.getRequest().getCloudStorage().getS3().getInstanceProfile())) {
@@ -56,13 +57,13 @@ public abstract class StackPostStrategyRoot implements Strategy {
             } else if (cluster.getRequest().getCloudStorage().getGcs() != null && credential != null) {
                 setGcsCloudStorageForCluster(cluster, credential);
             }
-            if (stackEntity.getRequest().getCluster() == null) {
-                stackEntity.getRequest().setCluster(cluster.getRequest());
+            if (stackTestDto.getRequest().getCluster() == null) {
+                stackTestDto.getRequest().setCluster(cluster.getRequest());
             }
         }
     }
 
-    protected void setKerberosIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
+    protected void setKerberosIfNeeded(StackTestDto stackTestDto, IntegrationTestContext integrationTestContext) {
 //        var kerberos = KerberosEntity.getTestContextCluster().apply(integrationTestContext);
 //        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
 //                && stackEntity.getRequest().getCluster().getKerberosName() == null;
@@ -71,11 +72,11 @@ public abstract class StackPostStrategyRoot implements Strategy {
 //        }
     }
 
-    protected void setGatewayIfNeeded(StackEntity stackEntity, IntegrationTestContext integrationTestContext) {
+    protected void setGatewayIfNeeded(StackTestDto stackTestDto, IntegrationTestContext integrationTestContext) {
         var clusterGateway = ClusterGateway.getTestContextGateway().apply(integrationTestContext);
         if (clusterGateway != null) {
-            if (stackEntity.hasCluster()) {
-                stackEntity.getRequest().getCluster().setGateway(clusterGateway.getRequest());
+            if (stackTestDto.hasCluster()) {
+                stackTestDto.getRequest().getCluster().setGateway(clusterGateway.getRequest());
             }
         }
     }

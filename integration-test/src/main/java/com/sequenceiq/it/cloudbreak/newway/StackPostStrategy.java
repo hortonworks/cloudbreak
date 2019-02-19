@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public class StackPostStrategy implements Strategy {
 
@@ -24,19 +25,19 @@ public class StackPostStrategy implements Strategy {
 
     @Override
     public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        StackEntity stackEntity = (StackEntity) entity;
+        StackTestDto stackTestDto = (StackTestDto) entity;
         CloudbreakClient client = getTestContextCloudbreakClient().apply(integrationTestContext);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
-        if (credential != null && stackEntity.getRequest().getEnvironment().getCredentialName() == null) {
-            stackEntity.getRequest().getEnvironment().setCredentialName(credential.getName());
+        if (credential != null && stackTestDto.getRequest().getEnvironment().getCredentialName() == null) {
+            stackTestDto.getRequest().getEnvironment().setCredentialName(credential.getName());
         }
 
         Cluster cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
         if (cluster != null) {
-            if (stackEntity.getRequest().getCluster() == null) {
-                stackEntity.getRequest().setCluster(cluster.getRequest());
+            if (stackTestDto.getRequest().getCluster() == null) {
+                stackTestDto.getRequest().setCluster(cluster.getRequest());
             }
             if (cluster.getRequest().getCloudStorage() != null && cluster.getRequest().getCloudStorage().getS3()
                     != null && isEmpty(cluster.getRequest().getCloudStorage().getS3().getInstanceProfile())) {
@@ -58,33 +59,33 @@ public class StackPostStrategy implements Strategy {
 
         Integer gatewayPort = integrationTestContext.getContextParam("MOCK_PORT", Integer.class);
         if (gatewayPort != null) {
-            stackEntity.getRequest().setGatewayPort(gatewayPort);
+            stackTestDto.getRequest().setGatewayPort(gatewayPort);
         }
 
         KerberosTestDto kerberos = new KerberosTestDto(null);
-        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
-                && stackEntity.getRequest().getCluster().getKerberosName() == null;
+        boolean updateKerberos = stackTestDto.getRequest().getCluster() != null && stackTestDto.getRequest().getCluster().getAmbari() != null
+                && stackTestDto.getRequest().getCluster().getKerberosName() == null;
         if (kerberos != null && updateKerberos) {
-            var environment = stackEntity.getRequest().getCluster();
+            var environment = stackTestDto.getRequest().getCluster();
             environment.setKerberosName(kerberos.getRequest().getName());
         }
 
         ClusterGateway clusterGateway = ClusterGateway.getTestContextGateway().apply(integrationTestContext);
         if (clusterGateway != null) {
-            if (stackEntity.hasCluster()) {
-                var clusterV2Request = stackEntity.getRequest().getCluster();
+            if (stackTestDto.hasCluster()) {
+                var clusterV2Request = stackTestDto.getRequest().getCluster();
                 clusterV2Request.setGateway(clusterGateway.getRequest());
             }
         }
 
         ImageSettingsEntity imageSettings = ImageSettingsEntity.getTestContextImageSettings().apply(integrationTestContext);
         if (imageSettings != null) {
-            stackEntity.getRequest().setImage(imageSettings.getRequest());
+            stackTestDto.getRequest().setImage(imageSettings.getRequest());
         }
 
         HostGroups hostGroups = HostGroups.getTestContextHostGroups().apply(integrationTestContext);
         if (hostGroups != null) {
-            stackEntity.getRequest().setInstanceGroups(hostGroups.getRequest());
+            stackTestDto.getRequest().setInstanceGroups(hostGroups.getRequest());
         }
 
         // TODO: we have to move this logic ot from here to the test or cloudprovider(helper) level -> @afarsang
@@ -121,13 +122,13 @@ public class StackPostStrategy implements Strategy {
             stackEntity.getRequest().getNetwork().getParameters().put("internetGatewayId", null);
         }*/
 
-        log(" Name:\n" + stackEntity.getRequest().getName());
-        logJSON(" Stack post request:\n", stackEntity.getRequest());
-        stackEntity.setResponse(
+        log(" Name:\n" + stackTestDto.getRequest().getName());
+        logJSON(" Stack post request:\n", stackTestDto.getRequest());
+        stackTestDto.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .post(client.getWorkspaceId(), stackEntity.getRequest()));
-        logJSON(" Stack post response:\n", stackEntity.getResponse());
-        log(" ID:\n" + stackEntity.getResponse().getId());
+                        .post(client.getWorkspaceId(), stackTestDto.getRequest()));
+        logJSON(" Stack post response:\n", stackTestDto.getResponse());
+        log(" ID:\n" + stackTestDto.getResponse().getId());
     }
 }

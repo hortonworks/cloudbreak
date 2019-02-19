@@ -10,7 +10,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.spark.StatefulRoute;
@@ -38,10 +39,10 @@ public class RecoveryItTest extends AbstractIntegrationTest {
         mockAmbari(testContext);
         testContext
                 .given(WORKER_ID, InstanceGroupEntity.class).withHostGroup(WORKER).withNodeCount(1)
-                .given(StackEntity.class).withName(stackName).replaceInstanceGroups(WORKER_ID)
+                .given(StackTestDto.class).withName(stackName).replaceInstanceGroups(WORKER_ID)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack.sync())
+                .when(StackTestAction::sync)
                 .await(STACK_FAILED)
                 .validate();
     }

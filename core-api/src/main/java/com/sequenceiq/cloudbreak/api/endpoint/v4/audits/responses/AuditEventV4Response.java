@@ -27,7 +27,7 @@ public class AuditEventV4Response {
     }
 
     public OperationDetails getOperation() {
-        return structuredEvent.getOperation();
+        return structuredEvent == null ? null : structuredEvent.getOperation();
     }
 
     public Long getAuditId() {
@@ -35,11 +35,11 @@ public class AuditEventV4Response {
     }
 
     public String getStatus() {
-        return structuredEvent.getStatus();
+        return structuredEvent == null ? null : structuredEvent.getStatus();
     }
 
     public Long getDuration() {
-        return structuredEvent.getDuration();
+        return structuredEvent == null ? null : structuredEvent.getDuration();
     }
 
     public StructuredEvent getStructuredEvent() {

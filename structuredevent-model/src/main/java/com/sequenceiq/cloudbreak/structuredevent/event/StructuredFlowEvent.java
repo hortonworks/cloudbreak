@@ -21,6 +21,7 @@ public class StructuredFlowEvent extends StructuredEvent {
     private String exception;
 
     public StructuredFlowEvent() {
+        super(StructuredFlowEvent.class.getSimpleName());
     }
 
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,

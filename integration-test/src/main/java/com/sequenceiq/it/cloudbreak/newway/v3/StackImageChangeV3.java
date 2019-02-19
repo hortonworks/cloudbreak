@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackImageChangeV3 extends AbstractCloudbreakEntity<StackImageChangeV4Request, Response, StackImageChangeV3> {
@@ -42,7 +42,7 @@ public class StackImageChangeV3 extends AbstractCloudbreakEntity<StackImageChang
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" changeImage " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().changeImage(workspaceId, stack.getRequest().getName(), stackImageChange.getRequest());

@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StructuredRestCallEvent extends StructuredEvent {
     private RestCallDetails restCall;
 
     public StructuredRestCallEvent() {
+        super(StructuredRestCallEvent.class.getSimpleName());
     }
 
     public StructuredRestCallEvent(OperationDetails operation, RestCallDetails restCall) {
