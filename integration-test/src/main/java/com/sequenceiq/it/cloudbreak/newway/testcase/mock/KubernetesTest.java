@@ -109,13 +109,13 @@ public class KubernetesTest extends AbstractIntegrationTest {
     @DataProvider(name = INVALID_ATTRIBUTE_PROVIDER)
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
-                {applicationContext.getBean(TestContext.class), longStringGeneratorUtil.stringGenerator(101), KUBERNETES_CONTENT,
+                {getBean(TestContext.class), longStringGeneratorUtil.stringGenerator(101), KUBERNETES_CONTENT,
                         " The length of the config's name has to be in range of 5 to 100"},
-                {applicationContext.getBean(TestContext.class), "abc", KUBERNETES_CONTENT,
+                {getBean(TestContext.class), "abc", KUBERNETES_CONTENT,
                         " The length of the config's name has to be in range of 5 to 100"},
-                {applicationContext.getBean(TestContext.class), "a-@#$%|:&*;", KUBERNETES_CONTENT,
+                {getBean(TestContext.class), "a-@#$%|:&*;", KUBERNETES_CONTENT,
                         " The config's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character"},
-                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForResource(), null,
+                {getBean(TestContext.class), getNameGenerator().getRandomNameForResource(), null,
                         "post.arg1.content: null, error: must not be null"}
         };
     }

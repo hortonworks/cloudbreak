@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,7 +85,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         String testClassName = getClass().getSimpleName();
         MDC.put("testlabel", testClassName);
         if (cleanupBeforeStart) {
-            applicationContext.getBean(PurgeGarbageService.class).purge();
+            getBean(PurgeGarbageService.class).purge();
         }
     }
 
@@ -105,12 +106,12 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @DataProvider(name = TEST_CONTEXT_WITH_MOCK)
     public Object[][] testContextWithMock() {
-        return new Object[][]{{applicationContext.getBean(MockedTestContext.class)}};
+        return new Object[][]{{getBean(MockedTestContext.class)}};
     }
 
     @DataProvider(name = TEST_CONTEXT)
     public Object[][] testContextWithoutMock() {
-        return new Object[][]{{applicationContext.getBean(SparklessTestContext.class)}};
+        return new Object[][]{{getBean(SparklessTestContext.class)}};
     }
 
     public RandomNameCreator getNameGenerator() {
@@ -182,4 +183,23 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         createDefaultImageCatalog(testContext);
         initializeDefaultClusterDefinitions(testContext);
     }
+
+    /**
+     * Obtains bean from the application context for the given type if both the bean and the application context exists
+     * @param requiredType the class of the expected bean
+     * @param <T> generic for the type of the expected bean
+     * @throws IllegalStateException if no application context exists or bean could not be created
+     * @return extracted instance from the application context
+     */
+    protected <T> T getBean(Class<T> requiredType) {
+        if (applicationContext != null) {
+            try {
+                return applicationContext.getBean(requiredType);
+            } catch (BeansException be) {
+                throw new IllegalStateException("No bean found!", be);
+            }
+        }
+        throw new IllegalStateException("No application context found!");
+    }
+
 }

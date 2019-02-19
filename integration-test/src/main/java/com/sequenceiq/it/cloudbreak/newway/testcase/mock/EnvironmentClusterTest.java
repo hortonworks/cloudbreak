@@ -41,7 +41,7 @@ import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
-    public static final String NEW_CREDENTIAL_KEY = "newCred";
+    private static final String NEW_CREDENTIAL_KEY = "newCred";
 
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
@@ -359,7 +359,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    protected static EnvironmentEntity checkNewCredentialAttachedToEnv(TestContext testContext,
+    private static EnvironmentEntity checkNewCredentialAttachedToEnv(TestContext testContext,
             EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {

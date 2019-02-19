@@ -554,7 +554,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    protected static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    private static EnvironmentEntity checkCredentialAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(CredentialTestDto.class).getName())) {
             throw new TestFailException("Credential is not attached to environment");
@@ -562,7 +562,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    protected static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    static EnvironmentEntity checkRdsAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> rdsConfigs = new HashSet<>();
         Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
         for (DatabaseV4Response rdsConfigResponse : rdsConfigResponseSet) {
@@ -580,7 +580,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         return checkRdsDetachedFromEnv(environment, rdsName);
     }
 
-    public static <T extends CloudbreakEntity> EnvironmentEntity checkRdsDetachedFromEnv(TestContext testContext,
+    static <T extends CloudbreakEntity> EnvironmentEntity checkRdsDetachedFromEnv(TestContext testContext,
             EnvironmentEntity environment, Class<T> rdsKey, CloudbreakClient cloudbreakClient) {
         String rdsName = testContext.get(rdsKey).getName();
         return checkRdsDetachedFromEnv(environment, rdsName);
@@ -597,7 +597,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    protected static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    private static EnvironmentEntity checkLdapAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> ldapConfigs = new HashSet<>();
         Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
         for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
@@ -609,7 +609,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    protected static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+    private static EnvironmentEntity checkProxyAttachedToEnv(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         Set<String> proxyConfigs = new HashSet<>();
         Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
         for (ProxyV4Response proxyV4Response : proxyV4ResponseSet) {
