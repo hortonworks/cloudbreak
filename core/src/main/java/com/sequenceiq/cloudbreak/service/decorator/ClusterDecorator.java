@@ -62,9 +62,9 @@ public class ClusterDecorator {
 
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, ClusterDefinition clusterDefinition, User user, Workspace workspace,
             @Nonnull Stack stack) {
-        prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(clusterDefinition), user);
+        prepareClusterDefinition(cluster, request, workspace, stack, Optional.ofNullable(clusterDefinition), user);
         prepareClusterManagerVariant(cluster);
-        validateBlueprintIfRequired(cluster, request, stack);
+        validateClusterDefinitionIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName());
         prepareLdap(cluster, request, user, workspace);
@@ -78,23 +78,23 @@ public class ClusterDecorator {
         }
     }
 
-    private void validateBlueprintIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
-        if (request.getAmbari().getValidateBlueprint()) {
+    private void validateClusterDefinitionIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
+        if (request.getAmbari().getValidateClusterDefinition()) {
             ambariBlueprintValidator.validateBlueprintForStack(subject, subject.getClusterDefinition(), subject.getHostGroups(), stack.getInstanceGroups());
         }
     }
 
-    private void prepareBlueprint(Cluster subject, ClusterV4Request request, Workspace workspace, Stack stack, Optional<ClusterDefinition> clusterDefinition,
-            User user) {
+    private void prepareClusterDefinition(Cluster subject, ClusterV4Request request, Workspace workspace, Stack stack,
+            Optional<ClusterDefinition> clusterDefinition, User user) {
         if (clusterDefinition.isPresent()) {
             subject.setClusterDefinition(clusterDefinition.get());
-        } else if (!Strings.isNullOrEmpty(request.getAmbari().getBlueprintName())) {
-            subject.setClusterDefinition(clusterDefinitionService.getByNameForWorkspace(request.getAmbari().getBlueprintName(), workspace));
+        } else if (!Strings.isNullOrEmpty(request.getAmbari().getClusterDefinitionName())) {
+            subject.setClusterDefinition(clusterDefinitionService.getByNameForWorkspace(request.getAmbari().getClusterDefinitionName(), workspace));
         } else {
-            throw new BadRequestException("Blueprint is not configured for the cluster!");
+            throw new BadRequestException("Cluster definition is not configured for the cluster!");
         }
         removeHaComponentsFromGatewayTopologies(subject);
-        subject.setTopologyValidation(request.getAmbari().getValidateBlueprint());
+        subject.setTopologyValidation(request.getAmbari().getValidateClusterDefinition());
     }
 
     private void prepareClusterManagerVariant(Cluster cluster) {

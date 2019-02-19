@@ -17,7 +17,7 @@ public class V4ExistingResourceRestUrlParser extends RestUrlParser {
 
     // Irregular requests with resource ID instead of resource name: v4/{workspaceId}/audits/{auditId}
     // Irregular GET requests with event but no resource name: v4/{workspaceId}/audits/zip and remaining patterns
-    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/\\d+/(audits/.*|blueprints/recommendation|image_catalogs/images"
+    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/\\d+/(audits/.*|clusterdefinitions/recommendation|image_catalogs/images"
             + "|connectors/[a-z_]+|file_systems/[a-z_]+)");
 
     private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([^/]+)");

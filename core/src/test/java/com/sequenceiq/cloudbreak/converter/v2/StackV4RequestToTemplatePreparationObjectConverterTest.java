@@ -71,9 +71,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_CREDENTIAL_NAME = "testCred";
 
-    private static final String TEST_BLUEPRINT_NAME = "testBp";
+    private static final String TEST_CLUSTER_DEFINITION_NAME = "testBp";
 
-    private static final String TEST_BLUEPRINT_TEXT = "{}";
+    private static final String TEST_CLUSTER_DEFINITION_TEXT = "{}";
 
     private static final int GENERAL_TEST_QUANTITY = 2;
 
@@ -164,10 +164,10 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(environment.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);
         when(cluster.getAmbari()).thenReturn(ambari);
-        when(ambari.getBlueprintName()).thenReturn(TEST_BLUEPRINT_NAME);
-        when(clusterDefinitionService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(clusterDefinition);
-        when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_BLUEPRINT_TEXT);
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(clusterDefinitionStackInfo);
+        when(ambari.getClusterDefinitionName()).thenReturn(TEST_CLUSTER_DEFINITION_NAME);
+        when(clusterDefinitionService.getByNameForWorkspace(TEST_CLUSTER_DEFINITION_NAME, workspace)).thenReturn(clusterDefinition);
+        when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_CLUSTER_DEFINITION_TEXT);
+        when(stackInfoService.clusterDefinitionStackInfo(TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(clusterDefinitionStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
@@ -314,7 +314,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         String stackType = "HDP";
         when(clusterDefinitionStackInfo.getVersion()).thenReturn(stackVersion);
         when(clusterDefinitionStackInfo.getType()).thenReturn(stackType);
-        ClusterDefinitionView expected = new ClusterDefinitionView(TEST_BLUEPRINT_TEXT, stackVersion, stackType);
+        ClusterDefinitionView expected = new ClusterDefinitionView(TEST_CLUSTER_DEFINITION_TEXT, stackVersion, stackType);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -324,7 +324,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenObtainingBlueprintStackInfoThenItsVersionShouldBeStoredAsStackRepoDetailsHdpVersion() {
         String expected = TEST_VERSION;
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(clusterDefinitionStackInfo);
+        when(stackInfoService.clusterDefinitionStackInfo(TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(clusterDefinitionStackInfo);
         when(clusterDefinitionStackInfo.getVersion()).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);

@@ -33,13 +33,13 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialModifyClusterTests.class);
 
     @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String credentialName, String blueprintName, String imageId)
+    public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String credentialName, String clusterDefinitionName, String imageId)
             throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential()
                 .withName(credentialName), "a credential is created.");
         given(Cluster.request()
-                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")

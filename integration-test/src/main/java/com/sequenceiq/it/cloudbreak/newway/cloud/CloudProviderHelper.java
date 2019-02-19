@@ -43,7 +43,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
-    private static final String DEFAULT_DATALAKE_BLUEPRINT = "Data Lake: Apache Ranger, Apache Hive Metastore";
+    private static final String DEFAULT_DATALAKE_AMBARI_BLUEPRINT = "Data Lake: Apache Ranger, Apache Hive Metastore";
 
     private static final String RECOVERY_MODE = "RecoveryMode";
 
@@ -204,8 +204,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         var req = new AmbariV4Request();
         req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
-        req.setBlueprintName(bluePrintName);
-        req.setValidateBlueprint(false);
+        req.setClusterDefinitionName(bluePrintName);
+        req.setValidateClusterDefinition(false);
         req.setValidateRepositories(Boolean.TRUE);
         req.setStackRepository(new StackRepositoryV4Request());
         return req;
@@ -255,7 +255,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     protected String getDatalakeBlueprintName() {
-        String blueprintName = testParameter.get("datalakeBlueprintName");
-        return blueprintName != null ? blueprintName : DEFAULT_DATALAKE_BLUEPRINT;
+        String clusterDefinitionName = testParameter.get("datalakeBlueprintName");
+        return clusterDefinitionName != null ? clusterDefinitionName : DEFAULT_DATALAKE_AMBARI_BLUEPRINT;
     }
 }

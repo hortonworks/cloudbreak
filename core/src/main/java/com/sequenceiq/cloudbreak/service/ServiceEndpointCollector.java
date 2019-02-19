@@ -139,8 +139,8 @@ public class ServiceEndpointCollector {
                 ExposedService.LOGSEARCH);
     }
 
-    private Collection<ExposedServiceV4Response> getKnoxServices(ClusterDefinition blueprint) {
-        String blueprintText = blueprint.getClusterDefinitionText();
+    private Collection<ExposedServiceV4Response> getKnoxServices(ClusterDefinition clusterDefinition) {
+        String blueprintText = clusterDefinition.getClusterDefinitionText();
         AmbariBlueprintTextProcessor blueprintTextProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
         haComponents.remove(ExposedService.RANGER.getServiceName());

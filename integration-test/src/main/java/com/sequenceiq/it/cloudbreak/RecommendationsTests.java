@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -35,9 +35,9 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 
 public class RecommendationsTests extends CloudbreakTest {
 
-    private static final String VALID_BP_NAME = "valid-blueprint";
+    private static final String VALID_CD_NAME = "valid-blueprint";
 
-    private static final String BP_DESCRIPTION = "temporary blueprint for API E2E tests";
+    private static final String CD_DESCRIPTION = "temporary cluster definition for API E2E tests";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecommendationsTests.class);
 
@@ -50,7 +50,7 @@ public class RecommendationsTests extends CloudbreakTest {
         setTestParameter(tp);
     }
 
-    private String getBlueprintFile() throws IOException {
+    private String getClusterDefinitionFile() throws IOException {
         return new String(StreamUtils.copyToByteArray(applicationContext.getResource("classpath:/blueprint/multi-node-hdfs-yarn.bp").getInputStream()));
     }
 
@@ -64,16 +64,16 @@ public class RecommendationsTests extends CloudbreakTest {
         return new HashSet<>(mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(Set.class, DiskV4Response.class)));
     }
 
-    private void createBlueprint() throws Exception {
+    private void createClusterDefinition() throws Exception {
         given(CloudbreakClient.created());
-        given(Blueprint.request().withName(VALID_BP_NAME).withDescription(BP_DESCRIPTION).withAmbariBlueprint(getBlueprintFile()));
-        when(Blueprint.post());
+        given(ClusterDefinition.request().withName(VALID_CD_NAME).withDescription(CD_DESCRIPTION).withClusterDefinition(getClusterDefinitionFile()));
+        when(ClusterDefinition.post());
     }
 
-    private void deleteBlueprint() throws Exception {
+    private void deleteClusterDefinition() throws Exception {
         given(CloudbreakClient.created());
-        given(Blueprint.request().withName(VALID_BP_NAME));
-        when(Blueprint.delete());
+        given(ClusterDefinition.request().withName(VALID_CD_NAME));
+        when(ClusterDefinition.delete());
     }
 
     private void deleteCredential() throws Exception {
@@ -95,10 +95,10 @@ public class RecommendationsTests extends CloudbreakTest {
 
     @BeforeClass
     public void setUp() throws Exception {
-        LOGGER.info("Create blueprint with name ::: {}", VALID_BP_NAME);
+        LOGGER.info("Create cluster definition with name ::: {}", VALID_CD_NAME);
 
         try {
-            createBlueprint();
+            createClusterDefinition();
         } catch (ForbiddenException | BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
             String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
@@ -108,10 +108,10 @@ public class RecommendationsTests extends CloudbreakTest {
 
     @AfterClass
     public void cleanUp() throws Exception {
-        LOGGER.info("Delete {} blueprint and {} credential.", VALID_BP_NAME, cloudProvider.getCredentialName());
+        LOGGER.info("Delete {} cluster definition and {} credential.", VALID_CD_NAME, cloudProvider.getCredentialName());
 
         try {
-            deleteBlueprint();
+            deleteClusterDefinition();
             deleteCredential();
         } catch (ForbiddenException | BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
@@ -145,11 +145,12 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Map<String, VmTypeV4Response> recommendationsForBlueprint = recommendations.getResponse().getRecommendations();
+                    Map<String, VmTypeV4Response> recommendationsForClusterDefinition = recommendations.getResponse().getRecommendations();
 
-                    for (Entry<String, VmTypeV4Response> recommendationForBlueprint : recommendationsForBlueprint.entrySet()) {
-                        LOGGER.debug("{} Recommendations are ::: {}", recommendationForBlueprint.getKey(), recommendationForBlueprint.getValue());
-                        Assert.assertFalse(recommendationForBlueprint.getValue().getValue().isEmpty(),
+                    for (Entry<String, VmTypeV4Response> recommendationForClusterDefinition : recommendationsForClusterDefinition.entrySet()) {
+                        LOGGER.debug("{} Recommendations are ::: {}", recommendationForClusterDefinition.getKey(),
+                                recommendationForClusterDefinition.getValue());
+                        Assert.assertFalse(recommendationForClusterDefinition.getValue().getValue().isEmpty(),
                                 "Recommendations should be present in response!");
                     }
                 }), "Recommendations should be part of the response."

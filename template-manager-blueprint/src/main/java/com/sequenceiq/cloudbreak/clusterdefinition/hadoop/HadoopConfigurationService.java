@@ -36,7 +36,7 @@ public class HadoopConfigurationService implements ClusterDefinitionComponentCon
     }
 
     @Override
-    public boolean specialCondition(TemplatePreparationObject source, String blueprintProcessor) {
+    public boolean specialCondition(TemplatePreparationObject source, String clusterDefinitionText) {
         return !source.getClusterDefinitionView().isHdf();
     }
 

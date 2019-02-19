@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor
 public class ComponentLocatorServiceTest {
 
     @Mock
-    private AmbariBlueprintTextProcessor blueprintProcessor;
+    private AmbariBlueprintTextProcessor ambariBlueprintTextProcessor;
 
     @Mock
     private HostGroupService hostGroupService;
@@ -65,9 +65,9 @@ public class ComponentLocatorServiceTest {
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
 
         when(hostGroupService.getByCluster(nullable(Long.class))).thenReturn(ImmutableSet.of(hg1, hg2));
-        when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
-        when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
-        when(ambariBlueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);
+        when(ambariBlueprintTextProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
+        when(ambariBlueprintTextProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
+        when(ambariBlueprintProcessorFactory.get(nullable(String.class))).thenReturn(ambariBlueprintTextProcessor);
     }
 
     private HostGroup createHostGroup(String name, Long id, String hostname) {

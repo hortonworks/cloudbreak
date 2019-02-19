@@ -14,7 +14,7 @@ public class StackV4RequestToStackValidationRequestConverter extends AbstractCon
     @Override
     public StackValidationV4Request convert(StackV4Request source) {
         StackValidationV4Request stackValidationRequest = new StackValidationV4Request();
-        stackValidationRequest.setBlueprintName(source.getCluster().getAmbari().getBlueprintName());
+        stackValidationRequest.setClusterDefinitionName(source.getCluster().getAmbari().getClusterDefinitionName());
         stackValidationRequest.setEnvironmentName(source.getEnvironment().getName());
         stackValidationRequest.setCredentialName(source.getEnvironment().getCredentialName());
         stackValidationRequest.setNetwork(source.getNetwork());

@@ -86,7 +86,7 @@ public class SharedServiceConfigProviderTest {
     private AmbariClientFactory ambariClientFactory;
 
     @Mock
-    private DatalakeConfigProvider datalakeConfigProvider;
+    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Mock
     private StackInputs stackInputs;
@@ -176,8 +176,8 @@ public class SharedServiceConfigProviderTest {
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.TRUE);
         AmbariClient ambariClient = new AmbariClient();
         when(credentialPrerequisiteService.createCumulusAmbariClient(anyString())).thenReturn(ambariClient);
-        when(datalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-        when(datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, ambariClient))
+        when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
+        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, ambariClient))
                 .thenReturn(Collections.singletonMap("test", "data"));
         when(stackService.save(stackIn)).thenReturn(stackIn);
         stackIn.setInputs(new Json(stackInputs));
@@ -205,8 +205,8 @@ public class SharedServiceConfigProviderTest {
         when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.FALSE);
         AmbariClient ambariClient = new AmbariClient();
-        when(datalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-        when(datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, ambariClient))
+        when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
+        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, ambariClient))
                 .thenReturn(Collections.singletonMap("test", "data"));
         when(stackService.save(stackIn)).thenReturn(stackIn);
         Stack dlStack = new Stack();

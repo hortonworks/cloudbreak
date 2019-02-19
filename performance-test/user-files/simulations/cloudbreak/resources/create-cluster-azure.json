@@ -33,7 +33,7 @@
   },
   "ldapRequired": false,
   "sssdConfigId": null,
-  "validateBlueprint": true,
+  "validateClusterDefinition": true,
   "fileSystem": null,
   "customContainer": null,
   "customQueue": "default",

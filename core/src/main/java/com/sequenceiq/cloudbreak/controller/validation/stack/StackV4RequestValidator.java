@@ -184,9 +184,9 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(stackRequest.getCluster().getAmbari().getBlueprintName(),
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(stackRequest.getCluster().getAmbari().getClusterDefinitionName(),
                 workspaceId);
-        boolean sharedServiceReadyBlueprint = clusterDefinitionService.isDatalakeBlueprint(clusterDefinition);
+        boolean sharedServiceReadyBlueprint = clusterDefinitionService.isDatalakeAmbariBlueprint(clusterDefinition);
         if (sharedServiceReadyBlueprint) {
             Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getCluster(), workspaceId);
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready cluster definition) you should provide at least "

@@ -180,7 +180,7 @@ public class AmbariBlueprintModulTest extends CentralBlueprintContext implements
                 prepareBlueprintPreparationObjectWithBlueprintText(inputFile);
 
         JSONObject expected = toJSON(outputFile.getFileContent());
-        JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(templatePreparationObject));
+        JSONObject resultBlueprintText = toJSON(getUnderTest().getClusterDefinitionText(templatePreparationObject));
         StringBuilder messageBuilder = new StringBuilder();
         messageBuilder.append("The result has not matched with the expected output ").append(outputFile.getFileName());
         messageBuilder.append("\nexpected:\n");
@@ -199,7 +199,7 @@ public class AmbariBlueprintModulTest extends CentralBlueprintContext implements
 
     private TemplatePreparationObject prepareBlueprintPreparationObjectWithBlueprintText(TestFile inputFile) {
         TemplatePreparationObject templatePreparationObject = testData;
-        templatePreparationObject.getClusterDefinitionView().setBlueprintText(inputFile.getFileContent());
+        templatePreparationObject.getClusterDefinitionView().setClusterDefinitionText(inputFile.getFileContent());
         return templatePreparationObject;
     }
 

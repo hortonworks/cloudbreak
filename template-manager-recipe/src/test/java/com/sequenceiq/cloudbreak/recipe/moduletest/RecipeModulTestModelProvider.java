@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.storageLocation;
-import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalBlueprintView;
+import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterDefinitionView;
 import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterConfigs;
 
 import java.io.File;
@@ -46,14 +46,14 @@ class RecipeModulTestModelProvider {
 
     static TemplatePreparationObject testTemplatePreparationObject() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.HIVE))))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithLocalLdap() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
@@ -62,7 +62,7 @@ class RecipeModulTestModelProvider {
         LdapConfig ldapConfig = ldapConfig();
         ldapConfig.setServerHost(String.format("%s%s", StringUtils.repeat("some-superlong-content", "-", 93), ".com"));
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withLdapConfig(ldapConfig, "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
@@ -71,91 +71,91 @@ class RecipeModulTestModelProvider {
         LdapConfig ldapConfig = ldapConfig();
         ldapConfig.setServerHost("\\");
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withLdapConfig(ldapConfig, "cn=admin,dc=example,dc=org", "admin")
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithSingleS3Storage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getS3ConfigView(getStorageLocationViews(1)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithTwoS3Storage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getS3ConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithSingleGcsStorage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getGcsConfigView(getStorageLocationViews(1)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithTwoGcsStorage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getGcsConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithSingleAdlsGen2Storage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getAdlsGen2ConfigView(getStorageLocationViews(1)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithTwoAdlsGen2Storage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getAdlsGen2ConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithSingleAdlsStorage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getAdlsConfigView(getStorageLocationViews(1)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithTwoAdlsStorage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getAdlsConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithSingleWasbStorage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getWasbConfigView(getStorageLocationViews(1)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithTwoWasbStorage() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withFileSystemConfigurationView(getWasbConfigView(getStorageLocationViews(2)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithDruidRds() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.DRUID), rdsConfig(DatabaseType.HIVE)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithRangerAndHiveRds() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
@@ -163,7 +163,7 @@ class RecipeModulTestModelProvider {
 
     static TemplatePreparationObject testTemplateWithNoSharedServiceAndRds() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>())
                 .withSharedServiceConfigs(null)
                 .build();
@@ -171,7 +171,7 @@ class RecipeModulTestModelProvider {
 
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithOnlyHiveRds() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.HIVE)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
@@ -179,7 +179,7 @@ class RecipeModulTestModelProvider {
 
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithOnlyRangerRds() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
@@ -187,7 +187,7 @@ class RecipeModulTestModelProvider {
 
     static TemplatePreparationObject testTemplateWhenBlueprintVersionIs25() {
         return getPreparedBuilder("master")
-                .withClusterDefinitionView(generalBlueprintView("", "2.5", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.5", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
@@ -198,7 +198,7 @@ class RecipeModulTestModelProvider {
         smartSenseSubscription.setSubscriptionId("A-99900000-C-00000000");
         return Builder.builder()
                 .withGeneralClusterConfigs(generalClusterConfigs())
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
+                .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
                 .withSmartSenseSubscription(smartSenseSubscription)
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))

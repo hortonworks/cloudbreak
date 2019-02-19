@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.doc;
 
 public class OperationDescriptions {
-    public static class BlueprintOpDescription {
-        public static final String GET_BY_BLUEPRINT_NAME = "retrieve validation request by blueprint name";
-        public static final String LIST_BY_WORKSPACE = "list blueprints for the given workspace";
-        public static final String GET_BY_NAME_IN_WORKSPACE = "get blueprint by name in workspace";
-        public static final String CREATE_IN_WORKSPACE = "create blueprint in workspace";
-        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete blueprint by name in workspace";
+    public static class ClusterDefinitionOpDescription {
+        public static final String GET_BY_NAME = "retrieve validation request by cluster definition name";
+        public static final String LIST_BY_WORKSPACE = "list cluster definitions for the given workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE = "get cluster definition by name in workspace";
+        public static final String CREATE_IN_WORKSPACE = "create cluster definition in workspace";
+        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete cluster definition by name in workspace";
     }
 
     public static class CredentialOpDescription {
@@ -25,7 +25,6 @@ public class OperationDescriptions {
     public static class StackOpDescription {
         public static final String POST_PRIVATE = "create stack as private resource";
         public static final String POST_PUBLIC = "create stack as public resource";
-        public static final String POST_PUBLIC_BLUEPRINT = "create stack as public resource for blueprint";
         public static final String GET_PRIVATE = "retrieve private stack";
         public static final String GET_PUBLIC = "retrieve public and private (owned) stacks";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private stack by name";
@@ -57,7 +56,7 @@ public class OperationDescriptions {
         public static final String REPAIR_CLUSTER_IN_WORKSPACE = "repairs the stack by name in workspace";
         public static final String DELETE_WITH_KERBEROS_IN_WORKSPACE = "deletes the stack (with kerberos cluster) by name in workspace";
         public static final String GET_STACK_REQUEST_IN_WORKSPACE = "gets StackRequest by name in workspace";
-        public static final String POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE = "posts stack for blueprint in workspace";
+        public static final String POST_STACK_FOR_CLUSTER_DEFINITION_IN_WORKSPACE = "posts stack for cluster definition in workspace";
         public static final String DELETE_INSTANCE_BY_ID_IN_WORKSPACE = "deletes instance from the stack's cluster in workspace";
         public static final String CHECK_IMAGE_IN_WORKSPACE = "checks image in stack by name in workspace";
     }
@@ -71,7 +70,7 @@ public class OperationDescriptions {
         public static final String PUT_BY_STACK_ID = "update cluster by stack id";
         public static final String UPGRADE_AMBARI = "upgrade the Ambari version";
         public static final String SET_MAINTENANCE_MODE = "set maintenance mode for the cluster";
-        public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
+        public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with cluster definition outputs";
         public static final String FAILURE_REPORT = "failure report";
         public static final String REPAIR_CLUSTER = "repair the cluster";
     }
@@ -202,7 +201,7 @@ public class OperationDescriptions {
     public static class ConnectorOpDescription {
         public static final String GET_DISK_TYPES = "retrive available disk types";
         public static final String GET_REGION_R_BY_TYPE = "retrive regions by type";
-        public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint";
+        public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given cluster definition";
         public static final String GET_TAG_SPECIFICATIONS = "retrive tag specifications";
         public static final String GET_NETWORKS = "retrive network properties";
         public static final String GET_SECURITYGROUPS = "retrive securitygroups properties";

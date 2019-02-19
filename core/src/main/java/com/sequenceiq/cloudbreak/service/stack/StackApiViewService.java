@@ -68,7 +68,7 @@ public class StackApiViewService {
                 stackViewResponses = stackViewResponses
                         .stream()
                         .filter(stackViewResponse ->
-                                Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getBlueprint().getTags().get("shared_services_ready")))
+                                Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getClusterDefinition().getTags().get("shared_services_ready")))
                         .collect(Collectors.toSet());
             }
             return stackViewResponses;

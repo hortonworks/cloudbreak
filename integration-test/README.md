@@ -140,11 +140,11 @@ tests:
 
   - name: blueprint_test
     parameters:
-      blueprintName: it-blueprint-restest
-      blueprintFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
+      clusterDefinitionName: it-blueprint-restest
+      clusterDefinitionFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
     classes:
-      - com.sequenceiq.it.cloudbreak.BlueprintCreationTest
-      - com.sequenceiq.it.cloudbreak.BlueprintDeleteByNameTest
+      - com.sequenceiq.it.cloudbreak.ClusterDefinitionCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterDefinitionDeleteByNameTest
 
   # integratontest.gcpcredential params must be set in application.yml
   - name: gcp_credential_test
@@ -163,7 +163,7 @@ In the example `cleanUp` is a suite level parameter and all the tests will get w
 name: OpenStack_full_smoketest_cred
 parameters:
   cloudProvider: OPENSTACK
-  blueprintName: testbp
+  clusterDefinitionName: testbp
   credentialName: openstack
   securityGroupName: all-services-port
   networkName: testosnetwork
@@ -227,7 +227,7 @@ In the example `cloudProvider` is a suite level parameter and `CloudbreakTestSui
 
 **Resource names if we have existing ones:**
 * credentialName - the name of the credential
-* blueprintName - the name of the blueprint
+* clusterDefinitionName - the name of the blueprint
 * stackName - the name of the cluster
 * instanceGroups - instance groups for cluster creation,
 

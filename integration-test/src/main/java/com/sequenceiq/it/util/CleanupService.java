@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
@@ -46,12 +46,12 @@ public class CleanupService {
                 .filter(stack -> stack.getName().startsWith("it-"))
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, workspaceId, stack.getName()));
 
-        cloudbreakClient.blueprintV4Endpoint()
+        cloudbreakClient.clusterDefinitionV4Endpoint()
                 .list(workspaceId)
                 .getResponses()
                 .stream()
-                .filter(blueprint -> blueprint.getName().startsWith("it-"))
-                .forEach(blueprint -> deleteBlueprint(workspaceId, cloudbreakClient, blueprint.getId()));
+                .filter(clusterDefinition -> clusterDefinition.getName().startsWith("it-"))
+                .forEach(clusterDefinition -> deleteClusterDefinition(workspaceId, cloudbreakClient, clusterDefinition.getId()));
 
         cloudbreakClient.recipeV4Endpoint()
                 .list(workspaceId)
@@ -88,15 +88,15 @@ public class CleanupService {
         }
     }
 
-    public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
-        if (blueprintId != null) {
-            Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId)
+    public void deleteClusterDefinition(Long workspaceId, CloudbreakClient cloudbreakClient, Long clusterDefinitionId) {
+        if (clusterDefinitionId != null) {
+            Optional<ClusterDefinitionV4ViewResponse> response = cloudbreakClient.clusterDefinitionV4Endpoint().list(workspaceId)
                     .getResponses()
                     .stream()
-                    .filter(blueprint -> blueprint.getId().equals(blueprintId))
+                    .filter(clusterDefinition -> clusterDefinition.getId().equals(clusterDefinitionId))
                     .findFirst();
             if (response.isPresent()) {
-                cloudbreakClient.blueprintV4Endpoint().delete(workspaceId, response.get().getName());
+                cloudbreakClient.clusterDefinitionV4Endpoint().delete(workspaceId, response.get().getName());
             }
         }
     }

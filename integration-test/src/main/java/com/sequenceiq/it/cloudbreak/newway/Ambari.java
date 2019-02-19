@@ -29,7 +29,7 @@ public class Ambari extends Entity  {
     }
 
     public Ambari withBlueprintName(String name) {
-        request.setBlueprintName(name);
+        request.setClusterDefinitionName(name);
         return this;
     }
 
@@ -58,8 +58,8 @@ public class Ambari extends Entity  {
         return this;
     }
 
-    public Ambari withValidateBlueprint(boolean validate) {
-        request.setValidateBlueprint(validate);
+    public Ambari withValidateClusterDefinition(boolean validate) {
+        request.setValidateClusterDefinition(validate);
         return this;
     }
 

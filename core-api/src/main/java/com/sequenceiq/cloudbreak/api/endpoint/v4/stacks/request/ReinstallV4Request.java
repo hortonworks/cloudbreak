@@ -29,8 +29,8 @@ public class ReinstallV4Request implements JsonEntity {
     private StackRepositoryV4Request stackRepository;
 
     @NotNull
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
-    private String blueprintName;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_NAME)
+    private String clusterDefinition;
 
     @ApiModelProperty(StackModelDescription.KERBEROS_PASSWORD)
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
@@ -57,12 +57,12 @@ public class ReinstallV4Request implements JsonEntity {
         this.stackRepository = stackRepository;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getClusterDefinition() {
+        return clusterDefinition;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setClusterDefinition(String clusterDefinition) {
+        this.clusterDefinition = clusterDefinition;
     }
 
     public String getKerberosPassword() {

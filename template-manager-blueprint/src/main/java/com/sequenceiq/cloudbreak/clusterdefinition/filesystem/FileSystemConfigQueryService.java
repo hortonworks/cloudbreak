@@ -58,7 +58,7 @@ public class FileSystemConfigQueryService {
     public Set<ConfigQueryEntry> queryParameters(FileSystemConfigQueryObject request) {
         Set<ConfigQueryEntry> filtered = new HashSet<>();
 
-        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = ambariBlueprintProcessorFactory.get(request.getBlueprintText());
+        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = ambariBlueprintProcessorFactory.get(request.getClusterDefinitionText());
         Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
         for (Map.Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
             for (String service : serviceHostgroupEntry.getValue()) {
@@ -106,7 +106,7 @@ public class FileSystemConfigQueryService {
         templateObject.put("attachedCluster", fileSystemConfigQueryObject.isAttachedCluster());
         templateObject.put("datalakeCluster", fileSystemConfigQueryObject.isDatalakeCluster());
         templateObject.put("storageName", fileSystemConfigQueryObject.getStorageName());
-        templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
+        templateObject.put("clusterDefinitionText", fileSystemConfigQueryObject.getClusterDefinitionText());
         templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));
         templateObject.put("protocol", protocol);
         return templateObject;

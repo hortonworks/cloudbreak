@@ -23,12 +23,12 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
     public AmbariEntity valid() {
         return withUserName("admin")
                 .withPassword("admin1234")
-                .withBlueprintName(MockCloudProvider.BLUEPRINT_DEFAULT_NAME)
+                .withClusterDefinitionName(MockCloudProvider.CLUSTER_DEFINITION_DEFAULT_NAME)
                 .withValidateRepositories(true);
     }
 
-    public AmbariEntity withBlueprintName(String blueprintName) {
-        getRequest().setBlueprintName(blueprintName);
+    public AmbariEntity withClusterDefinitionName(String clusterDefinitionName) {
+        getRequest().setClusterDefinitionName(clusterDefinitionName);
         return this;
     }
 
@@ -42,8 +42,8 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
         return this;
     }
 
-    public AmbariEntity withValidateBlueprint(Boolean validateBlueprint) {
-        getRequest().setValidateBlueprint(validateBlueprint);
+    public AmbariEntity withValidateClusterDefinition(Boolean validateClusterDefinition) {
+        getRequest().setValidateClusterDefinition(validateClusterDefinition);
         return this;
     }
 

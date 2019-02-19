@@ -19,8 +19,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.converter.v4.blueprints.BlueprintV4RequestToBlueprintConverter;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
+import com.sequenceiq.cloudbreak.converter.v4.clusterdefinition.ClusterDefinitionV4RequestToClusterDefinitionConverter;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -32,7 +32,7 @@ public class DefaultAmbariBlueprintCacheTest {
     private AmbariBlueprintUtils ambariBlueprintUtils;
 
     @Mock
-    private BlueprintV4RequestToBlueprintConverter converter;
+    private ClusterDefinitionV4RequestToClusterDefinitionConverter converter;
 
     @InjectMocks
     private DefaultAmbariBlueprintCache underTest;
@@ -47,7 +47,7 @@ public class DefaultAmbariBlueprintCacheTest {
 
         when(ambariBlueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
         when(ambariBlueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText);
-        when(converter.convert(any(BlueprintV4Request.class))).thenReturn(bp1);
+        when(converter.convert(any(ClusterDefinitionV4Request.class))).thenReturn(bp1);
 
         underTest.defaultBlueprints().clear();
     }

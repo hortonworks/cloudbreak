@@ -151,8 +151,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyHiveRdsWithNameThenErrorComes() {
-        when(clusterDefinitionService.isDatalakeBlueprint(any())).thenReturn(true);
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsOnlyHiveRdsWithNameThenErrorComes() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_HIVE_RDS_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
@@ -170,8 +170,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereIsOnlyRangerRdsWithNameThenErrorComes() {
-        when(clusterDefinitionService.isDatalakeBlueprint(any())).thenReturn(true);
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsOnlyRangerRdsWithNameThenErrorComes() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
@@ -189,8 +189,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameButLdapDoesntThenErrorComes() {
-        when(clusterDefinitionService.isDatalakeBlueprint(any())).thenReturn(true);
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameButLdapDoesntThenErrorComes() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
@@ -211,8 +211,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithNameThenEverythingIsFine() {
-        when(clusterDefinitionService.isDatalakeBlueprint(any())).thenReturn(true);
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameAndLdapWithNameThenEverythingIsFine() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
         request.getCluster().setLdapName(TEST_LDAP_NAME);
@@ -231,8 +231,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothIdAndLdapWithNameThenEverythingIsFine() {
-        when(clusterDefinitionService.isDatalakeBlueprint(any())).thenReturn(true);
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithBothIdAndLdapWithNameThenEverythingIsFine() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
         request.getCluster().setLdapName(TEST_LDAP_NAME);
@@ -250,8 +250,8 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWhenBlueprintIsSharedServiceReadyAndThereIsNoLdapAndRdsConfigGivenThenErrorComes() {
-        when(clusterDefinitionService.isDatalakeBlueprint(any())).thenReturn(true);
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsNoLdapAndRdsConfigGivenThenErrorComes() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Collections.emptySet());
         request.getCluster().setLdapName(null);
@@ -442,7 +442,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
     private AmbariV4Request getAmbariV4Request() {
         AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setBlueprintName(TEST_BP_NAME);
+        ambariV4Request.setClusterDefinitionName(TEST_BP_NAME);
         return ambariV4Request;
     }
 

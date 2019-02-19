@@ -39,7 +39,7 @@ public class StackInfoServiceTest {
         when(ambariBlueprintUtils.getBlueprintStackVersion(any(JsonNode.class))).thenReturn("2.6");
         when(ambariBlueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
-        stackInfoService.blueprintStackInfo(testBlueprint);
+        stackInfoService.clusterDefinitionStackInfo(testBlueprint);
 
         verify(ambariBlueprintUtils, times(1)).getBlueprintStackVersion(any(JsonNode.class));
         verify(ambariBlueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
@@ -52,7 +52,7 @@ public class StackInfoServiceTest {
         thrown.expect(ClusterDefinitionProcessingException.class);
         thrown.expectMessage("Unable to detect ClusterDefinitionStackInfo from the source cluster definition which was: not-a-valid-bluepint.");
 
-        stackInfoService.blueprintStackInfo(testBlueprint);
+        stackInfoService.clusterDefinitionStackInfo(testBlueprint);
 
         verify(ambariBlueprintUtils, times(0)).getBlueprintStackVersion(any(JsonNode.class));
         verify(ambariBlueprintUtils, times(0)).getBlueprintStackName(any(JsonNode.class));

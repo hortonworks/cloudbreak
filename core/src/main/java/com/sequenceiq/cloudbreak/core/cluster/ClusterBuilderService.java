@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
+import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -27,7 +27,7 @@ public class ClusterBuilderService {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private DatalakeConfigProvider datalakeConfigProvider;
+    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Inject
     private TransactionService transactionService;
@@ -47,7 +47,7 @@ public class ClusterBuilderService {
             try {
                 transactionService.required(() -> {
                     Stack stackInTransaction = stackService.getByIdWithListsInTransaction(stackId);
-                    datalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
+                    ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
                     return null;
                 });
             } catch (TransactionService.TransactionExecutionException e) {

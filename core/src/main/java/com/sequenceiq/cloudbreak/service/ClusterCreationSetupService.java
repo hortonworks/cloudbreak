@@ -392,7 +392,7 @@ public class ClusterCreationSetupService {
 
     private StackInfo defaultHDPInfo(ClusterDefinition clusterDefinition, ClusterV4Request request, Workspace workspace) {
         try {
-            JsonNode root = getBlueprintJsonNode(clusterDefinition, request, workspace);
+            JsonNode root = getClusterDefinitionJsonNode(clusterDefinition, request, workspace);
             if (root != null) {
                 String stackVersion = ambariBlueprintUtils.getBlueprintStackVersion(root);
                 String stackName = ambariBlueprintUtils.getBlueprintStackName(root);
@@ -418,15 +418,15 @@ public class ClusterCreationSetupService {
         return defaultHDPEntries.getEntries().values().iterator().next();
     }
 
-    private JsonNode getBlueprintJsonNode(ClusterDefinition clusterDefinition, ClusterV4Request request, Workspace workspace) throws IOException {
+    private JsonNode getClusterDefinitionJsonNode(ClusterDefinition clusterDefinition, ClusterV4Request request, Workspace workspace) throws IOException {
         JsonNode root = null;
         if (clusterDefinition != null) {
-            String blueprintText = clusterDefinition.getClusterDefinitionText();
-            root = JsonUtil.readTree(blueprintText);
-        } else if (request.getAmbari().getBlueprintName() != null) {
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(request.getAmbari().getBlueprintName(), workspace);
-            String blueprintText = clusterDefinition.getClusterDefinitionText();
-            root = JsonUtil.readTree(blueprintText);
+            String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+            root = JsonUtil.readTree(clusterDefinitionText);
+        } else if (request.getAmbari().getClusterDefinitionName() != null) {
+            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(request.getAmbari().getClusterDefinitionName(), workspace);
+            String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+            root = JsonUtil.readTree(clusterDefinitionText);
         }
         return root;
     }

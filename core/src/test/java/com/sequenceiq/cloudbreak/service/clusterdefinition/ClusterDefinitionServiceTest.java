@@ -56,7 +56,7 @@ public class ClusterDefinitionServiceTest {
 
     @Test
     public void testDeletionWithZeroClusters() {
-        when(clusterService.findByBlueprint(any())).thenReturn(Collections.emptySet());
+        when(clusterService.findByClusterDefinition(any())).thenReturn(Collections.emptySet());
 
         ClusterDefinition deleted = underTest.delete(clusterDefinition);
 
@@ -72,7 +72,7 @@ public class ClusterDefinitionServiceTest {
         cluster.setStatus(Status.AVAILABLE);
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage("c1");
-        when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster));
+        when(clusterService.findByClusterDefinition(any())).thenReturn(Set.of(cluster));
 
         underTest.delete(clusterDefinition);
     }
@@ -100,7 +100,7 @@ public class ClusterDefinitionServiceTest {
         cluster4.setClusterDefinition(clusterDefinition);
         cluster4.setStatus(Status.DELETE_FAILED);
 
-        when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster1, cluster2, cluster3, cluster4));
+        when(clusterService.findByClusterDefinition(any())).thenReturn(Set.of(cluster1, cluster2, cluster3, cluster4));
 
         ClusterDefinition deleted = underTest.delete(clusterDefinition);
 
@@ -121,7 +121,7 @@ public class ClusterDefinitionServiceTest {
         cluster2.setClusterDefinition(clusterDefinition);
         cluster2.setStatus(Status.DELETE_IN_PROGRESS);
 
-        when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster1, cluster2));
+        when(clusterService.findByClusterDefinition(any())).thenReturn(Set.of(cluster1, cluster2));
 
         try {
             underTest.delete(clusterDefinition);

@@ -70,14 +70,14 @@ public class UptimeNotifierTest {
         verify(notificationSender).send(argument1.capture());
         Notification<CloudbreakEventV4Response> notification = argument1.getValue();
         assertEquals(GCP, notification.getNotification().getCloud());
-        assertEquals("null", notification.getNotification().getBlueprintName());
-        assertNull(notification.getNotification().getBlueprintId());
+        assertEquals("null", notification.getNotification().getClusterDefinitionName());
+        assertNull(notification.getNotification().getClusterDefinitionId());
 
         verify(notificationSender, times(1)).send(any(Notification.class));
     }
 
     @Test
-    public void notificationSendingWhenBlueprintNotNullEverythingWorkFine() {
+    public void notificationSendingWhenClusterDefinitionNotNullEverythingWorkFine() {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
@@ -93,8 +93,8 @@ public class UptimeNotifierTest {
         verify(notificationSender).send(argument2.capture());
         Notification<CloudbreakEventV4Response> notification = argument2.getValue();
         assertEquals(GCP, notification.getNotification().getCloud());
-        assertEquals("multi-node-yarn", notification.getNotification().getBlueprintName());
-        assertEquals(Long.valueOf(1L), notification.getNotification().getBlueprintId());
+        assertEquals("multi-node-yarn", notification.getNotification().getClusterDefinitionName());
+        assertEquals(Long.valueOf(1L), notification.getNotification().getClusterDefinitionId());
 
         verify(notificationSender, times(1)).send(any(Notification.class));
     }
@@ -117,8 +117,8 @@ public class UptimeNotifierTest {
         verify(notificationSender).send(argument2.capture());
         Notification<CloudbreakEventV4Response> notification = argument2.getValue();
         assertEquals("null", notification.getNotification().getCloud());
-        assertEquals("multi-node-yarn", notification.getNotification().getBlueprintName());
-        assertEquals(Long.valueOf(1L), notification.getNotification().getBlueprintId());
+        assertEquals("multi-node-yarn", notification.getNotification().getClusterDefinitionName());
+        assertEquals(Long.valueOf(1L), notification.getNotification().getClusterDefinitionId());
 
         verify(notificationSender, times(1)).send(any(Notification.class));
     }

@@ -24,14 +24,14 @@ public class StackInfoService {
     public boolean isHdfCluster(String blueprintText) {
         boolean hdfCluster;
         try {
-            hdfCluster = "HDF".equalsIgnoreCase(blueprintStackInfo(blueprintText).getType());
+            hdfCluster = "HDF".equalsIgnoreCase(clusterDefinitionStackInfo(blueprintText).getType());
         } catch (ClusterDefinitionProcessingException e) {
             hdfCluster = false;
         }
         return hdfCluster;
     }
 
-    public ClusterDefinitionStackInfo blueprintStackInfo(String blueprintText) {
+    public ClusterDefinitionStackInfo clusterDefinitionStackInfo(String blueprintText) {
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
             return new ClusterDefinitionStackInfo(ambariBlueprintUtils.getBlueprintStackVersion(root), ambariBlueprintUtils.getBlueprintStackName(root));

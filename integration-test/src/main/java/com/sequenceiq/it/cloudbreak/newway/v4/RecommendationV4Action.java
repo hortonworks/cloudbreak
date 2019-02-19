@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -28,9 +28,9 @@ public class RecommendationV4Action {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
-        Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
-        if (blueprint != null && blueprint.getResponse() != null) {
-            recommendationEntity.withAvailabilityZone(blueprint.getResponse().getName());
+        ClusterDefinition clusterDefinition = integrationTestContext.getContextParam(ClusterDefinitionEntity.CLUSTER_DEFINITION, ClusterDefinition.class);
+        if (clusterDefinition != null && clusterDefinition.getResponse() != null) {
+            recommendationEntity.withAvailabilityZone(clusterDefinition.getResponse().getName());
         }
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
@@ -54,13 +54,13 @@ public class RecommendationV4Action {
 
         Log.log(String.join(" ", " post Recommendations to",
                 recommendationEntity.getCredentialName(), "credential and to",
-                recommendationEntity.getBlueprintName(), "blueprint",
+                recommendationEntity.getClusterDefinitionName(), "cluster definition",
                 recommendationEntity.getRegion(), "region",
                 recommendationEntity.getAvailabilityZone(), "availability zone. "));
         recommendationEntity.setResponse(
                 client.getCloudbreakClient()
-                        .blueprintV4Endpoint()
-                        .createRecommendation(workspaceId, recommendationEntity.getBlueprintName(), recommendationEntity.getCredentialName(),
+                        .clusterDefinitionV4Endpoint()
+                        .createRecommendation(workspaceId, recommendationEntity.getClusterDefinitionName(), recommendationEntity.getCredentialName(),
                                 recommendationEntity.getRegion(), null, recommendationEntity.getAvailabilityZone()));
         Log.logJSON(" post Recommendations response: ", recommendationEntity.getResponse());
     }

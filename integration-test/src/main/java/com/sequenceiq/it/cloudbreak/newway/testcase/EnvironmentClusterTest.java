@@ -54,7 +54,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        initializeDefaultClusterDefinitions(testContext);
     }
 
     @BeforeMethod
@@ -313,7 +313,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(rdsSet)
-                .withAmbari(new AmbariEntity(testContext).valid().withBlueprintName(BP_NAME));
+                .withAmbari(new AmbariEntity(testContext).valid().withClusterDefinitionName(BP_NAME));
         if (rdsName != null) {
             cluster.withRdsConfigNames(rdsSet);
         }

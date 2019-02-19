@@ -90,7 +90,7 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Image catalog name is mismatch!");
         }
 
-        if (!MockCloudProvider.BLUEPRINT_DEFAULT_NAME.equals(stackTemplate.getCluster().getAmbari().getBlueprintName())) {
+        if (!MockCloudProvider.CLUSTER_DEFINITION_DEFAULT_NAME.equals(stackTemplate.getCluster().getAmbari().getClusterDefinitionName())) {
             throw new IllegalArgumentException("Blueprint name is mismatch!");
         }
 

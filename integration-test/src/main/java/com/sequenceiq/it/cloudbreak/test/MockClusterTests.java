@@ -16,13 +16,13 @@ public class MockClusterTests extends CloudbreakMockClusterTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterTests.class);
 
-    @Test(enabled = true)
+    @Test
     public void testCreateNewRegularCluster() throws Exception {
-        String blueprintName = "Data Science: Apache Spark 2, Apache Zeppelin";
+        String clusterDefinitionName = "Data Science: Apache Spark 2, Apache Zeppelin";
         String clusterName = "mockcluster";
 
         given(Cluster.request()
-                        .withAmbariRequest(getMockProvider().ambariRequestWithBlueprintName(blueprintName)),
+                        .withAmbariRequest(getMockProvider().ambariRequestWithBlueprintName(clusterDefinitionName)),
                 "a cluster request");
         given(getMockProvider().aValidStackRequest()
                 .withName(clusterName), "a stack request");

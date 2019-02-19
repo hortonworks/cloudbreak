@@ -23,8 +23,8 @@ import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
@@ -38,10 +38,10 @@ public class WorkspaceTest extends AbstractIntegrationTest {
 
     private static final String FORBIDDEN_KEY = "forbiddenGetByName";
 
-    private static final String BLUEPRINT_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},\"settings\""
-            + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\","
-            + "\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
-            + "\"cardinality\":\"1\"}]}";
+    private static final String CLUSTER_DEFINITION_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},"
+            + "\"settings\":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\""
+            + ":\"master\",\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":\"ZOOKEEPER_CLIENT\""
+            + "}],\"cardinality\":\"1\"}]}";
 
     @Inject
     private LdapConfigTestClient ldapConfigTestClient;
@@ -78,11 +78,11 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateABlueprintAndGetOtherUser(TestContext testContext) {
+    public void testCreateAClusterDefinitionAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(BlueprintEntity.class).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
-                .when(Blueprint::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .given(ClusterDefinitionEntity.class).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
+                .when(ClusterDefinition::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }

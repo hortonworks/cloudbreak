@@ -27,7 +27,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        initializeDefaultClusterDefinitions(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

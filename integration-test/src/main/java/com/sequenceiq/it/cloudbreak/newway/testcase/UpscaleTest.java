@@ -99,7 +99,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
         Route customResponse2 = (request, response) -> {
             response.type("text/plain");
             response.status(400);
-            response.body("Bad blueprint format");
+            response.body("Bad cluster definition format");
             return "";
         };
         testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(BLUEPRINTS);

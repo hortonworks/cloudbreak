@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.AmbariViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.AmbariViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;

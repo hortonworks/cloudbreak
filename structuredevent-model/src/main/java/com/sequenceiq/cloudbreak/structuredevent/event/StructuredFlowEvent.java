@@ -14,7 +14,7 @@ public class StructuredFlowEvent extends StructuredEvent {
 
     private ClusterDetails cluster;
 
-    private BlueprintDetails blueprint;
+    private ClusterDefinitionDetails clusterDefinitionDetails;
 
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
@@ -24,22 +24,22 @@ public class StructuredFlowEvent extends StructuredEvent {
     }
 
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint) {
+            ClusterDetails cluster, ClusterDefinitionDetails clusterDefinitionDetails) {
         super(type, operation);
         this.flow = flow;
         this.stack = stack;
         this.cluster = cluster;
-        this.blueprint = blueprint;
+        this.clusterDefinitionDetails = clusterDefinitionDetails;
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, ClusterDetails cluster,
-            BlueprintDetails blueprint) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
+            ClusterDefinitionDetails clusterDefinitionDetails) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, clusterDefinitionDetails);
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprint, String exception) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
+            ClusterDetails cluster, ClusterDefinitionDetails clusterDefinitionDetails, String exception) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, clusterDefinitionDetails);
         this.exception = exception;
     }
 
@@ -86,12 +86,12 @@ public class StructuredFlowEvent extends StructuredEvent {
         this.cluster = cluster;
     }
 
-    public BlueprintDetails getBlueprint() {
-        return blueprint;
+    public ClusterDefinitionDetails getClusterDefinitionDetails() {
+        return clusterDefinitionDetails;
     }
 
-    public void setBlueprint(BlueprintDetails blueprint) {
-        this.blueprint = blueprint;
+    public void setClusterDefinitionDetails(ClusterDefinitionDetails clusterDefinitionDetails) {
+        this.clusterDefinitionDetails = clusterDefinitionDetails;
     }
 
     public String getException() {

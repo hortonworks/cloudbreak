@@ -24,8 +24,8 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
             cloudbreakEvent.setCloud(notificationDetails.getCloud());
             cloudbreakEvent.setRegion(notificationDetails.getRegion());
             cloudbreakEvent.setAvailabilityZone(notificationDetails.getAvailabiltyZone());
-            cloudbreakEvent.setBlueprintId(notificationDetails.getBlueprintId());
-            cloudbreakEvent.setBlueprintName(notificationDetails.getBlueprintName());
+            cloudbreakEvent.setClusterDefinitionId(notificationDetails.getClusterDefinitionId());
+            cloudbreakEvent.setClusterDefinitionName(notificationDetails.getClusterDefinitionName());
             cloudbreakEvent.setClusterId(notificationDetails.getClusterId());
             cloudbreakEvent.setClusterName(notificationDetails.getClusterName());
             cloudbreakEvent.setStackId(notificationDetails.getStackId());

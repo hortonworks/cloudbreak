@@ -63,7 +63,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(clusterDefinitions);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
         Assert.assertFalse(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -74,7 +74,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(2);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(clusterDefinitions);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -85,7 +85,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(2);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(clusterDefinitions);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -96,7 +96,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3, 1);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(clusterDefinitions);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -107,7 +107,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3, 1);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<ClusterDefinition> resultSet = underTest.loadBlueprintsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
+        Collection<ClusterDefinition> resultSet = underTest.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
 
         Assert.assertEquals(4L, resultSet.size());
     }
@@ -118,7 +118,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<ClusterDefinition> resultSet = underTest.loadBlueprintsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
+        Collection<ClusterDefinition> resultSet = underTest.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
 
         Assert.assertEquals(3L, resultSet.size());
     }
@@ -129,7 +129,7 @@ public class ClusterDefinitionLoaderServiceTest {
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3);
         when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<ClusterDefinition> resultSet = underTest.loadBlueprintsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
+        Collection<ClusterDefinition> resultSet = underTest.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
 
         Assert.assertEquals(3L, resultSet.size());
     }

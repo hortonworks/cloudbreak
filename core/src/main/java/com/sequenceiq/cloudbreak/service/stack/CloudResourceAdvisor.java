@@ -57,18 +57,18 @@ public class CloudResourceAdvisor {
     @Inject
     private CredentialService credentialService;
 
-    public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
+    public PlatformRecommendation createForClusterDefintion(Long workspaceId, String clusterDefinitionName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
         Credential credential = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
-        LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
-                blueprintName, cloudPlatform, region);
+        LOGGER.debug("Advising resources for clusterDefinitionName: {}, provider: {} and region: {}.",
+                clusterDefinitionName, cloudPlatform, region);
 
-        ClusterDefinition clusterDefinition = getClusterDefinition(blueprintName, workspaceId);
-        String blueprintText = clusterDefinition.getClusterDefinitionText();
-        Map<String, Set<String>> componentsByHostGroup = ambariBlueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
+        ClusterDefinition clusterDefinition = getClusterDefinition(clusterDefinitionName, workspaceId);
+        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+        Map<String, Set<String>> componentsByHostGroup = ambariBlueprintProcessorFactory.get(clusterDefinitionText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
 
@@ -103,11 +103,11 @@ public class CloudResourceAdvisor {
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
-    private ClusterDefinition getClusterDefinition(String blueprintName, Long workspaceId) {
+    private ClusterDefinition getClusterDefinition(String clusterDefinitionName, Long workspaceId) {
         ClusterDefinition clusterDefinition = null;
-        if (!Strings.isNullOrEmpty(blueprintName)) {
-            LOGGER.debug("Try to get validation by name: {}.", blueprintName);
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(blueprintName, workspaceId);
+        if (!Strings.isNullOrEmpty(clusterDefinitionName)) {
+            LOGGER.debug("Try to get validation by name: {}.", clusterDefinitionName);
+            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterDefinitionName, workspaceId);
         }
         return clusterDefinition;
     }

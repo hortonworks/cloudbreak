@@ -28,7 +28,7 @@ public interface FileSystemV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParameters")
     FileSystemParameterV4Responses getFileSystemParameters(@PathParam("workspaceId") Long workspaceId,
-            @NotNull @QueryParam("blueprintName") String blueprintName, @NotNull @QueryParam("clusterName") String clusterName,
+            @NotNull @QueryParam("clusterDefinitionName") String clusterDefinitionName, @NotNull @QueryParam("clusterName") String clusterName,
             @QueryParam("accountName") String accountName, @NotNull @QueryParam("storageName") String storageName,
             @NotNull @QueryParam("fileSystemType") String fileSystemType, @QueryParam("attachedCluster") @DefaultValue("false") Boolean attachedCluster);
 }

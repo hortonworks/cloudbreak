@@ -34,7 +34,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-azure-cred";
 
-    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String AZURE_CLUSTER_DEFAULT_NAME = "autotesting-azure-cluster";
 
@@ -149,8 +149,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getBlueprintName() {
-        return getTestParameter().getWithDefault("azureBlueprintName", BLUEPRINT_DEFAULT_NAME);
+    public String getClusterDefinitionName() {
+        return getTestParameter().getWithDefault("azureClusterDefinitionName", CLUSTER_DEFINITION_DEFAULT_NAME);
     }
 
     @Override
@@ -233,8 +233,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
-        var ambari = ambariRequestWithBlueprintName(blueprintName);
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
+        var ambari = ambariRequestWithBlueprintName(clusterDefinitionName);
         var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
@@ -261,7 +261,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidAttachedCluster() {
         return Cluster.request()
-                .withAmbariRequest(ambariRequestWithBlueprintName(getBlueprintName()))
+                .withAmbariRequest(ambariRequestWithBlueprintName(getClusterDefinitionName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
                         getTestParameter().get(Ranger.CONFIG_NAME),

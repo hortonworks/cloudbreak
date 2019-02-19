@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemConfigQueryServiceTest {
 
-    private static final String BLUEPRINT_TEXT = "testblueprint";
+    private static final String CLUSTER_DEFINITION_TEXT = "testblueprint";
 
     private static final String HIVE_METASTORE = "HIVE_METASTORE";
 
@@ -92,7 +92,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
@@ -123,7 +123,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
@@ -150,7 +150,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
@@ -172,7 +172,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withAttachedCluster(true)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
@@ -200,7 +200,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
@@ -224,7 +224,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
@@ -244,7 +244,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withDatalakeCluster(true)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
@@ -277,7 +277,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withDatalakeCluster(false)
                 .withAttachedCluster(false)
                 .withFileSystemType(FileSystemType.ADLS.name())
@@ -311,7 +311,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withDatalakeCluster(false)
                 .withAttachedCluster(true)
                 .withFileSystemType(FileSystemType.ADLS.name())
@@ -345,7 +345,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withAttachedCluster(false)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
@@ -374,7 +374,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withAttachedCluster(true)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
@@ -440,7 +440,7 @@ public class FileSystemConfigQueryServiceTest {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(storageName)
                 .withClusterName(CLUSTER_NAME)
-                .withBlueprintText(BLUEPRINT_TEXT)
+                .withClusterDefinitionText(CLUSTER_DEFINITION_TEXT)
                 .withAttachedCluster(true)
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();

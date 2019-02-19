@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.RecommendationV4Response;
 
 public class RecommendationEntity extends AbstractCloudbreakEntity<Object, RecommendationV4Response, RecommendationEntity> {
 
@@ -12,7 +12,7 @@ public class RecommendationEntity extends AbstractCloudbreakEntity<Object, Recom
 
     private String availabilityZone;
 
-    private String blueprintName;
+    private String clusterDefinitionName;
 
     private RecommendationEntity(String newId) {
         super(newId);
@@ -22,8 +22,8 @@ public class RecommendationEntity extends AbstractCloudbreakEntity<Object, Recom
         this(RECOMMENDATION);
     }
 
-    public RecommendationEntity withBlueprintName(String name) {
-        this.blueprintName = name;
+    public RecommendationEntity withClusterDefinitionName(String name) {
+        this.clusterDefinitionName = name;
         return this;
     }
 
@@ -54,7 +54,7 @@ public class RecommendationEntity extends AbstractCloudbreakEntity<Object, Recom
         return availabilityZone;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getClusterDefinitionName() {
+        return clusterDefinitionName;
     }
 }

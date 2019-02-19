@@ -101,7 +101,7 @@ public class KerberosFreeIpaTest {
     }
 
     @Test
-    public void testBlueprintName() {
+    public void testClusterDefinitionName() {
         underTest.setNameServers(nameServers);
 
         Set<ConstraintViolation<FreeIPAKerberosDescriptor>> constraintViolations = localValidatorFactory.validate(underTest);

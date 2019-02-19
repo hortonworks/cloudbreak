@@ -1,7 +1,7 @@
 {
   "account" : "accountid",
-  "blueprintId" : 53,
-  "blueprintName" : "multi-yarn-hdfs",
+  "clusterDefinitionId" : 53,
+  "clusterDefinitionName" : "multi-yarn-hdfs",
   "cloud" : "AWS",
   "eventMessage" : "Cloudbreak event message",
   "eventTimestamp" : "1438090740000",

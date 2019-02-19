@@ -18,7 +18,7 @@ public class AmbariBlueprintViewProvider {
 
     public ClusterDefinitionView getBlueprintView(@Nonnull ClusterDefinition clusterDefinition) {
         String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-        ClusterDefinitionStackInfo clusterDefinitionStackInfo = stackInfoService.blueprintStackInfo(clusterDefinitionText);
+        ClusterDefinitionStackInfo clusterDefinitionStackInfo = stackInfoService.clusterDefinitionStackInfo(clusterDefinitionText);
         return new ClusterDefinitionView(clusterDefinitionText, clusterDefinitionStackInfo.getVersion(), clusterDefinitionStackInfo.getType());
     }
 

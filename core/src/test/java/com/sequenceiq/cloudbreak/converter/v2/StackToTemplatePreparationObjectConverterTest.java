@@ -73,7 +73,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private static final String CLUSTER_OWNER = "owner";
 
-    private static final String TEST_BLUEPRINT_TEXT = "{}";
+    private static final String TEST_CLUSTER_DEFINITION_TEXT = "{}";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -160,10 +160,10 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
         when(instanceGroupMetadataCollector.collectMetadata(source)).thenReturn(groupInstances);
         when(cluster.getClusterDefinition()).thenReturn(clusterDefinition);
-        when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_CLUSTER_DEFINITION_TEXT);
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(clusterDefinitionStackInfo);
+        when(stackInfoService.clusterDefinitionStackInfo(TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(clusterDefinitionStackInfo);
     }
 
     @Test
@@ -302,7 +302,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenHdfConfigProviderProvidedThenItShouldBeStored() {
         HdfConfigs expected = mock(HdfConfigs.class);
         Set<HostGroup> hostGroups = new LinkedHashSet<>();
-        when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(expected);
+        when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -313,7 +313,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenHdfConfigIsNullThenOptionalShouldBeEmpty() {
         Set<HostGroup> hostGroups = new LinkedHashSet<>();
-        when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(null);
+        when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(null);
 
         TemplatePreparationObject result = underTest.convert(source);
 

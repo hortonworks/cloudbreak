@@ -21,14 +21,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralBlueprintUpdater;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
@@ -69,7 +69,7 @@ public class StackCommonService {
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
-    private CentralBlueprintUpdater centralBlueprintUpdater;
+    private CentralClusterDefinitionUpdater centralClusterDefinitionUpdater;
 
     @Inject
     private OperationRetryService operationRetryService;
@@ -229,11 +229,11 @@ public class StackCommonService {
         operationRetryService.retry(stack);
     }
 
-    public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {
+    public GeneratedClusterDefinitionV4Response postStackForClusterDefinition(StackV4Request stackRequest) {
         TemplatePreparationObject templatePreparationObject = converterUtil.convert(stackRequest, TemplatePreparationObject.class);
-        String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
-        GeneratedBlueprintV4Response response = new GeneratedBlueprintV4Response();
-        response.setBlueprintText(blueprintText);
+        String clusterDefinitionText = centralClusterDefinitionUpdater.getClusterDefinitionText(templatePreparationObject);
+        GeneratedClusterDefinitionV4Response response = new GeneratedClusterDefinitionV4Response();
+        response.setClusterDefinitionText(clusterDefinitionText);
         return response;
     }
 

@@ -223,7 +223,7 @@ public class ClusterService {
     private StackUtil stackUtil;
 
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
-        LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getClusterDefinition().getId());
+        LOGGER.debug("Cluster requested [ClusterDefinitionId: {}]", cluster.getClusterDefinition().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
@@ -868,21 +868,21 @@ public class ClusterService {
         }
     }
 
-    public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
-            String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
+    public Cluster recreate(Stack stack, String clusterDefinitionName, Set<HostGroup> hostGroups, boolean validateClusterDefinition,
+            StackRepoDetails stackRepoDetails, String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
         return transactionService.required(() -> {
-            checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
+            checkClusterDefinitionIdAndHostGroups(clusterDefinitionName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
             Cluster cluster = getCluster(stackWithLists);
             if (cluster != null && stackWithLists.getCluster().getKerberosConfig() != null) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
             }
-            ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
+            ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(clusterDefinitionName, stack.getWorkspace());
             if (!withEmbeddedAmbariDB(cluster)) {
                 throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
             }
-            if (validateBlueprint) {
+            if (validateClusterDefinition) {
                 ambariBlueprintValidator.validateBlueprintForStack(cluster, clusterDefinition, hostGroups, stackWithLists.getInstanceGroups());
             }
             Boolean containerOrchestrator;
@@ -921,9 +921,9 @@ public class ClusterService {
         kerberosConfigRepository.save(kerberosConfig);
     }
 
-    private void checkBlueprintIdAndHostGroups(String blueprintName, Set<HostGroup> hostGroups) {
-        if (blueprintName == null || hostGroups == null) {
-            throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
+    private void checkClusterDefinitionIdAndHostGroups(String clusterDefinition, Set<HostGroup> hostGroups) {
+        if (clusterDefinition == null || hostGroups == null) {
+            throw new BadRequestException("Cluster definition id and hostGroup assignments can not be null.");
         }
     }
 
@@ -933,7 +933,7 @@ public class ClusterService {
         cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
         createHDPRepoComponent(stackRepoDetails, stack);
-        LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getClusterDefinition().getId());
+        LOGGER.debug("Cluster requested [ClusterDefinitionId: {}]", cluster.getClusterDefinition().getId());
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
         cluster = clusterRepository.save(cluster);
@@ -1155,7 +1155,7 @@ public class ClusterService {
         return ambariClient;
     }
 
-    public Set<Cluster> findByBlueprint(ClusterDefinition clusterDefinition) {
+    public Set<Cluster> findByClusterDefinition(ClusterDefinition clusterDefinition) {
         return clusterRepository.findByClusterDefinition(clusterDefinition);
     }
 

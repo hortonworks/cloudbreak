@@ -33,8 +33,8 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 
 import spark.Route;
@@ -45,10 +45,10 @@ public class KerberosTest extends AbstractIntegrationTest {
 
     private static final String SALT_HIGHSTATE = "state.highstate";
 
-    private static final String BLUEPRINT_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},\"settings\""
-            + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\","
-            + "\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
-            + "\"cardinality\":\"1\"}]}";
+    private static final String CLUSTER_DEFINITION_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},"
+            + "\"settings\":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\""
+            + ":\"master\",\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":"
+            + "\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"1\"}]}";
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -61,13 +61,13 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = "dataProviderForTest")
-    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData) {
+    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String clusterDefinitionName, KerberosTestData testData) {
         mockAmbariBlueprintPassLdapSync(testContext);
         KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post)
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
@@ -77,7 +77,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withKerberos(request.getName())
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
-                                .withBlueprintName(blueprintName)))
+                                .withClusterDefinitionName(clusterDefinitionName)))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(testData.getAssertions())
@@ -87,10 +87,10 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = getNameGenerator().getRandomNameForMock();
+        String clusterDefinitionName = getNameGenerator().getRandomNameForMock();
         testContext
-                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(StackEntity.class)
                 .withInstanceGroups("master")
@@ -98,7 +98,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withKerberos(null)
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
-                                .withBlueprintName(blueprintName)))
+                                .withClusterDefinitionName(clusterDefinitionName)))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .validate();
@@ -107,12 +107,12 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = getNameGenerator().getRandomNameForMock();
+        String clusterDefinitionName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post)
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
@@ -122,7 +122,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                         .withKerberos("")
                         .withAmbari(new AmbariEntity(testContext)
                                 .valid()
-                                .withBlueprintName(blueprintName)))
+                                .withClusterDefinitionName(clusterDefinitionName)))
                 .when(Stack.postV4(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
                 .validate();
@@ -131,15 +131,15 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = getNameGenerator().getRandomNameForMock();
+        String clusterDefinitionName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         String descriptor = "{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
                 + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}";
         request.getAmbariDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
@@ -149,14 +149,14 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = getNameGenerator().getRandomNameForMock();
+        String clusterDefinitionName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setDescriptor(
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
@@ -166,13 +166,13 @@ public class KerberosTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = getNameGenerator().getRandomNameForMock();
+        String clusterDefinitionName = getNameGenerator().getRandomNameForMock();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintEntity.class).withName(blueprintName).withAmbariBlueprint(BLUEPRINT_TEXT)
-                .when(Blueprint.postV4())
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinition.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))

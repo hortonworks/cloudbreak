@@ -18,7 +18,7 @@ import org.springframework.vault.core.VaultTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralBlueprintUpdater;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
@@ -35,9 +35,9 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class CentralBlueprintContext {
 
     @Inject
-    private CentralBlueprintUpdater underTest;
+    private CentralClusterDefinitionUpdater underTest;
 
-    public CentralBlueprintUpdater getUnderTest() {
+    public CentralClusterDefinitionUpdater getUnderTest() {
         return underTest;
     }
 

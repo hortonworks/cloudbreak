@@ -30,8 +30,9 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends Abstra
         Cluster oneByStackId = clusterService.findOneByStackId(source.getStackId());
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup != null) {
-            String blueprintText = oneByStackId.getClusterDefinition().getClusterDefinitionText();
-            boolean dataNodeComponentInHostGroup = new AmbariBlueprintTextProcessor(blueprintText).isComponentExistsInHostGroup("DATANODE", hostGroup.getName());
+            String clusterDefinitionText = oneByStackId.getClusterDefinition().getClusterDefinitionText();
+            boolean dataNodeComponentInHostGroup = new AmbariBlueprintTextProcessor(clusterDefinitionText).isComponentExistsInHostGroup("DATANODE",
+                    hostGroup.getName());
             HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setValidateNodeCount(dataNodeComponentInHostGroup);

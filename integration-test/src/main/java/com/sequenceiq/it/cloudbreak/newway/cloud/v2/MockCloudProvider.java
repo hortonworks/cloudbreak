@@ -31,7 +31,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting mock credential";
 
-    public static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    public static final String CLUSTER_DEFINITION_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     public static final String NETWORK_DEFAULT_NAME = "autotesting-aws-net";
 

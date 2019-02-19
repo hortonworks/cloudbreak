@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor
 
 public class ClusterDefinitionView {
 
-    private String blueprintText;
+    private String clusterDefinitionText;
 
     private String version;
 
@@ -19,24 +19,24 @@ public class ClusterDefinitionView {
 
     private Set<String> components;
 
-    public ClusterDefinitionView(String blueprintText, String version, String type) {
-        this.blueprintText = blueprintText;
+    public ClusterDefinitionView(String clusterDefinitionText, String version, String type) {
+        this.clusterDefinitionText = clusterDefinitionText;
         this.type = type;
         this.version = version;
-        components = prepareComponents(blueprintText);
+        components = prepareComponents(clusterDefinitionText);
     }
 
-    public ClusterDefinitionView(ClusterDefinitionStackInfo clusterDefinitionStackInfo, String blueprintText) {
-        this.blueprintText = blueprintText;
+    public ClusterDefinitionView(ClusterDefinitionStackInfo clusterDefinitionStackInfo, String clusterDefinitionText) {
+        this.clusterDefinitionText = clusterDefinitionText;
         type = clusterDefinitionStackInfo.getType();
         version = clusterDefinitionStackInfo.getVersion();
-        components = prepareComponents(blueprintText);
+        components = prepareComponents(clusterDefinitionText);
     }
 
-    private Set<String> prepareComponents(String blueprintText) {
+    private Set<String> prepareComponents(String clusterDefinitionText) {
         Set<String> result = new HashSet<>();
         try {
-            AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = new AmbariBlueprintTextProcessor(blueprintText);
+            AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = new AmbariBlueprintTextProcessor(clusterDefinitionText);
             Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
             componentsByHostGroup.values().forEach(result::addAll);
         } catch (ClusterDefinitionProcessingException exception) {
@@ -49,8 +49,8 @@ public class ClusterDefinitionView {
         return version;
     }
 
-    public void setBlueprintText(String blueprintText) {
-        this.blueprintText = blueprintText;
+    public void setClusterDefinitionText(String clusterDefinitionText) {
+        this.clusterDefinitionText = clusterDefinitionText;
     }
 
     public void setVersion(String version) {
@@ -69,8 +69,8 @@ public class ClusterDefinitionView {
         return "HDF".equalsIgnoreCase(type);
     }
 
-    public String getBlueprintText() {
-        return blueprintText;
+    public String getClusterDefinitionText() {
+        return clusterDefinitionText;
     }
 
     public Set<String> getComponents() {
@@ -90,7 +90,7 @@ public class ClusterDefinitionView {
             return false;
         }
         ClusterDefinitionView that = (ClusterDefinitionView) o;
-        return Objects.equals(getBlueprintText(), that.getBlueprintText())
+        return Objects.equals(getClusterDefinitionText(), that.getClusterDefinitionText())
                 && Objects.equals(getVersion(), that.getVersion())
                 && Objects.equals(getType(), that.getType())
                 && Objects.equals(getComponents(), that.getComponents());
@@ -98,7 +98,7 @@ public class ClusterDefinitionView {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBlueprintText(), getVersion(), getType(), getComponents());
+        return Objects.hash(getClusterDefinitionText(), getVersion(), getType(), getComponents());
     }
 
 }
