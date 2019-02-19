@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDefinitionDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
@@ -60,18 +60,19 @@ public class StructuredFlowEventFactory {
                 stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(), stack.getTenant().getName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
-        BlueprintDetails blueprintDetails = null;
+        ClusterDefinitionDetails clusterDefinitionDetails = null;
         if (detailed) {
             stackDetails = conversionService.convert(stack, StackDetails.class);
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
                 clusterDetails = conversionService.convert(cluster, ClusterDetails.class);
-                blueprintDetails = conversionService.convert(cluster.getClusterDefinition(), BlueprintDetails.class);
+                clusterDefinitionDetails = conversionService.convert(cluster.getClusterDefinition(), ClusterDefinitionDetails.class);
             }
         }
         return exception != null
-            ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails, ExceptionUtils.getStackTrace(exception))
-            : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
+            ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, clusterDefinitionDetails,
+                ExceptionUtils.getStackTrace(exception))
+            : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, clusterDefinitionDetails);
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
@@ -100,8 +101,8 @@ public class StructuredFlowEventFactory {
                 notificationDetails.setClusterStatus(cluster.getStatus().name());
                 ClusterDefinition clusterDefinition = cluster.getClusterDefinition();
                 if (clusterDefinition != null) {
-                    notificationDetails.setBlueprintId(clusterDefinition.getId());
-                    notificationDetails.setBlueprintName(clusterDefinition.getStackName());
+                    notificationDetails.setClusterDefinitionId(clusterDefinition.getId());
+                    notificationDetails.setClusterDefinitionName(clusterDefinition.getStackName());
                 }
             }
         } catch (AccessDeniedException e) {

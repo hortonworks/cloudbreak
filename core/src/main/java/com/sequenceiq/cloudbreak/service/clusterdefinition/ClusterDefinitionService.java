@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -74,21 +74,21 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Inject
-    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
+    private CentralClusterDefinitionParameterQueryService centralClusterDefinitionParameterQueryService;
 
     @Inject
     private ClusterDefinitionLoaderService clusterDefinitionLoaderService;
 
     public ClusterDefinition get(Long id) {
-        return clusterDefinitionRepository.findById(id).orElseThrow(notFound("Blueprint", id));
+        return clusterDefinitionRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
     }
 
     public ClusterDefinition create(Workspace workspace, ClusterDefinition clusterDefinition, Collection<Map<String, Map<String, String>>> properties,
             User user) {
-        LOGGER.debug("Creating blueprint: Workspace: {} ({})", workspace.getId(), workspace.getName());
+        LOGGER.debug("Creating cluster definition: Workspace: {} ({})", workspace.getId(), workspace.getName());
         ClusterDefinition savedClusterDefinition;
         if (properties != null && !properties.isEmpty()) {
-            LOGGER.debug("Extend blueprint with the following properties: {}", properties);
+            LOGGER.debug("Extend cluster definition with the following properties: {}", properties);
             Map<String, Map<String, String>> configs = new HashMap<>(properties.size());
             for (Map<String, Map<String, String>> property : properties) {
                 for (Entry<String, Map<String, String>> entry : property.entrySet()) {
@@ -103,13 +103,13 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
             String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
             String extendedAmbariBlueprint = ambariBlueprintProcessorFactory.get(clusterDefinitionText)
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.debug("Extended blueprint result: {}", extendedAmbariBlueprint);
+            LOGGER.debug("Extended cluster definition result: {}", extendedAmbariBlueprint);
             clusterDefinition.setClusterDefinitionText(extendedAmbariBlueprint);
         }
         try {
             savedClusterDefinition = create(clusterDefinition, workspace.getId(), user);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER_DEFINITION, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
         }
         return savedClusterDefinition;
@@ -131,38 +131,39 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         Set<ClusterDefinition> clusterDefinitions = clusterDefinitionRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
-        if (clusterDefinitionLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(clusterDefinitions)) {
-            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-            clusterDefinitionLoaderService.loadBlueprintsForTheWorkspace(clusterDefinitions, workspace, this::saveDefaultsWithReadRight);
-            LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+        if (clusterDefinitionLoaderService.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions)) {
+            LOGGER.debug("Modifying cluster definitions based on the defaults for the '{}' workspace.", workspace.getId());
+            clusterDefinitionLoaderService.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::saveDefaultsWithReadRight);
+            LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return clusterDefinitionViewRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
     public Set<ClusterDefinition> getAllAvailableInWorkspace(Workspace workspace) {
         Set<ClusterDefinition> clusterDefinitions = clusterDefinitionRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-        if (clusterDefinitionLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(clusterDefinitions)) {
-            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-            clusterDefinitions = clusterDefinitionLoaderService.loadBlueprintsForTheWorkspace(clusterDefinitions, workspace, this::saveDefaultsWithReadRight);
-            LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+        if (clusterDefinitionLoaderService.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions)) {
+            LOGGER.debug("Modifying cluster definitions based on the defaults for the '{}' workspace.", workspace.getId());
+            clusterDefinitions = clusterDefinitionLoaderService.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace,
+                    this::saveDefaultsWithReadRight);
+            LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return clusterDefinitions;
     }
 
-    public boolean isDatalakeBlueprint(ClusterDefinition clusterDefinition) {
+    public boolean isDatalakeAmbariBlueprint(ClusterDefinition clusterDefinition) {
         return Optional.ofNullable((Boolean) clusterDefinition.getTags().getMap().get(SHARED_SERVICES_READY)).orElse(false);
     }
 
-    private Iterable<ClusterDefinition> saveDefaultsWithReadRight(Iterable<ClusterDefinition> blueprints, Workspace workspace) {
-        blueprints.forEach(bp -> bp.setWorkspace(workspace));
-        return clusterDefinitionRepository.saveAll(blueprints);
+    private Iterable<ClusterDefinition> saveDefaultsWithReadRight(Iterable<ClusterDefinition> clusterDefinitions, Workspace workspace) {
+        clusterDefinitions.forEach(bp -> bp.setWorkspace(workspace));
+        return clusterDefinitionRepository.saveAll(clusterDefinitions);
     }
 
     public ClusterDefinition delete(Long id) {
         return delete(get(id));
     }
 
-    public boolean isClouderaManagerBlueprint(ClusterDefinition clusterDefinition) {
+    public boolean isClouderaManagerTemplate(ClusterDefinition clusterDefinition) {
         return !isAmbariBlueprint(clusterDefinition);
     }
 
@@ -172,7 +173,7 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public ClusterDefinition delete(ClusterDefinition clusterDefinition) {
-        LOGGER.debug("Deleting blueprint with name: {}", clusterDefinition.getName());
+        LOGGER.debug("Deleting cluster definition with name: {}", clusterDefinition.getName());
         prepareDeletion(clusterDefinition);
         if (ResourceStatus.USER_MANAGED.equals(clusterDefinition.getStatus())) {
             clusterDefinitionRepository.delete(clusterDefinition);
@@ -196,30 +197,30 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     protected void prepareDeletion(ClusterDefinition clusterDefinition) {
-        Set<Cluster> notDeletedClustersWithThisBp = getNotDeletedClustersWithBlueprint(clusterDefinition);
-        if (!notDeletedClustersWithThisBp.isEmpty()) {
-            if (notDeletedClustersWithThisBp.size() > 1) {
-                String clusters = notDeletedClustersWithThisBp
+        Set<Cluster> notDeletedClustersWithThisCd = getNotDeletedClustersWithClusterDefinition(clusterDefinition);
+        if (!notDeletedClustersWithThisCd.isEmpty()) {
+            if (notDeletedClustersWithThisCd.size() > 1) {
+                String clusters = notDeletedClustersWithThisCd
                         .stream()
                         .map(Cluster::getName)
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(String.format(
-                        "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint. "
-                                + "The following clusters are using this blueprint: [%s]", clusterDefinition.getName(), clusters));
+                        "There are clusters associated with cluster definition '%s'. Please remove these before deleting the cluster definition. "
+                                + "The following clusters are using this cluster definition: [%s]", clusterDefinition.getName(), clusters));
             }
-            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses blueprint '%s'. Please remove this "
-                    + "cluster before deleting the blueprint", notDeletedClustersWithThisBp.iterator().next().getName(), clusterDefinition.getName()));
+            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses cluster definition '%s'. Please remove this "
+                    + "cluster before deleting the cluster definition", notDeletedClustersWithThisCd.iterator().next().getName(), clusterDefinition.getName()));
         }
     }
 
-    private Set<Cluster> getNotDeletedClustersWithBlueprint(ClusterDefinition clusterDefinition) {
-        Set<Cluster> clustersWithThisBlueprint = clusterService.findByBlueprint(clusterDefinition);
-        Set<Cluster> deletedClustersWithThisBp = clustersWithThisBlueprint.stream()
+    private Set<Cluster> getNotDeletedClustersWithClusterDefinition(ClusterDefinition clusterDefinition) {
+        Set<Cluster> clustersWithThisClusterDefinition = clusterService.findByClusterDefinition(clusterDefinition);
+        Set<Cluster> deletedClustersWithThisBp = clustersWithThisClusterDefinition.stream()
                 .filter(cluster -> DELETED_CLUSTER_STATUSES.contains(cluster.getStatus()))
                 .collect(Collectors.toSet());
         deletedClustersWithThisBp.forEach(cluster -> cluster.setClusterDefinition(null));
         clusterService.saveAll(deletedClustersWithThisBp);
-        Set<Cluster> notDeletedClustersWithThisBp = new HashSet<>(clustersWithThisBlueprint);
+        Set<Cluster> notDeletedClustersWithThisBp = new HashSet<>(clustersWithThisClusterDefinition);
         notDeletedClustersWithThisBp.removeAll(deletedClustersWithThisBp);
         return notDeletedClustersWithThisBp;
     }
@@ -229,9 +230,9 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
     }
 
     private Set<String> queryCustomParameters(String name, Long workspaceId) {
-        ClusterDefinition blueprint = getByNameForWorkspaceId(name, workspaceId);
-        String blueprintText = blueprint.getClusterDefinitionText();
-        return centralBlueprintParameterQueryService.queryCustomParameters(blueprintText);
+        ClusterDefinition clusterDefinition = getByNameForWorkspaceId(name, workspaceId);
+        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+        return centralClusterDefinitionParameterQueryService.queryCustomParameters(clusterDefinitionText);
     }
 
     public Map<String, String> queryCustomParametersMap(String name, Long workspaceId) {
@@ -255,13 +256,13 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withClusterName(clusterName)
                 .withStorageName(storageName)
-                .withBlueprintText(clusterDefinitionText)
+                .withClusterDefinitionText(clusterDefinitionText)
                 .withFileSystemType(fileSystemType)
                 .withAccountName(accountName)
                 .withAttachedCluster(attachedCluster)
                 .withDatalakeCluster(datalake)
                 .build();
 
-        return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);
+        return centralClusterDefinitionParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);
     }
 }

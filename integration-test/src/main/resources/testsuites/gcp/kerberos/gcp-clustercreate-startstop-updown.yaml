@@ -2,7 +2,7 @@
 name: Gcp_simple_kerberostest
 parameters: {
   cloudProvider: GCP,
-  blueprintName: multi-node-hdfs-yarn
+  clusterDefinitionName: multi-node-hdfs-yarn
 }
 
 tests:

@@ -94,12 +94,12 @@ public class PlatformParameterService {
                 request.getPlatformVariant(), request.getFilters());
     }
 
-    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
+    public PlatformRecommendation getRecommendation(Long workspaceId, String clusterDefinitionName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
         if (!ObjectUtils.allNotNull(region, availabilityZone)) {
             throw new BadRequestException("region and availabilityZone cannot be null");
         }
-        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone);
+        return cloudResourceAdvisor.createForClusterDefintion(workspaceId, clusterDefinitionName, credentialName, region, platformVariant, availabilityZone);
     }
 
     public CloudSecurityGroups getSecurityGroups(PlatformResourceRequest request) {

@@ -45,7 +45,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
-    private static final String BP_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CD_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     @Inject
     private LdapConfigTestClient ldapConfigTestClient;
@@ -55,7 +55,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
+        initializeDefaultClusterDefinitions(testContext);
     }
 
     @BeforeMethod
@@ -314,7 +314,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(rdsSet)
-                .withAmbari(testContext.given(AmbariEntity.class).withBlueprintName(BP_NAME));
+                .withAmbari(testContext.given(AmbariEntity.class).withClusterDefinitionName(CD_NAME));
         if (rdsName != null) {
             cluster.withRdsConfigNames(rdsSet);
         }

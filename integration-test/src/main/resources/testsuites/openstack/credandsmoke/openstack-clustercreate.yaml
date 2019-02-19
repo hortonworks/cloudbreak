@@ -1,7 +1,7 @@
 name: OpenStack_simple_smoketest_cred
 parameters:
   cloudProvider: OPENSTACK
-  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+  clusterDefinitionName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init

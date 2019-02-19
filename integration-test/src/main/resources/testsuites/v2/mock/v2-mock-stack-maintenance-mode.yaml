@@ -3,7 +3,7 @@ parameters:
   cloudProvider: MOCK
   region: Europe
   availabilityZone: europe-b
-  blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+  clusterDefinitionName: "Data Science: Apache Spark 2, Apache Zeppelin"
   mockPort: 9443
 
 tests:

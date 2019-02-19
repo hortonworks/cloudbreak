@@ -22,20 +22,20 @@ public class TemplateProcessor {
 
     public String process(String sourceTemplate, TemplatePreparationObject source, Map<String, Object> customProperties) throws IOException {
         long started = System.currentTimeMillis();
-        String generateBlueprint = generateTemplateWithParameters(sourceTemplate, source, customProperties);
+        String generateClusterDefinition = generateTemplateWithParameters(sourceTemplate, source, customProperties);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.debug("The template text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
-                generationTime, JsonUtil.minify(generateBlueprint));
-        return generateBlueprint;
+                generationTime, JsonUtil.minify(generateClusterDefinition));
+        return generateClusterDefinition;
     }
 
     public List<String> queryParameters(String sourceTemplate) throws IOException {
         long started = System.currentTimeMillis();
-        List<String> blueprintParameters = queryTemplateParameters(sourceTemplate);
+        List<String> clusterDefinitionParameters = queryTemplateParameters(sourceTemplate);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.debug("The template text processed successfully by the EL based template processor under {} ms, the parameters are: {}",
-                generationTime, blueprintParameters);
-        return blueprintParameters;
+                generationTime, clusterDefinitionParameters);
+        return clusterDefinitionParameters;
     }
 
     private String generateTemplateWithParameters(String sourceTemplate, TemplatePreparationObject source, Map<String, Object> customProperties)
@@ -58,7 +58,7 @@ public class TemplateProcessor {
                 .withSharedServiceConfigs(source.getSharedServiceConfigs().orElse(null))
                 .withComponents(source.getClusterDefinitionView().getComponents())
                 .withGateway(source.getGatewayView())
-                .withBlueprintView(source.getClusterDefinitionView())
+                .withClusterDefinitionView(source.getClusterDefinitionView())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
                 .withCustomInputs(source.getCustomInputs())

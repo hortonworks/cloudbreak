@@ -24,15 +24,15 @@ public class ModelDescriptions {
     private ModelDescriptions() {
     }
 
-    public static class BlueprintModelDescription {
-        public static final String URL = "url source of an ambari blueprint, set this or the ambariBlueprint field";
-        public static final String BLUEPRINT_NAME = "gathered from blueprintName field from the blueprint JSON";
-        public static final String AMBARI_BLUEPRINT = "ambari blueprint JSON, set this or the url field";
+    public static class ClusterDefinitionModelDescription {
+        public static final String URL = "url source of a cluster definition, set this or the clusterDefinition field";
+        public static final String CLUSTER_DEFINITION_NAME = "gathered from clusterDefinitionName field from the cluster definition";
+        public static final String CLUSTER_DEFINITION = "cluster definition, set this or the url field";
         public static final String HOST_GROUP_COUNT = "number of host groups";
-        public static final String STATUS = "status of the blueprint";
-        public static final String INPUTS = "input parameters of the blueprint";
-        public static final String BLUEPRINT_PROPERTIES = "properties to extend the blueprint with";
-        public static final String TAGS = "user defined tags for blueprint";
+        public static final String STATUS = "status of the cluster definition";
+        public static final String INPUTS = "input parameters of the cluster definition";
+        public static final String CLUSTER_DEFINITION_PROPERTIES = "properties to extend the cluster definition with";
+        public static final String TAGS = "user defined tags for cluster definition";
         public static final String STACK_TYPE = "The type of the stack: for example HDP or HDF";
         public static final String STACK_VERSION = "The version of the stack";
     }
@@ -125,8 +125,8 @@ public class ModelDescriptions {
     }
 
     public static class RecommendationRequestModelDescription {
-        public static final String BLUEPRINT_NAME = "name that could indentify an existing blueprint";
-        public static final String BLUEPRINT_ID = "id that could indentify an existing blueprint";
+        public static final String CLUSTER_DEFINITION_NAME = "name that could indentify an existing cluster defintion";
+        public static final String CLUSTER_DEFINITION_ID = "id that could indentify an existing cluster defintion";
     }
 
     public static class StackModelDescription {
@@ -144,7 +144,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_NAME = "credential resource name for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
-        public static final String EXTENDED_BLUEPRINT_TEXT = "extended bluerint text";
+        public static final String EXTENDED_CLUSTER_DEFINITION_TEXT = "extended cluster definition text";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
@@ -237,11 +237,11 @@ public class ModelDescriptions {
         public static final String STATUS_REASON = "status message of the cluster";
         public static final String CLUSTER_NAME = "name of the cluster";
         public static final String CLUSTER_ID = "id of the cluster";
-        public static final String BLUEPRINT_ID = "blueprint id for the cluster";
-        public static final String BLUEPRINT_NAME = "blueprint name for the cluster";
-        public static final String BLUEPRINT = "blueprint for the cluster";
+        public static final String CLUSTER_DEFINITION_ID = "cluster definition id for the cluster";
+        public static final String CLUSTER_DEFINITION_NAME = "cluster definition name for the cluster";
+        public static final String CLUSTER_DEFINITION = "cluster definition for the cluster";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
-        public static final String VALIDATE_BLUEPRINT = "blueprint validation";
+        public static final String VALIDATE_CLUSTER_DEFINITION = "cluster definition validation";
         public static final String VALIDATE_REPOSITORIES = "ambari and stack repository validation";
         public static final String SHARED_SERVICE = "shared service for a specific stack";
         public static final String FILESYSTEM = "filesystem for a specific stack";
@@ -249,8 +249,8 @@ public class ModelDescriptions {
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String CLUSTER_EXPOSED_SERVICES = "cluster exposed services for topologies";
         public static final String CONFIG_STRATEGY = "config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'";
-        public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
-        public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
+        public static final String CLUSTER_DEFINITION_INPUTS = "cluster definition inputs in the cluster";
+        public static final String CLUSTER_DEFINITION_CUSTOM_PROPERTIES = "cluster definition custom properties";
         public static final String CUSTOM_CONTAINERS = "custom containers";
         public static final String CUSTOM_QUEUE = "custom queue for yarn orchestrator";
         public static final String EXECUTOR_TYPE = "executor type of cluster";
@@ -272,7 +272,6 @@ public class ModelDescriptions {
         public static final String HOSTGROUPS = "collection of hostgroups";
         public static final String AMBARI_STACK_DETAILS = "details of the Ambari stack";
         public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";
-        public static final String AMBARI_DATABASE_DETAILS = "[DEPRECATED] use RdsConfig instead! details of the external Ambari database";
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";

@@ -71,7 +71,7 @@ public class DependecyDeletionService {
         }
         if (stack.getCluster() != null) {
             Cluster cluster = stack.getCluster();
-            deleteBlueprint(cluster.getClusterDefinition());
+            deleteClusterDefinition(cluster.getClusterDefinition());
             Set<HostGroup> hostGroupsInCluster = hostGroupService.getByCluster(cluster.getId());
             for (HostGroup hostGroup : hostGroupsInCluster) {
                 hostGroup.getRecipes().forEach(this::deleteRecipe);
@@ -119,7 +119,7 @@ public class DependecyDeletionService {
         }
     }
 
-    private void deleteBlueprint(ClusterDefinition clusterDefinition) {
+    private void deleteClusterDefinition(ClusterDefinition clusterDefinition) {
         try {
             if (clusterDefinition != null) {
                 clusterDefinitionService.delete(clusterDefinition);

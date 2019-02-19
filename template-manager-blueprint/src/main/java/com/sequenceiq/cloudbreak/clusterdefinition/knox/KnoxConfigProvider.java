@@ -27,7 +27,7 @@ public class KnoxConfigProvider implements ClusterDefinitionComponentConfigProvi
     }
 
     @Override
-    public boolean specialCondition(TemplatePreparationObject source, String blueprintText) {
+    public boolean specialCondition(TemplatePreparationObject source, String clusterDefinitionText) {
         return source.getGeneralClusterConfigs().isGatewayInstanceMetadataPresented();
     }
 }

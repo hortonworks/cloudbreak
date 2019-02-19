@@ -1,6 +1,6 @@
 {
   "networkId" : 1,
-  "blueprintId" : 2,
+  "clusterDefinitionId" : 2,
   "hostGroups": [
     {
       "name" : "hostGroupName",

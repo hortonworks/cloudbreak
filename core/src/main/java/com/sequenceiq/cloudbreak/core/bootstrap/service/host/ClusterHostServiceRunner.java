@@ -163,7 +163,7 @@ public class ClusterHostServiceRunner {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            boolean clouderaManager = clusterDefinitionService.isClouderaManagerBlueprint(cluster.getClusterDefinition());
+            boolean clouderaManager = clusterDefinitionService.isClouderaManagerTemplate(cluster.getClusterDefinition());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel, clouderaManager);
             recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
@@ -232,7 +232,7 @@ public class ClusterHostServiceRunner {
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
-        if (clusterDefinitionService.isClouderaManagerBlueprint(cluster.getClusterDefinition())) {
+        if (clusterDefinitionService.isClouderaManagerTemplate(cluster.getClusterDefinition())) {
             decoratePillarWithClouderaManagerRepo(stack.getId(), servicePillar);
             decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         } else {

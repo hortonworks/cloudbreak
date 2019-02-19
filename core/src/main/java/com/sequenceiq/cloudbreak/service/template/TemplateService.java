@@ -53,7 +53,7 @@ public class TemplateService {
         try {
             savedTemplate = templateRepository.save(template);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER_DEFINITION, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
         }
         return savedTemplate;

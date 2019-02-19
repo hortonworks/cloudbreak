@@ -197,19 +197,19 @@ public class ClusterV4RequestToClusterConverterTest {
     }
 
     @Test
-    public void testConvertWheBlueprintDoesNotExists() {
+    public void testConvertWheClusterDefinitionDoesNotExists() {
         String blueprintName = "bp-name";
 
         ClusterV4Request source = new ClusterV4Request();
 
         AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setBlueprintName(blueprintName);
+        ambariV4Request.setClusterDefinitionName(blueprintName);
         source.setAmbari(ambariV4Request);
 
         when(clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("Blueprint does not exists by name: bp-name");
+        expectedException.expectMessage("Cluster definition does not exists by name: bp-name");
 
         underTest.convert(source);
     }
@@ -224,7 +224,7 @@ public class ClusterV4RequestToClusterConverterTest {
         ClusterV4Request source = new ClusterV4Request();
 
         AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setBlueprintName(blueprintName);
+        ambariV4Request.setClusterDefinitionName(blueprintName);
         source.setAmbari(ambariV4Request);
 
         when(clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(clusterDefinition);

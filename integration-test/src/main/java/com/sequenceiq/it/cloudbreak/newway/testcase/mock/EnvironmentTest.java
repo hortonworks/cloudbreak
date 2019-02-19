@@ -58,7 +58,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         MockedTestContext testContext = (MockedTestContext) data[0];
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultBlueprints(testContext);
+        initializeDefaultClusterDefinitions(testContext);
     }
 
     @AfterMethod(alwaysRun = true)

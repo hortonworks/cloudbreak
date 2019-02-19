@@ -40,7 +40,7 @@ public class MockCloudProvider extends CloudProviderHelper {
 
     private static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting mock credential";
 
-    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String NETWORK_DEFAULT_NAME = "autotesting-aws-net";
 
@@ -182,9 +182,9 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getBlueprintName() {
-        String blueprintName = getTestParameter().get("mockBlueprintName");
-        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+    public String getClusterDefinitionName() {
+        String clusterDefinitionName = getTestParameter().get("mockClusterDefinitionName");
+        return clusterDefinitionName == null ? CLUSTER_DEFINITION_DEFAULT_NAME : clusterDefinitionName;
     }
 
     @Override

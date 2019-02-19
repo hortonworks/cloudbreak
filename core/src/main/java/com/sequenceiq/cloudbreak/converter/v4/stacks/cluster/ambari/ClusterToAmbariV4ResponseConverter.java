@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.stackrepository.StackRepositoryV4Response;
@@ -42,10 +42,10 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
     @Override
     public AmbariV4Response convert(Cluster source) {
         AmbariV4Response response = new AmbariV4Response();
-        response.setBlueprint(getConversionService().convert(source.getClusterDefinition(), BlueprintV4Response.class));
+        response.setClusterDefinition(getConversionService().convert(source.getClusterDefinition(), ClusterDefinitionV4Response.class));
         response.setConfigStrategy(source.getConfigStrategy());
         convertDpSecrets(source, response);
-        response.setExtendedBlueprintText(getExtendedBlueprintText(source));
+        response.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(source));
         response.setRepository(getComponent(source, ComponentType.AMBARI_REPO_DETAILS, AmbariRepo.class, AmbariRepositoryV4Response.class));
         response.setSecurityMasterKey(getConversionService().convert(source.getAmbariSecurityMasterKey(), SecretV4Response.class));
         String ambariIp = stackUtil.extractAmbariIp(source.getStack());
@@ -75,7 +75,7 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
         }
     }
 
-    private String getExtendedBlueprintText(Cluster source) {
+    private String getExtendedClusterDefinitionText(Cluster source) {
         if (StringUtils.isNoneEmpty(source.getExtendedClusterDefinitionText()) && !disableShowBlueprint) {
             String fromVault = source.getExtendedClusterDefinitionText();
             return anonymize(fromVault);

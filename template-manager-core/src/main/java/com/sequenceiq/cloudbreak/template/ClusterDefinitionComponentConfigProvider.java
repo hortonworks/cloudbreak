@@ -18,21 +18,20 @@ public interface ClusterDefinitionComponentConfigProvider {
         return blueprintProcessor;
     }
 
-    default List<ClusterDefinitionConfigurationEntry> getSettingsEntries(TemplatePreparationObject source, String blueprintProcessor) {
+    default List<ClusterDefinitionConfigurationEntry> getSettingsEntries(TemplatePreparationObject source, String clusterDefinitionProcessor) {
         return Lists.newArrayList();
     }
 
-    default List<ClusterDefinitionConfigurationEntry> getConfigurationEntries(TemplatePreparationObject source, String blueprintProcessor) {
+    default List<ClusterDefinitionConfigurationEntry> getConfigurationEntries(TemplatePreparationObject source, String clusterDefinitionProcessor) {
         return Lists.newArrayList();
     }
 
     default Map<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> getHostgroupConfigurationEntries(TemplatePreparationObject source,
-            String blueprintProcessor)
-            throws IOException {
+            String clusterDefinitionProcessor) throws IOException {
         return Maps.newHashMap();
     }
 
-    default boolean specialCondition(TemplatePreparationObject source, String blueprintText) {
+    default boolean specialCondition(TemplatePreparationObject source, String clusterDefinitionText) {
         return false;
     }
 

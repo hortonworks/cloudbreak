@@ -1,12 +1,12 @@
 {
   "name" : "mycluster",
   "emailNeeded" : true,
-  "blueprintId": 50,
+  "clusterDefinitionId": 50,
   "description" : "my cluster description",
   "ambari":{
     "userName" : "user",
     "password" : "pass"
   },
   "emailTo": "admin@example.com",
-  "validateBlueprint" : true
+  "validateClusterDefinition" : true
 }

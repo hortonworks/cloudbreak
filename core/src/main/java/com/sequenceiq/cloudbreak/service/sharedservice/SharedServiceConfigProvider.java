@@ -48,7 +48,7 @@ public class SharedServiceConfigProvider {
     private KerberosConfigProvider kerberosConfigProvider;
 
     @Inject
-    private DatalakeConfigProvider datalakeConfigProvider;
+    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Inject
     private DatalakeResourcesRepository datalakeResourcesRepository;
@@ -89,7 +89,7 @@ public class SharedServiceConfigProvider {
                 ambariClient = ambariClientFactory.getAmbariClient(datalakeStack, datalakeStack.getCluster());
                 if (!datalakeResource.isPresent()) {
                     datalakeResource = Optional.of(
-                            datalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, datalakeStack.getCluster(), ambariClient));
+                            ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, datalakeStack.getCluster(), ambariClient));
                 }
             }
             if (decorateStackWithConfigs(publicStack, ambariClient, datalakeResource)) {
@@ -106,9 +106,9 @@ public class SharedServiceConfigProvider {
         if (datalakeResource.isPresent() && ambariClient != null) {
             DatalakeResources datalakeResources = datalakeResource.get();
             publicStack.setDatalakeResourceId(datalakeResources.getId());
-            Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
+            Map<String, String> additionalParams = ambariDatalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
             Map<String, String> blueprintConfigParams =
-                    datalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, ambariClient);
+                    ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, ambariClient);
             StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
             stackInputs.setDatalakeInputs((Map) blueprintConfigParams);
             stackInputs.setFixInputs((Map) additionalParams);

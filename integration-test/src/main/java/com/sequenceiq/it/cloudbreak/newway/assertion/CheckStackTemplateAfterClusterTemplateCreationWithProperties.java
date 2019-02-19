@@ -89,9 +89,10 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Image catalog name is mismatch!");
         }
 
-        String blueprintName = entity.getTestParameter().getWithDefault(CommonCloudParameters.BLUEPRINT_NAME, CommonCloudParameters.DEFAULT_BLUEPRINT_NAME);
+        String blueprintName = entity.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
+                CommonCloudParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
 
-        if (!blueprintName.equals(stackTemplate.getCluster().getAmbari().getBlueprintName())) {
+        if (!blueprintName.equals(stackTemplate.getCluster().getAmbari().getClusterDefinitionName())) {
             throw new IllegalArgumentException("Blueprint name is mismatch!");
         }
 

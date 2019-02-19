@@ -49,7 +49,7 @@ public class TemplateParameterFilterTest {
     private List<String> generateTestData(String handleBarModelKey, int inputSize) {
         List<String> testData = new ArrayList<>();
         generateTestData(handleBarModelKey, inputSize, testData);
-        generateTestData(HandleBarModelKey.BLUEPRINT.modelKey(), inputSize, testData);
+        generateTestData(HandleBarModelKey.CLUSTER_DEFINITION.modelKey(), inputSize, testData);
         generateTestData(HandleBarModelKey.COMPONENTS.modelKey(), inputSize, testData);
         return testData;
 

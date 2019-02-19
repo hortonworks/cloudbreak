@@ -52,8 +52,8 @@ public class RecipeTestUtil {
         return generalClusterConfigs;
     }
 
-    public static ClusterDefinitionView generalBlueprintView(String blueprintText, String version, String type) {
-        return new ClusterDefinitionView(blueprintText, version, type);
+    public static ClusterDefinitionView generalClusterDefinitionView(String clusterDefinitionText, String version, String type) {
+        return new ClusterDefinitionView(clusterDefinitionText, version, type);
     }
 
     public static AmbariDatabase generalAmbariDatabase() {

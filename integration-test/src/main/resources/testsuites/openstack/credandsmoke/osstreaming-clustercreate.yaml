@@ -1,7 +1,7 @@
 name: Openstack Streaming Blueprint Test
 parameters:
   cloudProvider: OPENSTACK
-  blueprintName: hdp-streaming-cluster
+  clusterDefinitionName: hdp-streaming-cluster
 
 tests:
   - name: init

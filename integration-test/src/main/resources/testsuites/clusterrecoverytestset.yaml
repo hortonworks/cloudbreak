@@ -10,7 +10,7 @@ tests:
     parameters:
       clusterName: openstack-datasci-manrec
       provider: openstack
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
       workerInstanceCount: 5
@@ -25,7 +25,7 @@ tests:
     parameters:
       clusterName: openstack-datasci-autorec
       provider: openstack
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
       workerRecoveryMode: auto

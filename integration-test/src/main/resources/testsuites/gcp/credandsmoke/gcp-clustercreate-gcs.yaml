@@ -1,7 +1,7 @@
 name: Gcp_simple_smoketest_cred_gcs
 parameters:
   cloudProvider: GCP
-  blueprintName: "26EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+  clusterDefinitionName: "26EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init

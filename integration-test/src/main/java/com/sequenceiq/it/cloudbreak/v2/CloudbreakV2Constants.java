@@ -21,7 +21,7 @@ public class CloudbreakV2Constants {
 
     public static final String SSH_PUBLICKEY_ID = "SSH_PUBLICKEY_ID";
 
-    public static final String BLUEPRINT_NAME = "BLUEPRINT_NAME";
+    public static final String CLUSTER_DEFINITION_NAME = "CLUSTER_DEFINITION_NAME";
 
     public static final String STACK_NAME = "STACK_NAME";
 

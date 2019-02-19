@@ -21,8 +21,8 @@ public class StackValidationV4Request implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private Set<InstanceGroupV4Request> instanceGroups = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
-    private String blueprintName;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_NAME)
+    private String clusterDefinitionName;
 
     @ApiModelProperty(StackModelDescription.NETWORK_ID)
     private Long networkId;
@@ -55,12 +55,12 @@ public class StackValidationV4Request implements JsonEntity {
         this.instanceGroups = instanceGroups;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getClusterDefinitionName() {
+        return clusterDefinitionName;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setClusterDefinitionName(String clusterDefinitionName) {
+        this.clusterDefinitionName = clusterDefinitionName;
     }
 
     public Long getNetworkId() {

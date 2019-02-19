@@ -71,7 +71,7 @@ public class SmartSenseConfigProvider implements ClusterDefinitionComponentConfi
     }
 
     @Override
-    public boolean specialCondition(TemplatePreparationObject source, String blueprintText) {
+    public boolean specialCondition(TemplatePreparationObject source, String clusterDefinitionText) {
         return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscription().isPresent()
                 ? Optional.ofNullable(source.getSmartSenseSubscription().get().getSubscriptionId())
                 : Optional.empty());

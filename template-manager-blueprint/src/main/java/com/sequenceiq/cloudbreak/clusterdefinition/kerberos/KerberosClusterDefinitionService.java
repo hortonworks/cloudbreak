@@ -114,12 +114,12 @@ public class KerberosClusterDefinitionService implements ClusterDefinitionCompon
                     .setSecurityType("KERBEROS")
                     .extendBlueprintGlobalConfiguration(configs, forced);
         } catch (IOException e) {
-            throw new ClusterDefinitionProcessingException("Failed to extend blueprint with kerberos configurations.", e);
+            throw new ClusterDefinitionProcessingException("Failed to extend cluster definition with kerberos configurations.", e);
         }
     }
 
     @Override
-    public boolean specialCondition(TemplatePreparationObject source, String blueprintText) {
+    public boolean specialCondition(TemplatePreparationObject source, String clusterDefinitionText) {
         return source.getKerberosConfig().isPresent();
     }
 }

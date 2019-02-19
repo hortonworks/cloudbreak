@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 
 public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClusterTestConfiguration.class);
@@ -22,9 +22,9 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final int SLEEP_TIME = 10;
 
     @BeforeSuite
-    public void getAllBlueprints() throws Exception {
+    public void getAllClusterDefinitions() throws Exception {
         given(CloudbreakClient.created());
-        when(Blueprint.getAll());
+        when(ClusterDefinition.getAll());
     }
 
     @BeforeClass

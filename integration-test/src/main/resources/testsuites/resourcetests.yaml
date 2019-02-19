@@ -48,11 +48,11 @@ tests:
 
   - name: blueprint_test
     parameters:
-      blueprintName: it-blueprint-restest
-      blueprintFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
+      clusterDefinitionName: it-blueprint-restest
+      clusterDefinitionFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
     classes:
-      - com.sequenceiq.it.cloudbreak.BlueprintCreationTest
-      - com.sequenceiq.it.cloudbreak.BlueprintDeleteByNameTest
+      - com.sequenceiq.it.cloudbreak.ClusterDefinitionCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterDefinitionDeleteByNameTest
 
   # integratontest.gcpcredential params must be set in application.yml
   - name: gcp_credential_test

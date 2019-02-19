@@ -14,7 +14,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
@@ -26,9 +26,9 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateNewRegularCluster(MockedTestContext testContext) {
         mockSpi(testContext);
-        String name = testContext.get(BlueprintEntity.class).getRequest().getName();
+        String name = testContext.get(ClusterDefinitionEntity.class).getRequest().getName();
         testContext
-                .given("cm", AmbariEntity.class).withBlueprintName(name).withValidateBlueprint(Boolean.FALSE)
+                .given("cm", AmbariEntity.class).withClusterDefinitionName(name).withValidateClusterDefinition(Boolean.FALSE)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")
                 .given(StackEntity.class).withCluster("cmcluster")
                 .when(Stack.postV4())

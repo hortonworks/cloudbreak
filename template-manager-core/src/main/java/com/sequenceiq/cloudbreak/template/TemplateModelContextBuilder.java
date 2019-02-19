@@ -89,7 +89,7 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withBlueprintView(ClusterDefinitionView clusterDefinitionView) {
+    public TemplateModelContextBuilder withClusterDefinitionView(ClusterDefinitionView clusterDefinitionView) {
         this.clusterDefinitionView = clusterDefinitionView;
         return this;
     }
@@ -146,21 +146,21 @@ public class TemplateModelContextBuilder {
     }
 
     public Map<String, Object> build() {
-        Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
-        blueprintTemplateModelContext.put(HandleBarModelKey.COMPONENTS.modelKey(), components);
-        blueprintTemplateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.KERBEROS.modelKey(), kerberos.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.GATEWAY.modelKey(), gateway.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
-        blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(createAdjustedFileSystemConfig()));
-        blueprintTemplateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), clusterDefinitionView);
-        blueprintTemplateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
-        blueprintTemplateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
-        ModelConverterUtils.deepMerge(blueprintTemplateModelContext, ModelConverterUtils.convert(customInputs));
-        ModelConverterUtils.deepMerge(blueprintTemplateModelContext, ModelConverterUtils.convert(fixInputs));
-        blueprintTemplateModelContext.put(HandleBarModelKey.STACK_VERSION.modelKey(), "{{stack_version}}");
-        return blueprintTemplateModelContext;
+        Map<String, Object> templateModelContext = new HashMap<>();
+        templateModelContext.put(HandleBarModelKey.COMPONENTS.modelKey(), components);
+        templateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
+        templateModelContext.put(HandleBarModelKey.KERBEROS.modelKey(), kerberos.orElse(null));
+        templateModelContext.put(HandleBarModelKey.GATEWAY.modelKey(), gateway.orElse(null));
+        templateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
+        templateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(createAdjustedFileSystemConfig()));
+        templateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
+        templateModelContext.put(HandleBarModelKey.CLUSTER_DEFINITION.modelKey(), clusterDefinitionView);
+        templateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
+        templateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
+        ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(customInputs));
+        ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(fixInputs));
+        templateModelContext.put(HandleBarModelKey.STACK_VERSION.modelKey(), "{{stack_version}}");
+        return templateModelContext;
     }
 
     private Map<String, Object> createAdjustedFileSystemConfig() {

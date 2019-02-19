@@ -9,9 +9,9 @@ public class CloudbreakITContextConstants {
 
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
-    public static final String BLUEPRINT_ID = "BLUEPRINT_ID";
+    public static final String CLUSTER_DEFINITION_ID = "CLUSTER_DEFINITION_ID";
 
-    public static final String BLUEPRINT_NAME = "BLUEPRINT_NAME";
+    public static final String CLUSTER_DEFINITION_NAME = "CLUSTER_DEFINITION_NAME";
 
     public static final String RECIPE_ID = "RECIPE_ID";
 

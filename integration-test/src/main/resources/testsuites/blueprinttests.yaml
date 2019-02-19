@@ -6,7 +6,7 @@ parameters:
 tests:
   - name: blueprint_test
     classes:
-      - com.sequenceiq.it.cloudbreak.BlueprintTests
+      - com.sequenceiq.it.cloudbreak.ClusterDefinitionTests
 
 #  - name: cluster_test
 #    parameters:

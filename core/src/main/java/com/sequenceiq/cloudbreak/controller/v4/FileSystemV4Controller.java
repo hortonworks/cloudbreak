@@ -26,9 +26,9 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
-    public FileSystemParameterV4Responses getFileSystemParameters(Long workspaceId, String blueprintName, String clusterName,
+    public FileSystemParameterV4Responses getFileSystemParameters(Long workspaceId, String clusterDefinitionName, String clusterName,
             String accountName, String storageName, String fileSystemType, Boolean attachedCluster) {
-        Set<ConfigQueryEntry> entries = clusterDefinitionService.queryFileSystemParameters(blueprintName, clusterName, storageName,
+        Set<ConfigQueryEntry> entries = clusterDefinitionService.queryFileSystemParameters(clusterDefinitionName, clusterName, storageName,
                 fileSystemType, accountName, attachedCluster, workspaceId);
         return new FileSystemParameterV4Responses(converterUtil.convertAll(entries, FileSystemParameterV4Response.class));
     }

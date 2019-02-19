@@ -116,12 +116,12 @@
     },
     "executorType": "CONTAINER",
     "ambari": {
-      "blueprintId": 0,
-      "blueprintName": "string",
+      "clusterDefinitionId": 0,
+      "clusterDefinitionName": "string",
       "userName": "string",
       "password": "string",
       "kerberosConfigName": "testFreeIpaKdc",
-      "validateBlueprint": false,
+      "validateClusterDefinition": false,
       "ambariStackDetails": {
         "stack": "string",
         "version": "2.6",
@@ -150,13 +150,6 @@
         "password": "string"
       },
       "configStrategy": "NEVER_APPLY",
-      "blueprintInputs": [
-        {
-          "name": "string",
-          "propertyValue": "string"
-        }
-      ],
-      "blueprintCustomProperties": "string",
       "connectedCluster": {
         "sourceClusterId": 0,
         "sourceClusterName": "string"

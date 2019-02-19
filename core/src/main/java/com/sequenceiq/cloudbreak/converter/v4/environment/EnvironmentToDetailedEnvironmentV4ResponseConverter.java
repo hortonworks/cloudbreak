@@ -111,7 +111,7 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
             for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {
                 ServiceDescriptorV4Response serviceDescriptorResponse = new ServiceDescriptorV4Response();
                 serviceDescriptorResponse.setServiceName(serviceDescriptor.getServiceName());
-                serviceDescriptorResponse.setBlueprintParams((Map) serviceDescriptor.getBlueprintParams().getMap());
+                serviceDescriptorResponse.setBlueprintParams((Map) serviceDescriptor.getClusterDefinitionParams().getMap());
                 serviceDescriptorResponse.setComponentHosts((Map) serviceDescriptor.getComponentsHosts().getMap());
                 serviceDescriptorResponses.put(serviceDescriptor.getServiceName(), serviceDescriptorResponse);
             }

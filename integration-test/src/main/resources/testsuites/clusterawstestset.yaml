@@ -15,7 +15,7 @@ tests:
     parameters:
       clusterName: aws-base-datasci
       provider: aws
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
       isGatekeeper: true
@@ -32,7 +32,7 @@ tests:
     parameters:
       clusterName: aws-base-edwan
       provider: aws
-      blueprintName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
+      clusterDefinitionName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
       workerInstanceCount: 3
       image: base
       instancegroupName: worker
@@ -49,7 +49,7 @@ tests:
     parameters:
       clusterName: aws-base-flowmgmt
       provider: aws
-      blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
+      clusterDefinitionName: "Flow Management: Apache NiFi, Apache NiFi Registry"
       image: base
       instancegroupName: NiFi
     classes:
@@ -64,7 +64,7 @@ tests:
     parameters:
       clusterName: aws-prewarm-datasci
       provider: aws
-      blueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+      clusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
       image: hdp
       instancegroupName: worker
     classes:
@@ -80,7 +80,7 @@ tests:
     parameters:
       clusterName: aws-prewarm-edwan
       provider: aws
-      blueprintName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
+      clusterDefinitionName: "HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP"
       workerInstanceCount: 3
       image: hdp
       instancegroupName: worker
@@ -97,7 +97,7 @@ tests:
     parameters:
       clusterName: aws-prewarm-flowmgmt
       provider: aws
-      blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
+      clusterDefinitionName: "Flow Management: Apache NiFi, Apache NiFi Registry"
       image: hdf
       instancegroupName: NiFi
     classes:

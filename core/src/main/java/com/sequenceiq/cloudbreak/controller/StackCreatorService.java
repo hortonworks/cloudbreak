@@ -242,7 +242,7 @@ public class StackCreatorService {
     }
 
     private void setStackTypeAndValidateDatalake(Stack stack, ClusterDefinition clusterDefinition) {
-        if (clusterDefinitionService.isDatalakeBlueprint(clusterDefinition)) {
+        if (clusterDefinitionService.isDatalakeAmbariBlueprint(clusterDefinition)) {
             stack.setType(StackType.DATALAKE);
             if (stack.getEnvironment() != null) {
                 Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironment());
@@ -269,7 +269,7 @@ public class StackCreatorService {
     private boolean shouldUseBaseImage(ClusterV4Request clusterRequest, ClusterDefinition clusterDefinition) {
         return clusterRequest.getAmbari().getRepository() != null
                 || (clusterRequest.getAmbari().getStackRepository() != null && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
-                || clusterDefinitionService.isClouderaManagerBlueprint(clusterDefinition);
+                || clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition);
     }
 
     private void prepareSharedServiceIfNeed(Stack stack) {

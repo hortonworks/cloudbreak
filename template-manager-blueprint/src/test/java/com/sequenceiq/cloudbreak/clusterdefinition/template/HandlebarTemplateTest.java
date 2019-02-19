@@ -446,7 +446,7 @@ public class HandlebarTemplateTest {
         ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDP");
 
         return new TemplateModelContextBuilder()
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .withFixInputs(properties)
                 .build();
     }
@@ -458,7 +458,7 @@ public class HandlebarTemplateTest {
         ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.5", "HDP");
 
         return new TemplateModelContextBuilder()
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .withFixInputs(properties)
                 .build();
     }
@@ -608,7 +608,7 @@ public class HandlebarTemplateTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .build();
     }
 
@@ -642,7 +642,7 @@ public class HandlebarTemplateTest {
                 .withFixInputs(properties)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .build();
     }
 
@@ -657,7 +657,7 @@ public class HandlebarTemplateTest {
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets", Optional.empty()))
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .build();
     }
 
@@ -671,7 +671,7 @@ public class HandlebarTemplateTest {
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .build();
     }
 
@@ -680,7 +680,7 @@ public class HandlebarTemplateTest {
         ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .build();
     }
 
@@ -689,7 +689,7 @@ public class HandlebarTemplateTest {
         ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
-                .withBlueprintView(clusterDefinitionView)
+                .withClusterDefinitionView(clusterDefinitionView)
                 .build();
     }
 

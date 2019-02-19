@@ -43,7 +43,7 @@ public abstract class CloudProvider {
 
     public abstract String getCredentialName();
 
-    public abstract String getBlueprintName();
+    public abstract String getClusterDefinitionName();
 
     public abstract String getNetworkName();
 
@@ -96,7 +96,7 @@ public abstract class CloudProvider {
 
     public abstract Stack aValidAttachedClusterStackCreated(HostGroupType... groupTypes);
 
-    public abstract AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName);
+    public abstract AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName);
 
     public abstract ResourceHelper<?> getResourceHelper();
 

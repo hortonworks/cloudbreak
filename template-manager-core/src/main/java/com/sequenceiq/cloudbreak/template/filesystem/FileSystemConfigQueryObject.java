@@ -8,7 +8,7 @@ public class FileSystemConfigQueryObject {
 
     private final String storageName;
 
-    private final String blueprintText;
+    private final String clusterDefinitionText;
 
     private final String fileSystemType;
 
@@ -21,7 +21,7 @@ public class FileSystemConfigQueryObject {
     private FileSystemConfigQueryObject(FileSystemConfigQueryObject.Builder builder) {
         this.storageName = builder.storageName;
         this.clusterName = builder.clusterName;
-        this.blueprintText = builder.blueprintText;
+        this.clusterDefinitionText = builder.clusterDefinitionText;
         this.fileSystemType = builder.fileSystemType;
         this.accountName = builder.accountName;
         this.attachedCluster = builder.attachedCluster;
@@ -36,8 +36,8 @@ public class FileSystemConfigQueryObject {
         return storageName;
     }
 
-    public String getBlueprintText() {
-        return blueprintText;
+    public String getClusterDefinitionText() {
+        return clusterDefinitionText;
     }
 
     public String getFileSystemType() {
@@ -62,7 +62,7 @@ public class FileSystemConfigQueryObject {
 
         private String storageName;
 
-        private String blueprintText;
+        private String clusterDefinitionText;
 
         private String fileSystemType;
 
@@ -86,8 +86,8 @@ public class FileSystemConfigQueryObject {
             return this;
         }
 
-        public Builder withBlueprintText(String blueprintText) {
-            this.blueprintText = blueprintText;
+        public Builder withClusterDefinitionText(String clusterDefinitionText) {
+            this.clusterDefinitionText = clusterDefinitionText;
             return this;
         }
 

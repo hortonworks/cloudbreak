@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigProvider;
+import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
@@ -106,7 +106,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private KerberosService kerberosService;
 
     @Inject
-    private DatalakeConfigProvider datalakeConfigProvider;
+    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Inject
     private AmbariClientFactory ambariClientFactory;
@@ -129,7 +129,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             ClusterDefinition clusterDefinition = getClusterDefinition(source, workspace);
             String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-            ClusterDefinitionStackInfo clusterDefinitionStackInfo = stackInfoService.blueprintStackInfo(clusterDefinitionText);
+            ClusterDefinitionStackInfo clusterDefinitionStackInfo = stackInfoService.clusterDefinitionStackInfo(clusterDefinitionText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
             ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView(clusterDefinition.getClusterDefinitionText(),
@@ -163,10 +163,10 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 DatalakeResources datalakeResource = datalakeResourcesService.getByNameForWorkspace(source.getSharedService().getDatalakeName(), workspace);
                 if (datalakeResource != null) {
                     AmbariClient datalakeAmbariClient = ambariClientFactory.getAmbariClient(datalakeResource, credential);
-                    SharedServiceConfigsView sharedServiceConfigsView = datalakeConfigProvider.createSharedServiceConfigView(datalakeResource);
+                    SharedServiceConfigsView sharedServiceConfigsView = ambariDatalakeConfigProvider.createSharedServiceConfigView(datalakeResource);
                     Map<String, String> blueprintConfigParams =
-                            datalakeConfigProvider.getBlueprintConfigParameters(datalakeResource, clusterDefinition, datalakeAmbariClient);
-                    Map<String, String> additionalParams = datalakeConfigProvider.getAdditionalParameters(source, datalakeResource);
+                            ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResource, clusterDefinition, datalakeAmbariClient);
+                    Map<String, String> additionalParams = ambariDatalakeConfigProvider.getAdditionalParameters(source, datalakeResource);
                     builder.withSharedServiceConfigs(sharedServiceConfigsView)
                             .withFixInputs((Map) additionalParams)
                             .withCustomInputs((Map) blueprintConfigParams);
@@ -190,7 +190,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private ClusterDefinition getClusterDefinition(StackV4Request source, Workspace workspace) {
-        return clusterDefinitionService.getByNameForWorkspace(source.getCluster().getAmbari().getBlueprintName(), workspace);
+        return clusterDefinitionService.getByNameForWorkspace(source.getCluster().getAmbari().getClusterDefinitionName(), workspace);
     }
 
     private Optional<FlexSubscription> getFlexSubscription(StackV4Request source) {
