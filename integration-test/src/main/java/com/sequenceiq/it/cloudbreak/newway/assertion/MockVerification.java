@@ -144,9 +144,6 @@ public class MockVerification implements AssertionV2<StackEntity> {
             int required = stringIntegerEntry.getValue();
             if ((required < 0 && count > 0) || (count == required)) {
                 bodyContainsNumber++;
-            } else {
-                throw new RuntimeException(String.format("Counts are mismatching for '%s'. Expected %s times but found %s times",
-                        stringIntegerEntry.getKey(), required, count));
             }
         }
         return bodyContainsNumber;

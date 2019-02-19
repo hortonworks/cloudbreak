@@ -52,7 +52,7 @@ public class KerberosTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((TestContext) data[0]);
+        minimalSetupForClusterCreation((MockedTestContext) data[0]);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -76,6 +76,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .withCluster(new ClusterEntity(testContext)
                         .withKerberos(request.getName())
                         .withAmbari(new AmbariEntity(testContext)
+                                .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
@@ -96,6 +97,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .withCluster(new ClusterEntity(testContext)
                         .withKerberos(null)
                         .withAmbari(new AmbariEntity(testContext)
+                                .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
@@ -119,6 +121,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 .withCluster(new ClusterEntity(testContext)
                         .withKerberos("")
                         .withAmbari(new AmbariEntity(testContext)
+                                .valid()
                                 .withBlueprintName(blueprintName)))
                 .when(Stack.postV4(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
@@ -179,10 +182,10 @@ public class KerberosTest extends AbstractIntegrationTest {
     @DataProvider(name = "dataProviderForTest")
     public Object[][] provide() {
         return new Object[][]{
-                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.FREEIPA},
-                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.ACTIVE_DIRECTORY},
-                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.MIT},
-                {applicationContext.getBean(TestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.AMBARI_DESCRIPTOR}
+                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.FREEIPA},
+                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.ACTIVE_DIRECTORY},
+                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.MIT},
+                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForMock(), KerberosTestData.AMBARI_DESCRIPTOR}
         };
     }
 

@@ -7,7 +7,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class KerberizedScaleTest extends AbstractIntegrationTest {
 
@@ -22,7 +21,7 @@ public class KerberizedScaleTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         testContext.cleanupTestContextEntity();
     }
 

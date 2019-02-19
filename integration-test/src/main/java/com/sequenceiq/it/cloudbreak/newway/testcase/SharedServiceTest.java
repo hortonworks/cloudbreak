@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -72,13 +73,13 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContextEntity();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
