@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.newway.v4.UpdateStackDataAction;
 
 public class MaintenanceModeTest extends AbstractIntegrationTest {
 
-    protected static final Map<String, Status> CLUSTER_MAINTENANCE_MODE = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.MAINTENANCE_MODE_ENABLED);
+    private static final Map<String, Status> CLUSTER_MAINTENANCE_MODE = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.MAINTENANCE_MODE_ENABLED);
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {

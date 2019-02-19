@@ -145,9 +145,9 @@ public class RecipeTest extends AbstractIntegrationTest {
     @DataProvider(name = "dataProviderForNonPreTerminationRecipeTypes")
     public Object[][] getData() {
         return new Object[][]{
-                {applicationContext.getBean(MockedTestContext.class), PRE_AMBARI_START, 3},
-                {applicationContext.getBean(MockedTestContext.class), POST_AMBARI_START, 3},
-                {applicationContext.getBean(MockedTestContext.class), POST_CLUSTER_INSTALL, 2}
+                {getBean(MockedTestContext.class), PRE_AMBARI_START, 3},
+                {getBean(MockedTestContext.class), POST_AMBARI_START, 3},
+                {getBean(MockedTestContext.class), POST_CLUSTER_INSTALL, 2}
         };
     }
 

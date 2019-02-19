@@ -180,10 +180,10 @@ public class KerberosTest extends AbstractIntegrationTest {
     @DataProvider(name = "dataProviderForTest")
     public Object[][] provide() {
         return new Object[][]{
-                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.FREEIPA},
-                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.ACTIVE_DIRECTORY},
-                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.MIT},
-                {applicationContext.getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.AMBARI_DESCRIPTOR}
+                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.FREEIPA},
+                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.ACTIVE_DIRECTORY},
+                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.MIT},
+                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.AMBARI_DESCRIPTOR}
         };
     }
 

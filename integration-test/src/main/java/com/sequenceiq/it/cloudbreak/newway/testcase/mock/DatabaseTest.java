@@ -160,7 +160,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         Object[][] objects = new Object[databaseTypeList.size()][2];
         databaseTypeList
                 .forEach(databaseType -> {
-                    objects[databaseTypeList.indexOf(databaseType)][0] = applicationContext.getBean(TEST_CONTEXT_CLASS);
+                    objects[databaseTypeList.indexOf(databaseType)][0] = getBean(TEST_CONTEXT_CLASS);
                     objects[databaseTypeList.indexOf(databaseType)][1] = databaseType;
                 });
         return objects;
@@ -169,18 +169,18 @@ public class DatabaseTest extends AbstractIntegrationTest {
     @DataProvider(name = INVALID_ATTRIBUTE_PROVIDER)
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
-                {applicationContext.getBean(TEST_CONTEXT_CLASS), longStringGeneratorUtil.stringGenerator(51), DATABASE_USERNAME, DATABASE_PASSWORD,
+                {getBean(TEST_CONTEXT_CLASS), longStringGeneratorUtil.stringGenerator(51), DATABASE_USERNAME, DATABASE_PASSWORD,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "The length of the name has to be in range of 4 to 50"},
-                {applicationContext.getBean(TEST_CONTEXT_CLASS), "abc", DATABASE_USERNAME, DATABASE_PASSWORD,
+                {getBean(TEST_CONTEXT_CLASS), "abc", DATABASE_USERNAME, DATABASE_PASSWORD,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "The length of the name has to be in range of 4 to 50"},
-                {applicationContext.getBean(TEST_CONTEXT_CLASS), "a-@#$%|:&*;", DATABASE_USERNAME, DATABASE_PASSWORD,
+                {getBean(TEST_CONTEXT_CLASS), "a-@#$%|:&*;", DATABASE_USERNAME, DATABASE_PASSWORD,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "The database's name can only contain lowercase alphanumeric characters and "
                         + "hyphens and has start with an alphanumeric character"},
-                {applicationContext.getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), null, DATABASE_PASSWORD,
+                {getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), null, DATABASE_PASSWORD,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "connectionUserName: null, error: must not be null"},
-                {applicationContext.getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), DATABASE_USERNAME, null,
+                {getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), DATABASE_USERNAME, null,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "connectionPassword: null, error: must not be null"},
-                {applicationContext.getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), DATABASE_USERNAME, DATABASE_PASSWORD,
+                {getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), DATABASE_USERNAME, DATABASE_PASSWORD,
                         DATABASE_HOST_PORT_DB, "Unsupported database type"}
         };
     }
