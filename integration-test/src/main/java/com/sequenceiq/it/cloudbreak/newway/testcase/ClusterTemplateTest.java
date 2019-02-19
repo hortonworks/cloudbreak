@@ -59,7 +59,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Method method, Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
 
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -228,7 +228,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         testContext.cleanupTestContextEntity();
     }
 }

@@ -10,13 +10,14 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class AmbariSetupTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((TestContext) data[0]);
+        minimalSetupForClusterCreation((MockedTestContext) data[0]);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

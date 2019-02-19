@@ -28,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
@@ -53,7 +54,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
@@ -61,7 +62,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContextEntity();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -38,6 +39,8 @@ import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 public class EnvironmentClusterTest extends AbstractIntegrationTest {
+
+    public static final String NEW_CREDENTIAL_KEY = "newCred";
 
     private static final String FORBIDDEN_KEY = "forbiddenPost";
 
@@ -56,13 +59,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContextEntity();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -244,7 +247,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    public void testWlClusterChangeCred(TestContext testContext) {
+    public void testWlClusterChangeCred(MockedTestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .when(Environment::post)
                 .given(StackEntity.class)
@@ -252,15 +255,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
-                .given("newCred", CredentialEntity.class)
+                .given(NEW_CREDENTIAL_KEY, CredentialEntity.class)
                 .withName("int-change-cred-cl")
 
                 .given(EnvironmentEntity.class)
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)
-                .withCredential("newCred")
+                .withCredential(NEW_CREDENTIAL_KEY)
                 .when(Environment::changeCredential)
-                .then(EnvironmentTest::checkCredentialAttachedToEnv)
+                .then(EnvironmentClusterTest::checkNewCredentialAttachedToEnv)
                 .validate();
         checkCredentialAttachedToCluster(testContext);
     }
@@ -290,7 +293,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.given(StackEntity.class)
                 .withName(testContext.get(StackEntity.class).getName())
                 .when(Stack::getByName)
-                .then(EnvironmentClusterTest::checkCredentialInStack)
+                .then(EnvironmentClusterTest::checkNewCredentialInStack)
                 .validate();
     }
 
@@ -325,9 +328,9 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return cluster;
     }
 
-    private static StackEntity checkCredentialInStack(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
+    private static StackEntity checkNewCredentialInStack(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
         String credentialName = stack.getResponse().getEnvironment().getCredential().getName();
-        if (!credentialName.equals(testContext.get(CredentialEntity.class).getName())) {
+        if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
             throw new TestFailException("Credential is not attached to cluster");
         }
         return stack;
@@ -353,6 +356,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
         if (!proxyV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached proxy");
+        }
+        return environment;
+    }
+
+    protected static EnvironmentEntity checkNewCredentialAttachedToEnv(TestContext testContext,
+            EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
+        String credentialName = environment.getResponse().getCredentialName();
+        if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
+            throw new TestFailException("Credential is not attached to environment");
         }
         return environment;
     }

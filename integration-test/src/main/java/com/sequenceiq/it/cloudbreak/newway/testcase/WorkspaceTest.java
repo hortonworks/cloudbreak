@@ -48,13 +48,13 @@ public class WorkspaceTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContextEntity();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)

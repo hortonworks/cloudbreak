@@ -1,5 +1,5 @@
 name: "mock-cluster-tests"
 tests:
   - name: "newway mock testcases"
-    classes:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.MaintenanceModeTest
+    packages:
+      - com.sequenceiq.it.cloudbreak.newway.testcase.*
