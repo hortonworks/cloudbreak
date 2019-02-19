@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseV4Response extends DatabaseV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)

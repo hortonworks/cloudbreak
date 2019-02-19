@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.requests.FlexSubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FlexSubscriptionV4Response extends FlexSubscriptionV4Request {
 
     @ApiModelProperty(value = ModelDescriptions.ID, readOnly = true)
