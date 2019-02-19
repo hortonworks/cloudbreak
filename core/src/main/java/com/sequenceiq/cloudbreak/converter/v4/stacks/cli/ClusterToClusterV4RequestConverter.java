@@ -22,6 +22,7 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
     public ClusterV4Request convert(Cluster source) {
         ClusterV4Request clusterV2Request = new ClusterV4Request();
         clusterV2Request.setAmbari(getConversionService().convert(source, AmbariV4Request.class));
+        clusterV2Request.setExecutorType(source.getExecutorType());
         if (source.getFileSystem() != null) {
             clusterV2Request.setCloudStorage(getConversionService().convert(source.getFileSystem(), CloudStorageV4Request.class));
         }
