@@ -29,6 +29,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+<<<<<<< HEAD
+=======
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+>>>>>>> CB-424 give back all integration test
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
@@ -72,13 +78,13 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         minimalSetupForClusterCreation(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContextEntity();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

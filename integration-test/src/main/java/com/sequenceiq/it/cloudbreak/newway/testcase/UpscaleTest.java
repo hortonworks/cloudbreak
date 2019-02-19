@@ -37,7 +37,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         testContext.cleanupTestContextEntity();
     }
 

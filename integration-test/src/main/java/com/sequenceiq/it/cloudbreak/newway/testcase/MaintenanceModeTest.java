@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackRepositoryEntity;
 import com.sequenceiq.it.cloudbreak.newway.v4.ChangeImageAction;
@@ -21,7 +22,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
@@ -63,7 +64,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
         testContext.cleanupTestContextEntity();
     }
 }
