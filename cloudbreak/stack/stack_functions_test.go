@@ -5,6 +5,7 @@ import (
 
 	"github.com/hortonworks/cb-cli/cloudbreak/api/client/v3_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/cloudbreak/api/model"
+	"github.com/hortonworks/cb-cli/utils"
 )
 
 type getStackAvailableClient struct {
@@ -82,4 +83,19 @@ func TestWaitForOperationToFinishImplFailedCluster(t *testing.T) {
 	waitForOperationToFinishImpl(int64(2), "name", AVAILABLE, SKIP, client)
 
 	t.Error("Exit not happened")
+}
+
+type getStackNotFoundClient struct {
+}
+
+func (c getStackNotFoundClient) GetStackInWorkspace(*v3_workspace_id_stacks.GetStackInWorkspaceParams) (*v3_workspace_id_stacks.GetStackInWorkspaceOK, error) {
+	return nil, &utils.RESTError{
+		nil, 403,
+	}
+}
+
+func TestWaitForDeleteCompletedOperationToFinishImpl(t *testing.T) {
+	t.Parallel()
+
+	waitForOperationToFinishImpl(int64(2), "name", DELETE_COMPLETED, DELETE_COMPLETED, getStackNotFoundClient{})
 }
