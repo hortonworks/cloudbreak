@@ -8,7 +8,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackRepositoryEntity;
@@ -33,16 +34,16 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testMaintenanceMode(TestContext testContext) {
         testContext
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(MaintenanceModePostAction.enable())
                 .await(CLUSTER_MAINTENANCE_MODE)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(ChangeImageAction.valid())
                 .await(CLUSTER_MAINTENANCE_MODE)
-                .when(Stack.sync())
+                .when(StackTestAction::sync)
                 .await(CLUSTER_MAINTENANCE_MODE)
 
                 .given(StackRepositoryEntity.class)
@@ -54,7 +55,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
                 .withRepositoryVersion("2.7.5")
                 .when(new UpdateStackDataAction())
 
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .when(MaintenanceModePostAction.validate())
                 .await(CLUSTER_MAINTENANCE_MODE)
                 .when(MaintenanceModePostAction.disable())

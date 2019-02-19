@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.entity;
+package com.sequenceiq.it.cloudbreak.newway.entity.mpack;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,44 +12,44 @@ import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ManagementPackEntity extends AbstractCloudbreakEntity<ManagementPackV4Request, ManagementPackV4Response, ManagementPackEntity>
+public class MPackTestDto extends AbstractCloudbreakEntity<ManagementPackV4Request, ManagementPackV4Response, MPackTestDto>
         implements Purgable<ManagementPackV4Response> {
 
-    public ManagementPackEntity(TestContext testContext) {
+    public MPackTestDto(TestContext testContext) {
         super(new ManagementPackV4Request(), testContext);
     }
 
-    public ManagementPackEntity valid() {
+    public MPackTestDto valid() {
         return withName(getNameCreator().getRandomNameForMock())
                 .witMpackUrl("http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz");
     }
 
-    public ManagementPackEntity withName(String name) {
+    public MPackTestDto withName(String name) {
         getRequest().setName(name);
         return this;
     }
 
-    public ManagementPackEntity withDescription(String description) {
+    public MPackTestDto withDescription(String description) {
         getRequest().setDescription(description);
         return this;
     }
 
-    public ManagementPackEntity withForce(boolean force) {
+    public MPackTestDto withForce(boolean force) {
         getRequest().setForce(force);
         return this;
     }
 
-    public ManagementPackEntity witMpackUrl(String mpackUrl) {
+    public MPackTestDto witMpackUrl(String mpackUrl) {
         getRequest().setMpackUrl(mpackUrl);
         return this;
     }
 
-    public ManagementPackEntity withPurge(boolean purge) {
+    public MPackTestDto withPurge(boolean purge) {
         getRequest().setPurge(purge);
         return this;
     }
 
-    public ManagementPackEntity withPurgeList(List<String> purgeList) {
+    public MPackTestDto withPurgeList(List<String> purgeList) {
         getRequest().setPurgeList(purgeList);
         return this;
     }

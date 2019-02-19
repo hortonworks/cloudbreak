@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway;
+package com.sequenceiq.it.cloudbreak.newway.entity.stack;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
@@ -16,7 +16,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackRefreshAction;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -25,31 +28,31 @@ import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 @Prototype
-public class StackEntity extends StackV4EntityBase<StackEntity> implements Purgable<StackV4Response> {
+public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Purgable<StackV4Response> {
 
     public static final String STACK = "STACK";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackEntity.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackTestDto.class);
 
-    StackEntity(String newId) {
+    StackTestDto(String newId) {
         super(newId);
     }
 
-    public StackEntity() {
+    public StackTestDto() {
         this(STACK);
     }
 
-    public StackEntity(StackV4Request request) {
+    public StackTestDto(StackV4Request request) {
         this();
         setRequest(request);
     }
 
-    public StackEntity(TestContext testContext) {
+    public StackTestDto(TestContext testContext) {
         super(testContext);
     }
 
     @Override
-    public StackV4EntityBase<StackEntity> valid() {
+    public StackV4EntityBase<StackTestDto> valid() {
         return super.valid().withEnvironment(EnvironmentEntity.class);
     }
 
@@ -89,7 +92,7 @@ public class StackEntity extends StackV4EntityBase<StackEntity> implements Purga
 
     @Override
     public CloudbreakEntity refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(new StackRefreshAction(), key("refresh-stack-" + getName()));
+        return when(StackTestAction::refresh, key("refresh-stack-" + getName()));
     }
 
     @Override

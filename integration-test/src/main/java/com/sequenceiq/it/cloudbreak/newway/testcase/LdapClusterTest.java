@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -47,7 +47,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 .given(AmbariRepositoryV4Entity.class)
                 .given(AmbariEntity.class).withAmbariRepoDetails()
                 .given(ClusterEntity.class).withLdapConfig().withAmbari()
-                .given(StackEntity.class).withCluster()
+                .given(StackTestDto.class).withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, AmbariMock.LDAP_SYNC_EVENTS))
@@ -68,7 +68,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 .given(AmbariRepositoryV4Entity.class)
                 .given(AmbariEntity.class).withAmbariRepoDetails()
                 .given(ClusterEntity.class).withLdapConfig().withAmbari()
-                .given(StackEntity.class).withCluster().withName(stackName)
+                .given(StackTestDto.class).withCluster().withName(stackName)
                 .when(Stack.postV4())
                 .given(LdapConfigTestDto.class)
                 .when(ldapConfigTestClient.delete(), key("deleteFail"))

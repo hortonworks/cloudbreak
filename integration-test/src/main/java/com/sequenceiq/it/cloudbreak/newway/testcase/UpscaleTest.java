@@ -15,12 +15,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackPostAction;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 import spark.Route;
 
@@ -44,8 +44,8 @@ public class UpscaleTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testStackScaling(TestContext testContext) throws Exception {
         // GIVEN
-        testContext.given(StackEntity.class)
-                .when(new StackPostAction())
+        testContext.given(StackTestDto.class)
+                .when(StackTestAction::create)
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(15))
                 .await(STACK_AVAILABLE)
@@ -60,11 +60,11 @@ public class UpscaleTest extends AbstractIntegrationTest {
         int originalWorkedCount = 1;
         int desiredWorkedCount = 15;
         int addedNodes = desiredWorkedCount - originalWorkedCount;
-        testContext.given(StackEntity.class).withName(clusterName).withGatewayPort(testContext.getSparkServer().getPort())
+        testContext.given(StackTestDto.class).withName(clusterName).withGatewayPort(testContext.getSparkServer().getPort())
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkedCount))
-                .await(StackEntity.class, STACK_AVAILABLE)
+                .await(StackTestDto.class, STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/"))
                 .then(MockVerification.verify(HttpMethod.POST, MOCK_ROOT + "/cloud_instance_statuses").exactTimes(1))
                 .then(MockVerification.verify(HttpMethod.POST, MOCK_ROOT + "/cloud_metadata_statuses")
@@ -88,7 +88,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAmbariFailure(MockedTestContext testContext) {
         mockAmbariBlueprintFail(testContext);
-        testContext.given(StackEntity.class)
+        testContext.given(StackTestDto.class)
                 .when(Stack.postV4())
                 .await(STACK_FAILED)
                 .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").atLeast(1))

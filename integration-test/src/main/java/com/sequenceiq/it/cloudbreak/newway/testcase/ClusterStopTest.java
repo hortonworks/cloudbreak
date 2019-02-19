@@ -13,7 +13,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
@@ -42,10 +43,10 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);
         testContext
-                .given(StackEntity.class).valid().withName(clusterName)
+                .given(StackTestDto.class).valid().withName(clusterName)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack.stop())
+                .when(StackTestAction::stop)
                 .await(STACK_STOPPED)
                 .validate();
     }

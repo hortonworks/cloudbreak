@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 
@@ -22,7 +22,7 @@ public abstract class CloudProvider {
 
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "test credential";
 
-    public abstract StackEntity aValidStackRequest();
+    public abstract StackTestDto aValidStackRequest();
 
     public abstract CredentialTestDto aValidCredential();
 
@@ -30,7 +30,7 @@ public abstract class CloudProvider {
 
     public abstract Stack aValidStackCreated();
 
-    public abstract StackEntity aValidAttachedStackRequest(String datalakeName);
+    public abstract StackTestDto aValidAttachedStackRequest(String datalakeName);
 
     public abstract AmbariV4Request ambariRequestWithBlueprintName(String bluePrintName);
 

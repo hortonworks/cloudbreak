@@ -9,13 +9,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackPostAction;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseExistsAssertion;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public class StackCreationTest extends AbstractIntegrationTest {
 
@@ -27,8 +27,8 @@ public class StackCreationTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateNewRegularCluster(TestContext testContext) {
-        testContext.given(StackEntity.class)
-                .when(new StackPostAction())
+        testContext.given(StackTestDto.class)
+                .when(StackTestAction::create)
                 .await(STACK_AVAILABLE)
                 .validate();
     }
@@ -43,13 +43,13 @@ public class StackCreationTest extends AbstractIntegrationTest {
                 .when(DatabaseEntity.list())
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
                 .given(ClusterEntity.class).withName(clusterName).withDatabase(databaseName)
-                .given(StackEntity.class).withName(clusterName).withCluster(testContext.get(ClusterEntity.class))
+                .given(StackTestDto.class).withName(clusterName).withCluster(testContext.get(ClusterEntity.class))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .given(DatabaseEntity.class).withName(databaseName)
                 .when(DatabaseEntity.deleteV2(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
-                .given(StackEntity.class).withName(clusterName)
+                .given(StackTestDto.class).withName(clusterName)
                 .when(Stack.deleteV4())
                 .await(STACK_DELETED)
                 .given(DatabaseEntity.class).withName(databaseName)
@@ -59,7 +59,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAttemptToCreateTwoRegularClusterWithTheSameName(TestContext testContext) {
-        testContext.given(StackEntity.class)
+        testContext.given(StackTestDto.class)
                 .when(Stack.postV4())
                 .when(Stack.postV4(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))

@@ -10,7 +10,8 @@ import static javax.ws.rs.core.Response.Status.OK;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -30,12 +31,12 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         testContext
                 .given("cm", AmbariEntity.class).withBlueprintName(name).withValidateBlueprint(Boolean.FALSE)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")
-                .given(StackEntity.class).withCluster("cmcluster")
+                .given(StackTestDto.class).withCluster("cmcluster")
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack.stop())
+                .when(StackTestAction::stop)
                 .await(STACK_STOPPED)
-                .when(Stack.start())
+                .when(StackTestAction::start)
                 .await(STACK_AVAILABLE)
                 .validate();
     }

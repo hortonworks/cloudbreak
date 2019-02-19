@@ -21,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -68,7 +68,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class).withPlacement("placement")
+                .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
@@ -98,7 +98,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class).withPlacement("placement")
+                .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
@@ -168,7 +168,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withName("dl-wl-same-env2")
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
@@ -187,7 +187,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class).withPlacement("placement")
+                .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, null,  null, null, BP_NAME_DL))
@@ -204,7 +204,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private void createDatalake(TestContext testContext, Set<String> rdsList, String name, String bpName) {
         testContext.given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withName(name)
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
