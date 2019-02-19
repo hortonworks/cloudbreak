@@ -75,8 +75,7 @@ type StackV4Request struct {
 	Openstack OpenStackStackV4Parameters `json:"openstack,omitempty"`
 
 	// placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')
-	// Required: true
-	Placement *PlacementSettingsV4Request `json:"placement"`
+	Placement *PlacementSettingsV4Request `json:"placement,omitempty"`
 
 	// Shared service request
 	SharedService *SharedServiceV4Request `json:"sharedService,omitempty"`
@@ -356,8 +355,8 @@ func (m *StackV4Request) validateNetwork(formats strfmt.Registry) error {
 
 func (m *StackV4Request) validatePlacement(formats strfmt.Registry) error {
 
-	if err := validate.Required("placement", "body", m.Placement); err != nil {
-		return err
+	if swag.IsZero(m.Placement) { // not required
+		return nil
 	}
 
 	if m.Placement != nil {

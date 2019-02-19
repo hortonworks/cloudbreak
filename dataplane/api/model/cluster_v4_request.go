@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -32,6 +34,10 @@ type ClusterV4Request struct {
 	// RDS configuration names for the cluster
 	// Unique: true
 	Databases []string `json:"databases"`
+
+	// executor type of cluster
+	// Enum: [CONTAINER DEFAULT]
+	ExecutorType string `json:"executorType,omitempty"`
 
 	// gateway
 	Gateway *GatewayV4Request `json:"gateway,omitempty"`
@@ -63,6 +69,10 @@ func (m *ClusterV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDatabases(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateExecutorType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -137,6 +147,49 @@ func (m *ClusterV4Request) validateDatabases(formats strfmt.Registry) error {
 	}
 
 	if err := validate.UniqueItems("databases", "body", m.Databases); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var clusterV4RequestTypeExecutorTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["CONTAINER","DEFAULT"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		clusterV4RequestTypeExecutorTypePropEnum = append(clusterV4RequestTypeExecutorTypePropEnum, v)
+	}
+}
+
+const (
+
+	// ClusterV4RequestExecutorTypeCONTAINER captures enum value "CONTAINER"
+	ClusterV4RequestExecutorTypeCONTAINER string = "CONTAINER"
+
+	// ClusterV4RequestExecutorTypeDEFAULT captures enum value "DEFAULT"
+	ClusterV4RequestExecutorTypeDEFAULT string = "DEFAULT"
+)
+
+// prop value enum
+func (m *ClusterV4Request) validateExecutorTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, clusterV4RequestTypeExecutorTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ClusterV4Request) validateExecutorType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ExecutorType) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateExecutorTypeEnum("executorType", "body", m.ExecutorType); err != nil {
 		return err
 	}
 
