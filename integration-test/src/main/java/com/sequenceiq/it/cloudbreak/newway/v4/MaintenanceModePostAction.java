@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class MaintenanceModePostAction implements Action<StackEntity> {
+public class MaintenanceModePostAction implements Action<StackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceModePostAction.class);
 
@@ -36,7 +36,7 @@ public class MaintenanceModePostAction implements Action<StackEntity> {
     }
 
     @Override
-    public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
+    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
 
         logJSON(" Enable Maintenance Mode post request:\n", request);
 

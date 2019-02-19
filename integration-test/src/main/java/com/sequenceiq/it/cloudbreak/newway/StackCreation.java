@@ -1,10 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+
 public class StackCreation extends Stack {
 
-    private final StackEntity stack;
+    private final StackTestDto stack;
 
-    public StackCreation(StackEntity s) {
+    public StackCreation(StackTestDto s) {
         stack = s;
     }
 
@@ -13,7 +15,7 @@ public class StackCreation extends Stack {
         stack.setCreationStrategy(strategy);
     }
 
-    public StackEntity getStack() {
+    public StackTestDto getStack() {
         return stack;
     }
 }

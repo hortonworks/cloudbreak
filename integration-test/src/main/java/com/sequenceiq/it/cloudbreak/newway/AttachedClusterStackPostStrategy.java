@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public class AttachedClusterStackPostStrategy extends StackPostStrategyRoot {
 
@@ -12,7 +13,7 @@ public class AttachedClusterStackPostStrategy extends StackPostStrategyRoot {
 
     @Override
     public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        var stackEntity = (StackEntity) entity;
+        var stackEntity = (StackTestDto) entity;
         var client = getTestContextCloudbreakClient().apply(integrationTestContext);
 
         var credential = setCredentialIfNeededAndReturnIt(stackEntity, integrationTestContext);

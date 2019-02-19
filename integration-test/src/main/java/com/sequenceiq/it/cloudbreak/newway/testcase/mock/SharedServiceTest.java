@@ -34,7 +34,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefin
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
@@ -101,7 +101,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, blueprintName, cloudStorage()))
                 .capture(SharedServiceTest::rdsConfigNamesFromRequest, key(RDS_KEY))
@@ -131,9 +131,18 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(DatabaseEntity.post())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class)
+                .withName(blueprintName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true))
+                .withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
-                .init(StackEntity.class)
+                .init(StackTestDto.class)
+                .given(ClusterDefinitionEntity.class)
+                .withName(blueprintName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true))
+                .withClusterDefinition(VALID_DL_BP)
+                .when(ClusterDefinition.postV4())
+                .init(StackTestDto.class)
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, blueprintName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
@@ -154,7 +163,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
-                .init(StackEntity.class)
+                .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, null, blueprintName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
@@ -176,7 +185,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
-                .init(StackEntity.class)
+                .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, null, ldapName, blueprintName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
@@ -198,7 +207,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
-                .init(StackEntity.class)
+                .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, rangerRdsName, ldapName, blueprintName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
@@ -217,7 +226,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
-                .init(StackEntity.class)
+                .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, null, ldapName, blueprintName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
@@ -233,7 +242,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
-                .init(StackEntity.class)
+                .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, null, null, blueprintName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
@@ -286,7 +295,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return toReturn;
     }
 
-    private static StackEntity checkBlueprintTaggedWithSharedService(TestContext testContext, StackEntity stack, CloudbreakClient cloudbreakClient) {
+    private static StackTestDto checkBlueprintTaggedWithSharedService(TestContext testContext, StackTestDto stack, CloudbreakClient cloudbreakClient) {
         Map<String, Object> blueprintTags = stack.getResponse().getCluster().getAmbari().getClusterDefinition().getTags();
         if (!blueprintTags.containsKey(SHARED_SERVICE_TAG) || blueprintTags.get(SHARED_SERVICE_TAG) == null
                 || !(blueprintTags.get(SHARED_SERVICE_TAG) instanceof Boolean)
@@ -296,16 +305,16 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return stack;
     }
 
-    private List<AssertionV2<StackEntity>> cloudStorageParametersHasPassedToAmbariBlueprint() {
-        List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+    private List<AssertionV2<StackTestDto>> cloudStorageParametersHasPassedToAmbariBlueprint() {
+        List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getAccountName()));
         verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getClientId()));
         verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getCredential()));
         return verifications;
     }
 
-    private List<AssertionV2<StackEntity>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
-        List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+    private List<AssertionV2<StackTestDto>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
+        List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
@@ -317,8 +326,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-    private List<AssertionV2<StackEntity>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
-        List<AssertionV2<StackEntity>> verifications = new LinkedList<>();
+    private List<AssertionV2<StackTestDto>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
+        List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains("ranger_privelege_user_jdbc_url"));
         verifications.add(blueprintPostToAmbariContains(ranger.getConnectionURL()));
         verifications.add(blueprintPostToAmbariContains("javax.jdo.option.ConnectionURL"));
@@ -364,19 +373,19 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").bodyContains(content);
     }
 
-    private static Set<String> rdsConfigNamesFromResponse(StackEntity entity) {
+    private static Set<String> rdsConfigNamesFromResponse(StackTestDto entity) {
         return entity.getResponse().getCluster().getDatabases().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet());
     }
 
-    private static Set<String> rdsConfigNamesFromRequest(StackEntity entity) {
+    private static Set<String> rdsConfigNamesFromRequest(StackTestDto entity) {
         return entity.getRequest().getCluster().getDatabases();
     }
 
-    private static String ldapNameFromRequest(StackEntity entity) {
+    private static String ldapNameFromRequest(StackTestDto entity) {
         return entity.getRequest().getCluster().getLdapName();
     }
 
-    private static String ldapNameFromResponse(StackEntity entity) {
+    private static String ldapNameFromResponse(StackTestDto entity) {
         return entity.getResponse().getCluster().getLdap().getName();
     }
 

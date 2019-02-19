@@ -15,7 +15,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Request, Response, StackV3Operation> {
@@ -58,7 +58,7 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" scale " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stack.getRequest().getName(), stackOperation.getRequest());
@@ -69,7 +69,7 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" start " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putScaling(workspaceId, stack.getRequest().getName(), stackOperation.getRequest());
@@ -79,7 +79,7 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" stop " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putStop(workspaceId, stack.getRequest().getName());
@@ -89,7 +89,7 @@ public class StackV3Operation extends AbstractCloudbreakEntity<StackScaleV4Reque
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        StackEntity stack;
+        StackTestDto stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" sync " + stack.getRequest().getName());
         client.getCloudbreakClient().stackV4Endpoint().putSync(workspaceId, stack.getRequest().getName());

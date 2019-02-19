@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public abstract class CloudProviderHelper extends CloudProvider {
@@ -103,8 +103,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return aValidCredential(true);
     }
 
-    public StackEntity aValidStackRequest() {
-        return (StackEntity) Stack.request()
+    public StackTestDto aValidStackRequest() {
+        return (StackTestDto) Stack.request()
                 .withName(getClusterName())
                 .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups())

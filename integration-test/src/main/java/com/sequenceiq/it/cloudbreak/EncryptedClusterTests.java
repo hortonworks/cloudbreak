@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
@@ -47,7 +47,7 @@ public class EncryptedClusterTests extends ClusterTests {
                 "check ambari is running and components available");
     }
 
-    private StackEntity aValidStackRequestWithDifferentEncryptedTypes(CloudProvider cloudProvider) {
+    private StackTestDto aValidStackRequestWithDifferentEncryptedTypes(CloudProvider cloudProvider) {
         var stack = cloudProvider.aValidStackRequest();
         if (stack.getRequest() != null && stack.getRequest().getInstanceGroups() != null && stack.getRequest().getInstanceGroups().size() == 3) {
             if (AWS.equalsIgnoreCase(cloudProvider.getPlatform())) {
@@ -65,7 +65,7 @@ public class EncryptedClusterTests extends ClusterTests {
         return stack;
     }
 
-    private InstanceTemplateV4Request getInstanceGroup(StackEntity stack, int id) {
+    private InstanceTemplateV4Request getInstanceGroup(StackTestDto stack, int id) {
         return stack.getRequest().getInstanceGroups().get(id).getTemplate();
     }
 

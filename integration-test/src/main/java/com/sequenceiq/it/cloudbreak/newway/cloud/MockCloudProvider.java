@@ -23,7 +23,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.EntityCreationStrategy;
 import com.sequenceiq.it.cloudbreak.newway.PostCredentialWithNameFromMockStrategy;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class MockCloudProvider extends CloudProviderHelper {
@@ -69,7 +69,7 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public StackEntity aValidAttachedStackRequest(String datalakeName) {
+    public StackTestDto aValidAttachedStackRequest(String datalakeName) {
         throw new NotImplementedException("aValidAttachedStackRequest() method is not implemented yet");
     }
 

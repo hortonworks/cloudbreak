@@ -4,11 +4,11 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class StackScalePostAction implements Action<StackEntity> {
+public class StackScalePostAction implements Action<StackTestDto> {
 
     private StackScaleV4Request request = new StackScaleV4Request();
 
@@ -27,7 +27,7 @@ public class StackScalePostAction implements Action<StackEntity> {
     }
 
     @Override
-    public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
+    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         logJSON(" StackScale post request:\n", request);
         client.getCloudbreakClient()
                 .stackV4Endpoint()

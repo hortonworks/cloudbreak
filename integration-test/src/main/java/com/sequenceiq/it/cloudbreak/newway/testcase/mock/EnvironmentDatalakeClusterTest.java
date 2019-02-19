@@ -20,7 +20,7 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -60,7 +60,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeDelete(TestContext testContext) {
-        Set<String> rdsList = initRdsList(testContext);
+        String hivedb = getNameGenerator().getRandomNameForResource();
+        String rangerdb = getNameGenerator().getRandomNameForResource();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
@@ -69,7 +71,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class).withPlacement("placement")
+                .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
@@ -90,7 +92,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeDeleteFails(TestContext testContext) {
-        Set<String> rdsList = initRdsList(testContext);
+        String hivedb = getNameGenerator().getRandomNameForResource();
+        String rangerdb = getNameGenerator().getRandomNameForResource();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
@@ -99,7 +103,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class).withPlacement("placement")
+                .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
@@ -113,7 +117,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentWithDifferentDatalakes(TestContext testContext) {
-        Set<String> rdsList = initRdsList(testContext);
+        String hivedb = getNameGenerator().getRandomNameForResource();
+        String rangerdb = getNameGenerator().getRandomNameForResource();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -125,7 +131,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatalakeChangeCredentialFails(TestContext testContext) {
-        Set<String> rdsList = initRdsList(testContext);
+        String hivedb = getNameGenerator().getRandomNameForResource();
+        String rangerdb = getNameGenerator().getRandomNameForResource();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -145,7 +153,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatalakeDetachFails(TestContext testContext) {
-        Set<String> rdsList = initRdsList(testContext);
+        String hivedb = getNameGenerator().getRandomNameForResource();
+        String rangerdb = getNameGenerator().getRandomNameForResource();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -162,14 +172,16 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
-        Set<String> rdsList = initRdsList(testContext);
+        String hivedb = getNameGenerator().getRandomNameForResource();
+        String rangerdb = getNameGenerator().getRandomNameForResource();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withName("dl-wl-same-env2")
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
@@ -188,7 +200,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
 
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class).withPlacement("placement")
+                .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .withCluster(setResources(testContext, null,  null, null, BP_NAME_DL))
@@ -205,7 +217,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private void createDatalake(TestContext testContext, Set<String> rdsList, String bpName) {
         testContext.given("placement", PlacementSettingsEntity.class)
-                .given(StackEntity.class)
+                .given(StackTestDto.class)
                 .withName(getNameGenerator().getRandomNameForResource())
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
