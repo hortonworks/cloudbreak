@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -29,7 +32,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 public class SyncAllRunnerTest {
 
     @Test
-    public void submit() {
+    public void submit() throws IOException {
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
@@ -41,10 +44,11 @@ public class SyncAllRunnerTest {
 
         PowerMockito.mockStatic(SaltStates.class);
         ApplyResponse applyResponse = new ApplyResponse();
-        List<Map<String, Object>> result = new ArrayList<>();
-        Map<String, Object> nodes = new HashMap<>();
-        nodes.put("10-0-0-1.example.com", "something");
-        nodes.put("10-0-0-2.example.com", "something");
+        List<Map<String, JsonNode>> result = new ArrayList<>();
+        Map<String, JsonNode> nodes = new HashMap<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        nodes.put("10-0-0-1.example.com", objectMapper.valueToTree("something"));
+        nodes.put("10-0-0-2.example.com", objectMapper.valueToTree("something"));
         result.add(nodes);
         applyResponse.setResult(result);
         PowerMockito.when(SaltStates.syncAll(any())).thenReturn(applyResponse);

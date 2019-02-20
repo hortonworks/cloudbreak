@@ -230,10 +230,7 @@ class OrchestratorRecipeExecutor {
         for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
             Collection<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
             for (RecipeModel rm : entry.getValue()) {
-                //filter out default recipes
-                if (!DEFAULT_RECIPES.contains(rm.getName())) {
                     recipeNamesPerHostgroup.add(rm.getName());
-                }
             }
             if (!recipeNamesPerHostgroup.isEmpty()) {
                 String recipeNamesStr = Joiner.on(',').join(recipeNamesPerHostgroup);

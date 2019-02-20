@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -36,6 +38,8 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final Map<String, Multimap<String, String>> grains = new HashMap<>();
+
     public SaltApiRunPostResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
         this.instanceMap = instanceMap;
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
@@ -47,7 +51,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         return createSaltApiResponse(body);
     }
 
-    public Object createSaltApiResponse(String body) throws JsonProcessingException {
+    public Object createSaltApiResponse(String body) throws IOException {
         if (body.contains("manage.status")) {
             return minionStatuses();
         }
@@ -55,10 +59,13 @@ public class SaltApiRunPostResponse extends ITResponse {
             return ipAddresses();
         }
         if (body.contains("grains.append")) {
-            return grainsResponse();
+            return grainAppend(body);
+        }
+        if (body.contains("grains.get")) {
+            return grainsResponse(body);
         }
         if (body.contains("grains.remove")) {
-            return grainsResponse();
+            return grainRemove(body);
         }
         if (body.contains("saltutil.sync_all")) {
             return saltUtilSyncGrainsResponse();
@@ -130,7 +137,7 @@ public class SaltApiRunPostResponse extends ITResponse {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                upList.add("host-" + privateIp.replace(".", "-"));
+                upList.add("host-" + privateIp.replace(".", "-") + ".example.com");
             }
         }
         // intentional new ObjectMapper() -> .withGetterVisibility(Visibility.NONE) screws up serializing
@@ -147,7 +154,7 @@ public class SaltApiRunPostResponse extends ITResponse {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
                 Map<String, JsonNode> networkHashMap = new HashMap<>();
                 try {
-                    networkHashMap.put("host-" + privateIp.replace(".", "-"), JsonUtil.readTree("[\"" + privateIp + "\"]"));
+                    networkHashMap.put("host-" + privateIp.replace(".", "-") + ".example.com", JsonUtil.readTree("[\"" + privateIp + "\"]"));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -159,17 +166,17 @@ public class SaltApiRunPostResponse extends ITResponse {
         return objectMapper.writeValueAsString(minionIpAddressesResponse);
     }
 
-    protected Object saltUtilSyncGrainsResponse() throws JsonProcessingException {
+    protected Object saltUtilSyncGrainsResponse() throws IOException {
         ApplyResponse applyResponse = new ApplyResponse();
-        List<Map<String, Object>> responseList = new ArrayList<>();
+        List<Map<String, JsonNode>> responseList = new ArrayList<>();
 
-        Map<String, Object> hostMap = new HashMap<>();
+        Map<String, JsonNode> hostMap = new HashMap<>();
 
         for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
+                hostMap.put("host-" + privateIp.replace(".", "-") + ".example.com", JsonUtil.readTree("[\"" + privateIp + "\"]"));
             }
         }
 
@@ -179,17 +186,73 @@ public class SaltApiRunPostResponse extends ITResponse {
         return objectMapper.writeValueAsString(applyResponse);
     }
 
-    protected Object grainsResponse() throws JsonProcessingException {
-        ApplyResponse applyResponse = new ApplyResponse();
-        List<Map<String, Object>> responseList = new ArrayList<>();
+    private Object createGrainsModificationResponse(Map<String, JsonNode> hostMap) throws JsonProcessingException {
+        ApplyResponse response = new ApplyResponse();
+        ArrayList<Map<String, JsonNode>> result = new ArrayList<>();
+        result.add(hostMap);
+        response.setResult(result);
+        return objectMapper.writeValueAsString(response);
+    }
 
-        Map<String, Object> hostMap = new HashMap<>();
+    protected Object grainRemove(String body) throws IOException {
+        Matcher targetMatcher = Pattern.compile(".*(tgt=S%40([^&]+)).*").matcher(body);
+        Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*(arg=([^&]+)).*").matcher(body);
+        Map<String, JsonNode> hostMap = new HashMap<>();
+        if (targetMatcher.matches() && argMatcher.matches()) {
+            String[] targets = targetMatcher.group(2).split("\\+or\\+S%40");
+            String key = argMatcher.group(2);
+            String value = argMatcher.group(4);
+            for (String target : targets) {
+                if (grains.containsKey(target)) {
+                    Multimap<String, String> grainsForTarget = grains.get(target);
+                    grainsForTarget.remove(key, value);
+                }
+                hostMap.put("host-" + target.replace(".", "-"), objectMapper.valueToTree(grains.get(target).entries()));
+            }
+        }
+        return createGrainsModificationResponse(hostMap);
+    }
+
+    protected Object grainAppend(String body) throws IOException {
+        Matcher targetMatcher = Pattern.compile(".*(tgt=S%40([^&]+)).*").matcher(body);
+        Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*(arg=([^&]+)).*").matcher(body);
+        Map<String, JsonNode> hostMap = new HashMap<>();
+        if (targetMatcher.matches() && argMatcher.matches()) {
+            String[] targets = targetMatcher.group(2).split("\\+or\\+S%40");
+            String key = argMatcher.group(2);
+            String value = argMatcher.group(4);
+            for (String target : targets) {
+                if (!grains.containsKey(target)) {
+                    Multimap<String, String> grainsForTarget = ArrayListMultimap.create();
+                    grainsForTarget.put(key, value);
+                    grains.put(target, grainsForTarget);
+                } else {
+                    Multimap<String, String> grainsForTarget = grains.get(target);
+                    grainsForTarget.put(key, value);
+                }
+                hostMap.put("host-" + target.replace(".", "-"), objectMapper.valueToTree(grains.get(target).values()));
+            }
+        }
+        return createGrainsModificationResponse(hostMap);
+    }
+
+    protected Object grainsResponse(String body) throws IOException {
+        ApplyResponse applyResponse = new ApplyResponse();
+        List<Map<String, JsonNode>> responseList = new ArrayList<>();
+
+        Map<String, JsonNode> hostMap = new HashMap<>();
 
         for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
+                if (grains.containsKey(privateIp)) {
+                    Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*").matcher(body);
+                    if (argMatcher.matches()) {
+                        hostMap.put("host-" + privateIp.replace(".", "-") + ".example.com",
+                                objectMapper.valueToTree(grains.get(privateIp).get(argMatcher.group(2))));
+                    }
+                }
             }
         }
         responseList.add(hostMap);

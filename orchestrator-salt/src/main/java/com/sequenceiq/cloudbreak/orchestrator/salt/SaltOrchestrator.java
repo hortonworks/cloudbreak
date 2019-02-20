@@ -38,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -341,6 +342,10 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
+            // so it can happen that 'ambari_agent' role will be missing on some nodes. Please do not delete only if you know what you are doing.
+            Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
+            LOGGER.info("Roles before highstate: " + roles);
             runNewService(sc, new HighStateRunner(all, allNodes), exitModel);
         } catch (Exception e) {
             LOGGER.info("Error occurred during ambari bootstrap", e);
@@ -364,6 +369,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         if (!grainsProperties.isEmpty()) {
             for (Entry<String, Map<String, String>> hostGrains : grainsProperties.entrySet()) {
                 for (Entry<String, String> hostGrain : hostGrains.getValue().entrySet()) {
+                    LOGGER.debug("upload grains to host: " + hostGrain);
                     runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostGrains.getKey()), allNodes, hostGrain.getKey(), hostGrain.getValue(),
                             CompoundType.IP), exitModel);
                 }
@@ -507,7 +513,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, String> getGrainOnAllHosts(GatewayConfig gateway, String grain) throws CloudbreakOrchestratorFailedException {
+    public Map<String, JsonNode> getGrainOnAllHosts(GatewayConfig gateway, String grain) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
             return SaltStates.getGrains(saltConnector, grain);
         } catch (RuntimeException e) {

@@ -179,6 +179,9 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
+        PowerMockito.mockStatic(SaltStates.class);
+        PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
+
         SaltConfig saltConfig = new SaltConfig();
         saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel, false);
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
