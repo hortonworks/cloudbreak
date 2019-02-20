@@ -19,9 +19,8 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -32,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterCreationSuc
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
 public class ClouderaManagerSetupService implements ClusterSetupService {
@@ -54,16 +54,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private ClouderaHostGroupAssociationBuilder hostGroupAssociationBuilder;
 
     @Inject
-    private ClouderaClusterTemplateGenerator clusterTemplateGenerator;
-
-    @Inject
     private AmbariClusterCreationSuccessHandler ambariClusterCreationSuccessHandler;
 
     @Inject
     private ConversionService conversionService;
 
     @Inject
-    private PostgresConfigService postgresConfigService;
+    private CentralCmTemplateUpdater cmTemplateUpdater;
 
     @Override
     public void waitForServer(Stack stack) throws CloudbreakException {
@@ -92,12 +89,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             cluster.setExtendedBlueprintText(hostTemplate);
             clusterService.updateCluster(cluster);
 
-            Set<RDSConfig> rdsConfigs = postgresConfigService.createRdsConfigIfNeeded(stack, cluster);
-            String clusterTemplate = clusterTemplateGenerator.generateClusterTemplate(
-                    stack.getPrimaryGatewayInstance().getDiscoveryFQDN(), cluster, hostGroupMappings, rdsConfigs);
-            LOGGER.debug("Generated Cloudera cluster template: {}", clusterTemplate);
+            TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
+            ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings);
+            LOGGER.debug("Generated Cloudera cluster template: {}", apiClusterTemplate);
 
-            ApiClusterTemplate apiClusterTemplate = conversionService.convert(clusterTemplate, ApiClusterTemplate.class);
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
             ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(true, apiClusterTemplate);
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
