@@ -14,9 +14,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.RepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AmbariStackValidatorTest {
+public class StackRepositoryV4ValidatorTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ConstraintValidatorContext constraintValidatorContext;
@@ -215,7 +216,7 @@ public class AmbariStackValidatorTest {
     }
 
     @Test
-    public void testWithoutNoRepositorySpecificationSpecified() {
+    public void testWithoutRepositorySpecificationSpecifiedAndAnyMapcks() {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("3.0");
@@ -223,5 +224,29 @@ public class AmbariStackValidatorTest {
         boolean result = ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext);
 
         assertFalse(result);
+    }
+
+    @Test
+    public void testWithoutRepositorySpecificationSpecifiedAndWithMapckURL() {
+        StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("3.0");
+        ambariStackDetailsJson.setMpackUrl("https://mympackUrl");
+
+        boolean result = ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testWithoutRepositorySpecificationSpecifiedAndWithManagementPackDetailsRequestSpecified() {
+        StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("3.0");
+        ambariStackDetailsJson.getMpacks().add(new ManagementPackDetailsV4Request());
+
+        boolean result = ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext);
+
+        assertTrue(result);
     }
 }
