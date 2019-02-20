@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
@@ -22,6 +24,8 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
 public class HostGroupToHostGroupResponseConverter extends AbstractConversionServiceAwareConverter<HostGroup, HostGroupResponse> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HostGroupToHostGroupResponseConverter.class);
 
     @Override
     public HostGroupResponse convert(HostGroup source) {
@@ -40,8 +44,12 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
     private Set<String> getExtendedRecipes(Set<GeneratedRecipe> generatedRecipes) {
         Set<String> extendedRecipes = new HashSet<>();
         for (GeneratedRecipe generatedRecipe : generatedRecipes) {
-            String encodeRecipe = new String(Base64.encodeBase64(anonymize(generatedRecipe.getExtendedRecipe()).getBytes()));
-            extendedRecipes.add(encodeRecipe);
+            if (generatedRecipe.getExtendedRecipe() != null) {
+                String encodeRecipe = new String(Base64.encodeBase64(anonymize(generatedRecipe.getExtendedRecipe()).getBytes()));
+                extendedRecipes.add(encodeRecipe);
+            } else {
+                LOGGER.warn("Generated recipe's extendedRecipe field is null");
+            }
         }
         return extendedRecipes;
     }
