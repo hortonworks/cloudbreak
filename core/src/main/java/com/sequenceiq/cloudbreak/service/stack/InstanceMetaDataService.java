@@ -106,6 +106,10 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.findUnusedHostsInInstanceGroup(stackId, instanceGroupName);
     }
 
+    public Set<InstanceMetaData> getAllInstanceMetadataByStackId(Long stackId) {
+        return instanceMetaDataRepository.findAllInStack(stackId);
+    }
+
     private InstanceGroup getInstanceGroup(Iterable<InstanceGroup> instanceGroups, String groupName) {
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (groupName.equalsIgnoreCase(instanceGroup.getGroupName())) {
