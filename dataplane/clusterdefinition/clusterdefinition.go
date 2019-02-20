@@ -12,7 +12,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	v4bp "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_clusterdefinitions"
+	v4bp "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_cluster_definitions"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -59,7 +59,7 @@ func CreateClusterDefinitionFromUrl(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	urlLocation := c.String(fl.FlURL.Name)
 	createClusterDefinitionImpl(
-		cbClient.Cloudbreak.V4WorkspaceIDClusterdefinitions,
+		cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions,
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
 		c.Bool(fl.FlDlOptional.Name),
@@ -73,7 +73,7 @@ func CreateClusterDefinitionFromFile(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(fl.FlFile.Name)
 	createClusterDefinitionImpl(
-		cbClient.Cloudbreak.V4WorkspaceIDClusterdefinitions,
+		cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions,
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
 		c.Bool(fl.FlDlOptional.Name),
@@ -107,7 +107,7 @@ func DescribeClusterDefinition(c *cli.Context) {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	bp := FetchClusterDefinition(c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name), cbClient.Cloudbreak.V4WorkspaceIDClusterdefinitions)
+	bp := FetchClusterDefinition(c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name), cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions)
 	if output.Format != "table" {
 		output.Write(append(clusterDefinitionHeader, "Content", "ID"), convertResponseWithContentAndIDToClusterDefinition(bp))
 	} else {
@@ -131,7 +131,7 @@ func DeleteClusterDefinition(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete cluster definition")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	deleteClusterDefinitionsImpl(cbClient.Cloudbreak.V4WorkspaceIDClusterdefinitions, c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name))
+	deleteClusterDefinitionsImpl(cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions, c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name))
 }
 
 func deleteClusterDefinitionsImpl(client clusterDefinitionClient, workspace int64, name string) {
@@ -149,7 +149,7 @@ func ListClusterDefinitions(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspace := fl.FlWorkspaceOptional.Name
-	listClusterDefinitionsImpl(c.Int64(workspace), cbClient.Cloudbreak.V4WorkspaceIDClusterdefinitions, output.WriteList)
+	listClusterDefinitionsImpl(c.Int64(workspace), cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions, output.WriteList)
 }
 
 type clusterDefinitionClient interface {
@@ -185,7 +185,7 @@ func convertResponseToClusterDefinition(bp *model.ClusterDefinitionV4ViewRespons
 
 func convertResponseWithContentAndIDToClusterDefinition(bp *model.ClusterDefinitionV4Response) *clusterDefinitionOutJsonDescribe {
 	jsonRoot := decodeAndParseToJson(bp.ClusterDefinition)
-	clusterDefinitionsNode := jsonRoot["ClusterDefinitions"].(map[string]interface{})
+	clusterDefinitionsNode := jsonRoot["Blueprints"].(map[string]interface{})
 	return &clusterDefinitionOutJsonDescribe{
 		clusterDefinitionOut: &clusterDefinitionOut{
 			Name:           *bp.Name,
@@ -202,7 +202,7 @@ func convertResponseWithContentAndIDToClusterDefinition(bp *model.ClusterDefinit
 
 func convertResponseWithIDToClusterDefinition(bp *model.ClusterDefinitionV4Response) *clusterDefinitionOutTableDescribe {
 	jsonRoot := decodeAndParseToJson(bp.ClusterDefinition)
-	clusterDefinitionsNode := jsonRoot["ClusterDefinitions"].(map[string]interface{})
+	clusterDefinitionsNode := jsonRoot["Blueprints"].(map[string]interface{})
 	return &clusterDefinitionOutTableDescribe{
 		clusterDefinitionOut: &clusterDefinitionOut{
 			Name:           *bp.Name,

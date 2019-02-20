@@ -5,7 +5,15 @@
   "allowedInstanceTypes": [],
   "clusterTimeToLive": 0,
   "userTimeToLive": 0,
-  "platforms": null,
+  "platformEnablement": {
+    "AZURE": true,
+    "OPENSTACK": true,
+    "GCP": true,
+    "AWS": true,
+    "YARN": false,
+    "MOCK": false,
+    "CUMULUS_YARN": false
+  },
   "smartsenseEnabled": true,
   "defaultTags": {},
   "supportedExternalDatabases": [
@@ -59,23 +67,13 @@
           "databaseName": "ORACLE11",
           "displayName": "Oracle 11g",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "11",
-            "oracle11",
-            "oracle11g",
-            "11g"
-          ]
+          "versions": ["11", "oracle11", "oracle11g", "11g"]
         },
         {
           "databaseName": "ORACLE12",
           "displayName": "Oracle 12c",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "12",
-            "oracle12c",
-            "12c",
-            "oracle12"
-          ]
+          "versions": ["12", "oracle12c", "12c", "oracle12"]
         },
         {
           "databaseName": "MYSQL",
@@ -117,23 +115,13 @@
           "databaseName": "ORACLE12",
           "displayName": "Oracle 12c",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "12",
-            "oracle12c",
-            "12c",
-            "oracle12"
-          ]
+          "versions": ["12", "oracle12c", "12c", "oracle12"]
         },
         {
           "databaseName": "ORACLE11",
           "displayName": "Oracle 11g",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "11",
-            "oracle11",
-            "oracle11g",
-            "11g"
-          ]
+          "versions": ["11", "oracle11", "oracle11g", "11g"]
         },
         {
           "databaseName": "POSTGRES",
@@ -157,12 +145,7 @@
           "databaseName": "ORACLE12",
           "displayName": "Oracle 12c",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "12",
-            "oracle12c",
-            "12c",
-            "oracle12"
-          ]
+          "versions": ["12", "oracle12c", "12c", "oracle12"]
         },
         {
           "databaseName": "POSTGRES",
@@ -174,12 +157,7 @@
           "databaseName": "ORACLE11",
           "displayName": "Oracle 11g",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "11",
-            "oracle11",
-            "oracle11g",
-            "11g"
-          ]
+          "versions": ["11", "oracle11", "oracle11g", "11g"]
         }
       ]
     },
@@ -191,23 +169,13 @@
           "databaseName": "ORACLE12",
           "displayName": "Oracle 12c",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "12",
-            "oracle12c",
-            "12c",
-            "oracle12"
-          ]
+          "versions": ["12", "oracle12c", "12c", "oracle12"]
         },
         {
           "databaseName": "ORACLE11",
           "displayName": "Oracle 11g",
           "jdbcPrefix": "oracle",
-          "versions": [
-            "11",
-            "oracle11",
-            "oracle11g",
-            "11g"
-          ]
+          "versions": ["11", "oracle11", "oracle11g", "11g"]
         },
         {
           "databaseName": "MYSQL",

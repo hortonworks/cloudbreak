@@ -9,10 +9,10 @@
         {
           "permissions": [
             "ALL:READ",
-            "ORG:MANAGE",
+            "WORKSPACE:MANAGE",
             "ALL:WRITE"
           ],
-          "userId": "mock@hortonworks.com",
+          "userId": "50bb3a88-71d0-49db-8756-0ff75b9c7b86",
           "userName": null
         }
       ]

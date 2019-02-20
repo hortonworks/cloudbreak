@@ -20,7 +20,7 @@ import (
 type AmbariV4Response struct {
 
 	// cluster definition for the cluster
-	Blueprint *ClusterDefinitionV4Response `json:"blueprint,omitempty"`
+	ClusterDefinition *ClusterDefinitionV4Response `json:"clusterDefinition,omitempty"`
 
 	// config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'
 	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
@@ -33,7 +33,7 @@ type AmbariV4Response struct {
 	DpUser *SecretV4Response `json:"dpUser,omitempty"`
 
 	// cluster definition, set this or the url field
-	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
+	ExtendedClusterDefinitionText string `json:"extendedClusterDefinitionText,omitempty"`
 
 	// ambari password
 	// Required: true
@@ -63,7 +63,7 @@ type AmbariV4Response struct {
 func (m *AmbariV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateBlueprint(formats); err != nil {
+	if err := m.validateClusterDefinition(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -105,16 +105,16 @@ func (m *AmbariV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AmbariV4Response) validateBlueprint(formats strfmt.Registry) error {
+func (m *AmbariV4Response) validateClusterDefinition(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Blueprint) { // not required
+	if swag.IsZero(m.ClusterDefinition) { // not required
 		return nil
 	}
 
-	if m.Blueprint != nil {
-		if err := m.Blueprint.Validate(formats); err != nil {
+	if m.ClusterDefinition != nil {
+		if err := m.ClusterDefinition.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("blueprint")
+				return ve.ValidateName("clusterDefinition")
 			}
 			return err
 		}

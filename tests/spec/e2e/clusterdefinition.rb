@@ -8,56 +8,56 @@ define_method(:cb) do
   return cb
 end
 
-RSpec.describe 'Blueprint test cases', :type => :aruba do
+RSpec.describe 'Clusterdefinition test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "e2e shared vars"
 
   before(:all) do
     result = list_with_name_exists(@clusterdefinition_name_url) do
-      cb.blueprint.list.build
+      cb.clusterdefinition.list.build
     end
     if (result[0])
-      result = cb.blueprint.delete.name(@clusterdefinition_name_url).build
+      result = cb.clusterdefinition.delete.name(@clusterdefinition_name_url).build
       expect(result.exit_status).to eql 0
     end
   end
 
   before(:all) do
     result = list_with_name_exists(@clusterdefinition_name_file) do
-      cb.blueprint.list.build
+      cb.clusterdefinition.list.build
     end
     if (result[0])
-      result = cb.blueprint.delete.name(@clusterdefinition_name_file).build
+      result = cb.clusterdefinition.delete.name(@clusterdefinition_name_file).build
       expect(result.exit_status).to eql 0
     end
   end  
 
-  it "Blueprint - Create from url - Describe - List - Delete " do
+  it "Clusterdefinition - Create from url - Describe - List - Delete " do
     bp_create_describe_delete(cb, @clusterdefinition_name_url) do
-      cb.blueprint.create.from_url.name(@clusterdefinition_name_url).url(@clusterdefinition_url).build
+      cb.clusterdefinition.create.from_url.name(@clusterdefinition_name_url).url(@clusterdefinition_url).build
     end 
   end    
 
-  it "Blueprint - Create - Url doesn't exist" do
-    result = cb.blueprint.create.from_url.name("temp-bp").url("https://something123456789.com").build  
+  it "Clusterdefinition - Create - Url doesn't exist" do
+    result = cb.clusterdefinition.create.from_url.name("temp-bp").url("https://something123456789.com").build
     expect(result.exit_status).to eql 1
     expect(result.stderr).to include("error") 
   end
 
-  it "Blueprint - Create - Invalid url with no protocol " do
-    result = cb.blueprint.create.from_url.name("temp-bp").url("something123456789.com").build  
+  it "Clusterdefinition - Create - Invalid url with no protocol " do
+    result = cb.clusterdefinition.create.from_url.name("temp-bp").url("something123456789.com").build
     expect(result.exit_status).to eql 1
     expect(result.stderr).to include("error") 
   end
 
-  it "Blueprint - Create from file - Describe List - Delete " do
+  it "Clusterdefinition - Create from file - Describe List - Delete " do
     bp_create_describe_delete(cb, @clusterdefinition_name_file) do
-      cb.blueprint.create.from_file.name(@clusterdefinition_name_file).file(@clusterdefinition_file).build  
+      cb.clusterdefinition.create.from_file.name(@clusterdefinition_name_file).file(@clusterdefinition_file).build
     end 
   end 
 
-  it "Blueprint - Describe a default blueprint" do
-    result = cb.blueprint.describe.name(@default_clusterdefinition_name).build 
+  it "Clusterdefinition - Describe a default clusterdefinition" do
+    result = cb.clusterdefinition.describe.name(@default_clusterdefinition_name).build
     expect(result.exit_status).to eql 0
     expect(result.stdout.empty?).to be_falsy 
     json = JSON.parse(result.stdout)
@@ -68,13 +68,13 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
       StackVersion: /.*/,
       HostgroupCount: /.*/,
       Tags: /.*/,
-      BlueprintTextAsBase64: /.*/,
+      ClusterDefinitionTextAsBase64: /.*/,
       ID: /.*/
     )       
   end
 
-  it "Blueprint - List - All existing" do
-    result = cb.blueprint.list.build 
+  it "Clusterdefinition - List - All existing" do
+    result = cb.clusterdefinition.list.build
     expect(result.exit_status).to eql 0
     expect(result.stdout.empty?).to be_falsy
     json = JSON.parse(result.stdout)

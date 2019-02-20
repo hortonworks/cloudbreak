@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
 func Test_resolveWorkspaceIDAndStackName(t *testing.T) {
@@ -181,8 +182,8 @@ func Test_unmarshallCliInput(t *testing.T) {
 				stackDetails: &gotStackDetails,
 			},
 			wantStackDetails: model.StackRepositoryV4Request{
-				Stack:   "AMBARI",
-				Version: "2.7.0.0",
+				Stack:   &(&types.S{S: "AMBARI"}).S,
+				Version: &(&types.S{S: "2.7.0.0"}).S,
 				Repository: &model.RepositoryV4Request{
 					BaseURL:   "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
 					GpgKeyURL: "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins",
@@ -201,8 +202,8 @@ func Test_unmarshallCliInput(t *testing.T) {
 				stackDetails: &gotStackDetails,
 			},
 			wantStackDetails: model.StackRepositoryV4Request{
-				Stack:                    "HDP",
-				Version:                  "2.6.5.0",
+				Stack:                    &(&types.S{S: "HDP"}).S,
+				Version:                  &(&types.S{S: "2.6.5.0"}).S,
 				VersionDefinitionFileURL: "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml",
 			},
 		},
@@ -218,8 +219,8 @@ func Test_unmarshallCliInput(t *testing.T) {
 				stackDetails: &gotStackDetails,
 			},
 			wantStackDetails: model.StackRepositoryV4Request{
-				Stack:                    "HDF",
-				Version:                  "3.2.0.6-2",
+				Stack:                    &(&types.S{S: "HDF"}).S,
+				Version:                  &(&types.S{S: "3.2.0.6-2"}).S,
 				VersionDefinitionFileURL: "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.6-2/HDF-3.2.0.6-2.xml",
 				MpackURL:                 "http://private-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.6-2/HDF-3.2.0.6-2-centos7-rpm.tar.gz",
 			},
@@ -228,8 +229,8 @@ func Test_unmarshallCliInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			unmarshallCliInput(tt.args.stringFinder, tt.args.stackDetails)
-			if "AMBARI" == tt.wantStackDetails.Stack {
-				if gotStackDetails.Version != tt.wantStackDetails.Version {
+			if "AMBARI" == *tt.wantStackDetails.Stack {
+				if *gotStackDetails.Version != *tt.wantStackDetails.Version {
 					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Version)
 				}
 				if gotStackDetails.Repository.BaseURL != tt.wantStackDetails.Repository.BaseURL {
@@ -239,16 +240,16 @@ func Test_unmarshallCliInput(t *testing.T) {
 					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Repository.GpgKeyURL)
 				}
 			}
-			if "HDP" == tt.wantStackDetails.Stack {
-				if gotStackDetails.Version != tt.wantStackDetails.Version {
+			if "HDP" == *tt.wantStackDetails.Stack {
+				if *gotStackDetails.Version != *tt.wantStackDetails.Version {
 					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Version)
 				}
 				if gotStackDetails.VersionDefinitionFileURL != tt.wantStackDetails.VersionDefinitionFileURL {
 					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.VersionDefinitionFileURL)
 				}
 			}
-			if "HDF" == tt.wantStackDetails.Stack {
-				if gotStackDetails.Version != tt.wantStackDetails.Version {
+			if "HDF" == *tt.wantStackDetails.Stack {
+				if *gotStackDetails.Version != *tt.wantStackDetails.Version {
 					t.Errorf("unmarshallCliInput() got = %v, want %v", gotStackDetails, tt.wantStackDetails.Version)
 				}
 				if gotStackDetails.VersionDefinitionFileURL != tt.wantStackDetails.VersionDefinitionFileURL {
@@ -270,8 +271,8 @@ func Test_updateStackRepoDetails(t *testing.T) {
 		stackDetails *model.StackRepositoryV4Request
 	}
 	stackDetails := model.StackRepositoryV4Request{
-		Stack:   "AMBARI",
-		Version: "2.7.0.0",
+		Stack:   &(&types.S{S: "AMBARI"}).S,
+		Version: &(&types.S{S: "2.7.0.0"}).S,
 		Repository: &model.RepositoryV4Request{
 			BaseURL:   "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0",
 			GpgKeyURL: "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins",

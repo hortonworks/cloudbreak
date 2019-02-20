@@ -12,11 +12,11 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @recipe_name = "cli-recipe"
   @recipe_file = "../../recipes/echo.sh"
 
-  @default_clusterdefinition_name = "'HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin'"
+  @default_clusterdefinition_name = "'EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin'"
   @clusterdefinition_name_url = "cli-bp-url"
   @clusterdefinition_name_file = "cli-bp-file"
   @clusterdefinition_url = ENV['CLUSTER_DEFINITION_URL']
-  @clusterdefinition_file = "../../blueprints/test.bp"
+  @clusterdefinition_file = "../../clusterdefinitions/test.bp"
 
   @image_catalog_name = "cli-cat"
   @image_catalog_name_default = "cloudbreak-default"

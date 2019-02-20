@@ -59,12 +59,12 @@ func ChangeHdpRepo(c *cli.Context) {
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
 
 	stackDetails := &model.StackRepositoryV4Request{
-		Version:                  c.String(flags.FlVersion.Name),
+		Version:                  &(&types.S{S: c.String(flags.FlVersion.Name)}).S,
 		VersionDefinitionFileURL: c.String(flags.FlVdfUrl.Name),
 	}
 
 	unmarshallCliInput(c.String, stackDetails)
-	stackDetails.Stack = "HDP"
+	stackDetails.Stack = &(&types.S{S: "HDP"}).S
 	updateStackRepoDetails(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, stackDetails)
 }
 
@@ -84,13 +84,13 @@ func ChangeHdfRepo(c *cli.Context) {
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
 
 	stackDetails := &model.StackRepositoryV4Request{
-		Version:                  c.String(flags.FlVersion.Name),
+		Version:                  &(&types.S{S: c.String(flags.FlVersion.Name)}).S,
 		VersionDefinitionFileURL: c.String(flags.FlVdfUrl.Name),
 		MpackURL:                 c.String(flags.FlMPackUrl.Name),
 	}
 
 	unmarshallCliInput(c.String, stackDetails)
-	stackDetails.Stack = "HDF"
+	stackDetails.Stack = &(&types.S{S: "HDF"}).S
 	updateStackRepoDetails(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, stackDetails)
 
 }
@@ -100,7 +100,7 @@ func ChangeAmbariRepo(c *cli.Context) {
 	workspaceID, name := resolveWorkspaceIDAndStackName(c.Int64, c.String)
 
 	stackDetails := &model.StackRepositoryV4Request{
-		Version: c.String(flags.FlVersion.Name),
+		Version: &(&types.S{S: c.String(flags.FlVersion.Name)}).S,
 		Repository: &model.RepositoryV4Request{
 			BaseURL:   c.String(flags.FlRepoUrl.Name),
 			GpgKeyURL: c.String(flags.FlRepoGpgUrl.Name),
@@ -108,7 +108,7 @@ func ChangeAmbariRepo(c *cli.Context) {
 	}
 
 	unmarshallCliInput(c.String, stackDetails)
-	stackDetails.Stack = "AMBARI"
+	stackDetails.Stack = &(&types.S{S: "AMBARI"}).S
 	updateStackRepoDetails(cbClient.Cloudbreak.V4WorkspaceIDStacks, workspaceID, name, stackDetails)
 }
 
@@ -135,7 +135,7 @@ func GenerateHdpRepoJson(_ *cli.Context) {
 		UtilsBaseURL:             "____",
 		EnableGplRepo:            &(&types.B{B: true}).B,
 		Mpacks:                   []*model.ManagementPackDetailsV4Request{},
-		Version:                  "____",
+		Version:                  &(&types.S{S: "____"}).S,
 	}
 
 	jsonBytes, err := json.MarshalIndent(stackDetails, "", "\t")
@@ -164,7 +164,7 @@ func GenerateHdfRepoJson(_ *cli.Context) {
 				PreInstalled: &(&types.B{B: false}).B,
 			},
 		},
-		Version: "____",
+		Version: &(&types.S{S: "____"}).S,
 	}
 
 	jsonBytes, err := json.MarshalIndent(stackDetails, "", "\t")

@@ -27,7 +27,7 @@
         "status": "REQUESTED",
         "secure": false,
         "ambariServerIp": "52.16.174.228",
-        "blueprint": {
+        "clusterDefinition": {
           "id": 7,
           "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
           "description": "Useful for EDW analytics using Hive LLAP",
@@ -97,7 +97,7 @@
         "status": "REQUESTED",
         "secure": false,
         "ambariServerIp": null,
-        "blueprint": {
+        "clusterDefinition": {
           "id": 7,
           "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
           "description": "Useful for EDW analytics using Hive LLAP",
@@ -165,7 +165,7 @@
         "status": "AVAILABLE",
         "secure": false,
         "ambariServerIp": "35.187.4.62",
-        "blueprint": {
+        "clusterDefinition": {
           "id": 7,
           "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
           "description": "Useful for EDW analytics using Hive LLAP",
@@ -267,7 +267,7 @@
         "status": "REQUESTED",
         "secure": false,
         "ambariServerIp": null,
-        "blueprint": {
+        "clusterDefinition": {
           "id": 1,
           "name": "EDW-ETL: Apache Hive, Apache Spark 2",
           "description": "Useful for ETL data processing with Hive and Spark",

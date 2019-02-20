@@ -37,7 +37,7 @@ var maxCardinality = map[string]int{
 
 var getClusterDefinitionClient = func(server, refreshToken string) clusterdefinition.GetClusterDefinitionInWorkspace {
 	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
-	return cbClient.Cloudbreak.V4WorkspaceIDClusterdefinitions
+	return cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions
 }
 
 var stackClient = func(server, refreshToken string) getStackInWorkspace {
@@ -175,7 +175,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
 	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
-	isSharedServiceReady, _ := datalake.Cluster.Ambari.Blueprint.Tags["shared_services_ready"].(bool)
+	isSharedServiceReady, _ := datalake.Cluster.Ambari.ClusterDefinition.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		commonUtils.LogErrorMessageAndExit("The source cluster must be a datalake")
 	} else if datalake.Status != "AVAILABLE" || datalake.Cluster.Status != "AVAILABLE" {

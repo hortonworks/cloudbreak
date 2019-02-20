@@ -1,9 +1,9 @@
 var responses={};
 
-var acc = require('./accountpreferences/accountpreferences.json');
+var accountpreferences = require('./accountpreferences/accountpreferences.json');
 var platforms = require('./accountpreferences/platforms.json');
-var defaultblueprint = require('./blueprints/default-blueprint.json');
-var qablueprint = require('./blueprints/qa-blueprints.json');
+var defaultclusterdefinition = require('./clusterdefinitions/default-clusterdefinition.json');
+var qaclusterdefinition = require('./clusterdefinitions/qa-clusterdefinition.json');
 var disktypes = require('./connectors/disktypes.json');
 var gateways = require('./connectors/gateways.json');
 var ippools = require('./connectors/ippools.json');
@@ -73,17 +73,15 @@ stackReinstallResponses = addResponseObject(stackReinstallResponses,null, OK , "
 
 responses.getCloudbreakInfo= responseObject({ "app": { "name":"cloudbreak", "version":"MOCK" } }, OK);
 responses.getCloudbreakHealth= responseObject({ "status":"UP" }, OK);
-responses.getAccountPreferencesEndpoint= responseObject(acc, OK);
+responses.evictCurrentUserDetails = responseObject({ username: 'mock@hortonworks.com' }, OK);
+responses.getDeploymentInfo = responseObject(accountpreferences, OK);
+responses.getAuditEventsInWorkspace = responseObject([], OK);
+
 responses.isPlatformSelectionDisabled= responseObject(platforms, OK);
 responses.platformEnablement= responseObject(platforms, OK);
-responses.listBlueprintsByWorkspace = responseObject(qablueprint, OK);
-responses.getBlueprintInWorkspace = responseObject(defaultblueprint, OK);
-responses.getPrivatesBlueprint= responseObject(qablueprint, OK);
-responses.getPrivateBlueprint= responseObject(defaultblueprint, OK);
-responses.getBlueprint= responseObject(defaultblueprint, OK);
-responses.createBlueprintInWorkspace= responseObject(defaultblueprint, OK);
-responses.postPrivateBlueprint= responseObject(defaultblueprint, OK);
-responses.getBlueprintRequestFromId= responseObject(defaultblueprint, OK);
+responses.listClusterDefinitionsByWorkspace = responseObject(qaclusterdefinition, OK);
+responses.getClusterDefinitionInWorkspace = responseObject(defaultclusterdefinition, OK);
+responses.createClusterDefinitionInWorkspace= responseObject(defaultclusterdefinition, OK);
 responses.getDisktypes= responseObject(disktypes, OK);
 responses.getGatewaysCredentialId= responseObject(gateways, OK);
 responses.getIpPoolsCredentialId= responseObject(ippools, OK);
@@ -149,7 +147,7 @@ responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
 responses.createManagementPackInWorkspace = responseObject(mpacksSingle, OK);
 responses.postPrivateManagementPack = responseObject(mpacks, OK);
 responses.getWorkspaces = responseObject(workspaces, OK);
-responses.listEnvironment = responseObject(environments, OK)
+responses.listEnvironment = responseObject(environments, OK);
 
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,

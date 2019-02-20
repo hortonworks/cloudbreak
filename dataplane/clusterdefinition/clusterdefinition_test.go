@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	v4bp "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_clusterdefinitions"
+	v4bp "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_cluster_definitions"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"

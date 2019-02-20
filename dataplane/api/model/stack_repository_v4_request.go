@@ -42,7 +42,8 @@ type StackRepositoryV4Request struct {
 	Repository *RepositoryV4Request `json:"repository,omitempty"`
 
 	// name of the stack, like HDP
-	Stack string `json:"stack,omitempty"`
+	// Required: true
+	Stack *string `json:"stack"`
 
 	// url of the stack utils repository
 	UtilsBaseURL string `json:"utilsBaseURL,omitempty"`
@@ -54,8 +55,9 @@ type StackRepositoryV4Request struct {
 	Verify *bool `json:"verify,omitempty"`
 
 	// version of the stack
+	// Required: true
 	// Pattern: (^[0-9]+\.[0-9]+$)
-	Version string `json:"version,omitempty"`
+	Version *string `json:"version"`
 
 	// local path on the Ambari server or URL that point to the desired VDF file
 	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
@@ -74,6 +76,10 @@ func (m *StackRepositoryV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRepository(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStack(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -143,13 +149,22 @@ func (m *StackRepositoryV4Request) validateRepository(formats strfmt.Registry) e
 	return nil
 }
 
-func (m *StackRepositoryV4Request) validateVersion(formats strfmt.Registry) error {
+func (m *StackRepositoryV4Request) validateStack(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Version) { // not required
-		return nil
+	if err := validate.Required("stack", "body", m.Stack); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("version", "body", string(m.Version), `(^[0-9]+\.[0-9]+$)`); err != nil {
+	return nil
+}
+
+func (m *StackRepositoryV4Request) validateVersion(formats strfmt.Registry) error {
+
+	if err := validate.Required("version", "body", m.Version); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("version", "body", string(*m.Version), `(^[0-9]+\.[0-9]+$)`); err != nil {
 		return err
 	}
 

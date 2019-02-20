@@ -2,7 +2,7 @@ GIT_FIRST_PARENT ?= $(shell git describe --tags --first-parent | sed -nre 's/^[^
 GIT_LATEST_TAG ?= $(shell git describe --tags | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+\-[a-z]+\.[0-9]*")
 GIT_ACTIVE_BRANCH ?= $(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD | sed -e 's|origin/||g')
 DOCKER_IP ?= $(shell echo $(DOCKER_HOST) | awk -F/ '{print $$3}' | sed 's/:.*//')
-CLUSTER_DEFINITION_URL ?= https://raw.githubusercontent.com/hortonworks/cb-cli/$(GIT_ACTIVE_BRANCH)/tests/blueprints/test.bp
+CLUSTER_DEFINITION_URL ?= https://raw.githubusercontent.com/hortonworks/cb-cli/$(GIT_ACTIVE_BRANCH)/tests/clusterdefinitions/test.bp
 
 ifeq ($(DOCKER_IP),)
     DOCKER_IP=127.0.0.1
@@ -37,6 +37,7 @@ stop-mock:
 
 # Restart DataPlane Mock (only Containers are restarted) with same Swagger JSON and Mock IP as was set previously
 restart-mock:
+	ORIGINAL_IP=127.0.0.1 NEW_IP=$(DOCKER_IP) CLEANUP=true scripts/ip-replace.sh
 	GIT_VERSION=$(GIT_FIRST_PARENT) docker-compose -f tmp/docker-compose.yml -p cbreak down
 	GIT_VERSION=$(GIT_FIRST_PARENT) BASE_URL=https://$(DOCKER_IP) tmp/cbm.sh
 
