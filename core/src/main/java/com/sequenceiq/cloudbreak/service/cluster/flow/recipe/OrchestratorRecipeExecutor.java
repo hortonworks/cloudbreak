@@ -38,12 +38,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -69,7 +68,7 @@ class OrchestratorRecipeExecutor {
     private HostGroupService hostGroupService;
 
     @Inject
-    private InstanceGroupService instanceGroupService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private GeneratedRecipeService generatedRecipeService;
@@ -160,19 +159,22 @@ class OrchestratorRecipeExecutor {
         if (!recipeExecutionFailureCollector.canProcessExecutionFailure(exception)) {
             return exception.getMessage();
         }
-        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
-        Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors(exception, recipeMap,
-                instanceGroupService.findByStackId(stack.getId()));
-        String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")
-                .append(failure.getRecipe().getName())
-                .append("' - \n")
-                .append("Hostgroup: '")
-                .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
-                .append("' - \n")
-                .append("Instance: '")
-                .append(failure.getInstanceMetaData().getDiscoveryFQDN())
-                .append(']')
-                .toString()).collect(Collectors.joining(" ---------------------------------------------- ")
+        List<RecipeExecutionFailureCollector.RecipeFailure> failures = recipeExecutionFailureCollector.collectErrors(exception);
+        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId());
+
+        String message = failures.stream().map(failure -> {
+            InstanceMetaData metadata = recipeExecutionFailureCollector.getInstanceMetadataByHost(instanceMetaData, failure.getHost()).get();
+            return new StringBuilder("[Recipe: '")
+                    .append(failure.getRecipeName())
+                    .append("' - \n")
+                    .append("Hostgroup: '")
+                    .append(metadata.getInstanceGroup().getGroupName())
+                    .append("' - \n")
+                    .append("Instance: '")
+                    .append(metadata.getDiscoveryFQDN())
+                    .append(']')
+                    .toString();
+        }).collect(Collectors.joining("\n ---------------------------------------------- \n")
         );
         return new StringBuilder("Failed to execute recipe(s): \n").append(message).toString();
     }
@@ -225,7 +227,7 @@ class OrchestratorRecipeExecutor {
         for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
             Collection<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
             for (RecipeModel rm : entry.getValue()) {
-                    recipeNamesPerHostgroup.add(rm.getName());
+                recipeNamesPerHostgroup.add(rm.getName());
             }
             if (!recipeNamesPerHostgroup.isEmpty()) {
                 String recipeNamesStr = Joiner.on(',').join(recipeNamesPerHostgroup);
