@@ -1,0 +1,51 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  mavenCentral()
+}
+
+jar {
+  baseName = 'template-manager-cmtemplate'
+}
+
+dependencies {
+  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+    exclude group: 'org.slf4j'
+  }
+  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: '6.1.0')
+  compile group: 'com.github.jknack',             name: 'handlebars',                     version: '4.0.6'
+
+  compile project(':orchestrator-api')
+  compile project(':core-model')
+  compile project(':cloud-api')
+  compile project(':template-manager-core')
+
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+  testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
+  testCompile project(path: ':template-manager-core', configuration: 'tests')
+  testCompile project(path: ':core-model', configuration: 'tests')
+}
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}

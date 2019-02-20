@@ -72,11 +72,17 @@ public class AmbariBlueprintUtils {
     }
 
     public String getBlueprintStackVersion(JsonNode root) {
-        return root.get("Blueprints").get("stack_version").asText();
+        if (root.get("Blueprints") != null) {
+            return root.get("Blueprints").get("stack_version").asText();
+        }
+        return "";
     }
 
     public String getBlueprintStackName(JsonNode root) {
-        return root.get("Blueprints").get("stack_name").asText();
+        if (root.get("Blueprints") != null) {
+            return root.get("Blueprints").get("stack_name").asText();
+        }
+        return "";
     }
 
     public String getCDHStackVersion(JsonNode root) {
