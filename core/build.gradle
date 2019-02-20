@@ -216,6 +216,7 @@ dependencies {
   compile project(':structuredevent-model')
   compile project(':template-manager-blueprint')
   compile project(':template-manager-recipe')
+  compile project(':template-manager-cmtemplate')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-salt')

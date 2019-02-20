@@ -1,0 +1,277 @@
+{
+  "cdhVersion": "6.1.0",
+  "displayName": "simple_template",
+  "cmVersion": "6.1.0",
+  "repositories": [
+    "https://archive.cloudera.com/cdh6/{latest_supported}/parcels/",
+    "https://archive.cloudera.com/cdh5/parcels/5.14/",
+    "https://archive.cloudera.com/accumulo-c5/parcels/latest/",
+    "https://archive.cloudera.com/kafka/parcels/latest/",
+    "http://archive.cloudera.com/kudu/parcels/latest/",
+    "https://archive.cloudera.com/spark/parcels/latest/",
+    "https://archive.cloudera.com/sqoop-teradata-connector1/latest/",
+    "https://archive.cloudera.com/sqoop-netezza-connector1/latest/",
+    "https://archive.cloudera.com/sqoop-connectors/parcels/latest/"
+  ],
+  "products": [
+    {
+      "version": "6.1.0-1.cdh6.1.0.p0.770702",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "isilon",
+      "serviceType": "ISILON",
+      "serviceConfigs": [
+        {
+          "name": "default_fs_name",
+          "value": "hdfs"
+        }
+      ]
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "kafka",
+      "serviceType": "KAFKA",
+      "roleConfigGroups": [
+        {
+          "refName": "kafka-KAFKA_BROKER-BASE",
+          "roleType": "KAFKA_BROKER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hbase",
+      "serviceType": "HBASE",
+      "roleConfigGroups": [
+        {
+          "refName": "hbase-REGIONSERVER-BASE",
+          "roleType": "REGIONSERVER",
+          "base": true
+        },
+        {
+          "refName": "hbase-MASTER-BASE",
+          "roleType": "MASTER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true
+        },
+        {
+          "refName": "yarn-NODEMANAGER-BASE",
+          "roleType": "NODEMANAGER",
+          "base": true
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "spark_on_yarn",
+      "serviceType": "SPARK_ON_YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "roleType": "SPARK_YARN_HISTORY_SERVER",
+          "base": true
+        },
+        {
+          "refName": "spark_on_yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE",
+      "serviceConfigs": [
+        {
+          "name": "hive_metastore_database_password",
+          "variable": "hive-hive_metastore_database_password"
+        },
+        {
+          "name": "hive_metastore_database_port",
+          "variable": "hive-hive_metastore_database_port"
+        },
+        {
+          "name": "hive_metastore_database_host",
+          "variable": "hive-hive_metastore_database_host"
+        },
+        {
+          "name": "hive_metastore_database_type",
+          "variable": "hive-hive_metastore_database_type"
+        },
+        {
+          "name": "hive_metastore_database_name",
+          "variable": "hive-hive_metastore_database_name"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "impala",
+      "serviceType": "IMPALA",
+      "roleConfigGroups": [
+        {
+          "refName": "impala-IMPALAD-BASE",
+          "roleType": "IMPALAD",
+          "base": true
+        },
+        {
+          "refName": "impala-STATESTORE-BASE",
+          "roleType": "STATESTORE",
+          "base": true
+        },
+        {
+          "refName": "impala-CATALOGSERVER-BASE",
+          "roleType": "CATALOGSERVER",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hbase-MASTER-BASE",
+        "hdfs-BALANCER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hive-GATEWAY-BASE",
+        "hive-HIVEMETASTORE-BASE",
+        "hive-HIVESERVER2-BASE",
+        "impala-CATALOGSERVER-BASE",
+        "impala-STATESTORE-BASE",
+        "kafka-KAFKA_BROKER-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "zookeeper-SERVER-BASE"
+      ]
+    },
+    {
+      "refName": "worker",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hbase-REGIONSERVER-BASE",
+        "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "impala-IMPALAD-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "yarn-NODEMANAGER-BASE"
+      ]
+    }
+  ],
+  "instantiator": {
+    "clusterName": "testcluster",
+    "hosts": [
+      {
+        "hostName": "host3",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "host4",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "host1",
+        "hostTemplateRefName": "master"
+      },
+      {
+        "hostName": "host2",
+        "hostTemplateRefName": "master"
+      }
+    ],
+    "variables": [
+      {
+        "name": "hive-hive_metastore_database_host",
+        "value": "cluster.test.com"
+      },
+      {
+        "name": "hive-hive_metastore_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "hive-hive_metastore_database_name",
+        "value": "hive"
+      },
+      {
+        "name": "hive-hive_metastore_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "hive-hive_metastore_database_password",
+        "value": "password"
+      }
+    ]
+  }
+}
