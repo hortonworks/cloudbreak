@@ -28,10 +28,12 @@ dependencies {
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
+  implementation     group: 'org.postgresql',            name: 'postgresql'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
@@ -48,16 +50,17 @@ dependencies {
     implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
+    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
     testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
   }
 
-  implementation project(':cloud-common')
 }
 
 bootRun {
