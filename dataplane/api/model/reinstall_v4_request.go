@@ -19,9 +19,9 @@ import (
 // swagger:model ReinstallV4Request
 type ReinstallV4Request struct {
 
-	// blueprint name for the cluster
+	// cluster definition name for the cluster
 	// Required: true
-	BlueprintName *string `json:"blueprintName"`
+	ClusterDefinition *string `json:"clusterDefinition"`
 
 	// collection of instance groupst
 	// Unique: true
@@ -43,7 +43,7 @@ type ReinstallV4Request struct {
 func (m *ReinstallV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateBlueprintName(formats); err != nil {
+	if err := m.validateClusterDefinition(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -65,9 +65,9 @@ func (m *ReinstallV4Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ReinstallV4Request) validateBlueprintName(formats strfmt.Registry) error {
+func (m *ReinstallV4Request) validateClusterDefinition(formats strfmt.Registry) error {
 
-	if err := validate.Required("blueprintName", "body", m.BlueprintName); err != nil {
+	if err := validate.Required("clusterDefinition", "body", m.ClusterDefinition); err != nil {
 		return err
 	}
 

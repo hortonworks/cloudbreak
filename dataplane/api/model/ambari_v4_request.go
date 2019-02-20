@@ -19,8 +19,8 @@ import (
 // swagger:model AmbariV4Request
 type AmbariV4Request struct {
 
-	// blueprint name for the cluster
-	BlueprintName string `json:"blueprintName,omitempty"`
+	// cluster definition name for the cluster
+	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
 
 	// config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'
 	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
@@ -50,8 +50,8 @@ type AmbariV4Request struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	UserName *string `json:"userName"`
 
-	// blueprint validation
-	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
+	// cluster definition validation
+	ValidateClusterDefinition *bool `json:"validateClusterDefinition,omitempty"`
 
 	// ambari and stack repository validation
 	ValidateRepositories *bool `json:"validateRepositories,omitempty"`

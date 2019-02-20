@@ -7,12 +7,12 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 )
 
-func TestGetNodesByBlueprint(t *testing.T) {
+func TestGetNodesByClusterDefinitionDetails(t *testing.T) {
 	t.Parallel()
 
 	bp, _ := ioutil.ReadFile("../testdata/blueprint.json")
 
-	nodes := getNodesByBlueprint(bp)
+	nodes := getNodesByClusterDefinition(bp)
 
 	expectedNodes := []cloud.Node{
 		{Name: "master", GroupType: "GATEWAY", Count: 1},

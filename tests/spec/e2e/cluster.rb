@@ -114,9 +114,9 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   end
 
   it "Generate reinstall template" do 
-    result = cb.cluster.generate_reinstall_template.name(@os_cluster_name).blueprint_name(@default_blueprint_name).build
+    result = cb.cluster.generate_reinstall_template.name(@os_cluster_name).blueprint_name(@default_clusterdefinition_name).build
     expect(result.exit_status).to eql 0 
     expect(result.stdout.empty?).to be_falsy 
-    expect(JSON.parse(result.stdout)["blueprintName"]).to eq(@default_blueprint_name.gsub("'",""))    
+    expect(JSON.parse(result.stdout)["blueprintName"]).to eq(@default_clusterdefinition_name.gsub("'",""))    
   end           
 end

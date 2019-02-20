@@ -238,7 +238,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "file",
-			Usage: "location of the Ambari blueprint JSON file",
+			Usage: "location of the cluster definition JSON file",
 		},
 	}
 	FlURL = StringFlag{
@@ -248,25 +248,25 @@ var (
 			Usage: "URL location of the JSON file",
 		},
 	}
-	FlBlueprintName = StringFlag{
+	FlClusterDefinitionName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
-			Name:  "blueprint-name",
-			Usage: "name of the blueprint",
+			Name:  "cluster-definition-name",
+			Usage: "name of the cluster definition",
 		},
 	}
-	FlBlueprintNameOptional = StringFlag{
+	FlClusterDefinitionNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "blueprint-name",
-			Usage: "name of the blueprint",
+			Name:  "cluster-definition-name",
+			Usage: "name of the cluster definition",
 		},
 	}
-	FlBlueprintFileOptional = StringFlag{
+	FlClusterDefinitionFileOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "blueprint-file",
-			Usage: "location of the blueprint file",
+			Name:  "cluster-definition-file",
+			Usage: "location of the cluster definition file",
 		},
 	}
 	FlCloudStorageTypeOptional = StringFlag{
@@ -311,11 +311,11 @@ var (
 			Usage: "custom key encryption for GCP instances which can use your kms key",
 		},
 	}
-	FlWithBlueprintValidation = BoolFlag{
+	FlWithClusterDefinitionValidation = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
-			Name:  "with-blueprint-validation",
-			Usage: "enable Ambari blueprint validation",
+			Name:  "with-cluster-definition-validation",
+			Usage: "enable cluster definition validation",
 		},
 	}
 	FlExecutionType = StringFlag{
@@ -1318,7 +1318,7 @@ func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithBlueprintValidation} {
+	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithClusterDefinitionValidation} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

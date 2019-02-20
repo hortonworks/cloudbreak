@@ -22,14 +22,14 @@ type CloudbreakEventV4Response struct {
 	// availability zone of the stack
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
-	// blueprint id for the cluster
-	BlueprintID int64 `json:"blueprintId,omitempty"`
-
-	// gathered from blueprintName field from the blueprint JSON
-	BlueprintName string `json:"blueprintName,omitempty"`
-
 	// type of cloud provider
 	Cloud string `json:"cloud,omitempty"`
+
+	// cluster definition id for the cluster
+	ClusterDefinitionID int64 `json:"clusterDefinitionId,omitempty"`
+
+	// gathered from clusterDefinitionName field from the cluster definition
+	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
 
 	// id of the cluster
 	ClusterID int64 `json:"clusterId,omitempty"`

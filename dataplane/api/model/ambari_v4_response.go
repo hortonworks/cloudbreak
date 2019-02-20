@@ -19,8 +19,8 @@ import (
 // swagger:model AmbariV4Response
 type AmbariV4Response struct {
 
-	// blueprint for the cluster
-	Blueprint *BlueprintV4Response `json:"blueprint,omitempty"`
+	// cluster definition for the cluster
+	Blueprint *ClusterDefinitionV4Response `json:"blueprint,omitempty"`
 
 	// config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'
 	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
@@ -32,7 +32,7 @@ type AmbariV4Response struct {
 	// ambari username for Dataplane
 	DpUser *SecretV4Response `json:"dpUser,omitempty"`
 
-	// ambari blueprint JSON, set this or the url field
+	// cluster definition, set this or the url field
 	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
 
 	// ambari password

@@ -18,14 +18,14 @@ type NotificationDetails struct {
 	// availabilty zone
 	AvailabiltyZone string `json:"availabiltyZone,omitempty"`
 
-	// blueprint Id
-	BlueprintID int64 `json:"blueprintId,omitempty"`
-
-	// blueprint name
-	BlueprintName string `json:"blueprintName,omitempty"`
-
 	// cloud
 	Cloud string `json:"cloud,omitempty"`
+
+	// cluster definition Id
+	ClusterDefinitionID int64 `json:"clusterDefinitionId,omitempty"`
+
+	// cluster definition name
+	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
 
 	// cluster Id
 	ClusterID int64 `json:"clusterId,omitempty"`

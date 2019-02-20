@@ -16,11 +16,11 @@ import (
 // swagger:model StructuredFlowEvent
 type StructuredFlowEvent struct {
 
-	// blueprint
-	Blueprint *BlueprintDetails `json:"blueprint,omitempty"`
-
 	// cluster
 	Cluster *ClusterDetails `json:"cluster,omitempty"`
+
+	// cluster definition details
+	ClusterDefinitionDetails *ClusterDefinitionDetails `json:"clusterDefinitionDetails,omitempty"`
 
 	// duration
 	Duration int64 `json:"duration,omitempty"`
@@ -48,11 +48,11 @@ type StructuredFlowEvent struct {
 func (m *StructuredFlowEvent) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateBlueprint(formats); err != nil {
+	if err := m.validateCluster(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateCluster(formats); err != nil {
+	if err := m.validateClusterDefinitionDetails(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -74,24 +74,6 @@ func (m *StructuredFlowEvent) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StructuredFlowEvent) validateBlueprint(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Blueprint) { // not required
-		return nil
-	}
-
-	if m.Blueprint != nil {
-		if err := m.Blueprint.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("blueprint")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *StructuredFlowEvent) validateCluster(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Cluster) { // not required
@@ -102,6 +84,24 @@ func (m *StructuredFlowEvent) validateCluster(formats strfmt.Registry) error {
 		if err := m.Cluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cluster")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StructuredFlowEvent) validateClusterDefinitionDetails(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterDefinitionDetails) { // not required
+		return nil
+	}
+
+	if m.ClusterDefinitionDetails != nil {
+		if err := m.ClusterDefinitionDetails.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("clusterDefinitionDetails")
 			}
 			return err
 		}

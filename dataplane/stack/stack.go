@@ -348,12 +348,12 @@ func assembleReinstallRequest(c *cli.Context) *model.ReinstallV4Request {
 		commonutils.LogErrorMessageAndExit(msg)
 	}
 
-	bpName := c.String(fl.FlBlueprintNameOptional.Name)
+	bpName := c.String(fl.FlClusterDefinitionNameOptional.Name)
 	if len(bpName) != 0 {
-		req.BlueprintName = &bpName
+		req.ClusterDefinition = &bpName
 	}
-	if req.BlueprintName == nil || len(*req.BlueprintName) == 0 {
-		commonutils.LogErrorMessageAndExit("Name of the blueprint must be set either in the template or with the --blueprint-name command line option.")
+	if req.ClusterDefinition == nil || len(*req.ClusterDefinition) == 0 {
+		commonutils.LogErrorMessageAndExit("Name of the cluster definition must be set either in the template or with the --cluster-definition-name command line option.")
 	}
 
 	req.KerberosPassword = c.String(fl.FlKerberosPasswordOptional.Name)

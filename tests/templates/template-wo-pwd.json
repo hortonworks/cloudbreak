@@ -1,8 +1,7 @@
 {
   "cluster": {
     "ambari": {
-      "blueprintInputs": [],
-      "blueprintName": "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin",
+      "clusterDefinitionName": "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin",
       "userName": "admin"
     }
   },

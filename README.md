@@ -28,23 +28,23 @@ AUTHOR(S):
    Hortonworks
 
 COMMANDS:
-     audit         audit related operations
-     blueprint     blueprint related operations
-     cloud         information about cloud provider resources
-     cluster       cluster related operations
-     completion    prints the bash completion function
-     configure     configure the server address and credentials used to communicate with this server
-     credential    credential related operations
-     database      database management related operations
-     env           environment related operations
-     imagecatalog  imagecatalog related operations
-     ldap          ldap related operations
-     mpack         management pack related operations
-     proxy         proxy related operations
-     recipe        recipe related operations
-     user          user related operations
-     workspace     workspace related operations
-     help, h       Shows a list of commands or help for one command
+     audit                 audit related operations
+     clusterdefinition     cluster definition related operations
+     cloud                 information about cloud provider resources
+     cluster               cluster related operations
+     completion            prints the bash completion function
+     configure             configure the server address and credentials used to communicate with this server
+     credential            credential related operations
+     database              database management related operations
+     env                   environment related operations
+     imagecatalog          imagecatalog related operations
+     ldap                  ldap related operations
+     mpack                 management pack related operations
+     proxy                 proxy related operations
+     recipe                recipe related operations
+     user                  user related operations
+     workspace             workspace related operations
+     help, h               Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --debug        debug mode [$DEBUG]
@@ -97,7 +97,7 @@ The full reference of this descriptor file can be found in the API docs.
 The CLI can help with creating the skeleton of the cluster descriptor JSON.
 The following command outputs a descriptor file with empty values:
 ```
-dp cluster generate-template aws existing-subnet --blueprint-name "my-custom-blueprint"
+dp cluster generate-template aws existing-subnet --cluster-definition-name "my-custom-cluster-definition"
 ```
 The `aws` and `existing-subnet` keywords are subcommands to the `cluster generate-template` command and help with creating a skeleton with proper entries for the selected cloud provider and network configuration.
 Use the `-h` option to see the available subcommands, e.g.:

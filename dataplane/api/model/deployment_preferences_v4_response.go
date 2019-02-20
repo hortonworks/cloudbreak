@@ -57,7 +57,7 @@ var deploymentPreferencesV4ResponseFeatureSwitchV4sItemsEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["DISABLE_SHOW_CLI","DISABLE_SHOW_BLUEPRINT"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["DISABLE_SHOW_CLI","DISABLE_SHOW_CLUSTER_DEFINITION"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

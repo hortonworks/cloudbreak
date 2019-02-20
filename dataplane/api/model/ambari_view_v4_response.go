@@ -16,8 +16,8 @@ import (
 // swagger:model AmbariViewV4Response
 type AmbariViewV4Response struct {
 
-	// blueprint for the cluster
-	Blueprint *BlueprintV4ViewResponse `json:"blueprint,omitempty"`
+	// cluster definition for the cluster
+	ClusterDefinition *ClusterDefinitionV4ViewResponse `json:"clusterDefinition,omitempty"`
 
 	// public ambari ip of the stack
 	ServerIP string `json:"serverIp,omitempty"`
@@ -27,7 +27,7 @@ type AmbariViewV4Response struct {
 func (m *AmbariViewV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateBlueprint(formats); err != nil {
+	if err := m.validateClusterDefinition(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -37,16 +37,16 @@ func (m *AmbariViewV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AmbariViewV4Response) validateBlueprint(formats strfmt.Registry) error {
+func (m *AmbariViewV4Response) validateClusterDefinition(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Blueprint) { // not required
+	if swag.IsZero(m.ClusterDefinition) { // not required
 		return nil
 	}
 
-	if m.Blueprint != nil {
-		if err := m.Blueprint.Validate(formats); err != nil {
+	if m.ClusterDefinition != nil {
+		if err := m.ClusterDefinition.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("blueprint")
+				return ve.ValidateName("clusterDefinition")
 			}
 			return err
 		}

@@ -36,10 +36,10 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @mock_endpoint_reset = "/cb/api/reset"
     @mock_password = "mockpassword"
 
-    @default_blueprint_name = "'HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin'"
-    @blueprint_name_file = "cli-bp-file"
-    @blueprint_url = ENV['BLUEPRINT_URL']
-    @blueprint_file = "../../blueprints/test.bp"
+    @default_clusterdefinition_name = "'HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin'"
+    @clusterdefinition_name_file = "cli-bp-file"
+    @clusterdefinition_url = ENV['CLUSTER_DEFINITION_URL']
+    @clusterdefinition_file = "../../blueprints/test.bp"
 
     @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
     @recipe_name = "cli-recipe"

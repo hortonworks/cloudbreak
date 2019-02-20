@@ -17,11 +17,11 @@ func init() {
 				Usage: "list audit for a resource",
 				Subcommands: []cli.Command{
 					{
-						Name:   "blueprint",
-						Usage:  "list audit for blueprints",
+						Name:   "clusterdefinition",
+						Usage:  "list audit for cluster definitions",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
-						Action: audit.ListBlueprintAudits,
+						Action: audit.ListClusterDefinitionAudits,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)

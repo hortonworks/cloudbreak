@@ -27,7 +27,7 @@ type Client struct {
 /*
 GetUserProfileInWorkspace users related profile
 
-Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users
+Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users
 */
 func (a *Client) GetUserProfileInWorkspace(params *GetUserProfileInWorkspaceParams) (*GetUserProfileInWorkspaceOK, error) {
 	// TODO: Validate the params before sending

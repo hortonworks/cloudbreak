@@ -17,7 +17,6 @@ require (
 	github.com/go-openapi/validate v0.17.0
 	github.com/golang/lint v0.0.0-20181026193005-c67002cb31c3 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20180909121442-1003c8bd00dc // indirect
-	github.com/hortonworks/dp-cli-common v0.0.1
 	github.com/hortonworks/dp-cli-common/caasauth v0.0.0-20181126104958-228e0c1c270f
 	github.com/hortonworks/dp-cli-common/utils v0.0.0-20181126104958-228e0c1c270f
 	github.com/jgautheron/goconst v0.0.0-20170703170152-9740945f5dcb // indirect
@@ -26,7 +25,6 @@ require (
 	github.com/mdempsky/unconvert v0.0.0-20180703203632-1a9a0a0a3594 // indirect
 	github.com/mibk/dupl v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
-	github.com/olekukonko/tablewriter v0.0.1
 	github.com/onsi/gomega v1.4.2 // indirect
 	github.com/opennota/check v0.0.0-20180911053232-0c771f5545ff // indirect
 	github.com/securego/gosec v0.0.0-20181111085728-2695567487c0 // indirect
@@ -39,7 +37,7 @@ require (
 	golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3 // indirect
 	golang.org/x/net v0.0.0-20181005035420-146acd28ed58
 	golang.org/x/text v0.3.0
-	golang.org/x/tools v0.0.0-20181210225255-6a3e9aa2ab77
+	golang.org/x/tools v0.0.0-20181210225255-6a3e9aa2ab77 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20170511165959-379148ca0225 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
