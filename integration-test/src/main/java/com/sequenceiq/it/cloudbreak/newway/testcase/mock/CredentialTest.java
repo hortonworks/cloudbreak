@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.credential.CredentialTestAssertion;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
@@ -106,14 +107,12 @@ public class CredentialTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
     public void testCreateCredentialWithInvalidAttribute(MockedTestContext testContext,
-        String credentialName, String expectedErrorMessage) {
+        String credentialName, String expectedExceptionMessage) {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
                 .when(CredentialTestAction::create, key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), getErrorMessage(e), containsString(expectedErrorMessage));
-                }).withKey(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, withExpectedMessage(expectedExceptionMessage).withKey(BAD_REQUEST_KEY))
                 .validate();
     }
 
@@ -131,4 +130,9 @@ public class CredentialTest extends AbstractIntegrationTest {
                         "error: must not be null"}
         };
     }
+
+    private RunningParameter withExpectedMessage(String expectedErrorMessage) {
+        return exceptionConsumer(e -> assertThat(e.getMessage(), getErrorMessage(e), containsString(expectedErrorMessage)));
+    }
+
 }
