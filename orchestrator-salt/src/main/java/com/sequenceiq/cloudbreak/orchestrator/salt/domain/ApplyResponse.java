@@ -25,7 +25,7 @@ public class ApplyResponse {
         if (result != null && result.size() > 0) {
             Map<String, JsonNode> resultMap = result.get(0);
             if (resultMap != null && resultMap.get("jid") != null) {
-                return resultMap.get("jid").toString();
+                return resultMap.get("jid").asText();
             }
         }
         return null;
