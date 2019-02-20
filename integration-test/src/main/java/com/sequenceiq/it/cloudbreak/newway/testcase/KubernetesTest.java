@@ -1,10 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.exceptionConsumer;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -99,9 +96,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                 .withName(kubernetesName)
                 .withContent(content)
                 .when(KubernetesTestAction::create, key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), getErrorMessage(e), containsString(expectedErrorMessage));
-                }).withKey(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, expectedMessage(expectedErrorMessage).withKey(BAD_REQUEST_KEY))
                 .validate();
     }
 

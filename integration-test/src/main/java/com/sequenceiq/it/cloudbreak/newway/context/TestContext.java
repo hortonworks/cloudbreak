@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -422,7 +423,8 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
-        return StringUtils.isEmpty(runningParameter.getExpectedMessage()) || getErrorMessage(exception).matches(runningParameter.getExpectedMessage());
+        return StringUtils.isEmpty(runningParameter.getExpectedMessage())
+                || Pattern.compile(runningParameter.getExpectedMessage()).matcher(getErrorMessage(exception)).find();
     }
 
     public void handleExecptionsDuringTest() {

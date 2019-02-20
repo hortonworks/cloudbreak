@@ -73,7 +73,7 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .given(StackEntity.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(executionTime))
+                .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).atLeast(executionTime))
                 .validate();
     }
 

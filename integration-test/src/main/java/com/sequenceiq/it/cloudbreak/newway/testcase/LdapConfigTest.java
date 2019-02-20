@@ -1,11 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.exceptionConsumer;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 import java.util.UnknownFormatConversionException;
 
@@ -83,9 +80,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName("")
                 .when(ldapConfigTestClient.post(), key(key))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(getErrorMessage(e), containsString("The length of the ldap config's name has to be in range of 1 to 100"));
-                }).withKey(key))
+                .expect(BadRequestException.class,
+                        expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
+                                .withKey(key))
                 .validate();
     }
 
@@ -96,9 +93,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(INVALID_LDAP_NAME)
                 .when(ldapConfigTestClient.post(), key(INVALID_LDAP_NAME))
-                .expect(UnknownFormatConversionException.class, exceptionConsumer(e -> {
-                    assertThat(getErrorMessage(e), containsString("Conversion = '|'"));
-                }).withKey(INVALID_LDAP_NAME))
+                .expect(UnknownFormatConversionException.class,
+                        expectedMessage("Conversion = '|'")
+                                .withKey(INVALID_LDAP_NAME))
                 .validate();
     }
 
@@ -110,9 +107,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(longName)
                 .when(ldapConfigTestClient.post(), key(longName))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(getErrorMessage(e), containsString("The length of the ldap config's name has to be in range of 1 to 100"));
-                }).withKey(longName))
+                .expect(BadRequestException.class,
+                        expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
+                                .withKey(longName))
                 .validate();
     }
 
@@ -126,9 +123,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .withName(name)
                 .withDescription(longDesc)
                 .when(ldapConfigTestClient.post(), key(longDesc))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(getErrorMessage(e), containsString("The length of the ldap config's description has to be in range of 0 to 1000"));
-                }).withKey(longDesc))
+                .expect(BadRequestException.class,
+                        expectedMessage("The length of the ldap config's description has to be in range of 0 to 1000")
+                                .withKey(longDesc))
                 .validate();
     }
 
@@ -168,9 +165,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(name)
                 .when(ldapConfigTestClient.post(), key(name))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(getErrorMessage(e), containsString("dap already exists with name"));
-                }).withKey(name))
+                .expect(BadRequestException.class,
+                        expectedMessage("dap already exists with name")
+                                .withKey(name))
                 .validate();
     }
 }
