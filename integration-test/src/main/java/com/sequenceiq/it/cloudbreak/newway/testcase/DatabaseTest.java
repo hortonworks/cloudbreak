@@ -1,10 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.exceptionConsumer;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,9 +16,9 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseExistsAssertion;
 import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseTestAccessDeniedAssertion;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestEntity;
@@ -119,9 +116,9 @@ public class DatabaseTest extends AbstractIntegrationTest {
                     .withConnectionPassword(password)
                     .withConnectionURL(connectionUrl)
                 .when(DatabaseEntity.post(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), getErrorMessage(e), containsString(expectedErrorMessage));
-                }).withKey(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class,
+                        expectedMessage(expectedErrorMessage)
+                                .withKey(BAD_REQUEST_KEY))
                 .validate();
     }
 
@@ -137,9 +134,9 @@ public class DatabaseTest extends AbstractIntegrationTest {
                     .withConnectionURL(connectionUrl)
                     .withType("HIVE")
                 .when(DatabaseTestEntity.testConnection(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(e.getMessage(), getErrorMessage(e), containsString(expectedErrorMessage));
-                }).withKey(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class,
+                        expectedMessage(expectedErrorMessage)
+                                .withKey(BAD_REQUEST_KEY))
                 .validate();
     }
 

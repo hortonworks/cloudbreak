@@ -1,10 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.exceptionConsumer;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -25,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
-import com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil;
 
 public class BlueprintTest extends AbstractIntegrationTest {
 
@@ -78,9 +75,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .withName(blueprintName)
                 .withAmbariBlueprint(VALID_BP)
                 .when(Blueprint.postV4(), key(blueprintName))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(ResponseUtil.getErrorMessage(e), containsString("must match \"^[^;\\/%]*$\""));
-                }).withKey(blueprintName))
+                .expect(BadRequestException.class, expectedMessage(" error: must match ").withKey(blueprintName))
                 .validate();
     }
 
@@ -91,9 +86,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .withName(blueprintName)
                 .withAmbariBlueprint("apple-tree")
                 .when(Blueprint.postV4(), key(blueprintName))
-                .expect(BadRequestException.class, exceptionConsumer(e -> {
-                    assertThat(ResponseUtil.getErrorMessage(e), containsString("Failed to parse JSON"));
-                }).withKey(blueprintName))
+                .expect(BadRequestException.class, expectedMessage("Failed to parse JSON").withKey(blueprintName))
                 .validate();
     }
 
