@@ -6,6 +6,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -170,5 +172,14 @@ public class StackRepositoryV4Request implements JsonEntity {
 
     public void setMpacks(List<ManagementPackDetailsV4Request> mpacks) {
         this.mpacks = mpacks;
+    }
+
+    public boolean customRepoSpecified() {
+        boolean vdfFileSpecified = StringUtils.isNoneEmpty(versionDefinitionFileUrl);
+        boolean repositoriesSpecified = repository != null && StringUtils.isNoneEmpty(repository.getBaseUrl())
+                && StringUtils.isNoneEmpty(utilsBaseURL)
+                && StringUtils.isNoneEmpty(utilsRepoId);
+
+        return vdfFileSpecified || repositoriesSpecified;
     }
 }

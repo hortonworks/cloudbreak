@@ -268,7 +268,7 @@ public class StackCreatorService {
 
     private boolean shouldUseBaseImage(ClusterV4Request clusterRequest, Blueprint blueprint) {
         return clusterRequest.getAmbari().getRepository() != null
-                || clusterRequest.getAmbari().getStackRepository() != null
+                || (clusterRequest.getAmbari().getStackRepository() != null && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
                 || blueprintService.isClouderaManagerBlueprint(blueprint);
     }
 
