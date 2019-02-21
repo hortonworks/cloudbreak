@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleV4Request, Response, StackOperationEntity> {

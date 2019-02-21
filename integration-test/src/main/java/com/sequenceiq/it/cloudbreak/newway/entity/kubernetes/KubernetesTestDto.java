@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.requests.KubernetesV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Assertion;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
@@ -54,7 +54,7 @@ public class KubernetesTestDto extends AbstractCloudbreakEntity<KubernetesV4Requ
     }
 
     public KubernetesTestDto valid() {
-        return withName(getNameCreator().getRandomNameForMock())
+        return withName(getNameCreator().getRandomNameForResource())
                 .withContent("content")
                 .withDesription("great kubernetes config");
     }

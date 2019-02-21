@@ -1,11 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.entity.credential;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider.CREDENTIAL_DEFAULT_DESCRIPTION;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.MockCloudProvider.MOCK_CAPITAL;
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.Collection;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus.CumulusYarnCredentialV4Parameters;
@@ -16,13 +10,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.Yar
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
+
+import java.util.Collection;
+
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class CredentialTestDto extends AbstractCloudbreakEntity<CredentialV4Request, CredentialV4Response, CredentialTestDto>
@@ -40,13 +37,8 @@ public class CredentialTestDto extends AbstractCloudbreakEntity<CredentialV4Requ
     }
 
     public CredentialTestDto valid() {
-        MockCredentialV4Parameters credentialParameters = new MockCredentialV4Parameters();
-        MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
-        credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
-        return withName(getNameCreator().getRandomNameForMock())
-                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
-                .withMockParameters(credentialParameters)
-                .withCloudPlatform(MOCK_CAPITAL);
+        withName(getNameCreator().getRandomNameForResource());
+        return getCloudProvider().credential(this);
     }
 
     public CredentialTestDto withName(String name) {

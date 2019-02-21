@@ -21,17 +21,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, T> {
@@ -47,15 +44,26 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     public StackV4EntityBase<T> valid() {
-        String randomNameForMock = getNameCreator().getRandomNameForMock();
-        MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
-        return withName(randomNameForMock)
-                .withPlacement(getTestContext().init(PlacementSettingsEntity.class))
+        String name = getNameCreator().getRandomNameForResource();
+
+
+//        withName(name)
+//                .withPlacement(getTestContext().init(PlacementSettingsEntity.class))
+//                .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
+//                .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
+//                .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
+//                .withGatewayPort(mockedTestContext.getSparkServer().getPort())
+//                .withCluster(getTestContext().init(ClusterEntity.class).withName(name));
+//
+
+
+        return withName(name)
+                .withPlacement(getTestContext().given(PlacementSettingsEntity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
-                .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
-                .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
-                .withGatewayPort(mockedTestContext.getSparkServer().getPort())
-                .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
+                .withNetwork(getTestContext().given(NetworkV2Entity.class))
+                .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationEntity.class)))
+                .withGatewayPort(getCloudProvider().gatewayPort(this))
+                .withCluster(getTestContext().given(ClusterEntity.class).withName(name));
     }
 
     public StackV4EntityBase<T> withEveryProperties() {
@@ -229,11 +237,11 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> withNetwork(String key) {
         NetworkV2Entity network = getTestContext().get(key);
-        return withNetwork(network.getRequest());
+        return withNetwork(network);
     }
 
-    public StackV4EntityBase<T> withNetwork(NetworkV4Request network) {
-        getRequest().setNetwork(network);
+    public StackV4EntityBase<T> withNetwork(NetworkV2Entity network) {
+        getRequest().setNetwork(network.getRequest());
         return this;
     }
 
@@ -260,7 +268,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withGatewayPort(int port) {
+    public StackV4EntityBase<T> withGatewayPort(Integer port) {
         getRequest().setGatewayPort(port);
         return this;
     }

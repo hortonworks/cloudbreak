@@ -75,8 +75,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(HostGroups.request()
                 .addHostGroups(cloudProvider.instanceGroups(HostGroupType.SERVICES, HostGroupType.NIFI, HostGroupType.ZOOKEEPER)));
         given(cloudProvider.aValidStackRequest()
-                .withName(clusterName)
-                .withNetwork(AwsKerberos.getNetworkV2RequestForKerberosAws(getTestParameter())), "a stack request");
+                .withName(clusterName));
+//                .withNetwork(AwsKerberos.getNetworkV2RequestForKerberosAws(getTestParameter())), "a stack request");
         when(Stack.postV3());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
                 "wait and check availability");

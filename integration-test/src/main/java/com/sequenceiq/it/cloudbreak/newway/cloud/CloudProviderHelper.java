@@ -108,7 +108,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withName(getClusterName())
                 .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups())
-                .withNetwork(newNetwork())
+//                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
@@ -118,7 +118,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withName(getClusterName())
                 .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups())
-                .withNetwork(newNetwork())
+//                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
@@ -127,7 +127,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withName(getClusterName())
                 .withEnvironmentSettings(getEnvironmentSettings())
                 .withInstanceGroups(instanceGroups(groupTypes))
-                .withNetwork(newNetwork())
+//                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 

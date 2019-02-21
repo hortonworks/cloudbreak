@@ -52,7 +52,7 @@ public class SparkServer {
     @Value("#{'${integrationtest.cloudbreak.server}' + '${server.contextPath:/cb}'}")
     private String cloudbreakServerRoot;
 
-    private int port;
+    private Integer port;
 
     @Value("${mock.server.request.response.print:false}")
     private boolean printRequestBody;
@@ -129,7 +129,7 @@ public class SparkServer {
         return sparkService;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 

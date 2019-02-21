@@ -1,15 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion;
 
-import static com.google.common.collect.Sets.newHashSet;
-
-import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.util.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
@@ -18,9 +8,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Req
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ImageCatalogEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
+import org.springframework.util.StringUtils;
+
+import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implements AssertionV2<ClusterTemplateEntity> {
 
@@ -90,7 +89,9 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Image catalog name is mismatch!");
         }
 
-        if (!MockCloudProvider.BLUEPRINT_DEFAULT_NAME.equals(stackTemplate.getCluster().getAmbari().getBlueprintName())) {
+        String blueprintName = entity.getTestParameter().getWithDefault(CommonCloudParameters.BLUEPRINT_NAME, CommonCloudParameters.DEFAULT_BLUEPRINT_NAME);
+
+        if (!blueprintName.equals(stackTemplate.getCluster().getAmbari().getBlueprintName())) {
             throw new IllegalArgumentException("Blueprint name is mismatch!");
         }
 

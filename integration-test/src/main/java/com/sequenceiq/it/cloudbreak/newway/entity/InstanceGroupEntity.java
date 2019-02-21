@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -48,7 +47,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
                 .withSecurityGroup(getTestContext().init(SecurityGroupEntity.class))
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName().toLowerCase())
-                .withTemplate(getCloudProvider().template(getTestContext()));
+                .withTemplate(getTestContext().given(InstanceTemplateV4Entity.class));
     }
 
     public static InstanceGroupEntity hostGroup(TestContext testContext, HostGroupType hostGroupType) {
@@ -74,7 +73,7 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
                 .withSecurityGroup(testContext.init(SecurityGroupEntity.class))
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName().toLowerCase())
-                .withTemplate(entity.getCloudProvider().template(testContext));
+                .withTemplate(testContext.given(InstanceTemplateV4Entity.class));
     }
 
     public InstanceGroupEntity withNodeCount(int nodeCount) {

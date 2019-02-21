@@ -10,8 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 
 public class Credential extends CredentialTestDto {
 
-    Credential() {
-    }
+    private static final String CREDENTIAL = Credential.class.getSimpleName();
 
     public Credential(TestContext testContext) {
         super(testContext);
@@ -26,11 +25,11 @@ public class Credential extends CredentialTestDto {
     }
 
     static Function<IntegrationTestContext, Credential> getNew() {
-        return testContext -> new Credential();
+        return testContext -> null;
     }
 
     public static Credential request() {
-        return new Credential();
+        return null;
     }
 
     public static Credential created() {
@@ -38,9 +37,9 @@ public class Credential extends CredentialTestDto {
     }
 
     public static Credential created(int retryQuantity) {
-        Credential credential = new Credential();
-        credential.setCreationStrategy((testContext, entity) -> CredentialV4Action.createInGiven(testContext, entity, retryQuantity));
-        return credential;
+//        Credential credential = new Credential();
+//        credential.setCreationStrategy((testContext, entity) -> CredentialV4Action.createInGiven(testContext, entity, retryQuantity));
+        return null;
     }
 
     public static Credential deleted(Credential credential) {

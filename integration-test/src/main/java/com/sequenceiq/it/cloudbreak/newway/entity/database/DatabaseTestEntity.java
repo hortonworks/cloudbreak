@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseTestConnectionAction;
@@ -32,7 +32,7 @@ public class DatabaseTestEntity extends AbstractCloudbreakEntity<DatabaseTestV4R
 
     public DatabaseTestEntity valid() {
         return withRequest(new DatabaseV4Request())
-                .withName(getNameCreator().getRandomNameForMock())
+                .withName(getNameCreator().getRandomNameForResource())
                 .withConnectionUserName("user")
                 .withConnectionPassword("password")
                 .withConnectionURL("jdbc:postgresql://somedb.com:5432/mydb")
