@@ -124,7 +124,7 @@ public abstract class TestContext implements ApplicationContextAware {
             return action.action(this, entity, getCloudbreakClient(who));
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("when [{}] action is failed: {}, name: {}", key, e.getMessage(), entity.getName(), e);
+                LOGGER.error("when [{}] action is failed: {}, name: {}", key, getErrorMessage(e), entity.getName(), e);
             }
             exceptionMap.put(key, e);
         }
@@ -164,7 +164,7 @@ public abstract class TestContext implements ApplicationContextAware {
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("then [{}] assertion is failed: {}, name: {}", key, e.getMessage(), entity.getName(), e);
+                LOGGER.error("then [{}] assertion is failed: {}, name: {}", key, getErrorMessage(e), entity.getName(), e);
             }
             exceptionMap.put(key, e);
         }
@@ -267,7 +267,7 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("select (key={}, attribute: [{}], finder: [{}]) is failed: {}, name: {}",
-                        key, attribute, finder, e.getMessage(), entity.getName());
+                        key, attribute, finder, getErrorMessage(e), entity.getName());
             }
             exceptionMap.put(key, e);
         }
@@ -295,7 +295,7 @@ public abstract class TestContext implements ApplicationContextAware {
             captures.put(captureKey, new Capture(attr));
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("capture [{}] is failed: {}, name: {}", key, e.getMessage(), entity.getName());
+                LOGGER.error("capture [{}] is failed: {}, name: {}", key, getErrorMessage(e), entity.getName());
             }
             exceptionMap.put(key, e);
         }
@@ -328,7 +328,7 @@ public abstract class TestContext implements ApplicationContextAware {
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("verify [key={}] is failed: {}, name: {}", key, e.getMessage(), entity.getName(), e);
+                LOGGER.error("verify [key={}] is failed: {}, name: {}", key, getErrorMessage(e), entity.getName(), e);
             }
             exceptionMap.put(key, e);
         }
@@ -381,7 +381,7 @@ public abstract class TestContext implements ApplicationContextAware {
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, e.getMessage(), entity.getName());
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, getErrorMessage(e), entity.getName());
             }
             exceptionMap.put("await " + entity + " for desired statuses" + desiredStatuses, e);
         }

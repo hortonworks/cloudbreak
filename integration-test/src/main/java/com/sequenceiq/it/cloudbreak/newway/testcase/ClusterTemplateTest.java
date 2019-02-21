@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ManagementPackEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
@@ -117,7 +118,17 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext.given("stackTemplate", StackTemplateEntity.class)
                 .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
                 .when(new ClusterTemplateV4CreateAction(), key("ENVIRONMENT_NULL"))
-                .expect(BadRequestException.class, key("ENVIRONMENT_NULL").withExpectedMessage("The environment cannot be null."))
+                .expect(BadRequestException.class, key("ENVIRONMENT_NULL").withExpectedMessage("The environment name cannot be null."))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testCreateClusterTemplateWithoutEnvironmentName(TestContext testContext) {
+        testContext.given(EnvironmentSettingsV4Entity.class).withName(null)
+                .given("stackTemplate", StackTemplateEntity.class).withEnvironmentSettings()
+                .given(ClusterTemplateEntity.class).withStackTemplate("stackTemplate")
+                .when(new ClusterTemplateV4CreateAction(), key("ENVIRONMENT_NULL"))
+                .expect(BadRequestException.class, key("ENVIRONMENT_NULL").withExpectedMessage("The environment name cannot be null."))
                 .validate();
     }
 
