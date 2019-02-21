@@ -1,31 +1,52 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateHostInfo;
+import com.cloudera.api.swagger.model.ApiClusterTemplateHostTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-public class CmTemplateProcessor {
+public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     private final ApiClusterTemplate cmTemplate;
 
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
         try {
             cmTemplate = JsonUtil.readValue(cmTemplateText, ApiClusterTemplate.class);
         } catch (IOException e) {
-            throw new ClusterDefinitionProcessingException("Failed to parse blueprint text.", e);
+            throw new ClusterDefinitionProcessingException("Failed to parse cluster definition text.", e);
         }
+    }
+
+    @Override
+    public ClusterManagerType getClusterManagerType() {
+        return ClusterManagerType.CLOUDERA_MANAGER;
+    }
+
+    @Override
+    public Map<String, Set<String>> getComponentsByHostGroup() {
+        Map<String, Set<String>> result = new HashMap<>();
+        for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : cmTemplate.getHostTemplates()) {
+            Set<String> componentNames = apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames().stream().collect(Collectors.toSet());
+            result.put(apiClusterTemplateHostTemplate.getRefName(), componentNames);
+        }
+        return result;
     }
 
     public void addInstantiator(String clusterName) {

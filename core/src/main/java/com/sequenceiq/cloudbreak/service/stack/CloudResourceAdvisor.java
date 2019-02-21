@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.testng.collections.Maps;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -30,10 +28,14 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
 @Service
 public class CloudResourceAdvisor {
@@ -46,7 +48,7 @@ public class CloudResourceAdvisor {
     private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
@@ -68,9 +70,11 @@ public class CloudResourceAdvisor {
 
         ClusterDefinition clusterDefinition = getClusterDefinition(clusterDefinitionName, workspaceId);
         String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-        Map<String, Set<String>> componentsByHostGroup = ambariBlueprintProcessorFactory.get(clusterDefinitionText).getComponentsByHostGroup();
-        componentsByHostGroup
-                .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
+        ClusterDefinitionTextProcessor clusterDefinitionTextProcessor =
+                clusterDefinitionTextProcessorFactory.createClusterDefinitionTextProcessor(clusterDefinitionText);
+        Map<String, Set<String>> componentsByHostGroup = clusterDefinitionTextProcessor.getComponentsByHostGroup();
+        componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
+                isThereMasterComponents(clusterDefinitionTextProcessor.getClusterManagerType(), hGName, components)));
 
         PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
         Platform platform = platform(cloudPlatform);
@@ -98,8 +102,9 @@ public class CloudResourceAdvisor {
             Map<String, VmType> workerVmTypes = getVmTypesForComponentType(false, recommendations.getWorker(),
                     hostGroupContainsMasterComp, availableVmTypes, cloudPlatform, diskTypes);
             vmTypesByHostGroup.putAll(workerVmTypes);
+        } else {
+            componentsByHostGroup.keySet().stream().forEach(hg -> vmTypesByHostGroup.put(hg, null));
         }
-
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
@@ -112,9 +117,13 @@ public class CloudResourceAdvisor {
         return clusterDefinition;
     }
 
-    private boolean isThereMasterComponents(Collection<String> components) {
-        return components.stream()
-                .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster());
+    private boolean isThereMasterComponents(ClusterManagerType clusterManagerType, String hostGroupName, Collection<String> components) {
+        if (clusterManagerType == ClusterManagerType.AMBARI) {
+            return components.stream()
+                    .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster());
+        } else {
+            return hostGroupName.toLowerCase().contains("master");
+        }
     }
 
     private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {

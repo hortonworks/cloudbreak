@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosDescriptorS
 import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosServiceConfiguration;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-public class AmbariBlueprintTextProcessor {
+public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProcessor {
 
     public static final String CONFIGURATIONS_NODE = "configurations";
 
@@ -67,30 +67,30 @@ public class AmbariBlueprintTextProcessor {
 
     private static final String ROLE_TYPE = "roleType";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectNode clusterDefinition;
 
-    private final ObjectNode blueprint;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public AmbariBlueprintTextProcessor(@Nonnull String blueprintText) {
         try {
-            blueprint = Optional.ofNullable((ObjectNode) JsonUtil.readTree(blueprintText)).orElse(new ObjectNode(JsonNodeFactory.instance));
+            clusterDefinition = Optional.ofNullable((ObjectNode) JsonUtil.readTree(blueprintText)).orElse(new ObjectNode(JsonNodeFactory.instance));
         } catch (IOException e) {
-            throw new ClusterDefinitionProcessingException("Failed to parse blueprint text.", e);
+            throw new ClusterDefinitionProcessingException("Failed to parse cluster definition text.", e);
         }
     }
 
     public String asText() {
         try {
-            return JsonUtil.writeValueAsString(blueprint);
+            return JsonUtil.writeValueAsString(clusterDefinition);
         } catch (JsonProcessingException e) {
             throw new ClusterDefinitionProcessingException("Failed to render blueprint text.", e);
         }
     }
 
     public AmbariBlueprintTextProcessor addConfigEntries(List<ClusterDefinitionConfigurationEntry> configurationEntries, boolean override) {
-        JsonNode configurationsNode = blueprint.path(CONFIGURATIONS_NODE);
+        JsonNode configurationsNode = clusterDefinition.path(CONFIGURATIONS_NODE);
         if (configurationsNode.isMissingNode()) {
-            configurationsNode = blueprint.putArray(CONFIGURATIONS_NODE);
+            configurationsNode = clusterDefinition.putArray(CONFIGURATIONS_NODE);
         }
         ArrayNode configurationsArrayNode = (ArrayNode) configurationsNode;
         for (ClusterDefinitionConfigurationEntry configurationEntry : configurationEntries) {
@@ -111,12 +111,32 @@ public class AmbariBlueprintTextProcessor {
         return this;
     }
 
+    @Override
+    public ClusterManagerType getClusterManagerType() {
+        return ClusterManagerType.AMBARI;
+    }
+
+    @Override
+    public Map<String, Set<String>> getComponentsByHostGroup() {
+        Map<String, Set<String>> result = new HashMap<>();
+        JsonNode hostGroups = clusterDefinition.path(HOST_GROUPS_NODE);
+        for (JsonNode hostGroupNode : hostGroups) {
+            JsonNode components = hostGroupNode.path(COMPONENTS_NODE);
+            Set<String> componentNames = new HashSet<>();
+            for (JsonNode componentNode : components) {
+                componentNames.add(componentNode.path(NAME_NODE).asText());
+            }
+            result.put(hostGroupNode.path(NAME_NODE).asText(), componentNames);
+        }
+        return result;
+    }
+
     public Map<String, Map<String, String>> getConfigurationEntries() {
-        if (!blueprint.has("configurations")) {
+        if (!clusterDefinition.has("configurations")) {
             return Collections.emptyMap();
         }
         Map<String, Map<String, String>> configurations = new HashMap<>();
-        JsonNode configurationsArray = blueprint.get("configurations");
+        JsonNode configurationsArray = clusterDefinition.get("configurations");
         for (JsonNode config : configurationsArray) {
             Map<String, Object> configMap = objectMapper.convertValue(config, Map.class);
             if (!configMap.isEmpty()) {
@@ -133,9 +153,9 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor addSettingsEntries(List<ClusterDefinitionConfigurationEntry> configurationEntries, boolean override) {
-        JsonNode configurationsNode = blueprint.path(SETTINGS_NODE);
+        JsonNode configurationsNode = clusterDefinition.path(SETTINGS_NODE);
         if (configurationsNode.isMissingNode()) {
-            configurationsNode = blueprint.putArray(SETTINGS_NODE);
+            configurationsNode = clusterDefinition.putArray(SETTINGS_NODE);
         }
         ArrayNode configurationsArrayNode = (ArrayNode) configurationsNode;
         for (ClusterDefinitionConfigurationEntry configurationEntry : configurationEntries) {
@@ -160,7 +180,7 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public Optional<String> pathValue(String... path) {
-        JsonNode currentNode = blueprint;
+        JsonNode currentNode = clusterDefinition;
         for (int i = 0; i < path.length; i++) {
             if (currentNode.isArray()) {
                 ArrayNode array = (ArrayNode) currentNode;
@@ -194,7 +214,7 @@ public class AmbariBlueprintTextProcessor {
 
     public Set<String> getComponentsInHostGroup(String hostGroup) {
         Set<String> services = new HashSet<>();
-        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
@@ -210,8 +230,8 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor extendBlueprintHostGroupConfiguration(HostgroupConfigurations hostGroupConfig, boolean forced) {
-        ArrayNode configurations = getArrayFromNodeByNodeName(blueprint, CONFIGURATIONS_NODE);
-        ArrayNode hostgroups = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        ArrayNode configurations = getArrayFromNodeByNodeName(clusterDefinition, CONFIGURATIONS_NODE);
+        ArrayNode hostgroups = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         HostgroupConfigurations filteredConfiguraitons = hostGroupConfig.getFilteredConfigs(getExistingParametersFromGlobals(configurations), forced);
 
         for (HostgroupConfiguration filteredConfig : filteredConfiguraitons) {
@@ -270,7 +290,7 @@ public class AmbariBlueprintTextProcessor {
 
     private AmbariBlueprintTextProcessor extendBlueprintKerberosDescriptor(KerberosDescriptorService service, boolean forced) {
         if (service != null) {
-            ObjectNode blueprintNode = addObjectNodeIfMissing(blueprint, BLUEPRINTS);
+            ObjectNode blueprintNode = addObjectNodeIfMissing(clusterDefinition, BLUEPRINTS);
             ObjectNode securityNode = addObjectNodeIfMissing(blueprintNode, SECURITY_NODE);
             ObjectNode kerberosDescriptorNode = addObjectNodeIfMissing(securityNode, KERBEROS_DESCRIPTOR_NODE);
             ArrayNode servicesNode = addArrayNodeIfMissing(kerberosDescriptorNode, SERVICES_NODE);
@@ -324,9 +344,9 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations globalConfig, boolean forced) {
-        JsonNode configurations = blueprint.path(CONFIGURATIONS_NODE);
+        JsonNode configurations = clusterDefinition.path(CONFIGURATIONS_NODE);
         if (configurations.isMissingNode() && globalConfig != null && !globalConfig.isEmpty()) {
-            configurations = blueprint.putArray(CONFIGURATIONS_NODE);
+            configurations = clusterDefinition.putArray(CONFIGURATIONS_NODE);
             for (SiteConfiguration site : globalConfig) {
                 addSiteToConfiguration((ArrayNode) configurations, site);
             }
@@ -350,9 +370,9 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor extendBlueprintGlobalSettings(SiteSettingsConfigurations globalConfig, boolean forced) {
-        JsonNode configurations = blueprint.path(SETTINGS_NODE);
+        JsonNode configurations = clusterDefinition.path(SETTINGS_NODE);
         if (configurations.isMissingNode() && globalConfig != null && !globalConfig.isEmpty()) {
-            configurations = blueprint.putArray(SETTINGS_NODE);
+            configurations = clusterDefinition.putArray(SETTINGS_NODE);
             for (List<SiteConfiguration> site : globalConfig) {
                 if (site.size() > 0) {
                     addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
@@ -476,7 +496,7 @@ public class AmbariBlueprintTextProcessor {
 
     public Set<String> getHostGroupsWithComponent(String component) {
         Set<String> result = new HashSet<>();
-        JsonNode hostGroups = blueprint.path(HOST_GROUPS_NODE);
+        JsonNode hostGroups = clusterDefinition.path(HOST_GROUPS_NODE);
         for (JsonNode hostGroup : hostGroups) {
             JsonNode components = hostGroup.path(COMPONENTS_NODE);
             for (JsonNode c : components) {
@@ -485,20 +505,6 @@ public class AmbariBlueprintTextProcessor {
                     result.add(hostGroup.path(NAME_NODE).asText());
                 }
             }
-        }
-        return result;
-    }
-
-    public Map<String, Set<String>> getComponentsByHostGroup() {
-        Map<String, Set<String>> result = new HashMap<>();
-        JsonNode hostGroups = blueprint.path(HOST_GROUPS_NODE);
-        for (JsonNode hostGroupNode : hostGroups) {
-            JsonNode components = hostGroupNode.path(COMPONENTS_NODE);
-            Set<String> componentNames = new HashSet<>();
-            for (JsonNode componentNode : components) {
-                componentNames.add(componentNode.path(NAME_NODE).asText());
-            }
-            result.put(hostGroupNode.path(NAME_NODE).asText(), componentNames);
         }
         return result;
     }
@@ -618,7 +624,7 @@ public class AmbariBlueprintTextProcessor {
 
     public boolean isComponentExistsInBlueprint(String component) {
         boolean componentExists = false;
-        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext() && !componentExists) {
             JsonNode hostGroupNode = hostGroups.next();
@@ -629,7 +635,7 @@ public class AmbariBlueprintTextProcessor {
 
     public boolean isCMComponentExistsInBlueprint(String component) {
         boolean componentExists = false;
-        ArrayNode servicesNode = getArrayFromObjectNodeByPath(blueprint, SERVICES_NODE);
+        ArrayNode servicesNode = getArrayFromObjectNodeByPath(clusterDefinition, SERVICES_NODE);
         Iterator<JsonNode> services = servicesNode.elements();
         while (services.hasNext() && !componentExists) {
             JsonNode roles = services.next().get(ROLE_CONFIG_GROUPS);
@@ -656,7 +662,7 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor removeComponentFromBlueprint(String component) {
-        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
@@ -671,17 +677,17 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public String getStackName() {
-        ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
+        ObjectNode blueprintsNode = (ObjectNode) clusterDefinition.path(BLUEPRINTS);
         return blueprintsNode.get(STACK_NAME).asText();
     }
 
     public String getStackVersion() {
-        ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
+        ObjectNode blueprintsNode = (ObjectNode) clusterDefinition.path(BLUEPRINTS);
         return blueprintsNode.get(STACK_VERSION).asText();
     }
 
     public AmbariBlueprintTextProcessor modifyHdpVersion(String hdpVersion) {
-        ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
+        ObjectNode blueprintsNode = (ObjectNode) clusterDefinition.path(BLUEPRINTS);
         blueprintsNode.remove(STACK_VERSION);
         String[] split = hdpVersion.split("\\.");
         blueprintsNode.put(STACK_VERSION, split[0] + '.' + split[1]);
@@ -689,7 +695,7 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor addComponentToHostgroups(String component, Collection<String> hostGroupNames) {
-        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
@@ -703,7 +709,7 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
-        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroupNode = hostGroups.next();
@@ -717,7 +723,7 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public AmbariBlueprintTextProcessor setSecurityType(String type) {
-        ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
+        ObjectNode blueprintsNode = (ObjectNode) clusterDefinition.path(BLUEPRINTS);
         ObjectNode security = (ObjectNode) blueprintsNode.get(SECURITY_NODE);
         if (security == null) {
             security = blueprintsNode.putObject(SECURITY_NODE);
@@ -740,7 +746,7 @@ public class AmbariBlueprintTextProcessor {
 
     public AmbariBlueprintTextProcessor replaceConfiguration(String key, String configuration) {
         try {
-            ArrayNode configurations = getArrayFromNodeByNodeName(blueprint, CONFIGURATIONS_NODE);
+            ArrayNode configurations = getArrayFromNodeByNodeName(clusterDefinition, CONFIGURATIONS_NODE);
             Iterator<JsonNode> elements = configurations.elements();
             while (elements.hasNext()) {
                 if (elements.next().get(key) != null) {
@@ -751,7 +757,7 @@ public class AmbariBlueprintTextProcessor {
             configurations.add(JsonUtil.readTree(configuration));
             return this;
         } catch (IOException e) {
-            throw new ClusterDefinitionProcessingException("Failed to parse blueprint configuration text.", e);
+            throw new ClusterDefinitionProcessingException("Failed to parse clusterDefinition configuration text.", e);
         }
     }
 
@@ -778,7 +784,7 @@ public class AmbariBlueprintTextProcessor {
     }
 
     public ObjectNode getBlueprint() {
-        return blueprint;
+        return clusterDefinition;
     }
 
     private static class ComponentElement {

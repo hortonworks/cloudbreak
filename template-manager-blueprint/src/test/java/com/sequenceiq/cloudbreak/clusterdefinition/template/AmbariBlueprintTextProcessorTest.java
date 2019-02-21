@@ -229,7 +229,7 @@ public class AmbariBlueprintTextProcessorTest {
         List<ClusterDefinitionConfigurationEntry> configurationEntries = new ArrayList<>();
         thrown.expect(ClusterDefinitionProcessingException.class);
         //thrown.expect(JsonParseException.class);
-        thrown.expectMessage("Failed to parse blueprint text.");
+        thrown.expectMessage("Failed to parse cluster definition text.");
         underTest.get(testBlueprint).addConfigEntries(configurationEntries, true);
     }
 
@@ -253,7 +253,7 @@ public class AmbariBlueprintTextProcessorTest {
     public void testGetServicesInHostgroupThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-invalid.bp");
         thrown.expect(ClusterDefinitionProcessingException.class);
-        thrown.expectMessage("Failed to parse blueprint text.");
+        thrown.expectMessage("Failed to parse cluster definition text.");
         underTest.get(testBlueprint).getComponentsInHostGroup("slave_1");
     }
 
