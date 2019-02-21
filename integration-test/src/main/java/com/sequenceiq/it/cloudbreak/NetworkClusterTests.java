@@ -84,8 +84,8 @@ public class NetworkClusterTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithBlueprintName(cloudProvider.getBlueprintName())), cloudProvider.getPlatform() + " cluster request ");
-        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
-                " stack request ");
+//        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
+//                " stack request ");
         when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
@@ -99,8 +99,8 @@ public class NetworkClusterTests extends CloudbreakTest {
         given(cloudProvider.aValidCredential());
         given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithBlueprintName(cloudProvider.getBlueprintName())), cloudProvider.getPlatform() + " cluster request ");
-        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
-                " stack request ");
+//        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
+//                " stack request ");
         when(Stack.postV3(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait and check availability");
         then(Stack.checkClusterHasAmbariRunning(getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),

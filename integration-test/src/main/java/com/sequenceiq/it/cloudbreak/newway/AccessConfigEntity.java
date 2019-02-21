@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformAccessConfigsV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.v4.AccessConfigV4Action;
 
 public class AccessConfigEntity extends AbstractCloudbreakEntity<PlatformResourceParameters, PlatformAccessConfigsV4Response, AccessConfigEntity> {

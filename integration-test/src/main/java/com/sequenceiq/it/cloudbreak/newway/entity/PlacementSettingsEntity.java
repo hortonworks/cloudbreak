@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -21,8 +20,7 @@ public class PlacementSettingsEntity extends AbstractCloudbreakEntity<PlacementS
 
     @Override
     public PlacementSettingsEntity valid() {
-        return withRegion(getCloudProvider().region())
-                .withAvailabilityZone(getCloudProvider().availabilityZone());
+        return getCloudProvider().placement(this);
     }
 
     public PlacementSettingsEntity withRegion(String region) {

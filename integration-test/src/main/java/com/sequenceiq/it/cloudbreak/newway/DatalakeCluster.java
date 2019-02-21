@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.v3.DatalakeClusterV3Action;
 
 public class DatalakeCluster extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, DatalakeCluster> {

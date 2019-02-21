@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 
 public class ClusterGateway extends AbstractCloudbreakEntity<GatewayV4Request, GatewayResponse, ClusterGateway> {
 

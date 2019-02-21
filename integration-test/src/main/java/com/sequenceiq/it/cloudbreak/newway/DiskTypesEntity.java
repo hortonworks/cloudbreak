@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.Collection;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 
 public class DiskTypesEntity extends AbstractCloudbreakEntity<Integer, PlatformDisksV4Response, DiskTypesEntity> {
     public static final String DISKTYPES = "DISKTYPES";

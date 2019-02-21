@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
@@ -47,7 +47,7 @@ public class RecipeEntity extends AbstractCloudbreakEntity<RecipeV4Request, Reci
     }
 
     public RecipeEntity valid() {
-        return withName(getNameCreator().getRandomNameForMock())
+        return withName(getNameCreator().getRandomNameForResource())
                 .withRecipeType(RecipeV4Type.PRE_AMBARI_START)
                 .withContent(new String(Base64.getEncoder().encode("#!/bin/bash%necho ALMAA".getBytes())));
     }

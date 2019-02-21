@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -31,8 +30,8 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
     }
 
     public InstanceTemplateV4Entity valid() {
-        return withInstanceType("large")
-                .witAttachedVolume(getTestContext().init(VolumeV4Entity.class));
+        return getCloudProvider().template(withRootVolume(getTestContext().given(RootVolumeV4Entity.class))
+                .withAttachedVolume(getTestContext().init(VolumeV4Entity.class)));
     }
 
     public InstanceTemplateV4Entity withAttachedVolumes(Set<VolumeV4Request> volumes) {
@@ -60,17 +59,22 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
         return this;
     }
 
+    public InstanceTemplateV4Entity withRootVolume(RootVolumeV4Entity rootVolume) {
+        getRequest().setRootVolume(rootVolume.getRequest());
+        return this;
+    }
+
     public InstanceTemplateV4Entity withRootVolumeKey(String key) {
         getRequest().setRootVolume(getTestContext().get(key));
         return this;
     }
 
-    public InstanceTemplateV4Entity witAttachedVolume(VolumeV4Entity... volumes) {
+    public InstanceTemplateV4Entity withAttachedVolume(VolumeV4Entity... volumes) {
         getRequest().setAttachedVolumes(Stream.of(volumes).map(AbstractCloudbreakEntity::getRequest).collect(Collectors.toSet()));
         return this;
     }
 
-    public InstanceTemplateV4Entity witAttachedVolumeKeys(String... keys) {
+    public InstanceTemplateV4Entity withAttachedVolumeKeys(String... keys) {
         getRequest().setAttachedVolumes(Stream.of(keys).map(key -> {
             VolumeV4Entity value = getTestContext().get(key);
             return value.getRequest();

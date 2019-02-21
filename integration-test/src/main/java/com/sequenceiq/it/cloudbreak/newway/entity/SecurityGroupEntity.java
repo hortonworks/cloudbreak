@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.securitygroup.SecurityGroupV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;

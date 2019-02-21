@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
@@ -39,7 +39,7 @@ public class LdapConfigTestDto extends AbstractCloudbreakEntity<LdapV4Request, L
     }
 
     public LdapConfigTestDto valid() {
-        return withName(getNameCreator().getRandomNameForMock())
+        return withName(getNameCreator().getRandomNameForResource())
                 .withBindPassword("bindPassword")
                 .withAdminGroup("group")
                 .withBindDn("bindDn")

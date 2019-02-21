@@ -9,7 +9,7 @@ import javax.ws.rs.WebApplicationException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -42,7 +42,7 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request
     }
 
     public BlueprintEntity valid() {
-        return withName(getNameCreator().getRandomNameForMock())
+        return withName(getNameCreator().getRandomNameForResource())
                 .withAmbariBlueprint("someBlueprint");
     }
 

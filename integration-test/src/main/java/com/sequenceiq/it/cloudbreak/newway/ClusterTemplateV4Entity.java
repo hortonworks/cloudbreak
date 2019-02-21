@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.Map;
 
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 
 public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceParameters, PlatformVmtypesV4Response, VmTypeEntity> {
     public static final String VMTYPE = "VMTYPE";

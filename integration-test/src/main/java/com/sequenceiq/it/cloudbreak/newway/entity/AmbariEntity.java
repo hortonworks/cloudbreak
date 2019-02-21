@@ -4,9 +4,8 @@ import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
@@ -21,9 +20,10 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
     }
 
     public AmbariEntity valid() {
+        String blueprintName = getTestParameter().getWithDefault(CommonCloudParameters.BLUEPRINT_NAME, CommonCloudParameters.DEFAULT_BLUEPRINT_NAME);
         return withUserName("admin")
-                .withPassword("admin1234")
-                .withBlueprintName(MockCloudProvider.BLUEPRINT_DEFAULT_NAME)
+                .withPassword("Admin123")
+                .withBlueprintName(blueprintName)
                 .withValidateRepositories(true);
     }
 

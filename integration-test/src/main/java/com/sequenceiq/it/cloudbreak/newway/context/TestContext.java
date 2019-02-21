@@ -32,11 +32,13 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.newway.finder.Capture;
 import com.sequenceiq.it.cloudbreak.newway.finder.Finder;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
+import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.newway.wait.WaitUtilForMultipleStatuses;
 
 public abstract class TestContext implements ApplicationContextAware {
@@ -45,19 +47,19 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    private Map<String, CloudbreakEntity> resources = new LinkedHashMap<>();
+    private final Map<String, CloudbreakEntity> resources = new LinkedHashMap<>();
 
-    private Map<String, CloudbreakClient> clients = new HashMap<>();
+    private final Map<String, CloudbreakClient> clients = new HashMap<>();
 
-    private Map<String, Exception> exceptionMap = new HashMap<>();
+    private final Map<String, Exception> exceptionMap = new HashMap<>();
 
     private boolean shutdown;
 
-    private Map<String, String> statuses = new HashMap<>();
+    private final Map<String, String> statuses = new HashMap<>();
 
-    private Map<String, Object> selections = new HashMap<>();
+    private final Map<String, Object> selections = new HashMap<>();
 
-    private Map<String, Capture> captures = new HashMap<>();
+    private final Map<String, Capture> captures = new HashMap<>();
 
     @Inject
     private WaitUtilForMultipleStatuses waitUtil;
@@ -67,6 +69,11 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Value("${integrationtest.testsuite.cleanUpOnFailure:true}")
     private boolean cleanUpOnFailure;
+
+    @Inject
+    private CloudProviderProxy cloudProvider;
+
+    private DefaultModel model;
 
     public Map<String, CloudbreakEntity> getResources() {
         return resources;
@@ -208,7 +215,12 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <O extends CloudbreakEntity> O given(String key, Class<O> clss) {
         checkShutdown();
-        return (O) resources.computeIfAbsent(key, value -> init(clss));
+        O cloudbreakEntity = (O) resources.get(key);
+        if (cloudbreakEntity == null) {
+            cloudbreakEntity = init(clss);
+            resources.put(key, cloudbreakEntity);
+        }
+        return cloudbreakEntity;
     }
 
     public Map<String, String> getStatuses() {

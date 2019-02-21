@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.entity.kerberos;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeBase;
-import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public abstract class AbstractKerberosDescriptorTestDto<R extends KerberosTypeBase, E extends AbstractKerberosDescriptorTestDto>
