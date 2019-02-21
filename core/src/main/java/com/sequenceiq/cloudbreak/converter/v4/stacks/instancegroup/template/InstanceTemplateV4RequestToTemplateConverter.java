@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
 public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConversionServiceAwareConverter<InstanceTemplateV4Request, Template> {
@@ -35,13 +36,16 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
+    @Inject
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
     @Override
     public Template convert(InstanceTemplateV4Request source) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
-        setVolumesProperty(Optional.ofNullable(source.getAttachedVolumes()), Optional.ofNullable(source.getRootVolume()), template);
         template.setCloudPlatform(source.getCloudPlatform().name());
+        setVolumesProperty(source.getAttachedVolumes(), Optional.ofNullable(source.getRootVolume()), template);
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
@@ -61,9 +65,9 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
         };
     }
 
-    private void setVolumesProperty(Optional<Set<VolumeV4Request>> attachedVolumes, Optional<RootVolumeV4Request> rootVolume,  Template template) {
-        if (attachedVolumes.isPresent()) {
-            attachedVolumes.get().stream().findFirst().ifPresent(v -> {
+    private void setVolumesProperty(Set<VolumeV4Request> attachedVolumes, Optional<RootVolumeV4Request> rootVolume, Template template) {
+        if (!attachedVolumes.isEmpty()) {
+            attachedVolumes.stream().findFirst().ifPresent(v -> {
                 String volumeType = v.getType();
                 template.setVolumeType(volumeType == null ? "HDD" : volumeType);
                 Integer volumeCount = v.getCount();
@@ -75,6 +79,8 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
             template.setVolumeCount(0);
             template.setVolumeSize(0);
         }
-        template.setRootVolumeSize(rootVolume.isPresent() ? rootVolume.get().getSize() : 0);
+        template.setRootVolumeSize(rootVolume.map(RootVolumeV4Request::getSize).isPresent()
+                ? rootVolume.get().getSize()
+                : defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform()));
     }
 }

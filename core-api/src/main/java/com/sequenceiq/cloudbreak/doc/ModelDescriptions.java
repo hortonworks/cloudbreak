@@ -67,7 +67,7 @@ public class ModelDescriptions {
 
     public static class TemplateModelDescription {
         public static final String VOLUME_COUNT = "number of volumes";
-        public static final String VOLUME_SIZE = "size of volumes";
+        public static final String VOLUME_SIZE = "size of volume";
         public static final String ROOT_VOLUME_SIZE = "size of the root volume";
         public static final String VOLUME_TYPE = "type of the volumes";
         public static final String INSTANCE_TYPE = "type of the instance";
