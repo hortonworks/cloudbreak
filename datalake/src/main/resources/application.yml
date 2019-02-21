@@ -1,4 +1,6 @@
-server.servlet.context-path: "/dl"
+server:
+  servlet.context-path: "/dl"
+  port: 8086
 
 management:
   endpoints:
@@ -18,13 +20,17 @@ management:
       enabled: true
 
 datalake:
+  cert.dir: /certs/
+  client.id: datalake
   structuredevent:
     rest:
       enabled: false
-  db.env:
-    user: postgres
-    pass:
-    db: datalakedb
-    schema: public
-    cert.file: database.crt
-    ssl: false
+  db:
+    port.5432.tcp.port: 5432
+    env:
+      user: postgres
+      pass:
+      db: datalakedb
+      schema: public
+      cert.file: database.crt
+      ssl: false

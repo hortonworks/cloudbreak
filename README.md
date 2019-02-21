@@ -105,10 +105,13 @@ cbd migrate cbdb pending
 ```
 
 
-For some reason if you encounter a similar problem with Periscope, then run the following commands and you can restart the Cloudbreak Deployer:
+For some reason if you encounter a similar problem with Periscope or Datalake, then run the following commands and you can restart the Cloudbreak Deployer:
 ```
 cbd migrate periscopedb up
 cbd migrate periscopedb pending
+
+cbd migrate datalakedb up
+cbd migrate datalakedb pending
 ```
 You can track the Periscope's logs to check the results by executing the following command:
 ```
@@ -208,8 +211,17 @@ After having imported cloudbreak repo root you can launch Periscope application 
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ````
 
-The -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. 
-    
+The -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
+
+### Running datalake in IDEA
+
+After having imported cloudbreak repo root you can launch Datalake application by executing the com.sequenceiq.datalake.DatalakeApplication class with the following VM options:
+
+````
+-Ddatalake.db.env.address=YOUR_IP
+-Ddatalake.cloudbreak.url=http://YOUR_IP:8080
+````
+
 ## Command line
 
 ### Cloudbreak
@@ -252,6 +264,15 @@ To run periscope from command line you have to run the below gradle command with
 ```` 
 
 The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
+
+### Datalake
+To run datalake from command line you have to run the below gradle command with the following list of JVM parameters:
+
+````
+./gradlew :datalake:bootRun -PjvmArgs="-Ddatalake.db.env.address=YOUR_IP \
+-Ddatalake.cloudbreak.url=http://YOUR_IP:8080 \
+-Dspring.config.location=$(pwd)/datalake/src/main/resources/application.yml,$(pwd)/datalake/build/resources/main/application.properties"
+````
 
 ## Database development
 
