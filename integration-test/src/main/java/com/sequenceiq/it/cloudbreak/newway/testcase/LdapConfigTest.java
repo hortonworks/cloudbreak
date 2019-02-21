@@ -80,9 +80,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName("")
                 .when(ldapConfigTestClient.post(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
-                                .withKey(key))
+                .expect(BadRequestException.class, expectedMessage("The length of the ldap config's name has to be in range of 1 to 100").withKey(key))
                 .validate();
     }
 
@@ -93,9 +91,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(INVALID_LDAP_NAME)
                 .when(ldapConfigTestClient.post(), key(INVALID_LDAP_NAME))
-                .expect(UnknownFormatConversionException.class,
-                        expectedMessage("Conversion = '|'")
-                                .withKey(INVALID_LDAP_NAME))
+                .expect(UnknownFormatConversionException.class, expectedMessage("Conversion = '|'").withKey(INVALID_LDAP_NAME))
                 .validate();
     }
 
@@ -107,9 +103,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(longName)
                 .when(ldapConfigTestClient.post(), key(longName))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
-                                .withKey(longName))
+                .expect(BadRequestException.class, expectedMessage("The length of the ldap config's name has to be in range of 1 to 100").withKey(longName))
                 .validate();
     }
 
@@ -123,9 +117,8 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .withName(name)
                 .withDescription(longDesc)
                 .when(ldapConfigTestClient.post(), key(longDesc))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the ldap config's description has to be in range of 0 to 1000")
-                                .withKey(longDesc))
+                .expect(BadRequestException.class, expectedMessage("The length of the ldap config's description has to be in range of 0 to 1000")
+                        .withKey(longDesc))
                 .validate();
     }
 

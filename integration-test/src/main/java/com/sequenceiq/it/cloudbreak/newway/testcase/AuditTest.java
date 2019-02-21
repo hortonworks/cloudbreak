@@ -12,13 +12,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirecto
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.audit.AuditTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.blueprint.BlueprintTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4CreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kubernetes.KubernetesTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.audit.AuditTestAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -26,8 +27,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
@@ -107,10 +107,10 @@ public class AuditTest extends AbstractIntegrationTest {
     public void testCreateAuditForBlueprintAndThenValidate(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForMock();
         testContext
-                .given(BlueprintEntity.class)
+                .given(BlueprintTestDto.class)
                 .withName(blueprintName)
                 .withAmbariBlueprint(VALID_BP)
-                .when(Blueprint.postV4(), key(blueprintName))
+                .when(BlueprintTestAction::postV4, key(blueprintName))
                 .select(bp -> bp.getResponse().getId(), key(blueprintName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(blueprintName)
@@ -290,7 +290,7 @@ public class AuditTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .when(Stack.postV4())
+                .when(StackTestAction::create)
                 .await(STACK_AVAILABLE)
                 .select(env -> env.getResponse().getId(), key(stackName))
                 .given(AuditTestDto.class)

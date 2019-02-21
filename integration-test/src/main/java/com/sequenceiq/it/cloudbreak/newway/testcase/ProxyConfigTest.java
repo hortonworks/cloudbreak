@@ -111,9 +111,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(name))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the name has to be in range of 4 to 100")
-                                .withKey(name))
+                .expect(BadRequestException.class, expectedMessage("The length of the name has to be in range of 4 to 100").withKey(name))
                 .validate();
     }
 
@@ -129,9 +127,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(SHORT_PROXY_NAME))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the name has to be in range of 4 to 100")
-                                .withKey(SHORT_PROXY_NAME))
+                .expect(BadRequestException.class, expectedMessage("The length of the name has to be in range of 4 to 100").withKey(SHORT_PROXY_NAME))
                 .validate();
     }
 
@@ -147,9 +143,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(INVALID_PROXY_NAME))
-                .expect(UnknownFormatConversionException.class,
-                        expectedMessage("Conversion = '|'")
-                                .withKey(INVALID_PROXY_NAME))
+                .expect(UnknownFormatConversionException.class, expectedMessage("Conversion = '|'").withKey(INVALID_PROXY_NAME))
                 .validate();
     }
 
@@ -166,9 +160,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the name has to be in range of 4 to 100")
-                                .withKey(key))
+                .expect(BadRequestException.class, expectedMessage("The length of the name has to be in range of 4 to 100").withKey(key))
                 .validate();
     }
 
@@ -186,9 +178,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTPS)
                 .when(ProxyConfig.postV4(), key(name))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the description cannot be longer than 1000 character")
-                                .withKey(name))
+                .expect(BadRequestException.class, expectedMessage("The length of the description cannot be longer than 1000 character").withKey(name))
                 .validate();
     }
 
@@ -206,9 +196,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the server host has to be in range of 1 to 255")
-                                .withKey(key))
+                .expect(BadRequestException.class, expectedMessage("The length of the server host has to be in range of 1 to 255").withKey(key))
                 .validate();
     }
 
@@ -226,9 +214,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("Server port is required")
-                                .withKey(key))
+                .expect(BadRequestException.class, expectedMessage("Server port is required").withKey(key))
                 .validate();
     }
 
@@ -284,9 +270,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(ProxyConfig.postV4(), key(name))
-                .expect(BadRequestException.class,
-                        expectedMessage("proxy already exists with name")
-                                .withKey(name))
+                .expect(BadRequestException.class, expectedMessage("proxy already exists with name").withKey(name))
                 .validate();
     }
 }

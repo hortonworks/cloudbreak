@@ -46,13 +46,6 @@ tests:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
       - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
 
-  - name: blueprint_test
-    parameters:
-      blueprintName: it-blueprint-restest
-      blueprintFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
-    classes:
-      - com.sequenceiq.it.cloudbreak.BlueprintCreationTest
-      - com.sequenceiq.it.cloudbreak.BlueprintDeleteByNameTest
 
   # integratontest.gcpcredential params must be set in application.yml
   - name: gcp_credential_test

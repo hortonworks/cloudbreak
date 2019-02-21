@@ -11,23 +11,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprints.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.it.cloudbreak.newway.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request, BlueprintV4Response, BlueprintEntity> {
+@Prototype
+public class BlueprintTestDto extends AbstractCloudbreakEntity<BlueprintV4Request, BlueprintV4Response, BlueprintTestDto> {
     public static final String BLUEPRINT = "BLUEPRINT";
 
     private Collection<BlueprintV4ViewResponse> viewResponses;
 
-    BlueprintEntity(String newId) {
-        super(newId);
-        setRequest(new BlueprintV4Request());
-    }
-
-    BlueprintEntity() {
-        this(BLUEPRINT);
-    }
-
-    public BlueprintEntity(TestContext testContext) {
+    public BlueprintTestDto(TestContext testContext) {
         super(new BlueprintV4Request(), testContext);
     }
 
@@ -41,12 +34,12 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request
         }
     }
 
-    public BlueprintEntity valid() {
+    public BlueprintTestDto valid() {
         return withName(getNameCreator().getRandomNameForMock())
                 .withAmbariBlueprint("someBlueprint");
     }
 
-    public BlueprintEntity withName(String name) {
+    public BlueprintTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
@@ -56,17 +49,17 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request
         return getRequest().getDescription();
     }
 
-    public BlueprintEntity withDescription(String description) {
+    public BlueprintTestDto withDescription(String description) {
         getRequest().setDescription(description);
         return this;
     }
 
-    public BlueprintEntity withUrl(String url) {
+    public BlueprintTestDto withUrl(String url) {
         getRequest().setUrl(url);
         return this;
     }
 
-    public BlueprintEntity withAmbariBlueprint(String blueprint) {
+    public BlueprintTestDto withAmbariBlueprint(String blueprint) {
         getRequest().setAmbariBlueprint(blueprint);
         return this;
     }
@@ -75,7 +68,7 @@ public class BlueprintEntity extends AbstractCloudbreakEntity<BlueprintV4Request
         return getRequest().getTags();
     }
 
-    public BlueprintEntity withTag(List<String> keys, List<Object> values) {
+    public BlueprintTestDto withTag(List<String> keys, List<Object> values) {
         if (keys.size() != values.size()) {
             throw new IllegalStateException("The given keys number does not match with the values number");
         }

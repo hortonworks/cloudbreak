@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
-import com.sequenceiq.it.cloudbreak.newway.entity.blueprint.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -66,14 +65,14 @@ public class RecommendationsTests extends CloudbreakTest {
 
     private void createBlueprint() throws Exception {
         given(CloudbreakClient.created());
-        given(Blueprint.request().withName(VALID_BP_NAME).withDescription(BP_DESCRIPTION).withAmbariBlueprint(getBlueprintFile()));
-        when(Blueprint.post());
+//        given(BlueprintTestAction.request().withName(VALID_BP_NAME).withDescription(BP_DESCRIPTION).withAmbariBlueprint(getBlueprintFile()));
+//        when(BlueprintTestAction.post());
     }
 
     private void deleteBlueprint() throws Exception {
         given(CloudbreakClient.created());
-        given(Blueprint.request().withName(VALID_BP_NAME));
-        when(Blueprint.delete());
+//        given(BlueprintTestAction.request().withName(VALID_BP_NAME));
+//        when(BlueprintTestAction.delete());
     }
 
     private void deleteCredential() throws Exception {
