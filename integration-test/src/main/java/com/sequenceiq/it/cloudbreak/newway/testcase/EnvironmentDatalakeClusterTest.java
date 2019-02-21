@@ -59,7 +59,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeDelete(TestContext testContext) {
-        Set<String> rdsList = createDatalakeResources(testContext, "hivedb", "rangerdb");
+        String hivedb = getNameGenerator().getRandomNameForMock();
+        String rangerdb = getNameGenerator().getRandomNameForMock();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
@@ -89,7 +91,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDalalakeDeleteFails(TestContext testContext) {
-        Set<String> rdsList = createDatalakeResources(testContext, "hivedb1", "rangerdb1");
+        String hivedb = getNameGenerator().getRandomNameForMock();
+        String rangerdb = getNameGenerator().getRandomNameForMock();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
@@ -112,7 +116,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentWithDifferentDatalakes(TestContext testContext) {
-        Set<String> rdsList = createDatalakeResources(testContext, "hivedb2", "rangerdb2");
+        String hivedb = getNameGenerator().getRandomNameForMock();
+        String rangerdb = getNameGenerator().getRandomNameForMock();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -124,7 +130,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatalakeChangeCredentialFails(TestContext testContext) {
-        Set<String> rdsList = createDatalakeResources(testContext, "hivedb3", "rangerdb3");
+        String hivedb = getNameGenerator().getRandomNameForMock();
+        String rangerdb = getNameGenerator().getRandomNameForMock();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -144,7 +152,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDatalakeDetachFails(TestContext testContext) {
-        Set<String> rdsList = createDatalakeResources(testContext, "hivedb4", "rangerdb4");
+        String hivedb = getNameGenerator().getRandomNameForMock();
+        String rangerdb = getNameGenerator().getRandomNameForMock();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -161,7 +171,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
-        Set<String> rdsList = createDatalakeResources(testContext, "hivedb5", "rangerdb5");
+        String hivedb = getNameGenerator().getRandomNameForMock();
+        String rangerdb = getNameGenerator().getRandomNameForMock();
+        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))

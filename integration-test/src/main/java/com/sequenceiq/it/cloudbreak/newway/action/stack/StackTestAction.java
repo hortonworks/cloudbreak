@@ -16,9 +16,9 @@ import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public class StackTestAction {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackTestAction.class);
-
     public static final String INSTANCE_ID = "SDA-instanceId";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackTestAction.class);
 
     private StackTestAction() {
 
@@ -93,7 +93,8 @@ public class StackTestAction {
         return entity;
     }
 
-    public static StackTestDto updateAmbariPassword(TestContext testContext, StackTestDto entity, CloudbreakClient client, UserNamePasswordV4Request request) throws Exception {
+    public static StackTestDto updateAmbariPassword(TestContext testContext, StackTestDto entity,
+        CloudbreakClient client, UserNamePasswordV4Request request) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, " Stack update ambari password request:\n", entity.getRequest());
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(), entity.getName(), request);
