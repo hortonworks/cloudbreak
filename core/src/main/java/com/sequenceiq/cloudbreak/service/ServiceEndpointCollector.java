@@ -37,8 +37,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorUtil;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
 @Service
 public class ServiceEndpointCollector {
@@ -147,10 +149,14 @@ public class ServiceEndpointCollector {
 
     private Collection<ExposedServiceV4Response> getKnoxServices(ClusterDefinition clusterDefinition) {
         String blueprintText = clusterDefinition.getClusterDefinitionText();
-        AmbariBlueprintTextProcessor blueprintTextProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
-        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
-        haComponents.remove(ExposedService.RANGER.getServiceName());
-        return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
+        if (ClusterDefinitionTextProcessorUtil.getClusterManagerType(blueprintText) == ClusterManagerType.AMBARI) {
+            AmbariBlueprintTextProcessor blueprintTextProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
+            Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
+            haComponents.remove(ExposedService.RANGER.getServiceName());
+            return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
+        } else {
+            return List.of();
+        }
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {

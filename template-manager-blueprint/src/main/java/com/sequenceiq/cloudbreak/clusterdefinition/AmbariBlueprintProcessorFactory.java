@@ -10,5 +10,4 @@ public class AmbariBlueprintProcessorFactory {
     public AmbariBlueprintTextProcessor get(String blueprintText) {
         return new AmbariBlueprintTextProcessor(blueprintText);
     }
-
 }

@@ -295,7 +295,7 @@ public class ServiceEndpointCollectorTest {
 
     private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
         ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText("aBlueprint");
+        clusterDefinition.setClusterDefinitionText("{\"Blueprints\":{}}");
         when(clusterDefinitionService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(clusterDefinition);
         AmbariBlueprintTextProcessor blueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
         when(ambariBlueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
