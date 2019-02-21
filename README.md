@@ -218,6 +218,7 @@ The -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD value has to be 
 After having imported cloudbreak repo root you can launch Datalake application by executing the com.sequenceiq.datalake.DatalakeApplication class with the following VM options:
 
 ````
+-Dserver.port=8086
 -Ddatalake.db.env.address=YOUR_IP
 -Ddatalake.cloudbreak.url=http://YOUR_IP:8080
 ````
@@ -270,6 +271,7 @@ To run datalake from command line you have to run the below gradle command with 
 
 ````
 ./gradlew :datalake:bootRun -PjvmArgs="-Ddatalake.db.env.address=YOUR_IP \
+-Dserver.port=8086 \
 -Ddatalake.cloudbreak.url=http://YOUR_IP:8080 \
 -Dspring.config.location=$(pwd)/datalake/src/main/resources/application.yml,$(pwd)/datalake/build/resources/main/application.properties"
 ````

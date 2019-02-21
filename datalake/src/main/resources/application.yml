@@ -1,6 +1,4 @@
-server:
-  servlet.context-path: "/dl"
-  port: 8086
+server.servlet.context-path: "/dl"
 
 management:
   endpoints:
