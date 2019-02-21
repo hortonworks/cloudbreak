@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-@Table(name = "Blueprint")
+@Table(name = "ClusterDefinition")
 public class ClusterDefinitionView extends CompactView {
     private String stackType;
 

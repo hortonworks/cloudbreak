@@ -35,12 +35,11 @@ public class ServiceDescriptor implements ProvisionEntity, WorkspaceAwareResourc
     private String serviceName;
 
     @Convert(converter = JsonToString.class)
-    @Column(name = "blueprintParams", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private Json clusterDefinitionParams;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
-    @Column(name = "blueprintSecretParams")
     private Secret clusterDefinitionSecretParams = Secret.EMPTY;
 
     @Convert(converter = JsonToString.class)
