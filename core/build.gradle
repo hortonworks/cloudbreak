@@ -99,16 +99,16 @@ dependencyManagement {
     dependencySet(group: 'org.powermock', version: powermockVersion) {
       entry 'powermock-module-junit4'
       entry('powermock-api-mockito2') {
-        exclude group: 'org.hamcrest'
+        exclude group: 'org.hamcrest', name: '*'
       }
     }
 
     dependency (group: 'org.springframework.statemachine',  name: 'spring-statemachine-core',    version: '1.0.1.RELEASE') {
-      exclude group: 'org.springframework'
+      exclude group: 'org.springframework', name: '*'
     }
 
     dependency (group: 'com.google.oauth-client',           name: 'google-oauth-client-jetty',   version: '1.22.0') {
-      exclude module: 'servlet-api'
+      exclude group: '*', name: 'servlet-api'
     }
 
     dependencySet(group: 'org.junit.jupiter', version: '5.2.0') {
@@ -131,7 +131,7 @@ dependencyManagement {
     dependency group: 'javax.mail',                         name: 'mail',                        version: '1.5.0-b01'
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '2.1.7'
 
-    dependency group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.1.2.RELEASE'
+    dependency group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.4.RELEASE'
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
     dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',      version: springOauthVersion
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
