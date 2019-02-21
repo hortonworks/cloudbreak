@@ -24,12 +24,6 @@ public class ServiceEndpointConfig {
     @Value("${datalake.db.serviceid:}")
     private String databaseId;
 
-    @Value("${datalake.identity.server.url:}")
-    private String identityServiceUrl;
-
-    @Value("${datalake.identity.serviceid:}")
-    private String identityServiceId;
-
     @Value("${datalake.cloudbreak.url:}")
     private String cloudbreakUrl;
 
@@ -45,12 +39,6 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String databaseAddress(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveHostPort(dbHost, dbPort, databaseId);
-    }
-
-    @Bean
-    @DependsOn("serviceAddressResolver")
-    public String identityServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
-        return serviceAddressResolver.resolveUrl(identityServiceUrl, "http", identityServiceId);
     }
 
     @Bean
