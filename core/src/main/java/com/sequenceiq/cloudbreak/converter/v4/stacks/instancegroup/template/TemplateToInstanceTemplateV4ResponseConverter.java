@@ -43,7 +43,7 @@ public class TemplateToInstanceTemplateV4ResponseConverter extends AbstractConve
 
     private RootVolumeV4Response rootVolume(Template source) {
         RootVolumeV4Response response = new RootVolumeV4Response();
-        response.setSize(source.getVolumeSize());
+        response.setSize(source.getRootVolumeSize());
         return response;
     }
 }

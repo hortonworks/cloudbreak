@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -39,6 +40,9 @@ public class InstanceTemplateV4Request extends InstanceTemplateV4Base {
     }
 
     public Set<VolumeV4Request> getAttachedVolumes() {
+        if (attachedVolumes == null) {
+            return new HashSet<>();
+        }
         return attachedVolumes;
     }
 
