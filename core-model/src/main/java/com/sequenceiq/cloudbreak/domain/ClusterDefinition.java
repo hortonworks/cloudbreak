@@ -22,23 +22,22 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-@Table(name = "blueprint", uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
 public class ClusterDefinition implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blueprint_generator")
-    @SequenceGenerator(name = "blueprint_generator", sequenceName = "blueprint_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "clusterdefinition_generator")
+    @SequenceGenerator(name = "clusterdefinition_generator", sequenceName = "clusterdefinition_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "blueprintText", nullable = false)
+    @Column(nullable = false)
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret clusterDefinitionText = Secret.EMPTY;
 
-    @Column(name = "ambariName")
     private String stackName;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
