@@ -163,6 +163,10 @@
     {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
     {% if 'HDFSUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/{{ salt['pillar.get']('gateway:path') }}/{{ salt['pillar.get']('gateway:topologies:name') }}/hdfs/ -->
+    <!-- From HDP 3.0 -->
+    {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/{{ salt['pillar.get']('gateway:path') }}/{{ salt['pillar.get']('gateway:topologies:name') }}/hdfs/?host=http://{{ hostloc }}:{{ ports['HDFSUI'] }} -->
+    {%- endfor %}
     <service>
         <role>HDFSUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
