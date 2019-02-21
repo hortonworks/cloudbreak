@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequire
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -42,8 +44,9 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
 
     @Override
     public ClusterTemplate convert(ClusterTemplateV4Request source) {
-        if (source.getStackTemplate().getEnvironment() == null) {
-            throw new BadRequestException("The environment cannot be null.");
+        EnvironmentSettingsV4Request environment = source.getStackTemplate().getEnvironment();
+        if (environment == null || StringUtils.isEmpty(environment.getName())) {
+            throw new BadRequestException("The environment name cannot be null.");
         }
 
         ClusterTemplate clusterTemplate = new ClusterTemplate();

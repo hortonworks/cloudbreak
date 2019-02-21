@@ -86,8 +86,8 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .withImageSettings("imageSettings");
     }
 
-    public StackV4EntityBase<T> withEnvironmentSettings(Class<EnvironmentSettingsV4Entity> clss) {
-        return withEnvironmentSettings(clss.getSimpleName());
+    public StackV4EntityBase<T> withEnvironmentSettings() {
+        return withEnvironmentSettings(EnvironmentSettingsV4Entity.class.getSimpleName());
     }
 
     public StackV4EntityBase<T> withEnvironmentSettings(EnvironmentSettingsV4Entity environment) {
