@@ -20,10 +20,10 @@ import org.testng.collections.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater.Package;
+import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 
 @Component
 public class PackageVersionChecker {

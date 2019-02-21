@@ -1,0 +1,38 @@
+plugins {
+  id "java"
+  id 'maven'
+}
+
+repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  mavenCentral()
+  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
+  maven { url "https://repo.spring.io/release" }
+  maven { url "https://plugins.gradle.org/m2/" }
+  maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
+}
+
+jar {
+  baseName = 'cluster-ambari'
+}
+
+dependencies {
+  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+    exclude group: 'org.slf4j'
+  }
+  compile project(':cluster-api')
+  compile project(':template-manager-blueprint')
+
+  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+  testCompile group: 'org.powermock',            name: 'powermock-module-junit4',       version: powermockVersion
+  testCompile group: 'org.powermock',            name: 'powermock-api-mockito2',       version: powermockVersion
+  testCompile group: 'org.powermock',            name: 'powermock-reflect',       version: powermockVersion
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+}

@@ -10,6 +10,9 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.message.MessagesConfig;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { MessagesConfig.class, TestConfig.class })
 public class CloudbreakMessagesHostServiceTypeTest {

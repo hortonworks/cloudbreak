@@ -4,9 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -47,9 +43,6 @@ public class CollectDownscaleCandidatesHandlerTest {
     @Mock
     private StackService stackService;
 
-    @Mock
-    private AmbariDecommissioner ambariDecommissioner;
-
     @InjectMocks
     private CollectDownscaleCandidatesHandler testedClass;
 
@@ -67,7 +60,6 @@ public class CollectDownscaleCandidatesHandlerTest {
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
-        verify(ambariDecommissioner, never()).collectDownscaleCandidates(stack, HOST_GROUP_NAME, SCALING_ADJUSTMENT);
 
     }
 
@@ -86,7 +78,6 @@ public class CollectDownscaleCandidatesHandlerTest {
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
         assertFalse(submittedResult.getRequest().getDetails().isForced());
-        verify(ambariDecommissioner).verifyNodesAreRemovable(eq(stack), anyList());
     }
 
     @Test
@@ -104,7 +95,6 @@ public class CollectDownscaleCandidatesHandlerTest {
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
         assertTrue(submittedResult.getRequest().getDetails().isForced());
-        verify(ambariDecommissioner, never()).verifyNodesAreRemovable(eq(stack), anyList());
     }
 
     private Stack generateStackData() {

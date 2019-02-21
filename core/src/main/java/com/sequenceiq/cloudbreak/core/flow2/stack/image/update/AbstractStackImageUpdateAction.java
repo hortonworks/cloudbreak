@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreationService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -35,7 +35,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
     public static final String ORIGINAL_IMAGE = "ORIGINAL_IMAGE";
 
     @Inject
-    private FlowMessageService flowMessageService;
+    private CloudbreakFlowMessageService flowMessageService;
 
     @Inject
     private StackImageUpdateService stackImageUpdateService;
@@ -85,7 +85,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
         return new StackFailureEvent(payload.getStackId(), ex);
     }
 
-    protected FlowMessageService getFlowMessageService() {
+    protected CloudbreakFlowMessageService getFlowMessageService() {
         return flowMessageService;
     }
 

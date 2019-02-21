@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_0_0;
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
@@ -29,11 +28,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
-import com.sequenceiq.cloudbreak.clusterdefinition.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -62,16 +63,14 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
@@ -111,9 +110,6 @@ public class ClusterHostServiceRunner {
     private ComponentLocatorService componentLocator;
 
     @Inject
-    private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
-
-    @Inject
     private SmartSenseCredentialConfigService smartSenseCredentialConfigService;
 
     @Inject
@@ -138,9 +134,6 @@ public class ClusterHostServiceRunner {
     private AmbariBlueprintPortConfigCollector ambariBlueprintPortConfigCollector;
 
     @Inject
-    private AmbariRepositoryVersionService ambariRepositoryVersionService;
-
-    @Inject
     private ServiceProviderConnectorAdapter connector;
 
     @Inject
@@ -154,6 +147,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
 
     public void runClusterServices(Stack stack, Cluster cluster) {
         try {
@@ -230,6 +226,7 @@ public class ClusterHostServiceRunner {
         saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
 
         if (clusterDefinitionService.isClouderaManagerTemplate(cluster.getClusterDefinition())) {
             decoratePillarWithClouderaManagerRepo(stack.getId(), servicePillar);
@@ -243,7 +240,7 @@ public class ClusterHostServiceRunner {
                 ambariRepoMap.put("stack_version", clusterDefinition.getValue("Blueprints.stack_version"));
                 ambariRepoMap.put("stack_type", clusterDefinition.getValue("Blueprints.stack_name").toString().toLowerCase());
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
-                boolean setupLdapAndSsoOnApi = ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
+                boolean setupLdapAndSsoOnApi = connector.isLdapAndSSOReady(ambariRepo);
                 servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
                         singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
             }
@@ -260,11 +257,11 @@ public class ClusterHostServiceRunner {
         saveSssdIpaPillar(cluster, servicePillar);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
-        saveLdapsAdPillar(cluster, servicePillar);
+        saveLdapsAdPillar(cluster, servicePillar, connector);
         Map<String, Object> credentials = new HashMap<>();
-        credentials.put("username", ambariSecurityConfigProvider.getCloudbreakAmbariUserName(stack.getCluster()));
-        credentials.put("password", ambariSecurityConfigProvider.getCloudbreakAmbariPassword(stack.getCluster()));
-        credentials.put("securityMasterKey", ambariSecurityConfigProvider.getAmbariSecurityMasterKey(cluster));
+        credentials.put("username", connector.getCloudbreakClusterUserName(cluster));
+        credentials.put("password", connector.getCloudbreakClusterPassword(cluster));
+        credentials.put("securityMasterKey", connector.getMasterKey(cluster));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
 
         if (smartSenseCredentialConfigService.areCredentialsSpecified()) {
@@ -291,12 +288,12 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void saveLdapsAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+    private void saveLdapsAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector) {
         if (Objects.nonNull(cluster.getLdapConfig()) && Objects.nonNull(cluster.getLdapConfig().getCertificate())) {
             Map<String, Object> ldapsProperties = new HashMap<>();
-            ldapsProperties.put("certPath", ambariSecurityConfigProvider.getCertPath());
-            ldapsProperties.put("keystorePassword", ambariSecurityConfigProvider.getKeystorePassword());
-            ldapsProperties.put("keystorePath", ambariSecurityConfigProvider.getKeystorePath());
+            ldapsProperties.put("certPath", connector.getCertPath());
+            ldapsProperties.put("keystorePassword", connector.getKeystorePassword());
+            ldapsProperties.put("keystorePath", connector.getKeystorePath());
             servicePillar.put("ldaps-ad", new SaltPillarProperties("/ambari/ldaps.sls", singletonMap("ambari", singletonMap("ldaps", ldapsProperties))));
         }
     }

@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.util;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,15 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -34,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
@@ -47,6 +42,9 @@ public class StackUtil {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
 
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
@@ -106,7 +104,8 @@ public class StackUtil {
 
     private Map<String, Map<String, String>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
         return volumeSets.stream()
-                .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(), getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
+                .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(),
+                        resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
                 .map(entry -> {
                     List<Volume> volumes = entry.getValue().map(VolumeSetAttributes::getVolumes).orElse(List.of());
                     List<String> dataVolumes = volumes.stream().map(Volume::getDevice).collect(Collectors.toList());
@@ -157,22 +156,5 @@ public class StackUtil {
             uptime = uptime.plusMillis(now - cluster.getUpSince());
         }
         return uptime.toMillis();
-    }
-
-    public <T> Optional<T> getTypedAttributes(Resource resource, Class<T> attributeType) {
-        Json attributes = resource.getAttributes();
-        try {
-            return Objects.nonNull(attributes.getValue()) ? Optional.ofNullable(attributes.get(attributeType)) : Optional.empty();
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to parse attributes to type: " + attributeType.getSimpleName(), e);
-        }
-    }
-
-    public <T> void setTypedAttributes(Resource resource, T attributes) {
-        try {
-            resource.setAttributes(new Json(attributes));
-        } catch (JsonProcessingException e) {
-            throw new CloudbreakServiceException("Failed to parse attributes from type: " + attributes.getClass().getSimpleName(), e);
-        }
     }
 }

@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
 
 @Component
 public class NginxCertListenerTask extends StackBasedStatusCheckerTask<NginxPollerObject> {
@@ -41,7 +41,7 @@ public class NginxCertListenerTask extends StackBasedStatusCheckerTask<NginxPoll
 
     @Override
     public void handleTimeout(NginxPollerObject nginxPollerObject) {
-        throw new AmbariOperationFailedException("Operation timed out. Failed to check nginx.");
+        throw new CloudbreakServiceException("Operation timed out. Failed to check nginx.");
     }
 
     @Override

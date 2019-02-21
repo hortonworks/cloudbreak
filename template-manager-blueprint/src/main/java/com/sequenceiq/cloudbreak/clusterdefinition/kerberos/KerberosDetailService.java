@@ -19,8 +19,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Service
 public class KerberosDetailService {
 
-    private static final String PRINCIPAL = "/admin";
-
     private final Gson gson = new Gson();
 
     public String resolveTypeForKerberos(@Nonnull KerberosConfig kerberosConfig) {
@@ -58,11 +56,6 @@ public class KerberosDetailService {
 
     public String resolveContainerDnForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         return Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) ? null : kerberosConfig.getContainerDn();
-    }
-
-    public String resolvePrincipalForKerberos(@Nonnull KerberosConfig kerberosConfig) {
-        return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? kerberosConfig.getAdmin() + PRINCIPAL
-                : kerberosConfig.getPrincipal();
     }
 
     public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {

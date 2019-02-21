@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -21,7 +21,7 @@ public class PrepareClusterTerminationHandler implements ReactorEventHandler<Pre
     private EventBus eventBus;
 
     @Inject
-    private AmbariClusterConnector ambariClusterConnector;
+    private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
     private StackService stackService;
@@ -35,7 +35,8 @@ public class PrepareClusterTerminationHandler implements ReactorEventHandler<Pre
     public void accept(Event<PrepareClusterTerminationRequest> event) {
         PrepareClusterTerminationResult result;
         try {
-            ambariClusterConnector.prepareSecurity(stackService.getByIdWithListsInTransaction(event.getData().getStackId()));
+            clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getStackId()))
+                    .clusterSecurityService().prepareSecurity();
             result = new PrepareClusterTerminationResult(event.getData());
         } catch (Exception e) {
             result = new PrepareClusterTerminationResult(e.getMessage(), e, event.getData());

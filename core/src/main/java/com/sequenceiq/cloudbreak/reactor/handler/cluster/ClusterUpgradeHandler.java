@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterUpgradeService;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeService;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult;
@@ -16,7 +16,7 @@ import reactor.bus.EventBus;
 @Component
 public class ClusterUpgradeHandler implements ReactorEventHandler<ClusterUpgradeRequest> {
     @Inject
-    private AmbariClusterUpgradeService ambariClusterUpgradeService;
+    private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
     @Inject
     private EventBus eventBus;
@@ -31,7 +31,7 @@ public class ClusterUpgradeHandler implements ReactorEventHandler<ClusterUpgrade
         ClusterUpgradeRequest request = event.getData();
         ClusterUpgradeResult result;
         try {
-            ambariClusterUpgradeService.upgradeCluster(request.getStackId());
+            clusterManagerUpgradeService.upgradeCluster(request.getStackId());
             result = new ClusterUpgradeResult(request);
         } catch (Exception e) {
             result = new ClusterUpgradeResult(e.getMessage(), e, request);

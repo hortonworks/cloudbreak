@@ -8,11 +8,14 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -25,11 +28,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -41,7 +44,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -83,17 +85,22 @@ public class SharedServiceConfigProviderTest {
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Mock
-    private AmbariClientFactory ambariClientFactory;
-
-    @Mock
     private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Mock
     private StackInputs stackInputs;
 
+    @Mock
+    private DatalakeConfigApiConnector datalakeConfigApiConnector;
+
+    @Mock
+    private DatalakeConfigApi datalakeConfigApi;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(datalakeConfigApiConnector.getConnector(any(Stack.class))).thenReturn(datalakeConfigApi);
+        when(datalakeConfigApiConnector.getConnector(any(URL.class), anyString(), anyString())).thenReturn(datalakeConfigApi);
     }
 
     @Test
@@ -161,7 +168,6 @@ public class SharedServiceConfigProviderTest {
         assertEquals(publicStack.getInputs(), stack.getInputs());
         verify(datalakeResourcesRepository, times(0)).findById(anyLong());
         verify(credentialPrerequisiteService, times(0)).isCumulusCredential(anyString());
-        verify(ambariClientFactory, times(0)).getAmbariClient(any(Stack.class), any(Cluster.class));
     }
 
     @Test
@@ -174,10 +180,11 @@ public class SharedServiceConfigProviderTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.TRUE);
-        AmbariClient ambariClient = new AmbariClient();
-        when(credentialPrerequisiteService.createCumulusAmbariClient(anyString())).thenReturn(ambariClient);
+
+        DatalakeConfigApi connector = mock(DatalakeConfigApi.class);
+        when(credentialPrerequisiteService.createCumulusDatalakeConnector(anyString())).thenReturn(connector);
         when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, ambariClient))
+        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, connector))
                 .thenReturn(Collections.singletonMap("test", "data"));
         when(stackService.save(stackIn)).thenReturn(stackIn);
         stackIn.setInputs(new Json(stackInputs));
@@ -204,16 +211,14 @@ public class SharedServiceConfigProviderTest {
         datalakeResources.setDatalakeStackId(datalakeStackId);
         when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.FALSE);
-        AmbariClient ambariClient = new AmbariClient();
         when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, ambariClient))
+        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(eq(datalakeResources), eq(stackIn), any(DatalakeConfigApi.class)))
                 .thenReturn(Collections.singletonMap("test", "data"));
         when(stackService.save(stackIn)).thenReturn(stackIn);
         Stack dlStack = new Stack();
         dlStack.setId(datalakeStackId);
         dlStack.setCluster(createBarelyConfiguredRequestedCluster());
         when(stackService.getById(dlStack.getId())).thenReturn(dlStack);
-        when(ambariClientFactory.getAmbariClient(dlStack, dlStack.getCluster())).thenReturn(ambariClient);
         stackIn.setInputs(new Json(stackInputs));
 
         Stack stack = underTest.prepareDatalakeConfigs(stackIn);

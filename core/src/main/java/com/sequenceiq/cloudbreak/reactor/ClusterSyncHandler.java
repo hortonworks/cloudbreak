@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceMetadataUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.flow.status.ClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -28,7 +28,7 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
     private ClusterService clusterService;
 
     @Inject
-    private AmbariClusterStatusUpdater ambariClusterStatusUpdater;
+    private ClusterStatusUpdater clusterStatusUpdater;
 
     @Inject
     private EventBus eventBus;
@@ -51,7 +51,7 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getStackId());
-            ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
+            clusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster.isAvailable() || cluster.isMaintenanceModeEnabled()) {
                 instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack);
                 if (stack.isDatalake()) {

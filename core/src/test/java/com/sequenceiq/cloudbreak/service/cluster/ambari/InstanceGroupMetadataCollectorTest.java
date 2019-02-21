@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InstanceGroupMetadataCollectorTest {

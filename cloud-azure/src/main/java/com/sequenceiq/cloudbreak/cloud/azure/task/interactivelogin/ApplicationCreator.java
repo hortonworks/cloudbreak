@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureApplicationCreationView;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCredentialAppCreationCommand;
-import com.sequenceiq.cloudbreak.cloud.retry.RetryException;
+import com.sequenceiq.cloudbreak.retry.RetryException;
 
 /**
  * Created by perdos on 10/18/16.

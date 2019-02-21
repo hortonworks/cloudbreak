@@ -9,6 +9,12 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.retry.CheckTask;
+import com.sequenceiq.cloudbreak.retry.ErrorTask;
+import com.sequenceiq.cloudbreak.retry.ExceptionCheckTask;
+import com.sequenceiq.cloudbreak.retry.RetryTask;
+import com.sequenceiq.cloudbreak.retry.RetryUtil;
+
 public class RetryUtilTest {
 
     private final RetryTask task = mock(RetryTask.class);
