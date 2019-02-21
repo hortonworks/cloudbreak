@@ -14,7 +14,7 @@
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
 
-As a prerequisite you need to have Java 10 installed. You can get it with the following command:
+As a prerequisite you need to have Java 11 installed. You can get it with the following command:
 ```
 brew cask install java
 ```
@@ -138,17 +138,17 @@ In IDEA set your SDK to your Java version under:
 
 Set project SDK
 ```
-File -> Project Structure -> Project Settings -> Project -> Project SDK -> 10
+File -> Project Structure -> Project Settings -> Project -> Project SDK -> 11
 ```
 
 Set project Language level
 ```
-File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 10
+File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 11
 ```
 
 Set Gradle JVM
 ```
-IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 10
+IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 11
 ```
 
 ### Import project

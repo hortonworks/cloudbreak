@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.MetricType;
 
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 
 @Service
@@ -37,9 +36,7 @@ public class MetricService {
     }
 
     public void incrementCounter(MetricType metric) {
-        try (Counter counter = Metrics.counter(METRIC_PREFIX + metric.getMetricName().toLowerCase())) {
-            counter.increment();
-        }
+        Metrics.counter(METRIC_PREFIX + metric.getMetricName().toLowerCase()).increment();
     }
 
     public void submitGauge(MetricType metric, double value) {
@@ -50,8 +47,6 @@ public class MetricService {
     }
 
     private void initCounter(MetricType metric) {
-        try (Counter counter = Metrics.counter(METRIC_PREFIX + metric.getMetricName().toLowerCase())) {
-            counter.increment(0);
-        }
+        Metrics.counter(METRIC_PREFIX + metric.getMetricName().toLowerCase()).increment(0);
     }
 }

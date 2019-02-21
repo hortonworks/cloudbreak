@@ -18,7 +18,7 @@ public class PriorityMethodInterceptor implements IMethodInterceptor {
         Comparator<IMethodInstance> comparator = new Comparator<IMethodInstance>() {
             private int getPriority(IMethodInstance mi) {
                 int result = 0;
-                Method method = mi.getMethod().getMethod();
+                Method method = mi.getMethod().getConstructorOrMethod().getMethod();
                 Priority a1 = method.getAnnotation(Priority.class);
                 if (a1 != null) {
                     result = a1.value();

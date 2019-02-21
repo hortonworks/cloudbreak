@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 
@@ -96,15 +95,11 @@ public class MetricService {
     }
 
     private void incrementMetricCounter(String metric) {
-        try (Counter counter = Metrics.counter(METRIC_PREFIX + metric.toLowerCase())) {
-            counter.increment();
-        }
+        Metrics.counter(METRIC_PREFIX + metric.toLowerCase()).increment();
     }
 
     private void initMicrometerMetricCounter(String metric, String cloudPlatform) {
-        try (Counter counter = Metrics.counter(METRIC_PREFIX + getMetricNameWithPlatform(metric, cloudPlatform))) {
-            counter.increment(0);
-        }
+        Metrics.counter(METRIC_PREFIX + getMetricNameWithPlatform(metric, cloudPlatform)).increment(0);
     }
 
     private String getMetricNameWithPlatform(MetricType metric, String cloudPlatform) {
