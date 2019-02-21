@@ -17,7 +17,7 @@ buildscript {
 
 plugins {
   id 'org.ajoberstar.grgit' version '2.1.0'
-  id "com.github.spotbugs" version "1.6.2"
+  id "com.github.spotbugs" version "1.6.10"
 }
 
 if (project.hasProperty("reckon.scope")) {
@@ -55,8 +55,8 @@ subprojects {
   apply plugin: 'jacoco'
 
 
-    sourceCompatibility = 10
-  targetCompatibility = 10
+  sourceCompatibility = 11
+  targetCompatibility = 11
 
   configurations {
     deployerJars
@@ -80,13 +80,13 @@ subprojects {
   }
 
   spotbugs {
-    toolVersion = "3.1.7"
+    toolVersion = "3.1.11"
     excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
     effort = "min"
   }
 
   jacoco {
-    toolVersion = "0.8.2"
+    toolVersion = "0.8.3"
     reportsDir = file("$buildDir/reports/jacoco")
   }
 

@@ -40,6 +40,7 @@ dependencies {
     compile group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: '1.0.5'
     compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
     compile group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
+    compile group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: '2.7.0'
     compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
     compile group: 'org.freemarker',                        name: 'freemarker',                     version: freemarkerVersion
     compile group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion
