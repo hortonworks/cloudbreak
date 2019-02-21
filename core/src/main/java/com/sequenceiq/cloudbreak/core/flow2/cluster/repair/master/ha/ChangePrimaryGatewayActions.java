@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForClusterServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewaySuccess;
@@ -49,7 +49,7 @@ public class ChangePrimaryGatewayActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new WaitForAmbariServerRequest(context.getStackId());
+                return new WaitForClusterServerRequest(context.getStackId());
             }
         };
     }

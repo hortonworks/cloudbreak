@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,19 +30,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -66,9 +66,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -115,7 +115,7 @@ public class ClusterCreationSetupService {
     private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
-    private AmbariRepositoryVersionService ambariRepositoryVersionService;
+    private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
     private DefaultAmbariRepoService defaultAmbariRepoService;
@@ -207,7 +207,7 @@ public class ClusterCreationSetupService {
                     stackImageComponent);
             components.add(hdpRepoConfig);
             checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get());
-            checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
+            checkVDFFile(ambariRepoConfig, hdpRepoConfig, cluster);
         }
 
         LOGGER.debug("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -277,12 +277,11 @@ public class ClusterCreationSetupService {
         }
     }
 
-    private void checkVDFFile(ClusterComponent ambariRepoConfig, ClusterComponent hdpRepoConfig, String stackName) throws IOException {
+    private void checkVDFFile(ClusterComponent ambariRepoConfig, ClusterComponent hdpRepoConfig, Cluster cluster) throws IOException {
         AmbariRepo ambariRepo = ambariRepoConfig.getAttributes().get(AmbariRepo.class);
-
-        if (ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_6_0_0)
-                && !containsVDFUrl(hdpRepoConfig.getAttributes())) {
-            throw new BadRequestException(String.format("Couldn't determine any VDF file for the stack: %s", stackName));
+        ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
+        if (connector.isVdfReady(ambariRepo) && !containsVDFUrl(hdpRepoConfig.getAttributes())) {
+            throw new BadRequestException(String.format("Couldn't determine any VDF file for the stack: %s", cluster.getName()));
         }
     }
 

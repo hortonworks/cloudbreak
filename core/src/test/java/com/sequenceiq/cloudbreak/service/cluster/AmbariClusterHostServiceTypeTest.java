@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static java.util.Arrays.asList;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,13 +23,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -40,14 +36,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-
-import groovyx.net.http.HttpResponseException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterHostServiceTypeTest {
@@ -64,12 +57,6 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Mock
     private ClusterRepository clusterRepository;
-
-    @Mock
-    private AmbariClient ambariClient;
-
-    @Mock
-    private AmbariClientProvider ambariClientProvider;
 
     @Mock
     private InstanceMetaDataRepository instanceMetadataRepository;
@@ -136,18 +123,6 @@ public class AmbariClusterHostServiceTypeTest {
         thrown.expectMessage("Cannot stop a cluster '1'. Reason: Spot instances cannot be stopped.");
 
         underTest.updateStatus(1L, StatusRequest.STOPPED);
-    }
-
-    @Test
-    public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
-        // GIVEN
-        doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(HttpClientConfig.class), nullable(Integer.class), any(Cluster.class));
-        given(ambariClient.getClusterAsJson()).willReturn(null);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cluster response coming from Ambari server was null. [Ambari Server IP: '123.12.3.4']");
-        // WHEN
-        underTest.getClusterJson("123.12.3.4", 1L);
     }
 
     @Test

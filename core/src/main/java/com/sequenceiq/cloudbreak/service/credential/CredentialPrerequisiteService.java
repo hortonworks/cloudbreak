@@ -17,13 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -31,9 +31,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
-import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.user.UserPreferencesService;
 
 import reactor.bus.EventBus;
@@ -65,7 +65,7 @@ public class CredentialPrerequisiteService {
     private UserPreferencesService userPreferencesService;
 
     @Inject
-    private AmbariClientProvider ambariClientProvider;
+    private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
     public CredentialPrerequisitesV4Response getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, user.getUserId(), workspace.getId());
@@ -101,9 +101,9 @@ public class CredentialPrerequisiteService {
             }
         }
         if (isCumulusCredential(newAttributes)) {
-            AmbariClient ambariClient = createCumulusAmbariClient(newAttributes);
+            DatalakeConfigApi datalakeConnector = createCumulusDatalakeConnector(newAttributes);
             Map<String, String> params =
-                    ambariClient.getConfigValuesByConfigIds(List.of(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
+                    datalakeConnector.getConfigValuesByConfigIds(List.of(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
             newAttributes.put(CUMULUS_YARN_ENDPOINT, "http://" + params.get(ServiceDescriptorDefinitionProvider.YARN_RESOURCEMANAGER_WEBAPP_ADDRESS));
             attributesChanged = true;
         }
@@ -117,14 +117,14 @@ public class CredentialPrerequisiteService {
         return isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
     }
 
-    public AmbariClient createCumulusAmbariClient(Map<String, Object> attributes) {
+    public DatalakeConfigApi createCumulusDatalakeConnector(Map<String, Object> attributes) {
         if (isCumulusCredential(attributes)) {
             String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
             try {
-                URL ambariUrl = new URL(datalakeAmbariUrl);
-                AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariUrl, (String) attributes.get(CUMULUS_AMBARI_USER),
+                URL datalakeUrl = new URL(datalakeAmbariUrl);
+                DatalakeConfigApi connector = datalakeConfigApiConnector.getConnector(datalakeUrl, (String) attributes.get(CUMULUS_AMBARI_USER),
                         (String) attributes.get(CUMULUS_AMBARI_PASSWORD));
-                return ambariClient;
+                return connector;
             } catch (MalformedURLException e) {
                 throw new CloudbreakServiceException("Datalake Ambari URL is malformed: " + datalakeAmbariUrl, e);
             }
@@ -133,8 +133,8 @@ public class CredentialPrerequisiteService {
         }
     }
 
-    public AmbariClient createCumulusAmbariClient(String attributes) {
-        return createCumulusAmbariClient(convertJsonStringToMap(attributes));
+    public DatalakeConfigApi createCumulusDatalakeConnector(String attributes) {
+        return createCumulusDatalakeConnector(convertJsonStringToMap(attributes));
     }
 
     public boolean isCumulusCredential(Map<String, Object> attributes) {

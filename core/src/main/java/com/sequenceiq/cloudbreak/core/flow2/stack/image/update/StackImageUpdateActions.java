@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
+import com.sequenceiq.cloudbreak.service.OperationException;
 
 @Configuration
 public class StackImageUpdateActions {
@@ -152,7 +152,7 @@ public class StackImageUpdateActions {
     public AbstractStackFailureAction<StackImageUpdateState, StackImageUpdateEvent> handleImageUpdateFailure() {
         return new AbstractStackFailureAction<>() {
             @Inject
-            private FlowMessageService flowMessageService;
+            private CloudbreakFlowMessageService flowMessageService;
 
             @Inject
             private StackUpdater stackUpdater;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
-import com.sequenceiq.cloudbreak.cloud.retry.RetryUtil;
+import com.sequenceiq.cloudbreak.retry.RetryUtil;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 
 import reactor.bus.Event;

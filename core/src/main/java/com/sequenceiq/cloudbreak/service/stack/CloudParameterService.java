@@ -71,7 +71,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
+import com.sequenceiq.cloudbreak.service.OperationException;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

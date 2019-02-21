@@ -22,13 +22,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 
 @Service
 public class StackScalingService {
@@ -44,13 +44,13 @@ public class StackScalingService {
     private HostMetadataRepository hostMetadataRepository;
 
     @Inject
-    private AmbariDecommissioner ambariDecommissioner;
-
-    @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
 
     private enum Msg {
         STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
@@ -72,7 +72,7 @@ public class StackScalingService {
     public void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
         if (hostMetadata != null) {
             try {
-                ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata);
+                clusterApiConnectors.getConnector(stack).clusterDecomissionService().deleteHostFromCluster(hostMetadata);
                 // Deleting by entity will not work because HostMetadata has a reference pointed
                 // from HostGroup and per JPA, we would need to clear that up.
                 // Reference: http://stackoverflow.com/a/22315188

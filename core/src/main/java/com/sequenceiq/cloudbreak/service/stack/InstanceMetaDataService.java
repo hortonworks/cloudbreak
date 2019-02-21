@@ -127,4 +127,8 @@ public class InstanceMetaDataService {
     public InstanceMetaData pureSave(InstanceMetaData instanceMetaData) {
         return instanceMetaDataRepository.save(instanceMetaData);
     }
+
+    public Set<InstanceMetaData> findAllInStack(Long stackId) {
+        return instanceMetaDataRepository.findAllInStack(stackId);
+    }
 }

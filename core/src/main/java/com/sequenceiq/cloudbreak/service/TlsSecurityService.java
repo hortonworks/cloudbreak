@@ -118,7 +118,7 @@ public class TlsSecurityService {
         if (securityConfig == null) {
             return new HttpClientConfig(apiAddress);
         } else {
-            String serverCert = gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
+            String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
             String clientCertB64 = securityConfig.getClientCert();
             String clientKeyB64 = securityConfig.getClientKey();
             return new HttpClientConfig(apiAddress, serverCert,

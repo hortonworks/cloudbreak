@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -44,6 +45,9 @@ public class MountDisks {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
 
     @Inject
     private ResourceRepository resourceRepository;
@@ -104,10 +108,10 @@ public class MountDisks {
     private void persistUuidAndFstab(Stack stack, String instanceId, String uuids, String fstab) {
         resourceRepository.saveAll(stack.getDiskResources().stream()
                 .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
-                .peek(volumeSet -> stackUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
+                .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
                     volumeSetAttributes.setUuids(uuids);
                     volumeSetAttributes.setFstab(fstab);
-                    stackUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
+                    resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))
                 .collect(Collectors.toList()));
     }

@@ -155,7 +155,6 @@ dependencyManagement {
 }
 
 dependencies {
-  compile group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger'
   compile group: 'com.google.code.gson',               name: 'gson'
   compile group: 'org.codehaus.groovy',                name: 'groovy-all'
 
@@ -217,6 +216,7 @@ dependencies {
   compile project(':template-manager-blueprint')
   compile project(':template-manager-recipe')
   compile project(':template-manager-cmtemplate')
+  compile project(':cluster-api')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-salt')
@@ -229,6 +229,9 @@ dependencies {
   runtime project(':cloud-azure')
   runtime project(':cloud-yarn')
   runtime project(':cloud-cumulus-yarn')
+  runtime project(':cluster-ambari')
+  runtime project(':cluster-cm')
+
 
   runtime group: 'activation',                    name: 'activation'
 

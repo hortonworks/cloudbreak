@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 
 abstract class SendNotificationExceptionMapper<E extends Throwable> extends BaseExceptionMapper<E> {
 

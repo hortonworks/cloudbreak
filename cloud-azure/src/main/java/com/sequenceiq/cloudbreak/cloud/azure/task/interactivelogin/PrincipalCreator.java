@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.microsoft.azure.management.graphrbac.implementation.ServicePrincipalInner;
-import com.sequenceiq.cloudbreak.cloud.retry.RetryException;
+import com.sequenceiq.cloudbreak.retry.RetryException;
 
 /**
  * Created by perdos on 10/18/16.

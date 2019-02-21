@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -33,9 +34,9 @@ public class InstallClusterHandler implements ReactorEventHandler<InstallCluster
         Long stackId = event.getData().getStackId();
         Selectable response;
         try {
-            clusterBuilderService.buildAmbariCluster(stackId);
+            clusterBuilderService.buildCluster(stackId);
             response = new InstallClusterSuccess(stackId);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | CloudbreakException e) {
             response = new InstallClusterFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

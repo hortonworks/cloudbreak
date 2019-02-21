@@ -1,0 +1,34 @@
+plugins {
+  id "java"
+  id 'maven'
+}
+
+repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  mavenCentral()
+  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
+  maven { url "https://repo.spring.io/release" }
+  maven { url "https://plugins.gradle.org/m2/" }
+  maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
+}
+
+jar {
+  baseName = 'cluster-cm'
+}
+
+dependencies {
+  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: '6.1.0') {
+    exclude group: 'com.squareup.okio', module: 'okio'
+  }
+  compile project(':cluster-api')
+  compile project(':template-manager-cmtemplate')
+
+  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+}
