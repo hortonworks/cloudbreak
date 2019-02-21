@@ -83,7 +83,7 @@ import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
         @MockBean(AwsCreateStackStatusCheckerTask.class),
 //        @MockBean(Aws)
 })
-public class AwsLauchTest extends AwsComponentTest {
+public class AwsLaunchTest extends AwsComponentTest {
 
     private static final String LOGIN_USER_NAME = "loginusername";
 

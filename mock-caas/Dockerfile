@@ -1,4 +1,4 @@
-FROM hortonworks/hwx_openjdk:10-jdk-slim
+FROM hortonworks/hwx_openjdk:11-jdk-slim
 MAINTAINER info@hortonworks.com
 
 # REPO URL to download jar

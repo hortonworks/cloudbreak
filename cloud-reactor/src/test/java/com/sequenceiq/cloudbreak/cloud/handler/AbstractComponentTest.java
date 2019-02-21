@@ -13,7 +13,8 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = TestApplicationContext.class)
+@SpringBootTest(classes = TestApplicationContext.class,
+        properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractComponentTest<T> {
 
     @Inject

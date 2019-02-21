@@ -100,17 +100,19 @@ dependencyManagement {
     dependencySet(group: 'org.powermock', version: powermockVersion) {
       entry 'powermock-module-junit4'
       entry('powermock-api-mockito2') {
-        exclude group: 'org.hamcrest'
+        exclude group: 'org.hamcrest', name: '*'
       }
     }
 
     dependency (group: 'org.springframework.statemachine',  name: 'spring-statemachine-core',    version: '1.0.1.RELEASE') {
-      exclude group: 'org.springframework'
+      exclude group: 'org.springframework', name: '*'
     }
 
     dependency (group: 'com.google.oauth-client',           name: 'google-oauth-client-jetty',   version: '1.22.0') {
-      exclude module: 'servlet-api'
+      exclude group: '*', name: 'servlet-api'
     }
+
+    dependency group: 'org.testng',                         name: 'testng',                      version: testNgVersion
 
     dependencySet(group: 'org.junit.jupiter', version: '5.2.0') {
       entry 'junit-jupiter-api'
@@ -242,6 +244,7 @@ dependencies {
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
   testCompile group: 'com.h2database',           name: 'h2'
   testCompile group: 'org.mockito',              name: 'mockito-junit-jupiter'
+  testCompile group: 'org.testng',               name: 'testng'
   testCompile group: 'org.junit.vintage',        name: 'junit-vintage-engine'
   testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-api'
   testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'

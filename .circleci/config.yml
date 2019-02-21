@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     steps:
       - checkout
       - restore_cache:
@@ -26,7 +26,7 @@ jobs:
 
   code-quality-check-checkstyle-test:
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
@@ -50,7 +50,7 @@ jobs:
 
   code-quality-check-checkstyle-main:
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
@@ -74,7 +74,7 @@ jobs:
 
   code-quality-check-spotbugs-main:
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
@@ -98,7 +98,7 @@ jobs:
 
   code-quality-check-spotbugs-test:
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
@@ -124,7 +124,7 @@ jobs:
     environment:
       CC_TEST_REPORTER_ID: CC_TEST_REPORTER_ID
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
