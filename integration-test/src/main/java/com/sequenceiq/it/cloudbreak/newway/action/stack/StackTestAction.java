@@ -84,6 +84,20 @@ public class StackTestAction {
         return entity;
     }
 
+    public static StackTestDto modifyAmbariPassword(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
+        logJSON(LOGGER, " Stack put ambari password request:\n", entity.getRequest());
+        UserNamePasswordV4Request userNamePasswordV4Request = new UserNamePasswordV4Request();
+        userNamePasswordV4Request.setOldPassword(entity.getRequest().getCluster().getAmbari().getPassword());
+        userNamePasswordV4Request.setUserName(entity.getRequest().getCluster().getAmbari().getUserName());
+        userNamePasswordV4Request.setPassword("testnewambaripassword");
+        client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
+                entity.getName(), userNamePasswordV4Request);
+        logJSON(LOGGER, " Stack was modified ambari password successfully:\n", entity.getResponse());
+        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        return entity;
+    }
+
     public static StackTestDto sync(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, " Stack post request:\n", entity.getRequest());
