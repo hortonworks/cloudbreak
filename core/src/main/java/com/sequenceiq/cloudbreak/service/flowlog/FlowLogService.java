@@ -101,7 +101,7 @@ public class FlowLogService {
     }
 
     public boolean repeatedFlowState(FlowLog lastFlowLog, String event) {
-        return lastFlowLog.getNextEvent().equalsIgnoreCase(event);
+        return Optional.ofNullable(lastFlowLog.getNextEvent()).map(flowLog -> flowLog.equalsIgnoreCase(event)).orElse(false);
     }
 
     public void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables) {
