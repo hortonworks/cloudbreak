@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.testcase;
+package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.spark.DynamicRouteStack;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestResponse;
 import com.sequenceiq.it.spark.ambari.AmbariGetHostComponentsReponse;
