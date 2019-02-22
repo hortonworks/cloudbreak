@@ -16,6 +16,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateIma
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.it.cloudbreak.newway.Environment;
+import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetByNameAction;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetImagesByNameAction;
@@ -27,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
@@ -398,5 +402,76 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 })
                 .validate();
     }
-    //TODO test get images from catalog for existing Stack
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testGetImageCatalogByNameAndStackWhenPreWarmedImageHasBeenUsed(TestContext testContext) {
+        createDefaultCredential(testContext);
+        initializeDefaultClusterDefinitions(testContext);
+
+        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String stackName = imgCatalogName + "-stack";
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+
+        testContext
+                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl())
+                .when(new ImageCatalogPostAction())
+                .when(new ImageCatalogSetAsDefaultAction())
+
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+
+                .given(StackTestDto.class)
+                .withEnvironment(EnvironmentEntity.class)
+                .withName(stackName)
+                .when(Stack.postV4())
+                .await(STACK_AVAILABLE)
+
+                .given(ImageCatalogDto.class)
+                .when(new ImageCatalogGetImagesByNameAction(stackName))
+                .then((testContext1, entity, cloudbreakClient) -> {
+                    ImagesV4Response catalog = entity.getResponseByProvider();
+                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
+                        String msg = format("The Images response should contain results for MOCK provider and stack with name: '%s'.", stackName);
+                        throw new IllegalArgumentException(msg);
+                    }
+                    return entity;
+                })
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    public void testGetImageCatalogByNameAndStackWhenBaseImageHasBeenUsed(TestContext testContext) {
+        createDefaultCredential(testContext);
+        initializeDefaultClusterDefinitions(testContext);
+
+        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String stackName = imgCatalogName + "-stack";
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+
+        testContext
+                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .when(new ImageCatalogPostAction())
+                .when(new ImageCatalogSetAsDefaultAction())
+
+                .given(EnvironmentEntity.class)
+                .when(Environment::post)
+
+                .given(StackTestDto.class)
+                .withEnvironment(EnvironmentEntity.class)
+                .withName(stackName)
+                .when(Stack.postV4())
+                .await(STACK_AVAILABLE)
+
+                .given(ImageCatalogDto.class)
+                .when(new ImageCatalogGetImagesByNameAction(stackName))
+                .then((testContext1, entity, cloudbreakClient) -> {
+                    ImagesV4Response catalog = entity.getResponseByProvider();
+                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
+                        String msg = format("The Images response should contain results for MOCK provider and stack with name: '%s'.", stackName);
+                        throw new IllegalArgumentException(msg);
+                    }
+                    return entity;
+                })
+                .validate();
+    }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.Mock.CLOUDBREAK_SERVER_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG;
+import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG_PREWARMED;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +46,12 @@ public class ImageCatalogMockServerSetup {
 
     public String getImageCatalogUrl() {
         return String.join("", sparkServer.getEndpoint(), IMAGE_CATALOG);
+    }
+
+    public String getPreWarmedImageCatalogUrl() {
+        String jsonCatalogResponse = responseFromJsonFile("imagecatalog/catalog-with-prewarmed.json");
+        sparkServer.getSparkService().get(IMAGE_CATALOG_PREWARMED, (request, response) -> patchCbVersion(jsonCatalogResponse, testParameter));
+        return String.join("", sparkServer.getEndpoint(), IMAGE_CATALOG_PREWARMED);
     }
 
     public String patchCbVersion(String catalogJson, TestParameter testParameter) {
