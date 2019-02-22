@@ -16,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.audit.AuditTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4CreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kubernetes.KubernetesTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
@@ -24,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
@@ -48,6 +50,8 @@ public class AuditTest extends AbstractIntegrationTest {
             + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\""
             + ",\"configurations\":[],\"components\":[{\"name\":\"HIVE_METASTORE\"}],\"cardinality\":\"1"
             + "\"}]}";
+
+    private static final String IMG_CATALOG_URL = "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-prod-cb-image-catalog.json";
 
     @Inject
     private LdapConfigTestClient ldapConfigTestClient;
@@ -297,6 +301,23 @@ public class AuditTest extends AbstractIntegrationTest {
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(stackName)
                 .withResourceType("stacks")
+                .when(AuditTestAction::getAuditEvents)
+                .then(AuditTestAssertion.listContainsAtLeast(1))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    public void testCreateAuditForImageCatalogAndThenValidate(TestContext testContext) {
+        String catalogName = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(ImageCatalogDto.class)
+                .withName(catalogName)
+                .withUrl(IMG_CATALOG_URL)
+                .when(new ImageCatalogPostAction())
+                .select(r -> r.getResponse().getId(), key(catalogName))
+                .given(AuditTestDto.class)
+                .withResourceIdByKey(catalogName)
+                .withResourceType("image_catalogs")
                 .when(AuditTestAction::getAuditEvents)
                 .then(AuditTestAssertion.listContainsAtLeast(1))
                 .validate();

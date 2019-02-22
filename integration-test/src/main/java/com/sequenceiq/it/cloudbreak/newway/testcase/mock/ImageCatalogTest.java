@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.testcase;
+package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static java.lang.String.format;
 
@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ImageCatalogTest extends AbstractIntegrationTest {

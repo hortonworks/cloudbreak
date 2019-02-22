@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.testcase;
+package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.exceptionConsumer;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil;
 
 public class ClusterDefinitionTest extends AbstractIntegrationTest {
