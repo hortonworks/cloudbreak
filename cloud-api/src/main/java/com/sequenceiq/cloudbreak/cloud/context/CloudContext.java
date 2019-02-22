@@ -24,6 +24,8 @@ public class CloudContext {
 
     private final String userId;
 
+    private final String userName;
+
     private final Long workspaceId;
 
     public CloudContext(Long id, String name, String platform, String userId, Long workspaceId) {
@@ -34,6 +36,7 @@ public class CloudContext {
         this.workspaceId = workspaceId;
         variant = null;
         location = null;
+        userName = null;
     }
 
     public CloudContext(Long id, String name, String platform, String variant,
@@ -45,6 +48,19 @@ public class CloudContext {
         this.location = location;
         this.userId = userId;
         this.workspaceId = workspaceId;
+        userName = null;
+    }
+
+    public CloudContext(Long id, String name, String platform, String variant,
+            Location location, String userId, String userName, Long workspaceId) {
+        this.id = id;
+        this.name = name;
+        this.platform = Platform.platform(platform);
+        this.variant = Variant.variant(variant);
+        this.location = location;
+        this.userId = userId;
+        this.workspaceId = workspaceId;
+        this.userName = userName;
     }
 
     public Long getId() {
@@ -77,6 +93,10 @@ public class CloudContext {
 
     public Long getWorkspaceId() {
         return workspaceId;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     @Override
