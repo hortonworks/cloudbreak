@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefin
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
-public class BlueprintTest extends AbstractIntegrationTest {
+public class ClusterDefintionTest extends AbstractIntegrationTest {
 
     private static final String VALID_BP = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDP\",\"stack_version\":\"2.6\"},\"settings\""
             + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\""
@@ -95,7 +95,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
     public void testListBlueprint(TestContext testContext) {
         testContext.given(ClusterDefinitionEntity.class)
                 .when(ClusterDefinition.listV4())
-                .then(BlueprintTest::checkDefaultBlueprintsIsListed)
+                .then(ClusterDefintionTest::checkDefaultBlueprintsIsListed)
                 .validate();
     }
 
@@ -127,11 +127,12 @@ public class BlueprintTest extends AbstractIntegrationTest {
                     return entity;
                 })
                 .when(ClusterDefinition.listV4())
-                .then(BlueprintTest::checkBlueprintDoesNotExistInTheList)
+                .then(ClusterDefintionTest::checkBlueprintDoesNotExistInTheList)
                 .validate();
     }
 
-    private static ClusterDefinitionEntity checkBlueprintDoesNotExistInTheList(TestContext testContext, ClusterDefinitionEntity entity, CloudbreakClient cloudbreakClient) {
+    private static ClusterDefinitionEntity checkBlueprintDoesNotExistInTheList(TestContext testContext,
+        ClusterDefinitionEntity entity, CloudbreakClient cloudbreakClient) {
         if (entity.getViewResponses().stream().anyMatch(bp -> bp.getName().equals(entity.getName()))) {
             throw new TestFailException(
                     String.format("Blueprint is still exist in the db %s", entity.getName()));
@@ -155,7 +156,8 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private static ClusterDefinitionEntity checkDefaultBlueprintsIsListed(TestContext testContext, ClusterDefinitionEntity blueprint, CloudbreakClient cloudbreakClient) {
+    private static ClusterDefinitionEntity checkDefaultBlueprintsIsListed(TestContext testContext,
+        ClusterDefinitionEntity blueprint, CloudbreakClient cloudbreakClient) {
         List<ClusterDefinitionV4ViewResponse> result = blueprint.getViewResponses().stream()
                 .filter(bp -> bp.getStatus().equals(ResourceStatus.DEFAULT))
                 .collect(Collectors.toList());

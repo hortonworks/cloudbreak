@@ -115,7 +115,7 @@ public class AuditTest extends AbstractIntegrationTest {
                 .select(bp -> bp.getResponse().getId(), key(blueprintName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(blueprintName)
-                .withResourceType("cluster_definition")
+                .withResourceType("cluster_definitions")
                 .when(AuditTestAction::getAuditEvents)
                 .then(AuditTestAssertion.listContainsAtLeast(1))
                 .validate();
