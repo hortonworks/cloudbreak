@@ -64,7 +64,7 @@ func CreateRecipeFromFile(c *cli.Context) {
 func getExecutionType(executionType string) string {
 	switch strings.ToLower(executionType) {
 	case "pre-ambari-start":
-		return "PRE_CLUSTER_MANAGER_START"
+		return "PRE_AMBARI_START"
 	case "post-ambari-start":
 		return "POST_AMBARI_START"
 	case "post-cluster-install":
