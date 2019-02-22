@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -79,7 +79,7 @@ public class ClusterDecorator {
     }
 
     private void validateClusterDefinitionIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
-        if (request.getAmbari().getValidateClusterDefinition()) {
+        if (clusterDefinitionService.isAmbariBlueprint(subject.getClusterDefinition()) && request.getAmbari().getValidateClusterDefinition()) {
             ambariBlueprintValidator.validateBlueprintForStack(subject, subject.getClusterDefinition(), subject.getHostGroups(), stack.getInstanceGroups());
         }
     }
