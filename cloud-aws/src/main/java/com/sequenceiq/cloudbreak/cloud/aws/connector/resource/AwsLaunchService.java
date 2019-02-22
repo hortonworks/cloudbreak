@@ -242,7 +242,7 @@ public class AwsLaunchService {
                 new Parameter().withParameterKey("CBUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.CORE)),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY)),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getWorkspaceId())),
+                new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName())),
                 new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
