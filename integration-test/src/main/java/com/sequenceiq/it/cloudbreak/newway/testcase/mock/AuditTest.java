@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.testcase;
+package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
@@ -39,6 +39,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 // TODO image catalog test missing because the image catalog DTO creation is in progress
 public class AuditTest extends AbstractIntegrationTest {
