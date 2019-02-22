@@ -5,6 +5,10 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @cli_input_json = "../../templates/kilo-openstack-template.json"
   @aws_credential_name = "cli-aws-cred"
 
+  @environment_name = "cli-environment"
+  @environment_location = "Frankfurt"
+  @environment_regions = "RegionOne"
+
   @ambari_user = "admin"
   @ambari_password = 'Admin123!@#\"'
 
@@ -12,7 +16,7 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @recipe_name = "cli-recipe"
   @recipe_file = "../../recipes/echo.sh"
 
-  @default_clusterdefinition_name = "'EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin'"
+  @default_clusterdefinition_name = "'HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin'"
   @clusterdefinition_name_url = "cli-bp-url"
   @clusterdefinition_name_file = "cli-bp-file"
   @clusterdefinition_url = ENV['CLUSTER_DEFINITION_URL']

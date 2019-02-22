@@ -27,6 +27,17 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   end
 
   before(:all) do
+    result = list_with_name_exists(@environment_name)  do
+      cb.env.list.build
+    end
+    if !(result[0])
+      @environment_created = (cb.env.create.name(@environment_name).credential(@os_credential_name).location_name(@environment_location).regions(@environment_regions).build).stderr.empty?
+    else
+      @environment_created = true
+    end
+  end
+
+  before(:all) do
     result = list_with_name_exists(@os_cluster_name)  do
       cb.cluster.list.build
     end
@@ -38,15 +49,17 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   end  
   
   before(:each) do
-    skip("Credential creation failed") unless @credential_created 
+    skip("Environment creation failed") unless @environment_created
   end
 
   after(:all) do 
     result = cb.cluster.delete.name(@os_cluster_name).build
     expect(result).to be_successfully_executed
     expect(wait_for_cluster_deleted(cb, @os_cluster_name)).to be_falsy
+    result = cb.env.delete.name(@environment_name).build
+    expect(result).to be_successfully_executed
     result = cb.credential.delete.name(@os_credential_name).build
-    expect(result).to be_successfully_executed    
+    expect(result).to be_successfully_executed
   end
 
   it "Create cluster" do
