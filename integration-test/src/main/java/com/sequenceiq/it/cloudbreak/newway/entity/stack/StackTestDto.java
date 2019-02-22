@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
@@ -33,6 +34,8 @@ public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Pur
     public static final String STACK = "STACK";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTestDto.class);
+
+    private GeneratedClusterDefinitionV4Response generatedClusterDefinition;
 
     StackTestDto(String newId) {
         super(newId);
@@ -98,5 +101,14 @@ public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Pur
     @Override
     public CloudbreakEntity wait(Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
         return await(desiredStatuses, runningParameter);
+    }
+
+    public StackTestDto withGeneratedClusterDefinition(GeneratedClusterDefinitionV4Response generatedClusterDefinition) {
+        this.generatedClusterDefinition = generatedClusterDefinition;
+        return this;
+    }
+
+    public GeneratedClusterDefinitionV4Response getGeneratedClusterDefinition() {
+        return generatedClusterDefinition;
     }
 }

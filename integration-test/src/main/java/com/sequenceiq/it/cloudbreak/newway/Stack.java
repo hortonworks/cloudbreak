@@ -77,6 +77,18 @@ public class Stack extends StackTestDto {
         return StackTestAction::create;
     }
 
+    public static Action<StackTestDto> getV4() {
+        return StackTestAction::get;
+    }
+
+    public static Action<StackTestDto> getCli() {
+        return StackTestAction::getCli;
+    }
+
+    public static Action<StackTestDto> generatedBlueprint() {
+        return StackTestAction::getBlueprintByRequest;
+    }
+
     public static ResourceAction<Stack> postV3(String key) {
         return new ResourceAction<>(getTestContextStack(key), new StackPostV3Strategy());
     }

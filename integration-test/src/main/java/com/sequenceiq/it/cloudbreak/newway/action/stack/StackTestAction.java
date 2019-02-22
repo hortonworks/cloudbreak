@@ -5,11 +5,14 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static java.lang.String.format;
 
 import java.util.Collections;
+import java.util.HashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -54,6 +57,19 @@ public class StackTestAction {
                         .stackV4Endpoint()
                         .post(client.getWorkspaceId(), entity.getRequest()));
         logJSON(LOGGER, " Stack created was successfully:\n", entity.getResponse());
+        log(LOGGER, " ID: " + entity.getResponse().getId());
+
+        return entity;
+    }
+
+    public static StackTestDto get(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+        log(LOGGER, " Name: " + entity.getRequest().getName());
+        logJSON(LOGGER, " Stack get request:\n", entity.getRequest());
+        entity.setResponse(
+                client.getCloudbreakClient()
+                        .stackV4Endpoint()
+                        .get(client.getWorkspaceId(), entity.getName(), new HashSet<>()));
+        logJSON(LOGGER, " Stack get was successfully:\n", entity.getResponse());
         log(LOGGER, " ID: " + entity.getResponse().getId());
 
         return entity;
@@ -107,12 +123,26 @@ public class StackTestAction {
         return entity;
     }
 
-    public static StackTestDto updateAmbariPassword(TestContext testContext, StackTestDto entity,
-        CloudbreakClient client, UserNamePasswordV4Request request) throws Exception {
+    public static StackTestDto getBlueprintByRequest(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Stack update ambari password request:\n", entity.getRequest());
-        client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(), entity.getName(), request);
-        logJSON(LOGGER, " Stack update ambari password was successful:\n", entity.getResponse());
+        logJSON(LOGGER, " Stack get blueprint:\n", entity.getRequest());
+        GeneratedClusterDefinitionV4Response bp = client.getCloudbreakClient().stackV4Endpoint().postStackForClusterDefinition(
+                client.getWorkspaceId(),
+                entity.getName(),
+                entity.getRequest());
+        entity.withGeneratedClusterDefinition(bp);
+        logJSON(LOGGER, " get blueprint was successfully:\n", entity.getGeneratedClusterDefinition());
+        return entity;
+    }
+
+    public static StackTestDto getCli(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
+        logJSON(LOGGER, " Stack get cli skeleton:\n", entity.getRequest());
+        StackV4Request request = client.getCloudbreakClient().stackV4Endpoint().getRequestfromName(
+                client.getWorkspaceId(),
+                entity.getName());
+        entity.setRequest(request);
+        logJSON(LOGGER, " get cli skeleton was successfully:\n", entity.getRequest());
         log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
         return entity;
     }

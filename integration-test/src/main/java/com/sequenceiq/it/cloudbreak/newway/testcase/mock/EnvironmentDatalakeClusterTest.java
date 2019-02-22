@@ -172,6 +172,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
+        String dlName = getNameGenerator().getRandomNameForResource();
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -182,7 +183,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
                 .given("placement", PlacementSettingsEntity.class)
                 .given(StackTestDto.class)
-                .withName("dl-wl-same-env2")
+                .withName(dlName)
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withCluster(setResources(testContext, getRdsAsList(testContext),
