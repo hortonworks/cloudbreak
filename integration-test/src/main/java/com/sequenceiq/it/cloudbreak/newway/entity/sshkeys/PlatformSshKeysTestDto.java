@@ -8,7 +8,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 
 @Prototype
 public class PlatformSshKeysTestDto extends AbstractCloudbreakEntity<Object, PlatformSshKeysV4Response, PlatformSshKeysTestDto> {
@@ -28,7 +27,7 @@ public class PlatformSshKeysTestDto extends AbstractCloudbreakEntity<Object, Pla
     }
 
     @Override
-    public CloudbreakEntity valid() {
+    public PlatformSshKeysTestDto valid() {
         return withPlatformVariant("mock")
                 .withRegion("mockRegion")
                 .withAvailabilityZone("mockAZ")

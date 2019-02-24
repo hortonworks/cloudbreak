@@ -1,20 +1,25 @@
-package com.sequenceiq.it.cloudbreak.newway.entity.tagspecifications;
+package com.sequenceiq.it.cloudbreak.newway.entity.stackmatrix;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecificationsV4Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 
 @Prototype
-public class TagSpecificationsTestDto extends AbstractCloudbreakEntity<Object, TagSpecificationsV4Response, TagSpecificationsTestDto> {
+public class StackMatrixTestDto extends AbstractCloudbreakEntity<Object, StackMatrixV4Response, StackMatrixTestDto> {
 
-    protected TagSpecificationsTestDto(TestContext testContext) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackMatrixTestDto.class);
+
+    protected StackMatrixTestDto(TestContext testContext) {
         super(null, testContext);
     }
 
     @Override
-    public TagSpecificationsTestDto valid() {
+    public StackMatrixTestDto valid() {
         return this;
     }
 

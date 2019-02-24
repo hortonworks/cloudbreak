@@ -5,7 +5,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 
 @Prototype
 public class PlatformDiskTestDto extends AbstractCloudbreakEntity<Object, PlatformDisksV4Response, PlatformDiskTestDto> {
@@ -15,7 +14,7 @@ public class PlatformDiskTestDto extends AbstractCloudbreakEntity<Object, Platfo
     }
 
     @Override
-    public CloudbreakEntity valid() {
+    public PlatformDiskTestDto valid() {
         return this;
     }
 
