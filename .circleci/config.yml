@@ -176,7 +176,7 @@ jobs:
       - run:
           name: integration-test
           command: cd integration-test && make without-build && make revert-db
-          no_output_timeout: 35m
+          no_output_timeout: 120m
       - run:
           name: stop-containers and get cloudbreak log
           command: make stop-containers

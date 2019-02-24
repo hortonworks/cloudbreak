@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -26,8 +25,6 @@ public class ManagementPackTest extends AbstractIntegrationTest {
     private static final String ANOTHER_MPACK = "ANOTHER_MANAGEMENTPACK";
 
     private static final String FORBIDDEN = "FORBIDDEN";
-
-    private static final String CREATED = "GIVEN_MPACK";
 
     @BeforeMethod
     public void prepareUser(Object[] objects) {
@@ -104,49 +101,39 @@ public class ManagementPackTest extends AbstractIntegrationTest {
     }
 
     private AssertionV2<MPackTestDto> assertMpackExist() {
-        return new AssertionV2<MPackTestDto>() {
-            @Override
-            public MPackTestDto doAssertion(TestContext testContext, MPackTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-                Long workspaceId = cloudbreakClient.getWorkspaceId();
-                ManagementPackV4Response response;
-                try {
-                    response = cloudbreakClient.getCloudbreakClient().managementPackV4Endpoint().getByNameInWorkspace(workspaceId, entity.getName());
-                } catch (Exception e) {
-                    TestFailException testFailException =  new TestFailException("Couldn't find mpack");
-                    testFailException.initCause(e);
-                    throw testFailException;
-                }
-                entity.setResponse(response);
-                return entity;
+        return (testContext, entity, cloudbreakClient) -> {
+            Long workspaceId = cloudbreakClient.getWorkspaceId();
+            ManagementPackV4Response response;
+            try {
+                response = cloudbreakClient.getCloudbreakClient().managementPackV4Endpoint().getByNameInWorkspace(workspaceId, entity.getName());
+            } catch (Exception e) {
+                TestFailException testFailException =  new TestFailException("Couldn't find mpack");
+                testFailException.initCause(e);
+                throw testFailException;
             }
+            entity.setResponse(response);
+            return entity;
         };
     }
 
     private AssertionV2<MPackTestDto> assertMpacksHasGiven() {
-        return new AssertionV2<MPackTestDto>() {
-            @Override
-            public MPackTestDto doAssertion(TestContext testContext, MPackTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-                Assert.assertTrue(entity.getResponses().stream().anyMatch(mpack -> mpack.getId().equals(entity.getResponse().getId())));
-                return entity;
-            }
+        return (testContext, entity, cloudbreakClient) -> {
+            Assert.assertTrue(entity.getResponses().stream().anyMatch(mpack -> mpack.getId().equals(entity.getResponse().getId())));
+            return entity;
         };
     }
 
     private AssertionV2<MPackTestDto> assertMpackNotExist() {
-        return new AssertionV2<MPackTestDto>() {
-            @Override
-            public MPackTestDto doAssertion(TestContext testContext, MPackTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-                Long workspaceId = cloudbreakClient.getWorkspaceId();
-                ManagementPackV4Response response;
-                try {
-                    response = cloudbreakClient.getCloudbreakClient().managementPackV4Endpoint().getByNameInWorkspace(workspaceId, entity.getName());
-                } catch (Exception e) {
-                    return entity;
-                }
-                entity.setResponse(response);
-                TestFailException testFailException =  new TestFailException("Found ManagePack with name: " + entity.getName());
-                throw testFailException;
+        return (testContext, entity, cloudbreakClient) -> {
+            Long workspaceId = cloudbreakClient.getWorkspaceId();
+            ManagementPackV4Response response;
+            try {
+                response = cloudbreakClient.getCloudbreakClient().managementPackV4Endpoint().getByNameInWorkspace(workspaceId, entity.getName());
+            } catch (Exception e) {
+                return entity;
             }
+            entity.setResponse(response);
+            throw new TestFailException("Found ManagePack with name: " + entity.getName());
         };
     }
 }

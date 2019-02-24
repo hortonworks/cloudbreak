@@ -85,7 +85,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         String testClassName = getClass().getSimpleName();
         MDC.put("testlabel", testClassName);
         if (cleanupBeforeStart) {
-            getBean(PurgeGarbageService.class).purge();
+            applicationContext.getBean(PurgeGarbageService.class).purge();
         }
     }
 
