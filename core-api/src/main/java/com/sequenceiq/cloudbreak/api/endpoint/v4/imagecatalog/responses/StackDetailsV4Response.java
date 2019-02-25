@@ -14,7 +14,7 @@ public class StackDetailsV4Response implements JsonEntity {
     private String version;
 
     @JsonProperty
-    private StackRepoDetailsV4Response repository;
+    private AmbariStackRepoDetailsV4Response repository;
 
     private Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
 
@@ -26,11 +26,11 @@ public class StackDetailsV4Response implements JsonEntity {
         this.version = version;
     }
 
-    public StackRepoDetailsV4Response getRepository() {
+    public AmbariStackRepoDetailsV4Response getRepository() {
         return repository;
     }
 
-    public void setRepository(StackRepoDetailsV4Response repository) {
+    public void setRepository(AmbariStackRepoDetailsV4Response repository) {
         this.repository = repository;
     }
 

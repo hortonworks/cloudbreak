@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackRepoDetailsV4Response implements JsonEntity {
+public class AmbariStackRepoDetailsV4Response implements JsonEntity {
 
     @JsonProperty("stack")
     private Map<String, String> stack = new HashMap<>();

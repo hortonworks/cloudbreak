@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
 
-public class StackDescriptorV4Response {
+public class AmbariStackDescriptorV4Response {
 
     private String version;
 
     private String minAmbari;
 
-    private StackRepoDetailsV4Response repository;
+    private AmbariStackRepoDetailsV4Response repository;
 
     private Map<String, List<ManagementPackV4Entry>> mpacks;
 
@@ -34,11 +34,11 @@ public class StackDescriptorV4Response {
         this.minAmbari = minAmbari;
     }
 
-    public StackRepoDetailsV4Response getRepository() {
+    public AmbariStackRepoDetailsV4Response getRepository() {
         return repository;
     }
 
-    public void setRepository(StackRepoDetailsV4Response repository) {
+    public void setRepository(AmbariStackRepoDetailsV4Response repository) {
         this.repository = repository;
     }
 

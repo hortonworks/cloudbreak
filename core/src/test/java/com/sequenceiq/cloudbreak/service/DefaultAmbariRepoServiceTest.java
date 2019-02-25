@@ -18,7 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
@@ -38,8 +38,8 @@ public class DefaultAmbariRepoServiceTest {
         Map<String, RepositoryInfo> entries = new HashMap<>();
 
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
-        Map<String, StackDescriptorV4Response> hdpMap = new HashMap<>();
-        Map<String, StackDescriptorV4Response> hdfMap = new HashMap<>();
+        Map<String, AmbariStackDescriptorV4Response> hdpMap = new HashMap<>();
+        Map<String, AmbariStackDescriptorV4Response> hdfMap = new HashMap<>();
 
         AmbariInfoV4Response ambariInfoJson26 = new AmbariInfoV4Response();
         ambariInfoJson26.setVersion("2.6");
@@ -49,17 +49,17 @@ public class DefaultAmbariRepoServiceTest {
         ambariInfoJson27.setVersion("2.7");
         ambariInfoJson27.setRepository(getAmbariRepoJson("2.7"));
 
-        StackDescriptorV4Response hdpDescriptor26 = new StackDescriptorV4Response();
+        AmbariStackDescriptorV4Response hdpDescriptor26 = new AmbariStackDescriptorV4Response();
         hdpDescriptor26.setAmbari(ambariInfoJson26);
         hdpMap.put("2.7", hdpDescriptor26);
 
-        StackDescriptorV4Response hdpDescriptor30 = new StackDescriptorV4Response();
+        AmbariStackDescriptorV4Response hdpDescriptor30 = new AmbariStackDescriptorV4Response();
         hdpDescriptor30.setAmbari(ambariInfoJson27);
         hdpMap.put("3.0", hdpDescriptor30);
 
         stackMatrixV4Response.setHdp(hdpMap);
 
-        StackDescriptorV4Response hdfDescriptor31 = new StackDescriptorV4Response();
+        AmbariStackDescriptorV4Response hdfDescriptor31 = new AmbariStackDescriptorV4Response();
         hdfDescriptor31.setAmbari(ambariInfoJson27);
         hdfMap.put("3.1", hdfDescriptor31);
 

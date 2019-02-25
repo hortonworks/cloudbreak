@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackInfo implements Versioned {
+public class DefaultCDHInfo implements Versioned {
 
     private String version;
 
-    private AmbariDefaultStackRepoDetails repo;
+    private ClouderaManagerDefaultStackRepoDetails repo;
 
-    private String minAmbari;
+    private String minCM;
 
     @Override
     public String getVersion() {
@@ -21,22 +21,22 @@ public class StackInfo implements Versioned {
         this.version = version;
     }
 
-    public String getMinAmbari() {
-        return minAmbari;
+    public String getMinCM() {
+        return minCM;
     }
 
-    public void setMinAmbari(String minAmbari) {
-        this.minAmbari = minAmbari;
+    public void setMinCM(String minCM) {
+        this.minCM = minCM;
     }
 
-    public AmbariDefaultStackRepoDetails getRepo() {
+    public ClouderaManagerDefaultStackRepoDetails getRepo() {
         if (repo != null) {
-            repo.setHdpVersion(version);
+            repo.setCdhVersion(version);
         }
         return repo;
     }
 
-    public void setRepo(AmbariDefaultStackRepoDetails repo) {
+    public void setRepo(ClouderaManagerDefaultStackRepoDetails repo) {
         this.repo = repo;
     }
 
@@ -45,7 +45,7 @@ public class StackInfo implements Versioned {
         return "StackInfo{"
                 + "version='" + version + '\''
                 + ", repo=" + repo
-                + ", minAmbari=" + minAmbari
+                + ", minCM=" + minCM
                 + '}';
     }
 }

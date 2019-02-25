@@ -8,7 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DefaultStackRepoDetails implements Serializable {
+public class AmbariDefaultStackRepoDetails implements Serializable {
 
     public static final String REPO_ID_TAG = "repoid";
 

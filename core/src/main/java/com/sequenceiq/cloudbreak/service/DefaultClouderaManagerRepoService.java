@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.service.exception.RepositoryCannotFoundException;
 
@@ -21,14 +21,14 @@ public class DefaultClouderaManagerRepoService {
 
     private Map<String, RepositoryInfo> entries = new HashMap<>();
 
-    public AmbariRepo getDefault(String osType) {
+    public ClouderaManagerRepo getDefault(String osType) {
         for (Entry<String, RepositoryInfo> clouderaManagerInfoEntry : entries.entrySet()) {
             RepositoryInfo clouderaManagerInfo = clouderaManagerInfoEntry.getValue();
             if (clouderaManagerInfo.getRepo().get(osType) == null) {
                 LOGGER.info("Missing Cloudera Manager ({}) repo information for os: {}", clouderaManagerInfo.getVersion(), osType);
                 continue;
             }
-            AmbariRepo repository = new AmbariRepo();
+            ClouderaManagerRepo repository = new ClouderaManagerRepo();
             repository.setPredefined(Boolean.FALSE);
             repository.setVersion(clouderaManagerInfo.getVersion());
             repository.setBaseUrl(clouderaManagerInfo.getRepo().get(osType).getBaseurl());

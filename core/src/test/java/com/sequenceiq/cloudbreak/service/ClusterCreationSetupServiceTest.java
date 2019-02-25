@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -120,7 +120,7 @@ public class ClusterCreationSetupServiceTest {
         when(ambariBlueprintUtils.getBlueprintStackVersion(any())).thenReturn(version);
         when(ambariBlueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
         DefaultHDPInfo defaultHDPInfo = new DefaultHDPInfo();
-        DefaultStackRepoDetails stackRepoDetails = new DefaultStackRepoDetails();
+        AmbariDefaultStackRepoDetails stackRepoDetails = new AmbariDefaultStackRepoDetails();
         stackRepoDetails.setHdpVersion(version);
         Map<String, String> stackRepo = new HashMap<>();
         stackRepo.put("centos7", "http://centos7-repo/" + version);
