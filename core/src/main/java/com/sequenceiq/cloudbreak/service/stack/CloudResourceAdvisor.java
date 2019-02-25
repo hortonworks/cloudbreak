@@ -169,7 +169,7 @@ public class CloudResourceAdvisor {
             if (recommendedVolumeName.isPresent()) {
                 vmMetaDataProps.put("recommendedVolumeName", recommendedVolumeName.get().getKey());
                 DiskType diskType = DiskType.diskType(recommendedVolumeName.get().getKey());
-                if (diskTypes.displayNames().containsValue(diskType)) {
+                if (diskTypes.displayNames().containsKey(diskType) && diskTypes.displayNames().get(diskType) != null) {
                     vmMetaDataProps.put("recommendedVolumeDisplayName", diskTypes.displayNames().get(diskType).value());
                 }
             }
