@@ -6,9 +6,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
@@ -18,7 +18,7 @@ public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
         minimalSetupForClusterCreation(testContext);
         testContext.given(ClusterDefinitionEntity.class)
                 .withName(getNameGenerator().getRandomNameForResource())
-                .withClusterDefinition(ResourceUtil.readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp"))
+                .withClusterDefinition(ResourceUtil.readResourceAsString(applicationContext, "classpath:/clusterdefinition/clouderamanager.bp"))
                 .when(ClusterDefinition.postV4());
     }
 

@@ -25,11 +25,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.StackAction;
 import com.sequenceiq.it.cloudbreak.newway.StackCreation;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
 
@@ -253,7 +253,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     @Override
     public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
-        var ambari = ambariRequestWithBlueprintName(clusterDefinitionName);
+        var ambari = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
         var stackRepoDetails = new StackRepositoryV4Request();
         stackRepoDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
@@ -269,7 +269,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidDatalakeCluster() {
         return Cluster.request()
-                .withAmbariRequest(ambariRequestWithBlueprintName(getDatalakeBlueprintName()))
+                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
                 .withRdsConfigNames(of(getTestParameter().get(Ranger.CONFIG_NAME),
                         getTestParameter().get(Hive.CONFIG_NAME)))
@@ -279,7 +279,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidAttachedCluster() {
         return Cluster.request()
-                .withAmbariRequest(ambariRequestWithBlueprintName(getClusterDefinitionName()))
+                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getClusterDefinitionName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
                         getTestParameter().get(Ranger.CONFIG_NAME),
@@ -295,10 +295,9 @@ public class AwsCloudProvider extends CloudProviderHelper {
         return request.getStack();
     }
 
-    @Override
-    public AmbariV4Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+    public AmbariV4Request ambariRequestWithClusterDefinitionNameAndCustomAmbari(String clusterDefinitionName, String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
-        var req = ambariRequestWithBlueprintName(bluePrintName);
+        var req = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
         if (StringUtils.isNoneEmpty(customAmbariVersion)) {
             Preconditions.checkNotNull(customAmbariRepoUrl);
             Preconditions.checkNotNull(customAmbariRepoGpgKey);

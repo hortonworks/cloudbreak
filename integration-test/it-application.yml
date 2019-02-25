@@ -9,7 +9,7 @@ integrationtest:
     testsuite:
       threadPoolSize: 1
       pollingInterval: 1000
-    defaultBlueprintName: hdp-small-default
+    defaultClusterDefinitionName: hdp-small-default
     outputdir: /it
     command: suites
     cleanup:

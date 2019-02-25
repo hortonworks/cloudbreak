@@ -1,4 +1,4 @@
-name: Openstack Streaming Blueprint Test
+name: Openstack Streaming Cluster Definition Test
 parameters:
   cloudProvider: OPENSTACK
   clusterDefinitionName: hdp-streaming-cluster

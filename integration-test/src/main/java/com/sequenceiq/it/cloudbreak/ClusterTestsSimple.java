@@ -20,7 +20,7 @@ import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
 
 public class ClusterTestsSimple extends CloudbreakTest {
 
-    private static final String BLUEPRINT_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final int DESIRED_COUNT = 4;
 
@@ -55,7 +55,7 @@ public class ClusterTestsSimple extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
+                .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest(), "a stack request");
         when(Stack.postV3(), "post the stack request");

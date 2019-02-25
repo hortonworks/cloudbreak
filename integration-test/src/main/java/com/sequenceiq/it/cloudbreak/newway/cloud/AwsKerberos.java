@@ -44,7 +44,7 @@ public class AwsKerberos {
     }
 
     public static AmbariV4Request getAmbariV2Request(CloudProvider cloudProvider, String clusterDefinitionName, TestParameter testParameter) {
-        AmbariV4Request ambariRequest = cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName);
+        AmbariV4Request ambariRequest = cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName);
         ambariRequest.setUserName(USERNAME);
         ambariRequest.setPassword(testParameter.get(AD_PASSWORD));
         return ambariRequest;

@@ -9,7 +9,7 @@ tests:
   parameters:
     clusterName: e2e-azure-adlsgen2
     provider: azure
-    datalakeBlueprintName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
+    datalakeClusterDefinitionName: "HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin"
     image: hdp
     instancegroupName: worker
     cloudStorageType: ADLS_GEN_2

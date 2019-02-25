@@ -22,7 +22,7 @@ public class MockClusterTests extends CloudbreakMockClusterTest {
         String clusterName = "mockcluster";
 
         given(Cluster.request()
-                        .withAmbariRequest(getMockProvider().ambariRequestWithBlueprintName(clusterDefinitionName)),
+                        .withAmbariRequest(getMockProvider().ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(getMockProvider().aValidStackRequest()
                 .withName(clusterName), "a stack request");

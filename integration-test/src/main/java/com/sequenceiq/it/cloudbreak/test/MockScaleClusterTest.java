@@ -19,7 +19,7 @@ public class MockScaleClusterTest extends CloudbreakMockClusterTest {
         int desiredCount = 5;
 
         given(Cluster.request()
-                        .withAmbariRequest(getMockProvider().ambariRequestWithBlueprintName(clusterDefinitionName)),
+                        .withAmbariRequest(getMockProvider().ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(getMockProvider().aValidStackCreated()
                 .withName(clusterName), "a stack request");

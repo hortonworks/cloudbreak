@@ -37,8 +37,8 @@ import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
+import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
 
 public class Stack extends StackTestDto {
 
@@ -85,8 +85,8 @@ public class Stack extends StackTestDto {
         return StackTestAction::getCli;
     }
 
-    public static Action<StackTestDto> generatedBlueprint() {
-        return StackTestAction::getBlueprintByRequest;
+    public static Action<StackTestDto> generatedClusterDefinition() {
+        return StackTestAction::getClusterDefinitionByRequest;
     }
 
     public static ResourceAction<Stack> postV3(String key) {

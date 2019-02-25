@@ -19,16 +19,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 
 public class RecipeClusterTests extends CloudbreakTest {
 
-    private static final String BLUEPRINT_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
@@ -111,7 +111,7 @@ public class RecipeClusterTests extends CloudbreakTest {
     public void testCreateClusterWithRecipes() throws Exception {
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest().withInstanceGroups(cloudProvider.instanceGroups(RECIPE_NAMES)),  "a stack request");
         when(Stack.postV3(), "post the stack request with recipes");
@@ -159,7 +159,7 @@ public class RecipeClusterTests extends CloudbreakTest {
         invalidRecipe.add(INVALID_RECIPE_NAME);
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest().withInstanceGroups(cloudProvider.instanceGroups(invalidRecipe)).withName(INVALID_CLUSTER_NAME),
                 "a stack request");

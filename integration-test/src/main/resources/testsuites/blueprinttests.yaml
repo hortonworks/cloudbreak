@@ -4,7 +4,7 @@ parameters:
   cleanUp: false
 
 tests:
-  - name: blueprint_test
+  - name: cluster_definitions_test
     classes:
       - com.sequenceiq.it.cloudbreak.ClusterDefinitionTests
 

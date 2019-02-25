@@ -143,7 +143,7 @@ public class ScalingMock extends MockServer {
                 new AmbariServiceConfigResponse(getMockServerAddress(), getMockPort()), gson()::toJson);
         sparkService.get(AMBARI_API_ROOT + "/blueprints/:blueprintname", (request, response) -> {
             response.type("text/plain");
-            return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
+            return responseFromJsonFile("clusterdefinition/" + request.params("clusterdefinitionname") + ".bp");
         });
         sparkService.get(AMBARI_API_ROOT + "/clusters/:clusterName/hosts/:internalhostname", (request, response) -> {
             response.type("text/plain");

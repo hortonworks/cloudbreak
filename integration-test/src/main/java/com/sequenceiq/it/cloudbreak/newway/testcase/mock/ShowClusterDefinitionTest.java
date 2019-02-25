@@ -15,7 +15,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
-public class ShowBlueprintTest extends AbstractIntegrationTest {
+public class ShowClusterDefinitionTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -31,20 +31,20 @@ public class ShowBlueprintTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster does not exist the we should return with the future blueprint")
-    public void testGetBlueprintWhenClusterIsNotAliveThenShouldReturnWithBlueprint(MockedTestContext testContext) {
+            description = "When cluster does not exist the we should return with the future cluster definition")
+    public void testGetClusterDefinitionWhenClusterIsNotAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(StackTestDto.class).valid()
                 .withName(clusterName)
-                .when(Stack.generatedBlueprint())
-                .then(ShowBlueprintTest::checkFutureBlueprint)
+                .when(Stack.generatedClusterDefinition())
+                .then(ShowClusterDefinitionTest::checkFutureClusterDefinition)
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster exist the we should return with the generated blueprint")
-    public void testGetBlueprintWhenClusterIsAliveThenShouldReturnWithBlueprint(MockedTestContext testContext) {
+            description = "When cluster exist the we should return with the generated cluster definition")
+    public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(StackTestDto.class).valid()
@@ -52,27 +52,27 @@ public class ShowBlueprintTest extends AbstractIntegrationTest {
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(Stack.getV4())
-                .then(ShowBlueprintTest::checkGeneratedBlueprint)
+                .then(ShowClusterDefinitionTest::checkGeneratedClusterDefinition)
                 .validate();
     }
 
-    private static StackTestDto checkFutureBlueprint(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedBlueprintText = stackTestDto.getGeneratedClusterDefinition().getClusterDefinitionText();
-        validateGeneratedBlueprint(extendedBlueprintText);
+    private static StackTestDto checkFutureClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedClusterDefinitionText = stackTestDto.getGeneratedClusterDefinition().getClusterDefinitionText();
+        validateGeneratedClusterDefinition(extendedClusterDefinitionText);
         return stackTestDto;
     }
 
-    private static StackTestDto checkGeneratedBlueprint(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedBlueprintText = stackTestDto.getResponse().getCluster().getAmbari().getExtendedClusterDefinitionText();
-        validateGeneratedBlueprint(extendedBlueprintText);
+    private static StackTestDto checkGeneratedClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getAmbari().getExtendedClusterDefinitionText();
+        validateGeneratedClusterDefinition(extendedClusterDefinitionText);
         return stackTestDto;
     }
 
-    private static void validateGeneratedBlueprint(String extendedBlueprintText) {
-        if (Strings.isNullOrEmpty(extendedBlueprintText)) {
-            throw new TestFailException("Generated Blueprint does not exist");
-        } else if (!isJSONValid(extendedBlueprintText)) {
-            throw new TestFailException("Generated Blueprint is not a valid json");
+    private static void validateGeneratedClusterDefinition(String extendedClusterDefinitionText) {
+        if (Strings.isNullOrEmpty(extendedClusterDefinitionText)) {
+            throw new TestFailException("Generated Cluster Definition does not exist");
+        } else if (!isJSONValid(extendedClusterDefinitionText)) {
+            throw new TestFailException("Generated Cluster Definition is not a valid json");
         }
     }
 
