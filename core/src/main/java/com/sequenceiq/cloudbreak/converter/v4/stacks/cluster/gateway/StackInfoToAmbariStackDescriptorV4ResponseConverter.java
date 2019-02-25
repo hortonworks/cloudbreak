@@ -8,22 +8,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackRepoDetailsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class StackInfoToStackDescriptorV4ResponseConverter extends AbstractConversionServiceAwareConverter<StackInfo, StackDescriptorV4Response> {
+public class StackInfoToAmbariStackDescriptorV4ResponseConverter extends AbstractConversionServiceAwareConverter<StackInfo, AmbariStackDescriptorV4Response> {
 
     @Autowired
     private ConverterUtil converterUtil;
 
     @Override
-    public StackDescriptorV4Response convert(StackInfo source) {
-        StackDescriptorV4Response stackDescriptorV4 = new StackDescriptorV4Response();
+    public AmbariStackDescriptorV4Response convert(StackInfo source) {
+        AmbariStackDescriptorV4Response stackDescriptorV4 = new AmbariStackDescriptorV4Response();
 
         stackDescriptorV4.setVersion(source.getVersion());
         stackDescriptorV4.setMinAmbari(source.getMinAmbari());
@@ -38,14 +38,14 @@ public class StackInfoToStackDescriptorV4ResponseConverter extends AbstractConve
         return stackDescriptorV4;
     }
 
-    private StackRepoDetailsV4Response defaultStackRepoDetailsToStackRepoDetailsV4Response(DefaultStackRepoDetails defaultStackRepoDetails) {
-        if (defaultStackRepoDetails == null) {
+    private AmbariStackRepoDetailsV4Response defaultStackRepoDetailsToStackRepoDetailsV4Response(AmbariDefaultStackRepoDetails ambariDefaultStackRepoDetails) {
+        if (ambariDefaultStackRepoDetails == null) {
             return null;
         }
 
-        StackRepoDetailsV4Response stackRepoDetailsV4Response = new StackRepoDetailsV4Response();
-        stackRepoDetailsV4Response.setStack(defaultStackRepoDetails.getStack());
-        stackRepoDetailsV4Response.setUtil(defaultStackRepoDetails.getUtil());
-        return stackRepoDetailsV4Response;
+        AmbariStackRepoDetailsV4Response ambariStackRepoDetailsV4Response = new AmbariStackRepoDetailsV4Response();
+        ambariStackRepoDetailsV4Response.setStack(ambariDefaultStackRepoDetails.getStack());
+        ambariStackRepoDetailsV4Response.setUtil(ambariDefaultStackRepoDetails.getUtil());
+        return ambariStackRepoDetailsV4Response;
     }
 }

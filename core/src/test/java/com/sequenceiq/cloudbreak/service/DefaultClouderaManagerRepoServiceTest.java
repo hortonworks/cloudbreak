@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.service.exception.RepositoryCannotFoundException;
@@ -51,7 +51,7 @@ public class DefaultClouderaManagerRepoServiceTest {
 
     @Test
     public void testDefaultRepo() {
-        AmbariRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7");
+        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7");
         assertNotNull(repo);
 
         repo = defaultClouderaManagerRepoService.getDefault("amazonlinux2");

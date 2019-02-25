@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackDetailsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -93,7 +93,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         List<StackDetailsV4Response> result = new ArrayList<>();
         for (StackInfo info : defaultStackInfos) {
             StackDetailsV4Response json = new StackDetailsV4Response();
-            StackRepoDetailsV4Response repoJson = new StackRepoDetailsV4Response();
+            AmbariStackRepoDetailsV4Response repoJson = new AmbariStackRepoDetailsV4Response();
             Map<String, String> stackRepo = info.getRepo().getStack();
             if (stackRepo != null) {
                 repoJson.setStack(stackRepo);
@@ -154,8 +154,8 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         return json;
     }
 
-    private StackRepoDetailsV4Response convertStackRepoDetailsToJson(StackRepoDetails repo) {
-        StackRepoDetailsV4Response json = new StackRepoDetailsV4Response();
+    private AmbariStackRepoDetailsV4Response convertStackRepoDetailsToJson(StackRepoDetails repo) {
+        AmbariStackRepoDetailsV4Response json = new AmbariStackRepoDetailsV4Response();
         json.setStack(new HashMap<>(repo.getStack()));
         json.setUtil(new HashMap<>(repo.getUtil()));
         return json;

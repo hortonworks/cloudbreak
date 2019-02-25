@@ -14,7 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
@@ -49,7 +49,7 @@ public class DefaultAmbariRepoService {
 
     public AmbariRepo getDefault(String osType, String clusterType, String clusterVersion) {
         StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
-        Map<String, StackDescriptorV4Response> stackDescriptorMap;
+        Map<String, AmbariStackDescriptorV4Response> stackDescriptorMap;
 
         if (clusterType != null) {
             switch (clusterType) {
@@ -67,12 +67,12 @@ public class DefaultAmbariRepoService {
         }
 
         if (stackDescriptorMap != null) {
-            Optional<Entry<String, StackDescriptorV4Response>> descriptorEntry = stackDescriptorMap.entrySet().stream()
+            Optional<Entry<String, AmbariStackDescriptorV4Response>> descriptorEntry = stackDescriptorMap.entrySet().stream()
                     .filter(stackDescriptorEntry ->
                             clusterVersion == null || clusterVersion.equals(stackDescriptorEntry.getKey()))
                     .max(Comparator.comparing(Entry::getKey));
             if (descriptorEntry.isPresent()) {
-                Entry<String, StackDescriptorV4Response> stackDescriptorEntry = descriptorEntry.get();
+                Entry<String, AmbariStackDescriptorV4Response> stackDescriptorEntry = descriptorEntry.get();
                 AmbariInfoV4Response ambariInfoJson = stackDescriptorEntry.getValue().getAmbari();
                 if (ambariInfoJson.getRepository().get(osType) != null) {
                     AmbariRepo ambariRepo = new AmbariRepo();

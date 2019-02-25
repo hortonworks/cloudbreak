@@ -26,7 +26,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -36,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -116,11 +116,16 @@ public class ImageService {
             ClusterDefinition clusterDefinition, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
-        if (clusterDefinition != null && ambariBlueprintUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText())) {
+        if (clusterDefinition != null) {
             try {
                 JsonNode root = JsonUtil.readTree(clusterDefinition.getClusterDefinitionText());
-                clusterType = ambariBlueprintUtils.getBlueprintStackName(root);
-                clusterVersion = ambariBlueprintUtils.getBlueprintStackVersion(root);
+                if (ambariBlueprintUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText())) {
+                    clusterType = ambariBlueprintUtils.getBlueprintStackName(root);
+                    clusterVersion = ambariBlueprintUtils.getBlueprintStackVersion(root);
+                } else {
+                    clusterType = "CDH";
+                    clusterVersion = ambariBlueprintUtils.getCDHStackVersion(root);
+                }
             } catch (IOException ex) {
                 LOGGER.warn("Can not initiate default hdp info: ", ex);
             }
@@ -137,7 +142,7 @@ public class ImageService {
                 return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, user);
             } else {
                 LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
-                    + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
+                        + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
                 return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, user);
             }
         }

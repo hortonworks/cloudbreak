@@ -28,7 +28,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackDescriptorV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -245,7 +245,7 @@ public class ClusterCreationSetupService {
         Image image = imageComponent.getAttributes().get(Image.class);
         StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix();
         String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
-        Map<String, StackDescriptorV4Response> stackDescriptorMap;
+        Map<String, AmbariStackDescriptorV4Response> stackDescriptorMap;
 
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {
@@ -262,7 +262,7 @@ public class ClusterCreationSetupService {
                 LOGGER.warn("No stack descriptor map found for stacktype {}, using 'HDP'", stackType);
                 stackDescriptorMap = stackMatrixV4Response.getHdp();
         }
-        StackDescriptorV4Response stackDescriptorV4 = stackDescriptorMap.get(stackMajorVersion);
+        AmbariStackDescriptorV4Response stackDescriptorV4 = stackDescriptorMap.get(stackMajorVersion);
         if (stackDescriptorV4 != null) {
             boolean hasDefaultStackRepoUrlForOsType = stackDescriptorV4.getRepository().getStack().containsKey(image.getOsType());
             boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptorV4.getAmbari().getRepository().containsKey(image.getOsType());
@@ -319,7 +319,7 @@ public class ClusterCreationSetupService {
                 StackRepoDetails stackRepoDetails = stackRepoDetailsConverter.convert(ambariStackDetails);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
-                DefaultStackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(clusterDefinition, request, workspace).getRepo());
+                AmbariDefaultStackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(clusterDefinition, request, workspace).getRepo());
                 String osType = getOsType(stackId);
                 StackRepoDetails repo = createStackRepoDetails(stackRepoDetails, osType);
                 Optional<String> vdfUrl = getVDFUrlByOsType(osType, stackRepoDetails);
@@ -350,7 +350,7 @@ public class ClusterCreationSetupService {
         }
     }
 
-    private StackRepoDetails createStackRepoDetails(DefaultStackRepoDetails stackRepoDetails, String osType) {
+    private StackRepoDetails createStackRepoDetails(AmbariDefaultStackRepoDetails stackRepoDetails, String osType) {
         StackRepoDetails repo = new StackRepoDetails();
         repo.setHdpVersion(stackRepoDetails.getHdpVersion());
         repo.setStack(stackRepoDetails.getStack());
@@ -436,7 +436,7 @@ public class ClusterCreationSetupService {
         return image.getOsType();
     }
 
-    private Optional<String> getVDFUrlByOsType(String osType, DefaultStackRepoDetails stackRepoDetails) {
+    private Optional<String> getVDFUrlByOsType(String osType, AmbariDefaultStackRepoDetails stackRepoDetails) {
         String vdfStackRepoKeyFilter = VDF_REPO_KEY_PREFIX;
         if (!StringUtils.isEmpty(osType)) {
             vdfStackRepoKeyFilter += osType;
