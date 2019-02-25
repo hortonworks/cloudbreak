@@ -23,7 +23,7 @@ type StackDetailsV4Response struct {
 	Mpacks map[string][]ManagementPackV4Entry `json:"mpacks,omitempty"`
 
 	// repository
-	Repository *StackRepoDetailsV4Response `json:"repository,omitempty"`
+	Repository *AmbariStackRepoDetailsV4Response `json:"repository,omitempty"`
 
 	// version
 	Version string `json:"version,omitempty"`

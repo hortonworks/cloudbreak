@@ -17,16 +17,23 @@ import (
 // swagger:model StackMatrixV4Response
 type StackMatrixV4Response struct {
 
+	// cdh
+	Cdh map[string]ClouderaManagerStackDescriptorV4Response `json:"cdh,omitempty"`
+
 	// hdf
-	Hdf map[string]StackDescriptorV4Response `json:"hdf,omitempty"`
+	Hdf map[string]AmbariStackDescriptorV4Response `json:"hdf,omitempty"`
 
 	// hdp
-	Hdp map[string]StackDescriptorV4Response `json:"hdp,omitempty"`
+	Hdp map[string]AmbariStackDescriptorV4Response `json:"hdp,omitempty"`
 }
 
 // Validate validates this stack matrix v4 response
 func (m *StackMatrixV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCdh(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateHdf(formats); err != nil {
 		res = append(res, err)
@@ -39,6 +46,28 @@ func (m *StackMatrixV4Response) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *StackMatrixV4Response) validateCdh(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Cdh) { // not required
+		return nil
+	}
+
+	for k := range m.Cdh {
+
+		if err := validate.Required("cdh"+"."+k, "body", m.Cdh[k]); err != nil {
+			return err
+		}
+		if val, ok := m.Cdh[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

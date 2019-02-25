@@ -18,7 +18,7 @@ type VolumeV4Response struct {
 	// number of volumes
 	Count int32 `json:"count,omitempty"`
 
-	// size of volumes
+	// size of volume
 	Size int32 `json:"size,omitempty"`
 
 	// type of the volumes

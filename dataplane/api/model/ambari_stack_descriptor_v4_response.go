@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// StackDescriptorV4Response stack descriptor v4 response
-// swagger:model StackDescriptorV4Response
-type StackDescriptorV4Response struct {
+// AmbariStackDescriptorV4Response ambari stack descriptor v4 response
+// swagger:model AmbariStackDescriptorV4Response
+type AmbariStackDescriptorV4Response struct {
 
 	// ambari
 	Ambari *AmbariInfoV4Response `json:"ambari,omitempty"`
@@ -29,14 +29,14 @@ type StackDescriptorV4Response struct {
 	Mpacks map[string][]ManagementPackV4Entry `json:"mpacks,omitempty"`
 
 	// repository
-	Repository *StackRepoDetailsV4Response `json:"repository,omitempty"`
+	Repository *AmbariStackRepoDetailsV4Response `json:"repository,omitempty"`
 
 	// version
 	Version string `json:"version,omitempty"`
 }
 
-// Validate validates this stack descriptor v4 response
-func (m *StackDescriptorV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this ambari stack descriptor v4 response
+func (m *AmbariStackDescriptorV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbari(formats); err != nil {
@@ -57,7 +57,7 @@ func (m *StackDescriptorV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StackDescriptorV4Response) validateAmbari(formats strfmt.Registry) error {
+func (m *AmbariStackDescriptorV4Response) validateAmbari(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Ambari) { // not required
 		return nil
@@ -75,7 +75,7 @@ func (m *StackDescriptorV4Response) validateAmbari(formats strfmt.Registry) erro
 	return nil
 }
 
-func (m *StackDescriptorV4Response) validateMpacks(formats strfmt.Registry) error {
+func (m *AmbariStackDescriptorV4Response) validateMpacks(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Mpacks) { // not required
 		return nil
@@ -103,7 +103,7 @@ func (m *StackDescriptorV4Response) validateMpacks(formats strfmt.Registry) erro
 	return nil
 }
 
-func (m *StackDescriptorV4Response) validateRepository(formats strfmt.Registry) error {
+func (m *AmbariStackDescriptorV4Response) validateRepository(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Repository) { // not required
 		return nil
@@ -122,7 +122,7 @@ func (m *StackDescriptorV4Response) validateRepository(formats strfmt.Registry) 
 }
 
 // MarshalBinary interface implementation
-func (m *StackDescriptorV4Response) MarshalBinary() ([]byte, error) {
+func (m *AmbariStackDescriptorV4Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -130,8 +130,8 @@ func (m *StackDescriptorV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *StackDescriptorV4Response) UnmarshalBinary(b []byte) error {
-	var res StackDescriptorV4Response
+func (m *AmbariStackDescriptorV4Response) UnmarshalBinary(b []byte) error {
+	var res AmbariStackDescriptorV4Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

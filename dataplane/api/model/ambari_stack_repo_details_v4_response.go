@@ -11,9 +11,9 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// StackRepoDetailsV4Response stack repo details v4 response
-// swagger:model StackRepoDetailsV4Response
-type StackRepoDetailsV4Response struct {
+// AmbariStackRepoDetailsV4Response ambari stack repo details v4 response
+// swagger:model AmbariStackRepoDetailsV4Response
+type AmbariStackRepoDetailsV4Response struct {
 
 	// stack
 	Stack map[string]string `json:"stack,omitempty"`
@@ -22,13 +22,13 @@ type StackRepoDetailsV4Response struct {
 	Util map[string]string `json:"util,omitempty"`
 }
 
-// Validate validates this stack repo details v4 response
-func (m *StackRepoDetailsV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this ambari stack repo details v4 response
+func (m *AmbariStackRepoDetailsV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *StackRepoDetailsV4Response) MarshalBinary() ([]byte, error) {
+func (m *AmbariStackRepoDetailsV4Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -36,8 +36,8 @@ func (m *StackRepoDetailsV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *StackRepoDetailsV4Response) UnmarshalBinary(b []byte) error {
-	var res StackRepoDetailsV4Response
+func (m *AmbariStackRepoDetailsV4Response) UnmarshalBinary(b []byte) error {
+	var res AmbariStackRepoDetailsV4Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

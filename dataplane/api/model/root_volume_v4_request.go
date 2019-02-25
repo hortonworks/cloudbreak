@@ -17,7 +17,7 @@ import (
 // swagger:model RootVolumeV4Request
 type RootVolumeV4Request struct {
 
-	// size of volumes
+	// size of the root volume
 	// Required: true
 	Size *int32 `json:"size"`
 }

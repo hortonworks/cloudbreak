@@ -20,7 +20,7 @@ type VolumeV4Request struct {
 	// number of volumes
 	Count int32 `json:"count,omitempty"`
 
-	// size of volumes
+	// size of volume
 	// Required: true
 	Size *int32 `json:"size"`
 
