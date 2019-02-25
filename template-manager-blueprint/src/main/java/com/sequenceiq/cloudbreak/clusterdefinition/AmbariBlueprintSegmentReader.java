@@ -31,16 +31,16 @@ public class AmbariBlueprintSegmentReader implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariBlueprintSegmentReader.class);
 
-    @Value("${cb.blueprint.template.path:blueprints/configurations}")
+    @Value("${cb.clusterdefinition.ambari.template.path:blueprints/configurations}")
     private String blueprintTemplatePath;
 
-    @Value("${cb.blueprint.basic.path:blueprints/basics}")
+    @Value("${cb.clusterdefinition.ambari.basic.path:blueprints/basics}")
     private String basicTemplatePath;
 
-    @Value("${cb.blueprint.settings.path:blueprints/settings}")
+    @Value("${cb.clusterdefinition.ambari.settings.path:blueprints/settings}")
     private String settingsTemplatePath;
 
-    @Value("${cb.blueprint.security.kerberos_descriptor.path:blueprints/security/kerberos_descriptor}")
+    @Value("${cb.clusterdefinition.ambari.security.kerberos_descriptor.path:blueprints/security/kerberos_descriptor}")
     private String kerberosDescriptorTemplatePath;
 
     private ResourceLoader resourceLoader;

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLUSTER_DEFINITION;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLI;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLUSTER_DEFINITION;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 @Service
 public class PreferencesService {
 
-    @Value("${cb.disable.show.blueprint:false}")
+    @Value("${cb.disable.show.clusterdefinition:false}")
     private boolean disableShowBlueprint;
 
     @Value("${cb.disable.show.cli:false}")
