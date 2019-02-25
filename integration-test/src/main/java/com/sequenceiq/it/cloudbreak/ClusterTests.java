@@ -38,12 +38,12 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
 
     private static final int DESIRED_NO = 2;
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    @Test(dataProvider = "providernameclusterdefinitionimage", priority = 10)
     public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -60,7 +60,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "check ambari is running and components available");
     }
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    @Test(dataProvider = "providernameclusterdefinitionimage", priority = 10)
     public void testCreateHdfCluster(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
@@ -87,13 +87,13 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "check ambari is running and components available");
     }
 
-    @Test(dataProvider = "providernameblueprintimageos", priority = 10)
+    @Test(dataProvider = "providernameclusterdefinitionimage", priority = 10)
     public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String os)
             throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -110,12 +110,12 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                 "check ambari is running and components available");
     }
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    @Test(dataProvider = "providernameclusterdefinitionimage", priority = 10)
     public void testCreateNewClusterWithKnox(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -239,7 +239,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 
-    @DataProvider(name = "providernameblueprintimageos")
+    @DataProvider(name = "providernameclusterdefinitionimage")
     public Object[][] providerAndImageOs() {
         String clusterDefinition = getTestParameter().get("clusterDefinitionName");
         String provider = getTestParameter().get("provider").toLowerCase();

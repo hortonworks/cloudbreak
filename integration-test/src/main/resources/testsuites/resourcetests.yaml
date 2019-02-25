@@ -46,10 +46,10 @@ tests:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
       - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
 
-  - name: blueprint_test
+  - name: cluster_definition_test
     parameters:
-      clusterDefinitionName: it-blueprint-restest
-      clusterDefinitionFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
+      clusterDefinitionName: it-clusterdefinition-restest
+      clusterDefinitionFile: classpath:/clusterdefinition/multi-node-hdfs-yarn.bp
     classes:
       - com.sequenceiq.it.cloudbreak.ClusterDefinitionCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterDefinitionDeleteByNameTest

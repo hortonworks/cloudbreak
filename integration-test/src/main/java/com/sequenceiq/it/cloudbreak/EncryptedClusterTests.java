@@ -19,19 +19,19 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public class EncryptedClusterTests extends ClusterTests {
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    @Test(dataProvider = "providernameclusterdefinitionimage", priority = 10)
     public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String clusterDefinitionName, String imageId) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(clusterDefinitionName)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")

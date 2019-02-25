@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 
-import static com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock.BLUEPRINTS;
+import static com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock.CLUSTER_DEFINITIONS;
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_API_ROOT;
@@ -20,8 +20,8 @@ import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 import spark.Route;
 
@@ -90,7 +90,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testAmbariFailure(MockedTestContext testContext) {
-        mockAmbariBlueprintFail(testContext);
+        mockAmbariClusterDefinitionFail(testContext);
         testContext.given(StackTestDto.class)
                 .when(Stack.postV4())
                 .await(STACK_FAILED)
@@ -98,15 +98,15 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void mockAmbariBlueprintFail(MockedTestContext testContext) {
+    private void mockAmbariClusterDefinitionFail(MockedTestContext testContext) {
         Route customResponse2 = (request, response) -> {
             response.type("text/plain");
             response.status(400);
             response.body("Bad cluster definition format");
             return "";
         };
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(BLUEPRINTS);
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(BLUEPRINTS, customResponse2);
+        testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(CLUSTER_DEFINITIONS);
+        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(CLUSTER_DEFINITIONS, customResponse2);
     }
 
 }

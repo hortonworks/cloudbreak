@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter;
 
 public class CommonCloudParameters {
 
-    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    public static final String DEFAULT_CLUSTER_DEFINITION_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     public static final String DEFAULT_SSH_PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDXF9paZtj6ibDgRGtw2jTls1fysxETxG/rbCN9vYlpDw6ROK90rjXn"
             + "C0qi43kXbs5Z/NyFDDcYW4U1nUmJCIhQqNJv00ukTbS4McfeNYrZF78KNLtbUP57SfKzjcH1Txz9Zr3ILEADqMyNRzgSB2gw5XnfbbLUFQYcF3hT11gjEw99Qi9eCQ6nCM37iy9t"

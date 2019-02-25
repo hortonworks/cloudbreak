@@ -1,17 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
-import org.springframework.util.StringUtils;
+import static com.google.common.collect.Sets.newHashSet;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
@@ -19,7 +8,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.collect.Sets.newHashSet;
+import org.springframework.util.StringUtils;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
 public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implements AssertionV2<ClusterTemplateEntity> {
 
@@ -89,11 +90,11 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Image catalog name is mismatch!");
         }
 
-        String blueprintName = entity.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
-                CommonCloudParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+        String clusterDefinitionName = entity.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
+                CommonCloudParameters.DEFAULT_CLUSTER_DEFINITION_NAME);
 
-        if (!blueprintName.equals(stackTemplate.getCluster().getAmbari().getClusterDefinitionName())) {
-            throw new IllegalArgumentException("Blueprint name is mismatch!");
+        if (!clusterDefinitionName.equals(stackTemplate.getCluster().getAmbari().getClusterDefinitionName())) {
+            throw new IllegalArgumentException("Cluster Definition name is mismatch!");
         }
 
         if (!"2.7.2.2".equals(stackTemplate.getCluster().getAmbari().getRepository().getVersion())) {

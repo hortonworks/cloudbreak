@@ -12,11 +12,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public abstract class CloudProvider {
 
@@ -32,9 +32,9 @@ public abstract class CloudProvider {
 
     public abstract StackTestDto aValidAttachedStackRequest(String datalakeName);
 
-    public abstract AmbariV4Request ambariRequestWithBlueprintName(String bluePrintName);
+    public abstract AmbariV4Request ambariRequestWithClusterDefinitionName(String clusterDefinitionName);
 
-    public abstract AmbariV4Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+    public abstract AmbariV4Request ambariRequestWithClusterDefinitionNameAndCustomAmbari(String clusterDefinitionName, String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey);
 
     public abstract String getClusterName();

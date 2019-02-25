@@ -13,16 +13,16 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 
 public class ProxyClusterTests extends CloudbreakTest {
 
-    private static final String BLUEPRINT_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String VALID_PROXY_CONFIG = "e2e-proxy-cl";
 
@@ -71,7 +71,7 @@ public class ProxyClusterTests extends CloudbreakTest {
     public void testCreateClusterWithProxy(String securityGroupId) throws Exception {
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME))
+                .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME))
                 .withProxyConfigName(VALID_PROXY_CONFIG), "a cluster request with proxy");
         given(cloudProvider.aValidStackRequest()
                 .withInstanceGroups(cloudProvider.instanceGroups(securityGroupId)),  "a stack request with given security group");

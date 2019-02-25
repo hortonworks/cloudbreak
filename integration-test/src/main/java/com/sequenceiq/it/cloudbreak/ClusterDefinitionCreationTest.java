@@ -14,16 +14,16 @@ public class ClusterDefinitionCreationTest extends AbstractCloudbreakIntegration
 
     @Test
     @Parameters({ "clusterDefinitionName", "clusterDefinitionFile" })
-    public void testBlueprintCreation(@Optional("it-hdp-multi-blueprint") String clusterDefinitionName,
-            @Optional("classpath:/blueprint/hdp-multinode-default.bp") String clusterDefinitionFile) throws Exception {
+    public void testClusterDefinitionCreation(@Optional("it-hdp-multi-cluster-definition") String clusterDefinitionName,
+            @Optional("classpath:/clusterdefinition/hdp-multinode-default.bp") String clusterDefinitionFile) throws Exception {
         // GIVEN
-        String blueprintContent = ResourceUtil.readStringFromResource(applicationContext, clusterDefinitionFile);
+        String clusterDefinitionContent = ResourceUtil.readStringFromResource(applicationContext, clusterDefinitionFile);
         Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         // WHEN
         ClusterDefinitionV4Request clusterDefinitionRequest = new ClusterDefinitionV4Request();
         clusterDefinitionRequest.setName(clusterDefinitionName);
         clusterDefinitionRequest.setDescription("Cluster definition for integration testing");
-        clusterDefinitionRequest.setClusterDefinition(blueprintContent);
+        clusterDefinitionRequest.setClusterDefinition(clusterDefinitionContent);
         String id = getCloudbreakClient().clusterDefinitionV4Endpoint().post(workspaceId, clusterDefinitionRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);

@@ -7,7 +7,7 @@ import com.sequenceiq.it.spark.ITResponse;
 import spark.Request;
 import spark.Response;
 
-public class AmbariBlueprintsResponse extends ITResponse {
+public class AmbariClusterDefinitionsResponse extends ITResponse {
     @Override
     public Object handle(Request request, Response response) {
         response.type("text/plain");

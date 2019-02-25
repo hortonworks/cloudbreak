@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,20 +15,21 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
 
 public class GeneralRecipeClusterTests extends CloudbreakTest {
 
-    private static final String BLUEPRINT_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    private static final String CLUSTER_DEFINITION_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String VALID_RECIPE_DESCRIPTION = "python recipe for API E2E tests";
 
@@ -82,7 +82,7 @@ public class GeneralRecipeClusterTests extends CloudbreakTest {
     public void testAClusterCreation() throws Exception {
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider
                 .aValidStackRequest()

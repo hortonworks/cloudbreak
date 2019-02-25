@@ -12,9 +12,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigRequestDataCollector;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
@@ -26,8 +23,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.cloudbreak.filesystem.CloudStorageTypePathPrefix;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigRequestDataCollector;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -43,7 +43,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
-    private static final String DEFAULT_DATALAKE_AMBARI_BLUEPRINT = "Data Lake: Apache Ranger, Apache Hive Metastore";
+    private static final String DEFAULT_DATALAKE_AMBARI_CLUSTERDEFINITION = "Data Lake: Apache Ranger, Apache Hive Metastore";
 
     private static final String RECOVERY_MODE = "RecoveryMode";
 
@@ -194,17 +194,17 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     @Override
-    public AmbariV4Request ambariRequestWithBlueprintNameAndCustomAmbari(String bluePrintName, String customAmbariVersion,
+    public AmbariV4Request ambariRequestWithClusterDefinitionNameAndCustomAmbari(String clusterDefinitionName, String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
-        return ambariRequestWithBlueprintName(bluePrintName);
+        return ambariRequestWithClusterDefinitionName(clusterDefinitionName);
     }
 
     @Override
-    public AmbariV4Request ambariRequestWithBlueprintName(String bluePrintName) {
+    public AmbariV4Request ambariRequestWithClusterDefinitionName(String clusterDefinitionName) {
         var req = new AmbariV4Request();
         req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
-        req.setClusterDefinitionName(bluePrintName);
+        req.setClusterDefinitionName(clusterDefinitionName);
         req.setValidateClusterDefinition(false);
         req.setValidateRepositories(Boolean.TRUE);
         req.setStackRepository(new StackRepositoryV4Request());
@@ -254,8 +254,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return location;
     }
 
-    protected String getDatalakeBlueprintName() {
-        String clusterDefinitionName = testParameter.get("datalakeBlueprintName");
-        return clusterDefinitionName != null ? clusterDefinitionName : DEFAULT_DATALAKE_AMBARI_BLUEPRINT;
+    protected String getDatalakeClusterDefinitionName() {
+        String clusterDefinitionName = testParameter.get("datalakeClusterDefinitionName");
+        return clusterDefinitionName != null ? clusterDefinitionName : DEFAULT_DATALAKE_AMBARI_CLUSTERDEFINITION;
     }
 }

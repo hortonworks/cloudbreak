@@ -24,11 +24,11 @@ public class ClusterDefinitionTests extends CloudbreakTest {
 
     private static final String VALID_CD_NAME = "valid-br";
 
-    private static final String AGAIN_CD_NAME = "again-blueprint";
+    private static final String AGAIN_CD_NAME = "again-clusterdefinition";
 
-    private static final String LONG_DC_CD_NAME = "long-description-blueprint";
+    private static final String LONG_DC_CD_NAME = "long-description-clusterdefinition";
 
-    private static final String DELETE_CD_NAME = "delete-blueprint";
+    private static final String DELETE_CD_NAME = "delete-clusterdefinition";
 
     private static final String SPECIAL_CD_NAME = "@#$|:&* ABC";
 
@@ -36,9 +36,9 @@ public class ClusterDefinitionTests extends CloudbreakTest {
 
     private static final String INVALID_SHORT_CD_NAME = "";
 
-    private static final String EMPTY_CD_NAME = "temp-empty-blueprint";
+    private static final String EMPTY_CD_NAME = "temp-empty-clusterdefinition";
 
-    private static final String INVALIDURL_CD_NAME = "temp-url-blueprint";
+    private static final String INVALIDURL_CD_NAME = "temp-url-clusterdefinition";
 
     private static final String CD_DESCRIPTION = "temporary cluster definition for API E2E tests";
 
@@ -282,7 +282,7 @@ public class ClusterDefinitionTests extends CloudbreakTest {
         return new String(
                 StreamUtils.copyToByteArray(
                         applicationContext
-                                .getResource("classpath:/blueprint/hdp-multinode-default.bp")
+                                .getResource("classpath:/clusterdefinition/hdp-multinode-default.bp")
                                 .getInputStream()));
     }
 
@@ -290,13 +290,13 @@ public class ClusterDefinitionTests extends CloudbreakTest {
         return new String(
                 StreamUtils.copyToByteArray(
                         applicationContext
-                                .getResource("classpath:/blueprint/empty.bp")
+                                .getResource("classpath:/clustercefinition/empty.bp")
                                 .getInputStream()));
     }
 
     private String getClusterDefinitionUrl() {
         return "https://rawgit.com/hortonworks/cloudbreak/master/integration-test/src/main/resources/"
-                + "blueprint/multi-node-hdfs-yarn.bp";
+                + "clusterdefinition/multi-node-hdfs-yarn.bp";
     }
 
     private String getClusterDefinitionInvalidUrl() {

@@ -47,8 +47,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.testsuite.cleanUpOnFailure}")
     private boolean cleanUpOnFailure;
 
-    @Value("${integrationtest.defaultBlueprintName}")
-    private String defaultBlueprintName;
+    @Value("${integrationtest.defaultClusterDefinitionName}")
+    private String defaultClusterDefinitionName;
 
     @Value("${integrationtest.testsuite.skipRemainingTestsAfterOneFailed}")
     private boolean skipRemainingSuiteTestsAfterOneFailed;
@@ -135,7 +135,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient, workspaceId);
         }
-        putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+        putClusterDefinitionToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
                 .clusterDefinitionV4Endpoint(), clusterDefinitionName, workspaceId);
         putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
                 .credentialV4Endpoint(), cloudProvider, credentialName, workspaceId);
@@ -157,10 +157,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     }
 
-    private void putBlueprintToContextIfExist(ClusterDefinitionV4Endpoint endpoint, String clusterDefinitionName, Long workspaceId) {
+    private void putClusterDefinitionToContextIfExist(ClusterDefinitionV4Endpoint endpoint, String clusterDefinitionName, Long workspaceId) {
         endpoint.list(workspaceId);
         if (StringUtils.isEmpty(clusterDefinitionName)) {
-            clusterDefinitionName = defaultBlueprintName;
+            clusterDefinitionName = defaultClusterDefinitionName;
         }
         if (StringUtils.hasLength(clusterDefinitionName)) {
             String resourceName = endpoint.get(workspaceId, clusterDefinitionName).getName();

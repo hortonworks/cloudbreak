@@ -1,4 +1,4 @@
-name: Openstack Spark Blueprint Test
+name: Openstack Spark Cluster Definition Test
 parameters:
   cloudProvider: OPENSTACK
   clusterDefinitionName: hdp-spark-cluster

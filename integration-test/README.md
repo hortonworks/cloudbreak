@@ -112,7 +112,7 @@ under the cloudplatform specific directories (aws, azurerm, gcp, openstack, nati
 
 In gcp there is a kerberos test under kerberos directory and a recipe test under recipe directory.
 
-### Test suite example with credential / blueprint / template creation and deletion:
+### Test suite example with credential / cluster definition / template creation and deletion:
 
 ```
 name: Resource_tests
@@ -138,10 +138,10 @@ tests:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
       - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
 
-  - name: blueprint_test
+  - name: cluster_definition_test
     parameters:
-      clusterDefinitionName: it-blueprint-restest
-      clusterDefinitionFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
+      clusterDefinitionName: it-clusterdefinition-restest
+      clusterDefinitionFile: classpath:/clusterdefinition/multi-node-hdfs-yarn.bp
     classes:
       - com.sequenceiq.it.cloudbreak.ClusterDefinitionCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterDefinitionDeleteByNameTest
@@ -158,7 +158,7 @@ tests:
 All test has its own parameter set which you have to define. There are application level, suite level and test level parameters.
 In the example `cleanUp` is a suite level parameter and all the tests will get where it is defined as test parameter, but `gcpName` parameter only visible for the gcp_template_test tests.
 
-### Test suite example with existing credential, blueprint resources:
+### Test suite example with existing credential, cluster definition resources:
 ```
 name: OpenStack_full_smoketest_cred
 parameters:
@@ -227,7 +227,7 @@ In the example `cloudProvider` is a suite level parameter and `CloudbreakTestSui
 
 **Resource names if we have existing ones:**
 * credentialName - the name of the credential
-* clusterDefinitionName - the name of the blueprint
+* clusterDefinitionName - the name of the cluster definition
 * stackName - the name of the cluster
 * instanceGroups - instance groups for cluster creation,
 
@@ -253,7 +253,7 @@ com.sequenceiq.it.IntegrationTestApp
 
 *com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer*
 * Initialize cloudbreak test context for the suites
-* Store named resources in the context if given on applcication or suite level: blueprint, network, securitygroup, stack, credential, instancegroups
+* Store named resources in the context if given on applcication or suite level: cluster definition, network, securitygroup, stack, credential, instancegroups
 * Cleanup after the testsuite finished
 
 All the suite have to be started with these classes:
@@ -269,8 +269,8 @@ tests:
 ### Tests
 
 **Common, not cloudprovider specific tests:**
-* BlueprintCreationTest
-* BlueprintDeleteByNameTest
+* ClusterDefinitionCreationTest
+* ClusterDefinitionDeleteByNameTest
 * ClusterAndStackDownscaleTest
 * ClusterAndStackStopTest
 * ClusterCreationTest
@@ -304,7 +304,8 @@ tests:
 * Network creation tests
   * OpenStackNetworkCreationTest
 
-In a suite you can assemble the above mentioned tests in given order. Every suite has its own context in which the tests can share information with each other. (for example BlueprintCreationTest put the created blueprint's id into the context which is necessary for stack creation, etc)
+In a suite you can assemble the above mentioned tests in given order. Every suite has its own context in which the tests can share information with each 
+other. (for example ClusterDefinitionCreationTest put the created cluster definition's id into the context which is necessary for stack creation, etc)
 You can define parameters for the tests as well, for example GcpTempateCreationTest:
 
 ```

@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -32,10 +31,11 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 
 public class RecommendationsTests extends CloudbreakTest {
 
-    private static final String VALID_CD_NAME = "valid-blueprint";
+    private static final String VALID_CD_NAME = "valid-clusterdefinition";
 
     private static final String CD_DESCRIPTION = "temporary cluster definition for API E2E tests";
 
@@ -51,7 +51,7 @@ public class RecommendationsTests extends CloudbreakTest {
     }
 
     private String getClusterDefinitionFile() throws IOException {
-        return new String(StreamUtils.copyToByteArray(applicationContext.getResource("classpath:/blueprint/multi-node-hdfs-yarn.bp").getInputStream()));
+        return new String(StreamUtils.copyToByteArray(applicationContext.getResource("classpath:/clusterdefinition/multi-node-hdfs-yarn.bp").getInputStream()));
     }
 
     private String getJsonFile() throws IOException {

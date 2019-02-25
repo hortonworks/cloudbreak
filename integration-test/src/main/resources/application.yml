@@ -173,7 +173,7 @@ integrationtest:
         retryCount: 3
         cleanupBeforeStart: true
 
-    defaultBlueprintName:
+    defaultClusterDefinitionName:
 
     ambariContainer: hortonworks/ambari-agent
 

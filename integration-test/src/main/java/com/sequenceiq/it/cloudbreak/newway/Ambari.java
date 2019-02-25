@@ -28,7 +28,7 @@ public class Ambari extends Entity  {
         this.request = request;
     }
 
-    public Ambari withBlueprintName(String name) {
+    public Ambari withClusterDefinitionName(String name) {
         request.setClusterDefinitionName(name);
         return this;
     }

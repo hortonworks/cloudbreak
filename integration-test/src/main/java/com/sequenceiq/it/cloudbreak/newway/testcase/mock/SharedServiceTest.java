@@ -29,12 +29,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
@@ -43,8 +40,11 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class SharedServiceTest extends AbstractIntegrationTest {
@@ -88,7 +88,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         DatabaseV4Request hiveRds = rdsRequest(DatabaseType.HIVE, hiveRdsName);
         DatabaseV4Request rangerRds = rdsRequest(DatabaseType.RANGER, rangerRdsName);
         testContext
@@ -98,31 +98,32 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(DatabaseEntity.post())
                 .given(LdapConfigTestDto.class).withRequest(ldapRequest(ldapName)).withName(ldapName)
                 .when(ldapConfigTestClient.post())
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .given(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
-                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, blueprintName, cloudStorage()))
+                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, clusterDefinitionName, cloudStorage()))
                 .capture(SharedServiceTest::rdsConfigNamesFromRequest, key(RDS_KEY))
                 .capture(SharedServiceTest::ldapNameFromRequest, key(LDAP_KEY))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .verify(SharedServiceTest::rdsConfigNamesFromResponse, key(RDS_KEY))
                 .verify(SharedServiceTest::ldapNameFromResponse, key(LDAP_KEY))
-                .then(SharedServiceTest::checkBlueprintTaggedWithSharedService)
-                .then(cloudStorageParametersHasPassedToAmbariBlueprint())
-                .then(ldapParametersHasPassedToAmbariBlueprint(ldapName))
-                .then(rdsParametersHasPassedToAmbariBlueprint(hiveRds, rangerRds))
+                .then(SharedServiceTest::checkClusterDefinitionTaggedWithSharedService)
+                .then(cloudStorageParametersHasPassedToAmbariClusterDefinition())
+                .then(ldapParametersHasPassedToAmbariClusterDefinition(ldapName))
+                .then(rdsParametersHasPassedToAmbariClusterDefinition(hiveRds, rangerRds))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInBlueprint(TestContext testContext) {
+    public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInClusterDefinition(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(HIVE, DatabaseEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
@@ -132,12 +133,12 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(ClusterDefinitionEntity.class)
-                .withName(blueprintName)
+                .withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true))
                 .withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .init(StackTestDto.class)
-                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, blueprintName, cloudStorage))
+                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
@@ -147,19 +148,20 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     public void testCreateDatalakeClusterWithoutLdap(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(HIVE, DatabaseEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(DatabaseEntity.post())
                 .given(RANGER, DatabaseEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(DatabaseEntity.post())
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
-                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, null, blueprintName, cloudStorage))
+                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, null, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
@@ -169,19 +171,20 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsHive(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(HIVE, DatabaseEntity.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(DatabaseEntity.post())
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
-                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, null, ldapName, blueprintName, cloudStorage))
+                .withCluster(datalakeReadyCluster(testContext, hiveRdsName, null, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
@@ -191,19 +194,20 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsRanger(TestContext testContext) {
         String rangerRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(RANGER, DatabaseEntity.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(DatabaseEntity.post())
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
-                .withCluster(datalakeReadyCluster(testContext, null, rangerRdsName, ldapName, blueprintName, cloudStorage))
+                .withCluster(datalakeReadyCluster(testContext, null, rangerRdsName, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
@@ -212,17 +216,18 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithoutRds(TestContext testContext) {
         String ldapName = creator.getRandomNameForResource();
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
-                .withCluster(datalakeReadyCluster(testContext, null, null, ldapName, blueprintName, cloudStorage))
+                .withCluster(datalakeReadyCluster(testContext, null, null, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
@@ -230,15 +235,16 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateDatalakeClusterWithoutRdsAndLdap(TestContext testContext) {
-        String blueprintName = creator.getRandomNameForResource();
+        String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
-                .given(ClusterDefinitionEntity.class).withName(blueprintName).withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
+                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName)
+                .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
                 .when(ClusterDefinition.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
-                .withCluster(datalakeReadyCluster(testContext, null, null, null, blueprintName, cloudStorage))
+                .withCluster(datalakeReadyCluster(testContext, null, null, null, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
@@ -264,12 +270,12 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return storageLocation;
     }
 
-    private ClusterEntity datalakeReadyCluster(TestContext testContext, String hiveRdsName, String rangerRdsName, String ldapName, String blueprintName,
+    private ClusterEntity datalakeReadyCluster(TestContext testContext, String hiveRdsName, String rangerRdsName, String ldapName, String clusterDefinitionName,
             CloudStorageV4Request cloudStorage) {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName, rangerRdsName))
-                .withAmbari(testContext.given(AmbariEntity.class).withClusterDefinitionName(blueprintName));
+                .withAmbari(testContext.given(AmbariEntity.class).withClusterDefinitionName(clusterDefinitionName));
         if (ldapName != null) {
             cluster.withLdapConfigName(ldapName);
         }
@@ -289,44 +295,44 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return toReturn;
     }
 
-    private static StackTestDto checkBlueprintTaggedWithSharedService(TestContext testContext, StackTestDto stack, CloudbreakClient cloudbreakClient) {
-        Map<String, Object> blueprintTags = stack.getResponse().getCluster().getAmbari().getClusterDefinition().getTags();
-        if (!blueprintTags.containsKey(SHARED_SERVICE_TAG) || blueprintTags.get(SHARED_SERVICE_TAG) == null
-                || !(blueprintTags.get(SHARED_SERVICE_TAG) instanceof Boolean)
-                || !((Boolean) blueprintTags.get(SHARED_SERVICE_TAG))) {
-            throw new TestFailException("shared service tag has not passed properly (or at all) to the blueprint");
+    private static StackTestDto checkClusterDefinitionTaggedWithSharedService(TestContext testContext, StackTestDto stack, CloudbreakClient cloudbreakClient) {
+        Map<String, Object> clusterDefinitionTags = stack.getResponse().getCluster().getAmbari().getClusterDefinition().getTags();
+        if (!clusterDefinitionTags.containsKey(SHARED_SERVICE_TAG) || clusterDefinitionTags.get(SHARED_SERVICE_TAG) == null
+                || !(clusterDefinitionTags.get(SHARED_SERVICE_TAG) instanceof Boolean)
+                || !((Boolean) clusterDefinitionTags.get(SHARED_SERVICE_TAG))) {
+            throw new TestFailException("shared service tag has not passed properly (or at all) to the cluster definition");
         }
         return stack;
     }
 
-    private List<AssertionV2<StackTestDto>> cloudStorageParametersHasPassedToAmbariBlueprint() {
+    private List<AssertionV2<StackTestDto>> cloudStorageParametersHasPassedToAmbariClusterDefinition() {
         List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-        verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getAccountName()));
-        verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getClientId()));
-        verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getCredential()));
+        verifications.add(clusterDefinitionPostToAmbariContains(cloudStorage().getAdls().getAccountName()));
+        verifications.add(clusterDefinitionPostToAmbariContains(cloudStorage().getAdls().getClientId()));
+        verifications.add(clusterDefinitionPostToAmbariContains(cloudStorage().getAdls().getCredential()));
         return verifications;
     }
 
-    private List<AssertionV2<StackTestDto>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
+    private List<AssertionV2<StackTestDto>> ldapParametersHasPassedToAmbariClusterDefinition(String ldapName) {
         List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserSearchBase()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupSearchBase()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupNameAttribute()));
-        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getHost()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getUserSearchBase()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getGroupSearchBase()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getGroupNameAttribute()));
+        verifications.add(clusterDefinitionPostToAmbariContains(ldapRequest(ldapName).getHost()));
         return verifications;
     }
 
-    private List<AssertionV2<StackTestDto>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
+    private List<AssertionV2<StackTestDto>> rdsParametersHasPassedToAmbariClusterDefinition(DatabaseV4Request hive, DatabaseV4Request ranger) {
         List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-        verifications.add(blueprintPostToAmbariContains("ranger_privelege_user_jdbc_url"));
-        verifications.add(blueprintPostToAmbariContains(ranger.getConnectionURL()));
-        verifications.add(blueprintPostToAmbariContains("javax.jdo.option.ConnectionURL"));
-        verifications.add(blueprintPostToAmbariContains(hive.getConnectionURL()));
-        verifications.add(blueprintPostToAmbariContains("org.apache.hadoop.fs.adl.AdlFileSystem"));
+        verifications.add(clusterDefinitionPostToAmbariContains("ranger_privelege_user_jdbc_url"));
+        verifications.add(clusterDefinitionPostToAmbariContains(ranger.getConnectionURL()));
+        verifications.add(clusterDefinitionPostToAmbariContains("javax.jdo.option.ConnectionURL"));
+        verifications.add(clusterDefinitionPostToAmbariContains(hive.getConnectionURL()));
+        verifications.add(clusterDefinitionPostToAmbariContains("org.apache.hadoop.fs.adl.AdlFileSystem"));
         return verifications;
     }
 
@@ -363,7 +369,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return request;
     }
 
-    private MockVerification blueprintPostToAmbariContains(String content) {
+    private MockVerification clusterDefinitionPostToAmbariContains(String content) {
         return MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").bodyContains(content);
     }
 
