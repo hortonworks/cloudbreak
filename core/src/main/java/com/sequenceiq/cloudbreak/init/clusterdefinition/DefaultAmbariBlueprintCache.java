@@ -31,10 +31,10 @@ public class DefaultAmbariBlueprintCache {
 
     private final Map<String, ClusterDefinition> defaultBlueprints = new HashMap<>();
 
-    @Value("#{'${cb.blueprint.defaults:}'.split(';')}")
+    @Value("#{'${cb.clusterdefinition.ambari.defaults:}'.split(';')}")
     private List<String> releasedBlueprints;
 
-    @Value("#{'${cb.blueprint.internal:}'.split(';')}")
+    @Value("#{'${cb.clusterdefinition.ambari.internal:}'.split(';')}")
     private List<String> internalBlueprints;
 
     @Inject
