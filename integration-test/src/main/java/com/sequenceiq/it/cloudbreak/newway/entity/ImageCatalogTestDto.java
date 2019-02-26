@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ImageCatalogDto extends AbstractCloudbreakEntity<ImageCatalogV4Request, ImageCatalogV4Response, ImageCatalogDto>
+public class ImageCatalogTestDto extends AbstractCloudbreakEntity<ImageCatalogV4Request, ImageCatalogV4Response, ImageCatalogTestDto>
         implements Purgable<ImageCatalogV4Response> {
 
     public static final String IMAGE_CATALOG = "IMAGE_CATALOG";
@@ -25,31 +25,31 @@ public class ImageCatalogDto extends AbstractCloudbreakEntity<ImageCatalogV4Requ
 
     private ImagesV4Response imagesV4Response;
 
-    public ImageCatalogDto(TestContext testContext) {
+    public ImageCatalogTestDto(TestContext testContext) {
         super(new ImageCatalogV4Request(), testContext);
     }
 
-    public ImageCatalogDto(ImageCatalogV4Request imageCatalogV4Request, TestContext testContext) {
+    public ImageCatalogTestDto(ImageCatalogV4Request imageCatalogV4Request, TestContext testContext) {
         super(imageCatalogV4Request, testContext);
     }
 
-    public ImageCatalogDto() {
+    public ImageCatalogTestDto() {
         super(IMAGE_CATALOG);
         setRequest(new ImageCatalogV4Request());
     }
 
-    public ImageCatalogDto withName(String name) {
+    public ImageCatalogTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
     }
 
-    public ImageCatalogDto withUrl(String url) {
+    public ImageCatalogTestDto withUrl(String url) {
         getRequest().setUrl(url);
         return this;
     }
 
-    public ImageCatalogDto valid() {
+    public ImageCatalogTestDto valid() {
         MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
         return getCloudProvider().imageCatalog(withName(getNameCreator().getRandomNameForResource())
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl()));
@@ -68,7 +68,7 @@ public class ImageCatalogDto extends AbstractCloudbreakEntity<ImageCatalogV4Requ
         delete(context, getResponse(), cloudbreakClient);
     }
 
-    public static ImageCatalogDto putSetDefaultByName(TestContext testContext, ImageCatalogDto entity, CloudbreakClient cloudbreakClient)
+    public static ImageCatalogTestDto putSetDefaultByName(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient)
             throws IOException {
         entity.setResponse(
                 cloudbreakClient.getCloudbreakClient()

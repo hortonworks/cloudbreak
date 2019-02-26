@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 @Component
 public class RandomNameCreator {
 
+    public static final String PREFIX = "autotest-";
+
     @Inject
     private RandomNameGenerator generator;
 
@@ -21,10 +23,10 @@ public class RandomNameCreator {
     private CloudPlatform cloudPlatform;
 
     public String getRandomNameForResource() {
-        return cloudPlatform.name().toLowerCase() + '-' + generator.next().replaceAll("_", "-");
+        return PREFIX + cloudPlatform.name().toLowerCase() + '-' + generator.next().replaceAll("_", "-");
     }
 
     public String getInvalidRandomNameForResource() {
-        return cloudPlatform.name().toLowerCase() + "-?!;" + generator.next().replaceAll("_", "-");
+        return PREFIX + cloudPlatform.name().toLowerCase() + "-?!;" + generator.next().replaceAll("_", "-");
     }
 }

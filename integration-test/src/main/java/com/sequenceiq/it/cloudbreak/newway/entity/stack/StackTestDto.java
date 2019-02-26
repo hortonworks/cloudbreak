@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
@@ -80,7 +81,7 @@ public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Pur
 
     @Override
     public boolean deletable(StackV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

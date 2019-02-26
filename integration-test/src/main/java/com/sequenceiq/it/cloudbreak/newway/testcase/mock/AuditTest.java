@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
@@ -310,7 +310,7 @@ public class AuditTest extends AbstractIntegrationTest {
     public void testCreateAuditForImageCatalogAndThenValidate(TestContext testContext) {
         String catalogName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ImageCatalogDto.class)
+                .given(ImageCatalogTestDto.class)
                 .withName(catalogName)
                 .withUrl(IMG_CATALOG_URL)
                 .when(new ImageCatalogPostAction())

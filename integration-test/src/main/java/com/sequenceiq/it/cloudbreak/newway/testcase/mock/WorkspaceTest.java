@@ -24,7 +24,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
@@ -112,7 +112,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnImageCatalogWithImagesAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(ImageCatalogDto.class)
+                .given(ImageCatalogTestDto.class)
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetByNameAction(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
@@ -122,7 +122,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnImageCatalogWithoutImagesAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(ImageCatalogDto.class)
+                .given(ImageCatalogTestDto.class)
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetByNameAction(Boolean.FALSE), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))

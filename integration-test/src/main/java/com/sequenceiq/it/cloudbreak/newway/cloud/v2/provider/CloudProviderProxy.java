@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
 
 import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CLOUD_PROVIDER;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -46,16 +46,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
 //    @Override
-//    public String availabilityZone(TestContext testContext) {
-//        return delegate.availabilityZone(testContext);
-//    }
-
-//    @Override
-//    public String region(TestContext testContext) {
-//        return delegate.region(testContext);
-//    }
-
-//    @Override
 //    public InstanceTemplateV4Entity template(TestContext testContext) {
 //        return delegate.template(testContext);
 //    }
@@ -65,13 +55,18 @@ public class CloudProviderProxy implements CloudProvider {
 //        return delegate.network(testContext);
 //    }
 
-//    @Override
-//    public String getSubnetCIDR(TestContext testContext) {
-//        return delegate.getSubnetCIDR(testContext);
-//    }
+    @Override
+    public String availabilityZone() {
+        return delegate.availabilityZone();
+    }
 
     @Override
-    public ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog) {
+    public String region() {
+        return delegate.region();
+    }
+
+    @Override
+    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return delegate.imageCatalog(imageCatalog);
     }
 
@@ -88,6 +83,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public NetworkV2Entity network(NetworkV2Entity network) {
         return delegate.network(network);
+    }
+
+    @Override
+    public String getSubnetCIDR() {
+        return delegate.getSubnetCIDR();
     }
 
     @Override
@@ -118,5 +118,10 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public Integer gatewayPort(StackV4EntityBase stackEntity) {
         return delegate.gatewayPort(stackEntity);
+    }
+
+    @Override
+    public String getDefaultClusterDefinitionName() {
+        return delegate.getDefaultClusterDefinitionName();
     }
 }

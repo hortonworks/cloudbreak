@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter;
 
 public class AwsParameters {
 
+    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin";
+
     private static final String PREFIX = CommonCloudParameters.PREFIX + "aws.";
 
     public static final String PUBLIC_KEY_ID = PREFIX + "publicKeyId";

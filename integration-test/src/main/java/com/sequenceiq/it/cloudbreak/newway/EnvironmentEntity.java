@@ -138,7 +138,7 @@ public class EnvironmentEntity extends AbstractCloudbreakEntity<EnvironmentV4Req
 
     @Override
     public boolean deletable(SimpleEnvironmentV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

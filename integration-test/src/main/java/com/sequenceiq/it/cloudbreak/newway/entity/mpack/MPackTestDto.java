@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
@@ -61,7 +62,7 @@ public class MPackTestDto extends AbstractCloudbreakEntity<ManagementPackV4Reque
 
     @Override
     public boolean deletable(ManagementPackV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

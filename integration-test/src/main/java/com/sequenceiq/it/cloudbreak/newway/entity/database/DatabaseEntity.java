@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Assertion;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -104,7 +105,7 @@ public class DatabaseEntity extends AbstractCloudbreakEntity<DatabaseV4Request, 
 
     @Override
     public boolean deletable(DatabaseV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

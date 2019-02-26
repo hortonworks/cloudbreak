@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
-public class ImageCatalogDeleteAction implements Action<ImageCatalogDto> {
+public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogDeleteAction.class);
 
     @Override
-    public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, format(" Image catalog DELETE request:%n"), entity.getRequest());
         entity.setResponse(

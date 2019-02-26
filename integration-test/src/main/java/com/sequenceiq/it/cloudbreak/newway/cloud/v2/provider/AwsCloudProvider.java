@@ -1,6 +1,6 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
 
-import java.util.Collections;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
 
 import org.springframework.stereotype.Component;
 
@@ -9,29 +9,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsC
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AwsParameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
 
-    private static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting aws credential";
-
     private static final String KEY_BASED_CREDENTIAL = "key";
-
-    @Override
-    public ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog) {
-        return imageCatalog.withName("cloudbreak-default").withUrl(null);
-    }
 
     @Override
     public InstanceTemplateV4Entity template(InstanceTemplateV4Entity template) {
@@ -90,21 +78,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentEntity environment(EnvironmentEntity environment) {
-        return environment.withRegions(Collections.singleton(region()))
-                .withLocation(region());
-    }
-
     public String region() {
         return getTestParameter().getWithDefault(AwsParameters.REGION, "eu-west-1");
     }
 
     @Override
-    public PlacementSettingsEntity placement(PlacementSettingsEntity placement) {
-        return placement.withRegion(region())
-                .withAvailabilityZone(availabilityZone());
-    }
-
     public String availabilityZone() {
         return getTestParameter().getWithDefault(AwsParameters.AVAILABILITY_ZONE, "eu-west-1a");
     }
@@ -117,12 +95,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public Integer gatewayPort(StackV4EntityBase stackEntity) {
-        String gatewayPort = getTestParameter().getWithDefault(CommonCloudParameters.GATEWAY_PORT, null);
-        if (gatewayPort == null) {
-            return null;
-        }
-        return Integer.parseInt(gatewayPort);
+    public String getDefaultClusterDefinitionName() {
+        return AwsParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
     }
 
     public AwsCredentialV4Parameters awsCredentialDetailsArn() {

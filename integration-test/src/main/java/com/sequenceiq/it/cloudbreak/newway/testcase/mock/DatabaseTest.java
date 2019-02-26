@@ -64,7 +64,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(DatabaseEntity.class)
-                    .withName(databaseName)
+                .withName(databaseName)
                 .when(DatabaseEntity.post())
                 .when(DatabaseEntity.list())
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
@@ -82,7 +82,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(DatabaseEntity.class)
-                    .withName(databaseName)
+                .withName(databaseName)
                 .when(DatabaseEntity.post())
                 .when(DatabaseEntity.list())
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
@@ -96,13 +96,13 @@ public class DatabaseTest extends AbstractIntegrationTest {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(DatabaseEntity.class)
-                    .withType(type.name())
-                    .withName(databaseName)
+                .withType(type.name())
+                .withName(databaseName)
                 .when(DatabaseEntity.post())
                 .when(DatabaseEntity.list())
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
                 .given(DatabaseTestEntity.class)
-                    .withExistingName(databaseName)
+                .withExistingName(databaseName)
                 .when(DatabaseTestEntity.testConnection())
                 .validate();
     }
@@ -112,10 +112,10 @@ public class DatabaseTest extends AbstractIntegrationTest {
             String password, String connectionUrl, String expectedErrorMessage) {
         testContext
                 .given(DatabaseEntity.class)
-                    .withName(databaseName)
-                    .withConnectionUserName(username)
-                    .withConnectionPassword(password)
-                    .withConnectionURL(connectionUrl)
+                .withName(databaseName)
+                .withConnectionUserName(username)
+                .withConnectionPassword(password)
+                .withConnectionURL(connectionUrl)
                 .when(DatabaseEntity.post(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class,
                         expectedMessage(expectedErrorMessage)
@@ -128,12 +128,12 @@ public class DatabaseTest extends AbstractIntegrationTest {
             String password, String connectionUrl, String expectedErrorMessage) {
         testContext
                 .given(DatabaseTestEntity.class)
-                    .withRequest(new DatabaseV4Request())
-                    .withName(databaseName)
-                    .withConnectionUserName(username)
-                    .withConnectionPassword(password)
-                    .withConnectionURL(connectionUrl)
-                    .withType("HIVE")
+                .withRequest(new DatabaseV4Request())
+                .withName(databaseName)
+                .withConnectionUserName(username)
+                .withConnectionPassword(password)
+                .withConnectionURL(connectionUrl)
+                .withType("HIVE")
                 .when(DatabaseTestEntity.testConnection(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class,
                         expectedMessage(expectedErrorMessage)
@@ -145,7 +145,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
     public void testDatabaseTestConnectionWithNonExistingDbName(TestContext testContext) {
         testContext
                 .given(DatabaseTestEntity.class)
-                    .withExistingName("aNonExistingDb")
+                .withExistingName("aNonExistingDb")
                 .when(DatabaseTestEntity.testConnection())
                 .then(DatabaseTestAccessDeniedAssertion.getAssertion())
                 .validate();

@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
 public class ChangeImageAction implements Action<StackTestDto> {
 
@@ -29,8 +29,8 @@ public class ChangeImageAction implements Action<StackTestDto> {
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        ImageCatalogDto imageCatalogDto = testContext.get(ImageCatalogDto.class);
-        request.setImageCatalogName(imageCatalogDto.getName());
+        ImageCatalogTestDto imageCatalogTestDto = testContext.get(ImageCatalogTestDto.class);
+        request.setImageCatalogName(imageCatalogTestDto.getName());
 
         logJSON(" Enable Maintenance Mode post request:\n", request);
 

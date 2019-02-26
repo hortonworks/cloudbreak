@@ -29,7 +29,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogSetAs
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
@@ -64,7 +64,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetByNameAction(Boolean.FALSE))
                 .validate();
@@ -75,7 +77,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         String imgCatalogName = getNameGenerator().getRandomNameForResource().substring(0, 4);
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(IMG_CATALOG_URL)
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(IMG_CATALOG_URL)
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
                         .withExpectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
@@ -87,7 +91,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(longStringGeneratorUtil.stringGenerator(100));
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(IMG_CATALOG_URL)
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(IMG_CATALOG_URL)
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
                         .withExpectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
@@ -99,7 +105,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(IMAGECATALOG_NAME_WITH_SPECIAL_CHARS);
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(IMG_CATALOG_URL)
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(IMG_CATALOG_URL)
                 .when(new ImageCatalogPostWithoutNameLoggingAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction"))
                 .validate();
@@ -111,7 +119,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         String invalidURL = "https:/google.com/imagecatalog";
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(invalidURL)
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(invalidURL)
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
                         .withExpectedMessage(".* " + invalidURL + ", error: A valid image catalog must be available on the given URL"))
@@ -123,7 +133,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(IMG_CATALOG_URL + "/notanimagecatalog")
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(IMG_CATALOG_URL + "/notanimagecatalog")
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
                         .withExpectedMessage(".*A valid image catalog must be available on the given URL.*"))
@@ -135,7 +147,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(INVALID_IMAGECATALOG_JSON_URL)
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(INVALID_IMAGECATALOG_JSON_URL)
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
                         .withExpectedMessage(".*" + INVALID_IMAGECATALOG_JSON_URL + ", error: A valid image catalog must be available on the given URL.*"))
@@ -148,7 +162,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .select(imgCatalog -> imgCatalog.getResponse().getId(), RunningParameter.key("ImageCatalogPostActionSelect"))
                 .when(new ImageCatalogDeleteAction())
@@ -170,7 +186,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogDeleteAction())
                 .when(new ImageCatalogGetByNameAction(), RunningParameter.key("ImageCatalogDeleted"))
@@ -182,7 +200,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testImageCatalogDeletionWithDefaultImageCatalog(TestContext testContext) {
         testContext
-                .given(ImageCatalogDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
+                .given(ImageCatalogTestDto.class)
+                .withName(CB_DEFAULT_IMG_CATALOG_NAME)
                 .when(new ImageCatalogDeleteAction(), RunningParameter.key("ImageCatalogDeleteAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogDeleteAction")
                         .withExpectedMessage(format(".*%s cannot be deleted because it is an environment default image catalog.*",
@@ -193,7 +212,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testGetDefaultImageCatalog(TestContext testContext) {
         testContext
-                .given(ImageCatalogDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
+                .given(ImageCatalogTestDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
                 .when(new ImageCatalogGetByNameAction(Boolean.FALSE))
                 .validate();
     }
@@ -204,7 +223,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesByNameAction())
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -223,7 +244,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesByNameAction(CloudPlatform.AWS))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -242,7 +265,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogGetImagesByNameAction(), RunningParameter.key("ImageCatalogDoesNotExist"))
                 .expect(ForbiddenException.class, RunningParameter.key("ImageCatalogDoesNotExist"))
                 .validate();
@@ -254,7 +279,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesFromDefaultCatalogAction(CloudPlatform.AWS))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -273,7 +300,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesFromDefaultCatalogAction())
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -292,7 +321,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogSetAsDefaultAction())
                 .when(new ImageCatalogGetByNameAction())
@@ -312,7 +343,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogSetAsDefaultAction())
                 .withName(CB_DEFAULT_IMG_CATALOG_NAME)
@@ -335,9 +368,11 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
-                .select(ImageCatalogDto::getRequest, RunningParameter.key("ImageCatalogPostActionSelect"))
+                .select(ImageCatalogTestDto::getRequest, RunningParameter.key("ImageCatalogPostActionSelect"))
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Request request = cloudbreakClient
                             .getCloudbreakClient()
@@ -362,9 +397,11 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
-                .select(ImageCatalogDto::getResponse, RunningParameter.key("ImageCatalogPostActionSelect"))
+                .select(ImageCatalogTestDto::getResponse, RunningParameter.key("ImageCatalogPostActionSelect"))
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Response originalResponse = entity.getResponse();
                     UpdateImageCatalogV4Request updateRequest = new UpdateImageCatalogV4Request();
@@ -392,7 +429,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testGetListOfImageCatalogs(TestContext testContext) {
         testContext
-                .given(ImageCatalogDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
+                .given(ImageCatalogTestDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Responses list = cloudbreakClient
                             .getCloudbreakClient()
@@ -413,7 +450,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogSetAsDefaultAction())
 
@@ -426,7 +465,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
-                .given(ImageCatalogDto.class)
+                .given(ImageCatalogTestDto.class)
                 .when(new ImageCatalogGetImagesByNameAction(stackName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
@@ -449,7 +488,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
-                .given(ImageCatalogDto.class).withName(imgCatalogName).withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .given(ImageCatalogTestDto.class)
+                .withName(imgCatalogName)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogSetAsDefaultAction())
 
@@ -462,7 +503,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
-                .given(ImageCatalogDto.class)
+                .given(ImageCatalogTestDto.class)
                 .when(new ImageCatalogGetImagesByNameAction(stackName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
