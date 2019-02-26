@@ -23,7 +23,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
 
     private static final String BAD_REQUEST_KEY = "badRequest";
 
-    private static final String INVALID_ATTRIBUTE_PROVIDER = "kubernetesInvalidAttirbutesTestProvider";
+    private static final String INVALID_ATTRIBUTE_PROVIDER = "kubernetesInvalidAttributesTestProvider";
 
     private static final String KUBERNETES_CONTENT = "content";
 
@@ -105,13 +105,14 @@ public class KubernetesTest extends AbstractIntegrationTest {
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {getBean(TestContext.class), longStringGeneratorUtil.stringGenerator(101), KUBERNETES_CONTENT,
-                        " The length of the config's name has to be in range of 5 to 100"},
+                        "\"post.arg1.name\":\"The length of the config's name has to be in range of 5 to 100\""},
                 {getBean(TestContext.class), "abc", KUBERNETES_CONTENT,
-                        " The length of the config's name has to be in range of 5 to 100"},
+                        "\"post.arg1.name\":\"The length of the config's name has to be in range of 5 to 100\""},
                 {getBean(TestContext.class), "a-@#$%|:&*;", KUBERNETES_CONTENT,
-                        " The config's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character"},
+                        "\"post.arg1.name\":\"The config's name can only contain lowercase alphanumeric characters "
+                        + "and hyphens and has start with an alphanumeric character\""},
                 {getBean(TestContext.class), getNameGenerator().getRandomNameForResource(), null,
-                        "post.arg1.content: null, error: must not be null"}
+                        "\"post.arg1.content\":\"must not be null\""}
         };
     }
 }

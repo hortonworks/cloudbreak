@@ -29,7 +29,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
 
     private static final String DB_TYPE_PROVIDER = "databaseTypeTestProvider";
 
-    private static final String INVALID_ATTRIBUTE_PROVIDER = "databaseInvalidAttirbutesTestProvider";
+    private static final String INVALID_ATTRIBUTE_PROVIDER = "databaseInvalidAttributesTestProvider";
 
     private static final String DATABASE_PROTOCOL = "jdbc:postgresql://";
 
@@ -174,9 +174,9 @@ public class DatabaseTest extends AbstractIntegrationTest {
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "The database's name can only contain lowercase alphanumeric characters and "
                         + "hyphens and has start with an alphanumeric character"},
                 {getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), null, DATABASE_PASSWORD,
-                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "connectionUserName: null, error: must not be null"},
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "\".*connectionUserName\":\"must not be null\""},
                 {getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), DATABASE_USERNAME, null,
-                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "connectionPassword: null, error: must not be null"},
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB, "\".*connectionPassword\":\"must not be null\""},
                 {getBean(TEST_CONTEXT_CLASS), getNameGenerator().getRandomNameForResource(), DATABASE_USERNAME, DATABASE_PASSWORD,
                         DATABASE_HOST_PORT_DB, "Unsupported database type"}
         };

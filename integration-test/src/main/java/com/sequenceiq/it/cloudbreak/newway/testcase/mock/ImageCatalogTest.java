@@ -124,7 +124,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .withUrl(invalidURL)
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
-                        .withExpectedMessage(".* " + invalidURL + ", error: A valid image catalog must be available on the given URL"))
+                        .withExpectedMessage(".*A valid image catalog must be available on the given URL.*"))
                 .validate();
     }
 
@@ -152,7 +152,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .withUrl(INVALID_IMAGECATALOG_JSON_URL)
                 .when(new ImageCatalogPostAction(), RunningParameter.key("ImageCatalogPostAction"))
                 .expect(BadRequestException.class, RunningParameter.key("ImageCatalogPostAction")
-                        .withExpectedMessage(".*" + INVALID_IMAGECATALOG_JSON_URL + ", error: A valid image catalog must be available on the given URL.*"))
+                        .withExpectedMessage(".*A valid image catalog must be available on the given URL.*"))
                 .validate();
     }
 

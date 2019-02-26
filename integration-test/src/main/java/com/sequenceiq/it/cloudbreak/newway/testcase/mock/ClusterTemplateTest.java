@@ -167,8 +167,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateInvalidNameClusterTemplate(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withName(ILLEGAL_CT_NAME)
                 .when(new ClusterTemplateV4CreateAction(), key("illegalCtName"))
-                .expect(BadRequestException.class, key("illegalCtName").withExpectedMessage("post.arg1.name: Illegal template name ;, error: "
-                        + "The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon"))
+                .expect(BadRequestException.class, key("illegalCtName").withExpectedMessage("\"post.arg1.name\":"
+                        + "\"The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon\""))
                 .validate();
     }
 
@@ -187,8 +187,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateInvalidShortNameClusterTemplate(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withName("sh")
                 .when(new ClusterTemplateV4CreateAction(), key("illegalCtName"))
-                .expect(BadRequestException.class, key("illegalCtName").withExpectedMessage("post.arg1.name: sh, error: "
-                        + "The length of the cluster's name has to be in range of 5 to 40"))
+                .expect(BadRequestException.class, key("illegalCtName").withExpectedMessage("\"post.arg1.name\":"
+                        + "\"The length of the cluster's name has to be in range of 5 to 40\""))
                 .validate();
     }
 
@@ -212,8 +212,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .given(ClusterTemplateEntity.class).withDescription(invalidLongDescripton)
                 .when(new ClusterTemplateV4CreateAction(), key("longCtDescription"))
-                .expect(BadRequestException.class, key("longCtDescription").withExpectedMessage("post.arg1.description: "
-                        + invalidLongDescripton + ", error: size must be between 0 and 1000"))
+                .expect(BadRequestException.class, key("longCtDescription").withExpectedMessage("\"post.arg1.description\":"
+                        + "\"size must be between 0 and 1000\""))
                 .validate();
     }
 
@@ -221,7 +221,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateEmptyStackTemplateClusterTemplateException(TestContext testContext) {
         testContext.given(ClusterTemplateEntity.class).withoutStackTemplate()
                 .when(new ClusterTemplateV4CreateAction(), key("emptyStack"))
-                .expect(BadRequestException.class, key("emptyStack").withExpectedMessage("post.arg1.stackTemplate: null, error: must not be null"))
+                .expect(BadRequestException.class, key("emptyStack").withExpectedMessage("\"post.arg1.stackTemplate\":\"must not be null\""))
                 .validate();
     }
 
@@ -232,9 +232,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(new ClusterTemplateV4CreateAction(), key("nullTemplateName"))
                 .given(ClusterTemplateEntity.class).withName("")
                 .when(new ClusterTemplateV4CreateAction(), key("emptyTemplateName").withSkipOnFail(false))
-                .expect(BadRequestException.class, key("nullTemplateName").withExpectedMessage("post.arg1.name: null, error: must not be null"))
+                .expect(BadRequestException.class, key("nullTemplateName").withExpectedMessage("\"post.arg1.name\":\"must not be null\""))
                 .expect(BadRequestException.class, key("emptyTemplateName")
-                        .withExpectedMessage("post.arg1.name: , error: The length of the cluster's name has to be in range of 5 to 40"))
+                        .withExpectedMessage("\"post.arg1.name\":\"The length of the cluster's name has to be in range of 5 to 40\""))
                 .validate();
     }
 
