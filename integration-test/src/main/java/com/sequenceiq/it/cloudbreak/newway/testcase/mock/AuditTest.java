@@ -14,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.audit.AuditTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4CreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
@@ -28,8 +29,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
@@ -112,10 +112,10 @@ public class AuditTest extends AbstractIntegrationTest {
     public void testCreateAuditForBlueprintAndThenValidate(TestContext testContext) {
         String blueprintName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ClusterDefinitionEntity.class)
+                .given(ClusterDefinitionTestDto.class)
                 .withName(blueprintName)
                 .withClusterDefinition(VALID_BP)
-                .when(ClusterDefinition.postV4(), key(blueprintName))
+                .when(ClusterDefinitionTestAction.postV4(), key(blueprintName))
                 .select(bp -> bp.getResponse().getId(), key(blueprintName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(blueprintName)

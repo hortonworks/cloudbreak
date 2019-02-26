@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
@@ -20,7 +20,7 @@ public class ClusterDefinitionV4Action {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterDefinitionEntity clusterDefinitionEntity = (ClusterDefinitionEntity) entity;
+        ClusterDefinitionTestDto clusterDefinitionEntity = (ClusterDefinitionTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
@@ -36,7 +36,7 @@ public class ClusterDefinitionV4Action {
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        ClusterDefinitionEntity clusterDefinitionEntity = (ClusterDefinitionEntity) entity;
+        ClusterDefinitionTestDto clusterDefinitionEntity = (ClusterDefinitionTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
@@ -54,7 +54,7 @@ public class ClusterDefinitionV4Action {
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterDefinitionEntity clusterDefinitionEntity = (ClusterDefinitionEntity) entity;
+        ClusterDefinitionTestDto clusterDefinitionEntity = (ClusterDefinitionTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
@@ -69,7 +69,7 @@ public class ClusterDefinitionV4Action {
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterDefinitionEntity clusterDefinitionEntity = (ClusterDefinitionEntity) entity;
+        ClusterDefinitionTestDto clusterDefinitionEntity = (ClusterDefinitionTestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);

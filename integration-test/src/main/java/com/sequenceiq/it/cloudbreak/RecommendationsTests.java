@@ -31,7 +31,6 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 
 public class RecommendationsTests extends CloudbreakTest {
 
@@ -66,14 +65,14 @@ public class RecommendationsTests extends CloudbreakTest {
 
     private void createClusterDefinition() throws Exception {
         given(CloudbreakClient.created());
-        given(ClusterDefinition.request().withName(VALID_CD_NAME).withDescription(CD_DESCRIPTION).withClusterDefinition(getClusterDefinitionFile()));
-        when(ClusterDefinition.post());
+//        given(ClusterDefinition.request().withName(VALID_CD_NAME).withDescription(CD_DESCRIPTION).withClusterDefinition(getClusterDefinitionFile()));
+//        when(ClusterDefinition.post());
     }
 
     private void deleteClusterDefinition() throws Exception {
         given(CloudbreakClient.created());
-        given(ClusterDefinition.request().withName(VALID_CD_NAME));
-        when(ClusterDefinition.delete());
+//        given(ClusterDefinition.request().withName(VALID_CD_NAME));
+//        when(ClusterDefinition.delete());
     }
 
     private void deleteCredential() throws Exception {

@@ -8,14 +8,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.RecommendationEntity;
 import com.sequenceiq.it.cloudbreak.newway.Region;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class RecommendationV4Action {
@@ -28,7 +27,8 @@ public class RecommendationV4Action {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
-        ClusterDefinition clusterDefinition = integrationTestContext.getContextParam(ClusterDefinitionEntity.CLUSTER_DEFINITION, ClusterDefinition.class);
+        ClusterDefinitionTestDto clusterDefinition = integrationTestContext.getContextParam(ClusterDefinitionTestDto.CLUSTER_DEFINITION,
+                ClusterDefinitionTestDto.class);
         if (clusterDefinition != null && clusterDefinition.getResponse() != null) {
             recommendationEntity.withAvailabilityZone(clusterDefinition.getResponse().getName());
         }
