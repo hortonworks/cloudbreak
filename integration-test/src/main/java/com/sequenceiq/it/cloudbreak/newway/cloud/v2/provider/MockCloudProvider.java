@@ -1,4 +1,6 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
+
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
 
 import java.util.Collections;
 import java.util.Set;
@@ -12,9 +14,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.Moc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.MockParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -35,8 +38,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public static final String KEY_BASED_CREDENTIAL = "key";
 
     public static final String CREDENTIAL_DEFAULT_NAME = "autotesting-mock-cred";
-
-    public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting mock credential";
 
     public static final String NETWORK_DEFAULT_NAME = "autotesting-aws-net";
 
@@ -80,7 +81,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
     }
 
-    //    @Override
+    @Override
     public String region() {
         String regionParam = getTestParameter().get("mockRegion");
         return regionParam == null ? EUROPE : regionParam;
@@ -123,7 +124,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog) {
+    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return imageCatalog;
     }
 
@@ -172,5 +173,10 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public Integer gatewayPort(StackV4EntityBase stackEntity) {
         MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
         return mockedTestContext.getSparkServer().getPort();
+    }
+
+    @Override
+    public String getDefaultClusterDefinitionName() {
+        return MockParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
     }
 }

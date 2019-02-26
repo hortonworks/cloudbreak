@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.SPARK;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider.LONDON;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider.VALID_REGION;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider.MockCloudProvider.LONDON;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider.MockCloudProvider.VALID_REGION;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.force;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
@@ -31,7 +31,7 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClus
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreationWithProperties;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;

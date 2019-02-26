@@ -33,7 +33,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CloudProviderProxy;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.newway.finder.Capture;

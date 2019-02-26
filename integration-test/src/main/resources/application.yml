@@ -8,6 +8,48 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+    cloudProvider: MOCK
+    subnetCidr:
+    gatewayPort:
+    clusterDefinitionName:
+    sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDXF9paZtj6ibDgRGtw2jTls1fysxETxG/rbCN9vYlpDw6ROK90rjXnC0qi43kXbs5Z/NyFDDcYW4U1nUmJCIhQqNJv00ukTbS4McfeNYrZF78KNLtbUP57SfKzjcH1Txz9Zr3ILEADqMyNRzgSB2gw5XnfbbLUFQYcF3hT11gjEw99Qi9eCQ6nCM37iy9tCIfMyB5CI24LECv+8UMFdYw+X9JQXgkAlcPi1zmVNckD6dDGGC2nY9mK7jw0dqZ2W/Q2HvGVgP7iSxnKIFIylifPMz0jmtzpjPi4czgr34d4PFlQsv8LgwWEQMyTJGQmtF3GGa1o/qT07gePY2tl1sAzOLszfglmkBZS+POYi65fxYGepF5C0Rmc3427dLp+HPl8QSAuq0j92/3LGLOKTjn1qC2MjBNhbkhFhDKnv0VQslmN/nkgDKUSHfQqfMwo4HXFIIydUWxT+5PxFCaS4axzGQ2HYylxqonnU3P0DJkh/omegI36HyxxlMNlpf/zn3/zrwSFvKNCFvbQezJg8jdqq7VEHx4DH6WhYQ02TLsjmcA0EFp1HxTCbJojD/Ixev/Wc5duHotOBiS0CXdJwyzKSQttQS9NGn+/LvUyiD/Z/Rz2r3B0LpQsQu4tI/8F5Jq+QiRgS9cQRnuLZuvAwbSNYI+g+zPdhaZq8fvumWarcQ== apalfi@hortonworks.com"
+
+    # aws details
+    aws:
+      availabilityZone:
+      region:
+      credential:
+        type:
+        roleArn:
+        accessKey:
+        secretKey:
+      instance:
+        type:
+        volumeSize:
+        volumeCount:
+        volumeType:
+
+    # azure details
+    azure:
+      availabilityZone:
+      region:
+      vpcId:
+      subnetId:
+      credential:
+        appId:
+        appPassword:
+        subscriptionId:
+        tenantId:
+      instance:
+        type:
+        volumeSize:
+        volumeCount:
+        volumeType:
+
+
+
+# ---------- old test parameters: ---------- #
+
     outputdir: .
 
     publicKeyFile:

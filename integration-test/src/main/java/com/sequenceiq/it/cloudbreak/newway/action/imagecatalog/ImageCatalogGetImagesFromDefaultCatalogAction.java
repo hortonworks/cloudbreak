@@ -9,9 +9,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
-public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<ImageCatalogDto> {
+public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<ImageCatalogTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetImagesFromDefaultCatalogAction.class);
 
@@ -25,7 +25,7 @@ public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<Ima
     }
 
     @Override
-    public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
         LOGGER.info("Get images of ImageCatalog within workspace by catalog name: {}", entity.getRequest().getName());
         try {
             entity.setResponseByProvider(

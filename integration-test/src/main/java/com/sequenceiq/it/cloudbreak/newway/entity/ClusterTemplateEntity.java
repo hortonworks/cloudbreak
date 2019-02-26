@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -69,7 +70,7 @@ public class ClusterTemplateEntity extends AbstractCloudbreakEntity<ClusterTempl
 
     @Override
     public boolean deletable(ClusterTemplateV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

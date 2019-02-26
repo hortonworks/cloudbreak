@@ -1,28 +1,30 @@
 package com.sequenceiq.it.cloudbreak.newway.entity;
 
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.emptyRunningParameter;
+import static com.sequenceiq.it.cloudbreak.newway.finder.Finders.same;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+
+import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.newway.finder.Finder;
-import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.emptyRunningParameter;
-import static com.sequenceiq.it.cloudbreak.newway.finder.Finders.same;
 
 public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity> extends Entity implements CloudbreakEntity {
 

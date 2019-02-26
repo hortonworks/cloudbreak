@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
-public class ImageCatalogSetAsDefaultAction implements Action<ImageCatalogDto> {
+public class ImageCatalogSetAsDefaultAction implements Action<ImageCatalogTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogSetAsDefaultAction.class);
 
     @Override
-    public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
         LOGGER.info("Set Imagecatalog as default within workspace with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

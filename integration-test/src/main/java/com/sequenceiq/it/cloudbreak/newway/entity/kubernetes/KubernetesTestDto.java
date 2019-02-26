@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.requests.KubernetesV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.Assertion;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -90,7 +91,7 @@ public class KubernetesTestDto extends AbstractCloudbreakEntity<KubernetesV4Requ
 
     @Override
     public boolean deletable(KubernetesV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

@@ -39,7 +39,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
 import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
@@ -130,9 +130,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
-                .given(ImageCatalogDto.class)
+                .given(ImageCatalogTestDto.class)
                 .when(new ImageCatalogCreateIfNotExistsAction())
-                .when(ImageCatalogDto::putSetDefaultByName);
+                .when(ImageCatalogTestDto::putSetDefaultByName);
     }
 
     protected Set<String> createDefaultProxyConfig(TestContext testContext) {

@@ -12,11 +12,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
-public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogDto> {
+public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogTestDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetByNameAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetImagesByNameAction.class);
 
     private CloudPlatform platform = CloudPlatform.MOCK;
 
@@ -34,7 +34,7 @@ public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogDto
     }
 
     @Override
-    public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
         LOGGER.info("Get images of ImageCatalog within workspace by catalog name: {}", entity.getRequest().getName());
         try {
             ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakClient
@@ -50,17 +50,11 @@ public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogDto
         return entity;
     }
 
-    private ImagesV4Response getImagesV4Response(ImageCatalogDto entity, CloudbreakClient cloudbreakClient, ImageCatalogV4Endpoint imageCatalogV4Endpoint)
+    private ImagesV4Response getImagesV4Response(ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient, ImageCatalogV4Endpoint imageCatalogV4Endpoint)
             throws Exception {
-        ImagesV4Response imagesByName;
-        if (StringUtils.isNoneEmpty(stackName)) {
-            imagesByName = imageCatalogV4Endpoint
-                    .getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), stackName, null);
-        } else {
-            imagesByName = imageCatalogV4Endpoint
-                    .getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), null, platform.name());
-        }
-        return imagesByName;
+        return StringUtils.isNoneEmpty(stackName)
+                ? imageCatalogV4Endpoint.getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), stackName, null)
+                : imageCatalogV4Endpoint.getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), null, platform.name());
     }
 }
 

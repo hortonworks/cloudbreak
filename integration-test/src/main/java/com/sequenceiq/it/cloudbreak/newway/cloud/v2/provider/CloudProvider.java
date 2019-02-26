@@ -1,8 +1,8 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -13,11 +13,11 @@ import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
 public interface CloudProvider {
 
-//    String availabilityZone();
-//
-//    String region();
+    String availabilityZone();
 
-    ImageCatalogDto imageCatalog(ImageCatalogDto imageCatalog);
+    String region();
+
+    ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog);
 
     InstanceTemplateV4Entity template(InstanceTemplateV4Entity template);
 
@@ -25,7 +25,7 @@ public interface CloudProvider {
 
     NetworkV2Entity network(NetworkV2Entity network);
 
-//    String getSubnetCIDR();
+    String getSubnetCIDR();
 
     CloudPlatform getCloudPlatform();
 
@@ -38,4 +38,6 @@ public interface CloudProvider {
     StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity);
 
     Integer gatewayPort(StackV4EntityBase stackEntity);
+
+    String getDefaultClusterDefinitionName();
 }

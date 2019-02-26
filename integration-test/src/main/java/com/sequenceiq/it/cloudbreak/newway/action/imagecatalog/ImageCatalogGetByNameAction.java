@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 
-public class ImageCatalogGetByNameAction implements Action<ImageCatalogDto> {
+public class ImageCatalogGetByNameAction implements Action<ImageCatalogTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetByNameAction.class);
 
@@ -24,7 +24,7 @@ public class ImageCatalogGetByNameAction implements Action<ImageCatalogDto> {
     }
 
     @Override
-    public ImageCatalogDto action(TestContext testContext, ImageCatalogDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
         LOGGER.info("Get Imagecatalog within workspace by name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

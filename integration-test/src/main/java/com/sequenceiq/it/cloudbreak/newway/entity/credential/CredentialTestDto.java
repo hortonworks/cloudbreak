@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.Yar
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
@@ -105,7 +106,7 @@ public class CredentialTestDto extends AbstractCloudbreakEntity<CredentialV4Requ
 
     @Override
     public boolean deletable(CredentialV4Response entity) {
-        return entity.getName().startsWith("mock-");
+        return entity.getName().startsWith(RandomNameCreator.PREFIX);
     }
 
     @Override

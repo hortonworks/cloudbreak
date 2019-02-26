@@ -21,7 +21,7 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
 
     public AmbariEntity valid() {
         String clusterDefinitionName = getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
-                CommonCloudParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+                getCloudProvider().getDefaultClusterDefinitionName());
         return withUserName("admin")
                 .withPassword("Admin123")
                 .withClusterDefinitionName(clusterDefinitionName)

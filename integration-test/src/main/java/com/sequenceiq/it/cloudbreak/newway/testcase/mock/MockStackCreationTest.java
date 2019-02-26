@@ -1,16 +1,20 @@
-package com.sequenceiq.it.cloudbreak.newway.testcase.e2e;
+package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
+
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+
+import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
-public class StackCreationTest extends AbstractIntegrationTest {
+public class MockStackCreationTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -19,10 +23,11 @@ public class StackCreationTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    public void testCreateWorkloadCluster(TestContext testContext) {
+    public void testAttemptToCreateTwoRegularClusterWithTheSameName(TestContext testContext) {
         testContext.given(StackTestDto.class)
-                .when(StackTestAction::create)
-                .await(STACK_AVAILABLE)
+                .when(Stack.postV4())
+                .when(Stack.postV4(), key("badRequest"))
+                .expect(BadRequestException.class, key("badRequest"))
                 .validate();
     }
 

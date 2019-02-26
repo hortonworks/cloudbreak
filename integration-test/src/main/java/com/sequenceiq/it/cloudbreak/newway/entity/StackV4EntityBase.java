@@ -44,18 +44,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> valid() {
         String name = getNameCreator().getRandomNameForResource();
-
-
-//        withName(name)
-//                .withPlacement(getTestContext().init(PlacementSettingsEntity.class))
-//                .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
-//                .withNetwork(getCloudProvider().newNetwork(getTestContext()).getRequest())
-//                .withStackAuthentication(getTestContext().init(StackAuthenticationEntity.class))
-//                .withGatewayPort(mockedTestContext.getSparkServer().getPort())
-//                .withCluster(getTestContext().init(ClusterEntity.class).withName(name));
-//
-
-
         return withName(name)
                 .withPlacement(getTestContext().given(PlacementSettingsEntity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
@@ -66,7 +54,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     public StackV4EntityBase<T> withEveryProperties() {
-        ImageCatalogDto imgCat = getTestContext().get(ImageCatalogDto.class);
+        ImageCatalogTestDto imgCat = getTestContext().get(ImageCatalogTestDto.class);
         getTestContext()
                 .given("network", NetworkV2Entity.class).withSubnetCIDR("10.10.0.0/16")
                 .given("securityRulesWorker", SecurityRulesEntity.class).withPorts("55", "66", "77").withProtocol("ftp").withSubnet("10.0.0.0/32")
