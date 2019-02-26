@@ -12,7 +12,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
 
 public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClusterTestConfiguration.class);
@@ -24,7 +23,7 @@ public class CloudbreakClusterTestConfiguration extends CloudbreakTest {
     @BeforeSuite
     public void getAllClusterDefinitions() throws Exception {
         given(CloudbreakClient.created());
-        when(ClusterDefinition.getAll());
+//        when(ClusterDefinitionTestAction.getAll());
     }
 
     @BeforeClass

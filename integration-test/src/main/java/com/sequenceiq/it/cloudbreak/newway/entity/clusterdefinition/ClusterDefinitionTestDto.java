@@ -10,24 +10,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.Clus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 
-public class ClusterDefinitionEntity extends AbstractCloudbreakEntity<ClusterDefinitionV4Request, ClusterDefinitionV4Response, ClusterDefinitionEntity> {
+@Prototype
+public class ClusterDefinitionTestDto extends AbstractCloudbreakEntity<ClusterDefinitionV4Request, ClusterDefinitionV4Response, ClusterDefinitionTestDto> {
     public static final String CLUSTER_DEFINITION = "CLUSTER_DEFINITION";
 
     private Collection<ClusterDefinitionV4ViewResponse> viewResponses;
 
-    ClusterDefinitionEntity(String newId) {
-        super(newId);
-        setRequest(new ClusterDefinitionV4Request());
-    }
-
-    ClusterDefinitionEntity() {
-        this(CLUSTER_DEFINITION);
-    }
-
-    public ClusterDefinitionEntity(TestContext testContext) {
+    public ClusterDefinitionTestDto(TestContext testContext) {
         super(new ClusterDefinitionV4Request(), testContext);
     }
 
@@ -41,12 +34,12 @@ public class ClusterDefinitionEntity extends AbstractCloudbreakEntity<ClusterDef
         }
     }
 
-    public ClusterDefinitionEntity valid() {
+    public ClusterDefinitionTestDto valid() {
         return withName(getNameCreator().getRandomNameForResource())
                 .withClusterDefinition("someClusterDefinition");
     }
 
-    public ClusterDefinitionEntity withName(String name) {
+    public ClusterDefinitionTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
@@ -56,17 +49,17 @@ public class ClusterDefinitionEntity extends AbstractCloudbreakEntity<ClusterDef
         return getRequest().getDescription();
     }
 
-    public ClusterDefinitionEntity withDescription(String description) {
+    public ClusterDefinitionTestDto withDescription(String description) {
         getRequest().setDescription(description);
         return this;
     }
 
-    public ClusterDefinitionEntity withUrl(String url) {
+    public ClusterDefinitionTestDto withUrl(String url) {
         getRequest().setUrl(url);
         return this;
     }
 
-    public ClusterDefinitionEntity withClusterDefinition(String clusterDefiniton) {
+    public ClusterDefinitionTestDto withClusterDefinition(String clusterDefiniton) {
         getRequest().setClusterDefinition(clusterDefiniton);
         return this;
     }
@@ -75,7 +68,7 @@ public class ClusterDefinitionEntity extends AbstractCloudbreakEntity<ClusterDef
         return getRequest().getTags();
     }
 
-    public ClusterDefinitionEntity withTag(List<String> keys, List<Object> values) {
+    public ClusterDefinitionTestDto withTag(List<String> keys, List<Object> values) {
         if (keys.size() != values.size()) {
             throw new IllegalStateException("The given keys number does not match with the values number");
         }

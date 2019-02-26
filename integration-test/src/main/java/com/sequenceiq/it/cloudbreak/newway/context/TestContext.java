@@ -9,12 +9,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -26,6 +24,7 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -75,6 +74,8 @@ public abstract class TestContext implements ApplicationContextAware {
     private CloudProviderProxy cloudProvider;
 
     private DefaultModel model;
+
+    private boolean validated;
 
     public Map<String, CloudbreakEntity> getResources() {
         return resources;
@@ -408,30 +409,20 @@ public abstract class TestContext implements ApplicationContextAware {
         if (exception == null) {
             String message = "Expected an exception but cannot find with key: " + key;
             exceptionMap.put("expect", new RuntimeException(message));
-            Assert.fail(message);
         } else {
             if (!exception.getClass().equals(expectedException)) {
                 String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
                         expectedException, exception.getClass());
                 exceptionMap.put("expect", new RuntimeException(message));
-                Assert.fail(message);
             } else if (!isMessageEquals(exception, runningParameter)) {
                 String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
                         runningParameter.getExpectedMessage(), getErrorMessage(exception));
                 exceptionMap.put("expect", new RuntimeException(message));
-                Assert.fail(message);
             } else {
-                runExceptionConsumer(runningParameter.getExceptionConsumer(), exception);
                 exceptionMap.remove(key);
             }
         }
         return entity;
-    }
-
-    private void runExceptionConsumer(Consumer<Exception> exceptionConsumer, Exception exception) {
-        if (exceptionConsumer != null) {
-            exceptionConsumer.accept(exception);
-        }
     }
 
     private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
@@ -439,7 +430,8 @@ public abstract class TestContext implements ApplicationContextAware {
                 || Pattern.compile(runningParameter.getExpectedMessage()).matcher(getErrorMessage(exception)).find();
     }
 
-    public void handleExecptionsDuringTest() {
+    public void handleExecptionsDuringTest(boolean silently) {
+        validated = true;
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
         if (!exceptionsDuringTest.isEmpty()) {
@@ -449,7 +441,9 @@ public abstract class TestContext implements ApplicationContextAware {
                 br.append(msg).append(": ").append(getErrorMessage(ex)).append(System.lineSeparator());
             });
             exceptionsDuringTest.clear();
-            Assert.fail(br.toString());
+            if (!silently) {
+                throw new TestFailException(br.toString());
+            }
         }
     }
 
@@ -495,8 +489,12 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public void cleanupTestContextEntity() {
+        if (!validated) {
+            throw new IllegalStateException(
+                    "Should be validate the context! Maybe do you forget to call .validate() end of the test? See other tests for example");
+        }
         checkShutdown();
-        handleExecptionsDuringTest();
+        handleExecptionsDuringTest(true);
         if (!cleanUpOnFailure && !getExceptionMap().isEmpty()) {
             LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
             return;

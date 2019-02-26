@@ -214,7 +214,7 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
     }
 
     public void validate() {
-        testContext.handleExecptionsDuringTest();
+        testContext.handleExecptionsDuringTest(false);
     }
 
     public RandomNameCreator getNameCreator() {

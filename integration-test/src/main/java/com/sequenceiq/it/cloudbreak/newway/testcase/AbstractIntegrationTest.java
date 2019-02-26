@@ -41,7 +41,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
@@ -172,7 +172,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void initializeDefaultClusterDefinitions(TestContext testContext) {
         testContext
-                .init(ClusterDefinitionEntity.class)
+                .init(ClusterDefinitionTestDto.class)
                 .when(new ClusterDefinitionGetListAction());
     }
 

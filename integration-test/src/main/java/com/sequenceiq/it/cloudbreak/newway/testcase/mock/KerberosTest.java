@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerber
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
@@ -32,8 +33,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinition;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -67,8 +67,8 @@ public class KerberosTest extends AbstractIntegrationTest {
         KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinition.postV4())
+                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestAction.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post)
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
@@ -89,8 +89,8 @@ public class KerberosTest extends AbstractIntegrationTest {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinition.postV4())
+                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestAction.postV4())
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
@@ -110,8 +110,8 @@ public class KerberosTest extends AbstractIntegrationTest {
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinition.postV4())
+                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestAction.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post)
                 .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
@@ -136,8 +136,8 @@ public class KerberosTest extends AbstractIntegrationTest {
         request.getAmbariDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinition.postV4())
+                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestAction.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
@@ -153,8 +153,8 @@ public class KerberosTest extends AbstractIntegrationTest {
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinition.postV4())
+                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestAction.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
@@ -169,8 +169,8 @@ public class KerberosTest extends AbstractIntegrationTest {
         request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionEntity.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinition.postV4())
+                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestAction.postV4())
                 .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
                 .when(KerberosTestAction::post, key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
