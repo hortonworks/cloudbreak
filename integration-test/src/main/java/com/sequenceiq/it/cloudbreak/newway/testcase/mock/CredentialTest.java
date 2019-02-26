@@ -115,14 +115,14 @@ public class CredentialTest extends AbstractIntegrationTest {
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {getBean(MockedTestContext.class), longStringGeneratorUtil.stringGenerator(101),
-                        " The length of the credential's name has to be in range of 5 to 100"},
+                        "\"post.arg1.name\":\"The length of the credential's name has to be in range of 5 to 100\""},
                 {getBean(MockedTestContext.class), "abc",
-                        " The length of the credential's name has to be in range of 5 to 100"},
+                        "\"post.arg1.name\":\"The length of the credential's name has to be in range of 5 to 100\""},
                 {getBean(MockedTestContext.class), "a-@#$%|:&*;",
-                        " The name of the credential can only contain lowercase alphanumeric characters and "
-                                + "hyphens and has start with an alphanumeric character"},
+                        "\"post.arg1.name\":\"The name of the credential can only contain lowercase alphanumeric characters and "
+                                + "hyphens and has start with an alphanumeric character\""},
                 {getBean(MockedTestContext.class), null,
-                        "error: must not be null"}
+                        "\"post.arg1.name\":\"must not be null\""}
         };
     }
 }
