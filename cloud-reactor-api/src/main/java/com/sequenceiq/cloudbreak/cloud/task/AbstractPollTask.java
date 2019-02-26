@@ -46,6 +46,6 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
             return false;
         }
         PollGroup pollGroup = InMemoryStateStore.getStack(authenticatedContext.getCloudContext().getId());
-        return pollGroup != null && CANCELLED.equals(pollGroup);
+        return CANCELLED.equals(pollGroup);
     }
 }

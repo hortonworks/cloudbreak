@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
@@ -16,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = Network.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @WorkspaceResourceType(resource = WorkspaceResource.SECURITY_GROUP)
 public interface SecurityGroupRepository extends WorkspaceResourceRepository<SecurityGroup, Long> {
 

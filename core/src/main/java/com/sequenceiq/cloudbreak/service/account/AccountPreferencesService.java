@@ -48,13 +48,9 @@ public class AccountPreferencesService {
 
     public Set<String> enabledPlatforms() {
         Set<String> platforms;
-        if (enabledPlatforms.isEmpty()) {
-            platforms = cloudConstants.stream()
-                    .map(cloudConstant -> cloudConstant.platform().value())
-                    .collect(Collectors.toSet());
-        } else {
-            platforms = Sets.newHashSet(enabledPlatforms.split(","));
-        }
+        platforms = enabledPlatforms.isEmpty() ? cloudConstants.stream()
+                .map(cloudConstant -> cloudConstant.platform().value())
+                .collect(Collectors.toSet()) : Sets.newHashSet(enabledPlatforms.split(","));
         return platforms;
     }
 

@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AuditOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,14 +27,14 @@ public interface AuditV3Endpoint {
     @GET
     @Path("event/{auditId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AuditOpDescription.GET_BY_ORG, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = AuditOpDescription.GET_BY_ORG, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventByWorkspace")
     AuditEvent getAuditEventByWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
 
     @GET
     @Path("events/{resourceType}/{resourceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsInWorkspace")
     List<AuditEvent> getAuditEventsInWorkspace(@PathParam("workspaceId") Long workspaceId,
             @PathParam("resourceType") String resourceType, @PathParam("resourceId") Long resourceId);
@@ -42,7 +42,7 @@ public interface AuditV3Endpoint {
     @GET
     @Path("events/zip/{resourceType}/{resourceId}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = OperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipInWorkspace")
     Response getAuditEventsZipInWorkspace(@PathParam("workspaceId") Long workspaceId,
             @PathParam("resourceType") String resourceType, @PathParam("resourceId") Long resourceId);

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -118,7 +119,7 @@ public class EncryptedSnapshotService {
 
     private void saveEncryptedResource(AuthenticatedContext ac, PersistenceNotifier resourceNotifier, ResourceType awsEncryptedVolume,
             String volumeId, String groupName) {
-        CloudResource cloudResource = new CloudResource.Builder()
+        CloudResource cloudResource = new Builder()
                 .type(awsEncryptedVolume)
                 .name(volumeId)
                 .group(groupName)

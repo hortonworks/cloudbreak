@@ -63,7 +63,7 @@ public class WorkspaceModificationVerifierService {
                 .collect(Collectors.toSet());
 
         if (!usersNotInTheWorkspace.isEmpty()) {
-            String usersCommaSeparated = usersNotInTheWorkspace.stream().collect(Collectors.joining(", "));
+            String usersCommaSeparated = String.join(", ", usersNotInTheWorkspace);
             throw new BadRequestException("The following users are not in the workspace: " + usersCommaSeparated);
         }
 
@@ -79,7 +79,7 @@ public class WorkspaceModificationVerifierService {
                 .collect(Collectors.toSet());
 
         if (!usersInWorkspace.isEmpty()) {
-            String usersCommaSeparated = usersInWorkspace.stream().collect(Collectors.joining(", "));
+            String usersCommaSeparated = String.join(", ", usersInWorkspace);
             throw new BadRequestException("The following users are already in the workspace: " + usersCommaSeparated);
         }
     }

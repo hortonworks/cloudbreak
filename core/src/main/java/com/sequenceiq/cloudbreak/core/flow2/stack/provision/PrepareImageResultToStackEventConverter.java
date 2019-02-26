@@ -13,6 +13,6 @@ public class PrepareImageResultToStackEventConverter implements PayloadConverter
 
     @Override
     public StackEvent convert(Object payload) {
-        return new StackEvent(((CloudPlatformResult) payload).getRequest().getCloudContext().getId());
+        return new StackEvent(((CloudPlatformResult<?>) payload).getRequest().getCloudContext().getId());
     }
 }

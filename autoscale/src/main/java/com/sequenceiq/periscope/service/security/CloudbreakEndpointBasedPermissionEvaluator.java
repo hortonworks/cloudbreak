@@ -37,7 +37,7 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
         if (target instanceof Optional) {
-            target = ((Optional) target).orElse(null);
+            target = ((Optional<?>) target).orElse(null);
         }
         if (target == null) {
             return false;

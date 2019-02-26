@@ -19,7 +19,7 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty
     private WorkspaceResourceResponse workspace;
 
-    @ApiModelProperty(value = ModelDescriptions.GOV_CLOUD_FLAG)
+    @ApiModelProperty(ModelDescriptions.GOV_CLOUD_FLAG)
     private Boolean govCloud;
 
     @JsonProperty("public")

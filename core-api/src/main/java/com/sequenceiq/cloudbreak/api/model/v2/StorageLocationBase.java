@@ -56,14 +56,14 @@ public abstract class StorageLocationBase implements JsonEntity {
             return false;
         }
         StorageLocationBase that = (StorageLocationBase) o;
-        return Objects.equals(getPropertyFile(), that.getPropertyFile())
-                && Objects.equals(getPropertyName(), that.getPropertyName())
-                && Objects.equals(getValue(), that.getValue());
+        return Objects.equals(propertyFile, that.propertyFile)
+                && Objects.equals(propertyName, that.propertyName)
+                && Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPropertyFile(), getPropertyName(), getValue());
+        return Objects.hash(propertyFile, propertyName, value);
     }
 
 }

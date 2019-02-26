@@ -35,9 +35,6 @@ public class GeneralClusterConfigs {
 
     private int kafkaReplicationFactor;
 
-    public GeneralClusterConfigs() {
-    }
-
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }

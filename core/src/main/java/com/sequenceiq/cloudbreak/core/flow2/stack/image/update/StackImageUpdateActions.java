@@ -59,7 +59,7 @@ public class StackImageUpdateActions {
             protected void doExecute(StackContext context, StackImageUpdateTriggerEvent payload, Map<Object, Object> variables) {
                 getFlowMessageService().fireEventAndLog(context.getStack().getId(), Msg.STACK_IMAGE_UPDATE_STARTED, Status.UPDATE_IN_PROGRESS.name());
                 if (!getStackImageUpdateService().isCbVersionOk(context.getStack())) {
-                    throw new OperationException("Stack must be created at least with Cloudbreak version [" + StackImageUpdateService.MIN_VERSION + "]");
+                    throw new OperationException("Stack must be created at least with Cloudbreak version [" + StackImageUpdateService.MIN_VERSION + ']');
                 }
                 StatedImage newImage = getStackImageUpdateService().getNewImageIfVersionsMatch(context.getStack(), payload.getNewImageId(),
                         payload.getImageCatalogName(), payload.getImageCatalogUrl());

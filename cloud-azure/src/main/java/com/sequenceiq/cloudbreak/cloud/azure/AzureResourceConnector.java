@@ -67,7 +67,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceConnector.class);
 
-    private static final Double PUBLIC_ADDRESS_BATCH_RATIO = 100D / 30;
+    private static final Double PUBLIC_ADDRESS_BATCH_RATIO = 100.0D / 30;
 
     private static final String NETWORK_INTERFACES_NAMES = "NETWORK_INTERFACES_NAMES";
 

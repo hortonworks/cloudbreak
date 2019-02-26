@@ -31,7 +31,7 @@ public class Image {
 
     private boolean defaultImage;
 
-    private Map<String, String> packageVersions;
+    private final Map<String, String> packageVersions;
 
     @JsonCreator
     public Image(

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 
@@ -47,7 +46,7 @@ public class ClusterTerminationFlowService {
         LOGGER.info("Cluster delete started.");
     }
 
-    public void finishClusterTerminationAllowed(ClusterViewContext context, ClusterTerminationResult payload) throws TransactionExecutionException {
+    public void finishClusterTerminationAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         LOGGER.info("Terminate cluster result: {}", payload);
         StackView stackView = context.getStack();
         ClusterView clusterView = context.getClusterView();

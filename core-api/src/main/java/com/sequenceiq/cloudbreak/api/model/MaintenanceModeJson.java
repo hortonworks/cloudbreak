@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MaintenanceModeJson implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.STATUS_MAINTENANCE_MODE)
+    @ApiModelProperty(ClusterModelDescription.STATUS_MAINTENANCE_MODE)
     private MaintenanceModeStatus status;
 
     public MaintenanceModeStatus getStatus() {

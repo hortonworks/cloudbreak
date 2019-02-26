@@ -92,7 +92,7 @@ public class OpenStackSetup implements Setup {
     }
 
     @Override
-    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) {
 
     }
 

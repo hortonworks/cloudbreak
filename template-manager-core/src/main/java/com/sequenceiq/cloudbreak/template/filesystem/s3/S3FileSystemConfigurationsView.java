@@ -13,7 +13,7 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
 
     public S3FileSystemConfigurationsView(S3FileSystem s3FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
         super(s3FileSystem.getStorageContainer(), deafultFs, locations);
-        this.instanceProfile = s3FileSystem.getInstanceProfile();
+        instanceProfile = s3FileSystem.getInstanceProfile();
     }
 
     public String getInstanceProfile() {

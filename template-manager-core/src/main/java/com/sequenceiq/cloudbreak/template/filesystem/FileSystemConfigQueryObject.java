@@ -16,13 +16,13 @@ public class FileSystemConfigQueryObject {
 
     private final boolean attachedCluster;
 
-    private FileSystemConfigQueryObject(FileSystemConfigQueryObject.Builder builder) {
-        this.storageName = builder.storageName;
-        this.clusterName = builder.clusterName;
-        this.blueprintText = builder.blueprintText;
-        this.fileSystemType = builder.fileSystemType;
-        this.accountName = builder.accountName;
-        this.attachedCluster = builder.attachedCluster;
+    private FileSystemConfigQueryObject(Builder builder) {
+        storageName = builder.storageName;
+        clusterName = builder.clusterName;
+        blueprintText = builder.blueprintText;
+        fileSystemType = builder.fileSystemType;
+        accountName = builder.accountName;
+        attachedCluster = builder.attachedCluster;
     }
 
     public String getClusterName() {

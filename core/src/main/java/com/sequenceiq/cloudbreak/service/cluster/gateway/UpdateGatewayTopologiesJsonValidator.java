@@ -89,6 +89,6 @@ class UpdateGatewayTopologiesJsonValidator implements Validator<UpdateGatewayTop
     }
 
     private String joinMissingTopologyNames(List<String> requestedTopologyNames) {
-        return requestedTopologyNames.stream().collect(Collectors.joining(" ,"));
+        return String.join(" ,", requestedTopologyNames);
     }
 }

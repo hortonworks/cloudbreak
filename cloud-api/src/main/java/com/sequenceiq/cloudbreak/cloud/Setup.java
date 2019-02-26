@@ -61,9 +61,8 @@ public interface Setup {
      *
      * @param authenticatedContext the context which already contains the authenticated client
      * @param parameters map of parameters
-     * @throws Exception exception is thrown when the parameters does not meet the desired requirements
      */
-    void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception;
+    void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters);
 
     /**
      * Implementation of this method shall contain basic checks if scaling is possible or not.

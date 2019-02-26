@@ -40,7 +40,7 @@ public class ComponentState {
 
         UPGRADING("UPGRADING");
 
-        private String value;
+        private final String value;
 
         StateEnum(String value) {
             this.value = value;

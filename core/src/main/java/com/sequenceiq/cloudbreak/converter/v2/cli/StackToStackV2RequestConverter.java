@@ -61,7 +61,7 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
         stackV2Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV2Request.class));
         for (InstanceGroup instanceGroup : source.getInstanceGroups()) {
             InstanceGroupV2Request instanceGroupV2Request = getConversionService().convert(instanceGroup, InstanceGroupV2Request.class);
-            instanceGroupV2Request = collectInformationsFromActualHostgroup(source, instanceGroup, instanceGroupV2Request);
+            collectInformationsFromActualHostgroup(source, instanceGroup, instanceGroupV2Request);
             stackV2Request.getInstanceGroups().add(instanceGroupV2Request);
         }
         prepareImage(source, stackV2Request);
@@ -115,7 +115,7 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private InstanceGroupV2Request collectInformationsFromActualHostgroup(Stack source, InstanceGroup instanceGroup,
+    private void collectInformationsFromActualHostgroup(Stack source, InstanceGroup instanceGroup,
             InstanceGroupV2Request instanceGroupV2Request) {
         HostGroup actualHostgroup = null;
         if (source.getCluster() != null) {
@@ -132,7 +132,6 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
                 instanceGroupV2Request.getRecipeNames().add(recipe.getName());
             }
         }
-        return instanceGroupV2Request;
     }
 
     private void prepareTags(Stack source, StackV2Request stackV2Request) {

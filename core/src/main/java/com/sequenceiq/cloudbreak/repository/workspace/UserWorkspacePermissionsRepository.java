@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository.workspace;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = UserWorkspacePermissions.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 public interface UserWorkspacePermissionsRepository extends DisabledBaseRepository<UserWorkspacePermissions, Long> {
 

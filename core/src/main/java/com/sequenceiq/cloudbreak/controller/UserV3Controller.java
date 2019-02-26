@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
-@Transactional(Transactional.TxType.NEVER)
+@Transactional(TxType.NEVER)
 public class UserV3Controller implements UserV3Endpoint {
 
     @Inject

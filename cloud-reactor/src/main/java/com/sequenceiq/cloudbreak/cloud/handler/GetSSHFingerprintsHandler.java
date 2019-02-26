@@ -51,11 +51,11 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
     @Override
     public void accept(Event<GetSSHFingerprintsRequest> getSSHFingerprintsRequestEvent) {
         LOGGER.info("Received event: {}", getSSHFingerprintsRequestEvent);
-        GetSSHFingerprintsRequest fingerprintsRequest = getSSHFingerprintsRequestEvent.getData();
+        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> fingerprintsRequest = getSSHFingerprintsRequestEvent.getData();
         try {
             CloudContext cloudContext = fingerprintsRequest.getCloudContext();
             CloudInstance cloudInstance = fingerprintsRequest.getCloudInstance();
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, fingerprintsRequest.getCloudCredential());
             GetSSHFingerprintsResult fingerprintsResult;
             try {

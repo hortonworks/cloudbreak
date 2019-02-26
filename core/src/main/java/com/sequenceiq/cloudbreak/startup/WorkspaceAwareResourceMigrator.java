@@ -32,9 +32,7 @@ public class WorkspaceAwareResourceMigrator {
         try {
             transactionService.required(() -> {
                 Iterable<? extends WorkspaceAwareResource> resources = findAll.get();
-                resources.forEach(resource -> {
-                    setWorkspace(userMigrationResults, save, resource);
-                });
+                resources.forEach(resource -> setWorkspace(userMigrationResults, save, resource));
                 return null;
             });
         } catch (TransactionExecutionException e) {

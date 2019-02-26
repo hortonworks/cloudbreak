@@ -40,7 +40,7 @@ public class AMICopyStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     protected Boolean doCall() {
-        LOGGER.debug("Checking copied AMIs status are available: '{}'", imageIds.stream().collect(Collectors.joining(",")));
+        LOGGER.debug("Checking copied AMIs status are available: '{}'", String.join(",", imageIds));
         DescribeImagesResult describeImagesResult = amazonEC2Client.describeImages(new DescribeImagesRequest().withImageIds(imageIds));
         checkForCopyFailures(describeImagesResult);
         return describeImagesResult.getImages()
@@ -55,7 +55,7 @@ public class AMICopyStatusCheckerTask extends PollBooleanStateTask {
                 .map(image -> String.format("AMI: '%s' failed due to: '%s'", image.getImageId(), image.getStateReason()))
                 .collect(Collectors.toSet());
         if (!failedCopies.isEmpty()) {
-            throw new CloudConnectorException(String.format("AMI(s) failed to copy: '%s'", failedCopies.stream().collect(Collectors.joining(", "))));
+            throw new CloudConnectorException(String.format("AMI(s) failed to copy: '%s'", String.join(", ", failedCopies)));
         }
     }
 }

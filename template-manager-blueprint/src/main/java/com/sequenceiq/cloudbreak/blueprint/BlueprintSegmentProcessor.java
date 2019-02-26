@@ -92,7 +92,7 @@ public class BlueprintSegmentProcessor {
         return value.getFiles().stream().filter(item -> !item.endsWith(SERVICES_JSON)).collect(Collectors.toList());
     }
 
-    private String prepareContent(final String filePath, TemplatePreparationObject source, Map<String, Object> configs) {
+    private String prepareContent(String filePath, TemplatePreparationObject source, Map<String, Object> configs) {
         String result;
         String content = readFileFromClasspathQuietly(filePath);
         try {

@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.template.model;
 
 public class BlueprintStackInfo {
 
-    private String version;
+    private final String version;
 
-    private String type;
+    private final String type;
 
     public BlueprintStackInfo(String version, String type) {
         this.version = version;

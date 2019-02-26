@@ -38,7 +38,7 @@ public class LdapView {
 
     private String connectionURL;
 
-    private String host;
+    private final String host;
 
     private int port;
 
@@ -74,7 +74,7 @@ public class LdapView {
     }
 
     public boolean isSecure() {
-        return protocol.toLowerCase().equalsIgnoreCase("ldaps");
+        return "ldaps".equalsIgnoreCase(protocol.toLowerCase());
     }
 
     public String getProtocol() {

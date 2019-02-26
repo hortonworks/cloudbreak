@@ -19,10 +19,10 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
 
     public AdlsGen2FileSystemConfigurationsView(AdlsGen2FileSystem adlsGen2FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
         super(adlsGen2FileSystem.getStorageContainer(), deafultFs, locations);
-        this.accountName = adlsGen2FileSystem.getAccountName();
-        this.accountKey = adlsGen2FileSystem.getAccountKey();
-        this.storageContainerName = adlsGen2FileSystem.getStorageContainerName();
-        this.storageContainer = adlsGen2FileSystem.getStorageContainer();
+        accountName = adlsGen2FileSystem.getAccountName();
+        accountKey = adlsGen2FileSystem.getAccountKey();
+        storageContainerName = adlsGen2FileSystem.getStorageContainerName();
+        storageContainer = adlsGen2FileSystem.getStorageContainer();
     }
 
     public String getAccountName() {

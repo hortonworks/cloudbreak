@@ -28,11 +28,7 @@ public abstract class RestUrlParser {
     }
 
     public boolean fillParams(ContainerRequestContext requestContext, Map<String, String> params) {
-        if (parsedMethods().stream().anyMatch(method -> method.equals(getMethod(requestContext)))) {
-            return fillParams(getUrl(requestContext), params);
-        } else {
-            return false;
-        }
+        return parsedMethods().stream().anyMatch(method -> method.equals(getMethod(requestContext))) && fillParams(getUrl(requestContext), params);
     }
 
     private boolean fillParams(String url, Map<String, String> params) {

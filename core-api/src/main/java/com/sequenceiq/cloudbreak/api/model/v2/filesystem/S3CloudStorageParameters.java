@@ -41,12 +41,12 @@ public class S3CloudStorageParameters implements CloudStorageParameters {
             return false;
         }
         S3CloudStorageParameters that = (S3CloudStorageParameters) o;
-        return Objects.equals(getInstanceProfile(), that.getInstanceProfile());
+        return Objects.equals(instanceProfile, that.instanceProfile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInstanceProfile());
+        return Objects.hash(instanceProfile);
     }
 
 }

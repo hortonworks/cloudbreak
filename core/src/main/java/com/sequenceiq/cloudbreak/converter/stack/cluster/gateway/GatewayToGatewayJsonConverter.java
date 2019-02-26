@@ -24,11 +24,11 @@ public class GatewayToGatewayJsonConverter extends AbstractConversionServiceAwar
         gatewayJson.setSsoProvider(gateway.getSsoProvider());
         gatewayJson.setSsoType(gateway.getSsoType());
         gatewayJson.setGatewayType(gateway.getGatewayType());
-        gatewayJson = convertTopologies(gateway, gatewayJson);
+        convertTopologies(gateway, gatewayJson);
         return gatewayJson;
     }
 
-    private GatewayJson convertTopologies(Gateway gateway, GatewayJson gatewayJson) {
+    private void convertTopologies(Gateway gateway, GatewayJson gatewayJson) {
         Set<GatewayTopology> gatewayTopologies = gateway.getTopologies();
         if (!CollectionUtils.isEmpty(gatewayTopologies)) {
             List<GatewayTopologyJson> topologies = gatewayTopologies.stream()
@@ -36,6 +36,5 @@ public class GatewayToGatewayJsonConverter extends AbstractConversionServiceAwar
                     .collect(Collectors.toList());
             gatewayJson.setTopologies(topologies);
         }
-        return gatewayJson;
     }
 }

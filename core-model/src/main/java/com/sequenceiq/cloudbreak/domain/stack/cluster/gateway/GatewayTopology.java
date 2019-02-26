@@ -35,10 +35,10 @@ public class GatewayTopology implements ProvisionEntity {
 
     public GatewayTopology copy() {
         GatewayTopology gatewayTopology = new GatewayTopology();
-        gatewayTopology.setId(id);
-        gatewayTopology.setTopologyName(topologyName);
-        gatewayTopology.setExposedServices(exposedServices);
-        gatewayTopology.setGateway(gateway);
+        gatewayTopology.id = id;
+        gatewayTopology.topologyName = topologyName;
+        gatewayTopology.exposedServices = exposedServices;
+        gatewayTopology.gateway = gateway;
         return gatewayTopology;
     }
 

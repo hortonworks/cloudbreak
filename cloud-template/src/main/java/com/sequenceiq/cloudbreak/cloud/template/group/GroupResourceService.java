@@ -58,9 +58,9 @@ public class GroupResourceService {
             AuthenticatedContext auth, Iterable<Group> groups, Network network, Security security) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        for (GroupResourceBuilder builder : resourceBuilders.group(cloudContext.getPlatform())) {
+        for (GroupResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.group(cloudContext.getPlatform())) {
             PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-            if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+            if (CANCELLED.equals(pollGroup)) {
                 break;
             }
             for (Group group : getOrderedCopy(groups)) {
@@ -86,9 +86,9 @@ public class GroupResourceService {
             AuthenticatedContext auth, Collection<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<GroupResourceBuilder> builderChain = resourceBuilders.group(cloudContext.getPlatform());
+        List<GroupResourceBuilder<ResourceBuilderContext>> builderChain = resourceBuilders.group(cloudContext.getPlatform());
         for (int i = builderChain.size() - 1; i >= 0; i--) {
-            GroupResourceBuilder builder = builderChain.get(i);
+            GroupResourceBuilder<ResourceBuilderContext> builder = builderChain.get(i);
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
             for (CloudResource resource : specificResources) {
                 if (resource.getStatus() == CommonStatus.CREATED) {
@@ -110,7 +110,7 @@ public class GroupResourceService {
             Network network, Security security, Collection<CloudResource> groupResources) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
-        for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
             List<CloudResource> resources = getResources(groupResources, builder.resourceType());
             for (CloudResource resource : resources) {
                 CloudResourceStatus status = builder.update(context, auth, network, security, resource);
@@ -127,7 +127,7 @@ public class GroupResourceService {
 
     public List<CloudResource> getGroupResources(Platform platform, Collection<CloudResource> resources) {
         Collection<ResourceType> types = new ArrayList<>();
-        for (GroupResourceBuilder builder : resourceBuilders.group(platform)) {
+        for (GroupResourceBuilder<?> builder : resourceBuilders.group(platform)) {
             types.add(builder.resourceType());
         }
         return getResources(resources, types);
@@ -160,7 +160,7 @@ public class GroupResourceService {
     }
 
     private Iterable<Group> getOrderedCopy(Iterable<Group> groups) {
-        Ordering<Group> byLengthOrdering = new Ordering<Group>() {
+        Ordering<Group> byLengthOrdering = new Ordering<>() {
             @Override
             public int compare(Group left, Group right) {
                 return Ints.compare(left.getInstancesSize(), right.getInstancesSize());

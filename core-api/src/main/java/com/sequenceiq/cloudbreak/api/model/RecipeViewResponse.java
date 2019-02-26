@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class RecipeViewResponse extends CompactViewResponse {
     @NotNull
-    @ApiModelProperty(ModelDescriptions.RecipeModelDescription.TYPE)
+    @ApiModelProperty(RecipeModelDescription.TYPE)
     private RecipeType recipeType;
 
     public RecipeType getRecipeType() {

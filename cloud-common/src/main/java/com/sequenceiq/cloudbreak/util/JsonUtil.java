@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,7 +28,7 @@ public class JsonUtil {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static {
-        MAPPER.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+        MAPPER.enable(Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
     }
 

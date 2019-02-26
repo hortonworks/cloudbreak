@@ -18,11 +18,12 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class GcpConnector implements CloudConnector {
+public class GcpConnector implements CloudConnector<List<CloudResource>> {
 
     @Inject
     private GcpAuthenticator authenticator;
@@ -75,7 +76,7 @@ public class GcpConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<List<CloudResource>> resources() {
         return resourceConnector;
     }
 

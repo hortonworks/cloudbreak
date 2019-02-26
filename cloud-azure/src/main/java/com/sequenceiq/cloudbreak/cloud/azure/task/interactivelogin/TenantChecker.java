@@ -41,35 +41,35 @@ public class TenantChecker {
         request.accept(MediaType.APPLICATION_JSON);
 
         request.header("Authorization", "Bearer " + accessToken);
-        Response response = request.get();
+        try (Response response = request.get()) {
+            if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
+                String entity = response.readEntity(String.class);
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode tenantArray = mapper.readTree(entity).get("value");
+                    ObjectReader reader = mapper.readerFor(new TypeReference<ArrayList<AzureTenant>>() {
+                    });
 
-        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
-            String entity = response.readEntity(String.class);
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode tenantArray = mapper.readTree(entity).get("value");
-                ObjectReader reader = mapper.readerFor(new TypeReference<ArrayList<AzureTenant>>() {
-                });
-
-                List<AzureTenant> tenants = reader.readValue(tenantArray);
-                for (AzureTenant tenant: tenants) {
-                    if (tenant.getTenantId().equals(tenantId)) {
-                        LOGGER.debug("Tenant definitions successfully retrieved:" + tenant.getTenantId());
-                        return;
+                    List<AzureTenant> tenants = reader.readValue(tenantArray);
+                    for (AzureTenant tenant : tenants) {
+                        if (tenant.getTenantId().equals(tenantId)) {
+                            LOGGER.debug("Tenant definitions successfully retrieved:" + tenant.getTenantId());
+                            return;
+                        }
                     }
+                } catch (IOException e) {
+                    throw new InteractiveLoginException(e.toString());
                 }
-            } catch (IOException e) {
-                throw new InteractiveLoginException(e.toString());
-            }
-            throw new InteractiveLoginException("Tenant specified in Profile file not found with id: " + tenantId);
-        } else {
-            String errorResponse = response.readEntity(String.class);
-            try {
-                String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                LOGGER.error("Tenant retrieve error:" + errorMessage);
-                throw new InteractiveLoginException("Error with the tenant specified in Profile file id: " + tenantId + ", message: " + errorMessage);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
+                throw new InteractiveLoginException("Tenant specified in Profile file not found with id: " + tenantId);
+            } else {
+                String errorResponse = response.readEntity(String.class);
+                try {
+                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                    LOGGER.error("Tenant retrieve error:" + errorMessage);
+                    throw new InteractiveLoginException("Error with the tenant specified in Profile file id: " + tenantId + ", message: " + errorMessage);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
     }

@@ -62,7 +62,7 @@ public class TlsSetupService {
                 nginxCertListenerTask, new NginxPollerObject(stack, client, ip, gatewayPort, x509TrustManager),
                 POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
-            nginxTarget.path("/").request().get();
+            nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();
             String serverCert = PkiUtil.convert(chain[0]);
             InstanceMetaData metaData = getInstanceMetaData(gwInstance);

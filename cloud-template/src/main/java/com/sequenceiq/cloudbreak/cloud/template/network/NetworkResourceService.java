@@ -54,9 +54,9 @@ public class NetworkResourceService {
             AuthenticatedContext auth, Network network, Security security) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
             PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-            if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+            if (CANCELLED.equals(pollGroup)) {
                 break;
             }
             try {
@@ -79,9 +79,9 @@ public class NetworkResourceService {
             AuthenticatedContext auth, Iterable<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<NetworkResourceBuilder> builderChain = resourceBuilders.network(cloudContext.getPlatform());
+        List<NetworkResourceBuilder<ResourceBuilderContext>> builderChain = resourceBuilders.network(cloudContext.getPlatform());
         for (int i = builderChain.size() - 1; i >= 0; i--) {
-            NetworkResourceBuilder builder = builderChain.get(i);
+            NetworkResourceBuilder<ResourceBuilderContext> builder = builderChain.get(i);
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
             for (CloudResource resource : specificResources) {
                 if (resource.getStatus() == CommonStatus.CREATED) {
@@ -103,7 +103,7 @@ public class NetworkResourceService {
             Network network, Security security, Iterable<CloudResource> networkResources) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
-        for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
             CloudResource resource = getResources(networkResources, builder.resourceType()).get(0);
             CloudResourceStatus status = builder.update(context, auth, network, security, resource);
             if (status != null) {
@@ -118,7 +118,7 @@ public class NetworkResourceService {
 
     public List<CloudResource> getNetworkResources(Platform platform, Iterable<CloudResource> resources) {
         Collection<ResourceType> types = new ArrayList<>();
-        for (NetworkResourceBuilder builder : resourceBuilders.network(platform)) {
+        for (NetworkResourceBuilder<?> builder : resourceBuilders.network(platform)) {
             types.add(builder.resourceType());
         }
         return getResources(resources, types);

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -48,14 +49,14 @@ public class StackMatrixService {
         StackMatrix stackMatrix = new StackMatrix();
 
         Map<String, StackDescriptor> hdfStackDescriptors = new HashMap<>();
-        for (Map.Entry<String, DefaultHDFInfo> defaultHDFInfoEntry : hdfEntries.entrySet()) {
+        for (Entry<String, DefaultHDFInfo> defaultHDFInfoEntry : hdfEntries.entrySet()) {
             DefaultHDFInfo defaultHDFInfo = defaultHDFInfoEntry.getValue();
             StackDescriptor stackDescriptor = getStackDescriptor(defaultHDFInfo);
             hdfStackDescriptors.put(defaultHDFInfoEntry.getKey(), stackDescriptor);
         }
 
         Map<String, StackDescriptor> hdpStackDescriptors = new HashMap<>();
-        for (Map.Entry<String, DefaultHDPInfo> defaultHDPInfoEntry : hdpEntries.entrySet()) {
+        for (Entry<String, DefaultHDPInfo> defaultHDPInfoEntry : hdpEntries.entrySet()) {
             DefaultHDPInfo defaultHDPInfo = defaultHDPInfoEntry.getValue();
             StackDescriptor stackDescriptor = getStackDescriptor(defaultHDPInfo);
             hdpStackDescriptors.put(defaultHDPInfoEntry.getKey(), stackDescriptor);

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
@@ -145,7 +146,7 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.UPTIME)
     private Long uptime;
 
-    @ApiModelProperty(ModelDescriptions.BlueprintModelDescription.AMBARI_BLUEPRINT)
+    @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String extendedBlueprintText;

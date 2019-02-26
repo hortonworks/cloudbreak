@@ -42,7 +42,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
     public Action<?, ?> bootstrappingMachinesAction() {
-        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrappingMachines(context.getStack());
@@ -58,7 +58,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "COLLECTING_HOST_METADATA_STATE")
     public Action<?, ?> collectingHostMetadataAction() {
-        return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
+        return new AbstractStackCreationAction<>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.collectingHostMetadata(context.getStack());
@@ -74,7 +74,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "UPLOAD_RECIPES_STATE")
     public Action<?, ?> uploadRecipesAction() {
-        return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
+        return new AbstractClusterAction<>(HostMetadataSetupSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -89,7 +89,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
     public Action<?, ?> startingAmbariServicesAction() {
-        return new AbstractClusterAction<UploadRecipesSuccess>(UploadRecipesSuccess.class) {
+        return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack());
@@ -105,7 +105,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "REGISTER_PROXY_STATE")
     public Action<?, ?> registerProxyAction() {
-        return new AbstractClusterAction<StartAmbariServicesSuccess>(StartAmbariServicesSuccess.class) {
+        return new AbstractClusterAction<>(StartAmbariServicesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -120,7 +120,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_AMBARI_STATE")
     public Action<?, ?> startingAmbariAction() {
-        return new AbstractClusterAction<RegisterProxySuccess>(RegisterProxySuccess.class) {
+        return new AbstractClusterAction<>(RegisterProxySuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, RegisterProxySuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.startingAmbari(context.getStackId());
@@ -136,7 +136,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "CONFIGURE_LDAP_SSO_STATE")
     public Action<?, ?> configureLdapSSOAction() {
-        return new AbstractClusterAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
+        return new AbstractClusterAction<>(StartAmbariSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -151,7 +151,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "INSTALLING_CLUSTER_STATE")
     public Action<?, ?> installingClusterAction() {
-        return new AbstractClusterAction<LdapSSOConfigurationSuccess>(LdapSSOConfigurationSuccess.class) {
+        return new AbstractClusterAction<>(LdapSSOConfigurationSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, LdapSSOConfigurationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.installingCluster(context.getStack());
@@ -167,11 +167,11 @@ public class ClusterCreationActions {
 
     @Bean(name = "CLUSTER_CREATION_FINISHED_STATE")
     public Action<?, ?> clusterCreationFinishedAction() {
-        return new AbstractClusterAction<InstallClusterSuccess>(InstallClusterSuccess.class) {
+        return new AbstractClusterAction<>(InstallClusterSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.clusterInstallationFinished(context.getStack());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -188,7 +188,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

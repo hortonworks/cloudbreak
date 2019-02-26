@@ -77,7 +77,7 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
             List<ManagementPackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
                     mp, ManagementPackDetails.class)).collect(Collectors.toList());
             ambariStackDetailsJson.setMpacks(mpacks);
-            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(mp -> mp.isStackDefault()).findFirst();
+            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(ManagementPackComponent::isStackDefault).findFirst();
             stackDefaultMpack.ifPresent(mp -> ambariStackDetailsJson.setMpackUrl(mp.getMpackUrl()));
         }
         return ambariStackDetailsJson;

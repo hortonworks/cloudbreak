@@ -100,7 +100,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
             krb5Conf.put("domains", domains);
             krb5Conf.put("manage_krb5_conf", "true");
             if (!useUdp || kpropPort != null) {
-                krb5Conf.put("content", krb5Config.toString());
+                krb5Conf.put("content", krb5Config);
             }
             configs.addSiteConfiguration("kerberos-env", kerberosEnv);
             configs.addSiteConfiguration("krb5-conf", krb5Conf);

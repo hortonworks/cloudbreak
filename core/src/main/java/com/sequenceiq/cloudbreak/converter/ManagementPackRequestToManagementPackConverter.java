@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -29,7 +27,7 @@ public class ManagementPackRequestToManagementPackConverter extends AbstractConv
         mpack.setDescription(source.getDescription());
         mpack.setMpackUrl(source.getMpackUrl());
         mpack.setPurge(source.isPurge());
-        mpack.setPurgeList(source.getPurgeList().stream().collect(Collectors.joining(",")));
+        mpack.setPurgeList(String.join(",", source.getPurgeList()));
         mpack.setForce(source.isForce());
         return mpack;
     }

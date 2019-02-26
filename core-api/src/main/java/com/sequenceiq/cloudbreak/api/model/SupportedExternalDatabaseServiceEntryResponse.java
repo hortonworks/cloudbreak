@@ -12,13 +12,13 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("SupportedExternalDatabaseServiceEntryResponse")
 public class SupportedExternalDatabaseServiceEntryResponse implements JsonEntity {
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.NAME)
+    @ApiModelProperty(SupportedDatabaseModelDescription.NAME)
     private String name;
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.SERVICE_DISPLAYNAME)
+    @ApiModelProperty(SupportedDatabaseModelDescription.SERVICE_DISPLAYNAME)
     private String displayName;
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.DATABASES)
+    @ApiModelProperty(SupportedDatabaseModelDescription.DATABASES)
     private Set<SupportedDatabaseEntryResponse> databases = new HashSet<>();
 
     public String getName() {

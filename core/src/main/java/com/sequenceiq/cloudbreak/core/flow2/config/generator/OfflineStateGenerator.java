@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.config.generator;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -193,7 +194,7 @@ public class OfflineStateGenerator {
                 throw new IOException("Unable to create directories: " + destinationDir.getAbsolutePath());
             }
         }
-        Files.write(Paths.get(String.format("%s/%s.dot", OUT_PATH, flowConfiguration.getClass().getSimpleName())), content.getBytes("UTF-8"));
+        Files.write(Paths.get(String.format("%s/%s.dot", OUT_PATH, flowConfiguration.getClass().getSimpleName())), content.getBytes(StandardCharsets.UTF_8));
     }
 
     private static void inject(Object target, String name, Object value) {

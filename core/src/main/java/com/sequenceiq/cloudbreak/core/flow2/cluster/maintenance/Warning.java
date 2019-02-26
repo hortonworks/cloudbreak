@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
+import com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance.MaintenanceModeValidationService.WarningType;
+
 public class Warning {
 
-    private final MaintenanceModeValidationService.WarningType warningType;
+    private final WarningType warningType;
 
-    private String message;
+    private final String message;
 
-    public Warning(MaintenanceModeValidationService.WarningType warningType, String message) {
+    public Warning(WarningType warningType, String message) {
         this.warningType = warningType;
         this.message = message;
     }
 
-    public MaintenanceModeValidationService.WarningType getWarningType() {
+    public WarningType getWarningType() {
         return warningType;
     }
 
@@ -21,7 +23,7 @@ public class Warning {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("Warning{");
+        StringBuilder sb = new StringBuilder("Warning{");
         sb.append("warningType=").append(warningType);
         sb.append(", message='").append(message).append('\'');
         sb.append('}');

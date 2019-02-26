@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client.target;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HostMatcher implements Target<String> {
 
@@ -13,7 +12,7 @@ public class HostMatcher implements Target<String> {
 
     @Override
     public String getTarget() {
-        return addresses.stream().collect(Collectors.joining(","));
+        return String.join(",", addresses);
     }
 
     @Override

@@ -80,7 +80,7 @@ public class StackCreationActions {
 
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
-        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -95,7 +95,7 @@ public class StackCreationActions {
 
     @Bean(name = "SETUP_STATE")
     public Action<?, ?> provisioningSetupAction() {
-        return new AbstractStackCreationAction<ValidationResult>(ValidationResult.class) {
+        return new AbstractStackCreationAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackContext context, ValidationResult payload, Map<Object, Object> variables) {
                 stackCreationService.setupProvision(context.getStack());
@@ -111,7 +111,7 @@ public class StackCreationActions {
 
     @Bean(name = "IMAGESETUP_STATE")
     public Action<?, ?> prepareImageAction() {
-        return new AbstractStackCreationAction<SetupResult>(SetupResult.class) {
+        return new AbstractStackCreationAction<>(SetupResult.class) {
             @Override
             protected void doExecute(StackContext context, SetupResult payload, Map<Object, Object> variables) {
                 stackCreationService.prepareImage(context.getStack());
@@ -133,7 +133,7 @@ public class StackCreationActions {
 
     @Bean(name = "CREATE_CREDENTIAL_STATE")
     public Action<?, ?> createCredentialAction() {
-        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 variables.put(START_DATE, new Date());
@@ -150,7 +150,7 @@ public class StackCreationActions {
 
     @Bean(name = "START_PROVISIONING_STATE")
     public Action<?, ?> startProvisioningAction() {
-        return new AbstractStackCreationAction<CreateCredentialResult>(CreateCredentialResult.class) {
+        return new AbstractStackCreationAction<>(CreateCredentialResult.class) {
             @Override
             protected void doExecute(StackContext context, CreateCredentialResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -160,19 +160,19 @@ public class StackCreationActions {
             protected Selectable createRequest(StackContext context) {
                 FailurePolicy policy = Optional.ofNullable(context.getStack().getFailurePolicy()).orElse(new FailurePolicy());
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
-                    policy.getAdjustmentType(), policy.getThreshold());
+                        policy.getAdjustmentType(), policy.getThreshold());
             }
         };
     }
 
     @Bean(name = "PROVISIONING_FINISHED_STATE")
     public Action<?, ?> provisioningFinishedAction() {
-        return new AbstractStackCreationAction<LaunchStackResult>(LaunchStackResult.class) {
+        return new AbstractStackCreationAction<>(LaunchStackResult.class) {
             @Override
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.provisioningFinished(context, payload, variables);
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(),
-                    context.getCloudCredential(), context.getCloudStack());
+                        context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -187,12 +187,12 @@ public class StackCreationActions {
 
     @Bean(name = "COLLECTMETADATA_STATE")
     public Action<?, ?> collectMetadataAction() {
-        return new AbstractStackCreationAction<CollectMetadataResult>(CollectMetadataResult.class) {
+        return new AbstractStackCreationAction<>(CollectMetadataResult.class) {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
-                    context.getCloudStack());
+                        context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -206,12 +206,12 @@ public class StackCreationActions {
 
     @Bean(name = "GET_TLS_INFO_STATE")
     public Action<?, ?> getTlsInfoAction() {
-        return new AbstractStackCreationAction<GetTlsInfoResult>(GetTlsInfoResult.class) {
+        return new AbstractStackCreationAction<>(GetTlsInfoResult.class) {
             @Override
             protected void doExecute(StackContext context, GetTlsInfoResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.saveTlsInfo(context, payload.getTlsInfo());
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
-                    context.getCloudStack());
+                        context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -226,7 +226,7 @@ public class StackCreationActions {
 
     @Bean(name = "TLS_SETUP_STATE")
     public Action<?, ?> tlsSetupAction() {
-        return new AbstractStackCreationAction<GetSSHFingerprintsResult>(GetSSHFingerprintsResult.class) {
+        return new AbstractStackCreationAction<>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.setupTls(context);
@@ -238,11 +238,11 @@ public class StackCreationActions {
 
     @Bean(name = "STACK_CREATION_FINISHED_STATE")
     public Action<?, ?> stackCreationFinishedAction() {
-        return new AbstractStackCreationAction<StackWithFingerprintsEvent>(StackWithFingerprintsEvent.class) {
+        return new AbstractStackCreationAction<>(StackWithFingerprintsEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) {
                 stackCreationService.stackCreationFinished(context.getStack());
-                metricService.incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -269,7 +269,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackCreationService.handleStackCreationFailure(context.getStackView(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

@@ -46,7 +46,7 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
         }
         template.setDescription(source.getDescription());
         template.setStatus(ResourceStatus.USER_MANAGED);
-        template = convertVolume(source, template);
+        convertVolume(source, template);
         template.setCloudPlatform(source.getCloudPlatform());
         template.setRootVolumeSize(source.getRootVolumeSize());
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
@@ -77,13 +77,12 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
         };
     }
 
-    private Template convertVolume(TemplateRequest source, Template template) {
+    private void convertVolume(TemplateRequest source, Template template) {
         String volumeType = source.getVolumeType();
         template.setVolumeType(volumeType == null ? "HDD" : volumeType);
         Integer volumeCount = source.getVolumeCount();
         template.setVolumeCount(volumeCount == null ? Integer.valueOf(0) : volumeCount);
         Integer volumeSize = source.getVolumeSize();
         template.setVolumeSize(volumeSize == null ? Integer.valueOf(0) : volumeSize);
-        return template;
     }
 }

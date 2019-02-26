@@ -38,8 +38,8 @@ public interface AmbariDatabaseMapper {
 
     @Named("connectionUrl")
     default String mapConnectionUrl(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
-        return "jdbc:" + ambariDatabaseDetailsJson.getVendor().jdbcUrlDriverId() + "://" + ambariDatabaseDetailsJson.getHost() + ":"
-                + ambariDatabaseDetailsJson.getPort() + "/" + ambariDatabaseDetailsJson.getName();
+        return "jdbc:" + ambariDatabaseDetailsJson.getVendor().jdbcUrlDriverId() + "://" + ambariDatabaseDetailsJson.getHost() + ':'
+                + ambariDatabaseDetailsJson.getPort() + '/' + ambariDatabaseDetailsJson.getName();
     }
 
     @Named("name")

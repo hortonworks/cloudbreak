@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariRepoDetailsDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariStackDetailsDescription;
 import com.sequenceiq.cloudbreak.validation.ValidAmbariStack;
 
@@ -65,7 +65,7 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(AmbariStackDetailsDescription.MPACKS)
     private List<ManagementPackDetails> mpacks = new ArrayList<>();
 
-    @ApiModelProperty(ModelDescriptions.AmbariRepoDetailsDescription.AMBARI_REPO_GPG_KEY)
+    @ApiModelProperty(AmbariRepoDetailsDescription.AMBARI_REPO_GPG_KEY)
     private String gpgKeyUrl;
 
     public String getStack() {

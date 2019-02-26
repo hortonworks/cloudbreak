@@ -63,7 +63,7 @@ public class StackStartActions {
 
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
-        return new AbstractStackStartAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackStartAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.startStackStart(context);
@@ -106,7 +106,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackStartStopContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 stackStartStopService.finishStackStart(context, payload.getResults());
-                metricService.incrementMetricCounter(MetricType.STACK_START_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.STACK_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -123,7 +123,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.handleStackStartError(context.getStackView(), payload);
-                metricService.incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

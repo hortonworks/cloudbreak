@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HostgroupConfiguration {
-    private String name;
+    private final String name;
 
-    private SiteConfigurations siteConfigs;
+    private final SiteConfigurations siteConfigs;
 
     public HostgroupConfiguration(String name, Map<String, Map<String, String>> config) {
         this.name = name;
-        this.siteConfigs = SiteConfigurations.fromMap(config);
+        siteConfigs = SiteConfigurations.fromMap(config);
     }
 
     public static HostgroupConfiguration getEmptyConfiguration(String name) {

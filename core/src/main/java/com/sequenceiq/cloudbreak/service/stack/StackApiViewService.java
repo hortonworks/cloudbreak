@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 
 @Service
 public class StackApiViewService {
@@ -31,8 +33,8 @@ public class StackApiViewService {
         try {
             return transactionService.required(() ->
                     convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 

@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 
 import io.swagger.annotations.Api;
@@ -150,7 +150,7 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postStackForBlueprintV3")
     GeneratedBlueprintResponse postStackForBlueprint(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid StackV2Request stackRequest) throws Exception;
+            @Valid StackV2Request stackRequest);
 
     // deleteInstanceStackV2
     @DELETE
@@ -198,14 +198,14 @@ public interface StackV3Endpoint {
     @PUT
     @Path("{name}/maintenance")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE, produces = ContentType.JSON, notes = Notes.MAINTENANCE_NOTES,
+    @ApiOperation(value = ClusterOpDescription.SET_MAINTENANCE_MODE, produces = ContentType.JSON, notes = Notes.MAINTENANCE_NOTES,
             nickname = "setClusterMaintenanceMode")
     Response setClusterMaintenanceMode(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @NotNull MaintenanceModeJson maintenanceMode);
 
     @PUT
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
+    @ApiOperation(value = ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "putClusterV3")
     Response put(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UpdateClusterJson updateJson);
 }

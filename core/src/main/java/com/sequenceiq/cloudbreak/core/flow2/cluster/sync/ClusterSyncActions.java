@@ -22,7 +22,7 @@ public class ClusterSyncActions {
 
     @Bean(name = "CLUSTER_SYNC_STATE")
     public Action<?, ?> syncCluster() {
-        return new AbstractClusterSyncAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterSyncAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterSyncContext context, StackEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -37,7 +37,7 @@ public class ClusterSyncActions {
 
     @Bean(name = "CLUSTER_SYNC_FINISHED_STATE")
     public Action<?, ?> finishSyncCluster() {
-        return new AbstractClusterSyncAction<ClusterSyncResult>(ClusterSyncResult.class) {
+        return new AbstractClusterSyncAction<>(ClusterSyncResult.class) {
             @Override
             protected void doExecute(ClusterSyncContext context, ClusterSyncResult payload, Map<Object, Object> variables) {
                 sendEvent(context);

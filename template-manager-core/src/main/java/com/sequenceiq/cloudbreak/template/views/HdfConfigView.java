@@ -4,19 +4,19 @@ import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 
 public class HdfConfigView {
 
-    private String nodeEntities;
+    private final String nodeEntities;
 
-    private String registryNodeEntities;
+    private final String registryNodeEntities;
 
-    private String nodeUserEntities;
+    private final String nodeUserEntities;
 
-    private String proxyHosts;
+    private final String proxyHosts;
 
     public HdfConfigView(HdfConfigs hdfConfigs) {
-        this.nodeEntities = hdfConfigs.getNodeEntities();
-        this.proxyHosts = hdfConfigs.getProxyHosts().orElse(null);
-        this.registryNodeEntities = hdfConfigs.getRegistryNodeEntities();
-        this.nodeUserEntities = hdfConfigs.getNodeUserEntities();
+        nodeEntities = hdfConfigs.getNodeEntities();
+        proxyHosts = hdfConfigs.getProxyHosts().orElse(null);
+        registryNodeEntities = hdfConfigs.getRegistryNodeEntities();
+        nodeUserEntities = hdfConfigs.getNodeUserEntities();
     }
 
     public String getNodeEntities() {

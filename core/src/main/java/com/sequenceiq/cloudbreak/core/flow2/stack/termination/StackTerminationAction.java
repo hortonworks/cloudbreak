@@ -57,12 +57,12 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Stack
     }
 
     @Override
-    protected TerminateStackRequest createRequest(StackTerminationContext context) {
+    protected TerminateStackRequest<?> createRequest(StackTerminationContext context) {
         return new TerminateStackRequest<>(context.getCloudContext(), context.getCloudStack(), context.getCloudCredential(), context.getCloudResources());
     }
 
     protected void doExecute(StackTerminationContext context) {
-        TerminateStackRequest terminateRequest = createRequest(context);
+        TerminateStackRequest<?> terminateRequest = createRequest(context);
         sendEvent(context.getFlowId(), terminateRequest.selector(), terminateRequest);
     }
 }

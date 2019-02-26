@@ -57,7 +57,7 @@ public class StackStopActions {
 
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
-        return new AbstractStackStopAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackStopAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.startStackStop(context);
@@ -76,11 +76,11 @@ public class StackStopActions {
 
     @Bean(name = "STOP_FINISHED_STATE")
     public Action<?, ?> stackStopFinishedAction() {
-        return new AbstractStackStopAction<StopInstancesResult>(StopInstancesResult.class) {
+        return new AbstractStackStopAction<>(StopInstancesResult.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StopInstancesResult payload, Map<Object, Object> variables) {
                 stackStartStopService.finishStackStop(context, payload);
-                metricService.incrementMetricCounter(MetricType.STACK_STOP_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.STACK_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -97,7 +97,7 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.handleStackStopError(context.getStackView(), payload);
-                metricService.incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

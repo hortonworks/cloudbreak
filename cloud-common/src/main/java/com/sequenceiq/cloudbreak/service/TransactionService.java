@@ -115,7 +115,7 @@ public class TransactionService {
         }
 
         @Override
-        public RuntimeException getCause() {
+        public synchronized RuntimeException getCause() {
             return (RuntimeException) super.getCause();
         }
     }

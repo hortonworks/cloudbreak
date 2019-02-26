@@ -33,7 +33,7 @@ public class StackRepoDetailsToAmbariStackDetailsResponseConverter
             List<ManagementPackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
                     mp, ManagementPackDetails.class)).collect(Collectors.toList());
             ambariRepoDetailsJson.setMpacks(mpacks);
-            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(mp -> mp.isStackDefault()).findFirst();
+            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(ManagementPackComponent::isStackDefault).findFirst();
             stackDefaultMpack.ifPresent(mp -> ambariRepoDetailsJson.getStack().put(StackRepoDetails.MPACK_TAG, mp.getMpackUrl()));
         }
         return ambariRepoDetailsJson;

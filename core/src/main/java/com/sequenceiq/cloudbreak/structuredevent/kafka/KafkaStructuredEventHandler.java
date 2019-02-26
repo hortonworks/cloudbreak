@@ -27,7 +27,7 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
     @Inject
     private StructuredEventSenderConfig structuredEventSenderConfig;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
     private KafkaTemplate<String, String> kafkaTemplate;

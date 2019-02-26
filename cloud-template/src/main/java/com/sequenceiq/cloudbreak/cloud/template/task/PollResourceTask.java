@@ -17,13 +17,13 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 public class PollResourceTask extends AbstractPollTask<List<CloudResourceStatus>> {
     public static final String NAME = "pollResourceTask";
 
-    private final ResourceChecker checker;
+    private final ResourceChecker<ResourceBuilderContext> checker;
 
     private final List<CloudResource> cloudResources;
 
     private final ResourceBuilderContext context;
 
-    public PollResourceTask(AuthenticatedContext authenticatedContext, ResourceChecker checker,
+    public PollResourceTask(AuthenticatedContext authenticatedContext, ResourceChecker<ResourceBuilderContext> checker,
             List<CloudResource> cloudResources, ResourceBuilderContext context, boolean cancellable) {
         super(authenticatedContext, cancellable);
         this.checker = checker;

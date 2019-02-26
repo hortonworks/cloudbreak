@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 
 import io.swagger.annotations.Api;
@@ -48,21 +48,21 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postPrivateStackV2")
-    StackResponse postPrivate(@Valid StackV2Request stackRequest) throws Exception;
+    StackResponse postPrivate(@Valid StackV2Request stackRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PUBLIC, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postPublicStackV2")
-    StackResponse postPublic(@Valid StackV2Request stackRequest) throws Exception;
+    StackResponse postPublic(@Valid StackV2Request stackRequest);
 
     @POST
     @Path("blueprint")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PUBLIC_BLUEPRINT, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postPublicStackV2ForBlueprint")
-    GeneratedBlueprintResponse postStackForBlueprint(@Valid StackV2Request stackRequest) throws Exception;
+    GeneratedBlueprintResponse postStackForBlueprint(@Valid StackV2Request stackRequest);
 
     @GET
     @Path("user")
@@ -200,7 +200,7 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Path("{stackId}/deleteInstances")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    @ApiOperation(value = OperationDescriptions.StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstancesStackV2")
     Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
 
@@ -228,7 +228,7 @@ public interface StackV2Endpoint extends StackEndpoint {
     @POST
     @Path("{name}/manualrepair")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
+    @ApiOperation(value = ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairClusterV2")
     Response repairCluster(@PathParam("name") String name, ClusterRepairRequest clusterRepairRequest);
 

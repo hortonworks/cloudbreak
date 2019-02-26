@@ -87,26 +87,24 @@ public class StackRepairService {
 
         @Override
         public void run() {
-            boolean submitted = false;
             int trials = 0;
-            while (!submitted) {
+            while (true) {
                 try {
                     reactorFlowManager.triggerStackRepairFlow(stackId, unhealthyInstances);
                     flowMessageService.fireEventAndLog(stackId, Msg.STACK_REPAIR_TRIGGERED, Status.UPDATE_IN_PROGRESS.name());
-                    submitted = true;
+                    return;
                 } catch (FlowsAlreadyRunningException ignored) {
-                    trials++;
-                    if (trials == RETRIES) {
-                        LOGGER.error("Could not submit because other flows are running for stack " + stackId);
-                        return;
-                    }
-                    LOGGER.info("Waiting for other flows of stack " + stackId + " to complete.");
-                    try {
-                        Thread.sleep(SLEEP_TIME_MS);
-                    } catch (InterruptedException e) {
-                        LOGGER.error("Interrupted while waiting for other flows to finish.", e);
-                        return;
-                    }
+                }
+                if (++trials == RETRIES) {
+                    LOGGER.error("Could not submit because other flows are running for stack " + stackId);
+                    return;
+                }
+                LOGGER.info("Waiting for other flows of stack " + stackId + " to complete.");
+                try {
+                    Thread.sleep(SLEEP_TIME_MS);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Interrupted while waiting for other flows to finish.", e);
+                    return;
                 }
             }
         }

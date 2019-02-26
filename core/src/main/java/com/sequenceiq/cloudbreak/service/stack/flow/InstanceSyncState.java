@@ -8,19 +8,19 @@ public enum InstanceSyncState {
     public static InstanceSyncState getInstanceSyncState(InstanceStatus instanceStatus) {
         switch (instanceStatus) {
             case IN_PROGRESS:
-                return InstanceSyncState.IN_PROGRESS;
+                return IN_PROGRESS;
             case STARTED:
-                return InstanceSyncState.RUNNING;
+                return RUNNING;
             case STOPPED:
-                return InstanceSyncState.STOPPED;
+                return STOPPED;
             case CREATED:
-                return InstanceSyncState.RUNNING;
+                return RUNNING;
             case FAILED:
-                return InstanceSyncState.DELETED;
+                return DELETED;
             case TERMINATED:
-                return InstanceSyncState.DELETED_ON_PROVIDER_SIDE;
+                return DELETED_ON_PROVIDER_SIDE;
             default:
-                return InstanceSyncState.UNKNOWN;
+                return UNKNOWN;
         }
     }
 }

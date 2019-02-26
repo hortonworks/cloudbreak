@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.springframework.core.convert.ConversionService;
@@ -23,7 +20,7 @@ public class SecurityRuleToSecurityRuleDetailsConverter extends AbstractConversi
         securityRuleDetails.setCidr(source.getCidr());
         securityRuleDetails.setProtocol(source.getProtocol());
         if (!SecurityRule.ICMP.equalsIgnoreCase(source.getProtocol())) {
-            securityRuleDetails.setPorts(Arrays.stream(source.getPorts()).collect(Collectors.joining(",")));
+            securityRuleDetails.setPorts(String.join(",", source.getPorts()));
         }
         return securityRuleDetails;
     }

@@ -78,7 +78,6 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     @Inject
     private PersistenceNotifier persistenceNotifier;
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -266,7 +265,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 if (!exists) {
                     throw new ActionWentFailException("Stack not exists");
                 }
-                return exists;
+                return true;
             });
             client.heat().stacks().delete(stackName, heatStackId);
             LOGGER.info("Heat stack has been deleted");

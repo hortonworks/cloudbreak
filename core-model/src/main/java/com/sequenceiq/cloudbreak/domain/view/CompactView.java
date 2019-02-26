@@ -22,10 +22,10 @@ public abstract class CompactView implements ProvisionEntity, WorkspaceAwareReso
 
     private String description;
 
-    public CompactView() {
+    protected CompactView() {
     }
 
-    public CompactView(Long id, String name, String owner) {
+    protected CompactView(Long id, String name, String owner) {
         this.id = id;
         this.name = name;
         this.owner = owner;

@@ -139,7 +139,7 @@ public class History {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(long clusterId) {
         this.clusterId = clusterId;
     }
 
@@ -237,9 +237,5 @@ public class History {
 
     public void setHostGroup(String hostGroup) {
         this.hostGroup = hostGroup;
-    }
-
-    public void setClusterId(long clusterId) {
-        this.clusterId = clusterId;
     }
 }

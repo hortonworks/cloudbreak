@@ -217,11 +217,15 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
-        } catch (Exception e) {
+
+        } catch (ExecutionException e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
-            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
+            throw new CloudbreakOrchestratorFailedException(e);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -239,11 +243,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
             LOGGER.info("Roles before highstate: " + roles);
             runNewService(sc, new HighStateRunner(all, allNodes), exitModel);
-        } catch (Exception e) {
+        } catch (ExecutionException e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
-            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
+            throw new CloudbreakOrchestratorFailedException(e);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("Run services on nodes finished: {}", allNodes);
@@ -303,11 +310,14 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             // salt '*' state.highstate
             runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
-        } catch (Exception e) {
+        } catch (ExecutionException e) {
             LOGGER.error("Error occurred during primary gateway change", e);
-            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
+            throw new CloudbreakOrchestratorFailedException(e);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during primary gateway change", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

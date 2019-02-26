@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.api;
 
 import java.util.Collection;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -18,11 +17,11 @@ public interface ClusterApi {
         clusterSetupService().buildCluster(stack);
     }
 
-    default void waitForHosts(Stack stack) throws CloudbreakSecuritySetupException {
+    default void waitForHosts(Stack stack) {
         clusterSetupService().waitForHosts(stack);
     }
 
-    default boolean available(Stack stack) throws CloudbreakSecuritySetupException {
+    default boolean available(Stack stack) {
         return clusterSetupService().available(stack);
     }
 

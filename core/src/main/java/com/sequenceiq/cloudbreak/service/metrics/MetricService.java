@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 
@@ -21,7 +22,7 @@ public class MetricService {
 
     private static final String METRIC_PREFIX = "cloudbreak.";
 
-    private Map<String, Double> gaugeCache = new HashMap<>();
+    private final Map<String, Double> gaugeCache = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -91,15 +92,19 @@ public class MetricService {
         gaugeCache.put(metricName, value);
 
         Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
-        Metrics.gauge(metricName, tags, gaugeCache, cache -> cache.getOrDefault(metricName, 0d));
+        Metrics.gauge(metricName, tags, gaugeCache, cache -> cache.getOrDefault(metricName, 0.0d));
     }
 
     private void incrementMetricCounter(String metric) {
-        Metrics.counter(METRIC_PREFIX + metric.toLowerCase()).increment();
+        try (Counter counter = Metrics.counter(METRIC_PREFIX + metric.toLowerCase())) {
+            counter.increment();
+        }
     }
 
     private void initMicrometerMetricCounter(String metric, String cloudPlatform) {
-        Metrics.counter(METRIC_PREFIX + getMetricNameWithPlatform(metric, cloudPlatform)).increment(0);
+        try (Counter counter = Metrics.counter(METRIC_PREFIX + getMetricNameWithPlatform(metric, cloudPlatform))) {
+            counter.increment(0);
+        }
     }
 
     private String getMetricNameWithPlatform(MetricType metric, String cloudPlatform) {

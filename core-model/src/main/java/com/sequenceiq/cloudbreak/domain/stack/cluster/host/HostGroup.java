@@ -31,11 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
         subgraphs = {
                 @NamedSubgraph(name = "instanceGroup",
                         attributeNodes = @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceMetaData")),
-                @NamedSubgraph(name = "instanceMetaData",
-                        attributeNodes = {
-                                @NamedAttributeNode("instanceMetaData")
-                        }
-                )
+                @NamedSubgraph(name = "instanceMetaData", attributeNodes = @NamedAttributeNode("instanceMetaData"))
         }
 )
 @Entity

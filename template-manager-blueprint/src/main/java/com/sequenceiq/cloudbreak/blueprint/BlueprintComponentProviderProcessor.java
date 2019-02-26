@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +22,7 @@ public class BlueprintComponentProviderProcessor {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
-    public String process(TemplatePreparationObject source, String blueprintText) throws IOException {
+    public String process(TemplatePreparationObject source, String blueprintText) {
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         for (BlueprintComponentConfigProvider provider : blueprintComponentConfigProviders) {
             if (blueprintProcessor.componentsExistsInBlueprint(provider.components()) || provider.specialCondition(source, blueprintText)) {

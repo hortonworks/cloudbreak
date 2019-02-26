@@ -203,7 +203,7 @@ public class InstanceMetadataUpdater {
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
                             .filter(e -> StringUtils.isNotBlank(e.getValue()))
-                            .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Map.Entry::getValue));
+                            .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Entry::getValue));
             packageVersionsByNameByHost.put(entry.getKey(), versionByName);
         }
         return packageVersionsByNameByHost;
@@ -225,7 +225,7 @@ public class InstanceMetadataUpdater {
             Multimap<String, String> pkgVersionsMMap = HashMultimap.create();
             for (InstanceMetaData im : instanceMetadataList) {
                 Image image = im.getImage().get(Image.class);
-                for (Map.Entry<String, String> packageEntry : image.getPackageVersions().entrySet()) {
+                for (Entry<String, String> packageEntry : image.getPackageVersions().entrySet()) {
                     pkgVersionsMMap.put(packageEntry.getKey(), packageEntry.getValue());
                 }
             }

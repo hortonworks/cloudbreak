@@ -83,11 +83,11 @@ public class UserAndWorkspaceMigrator {
                 return new UserMigrationResults(ownerIdToUser, orphanedResources);
             } catch (TokenUnavailableException e) {
                 LOGGER.error("Failed to fetch identity users. Waiting for 5 seconds for UAA.", e);
-                try {
-                    Thread.sleep(SLEEP_TIME);
-                } catch (InterruptedException interrupted) {
-                    throw new IllegalStateException(interrupted);
-                }
+            }
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException interrupted) {
+                throw new IllegalStateException(interrupted);
             }
         }
         String errorMessage = "Failed to fetch identity users. Workspace migration is no possible.";

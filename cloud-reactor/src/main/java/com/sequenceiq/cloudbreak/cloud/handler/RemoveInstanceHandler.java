@@ -55,7 +55,7 @@ public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveIn
         RemoveInstanceResult result;
         try {
             CloudContext cloudContext = request.getCloudContext();
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().downscale(ac, request.getCloudStack(), request.getCloudResources(),
                     request.getInstances(), Collections.emptyMap());

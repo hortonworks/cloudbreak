@@ -91,15 +91,15 @@ public class BlueprintView {
             return false;
         }
         BlueprintView that = (BlueprintView) o;
-        return Objects.equals(getBlueprintText(), that.getBlueprintText())
-                && Objects.equals(getVersion(), that.getVersion())
-                && Objects.equals(getType(), that.getType())
-                && Objects.equals(getComponents(), that.getComponents());
+        return Objects.equals(blueprintText, that.blueprintText)
+                && Objects.equals(version, that.version)
+                && Objects.equals(type, that.type)
+                && Objects.equals(components, that.components);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBlueprintText(), getVersion(), getType(), getComponents());
+        return Objects.hash(blueprintText, version, type, components);
     }
 
 }

@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class RdsConfigRequestParameters implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.VERSION, required = true)
+    @ApiModelProperty(value = RDSConfig.VERSION, required = true)
     private String version;
 
     public String getVersion() {

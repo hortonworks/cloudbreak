@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,7 +20,7 @@ public class FileSystemResponse extends FileSystemBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.FileSystem.LOCATIONS)
+    @ApiModelProperty(FileSystem.LOCATIONS)
     private Set<StorageLocationResponse> locations = new HashSet<>();
 
     @JsonProperty("id")

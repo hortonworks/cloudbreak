@@ -37,7 +37,7 @@ public class ClusterCredentialChangeActions {
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_STATE")
     public Action<?, ?> changingClusterCredential() {
-        return new AbstractClusterAction<ClusterCredentialChangeTriggerEvent>(ClusterCredentialChangeTriggerEvent.class) {
+        return new AbstractClusterAction<>(ClusterCredentialChangeTriggerEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext ctx, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) {
                 clusterCredentialChangeService.credentialChange(ctx.getStackId());
@@ -59,7 +59,7 @@ public class ClusterCredentialChangeActions {
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_FINISHED_STATE")
     public Action<?, ?> clusterCredentialChangeFinished() {
-        return new AbstractClusterAction<ClusterCredentialChangeResult>(ClusterCredentialChangeResult.class) {
+        return new AbstractClusterAction<>(ClusterCredentialChangeResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) {
                 switch (payload.getRequest().getType()) {

@@ -42,7 +42,7 @@ public enum FileSystemType {
         return defaultPath;
     }
 
-    public static FileSystemType fromClass(Class clazz) {
+    public static FileSystemType fromClass(Class<?> clazz) {
         for (FileSystemType fileSystemType : FileSystemType.values()) {
             if (fileSystemType.clazz.equals(clazz)) {
                 return fileSystemType;

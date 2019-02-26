@@ -46,12 +46,12 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
 
     private final CloudResource resource;
 
-    private final ComputeResourceBuilder builder;
+    private final ComputeResourceBuilder<ResourceBuilderContext> builder;
 
     private final boolean cancellable;
 
     public ResourceDeleteThread(ResourceBuilderContext context, AuthenticatedContext auth,
-            CloudResource resource, ComputeResourceBuilder builder, boolean cancellable) {
+            CloudResource resource, ComputeResourceBuilder<ResourceBuilderContext> builder, boolean cancellable) {
         this.context = context;
         this.auth = auth;
         this.resource = resource;

@@ -11,7 +11,9 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceMetaDataModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,25 +30,25 @@ public class HardwareInfoResponse implements JsonEntity {
     @ApiModelProperty(value = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
     private String groupName;
 
-    @ApiModelProperty(ModelDescriptions.HostMetadataModelDescription.STATE)
+    @ApiModelProperty(HostMetadataModelDescription.STATE)
     private String state;
 
-    @ApiModelProperty(ModelDescriptions.InstanceMetaDataModelDescription.PRIVATE_IP)
+    @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)
     private String privateIp;
 
-    @ApiModelProperty(ModelDescriptions.InstanceMetaDataModelDescription.PUBLIC_IP)
+    @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
 
     @ApiModelProperty
     private Integer sshPort;
 
-    @ApiModelProperty(ModelDescriptions.InstanceMetaDataModelDescription.INSTANCE_ID)
+    @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
 
     @ApiModelProperty(ModelDescriptions.AMBARI_SERVER)
     private Boolean ambariServer;
 
-    @ApiModelProperty(ModelDescriptions.InstanceMetaDataModelDescription.DISCOVERY_FQDN)
+    @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;
 
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)

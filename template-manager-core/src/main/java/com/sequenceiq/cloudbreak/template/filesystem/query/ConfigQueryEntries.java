@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigQueryEntries {
 
-    private Set<ConfigQueryEntry> entries = new HashSet<>();
+    private final Set<ConfigQueryEntry> entries = new HashSet<>();
 
     public Set<ConfigQueryEntry> getEntries() {
         return entries

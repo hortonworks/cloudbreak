@@ -75,7 +75,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<CloudResource> buildableResources = new ArrayList<>();
         try {
-            for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
+            for (ComputeResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
                 LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
                 List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
                 if (!cloudResources.isEmpty()) {
@@ -83,7 +83,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                     createResource(auth, cloudResources);
 
                     PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-                    if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+                    if (CANCELLED.equals(pollGroup)) {
                         throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
                     }
 

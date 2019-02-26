@@ -60,11 +60,11 @@ public class GatewayJsonValidator implements Validator<GatewayJson> {
                 .collect(Collectors.toList());
 
         Set<String> uniqueNames = new HashSet<>(topologyNames);
-        uniqueNames.stream().forEach(topologyNames::remove);
+        uniqueNames.forEach(topologyNames::remove);
 
         validationResultBuilder.ifError(() -> !topologyNames.isEmpty(),
                 "There are duplicate topology names is gateway.topologies! "
                         + "All topology name should be unique for a gateway. Duplicates are: "
-                        + topologyNames.stream().collect(Collectors.joining(", ")));
+                        + String.join(", ", topologyNames));
     }
 }
