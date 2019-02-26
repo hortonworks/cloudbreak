@@ -238,6 +238,13 @@ cb:
           stack:
             repoid: CDH
             redhat7: https://archive.cloudera.com/cdh6/{latest_supported}/parcels/
+      "[6.1.1]":
+        version: 6.1.1-1.cdh6.1.1.p0.875250
+        minCM: 6.1
+        repo:
+          stack:
+            repoid: CDH
+            redhat7: https://archive.cloudera.com/cdh6/{latest_supported}/parcels/
 
   ambari:
     entries:
