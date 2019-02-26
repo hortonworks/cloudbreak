@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class FileSystemRequest extends FileSystemBase {
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.FileSystem.LOCATIONS)
+    @ApiModelProperty(FileSystem.LOCATIONS)
     private Set<StorageLocationRequest> locations = new HashSet<>();
 
     public Set<StorageLocationRequest> getLocations() {
@@ -41,12 +41,12 @@ public class FileSystemRequest extends FileSystemBase {
             return false;
         }
         FileSystemRequest that = (FileSystemRequest) o;
-        return Objects.equals(getLocations(), that.getLocations());
+        return Objects.equals(locations, that.locations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getLocations());
+        return Objects.hash(locations);
     }
 
 }

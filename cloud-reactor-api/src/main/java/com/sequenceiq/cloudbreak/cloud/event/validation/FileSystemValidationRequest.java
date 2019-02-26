@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 
-public class FileSystemValidationRequest extends CloudPlatformRequest<FileSystemValidationResult> {
+public class FileSystemValidationRequest extends CloudPlatformRequest<FileSystemValidationResult<? extends FileSystemValidationRequest>> {
 
     private final SpiFileSystem spiFileSystem;
 

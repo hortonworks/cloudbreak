@@ -40,8 +40,6 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
     @Value("${cb.blueprint.settings.path:blueprints/settings}")
     private String settingsTemplatePath;
 
-    private ResourceLoader resourceLoader;
-
     public Map<ServiceName, TemplateFiles> collectAllServiceFile() {
         return readAllFilesFromParameterDir(blueprintTemplatePath);
     }
@@ -58,7 +56,7 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
         Map<ServiceName, TemplateFiles> collectedFiles = new HashMap<>();
         try {
             List<Resource> files = getFiles(dir);
-            for (final Resource serviceEntry : files) {
+            for (Resource serviceEntry : files) {
                 String[] serviceAndPath = serviceEntry.getURL().getPath().split(dir);
                 String simpleServiceName = serviceAndPath[1].split("/")[1];
                 String insideFolder = String.format("%s%s", dir, serviceAndPath[1]);
@@ -95,6 +93,5 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
 
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
     }
 }

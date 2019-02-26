@@ -84,7 +84,7 @@ public class SharedServiceConfigProvider {
                 stackInputs.setDatalakeInputs(configsResponse.getDatalakeInputs());
                 stackInputs.setFixInputs(configsResponse.getFixInputs());
 
-                return Optional.ofNullable(stackInputs);
+                return Optional.of(stackInputs);
             }
         } catch (IOException e) {
             LOGGER.warn("Could not propagate cluster input parameters");

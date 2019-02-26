@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -147,13 +148,13 @@ public class BlueprintTextProcessor {
 
     public Optional<String> pathValue(String... path) {
         JsonNode currentNode = blueprint;
-        for (int i = 0; i < path.length; i++) {
+        for (String s : path) {
             if (currentNode.isArray()) {
                 ArrayNode array = (ArrayNode) currentNode;
                 Iterator<JsonNode> it = array.elements();
                 boolean found = false;
                 while (it.hasNext()) {
-                    JsonNode candidate = it.next().path(path[i]);
+                    JsonNode candidate = it.next().path(s);
                     if (!candidate.isMissingNode()) {
                         currentNode = candidate;
                         found = true;
@@ -164,7 +165,7 @@ public class BlueprintTextProcessor {
                     currentNode = MissingNode.getInstance();
                 }
             } else {
-                currentNode = currentNode.path(path[i]);
+                currentNode = currentNode.path(s);
             }
         }
         return currentNode.isValueNode() ? Optional.of(currentNode.textValue()) : Optional.empty();
@@ -174,7 +175,6 @@ public class BlueprintTextProcessor {
         return getComponentsByHostGroup().entrySet()
                 .stream()
                 .flatMap(entry -> entry.getValue().stream())
-                .distinct()
                 .collect(Collectors.toSet());
     }
 
@@ -285,14 +285,14 @@ public class BlueprintTextProcessor {
         if (configurations.isMissingNode() && globalConfig != null && !globalConfig.isEmpty()) {
             configurations = blueprint.putArray(SETTINGS_NODE);
             for (List<SiteConfiguration> site : globalConfig) {
-                if (site.size() > 0) {
+                if (!site.isEmpty()) {
                     addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
                 }
             }
         } else {
             if (globalConfig != null) {
                 for (List<SiteConfiguration> site : globalConfig) {
-                    if (site.size() > 0) {
+                    if (!site.isEmpty()) {
                         ArrayNode siteNode = (ArrayNode) configurations.findValue(site.get(0).getName());
                         if (siteNode == null) {
                             addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
@@ -339,9 +339,9 @@ public class BlueprintTextProcessor {
     private ObjectNode findBestMatch(ArrayNode siteNode, SiteConfiguration conf) {
         ObjectNode result = null;
         int maxFound = 0;
-        for (Iterator i = siteNode.iterator(); i.hasNext();) {
+        for (JsonNode jsonNode : siteNode) {
             int foundNum = 0;
-            ObjectNode prop = (ObjectNode) i.next();
+            ObjectNode prop = (ObjectNode) jsonNode;
             for (String key : conf.getProperties().keySet()) {
                 JsonNode found = prop.get(key);
                 if (found != null) {
@@ -349,7 +349,6 @@ public class BlueprintTextProcessor {
                 }
                 if ("name".equals(key) && !conf.getProperties().get(key).equals(found.asText())) {
                     foundNum = 0;
-                    continue;
                 }
             }
             if (foundNum > maxFound) {
@@ -369,13 +368,13 @@ public class BlueprintTextProcessor {
     }
 
     private void putAll(ObjectNode objectToModify, Map<String, String> properties) {
-        for (Map.Entry<String, String> prop : properties.entrySet()) {
+        for (Entry<String, String> prop : properties.entrySet()) {
             objectToModify.put(prop.getKey(), prop.getValue());
         }
     }
 
     private void putAllIfAbsent(ObjectNode objectToModify, Map<String, String> properties) {
-        for (Map.Entry<String, String> prop : properties.entrySet()) {
+        for (Entry<String, String> prop : properties.entrySet()) {
             JsonNode exists = objectToModify.get(prop.getKey());
             if (exists == null) {
                 objectToModify.put(prop.getKey(), prop.getValue());
@@ -449,14 +448,14 @@ public class BlueprintTextProcessor {
             SiteSettingsConfigurations result = SiteSettingsConfigurations.getEmptyConfiguration();
             ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
 
-            for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
-                Map.Entry<String, JsonNode> site = sites.next();
+            for (Iterator<Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
+                Entry<String, JsonNode> site = sites.next();
                 ArrayNode siteNodeList = (ArrayNode) site.getValue();
 
                 for (JsonNode siteNodeElement : siteNodeList) {
                     Map<String, String> siteprops = new HashMap<>();
-                    for (Iterator<Map.Entry<String, JsonNode>> props = siteNodeElement.fields(); props.hasNext();) {
-                        Map.Entry<String, JsonNode> prop = props.next();
+                    for (Iterator<Entry<String, JsonNode>> props = siteNodeElement.fields(); props.hasNext();) {
+                        Entry<String, JsonNode> prop = props.next();
                         siteprops.put(prop.getKey(), prop.getValue().textValue());
                     }
                     if (!siteprops.isEmpty()) {
@@ -475,8 +474,8 @@ public class BlueprintTextProcessor {
             SiteConfigurations result = SiteConfigurations.getEmptyConfiguration();
             ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
 
-            for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
-                Map.Entry<String, JsonNode> site = sites.next();
+            for (Iterator<Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
+                Entry<String, JsonNode> site = sites.next();
                 if (site.getValue().isArray()) {
                     ArrayNode siteArray = (ArrayNode) site.getValue();
                     for (JsonNode siteNodeElement : siteArray) {
@@ -492,15 +491,15 @@ public class BlueprintTextProcessor {
         }
     }
 
-    private void prepareObjectNodeForSiteConfiguration(SiteConfigurations result, Map.Entry<String, JsonNode> site, ObjectNode siteNodeElement) {
+    private void prepareObjectNodeForSiteConfiguration(SiteConfigurations result, Entry<String, JsonNode> site, ObjectNode siteNodeElement) {
         ObjectNode siteNode = siteNodeElement;
         JsonNode properties = siteNode.findValue(PROPERTIES_NODE);
         if (properties != null) {
             siteNode = (ObjectNode) properties;
         }
         Map<String, String> siteprops = new HashMap<>();
-        for (Iterator<Map.Entry<String, JsonNode>> props = siteNode.fields(); props.hasNext();) {
-            Map.Entry<String, JsonNode> prop = props.next();
+        for (Iterator<Entry<String, JsonNode>> props = siteNode.fields(); props.hasNext();) {
+            Entry<String, JsonNode> prop = props.next();
             siteprops.put(prop.getKey(), prop.getValue().textValue());
         }
         if (!siteprops.isEmpty()) {
@@ -574,7 +573,7 @@ public class BlueprintTextProcessor {
             String hostGroupName = hostGroupNode.path("name").textValue();
             if (hostGroupNames.contains(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
                 ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
-                components.addPOJO(new BlueprintTextProcessor.ComponentElement(component));
+                components.addPOJO(new ComponentElement(component));
             }
         }
         return this;
@@ -588,7 +587,7 @@ public class BlueprintTextProcessor {
             String hostGroupName = hostGroupNode.path("name").textValue();
             if (addToHostgroup.test(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
                 ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
-                components.addPOJO(new BlueprintTextProcessor.ComponentElement(component));
+                components.addPOJO(new ComponentElement(component));
             }
         }
         return this;

@@ -4,6 +4,5 @@ public enum MaintenanceModeStatus {
 
     ENABLED,
     VALIDATION_REQUESTED,
-    DISABLED;
-
+    DISABLED
 }

@@ -94,7 +94,7 @@ public class CloudPlatformConnectorsTest {
         return new FakeCloudConnector(variant, platform);
     }
 
-    private static class FakeCloudConnector implements CloudConnector {
+    private static class FakeCloudConnector implements CloudConnector<Object> {
         private final String variant;
 
         private final String platform;

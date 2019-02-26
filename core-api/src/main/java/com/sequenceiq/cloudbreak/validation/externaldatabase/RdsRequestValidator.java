@@ -43,8 +43,6 @@ public class RdsRequestValidator implements ConstraintValidator<ValidRds, RDSCon
                         serviceEntry.get().getDatabases()
                                 .stream()
                                 .map(SupportedDatabaseEntry::getDatabaseName)
-                                .collect(Collectors.toList())
-                                .stream()
                                 .collect(Collectors.joining(",")), request.getType());
                 ValidatorUtil.addConstraintViolation(context, message, "status");
             }

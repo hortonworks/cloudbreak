@@ -27,7 +27,7 @@ public class ClusterStopActions {
 
     @Bean(name = "CLUSTER_STOPPING_STATE")
     public Action<?, ?> stoppingCluster() {
-        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterStopService.stoppingCluster(context.getStackId());
@@ -43,11 +43,11 @@ public class ClusterStopActions {
 
     @Bean(name = "CLUSTER_STOP_FINISHED_STATE")
     public Action<?, ?> clusterStopFinished() {
-        return new AbstractClusterAction<ClusterStopResult>(ClusterStopResult.class) {
+        return new AbstractClusterAction<>(ClusterStopResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStopResult payload, Map<Object, Object> variables) {
                 clusterStopService.clusterStopFinished(context.getStackId());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -64,7 +64,7 @@ public class ClusterStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterStopService.handleClusterStopFailure(context.getStackView(), payload.getException().getMessage());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

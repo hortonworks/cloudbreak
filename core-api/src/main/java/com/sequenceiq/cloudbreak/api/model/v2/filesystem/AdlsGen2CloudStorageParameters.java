@@ -53,13 +53,13 @@ public class AdlsGen2CloudStorageParameters implements CloudStorageParameters {
             return false;
         }
         AdlsGen2CloudStorageParameters that = (AdlsGen2CloudStorageParameters) o;
-        return Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName());
+        return Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName());
+        return Objects.hash(accountKey, accountName);
     }
 
 }

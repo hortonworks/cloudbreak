@@ -51,13 +51,13 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
             return false;
         }
         AdlsGen2FileSystem that = (AdlsGen2FileSystem) o;
-        return Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName())
-                && Objects.equals(getStorageContainerName(), that.getStorageContainerName());
+        return Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(storageContainerName, that.storageContainerName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName(), getStorageContainerName());
+        return Objects.hash(accountKey, accountName, storageContainerName);
     }
 }

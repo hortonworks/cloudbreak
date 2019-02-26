@@ -13,10 +13,10 @@ public abstract class StructuredEvent implements Serializable {
 
     private OperationDetails operation;
 
-    public StructuredEvent() {
+    protected StructuredEvent() {
     }
 
-    public StructuredEvent(String type, OperationDetails operation) {
+    protected StructuredEvent(String type, OperationDetails operation) {
         this.type = type;
         this.operation = operation;
     }

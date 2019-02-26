@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
@@ -16,7 +17,7 @@ import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ClusterComponent.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 public interface ClusterComponentRepository extends DisabledBaseRepository<ClusterComponent, Long> {
 

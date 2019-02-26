@@ -100,7 +100,7 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getUser().getId(), updateStackJson);
+            cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getUser().getId(), updateStackJson).close();
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Upscale successfully triggered";
             metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -131,7 +131,7 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getUser().getId(), updateClusterJson);
+            cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getUser().getId(), updateClusterJson).close();
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Downscale successfully triggered";
             metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);

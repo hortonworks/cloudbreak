@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.KnoxServicesOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +25,7 @@ public interface KnoxServicesV3Endpoint {
     @GET
     @Path("{blueprintName}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.KnoxServicesOpDescription.LIST_IN_WORKSPACE_FOR_BLUEPRINT,
+    @ApiOperation(value = KnoxServicesOpDescription.LIST_IN_WORKSPACE_FOR_BLUEPRINT,
             produces = ContentType.JSON,
             nickname = "listByWorkspaceAndBlueprint")
     Collection<ExposedServiceResponse> listByWorkspaceAndBlueprint(@PathParam("workspaceId") Long workspaceId,

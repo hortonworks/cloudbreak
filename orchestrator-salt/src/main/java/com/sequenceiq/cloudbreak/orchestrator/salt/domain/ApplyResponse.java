@@ -22,7 +22,7 @@ public class ApplyResponse {
     }
 
     public String getJid() {
-        if (result != null && result.size() > 0) {
+        if (result != null && !result.isEmpty()) {
             Map<String, JsonNode> resultMap = result.get(0);
             if (resultMap != null && resultMap.get("jid") != null) {
                 return resultMap.get("jid").asText();

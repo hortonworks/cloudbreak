@@ -25,10 +25,10 @@ public class AdlsFileSystemConfigurationsView extends BaseFileSystemConfiguratio
 
     public AdlsFileSystemConfigurationsView(AdlsFileSystem adlsFileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
         super(adlsFileSystem.getStorageContainer(), deafultFs, locations);
-        this.accountName = adlsFileSystem.getAccountName();
-        this.clientId = adlsFileSystem.getClientId();
-        this.credential = adlsFileSystem.getCredential();
-        this.tenantId = adlsFileSystem.getTenantId();
+        accountName = adlsFileSystem.getAccountName();
+        clientId = adlsFileSystem.getClientId();
+        credential = adlsFileSystem.getCredential();
+        tenantId = adlsFileSystem.getTenantId();
     }
 
     public String getAccountName() {

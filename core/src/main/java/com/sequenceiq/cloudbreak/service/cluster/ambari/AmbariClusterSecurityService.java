@@ -70,7 +70,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
             Map<String, Integer> operationRequests = new HashMap<>();
             Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
-                int opId = s.equals("ZOOKEEPER") ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
+                int opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
                 if (opId != -1) {
                     operationRequests.put(s + "_SERVICE_STATE", opId);
                 }

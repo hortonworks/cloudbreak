@@ -26,7 +26,7 @@ public class NginxCertListenerTask extends StackBasedStatusCheckerTask<NginxPoll
         try {
             Client client = nginxPollerObject.getClient();
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, port));
-            nginxTarget.path("/").request().get();
+            nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = nginxPollerObject.getTrustManager().getChain();
             if (chain == null || chain.length == 0) {
                 LOGGER.info("Nginx is listening on {}:{}, but TLS is not configured yet", ip, port);

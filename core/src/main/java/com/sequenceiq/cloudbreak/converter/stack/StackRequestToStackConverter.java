@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -152,10 +153,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
 
     private Json getTags(StackTags tags) {
         try {
-            if (tags == null) {
-                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
-            }
-            return new Json(tags);
+            return new Json(Objects.requireNonNullElseGet(tags, () -> new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>())));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
@@ -163,10 +161,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
 
     private Json getInputs(StackInputs stackInputs) {
         try {
-            if (stackInputs == null) {
-                return new Json(new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>()));
-            }
-            return new Json(stackInputs);
+            return new Json(Objects.requireNonNullElseGet(stackInputs, () -> new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>())));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic inputs.");
         }

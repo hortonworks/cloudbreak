@@ -156,7 +156,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) {
         Map<String, String> candidates;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();

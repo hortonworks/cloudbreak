@@ -67,7 +67,7 @@ public class DefaultSecurityGroupCreator {
     }
 
     private String concatenatePorts(Iterable<Port> ports) {
-        StringBuilder builder = new StringBuilder("");
+        StringBuilder builder = new StringBuilder();
         Iterator<Port> portsIterator = ports.iterator();
         while (portsIterator.hasNext()) {
             Port port = portsIterator.next();

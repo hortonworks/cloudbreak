@@ -137,7 +137,7 @@ public class CloudFormationTemplateBuilder {
 
         private Map<String, String> snapshotId = new HashMap<>();
 
-        private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
+        private final Map<String, String> encryptedAMIByGroupName = new HashMap<>();
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;

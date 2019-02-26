@@ -11,6 +11,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class RestClientUtil {
     }
 
     private static ClientBuilder enableRestDebug(ClientBuilder builder) {
-        return builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY)
+        return builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, Verbosity.PAYLOAD_ANY)
                 .property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_CLIENT, "INFO");
     }
 }

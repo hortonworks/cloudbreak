@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,7 +18,7 @@ public class LDAPTestRequest implements JsonEntity {
     private String name;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.LdapConfigModelDescription.VALIDATION_REQUEST)
+    @ApiModelProperty(LdapConfigModelDescription.VALIDATION_REQUEST)
     private LdapValidationRequest validationRequest;
 
     public String getName() {

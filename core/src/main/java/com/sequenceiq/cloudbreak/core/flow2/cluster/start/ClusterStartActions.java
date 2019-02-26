@@ -36,7 +36,7 @@ public class ClusterStartActions {
 
     @Bean(name = "CLUSTER_STARTING_STATE")
     public Action<?, ?> startingCluster() {
-        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterStartService.startingCluster(context.getStack());
@@ -52,7 +52,7 @@ public class ClusterStartActions {
 
     @Bean(name = "CLUSTER_START_POLLING_STATE")
     public Action<?, ?> clusterStartPolling() {
-        return new AbstractClusterAction<ClusterStartResult>(ClusterStartResult.class) {
+        return new AbstractClusterAction<>(ClusterStartResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) {
                 sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
@@ -62,11 +62,11 @@ public class ClusterStartActions {
 
     @Bean(name = "CLUSTER_START_FINISHED_STATE")
     public Action<?, ?> clusterStartFinished() {
-        return new AbstractClusterAction<ClusterStartPollingResult>(ClusterStartPollingResult.class) {
+        return new AbstractClusterAction<>(ClusterStartPollingResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) {
                 clusterStartService.clusterStartFinished(context.getStack());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -83,7 +83,7 @@ public class ClusterStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterStartService.handleClusterStartFailure(context.getStackView(), payload.getException().getMessage());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

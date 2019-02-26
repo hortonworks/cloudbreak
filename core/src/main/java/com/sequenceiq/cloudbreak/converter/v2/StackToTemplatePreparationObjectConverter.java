@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserDetailsService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
@@ -104,7 +105,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
 
-            return TemplatePreparationObject.Builder.builder()
+            return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))

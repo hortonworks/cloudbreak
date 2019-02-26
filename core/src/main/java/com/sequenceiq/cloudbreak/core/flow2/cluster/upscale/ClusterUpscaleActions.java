@@ -44,7 +44,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
     public Action<?, ?> uploadUpscaleRecipesAction() {
-        return new AbstractClusterUpscaleAction<ClusterScaleTriggerEvent>(ClusterScaleTriggerEvent.class) {
+        return new AbstractClusterUpscaleAction<>(ClusterScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
@@ -65,7 +65,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPSCALING_AMBARI_STATE")
     public Action<?, ?> upscalingAmbariAction() {
-        return new AbstractClusterUpscaleAction<UploadUpscaleRecipesResult>(UploadUpscaleRecipesResult.class) {
+        return new AbstractClusterUpscaleAction<>(UploadUpscaleRecipesResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.upscalingAmbari(context.getStackId());
@@ -82,7 +82,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPSCALING_CLUSTER_STATE")
     public Action<?, ?> installServicesAction() {
-        return new AbstractClusterUpscaleAction<UpscaleAmbariResult>(UpscaleAmbariResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscaleAmbariResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleAmbariResult payload, Map<Object, Object> variables) {
@@ -98,7 +98,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "EXECUTING_POSTRECIPES_STATE")
     public Action<?, ?> executePostRecipesAction() {
-        return new AbstractClusterUpscaleAction<UpscaleClusterResult>(UpscaleClusterResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscaleClusterResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterResult payload, Map<Object, Object> variables) {
@@ -114,12 +114,12 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "FINALIZE_UPSCALE_STATE")
     public Action<?, ?> upscaleFinishedAction() {
-        return new AbstractClusterUpscaleAction<UpscalePostRecipesResult>(UpscalePostRecipesResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscalePostRecipesResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context.getFlowId(), FINALIZED_EVENT.event(), payload);
             }
 
@@ -137,7 +137,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
             }
         };

@@ -55,7 +55,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 1;
 
-    private static final float NO_MB_PER_GB = 1024f;
+    private static final float NO_MB_PER_GB = 1024.0f;
 
     @Value("${cb.azure.default.vmtype:Standard_D12_v2}")
     private String armVmDefault;
@@ -154,12 +154,8 @@ public class AzurePlatformResources implements PlatformResources {
                     .withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
 
             for (VolumeParameterType volumeParameterType : values()) {
-                switch (volumeParameterType) {
-                    case MAGNETIC:
-                        builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, virtualMachineSize));
-                        break;
-                    default:
-                        break;
+                if (volumeParameterType == MAGNETIC) {
+                    builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, virtualMachineSize));
                 }
             }
             VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);

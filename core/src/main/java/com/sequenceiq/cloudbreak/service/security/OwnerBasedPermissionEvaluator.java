@@ -37,7 +37,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
         PermissionType p = PermissionType.valueOf(permission.toString().toUpperCase());
         if (target instanceof Optional) {
-            target = ((Optional) target).orElse(null);
+            target = ((Optional<?>) target).orElse(null);
         }
         if (target == null) {
             return false;

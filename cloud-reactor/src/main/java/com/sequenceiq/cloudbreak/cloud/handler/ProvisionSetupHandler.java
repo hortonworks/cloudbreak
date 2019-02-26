@@ -40,11 +40,11 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
     @Override
     public void accept(Event<SetupRequest> event) {
         LOGGER.info("Received event: {}", event);
-        SetupRequest request = event.getData();
+        SetupRequest<SetupResult> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         SetupResult result;
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
             connector.setup().prerequisites(auth, cloudStack, resourceNotifier);

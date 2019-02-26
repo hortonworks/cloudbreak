@@ -23,7 +23,7 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
 
     private final Field callableInFutureTask;
 
-    private final Class<? extends Callable> adapterClass;
+    private final Class<? extends Callable<Object>> adapterClass;
 
     private final Field runnableInAdapter;
 
@@ -34,8 +34,9 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
         try {
             callableInFutureTask = FutureTask.class.getDeclaredField("callable");
             callableInFutureTask.setAccessible(true);
-            adapterClass = Executors.callable(() -> {
-            }).getClass();
+            Callable<Object> adapter = Executors.callable(() -> {
+            });
+            adapterClass = (Class<? extends Callable<Object>>) adapter.getClass();
             runnableInAdapter = adapterClass.getDeclaredField("task");
             runnableInAdapter.setAccessible(true);
         } catch (NoSuchFieldException e) {

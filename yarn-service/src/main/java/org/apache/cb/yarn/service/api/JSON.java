@@ -16,7 +16,7 @@ import com.fasterxml.jackson.datatype.threetenbp.ThreeTenModule;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-08-08T16:59:40.572+02:00")
 public class JSON implements ContextResolver<ObjectMapper> {
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     public JSON() {
         mapper = new ObjectMapper();

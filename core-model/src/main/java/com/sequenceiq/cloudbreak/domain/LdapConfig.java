@@ -83,27 +83,27 @@ public class LdapConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     public LdapConfig copyWithoutWorkspace() {
         LdapConfig copy = new LdapConfig();
-        copy.setId(id);
-        copy.setName(name);
-        copy.setDescription(description);
-        copy.setAccount(account);
-        copy.setOwner(owner);
-        copy.setServerHost(serverHost);
-        copy.setServerPort(serverPort);
-        copy.setProtocol(protocol);
-        copy.setBindDn(bindDn);
-        copy.setBindPassword(bindPassword);
-        copy.setDirectoryType(directoryType);
-        copy.setUserSearchBase(userSearchBase);
-        copy.setUserDnPattern(userDnPattern);
-        copy.setUserNameAttribute(userNameAttribute);
-        copy.setUserObjectClass(userObjectClass);
-        copy.setGroupSearchBase(groupSearchBase);
-        copy.setGroupNameAttribute(groupNameAttribute);
-        copy.setGroupObjectClass(groupObjectClass);
-        copy.setGroupMemberAttribute(groupMemberAttribute);
-        copy.setDomain(domain);
-        copy.setAdminGroup(adminGroup);
+        copy.id = id;
+        copy.name = name;
+        copy.description = description;
+        copy.account = account;
+        copy.owner = owner;
+        copy.serverHost = serverHost;
+        copy.serverPort = serverPort;
+        copy.protocol = protocol;
+        copy.bindDn = bindDn;
+        copy.bindPassword = bindPassword;
+        copy.directoryType = directoryType;
+        copy.userSearchBase = userSearchBase;
+        copy.userDnPattern = userDnPattern;
+        copy.userNameAttribute = userNameAttribute;
+        copy.userObjectClass = userObjectClass;
+        copy.groupSearchBase = groupSearchBase;
+        copy.groupNameAttribute = groupNameAttribute;
+        copy.groupObjectClass = groupObjectClass;
+        copy.groupMemberAttribute = groupMemberAttribute;
+        copy.domain = domain;
+        copy.adminGroup = adminGroup;
         return copy;
     }
 

@@ -9,11 +9,12 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.MpackDetailsDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class ManagementPackBase implements JsonEntity {
-    @NotNull()
+    @NotNull
     @Size(max = 100, min = 5, message = "The length of the management pack's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The management pack's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -27,16 +28,16 @@ public abstract class ManagementPackBase implements JsonEntity {
     @NotNull
     @Pattern(regexp = "^http[s]?://.*",
             message = "The URL should start with the protocol (http, https)")
-    @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.MPACK_URL)
+    @ApiModelProperty(MpackDetailsDescription.MPACK_URL)
     private String mpackUrl;
 
-    @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.PURGE)
+    @ApiModelProperty(MpackDetailsDescription.PURGE)
     private boolean purge;
 
-    @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.PURGE_LIST)
+    @ApiModelProperty(MpackDetailsDescription.PURGE_LIST)
     private List<String> purgeList = Collections.emptyList();
 
-    @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.FORCE)
+    @ApiModelProperty(MpackDetailsDescription.FORCE)
     private boolean force;
 
     public String getName() {

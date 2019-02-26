@@ -21,10 +21,10 @@ public class WasbFileSystemConfigurationsView extends BaseFileSystemConfiguratio
 
     public WasbFileSystemConfigurationsView(WasbFileSystem wasbFileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
         super(wasbFileSystem.getStorageContainer(), deafultFs, locations);
-        this.accountName = wasbFileSystem.getAccountName();
-        this.accountKey = wasbFileSystem.getAccountKey();
-        this.secure = wasbFileSystem.isSecure();
-        this.storageContainerName = wasbFileSystem.getStorageContainerName();
+        accountName = wasbFileSystem.getAccountName();
+        accountKey = wasbFileSystem.getAccountKey();
+        secure = wasbFileSystem.isSecure();
+        storageContainerName = wasbFileSystem.getStorageContainerName();
     }
 
     public String getAccountKey() {

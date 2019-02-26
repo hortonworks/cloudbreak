@@ -54,10 +54,8 @@ public class WorkspaceMigrationRunner {
                 services.stream()
                         .filter(service -> !service.resource().equals(WorkspaceResource.STRUCTURED_EVENT))
                         .map(service -> (WorkspaceAwareResourceService<WorkspaceAwareResource>) service)
-                        .forEach(service -> {
-                            workspaceAwareResourceMigrator.migrateResourceWorkspace(userMigrationResults, service::findAll,
-                                    service::pureSave);
-                        });
+                        .forEach(service -> workspaceAwareResourceMigrator.migrateResourceWorkspace(userMigrationResults, service::findAll,
+                                service::pureSave));
                 structuredEventWorkspaceMigrator.migrate(userMigrationResults);
             }
             finished.set(true);

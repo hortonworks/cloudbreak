@@ -48,16 +48,16 @@ public class HdfConfigProvider {
         List<InstanceMetaData>> groupInstances) {
         String port = blueprintTextProcessor.pathValue("configurations", "nifi-ambari-config", "nifi.node.ssl.port").orElse(DEFAULT_NIFI_PORT);
         List<String> publicIps = collectPublicIps(groupInstances, nifiIgs);
-        return publicIps.isEmpty() ? Optional.empty() : Optional.of(publicIps.stream().map(ip -> ip + ":" + port).collect(Collectors.joining(",")));
+        return publicIps.isEmpty() ? Optional.empty() : Optional.of(publicIps.stream().map(ip -> ip + ':' + port).collect(Collectors.joining(",")));
     }
 
     private List<String> collectFqdnsByInstanceGroupName(Map<String, List<InstanceMetaData>> fqdns, Set<InstanceGroup> nifiIgs) {
-        return nifiIgs.stream().flatMap(ig -> fqdns.get(ig.getGroupName()).stream()).map(im -> im.getDiscoveryFQDN()).collect(Collectors.toList());
+        return nifiIgs.stream().flatMap(ig -> fqdns.get(ig.getGroupName()).stream()).map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
     }
 
     private List<String> collectPublicIps(Map<String, List<InstanceMetaData>> groupInstances, Set<InstanceGroup> nifiIgs) {
         return nifiIgs.stream().flatMap(ig -> groupInstances.get(ig.getGroupName()).stream()).filter(im -> StringUtils.hasText(im.getPublicIp()))
-            .map(im -> im.getPublicIp()).collect(Collectors.toList());
+            .map(InstanceMetaData::getPublicIp).collect(Collectors.toList());
     }
 
     private Set<InstanceGroup> collectInstanceGroupsWhichContainsNifiMasters(Set<HostGroup> hostgroups, Set<String> nifiMasters) {

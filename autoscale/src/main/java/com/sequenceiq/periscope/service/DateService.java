@@ -59,12 +59,7 @@ public final class DateService {
         String[] splits = cron.split("\\s+");
         if (splits.length < MINIMAL_CRON_SEGMENT_LENGTH && splits.length > MINIMAL_USER_DEFINED_CRON_SEGMENT_LENGTH) {
             for (int i = splits.length; i < MINIMAL_CRON_SEGMENT_LENGTH; i++) {
-                switch (i) {
-                    case DAY_OF_WEEK_FIELD:  cron = String.format("%s ?", cron);
-                        break;
-                    default: cron = String.format("%s *", cron);
-                        break;
-                }
+                cron = i == DAY_OF_WEEK_FIELD ? String.format("%s ?", cron) : String.format("%s *", cron);
             }
         }
         try {

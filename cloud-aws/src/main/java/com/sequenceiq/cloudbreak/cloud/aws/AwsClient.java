@@ -87,13 +87,9 @@ public class AwsClient {
     }
 
     public AWSStaticCredentialsProvider getAwsStaticCredentialsProvider(AwsCredentialView awsCredential) {
-        AWSStaticCredentialsProvider awsStaticCredentialsProvider;
-        if (isRoleAssumeRequired(awsCredential)) {
-            awsStaticCredentialsProvider = new AWSStaticCredentialsProvider(credentialClient.retrieveCachedSessionCredentials(awsCredential));
-        } else {
-            awsStaticCredentialsProvider = new AWSStaticCredentialsProvider(createAwsCredentials(awsCredential));
-        }
-        return awsStaticCredentialsProvider;
+        return isRoleAssumeRequired(awsCredential)
+                ? new AWSStaticCredentialsProvider(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                : new AWSStaticCredentialsProvider(createAwsCredentials(awsCredential));
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
@@ -155,7 +151,7 @@ public class AwsClient {
             throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accesKeyString, secretAccesKeyString));
         } else if (awsSecretAccessKeyAvailable && !awsAccessKeyAvailable) {
             throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accesKeyString, secretAccesKeyString));
-        } else if (!awsAccessKeyAvailable && !awsSecretAccessKeyAvailable) {
+        } else if (!awsAccessKeyAvailable) {
             try {
                 try (InstanceProfileCredentialsProvider provider = new InstanceProfileCredentialsProvider()) {
                     provider.getCredentials();

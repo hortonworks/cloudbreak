@@ -4,13 +4,13 @@ import java.util.Optional;
 
 public class HdfConfigs {
 
-    private String nodeEntities;
+    private final String nodeEntities;
 
-    private String registryNodeEntities;
+    private final String registryNodeEntities;
 
-    private String nodeUserEntities;
+    private final String nodeUserEntities;
 
-    private Optional<String> proxyHosts;
+    private final Optional<String> proxyHosts;
 
     public HdfConfigs(String nodeEntities, String registryNodeEntities, String nodeUserEntities, Optional<String> proxyHosts) {
         this.nodeEntities = nodeEntities;

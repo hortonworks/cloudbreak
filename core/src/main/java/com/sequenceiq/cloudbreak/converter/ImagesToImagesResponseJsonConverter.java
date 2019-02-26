@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -104,7 +105,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
             json.setRepo(repoJson);
             json.setVersion(info.getVersion());
             Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
-            for (Map.Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
+            for (Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
                 mpacks.put(mp.getKey(), mp.getValue().stream().map(mpack -> {
                     ManagementPackEntry mpackEntry = new ManagementPackEntry();
                     mpackEntry.setMpackUrl(mpack.getMpackUrl());

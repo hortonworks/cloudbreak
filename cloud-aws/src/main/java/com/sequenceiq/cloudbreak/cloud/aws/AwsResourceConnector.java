@@ -120,7 +120,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     private static final int CIDR_PREFIX = 24;
 
-    private static final List<String> UPSCALE_PROCESSES = asList("Launch");
+    private static final List<String> UPSCALE_PROCESSES = singletonList("Launch");
 
     private static final List<String> SUSPENDED_PROCESSES = asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
@@ -657,7 +657,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         Map<String, Group> groupMap = scaledGroups.stream().collect(
                 Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
         resumeAutoScaling(amazonASClient, groupMap.keySet(), UPSCALE_PROCESSES);
-        for (Map.Entry<String, Group> groupEntry : groupMap.entrySet()) {
+        for (Entry<String, Group> groupEntry : groupMap.entrySet()) {
             Group group = groupEntry.getValue();
             amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                     .withAutoScalingGroupName(groupEntry.getKey())
@@ -850,7 +850,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVPC())));
         List<Subnet> awsSubnets = ec2Client.describeSubnets(request).getSubnets();
         List<String> subnetCidrs = awsSubnets.stream().map(Subnet::getCidrBlock).collect(Collectors.toList());
-        LOGGER.info("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), subnetCidrs.stream().collect(Collectors.joining(",")));
+        LOGGER.info("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), String.join(",", subnetCidrs));
 
         return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
     }
@@ -863,7 +863,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         if (netmaskBits <= 0) {
             throw new CloudConnectorException("The selected VPC has to be in a bigger CIDR range than /24");
         }
-        int numberOfSubnets = Double.valueOf(Math.pow(2, netmaskBits)).intValue();
+        int numberOfSubnets = Double.valueOf(StrictMath.pow(2, netmaskBits)).intValue();
         int targetSubnet = 0;
         if (stackName != null) {
             byte[] b = stackName.getBytes(Charset.forName("UTF-8"));

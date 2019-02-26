@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model.audit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
@@ -9,12 +10,12 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class AuditEvent {
 
-    private Long auditId;
+    private final Long auditId;
 
-    private StructuredEvent structuredEvent;
+    private final StructuredEvent structuredEvent;
 
     public AuditEvent(Long auditId, StructuredEvent structuredEvent) {
         this.auditId = auditId;

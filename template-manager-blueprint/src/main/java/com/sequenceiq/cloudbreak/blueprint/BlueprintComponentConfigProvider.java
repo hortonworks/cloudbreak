@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,8 +7,8 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupEntry;
 
@@ -23,12 +22,12 @@ public interface BlueprintComponentConfigProvider {
         return Lists.newArrayList();
     }
 
-    default List<BlueprintConfigurationEntry> getConfigurationEntries(TemplatePreparationObject source, String blueprintProcessor) throws IOException {
+    default List<BlueprintConfigurationEntry> getConfigurationEntries(TemplatePreparationObject source, String blueprintProcessor) {
         return Lists.newArrayList();
     }
 
-    default Map<HostgroupEntry, List<BlueprintConfigurationEntry>> getHostgroupConfigurationEntries(TemplatePreparationObject source, String blueprintProcessor)
-            throws IOException {
+    default Map<HostgroupEntry, List<BlueprintConfigurationEntry>> getHostgroupConfigurationEntries(TemplatePreparationObject source,
+            String blueprintProcessor) {
         return Maps.newHashMap();
     }
 

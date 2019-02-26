@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -25,9 +25,7 @@ public class InstanceGroupMetadataCollector {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             result.put(
                     instanceGroup.getGroupName(),
-                    instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())
-                            .stream()
-                            .collect(Collectors.toList()));
+                    new ArrayList<>(instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())));
         }
         return result;
     }

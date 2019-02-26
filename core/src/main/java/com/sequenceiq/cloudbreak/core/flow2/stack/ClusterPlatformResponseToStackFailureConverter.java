@@ -12,7 +12,7 @@ public class ClusterPlatformResponseToStackFailureConverter implements PayloadCo
 
     @Override
     public StackFailureEvent convert(Object payload) {
-        ClusterPlatformResult clusterPlatformResult = (ClusterPlatformResult) payload;
+        ClusterPlatformResult<?> clusterPlatformResult = (ClusterPlatformResult<?>) payload;
         return new StackFailureEvent(clusterPlatformResult.getRequest().getStackId(), clusterPlatformResult.getErrorDetails());
     }
 }

@@ -38,7 +38,7 @@ public class ClusterUpgradeActions {
 
     @Bean(name = "CLUSTER_UPGRADE_STATE")
     public Action<?, ?> upgradeCluster() {
-        return new AbstractClusterUpgradeAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterUpgradeAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterUpgradeService.upgradeCluster(context.getStackId());
@@ -54,7 +54,7 @@ public class ClusterUpgradeActions {
 
     @Bean(name = "CLUSTER_UPGRADE_FINISHED_STATE")
     public Action<?, ?> clusterUpgradeFinished() {
-        return new AbstractClusterAction<ClusterUpgradeResult>(ClusterUpgradeResult.class) {
+        return new AbstractClusterAction<>(ClusterUpgradeResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterUpgradeResult payload, Map<Object, Object> variables) {
                 clusterUpgradeService.clusterUpgradeFinished(context.getStack());

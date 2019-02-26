@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package org.apache.cb.yarn.service.api;
 
 import java.util.List;

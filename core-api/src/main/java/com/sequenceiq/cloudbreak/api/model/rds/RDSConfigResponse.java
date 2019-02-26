@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.users.WorkspaceResourceResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -24,16 +25,16 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.STACK_VERSION)
+    @ApiModelProperty(RDSConfig.STACK_VERSION)
     private String stackVersion;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE, required = true)
+    @ApiModelProperty(value = RDSConfig.DB_ENGINE, required = true)
     private String databaseEngine;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_DRIVER_NAME, required = true)
+    @ApiModelProperty(value = RDSConfig.CONNECTION_DRIVER_NAME, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
+    @ApiModelProperty(value = RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)

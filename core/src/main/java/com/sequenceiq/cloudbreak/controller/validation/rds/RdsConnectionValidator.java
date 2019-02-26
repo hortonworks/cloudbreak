@@ -35,7 +35,7 @@ public class RdsConnectionValidator {
         try {
             URL[] urls = {new URL("jar:" + rdsConfig.getConnectorJarUrl() + "!/")};
             try (URLClassLoader cl = URLClassLoader.newInstance(urls)) {
-                Driver d = (Driver) cl.loadClass(rdsConfig.getDatabaseEngine().connectionDriver()).newInstance();
+                Driver d = (Driver) cl.loadClass(rdsConfig.getDatabaseEngine().connectionDriver()).getConstructor().newInstance();
                 validateRdsConnection(d, rdsConfig);
             } catch (ClassNotFoundException e) {
                 String msg = String.format("Invalid connector JAR. Could not find the specified class (%s) or the JAR does not exist.",

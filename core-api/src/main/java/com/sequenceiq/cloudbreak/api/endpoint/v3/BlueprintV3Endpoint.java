@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintViewResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
@@ -69,7 +68,7 @@ public interface BlueprintV3Endpoint {
     @GET
     @Path("{name}/custom-parameters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = ContentType.JSON, nickname = "getBlueprintCustomParameters")
+    @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = JSON, nickname = "getBlueprintCustomParameters")
     ParametersQueryResponse getCustomParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }

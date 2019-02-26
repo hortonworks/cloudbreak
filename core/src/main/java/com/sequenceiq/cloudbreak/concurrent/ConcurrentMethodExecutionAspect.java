@@ -83,7 +83,7 @@ public class ConcurrentMethodExecutionAspect {
     }
 
     private String createLockKey(String lockPrefix, Long stackId) {
-        return stackId == null ? lockPrefix : lockPrefix + String.valueOf(stackId);
+        return stackId == null ? lockPrefix : lockPrefix + stackId;
     }
 
     private String getGuardedMethodLockPrefix(JoinPoint joinPoint) {

@@ -41,12 +41,12 @@ public class GcsCloudStorageParameters implements CloudStorageParameters {
             return false;
         }
         GcsCloudStorageParameters that = (GcsCloudStorageParameters) o;
-        return Objects.equals(getServiceAccountEmail(), that.getServiceAccountEmail());
+        return Objects.equals(serviceAccountEmail, that.serviceAccountEmail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getServiceAccountEmail());
+        return Objects.hash(serviceAccountEmail);
     }
 
 }

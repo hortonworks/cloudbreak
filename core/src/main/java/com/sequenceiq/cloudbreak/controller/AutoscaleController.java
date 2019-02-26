@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -116,9 +116,9 @@ public class AutoscaleController implements AutoscaleEndpoint {
         try {
             restRequestThreadLocalService.setCloudbreakUserByOwner(owner);
             Stack stack = stackService.get(id);
-            if (WorkspacePermissions.Action.WRITE.name().equalsIgnoreCase(permission)) {
+            if (Action.WRITE.name().equalsIgnoreCase(permission)) {
                 User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-                permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, WorkspacePermissions.Action.WRITE, user);
+                permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, Action.WRITE, user);
             }
             return true;
         } catch (RuntimeException ignore) {

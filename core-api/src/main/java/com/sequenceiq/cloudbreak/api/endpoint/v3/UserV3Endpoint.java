@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.users.UserProfileResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UserOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,14 +26,14 @@ public interface UserV3Endpoint {
     @GET
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+    @ApiOperation(value = UserOpDescription.USER_GET_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "getUserProfileInWorkspace")
     UserProfileResponse getProfileInWorkspace(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_PUT_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+    @ApiOperation(value = UserOpDescription.USER_PUT_PROFILE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "modifyUserProfileInWorkspace")
     void modifyProfileInWorkspace(@PathParam("workspaceId") Long workspaceId, UserProfileRequest userProfileRequest);
 }

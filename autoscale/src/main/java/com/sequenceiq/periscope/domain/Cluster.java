@@ -211,7 +211,7 @@ public class Cluster implements Monitored {
     }
 
     public synchronized void setLastScalingActivityCurrent() {
-        setLastScalingActivity(System.currentTimeMillis());
+        lastScalingActivity = System.currentTimeMillis();
     }
 
     public boolean isRunning() {

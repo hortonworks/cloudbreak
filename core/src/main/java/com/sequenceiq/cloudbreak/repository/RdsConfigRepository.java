@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepositor
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = RDSConfig.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 @WorkspaceResourceType(resource = WorkspaceResource.RDS)
 public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConfig, Long> {

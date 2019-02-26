@@ -41,7 +41,7 @@ public class Artifact {
 
         SERVICE("SERVICE");
 
-        private String value;
+        private final String value;
 
         TypeEnum(String value) {
             this.value = value;

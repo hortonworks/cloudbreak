@@ -57,9 +57,9 @@ public class AmbariDecommissionTimeCalculator {
         String timeString;
         if (decommissionMinutes >= SECONDS_PER_MINUTE) {
             long decommissionHours = Math.round(decommissionMinutes / (double) SECONDS_PER_MINUTE);
-            timeString = String.valueOf(decommissionHours + " hours");
+            timeString = decommissionHours + " hours";
         } else {
-            timeString = String.valueOf(decommissionMinutes) + " minutes";
+            timeString = decommissionMinutes + " minutes";
         }
         return timeString;
     }

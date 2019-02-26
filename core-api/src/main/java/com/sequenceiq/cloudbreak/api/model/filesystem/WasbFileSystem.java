@@ -61,15 +61,15 @@ public class WasbFileSystem extends BaseFileSystem {
             return false;
         }
         WasbFileSystem that = (WasbFileSystem) o;
-        return isSecure() == that.isSecure()
-                && Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName())
-                && Objects.equals(getStorageContainerName(), that.getStorageContainerName());
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(storageContainerName, that.storageContainerName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName(), isSecure(), getStorageContainerName());
+        return Objects.hash(accountKey, accountName, secure, storageContainerName);
     }
 
 }

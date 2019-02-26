@@ -183,7 +183,7 @@ public class StackCreationService {
         Stack stack = context.getStack();
         if (usePrivateIpToTls) {
             SecurityConfig securityConfig = stack.getSecurityConfig();
-            securityConfig.setUsePrivateIpToTls(usePrivateIpToTls);
+            securityConfig.setUsePrivateIpToTls(true);
             stackUpdater.updateStackSecurityConfig(stack, securityConfig);
             stack = stackService.getByIdWithListsInTransaction(stack.getId());
             LOGGER.info("Update Stack and it's SecurityConfig to use private ip when TLS is built.");

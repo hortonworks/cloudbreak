@@ -43,10 +43,10 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
     @Override
     public void accept(Event<CheckImageRequest> event) {
         LOGGER.info("Received event: {}", event);
-        CheckImageRequest request = event.getData();
+        CheckImageRequest<?> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             Image image = request.getImage();
             CloudStack stack = request.getStack();

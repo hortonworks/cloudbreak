@@ -61,14 +61,14 @@ public class AdlsFileSystem extends BaseFileSystem {
             return false;
         }
         AdlsFileSystem that = (AdlsFileSystem) o;
-        return Objects.equals(getAccountName(), that.getAccountName())
-                && Objects.equals(getClientId(), that.getClientId())
-                && Objects.equals(getCredential(), that.getCredential())
-                && Objects.equals(getTenantId(), that.getTenantId());
+        return Objects.equals(accountName, that.accountName)
+                && Objects.equals(clientId, that.clientId)
+                && Objects.equals(credential, that.credential)
+                && Objects.equals(tenantId, that.tenantId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountName(), getClientId(), getCredential(), getTenantId());
+        return Objects.hash(accountName, clientId, credential, tenantId);
     }
 }

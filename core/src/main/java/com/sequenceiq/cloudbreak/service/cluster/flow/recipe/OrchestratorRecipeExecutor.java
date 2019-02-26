@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -159,7 +160,7 @@ class OrchestratorRecipeExecutor {
         if (!recipeExecutionFailureCollector.canProcessExecutionFailure(exception)) {
             return exception.getMessage();
         }
-        List<RecipeExecutionFailureCollector.RecipeFailure> failures = recipeExecutionFailureCollector.collectErrors(exception);
+        List<RecipeFailure> failures = recipeExecutionFailureCollector.collectErrors(exception);
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId());
 
         String message = failures.stream().map(failure -> {

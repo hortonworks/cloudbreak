@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class GeneralClusterConfigsProvider {
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
             List<InstanceMetaData> gatewayInstanceMetadata = stack.getGatewayInstanceMetadata();
-            gatewayInstanceMetadataPresented = gatewayInstanceMetadata.size() > 0
+            gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty()
                     && stack.getCluster().getGateway() != null
                     && stack.getCluster().getGateway().isGatewayEnabled();
             instanceMetadataPresented = true;
@@ -70,7 +71,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setIdentityUserEmail(email);
 
         generalClusterConfigs.setAmbariIp("pending...");
-        generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
+        generalClusterConfigs.setInstanceGroupsPresented(false);
         generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
         if (stack.getCluster().getAmbari().getGateway() != null) {
             gatewayInstanceMetadataPresented = true;
@@ -82,7 +83,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setUuid("pending...");
         generalClusterConfigs.setUserName(stack.getCluster().getAmbari().getUserName());
         generalClusterConfigs.setNodeCount(nodeCount);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable("pending..."));
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("pending..."));
         generalClusterConfigs.setKafkaReplicationFactor(1);
 
         return generalClusterConfigs;
@@ -92,7 +93,7 @@ public class GeneralClusterConfigsProvider {
         int kafkaBrokerNumber = 0;
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
-        for (Map.Entry<String, Set<String>> hostGroup : componentsByHostGroup.entrySet()) {
+        for (Entry<String, Set<String>> hostGroup : componentsByHostGroup.entrySet()) {
             for (String service : hostGroup.getValue()) {
                 if (KAFKA_BROKER.equals(service)) {
                     kafkaBrokerNumber++;

@@ -30,7 +30,6 @@ public class AppMasterFilter implements HostFilter {
     private Client restClient;
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
         List<HostMetadata> result = new ArrayList<>(hosts);
         try {
@@ -46,17 +45,11 @@ public class AppMasterFilter implements HostFilter {
                     String hostName = node.get(AM_KEY).textValue();
                     hostsWithAM.add(hostName.substring(0, hostName.lastIndexOf(':')));
                 }
-                result = filter(hostsWithAM, result);
+                result.removeIf(host -> hostsWithAM.contains(host.getHostName()));
             }
         } catch (Exception e) {
             throw new HostFilterException("Error filtering based on ApplicationMaster location", e);
         }
         return result;
     }
-
-    private List<HostMetadata> filter(Collection<String> hostsWithAM, List<HostMetadata> hosts) {
-        hosts.removeIf(host -> hostsWithAM.contains(host.getHostName()));
-        return hosts;
-    }
-
 }

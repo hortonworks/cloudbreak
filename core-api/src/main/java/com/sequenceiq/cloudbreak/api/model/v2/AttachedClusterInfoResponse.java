@@ -2,13 +2,14 @@ package com.sequenceiq.cloudbreak.api.model.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class AttachedClusterInfoResponse implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ID)

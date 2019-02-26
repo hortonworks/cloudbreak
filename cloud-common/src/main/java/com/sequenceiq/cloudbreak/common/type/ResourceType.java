@@ -51,7 +51,7 @@ public enum ResourceType {
     // MOCK
     MOCK_INSTANCE;
 
-    private CommonResourceType commonResourceType;
+    private final CommonResourceType commonResourceType;
 
     ResourceType() {
         this(CommonResourceType.RESOURCE);

@@ -4,7 +4,7 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,11 +13,11 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RDSTestRequest implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.RDSConfig.NAME)
+    @ApiModelProperty(RDSConfig.NAME)
     private String name;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.RDSConfig.RDS_CONFIG_REQUEST)
+    @ApiModelProperty(RDSConfig.RDS_CONFIG_REQUEST)
     private RDSConfigRequest rdsConfig;
 
     public String getName() {

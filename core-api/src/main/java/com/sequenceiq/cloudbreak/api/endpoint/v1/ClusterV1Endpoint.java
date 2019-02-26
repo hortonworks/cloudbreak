@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTo
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.GatewayOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -106,7 +106,7 @@ public interface ClusterV1Endpoint {
     @PUT
     @Path("{id}/cluster/gateway")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.GatewayOpDescription.UPDATE_GATEWAY_TOPOLOGIES, produces = ContentType.JSON, notes = Notes.GATEWAY_NOTES,
+    @ApiOperation(value = GatewayOpDescription.UPDATE_GATEWAY_TOPOLOGIES, produces = ContentType.JSON, notes = Notes.GATEWAY_NOTES,
             nickname = "updateGatewayTopologies")
     GatewayJson updateGatewayTopologies(@PathParam("id") Long stackId, @NotNull UpdateGatewayTopologiesJson request);
 

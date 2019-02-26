@@ -22,7 +22,7 @@ public class InstanceStateQuery {
 
     public List<CloudVmInstanceStatus> getCloudVmInstanceStatuses(
             CloudCredential cloudCredential, CloudContext cloudContext, List<CloudInstance> instances) {
-        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, cloudCredential);
         return connector.instances().check(auth, instances);
     }

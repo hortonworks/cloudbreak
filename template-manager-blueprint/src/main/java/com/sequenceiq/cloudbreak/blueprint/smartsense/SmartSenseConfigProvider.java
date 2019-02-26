@@ -89,7 +89,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     private String addSmartSenseServerToBp(BlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
             Collection<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT)) {
-            String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
+            String aHostGroupName = hostGroupNames.stream().min(String::compareTo).get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
                 if (hostGroup.isInstanceGroupConfigured() && GATEWAY.equals(hostGroup.getInstanceGroupType()) && hostGroup.getNodeCount().equals(1)) {
@@ -110,7 +110,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
 
             }
             LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
-            final String finalAHostGroupName = aHostGroupName;
+            String finalAHostGroupName = aHostGroupName;
             blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, finalAHostGroupName::equals);
         }
         return blueprintProcessor.asText();

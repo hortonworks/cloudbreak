@@ -79,7 +79,7 @@ public class Component {
 
         NEVER("NEVER");
 
-        private String value;
+        private final String value;
 
         RestartPolicyEnum(String value) {
             this.value = value;

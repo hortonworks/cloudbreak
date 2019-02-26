@@ -58,10 +58,8 @@ public class GatewayService {
         try {
             return transactionService.required(() -> tryUpdatingGateway(stackId, request));
         } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof BadRequestException) {
-                throw BadRequestException.class.cast(e.getCause());
-            } else if (e.getCause() instanceof FlowsAlreadyRunningException) {
-                throw FlowsAlreadyRunningException.class.cast(e.getCause());
+            if (e.getCause() instanceof BadRequestException || e.getCause() instanceof FlowsAlreadyRunningException) {
+                throw e.getCause();
             } else {
                 throw new TransactionRuntimeExecutionException(e);
             }

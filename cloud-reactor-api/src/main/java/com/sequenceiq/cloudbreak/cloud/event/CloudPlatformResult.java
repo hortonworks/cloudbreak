@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.event;
 
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 
-public class CloudPlatformResult<R extends CloudPlatformRequest> implements Payload {
+public class CloudPlatformResult<R extends CloudPlatformRequest<?>> implements Payload {
 
     private EventStatus status;
 

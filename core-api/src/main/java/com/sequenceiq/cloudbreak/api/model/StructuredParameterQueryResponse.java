@@ -89,19 +89,19 @@ public class StructuredParameterQueryResponse implements JsonEntity {
             return false;
         }
         StructuredParameterQueryResponse that = (StructuredParameterQueryResponse) o;
-        return Objects.equals(getPropertyName(), that.getPropertyName())
-                && Objects.equals(getDescription(), that.getDescription())
-                && Objects.equals(getDefaultPath(), that.getDefaultPath())
-                && Objects.equals(getRelatedService(), that.getRelatedService())
-                && Objects.equals(getPropertyFile(), that.getPropertyFile())
-                && Objects.equals(getProtocol(), that.getProtocol())
-                && Objects.equals(getPropertyDisplayName(), that.getPropertyDisplayName());
+        return Objects.equals(propertyName, that.propertyName)
+                && Objects.equals(description, that.description)
+                && Objects.equals(defaultPath, that.defaultPath)
+                && Objects.equals(relatedService, that.relatedService)
+                && Objects.equals(propertyFile, that.propertyFile)
+                && Objects.equals(protocol, that.protocol)
+                && Objects.equals(propertyDisplayName, that.propertyDisplayName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPropertyName(), getDescription(), getDefaultPath(), getRelatedService(), getPropertyFile(), getProtocol(),
-                getPropertyDisplayName());
+        return Objects.hash(propertyName, description, defaultPath, relatedService, propertyFile, protocol,
+                propertyDisplayName);
     }
 
 }

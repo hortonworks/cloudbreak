@@ -207,7 +207,7 @@ public class ClusterCreationSetupService {
         String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {
-            stackType = stackType.substring(0, stackType.indexOf("-"));
+            stackType = stackType.substring(0, stackType.indexOf('-'));
         }
         StackDescriptor stackDescriptor = stackMatrixService.getStackDescriptor(stackType, stackMajorVersion);
         if (stackDescriptor != null) {

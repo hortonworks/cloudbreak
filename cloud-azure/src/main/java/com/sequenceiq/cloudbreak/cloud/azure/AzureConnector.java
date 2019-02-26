@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class AzureConnector implements CloudConnector {
+public class AzureConnector implements CloudConnector<Map<String, Map<String, Object>>> {
 
     @Inject
     private AzureAuthenticator azureAuthenticator;
@@ -84,7 +85,7 @@ public class AzureConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<Map<String, Map<String, Object>>> resources() {
         return azureResourceConnector;
     }
 

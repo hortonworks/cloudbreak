@@ -110,11 +110,7 @@ public enum DatabaseVendor {
     }
 
     private static Optional<String> databaseVersion(Optional<RdsConfigRequestParameters> rdsConfigRequestParameters) {
-        if (rdsConfigRequestParameters.isPresent()) {
-            return Optional.of(rdsConfigRequestParameters.get().getVersion());
-        } else {
-            return Optional.empty();
-        }
+        return rdsConfigRequestParameters.isPresent() ? Optional.of(rdsConfigRequestParameters.get().getVersion()) : Optional.empty();
     }
 
     public static Collection<DatabaseVendor> availableVendors() {

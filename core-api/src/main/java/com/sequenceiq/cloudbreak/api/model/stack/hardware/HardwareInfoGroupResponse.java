@@ -6,7 +6,8 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HardwareModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,12 +16,12 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HardwareInfoGroupResponse implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE)
+    @ApiModelProperty(HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.HardwareModelDescription.METADATA)
+    @ApiModelProperty(HardwareModelDescription.METADATA)
     private Set<HardwareInfoResponse> hardwareInfos = new HashSet<>();
 
     public RecoveryMode getRecoveryMode() {

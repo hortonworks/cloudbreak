@@ -83,9 +83,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
                 () -> validateBlueprint(stackValidationRequest, stackValidation, workspace), "blueprint", stackValidationRequest.getBlueprintId()
         );
         formatAccessDeniedMessage(
-                () -> {
-                    validateCredential(stackValidationRequest, stackValidation, workspace);
-                }, "credential", stackValidationRequest.getCredentialId()
+                () -> validateCredential(stackValidationRequest, stackValidation, workspace), "credential", stackValidationRequest.getCredentialId()
         );
         formatAccessDeniedMessage(
                 () -> validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation),

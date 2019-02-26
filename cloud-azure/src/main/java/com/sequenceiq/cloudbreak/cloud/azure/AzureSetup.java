@@ -123,7 +123,7 @@ public class AzureSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
                 int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info("CopyStatus Pending {} byte/{} byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
+                LOGGER.info("CopyStatus Pending {} byte/{} byte: %.4s {}%%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
         } catch (RuntimeException ignored) {
@@ -161,7 +161,7 @@ public class AzureSetup implements Setup {
     }
 
     @Override
-    public void validateParameters(AuthenticatedContext ac, Map<String, String> parameters) throws Exception {
+    public void validateParameters(AuthenticatedContext ac, Map<String, String> parameters) {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = parameters.get(AzureResourceConnector.RESOURCE_GROUP_NAME);
         if (StringUtils.isEmpty(resourceGroupName)) {

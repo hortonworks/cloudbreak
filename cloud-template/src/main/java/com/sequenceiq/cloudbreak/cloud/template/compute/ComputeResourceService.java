@@ -68,10 +68,10 @@ public class ComputeResourceService {
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
-        List<ComputeResourceBuilder> builders = resourceBuilders.compute(platform);
+        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(platform);
         int numberOfBuilders = builders.size();
         for (int i = numberOfBuilders - 1; i >= 0; i--) {
-            ComputeResourceBuilder builder = builders.get(i);
+            ComputeResourceBuilder<?> builder = builders.get(i);
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             for (CloudResource cloudResource : resourceList) {
                 ResourceDeleteThread thread = createThread(ResourceDeleteThread.NAME, context, auth, cloudResource, builder, cancellable);
@@ -102,11 +102,11 @@ public class ComputeResourceService {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
         Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
-        List<ComputeResourceBuilder> builders = resourceBuilders.compute(platform);
+        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(platform);
         if (!context.isBuild()) {
             Collections.reverse(builders);
         }
-        for (ComputeResourceBuilder builder : builders) {
+        for (ComputeResourceBuilder<?> builder : builders) {
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             for (CloudResource cloudResource : resourceList) {
                 CloudInstance instance = getCloudInstance(cloudResource, instances);
@@ -214,7 +214,7 @@ public class ComputeResourceService {
 
             CloudContext cloudContext = auth.getCloudContext();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-            List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
+            List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(cloudContext.getPlatform());
             for (Group group : getOrderedCopy(groups)) {
                 List<CloudInstance> instances = group.getInstances();
                 for (CloudInstance instance : instances) {
@@ -247,7 +247,7 @@ public class ComputeResourceService {
         }
 
         private Iterable<Group> getOrderedCopy(Iterable<Group> groups) {
-            Ordering<Group> byLengthOrdering = new Ordering<Group>() {
+            Ordering<Group> byLengthOrdering = new Ordering<>() {
                 @Override
                 public int compare(Group left, Group right) {
                     return Ints.compare(left.getInstances().size(), right.getInstances().size());
