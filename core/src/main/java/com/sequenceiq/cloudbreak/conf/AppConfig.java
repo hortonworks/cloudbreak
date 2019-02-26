@@ -126,7 +126,7 @@ public class AppConfig implements ResourceLoaderAware {
     private List<HostOrchestrator> hostOrchestrators;
 
     @Inject
-    private List<FileSystemConfigurator> fileSystemConfigurators;
+    private List<FileSystemConfigurator<?>> fileSystemConfigurators;
 
     @Inject
     private ConfigurableEnvironment environment;
@@ -166,8 +166,8 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public FilterRegistrationBean turnOnStackUnderOperationService() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
+    public FilterRegistrationBean<GenericFilterBean> turnOnStackUnderOperationService() {
+        FilterRegistrationBean<GenericFilterBean> registration = new FilterRegistrationBean();
         registration.setFilter(new GenericFilterBean() {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -207,9 +207,9 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators() {
-        Map<FileSystemType, FileSystemConfigurator> map = new EnumMap<>(FileSystemType.class);
-        for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
+    public Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators() {
+        Map<FileSystemType, FileSystemConfigurator<?>> map = new EnumMap<>(FileSystemType.class);
+        for (FileSystemConfigurator<?> fileSystemConfigurator : fileSystemConfigurators) {
             map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
         }
         return map;

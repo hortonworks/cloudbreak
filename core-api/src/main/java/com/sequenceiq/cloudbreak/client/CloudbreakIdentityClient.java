@@ -246,14 +246,10 @@ public class CloudbreakIdentityClient {
                 .filter(e -> e.endpointType.equals(clazz))
                 .map(e -> e.endPointProxy)
                 .findFirst();
-        if (first.isPresent()) {
-            return (T) first.get();
-        } else {
-            return null;
-        }
+        return first.isPresent() ? (T) first.get() : null;
     }
 
-    protected void refreshEndpointWrapperHolder(String token) {
+    protected synchronized void refreshEndpointWrapperHolder(String token) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
         webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);

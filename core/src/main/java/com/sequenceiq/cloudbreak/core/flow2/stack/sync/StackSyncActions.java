@@ -78,7 +78,7 @@ public class StackSyncActions {
 
     @Bean(name = "SYNC_FINISHED_STATE")
     public Action<?, ?> stackSyncFinishedAction() {
-        return new AbstractStackSyncAction<GetInstancesStateResult>(GetInstancesStateResult.class) {
+        return new AbstractStackSyncAction<>(GetInstancesStateResult.class) {
             @Override
             protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
                 stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), context.isStatusUpdateEnabled());

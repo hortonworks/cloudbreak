@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.validation;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -24,29 +23,24 @@ public class ManagementPackResourceValidator implements ConstraintValidator<Vali
 
     @Override
     public boolean isValid(ManagementPackV4Request value, ConstraintValidatorContext context) {
-        boolean result = true;
         if (StringUtils.isEmpty(value.getMpackUrl())) {
             ValidatorUtil.addConstraintViolation(context, "mpackUrl cannot be empty", "mpackUrl");
-            result = false;
+            return false;
         }
         if (!value.isPurge() && !value.getPurgeList().isEmpty()) {
             ValidatorUtil.addConstraintViolation(context, "purgeList have to be empty if purge option is false", "purgeList");
-            result = false;
+            return false;
         }
-        if (!isValidPurgeList(value, context)) {
-            result = false;
-        }
-        return result;
+        return isValidPurgeList(value, context);
     }
 
     private boolean isValidPurgeList(ManagementPackV4Request value, ConstraintValidatorContext context) {
-        boolean result = true;
         if (value.getPurgeList().stream().anyMatch(p -> !validPurgeListElements.contains(p))) {
-            ValidatorUtil.addConstraintViolation(context, String.format("purgelist contains only elements from %s", validPurgeListElements.stream().collect(
-                    Collectors.joining(","))), "purgeList");
-            result = false;
+            ValidatorUtil.addConstraintViolation(context, String.format("purgelist contains only elements from %s",
+                    String.join(",", validPurgeListElements)), "purgeList");
+            return false;
         }
-        return result;
+        return true;
     }
 
 }

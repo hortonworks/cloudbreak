@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,18 +22,18 @@ import io.swagger.annotations.ApiModelProperty;
 public class FileSystemValidationV4Request implements JsonEntity {
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.FileSystem.LOCATIONS)
+    @ApiModelProperty(FileSystem.LOCATIONS)
     private Set<StorageLocationV4Request> locations = new HashSet<>();
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.NAME, required = true)
+    @ApiModelProperty(value = FileSystem.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.TYPE, required = true)
+    @ApiModelProperty(value = FileSystem.TYPE, required = true)
     private String type;
 
-    @ApiModelProperty(ModelDescriptions.FileSystem.DEFAULT)
+    @ApiModelProperty(FileSystem.DEFAULT)
     private boolean defaultFs;
 
     @Valid

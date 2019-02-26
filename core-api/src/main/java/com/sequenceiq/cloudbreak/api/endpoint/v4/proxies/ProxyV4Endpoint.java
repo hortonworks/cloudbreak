@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ProxyConfigOpDescription;
 
 import io.swagger.annotations.Api;
@@ -81,7 +80,7 @@ public interface ProxyV4Endpoint {
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ProxyConfigOpDescription.GET_REQUEST_BY_NAME,
+    @ApiOperation(value = ProxyConfigOpDescription.GET_REQUEST_BY_NAME,
             produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "getProxyRequestFromNameInWorkspace")
     ProxyV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);

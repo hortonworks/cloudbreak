@@ -49,7 +49,7 @@ public class KubernetesConfig implements ProvisionEntity, EnvironmentAwareResour
     @ManyToOne
     private Workspace workspace;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_kubernetes", joinColumns = @JoinColumn(name = "kubernetesid"), inverseJoinColumns = @JoinColumn(name = "envid"))
     private Set<EnvironmentView> environments = new HashSet<>();
 
@@ -88,7 +88,7 @@ public class KubernetesConfig implements ProvisionEntity, EnvironmentAwareResour
     }
 
     public void setConfiguration(String config) {
-        this.configuration = new Secret(config);
+        configuration = new Secret(config);
     }
 
     @Override

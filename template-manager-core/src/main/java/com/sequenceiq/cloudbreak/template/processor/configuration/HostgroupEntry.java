@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.template.processor.configuration;
 
 public class HostgroupEntry {
 
-    private String hostGroup;
+    private final String hostGroup;
 
     private HostgroupEntry(String hostGroup) {
         this.hostGroup = hostGroup;

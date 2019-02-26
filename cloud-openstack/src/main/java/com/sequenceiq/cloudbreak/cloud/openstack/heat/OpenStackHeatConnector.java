@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackStackValidator;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackTagValidator;
 
 @Service
-public class OpenStackHeatConnector implements CloudConnector {
+public class OpenStackHeatConnector implements CloudConnector<Object> {
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
@@ -82,7 +82,7 @@ public class OpenStackHeatConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<Object> resources() {
         return resourceConnector;
     }
 

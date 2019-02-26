@@ -11,9 +11,11 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-@Target({ ElementType.TYPE })
+import com.sequenceiq.cloudbreak.api.model.annotations.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
+
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator.class)
+@Constraint(validatedBy = MutuallyExclusiveNotNullValidator.class)
 public @interface MutuallyExclusiveNotNull {
 
     String[] fieldNames();
@@ -36,18 +38,17 @@ public @interface MutuallyExclusiveNotNull {
             if (value == null) {
                 return false;
             }
-            boolean hasNotNull = false;
+            boolean hasNull = true;
             try {
                 for (String fieldName : fieldNames) {
                     Field field = value.getClass().getDeclaredField(fieldName);
                     field.setAccessible(true);
                     Object fieldValue = field.get(value);
                     if (fieldValue != null) {
-                        if (!hasNotNull) {
-                            hasNotNull = true;
-                        } else {
+                        if (!hasNull) {
                             return false;
                         }
+                        hasNull = false;
                     }
 
                 }
@@ -55,7 +56,7 @@ public @interface MutuallyExclusiveNotNull {
                 throw new RuntimeException(e);
             }
 
-            return hasNotNull;
+            return !hasNull;
         }
     }
 }

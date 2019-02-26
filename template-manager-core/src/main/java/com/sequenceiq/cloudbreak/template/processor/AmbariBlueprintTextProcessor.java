@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -67,9 +68,9 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
 
     private static final String ROLE_TYPE = "roleType";
 
-    private ObjectNode clusterDefinition;
+    private final ObjectNode clusterDefinition;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AmbariBlueprintTextProcessor(@Nonnull String blueprintText) {
         try {
@@ -181,13 +182,13 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
 
     public Optional<String> pathValue(String... path) {
         JsonNode currentNode = clusterDefinition;
-        for (int i = 0; i < path.length; i++) {
+        for (String s : path) {
             if (currentNode.isArray()) {
                 ArrayNode array = (ArrayNode) currentNode;
                 Iterator<JsonNode> it = array.elements();
                 boolean found = false;
                 while (it.hasNext()) {
-                    JsonNode candidate = it.next().path(path[i]);
+                    JsonNode candidate = it.next().path(s);
                     if (!candidate.isMissingNode()) {
                         currentNode = candidate;
                         found = true;
@@ -198,7 +199,7 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
                     currentNode = MissingNode.getInstance();
                 }
             } else {
-                currentNode = currentNode.path(path[i]);
+                currentNode = currentNode.path(s);
             }
         }
         return currentNode.isValueNode() ? Optional.of(currentNode.textValue()) : Optional.empty();
@@ -208,7 +209,6 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
         return getComponentsByHostGroup().entrySet()
                 .stream()
                 .flatMap(entry -> entry.getValue().stream())
-                .distinct()
                 .collect(Collectors.toSet());
     }
 
@@ -300,7 +300,7 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
                 serviceNode.put(NAME_NODE, service.getName());
             }
             ArrayNode configurationsNode = addArrayNodeIfMissing(serviceNode, CONFIGURATIONS_NODE);
-            for (Map.Entry<String, KerberosServiceConfiguration> entry : service.getConfigurations().entrySet()) {
+            for (Entry<String, KerberosServiceConfiguration> entry : service.getConfigurations().entrySet()) {
                 ObjectNode configNode = (ObjectNode) configurationsNode.findValue(entry.getKey());
                 if (configNode == null) {
                     configNode = configurationsNode.addObject();
@@ -374,14 +374,14 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
         if (configurations.isMissingNode() && globalConfig != null && !globalConfig.isEmpty()) {
             configurations = clusterDefinition.putArray(SETTINGS_NODE);
             for (List<SiteConfiguration> site : globalConfig) {
-                if (site.size() > 0) {
+                if (!site.isEmpty()) {
                     addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
                 }
             }
         } else {
             if (globalConfig != null) {
                 for (List<SiteConfiguration> site : globalConfig) {
-                    if (site.size() > 0) {
+                    if (!site.isEmpty()) {
                         ArrayNode siteNode = (ArrayNode) configurations.findValue(site.get(0).getName());
                         if (siteNode == null) {
                             addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
@@ -428,9 +428,9 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
     private ObjectNode findBestMatch(ArrayNode siteNode, SiteConfiguration conf) {
         ObjectNode result = null;
         int maxFound = 0;
-        for (Iterator i = siteNode.iterator(); i.hasNext();) {
+        for (JsonNode jsonNode : siteNode) {
             int foundNum = 0;
-            ObjectNode prop = (ObjectNode) i.next();
+            ObjectNode prop = (ObjectNode) jsonNode;
             for (String key : conf.getProperties().keySet()) {
                 JsonNode found = prop.get(key);
                 if (found != null) {
@@ -438,7 +438,6 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
                 }
                 if (NAME_NODE.equals(key) && !conf.getProperties().get(key).equals(found.asText())) {
                     foundNum = 0;
-                    continue;
                 }
             }
             if (foundNum > maxFound) {
@@ -458,13 +457,13 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
     }
 
     private void putAll(ObjectNode objectToModify, Map<String, String> properties) {
-        for (Map.Entry<String, String> prop : properties.entrySet()) {
+        for (Entry<String, String> prop : properties.entrySet()) {
             objectToModify.put(prop.getKey(), prop.getValue());
         }
     }
 
     private void putAllIfAbsent(ObjectNode objectToModify, Map<String, String> properties) {
-        for (Map.Entry<String, String> prop : properties.entrySet()) {
+        for (Entry<String, String> prop : properties.entrySet()) {
             JsonNode exists = objectToModify.get(prop.getKey());
             if (exists == null) {
                 objectToModify.put(prop.getKey(), prop.getValue());
@@ -532,11 +531,11 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
                 KerberosDescriptorService kerberosDescriptorService = new KerberosDescriptorService(name.textValue());
                 ArrayNode configurations = (ArrayNode) root.findValue("configurations");
                 for (JsonNode configuration : configurations) {
-                    for (Iterator<Map.Entry<String, JsonNode>> configEntry = configuration.fields(); configEntry.hasNext();) {
-                        Map.Entry<String, JsonNode> next = configEntry.next();
+                    for (Iterator<Entry<String, JsonNode>> configEntry = configuration.fields(); configEntry.hasNext();) {
+                        Entry<String, JsonNode> next = configEntry.next();
                         Map<String, String> configProps = new HashMap<>();
-                        for (Iterator<Map.Entry<String, JsonNode>> props = next.getValue().fields(); props.hasNext();) {
-                            Map.Entry<String, JsonNode> entry = props.next();
+                        for (Iterator<Entry<String, JsonNode>> props = next.getValue().fields(); props.hasNext();) {
+                            Entry<String, JsonNode> entry = props.next();
                             configProps.put(entry.getKey(), entry.getValue().textValue());
                         }
                         if (!configProps.isEmpty()) {
@@ -558,14 +557,14 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
             SiteSettingsConfigurations result = SiteSettingsConfigurations.getEmptyConfiguration();
             ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
 
-            for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
-                Map.Entry<String, JsonNode> site = sites.next();
+            for (Iterator<Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
+                Entry<String, JsonNode> site = sites.next();
                 ArrayNode siteNodeList = (ArrayNode) site.getValue();
 
                 for (JsonNode siteNodeElement : siteNodeList) {
                     Map<String, String> siteprops = new HashMap<>();
-                    for (Iterator<Map.Entry<String, JsonNode>> props = siteNodeElement.fields(); props.hasNext();) {
-                        Map.Entry<String, JsonNode> prop = props.next();
+                    for (Iterator<Entry<String, JsonNode>> props = siteNodeElement.fields(); props.hasNext();) {
+                        Entry<String, JsonNode> prop = props.next();
                         siteprops.put(prop.getKey(), prop.getValue().textValue());
                     }
                     if (!siteprops.isEmpty()) {
@@ -584,8 +583,8 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
             SiteConfigurations result = SiteConfigurations.getEmptyConfiguration();
             ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
 
-            for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
-                Map.Entry<String, JsonNode> site = sites.next();
+            for (Iterator<Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
+                Entry<String, JsonNode> site = sites.next();
                 if (site.getValue().isArray()) {
                     ArrayNode siteArray = (ArrayNode) site.getValue();
                     for (JsonNode siteNodeElement : siteArray) {
@@ -601,15 +600,15 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
         }
     }
 
-    private void prepareObjectNodeForSiteConfiguration(SiteConfigurations result, Map.Entry<String, JsonNode> site, ObjectNode siteNodeElement) {
+    private void prepareObjectNodeForSiteConfiguration(SiteConfigurations result, Entry<String, JsonNode> site, ObjectNode siteNodeElement) {
         ObjectNode siteNode = siteNodeElement;
         JsonNode properties = siteNode.findValue(PROPERTIES_NODE);
         if (properties != null) {
             siteNode = (ObjectNode) properties;
         }
         Map<String, String> siteprops = new HashMap<>();
-        for (Iterator<Map.Entry<String, JsonNode>> props = siteNode.fields(); props.hasNext();) {
-            Map.Entry<String, JsonNode> prop = props.next();
+        for (Iterator<Entry<String, JsonNode>> props = siteNode.fields(); props.hasNext();) {
+            Entry<String, JsonNode> prop = props.next();
             siteprops.put(prop.getKey(), prop.getValue().textValue());
         }
         if (!siteprops.isEmpty()) {
@@ -702,7 +701,7 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
             String hostGroupName = hostGroupNode.path(NAME_NODE).textValue();
             if (hostGroupNames.contains(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
                 ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
-                components.addPOJO(new AmbariBlueprintTextProcessor.ComponentElement(component));
+                components.addPOJO(new ComponentElement(component));
             }
         }
         return this;
@@ -716,7 +715,7 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
             String hostGroupName = hostGroupNode.path(NAME_NODE).textValue();
             if (addToHostgroup.test(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
                 ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
-                components.addPOJO(new AmbariBlueprintTextProcessor.ComponentElement(component));
+                components.addPOJO(new ComponentElement(component));
             }
         }
         return this;

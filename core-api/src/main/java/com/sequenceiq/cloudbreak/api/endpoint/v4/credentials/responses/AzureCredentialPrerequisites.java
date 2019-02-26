@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class AzureCredentialPrerequisites implements JsonEntity {
 
     @ApiModelProperty(value = AZURE_APP_CREATION_COMMAND, required = true)
-    private String appCreationCommand;
+    private final String appCreationCommand;
 
     public AzureCredentialPrerequisites(String appCreationCommand) {
         this.appCreationCommand = appCreationCommand;

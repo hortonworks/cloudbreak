@@ -87,7 +87,7 @@ public class AzureClient {
 
     public AzureClient(AzureClientCredentials azureClientCredentials) {
         this.azureClientCredentials = azureClientCredentials;
-        this.azure = azureClientCredentials.getAzure();
+        azure = azureClientCredentials.getAzure();
     }
 
     private <T> T handleAuthException(Supplier<T> function) {
@@ -123,7 +123,7 @@ public class AzureClient {
     }
 
     public ResourceGroups getResourceGroups() {
-        return handleAuthException(() -> azure.resourceGroups());
+        return handleAuthException(azure::resourceGroups);
     }
 
     public PagedList<Network> getNetworks() {
@@ -188,11 +188,11 @@ public class AzureClient {
     }
 
     public Deployments getTemplateDeployments(String resourceGroupName) {
-        return handleAuthException(() -> azure.deployments());
+        return handleAuthException(azure::deployments);
     }
 
     public StorageAccounts getStorageAccounts() {
-        return handleAuthException(() -> azure.storageAccounts());
+        return handleAuthException(azure::storageAccounts);
     }
 
     public PagedList<StorageAccount> getStorageAccountsForResourceGroup(String resourceGroup) {
@@ -284,7 +284,7 @@ public class AzureClient {
         VirtualMachineDataDisk dataDisk = vm.dataDisks()
                 .values()
                 .stream()
-                .filter(virtualMachineDataDisk -> virtualMachineDataDisk.id().equals(id))
+                .filter(dd -> dd.id().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new CloudConnectorException(String.format("Virtual machine does not have attached data disk with id %s", id)));
         int lun = dataDisk.lun();
@@ -310,11 +310,7 @@ public class AzureClient {
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
-        if (Objects.nonNull(diskType)) {
-            return DiskSkuTypes.fromStorageAccountType(StorageAccountTypes.fromString(diskType.value()));
-        } else {
-            return DiskSkuTypes.STANDARD_LRS;
-        }
+        return Objects.nonNull(diskType) ? DiskSkuTypes.fromStorageAccountType(StorageAccountTypes.fromString(diskType.value())) : DiskSkuTypes.STANDARD_LRS;
     }
 
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -531,7 +527,7 @@ public class AzureClient {
     }
 
     public NetworkInterfaces getNetworkInterfaces() {
-        return handleAuthException(() -> azure.networkInterfaces());
+        return handleAuthException(azure::networkInterfaces);
     }
 
     public Subnet getSubnetProperties(String resourceGroup, String virtualNetwork, String subnet) {
@@ -626,7 +622,7 @@ public class AzureClient {
     }
 
     public NetworkSecurityGroups getSecurityGroups() {
-        return handleAuthException(() -> azure.networkSecurityGroups());
+        return handleAuthException(azure::networkSecurityGroups);
     }
 
     public LoadBalancer getLoadBalancer(String resourceGroupName, String loadBalancerName) {

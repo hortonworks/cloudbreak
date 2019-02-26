@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.template;
 
-import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Handlebars.SafeString;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 
@@ -17,7 +17,7 @@ public class NoEscapeHelper implements Helper<String> {
     public static final String NAME = "noescape";
 
     @Override
-    public Object apply(String context, final Options options) {
-        return new Handlebars.SafeString(context);
+    public Object apply(String context, Options options) {
+        return new SafeString(context);
     }
 }

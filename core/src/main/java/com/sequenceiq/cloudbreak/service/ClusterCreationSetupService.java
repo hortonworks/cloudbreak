@@ -220,16 +220,14 @@ public class ClusterCreationSetupService {
     }
 
     private void decorateHostGroupWithConstraint(Stack stack, Cluster cluster) {
-        stack.getInstanceGroups().forEach(ig -> {
-            cluster.getHostGroups().stream()
-                    .filter(hostGroup -> hostGroup.getName().equals(ig.getGroupName()))
-                    .findFirst()
-                    .ifPresent(hostGroup -> {
-                        Constraint constraint = new Constraint();
-                        constraint.setInstanceGroup(ig);
-                        hostGroup.setConstraint(constraint);
-                    });
-        });
+        stack.getInstanceGroups().forEach(ig -> cluster.getHostGroups().stream()
+                .filter(hostGroup -> hostGroup.getName().equals(ig.getGroupName()))
+                .findFirst()
+                .ifPresent(hostGroup -> {
+                    Constraint constraint = new Constraint();
+                    constraint.setInstanceGroup(ig);
+                    hostGroup.setConstraint(constraint);
+                }));
     }
 
     private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack, Cluster cluster) {
@@ -249,7 +247,7 @@ public class ClusterCreationSetupService {
 
         String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
         if (stackType.contains("-")) {
-            stackType = stackType.substring(0, stackType.indexOf("-"));
+            stackType = stackType.substring(0, stackType.indexOf('-'));
         }
         switch (stackType) {
             case "HDP":
@@ -267,7 +265,7 @@ public class ClusterCreationSetupService {
             boolean hasDefaultStackRepoUrlForOsType = stackDescriptorV4.getRepository().getStack().containsKey(image.getOsType());
             boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptorV4.getAmbari().getRepository().containsKey(image.getOsType());
             boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptorV4.getMinAmbari().length()),
-                    () -> stackDescriptorV4.getMinAmbari()) >= 0;
+                    stackDescriptorV4::getMinAmbari) >= 0;
             if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
                 String message = String.format("The given repository information seems to be incompatible."
                                 + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),

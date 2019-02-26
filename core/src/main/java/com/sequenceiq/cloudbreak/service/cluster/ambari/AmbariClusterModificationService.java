@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
@@ -313,11 +314,11 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 Map<String, String> masterSlaveWithState = collectMasterSlaveComponents(components).stream()
                         .collect(Collectors.toMap(Function.identity(), componentStatus::get));
                 if (masterSlaveWithState.values().stream().anyMatch("UNKNOWN"::equals)) {
-                    throw new Retry.ActionWentFailException("Ambari has not recovered");
+                    throw new ActionWentFailException("Ambari has not recovered");
                 }
                 return componentStatus;
             });
-        } catch (Retry.ActionWentFailException e) {
+        } catch (ActionWentFailException e) {
             throw new CloudbreakException("Status of one or more components in ambari remained in UNKNOWN status.");
         }
     }
@@ -435,13 +436,13 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         private AmbariMessages operationFailedMessage;
 
         private OperationParameters(AmbariOperationType ambariOperationType, AmbariMessages operationFailedMessage) {
-            this.waitForOperation = true;
+            waitForOperation = true;
             this.ambariOperationType = ambariOperationType;
             this.operationFailedMessage = operationFailedMessage;
         }
 
         private OperationParameters() {
-            this.waitForOperation = false;
+            waitForOperation = false;
         }
 
         private boolean isWaitForOperation() {

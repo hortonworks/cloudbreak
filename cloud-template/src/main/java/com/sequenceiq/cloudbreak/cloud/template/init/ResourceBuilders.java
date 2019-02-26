@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 @Component
 public class ResourceBuilders {
@@ -31,11 +32,11 @@ public class ResourceBuilders {
     @Inject
     private List<GroupResourceBuilder> group;
 
-    private final Map<Platform, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
+    private final Map<Platform, List<NetworkResourceBuilder<ResourceBuilderContext>>> networkChain = new HashMap<>();
 
-    private final Map<Platform, List<GroupResourceBuilder>> groupChain = new HashMap<>();
+    private final Map<Platform, List<GroupResourceBuilder<ResourceBuilderContext>>> groupChain = new HashMap<>();
 
-    private final Map<Platform, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
+    private final Map<Platform, List<ComputeResourceBuilder<ResourceBuilderContext>>> computeChain = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -45,37 +46,37 @@ public class ResourceBuilders {
         initCompute(comparator);
     }
 
-    public List<NetworkResourceBuilder> network(Platform platform) {
+    public List<NetworkResourceBuilder<ResourceBuilderContext>> network(Platform platform) {
         return new ArrayList<>(networkChain.get(platform));
     }
 
-    public List<ComputeResourceBuilder> compute(Platform platform) {
+    public List<ComputeResourceBuilder<ResourceBuilderContext>> compute(Platform platform) {
         return new ArrayList<>(computeChain.get(platform));
     }
 
-    public List<GroupResourceBuilder> group(Platform platform) {
+    public List<GroupResourceBuilder<ResourceBuilderContext>> group(Platform platform) {
         return new ArrayList<>(groupChain.get(platform));
     }
 
     private void initNetwork(Comparator<OrderedBuilder> comparator) {
-        for (NetworkResourceBuilder<?> builder : network) {
-            List<NetworkResourceBuilder> chain = networkChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : network) {
+            List<NetworkResourceBuilder<ResourceBuilderContext>> chain = networkChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }
     }
 
     private void initCompute(Comparator<OrderedBuilder> comparator) {
-        for (ComputeResourceBuilder<?> builder : compute) {
-            List<ComputeResourceBuilder> chain = computeChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
+        for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
+            List<ComputeResourceBuilder<ResourceBuilderContext>> chain = computeChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }
     }
 
     private void initGroup(Comparator<OrderedBuilder> comparator) {
-        for (GroupResourceBuilder<?> builder : group) {
-            List<GroupResourceBuilder> chain = groupChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
+        for (GroupResourceBuilder<ResourceBuilderContext> builder : group) {
+            List<GroupResourceBuilder<ResourceBuilderContext>> chain = groupChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }

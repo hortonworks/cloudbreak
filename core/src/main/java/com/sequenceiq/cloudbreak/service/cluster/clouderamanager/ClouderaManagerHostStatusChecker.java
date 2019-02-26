@@ -36,7 +36,7 @@ public class ClouderaManagerHostStatusChecker extends ClusterBasedStatusCheckerT
                     .filter(instanceMetaData -> !hostNamesFromManager.contains(instanceMetaData.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
 
-            if (notKnownInstancesByManager.size() > 0) {
+            if (!notKnownInstancesByManager.isEmpty()) {
                 LOGGER.warn("there are missing nodes from cloudera manager, not known instances: {}", notKnownInstancesByManager);
                 return false;
             } else {

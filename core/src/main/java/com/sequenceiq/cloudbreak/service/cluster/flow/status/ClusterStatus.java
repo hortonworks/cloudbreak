@@ -31,7 +31,7 @@ public enum ClusterStatus {
         this.stackStatus = stackStatus;
         this.clusterStatus = clusterStatus;
         this.statusReason = statusReason;
-        this.statusReasonArg = "";
+        statusReasonArg = "";
     }
 
     public String getStatusReason() {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.template;
 
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.Options.Buffer;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class IfNullHelper implements Helper<Object> {
 
     @Override
     public Object apply(Object context, Options options) throws IOException {
-        Options.Buffer buffer = options.buffer();
+        Buffer buffer = options.buffer();
 
         if (context == null) {
             buffer.append(options.fn());

@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
@@ -37,12 +38,12 @@ public class TargetIdPermissionChecker implements PermissionChecker<CheckPermiss
         if (!repositoryClass.isPresent()) {
             throw new IllegalArgumentException("Unable to determine entity class!");
         }
-        CrudRepository<?, ?> targetRepository = (CrudRepository<?, ?>) applicationContext.getBean(repositoryClass.get());
+        CrudRepository<?, Serializable> targetRepository = (CrudRepository<?, Serializable>) applicationContext.getBean(repositoryClass.get());
         if (!(targetRepository instanceof WorkspaceResourceRepository)) {
             throw new IllegalArgumentException("Type of target repository should be WorkspaceResourceRepository!");
         }
-        Object targetId = proceedingJoinPoint.getArgs()[targetIdIndex];
-        Optional<WorkspaceAwareResource> targetOptional = ((WorkspaceResourceRepository) targetRepository).findById((Serializable) targetId);
+        Serializable targetId = (Serializable) proceedingJoinPoint.getArgs()[targetIdIndex];
+        Optional<WorkspaceAwareResource> targetOptional = ((DisabledBaseRepository<WorkspaceAwareResource, Serializable>) targetRepository).findById(targetId);
         if (!targetOptional.isPresent()) {
             throw new NotFoundException("Target not found");
         }

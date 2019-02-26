@@ -19,8 +19,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
@@ -53,8 +51,6 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     @OneToMany(mappedBy = "gateway", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<GatewayTopology> topologies = new HashSet<>();
 
-    private String topologyName = "";
-
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json exposedServices;
@@ -78,27 +74,23 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     private String tokenCert;
 
-    // It is not used anyomore, other than to support Cloudbreak upgrade-ability (e.g. frm 2.4 to 2.7)
-    // It is set to false by hibernate when loading old gateways created with previous CB versions
-    private boolean enableGateway = true;
-
     @ManyToOne
     private Workspace workspace;
 
     public Gateway copy() {
         Gateway gateway = new Gateway();
-        gateway.setTopologies(topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet()));
-        gateway.setTokenCert(tokenCert);
-        gateway.setSignCert(signCert);
+        gateway.topologies = topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet());
+        gateway.tokenCert = tokenCert;
+        gateway.signCert = signCert;
         gateway.signKey = signKey;
-        gateway.setPath(path);
-        gateway.setGatewayType(gatewayType);
-        gateway.setSsoType(ssoType);
-        gateway.setCluster(cluster);
-        gateway.setId(id);
-        gateway.setSignPub(signPub);
-        gateway.setSsoProvider(ssoProvider);
-        gateway.setWorkspace(workspace);
+        gateway.path = path;
+        gateway.gatewayType = gatewayType;
+        gateway.ssoType = ssoType;
+        gateway.cluster = cluster;
+        gateway.id = id;
+        gateway.signPub = signPub;
+        gateway.ssoProvider = ssoProvider;
+        gateway.workspace = workspace;
         return gateway;
     }
 
@@ -113,7 +105,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public String getName() {
-        return getResource().getShortName() + "-" + id;
+        return getResource().getShortName() + '-' + id;
     }
 
     @Override
@@ -211,24 +203,10 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public Set<GatewayTopology> getTopologies() {
-        if (StringUtils.isNotEmpty(topologyName) && topologies.stream().noneMatch(t -> t.getTopologyName().equals(topologyName))) {
-            GatewayTopology gatewayTopology = new GatewayTopology();
-            gatewayTopology.setTopologyName(topologyName);
-            if (exposedServices != null && StringUtils.isNoneEmpty(exposedServices.getValue())) {
-                gatewayTopology.setExposedServices(exposedServices);
-            }
-            topologies.add(gatewayTopology);
-
-        }
         return topologies;
     }
 
     public void setTopologies(Set<GatewayTopology> topologies) {
         this.topologies = topologies;
-    }
-
-    // to support Cloudbreak upgrade-ability (e.g. frm 2.4 to 2.7)
-    public boolean isGatewayEnabled() {
-        return enableGateway;
     }
 }

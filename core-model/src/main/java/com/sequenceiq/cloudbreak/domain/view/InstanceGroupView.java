@@ -24,7 +24,7 @@ public class InstanceGroupView implements ProvisionEntity {
     private StackApiView stack;
 
     @OneToMany(mappedBy = "instanceGroup", fetch = FetchType.EAGER)
-    private Set<InstanceMetaDataView> instanceMetaData = new HashSet<>();
+    private final Set<InstanceMetaDataView> instanceMetaData = new HashSet<>();
 
     public Integer getNodeCount() {
         return getNotTerminatedInstanceMetaDataSet().size();

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class AwsElasticIpService {
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 
     public List<String> getEipsForGatewayGroup(Map<String, String> eipAllocationIds, Group gateway) {
-        return eipAllocationIds.entrySet().stream().filter(e -> e.getKey().contains(gateway.getName().replace("_", ""))).map(Map.Entry::getValue)
+        return eipAllocationIds.entrySet().stream().filter(e -> e.getKey().contains(gateway.getName().replace("_", ""))).map(Entry::getValue)
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +54,7 @@ public class AwsElasticIpService {
 
     public Map<String, String> getElasticIpAllocationIds(Map<String, String> outputs, String cFStackName) {
         Map<String, String> elasticIpIds = outputs.entrySet().stream().filter(e -> e.getKey().startsWith(CFS_OUTPUT_EIPALLOCATION_ID))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
         if (!elasticIpIds.isEmpty()) {
             return elasticIpIds;
         } else {

@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.Environmen
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EnvironmentOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -106,7 +106,7 @@ public interface EnvironmentV4Endpoint {
     @POST
     @Path("/{name}/register_datalake_prerequisites")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.DATALAKE_PREREQUISITES, produces = ContentType.JSON,
+    @ApiOperation(value = UtilityOpDescription.DATALAKE_PREREQUISITES, produces = ContentType.JSON,
             nickname = "registerDatalakePrerequisites")
     DatalakePrerequisiteV4Response registerDatalakePrerequisite(
             @PathParam("workspaceId") Long workspaceId,

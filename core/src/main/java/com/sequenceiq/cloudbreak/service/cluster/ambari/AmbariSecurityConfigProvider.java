@@ -49,7 +49,7 @@ public class AmbariSecurityConfigProvider {
     }
 
     public String getAmbariUserProvidedPassword(Cluster cluster) {
-        return cluster.getPassword() == null ? null : cluster.getPassword();
+        return cluster.getPassword();
     }
 
     public String getAmbariSecurityMasterKey(Cluster cluster) {

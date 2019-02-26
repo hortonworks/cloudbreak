@@ -30,7 +30,7 @@ public class ClusterResetActions {
 
     @Bean(name = "CLUSTER_RESET_STATE")
     public Action<?, ?> syncCluster() {
-        return new AbstractClusterResetAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterResetAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterResetService.resetCluster(context.getStackId());
@@ -46,7 +46,7 @@ public class ClusterResetActions {
 
     @Bean(name = "CLUSTER_RESET_FINISHED_STATE")
     public Action<?, ?> finishResetCluster() {
-        return new AbstractClusterResetAction<ClusterResetResult>(ClusterResetResult.class) {
+        return new AbstractClusterResetAction<>(ClusterResetResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterResetResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -61,7 +61,7 @@ public class ClusterResetActions {
 
     @Bean(name = "CLUSTER_RESET_START_AMBARI_FINISHED_STATE")
     public Action<?, ?> finishStartAmbari() {
-        return new AbstractClusterResetAction<StartClusterSuccess>(StartClusterSuccess.class) {
+        return new AbstractClusterResetAction<>(StartClusterSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartClusterSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);

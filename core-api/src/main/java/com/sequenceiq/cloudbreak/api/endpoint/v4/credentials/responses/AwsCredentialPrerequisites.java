@@ -14,10 +14,10 @@ import io.swagger.annotations.ApiModelProperty;
 public class AwsCredentialPrerequisites implements JsonEntity {
 
     @ApiModelProperty(value = AWS_EXTERNAL_ID, required = true)
-    private String externalId;
+    private final String externalId;
 
     @ApiModelProperty(value = AWS_POLICY_JSON, required = true)
-    private String policyJson;
+    private final String policyJson;
 
     public AwsCredentialPrerequisites(String externalId, String policyJson) {
         this.externalId = externalId;

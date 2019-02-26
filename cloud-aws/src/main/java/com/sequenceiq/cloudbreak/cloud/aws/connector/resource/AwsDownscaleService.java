@@ -84,7 +84,7 @@ public class AwsDownscaleService {
             try {
                 amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                         .withAutoScalingGroupName(asGroupName)
-                        .withMaxSize(getInstanceCount(stack, vms.get(0).getTemplate().getGroupName())));
+                        .withMaxSize((int) getInstanceCount(stack, vms.get(0).getTemplate().getGroupName())));
             } catch (AmazonServiceException e) {
                 LOGGER.warn(e.getErrorMessage());
             }
@@ -116,11 +116,11 @@ public class AwsDownscaleService {
         }
     }
 
-    private int getInstanceCount(CloudStack stack, String groupName) {
-        int result = -1;
+    private long getInstanceCount(CloudStack stack, String groupName) {
+        long result = -1L;
         Optional<Group> group = stack.getGroups().stream().filter(g -> g.getName().equals(groupName)).findFirst();
         if (group.isPresent()) {
-            result = (int) group.get().getInstances().stream().filter(inst -> !inst.getTemplate().getStatus().equals(InstanceStatus.DELETE_REQUESTED)).count();
+            result = group.get().getInstances().stream().filter(inst -> !inst.getTemplate().getStatus().equals(InstanceStatus.DELETE_REQUESTED)).count();
         }
         return result;
     }

@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class GcpCredentialPrerequisites implements JsonEntity {
 
     @ApiModelProperty(value = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, required = true)
-    private String creationCommand;
+    private final String creationCommand;
 
     public GcpCredentialPrerequisites(String creationCommand) {
         this.creationCommand = creationCommand;

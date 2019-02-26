@@ -45,7 +45,7 @@ public class CloudRegions {
 
     public Set<String> getRegionNames() {
         return cloudRegions.keySet().stream()
-                .map(region -> region.getRegionName())
+                .map(Region::getRegionName)
                 .collect(Collectors.toSet());
     }
 

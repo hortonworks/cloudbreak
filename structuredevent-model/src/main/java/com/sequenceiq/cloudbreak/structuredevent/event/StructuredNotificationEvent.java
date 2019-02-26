@@ -17,21 +17,21 @@ public class StructuredNotificationEvent extends StructuredEvent {
     public StructuredNotificationEvent(OperationDetails operation, NotificationDetails notificationDetails) {
         super(StructuredNotificationEvent.class.getSimpleName(), operation);
         this.notificationDetails = notificationDetails;
-        this.ldapNotificationDetails = null;
-        this.rdsNotificationDetails = null;
+        ldapNotificationDetails = null;
+        rdsNotificationDetails = null;
     }
 
     public StructuredNotificationEvent(OperationDetails operation, LdapNotificationDetails ldapNotificationDetails) {
         super(StructuredNotificationEvent.class.getSimpleName(), operation);
-        this.notificationDetails = null;
+        notificationDetails = null;
         this.ldapNotificationDetails = ldapNotificationDetails;
-        this.rdsNotificationDetails = null;
+        rdsNotificationDetails = null;
     }
 
     public StructuredNotificationEvent(OperationDetails operation, RdsNotificationDetails rdsNotificationDetails) {
         super(StructuredNotificationEvent.class.getSimpleName(), operation);
-        this.notificationDetails = null;
-        this.ldapNotificationDetails = null;
+        notificationDetails = null;
+        ldapNotificationDetails = null;
         this.rdsNotificationDetails = rdsNotificationDetails;
     }
 

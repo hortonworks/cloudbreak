@@ -16,7 +16,7 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
 
     @Override
     public void initialize(ValidSubnet constraintAnnotation) {
-        this.subnetType = constraintAnnotation.value();
+        subnetType = constraintAnnotation.value();
     }
 
     @Override

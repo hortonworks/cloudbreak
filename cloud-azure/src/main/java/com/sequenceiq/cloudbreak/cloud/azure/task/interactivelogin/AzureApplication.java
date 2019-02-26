@@ -4,16 +4,16 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureApplicationCreationView;
 
 public class AzureApplication {
 
-    private String appId;
+    private final String appId;
 
-    private String objectId;
+    private final String objectId;
 
-    private AzureApplicationCreationView azureApplicationCreationView;
+    private final AzureApplicationCreationView azureApplicationCreationView;
 
     public AzureApplication(String appId, String objectId, AzureApplicationCreationView appCreationView) {
         this.appId = appId;
         this.objectId = objectId;
-        this.azureApplicationCreationView = appCreationView;
+        azureApplicationCreationView = appCreationView;
     }
 
     public String getAppId() {

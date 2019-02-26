@@ -95,10 +95,10 @@ public class PrincipalCreator {
         Builder request = resource.path("servicePrincipals/" + objectId).queryParam("api-version", GRAPH_API_VERSION).request();
         request.accept(MediaType.APPLICATION_JSON);
         request.header("Authorization", "Bearer " + accessToken);
-        Response response = request.get();
-
-        if (response.getStatus() != HttpStatus.SC_OK) {
-            throw new RetryException("Principal with objectId (" + objectId + ") hasn't been created yet");
+        try (Response response = request.get()) {
+            if (response.getStatus() != HttpStatus.SC_OK) {
+                throw new RetryException("Principal with objectId (" + objectId + ") hasn't been created yet");
+            }
         }
     }
 
@@ -109,14 +109,14 @@ public class PrincipalCreator {
         formData.put("client_id", app.getAppId());
         formData.put("client_secret", app.getAzureApplicationCreationView().getAppSecret());
         formData.put("resource", app.getAzureApplicationCreationView().getAppIdentifierURI());
-        Response loginResponse = loginResource.path("/oauth2/token")
+        try (Response loginResponse = loginResource.path("/oauth2/token")
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .post(Entity.form(new MultivaluedHashMap<>(formData)));
-
-        if (loginResponse.getStatus() != HttpStatus.SC_OK) {
-            throw new RetryException("Principal with objectId (" + objectId + ") hasn't been available yet");
+                .post(Entity.form(new MultivaluedHashMap<>(formData)))) {
+            if (loginResponse.getStatus() != HttpStatus.SC_OK) {
+                throw new RetryException("Principal with objectId (" + objectId + ") hasn't been available yet");
+            }
         }
     }
 }

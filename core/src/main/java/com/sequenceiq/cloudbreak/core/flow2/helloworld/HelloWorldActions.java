@@ -22,7 +22,7 @@ public class HelloWorldActions {
 
     @Bean(name = "HELLO_WORLD_START_STATE")
     public Action<?, ?> startAction() {
-        return new AbstractHelloWorldAction<Payload>(Payload.class) {
+        return new AbstractHelloWorldAction<>(Payload.class) {
 
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
@@ -33,7 +33,7 @@ public class HelloWorldActions {
 
     @Bean(name = "HELLO_WORLD_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractHelloWorldAction<Payload>(Payload.class) {
+        return new AbstractHelloWorldAction<>(Payload.class) {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -59,7 +59,7 @@ public class HelloWorldActions {
 
     @Bean(name = "HELLO_WORLD_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractHelloWorldAction<Payload>(Payload.class) {
+        return new AbstractHelloWorldAction<>(Payload.class) {
 
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {

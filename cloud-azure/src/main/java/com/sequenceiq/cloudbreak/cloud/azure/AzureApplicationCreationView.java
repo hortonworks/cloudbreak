@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 public class AzureApplicationCreationView {
 
-    private String appIdentifierURI;
+    private final String appIdentifierURI;
 
-    private String appSecret;
+    private final String appSecret;
 
-    private String replyURL;
+    private final String replyURL;
 
-    private String appCreationRequestPayload;
+    private final String appCreationRequestPayload;
 
     public AzureApplicationCreationView(String appIdentifierURI, String appSecret, String replyURL, String appCreationRequestPayload) {
         this.appIdentifierURI = appIdentifierURI;

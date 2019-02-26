@@ -137,7 +137,7 @@ public class StackSyncService {
         handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
     }
 
-    private void syncInstance(InstanceMetaData instanceMetaData, CloudInstance cloudInstance, Json imageJson) throws JsonProcessingException {
+    private void syncInstance(InstanceMetaData instanceMetaData, CloudInstance cloudInstance, Json imageJson) {
         String instanceName = cloudInstance.getStringParameter(INSTANCE_NAME);
         instanceMetaData.setInstanceName(instanceName);
         if (instanceMetaData.getImage() == null) {

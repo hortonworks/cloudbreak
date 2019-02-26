@@ -87,7 +87,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         try {
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
             Optional<ApiUser2> oldAdminUser = oldUserList.getItems().stream()
-                    .filter(apiUser2 -> apiUser2.getName().equals("admin"))
+                    .filter(apiUser2 -> "admin".equals(apiUser2.getName()))
                     .findFirst();
             if (oldAdminUser.isPresent()) {
                 Cluster cluster = stack.getCluster();

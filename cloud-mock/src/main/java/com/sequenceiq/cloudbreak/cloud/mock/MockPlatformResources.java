@@ -144,8 +144,8 @@ public class MockPlatformResources implements PlatformResources {
 
     private Map<Region, List<AvailabilityZone>> readRegionsMock() {
         Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-        regions.put(Region.region("USA"), getAvailabilityZones(USA_AVAILABILITY_ZONES));
-        regions.put(Region.region("Europe"), getAvailabilityZones(EUROPE_AVAILABILITY_ZONES));
+        regions.put(region("USA"), getAvailabilityZones(USA_AVAILABILITY_ZONES));
+        regions.put(region("Europe"), getAvailabilityZones(EUROPE_AVAILABILITY_ZONES));
         return regions;
     }
 
@@ -233,7 +233,7 @@ public class MockPlatformResources implements PlatformResources {
         if (isNoneEmpty(defaultRegions)) {
             for (String entry : defaultRegions.split(",")) {
                 String[] keyValue = entry.split(":");
-                defaultRegionsMap.put(platform(keyValue[0]), Region.region(keyValue[1]));
+                defaultRegionsMap.put(platform(keyValue[0]), region(keyValue[1]));
             }
             Region platformRegion = defaultRegionsMap.get(platform(MockConstants.MOCK));
             if (platformRegion != null && !isEmpty(platformRegion.value())) {

@@ -48,10 +48,10 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
 
     private final CloudInstance instance;
 
-    private final ComputeResourceBuilder builder;
+    private final ComputeResourceBuilder<ResourceBuilderContext> builder;
 
     public ResourceStopStartThread(ResourceBuilderContext context, AuthenticatedContext auth,
-            CloudResource resource, CloudInstance instance, ComputeResourceBuilder builder) {
+            CloudResource resource, CloudInstance instance, ComputeResourceBuilder<ResourceBuilderContext> builder) {
         this.context = context;
         this.auth = auth;
         this.resource = resource;
@@ -63,7 +63,7 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
     public ResourceRequestResult<List<CloudVmInstanceStatus>> call() throws Exception {
         LOGGER.debug("{} compute resource {}", context.isBuild() ? "Starting" : "Stopping", resource);
         PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-        if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+        if (CANCELLED.equals(pollGroup)) {
             List<CloudVmInstanceStatus> result = createResult(InstanceStatus.UNKNOWN);
             return new ResourceRequestResult<>(FutureResult.SUCCESS, result);
         }

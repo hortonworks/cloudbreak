@@ -64,7 +64,4 @@ public abstract class BaseAlert implements Clustered {
         return scalingPolicy == null ? null : scalingPolicy.getId();
     }
 
-    @Override
-    public abstract Cluster getCluster();
-
 }

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,15 +50,11 @@ public class PreTerminationStateExecutor {
                             clusterDeletionBasedModel(stack.getId(), cluster.getId()));
                 }
             } catch (CloudbreakOrchestratorFailedException e) {
-                Set<Map.Entry<String, Collection<String>>> entries = e.getNodesWithErrors().asMap().entrySet();
+                Set<Entry<String, Collection<String>>> entries = e.getNodesWithErrors().asMap().entrySet();
                 String errors;
-                if (entries.isEmpty()) {
-                    errors = e.getMessage();
-                } else {
-                    errors = entries.stream()
-                            .map(entry -> entry.getKey() + ": " + entry.getValue())
-                            .collect(Collectors.joining("\n"));
-                }
+                errors = entries.isEmpty() ? e.getMessage() : entries.stream()
+                        .map(entry -> entry.getKey() + ": " + entry.getValue())
+                        .collect(Collectors.joining("\n"));
                 String message = "Leaving AD domain had some errors:\n" + errors;
                 throw new CloudbreakException(message, e);
             }

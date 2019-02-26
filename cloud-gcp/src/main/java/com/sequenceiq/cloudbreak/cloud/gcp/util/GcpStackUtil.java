@@ -67,7 +67,7 @@ public final class GcpStackUtil {
 
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL, CloudKMSScopes.CLOUD_PLATFORM);
 
-    private static final String GCP_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/";
+    private static final String GCP_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/%s";
 
     private static final String EMPTY_BUCKET = "";
 
@@ -98,7 +98,7 @@ public final class GcpStackUtil {
 
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
         String credentialJson = getServiceAccountCredentialJson(gcpCredential);
-        if (StringUtils.isNoneEmpty(credentialJson)) {
+        if (isNoneEmpty(credentialJson)) {
             return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
                     .createScoped(SCOPES);
         } else {
@@ -139,22 +139,22 @@ public final class GcpStackUtil {
 
     public static CloudCredential prepareCredential(CloudCredential credential) {
         try {
-            String credentialJson = GcpStackUtil.getServiceAccountCredentialJson(credential);
-            if (StringUtils.isNoneEmpty(credentialJson)) {
+            String credentialJson = getServiceAccountCredentialJson(credential);
+            if (isNoneEmpty(credentialJson)) {
                 JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
                 JsonNode projectId = credNode.get("project_id");
                 if (projectId != null) {
-                    credential.putParameter(GcpStackUtil.PROJECT_ID, projectId.asText());
+                    credential.putParameter(PROJECT_ID, projectId.asText());
                 } else {
                     throw new CredentialVerificationException("project_id is missing from json");
                 }
                 JsonNode clientEmail = credNode.get("client_email");
                 if (clientEmail != null) {
-                    credential.putParameter(GcpStackUtil.SERVICE_ACCOUNT, clientEmail.asText());
+                    credential.putParameter(SERVICE_ACCOUNT, clientEmail.asText());
                 } else {
                     throw new CredentialVerificationException("client_email is missing from json");
                 }
-                credential.putParameter(GcpStackUtil.PRIVATE_KEY, "");
+                credential.putParameter(PRIVATE_KEY, "");
             }
             return credential;
         } catch (IOException iox) {
@@ -249,7 +249,7 @@ public final class GcpStackUtil {
     }
 
     public static String getAmbariImage(String projectId, String image) {
-        return String.format(GCP_IMAGE_TYPE_PREFIX + getImageName(image), projectId);
+        return String.format(GCP_IMAGE_TYPE_PREFIX, projectId, getImageName(image));
     }
 
     public static Long getPrivateId(String resourceName) {

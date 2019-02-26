@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -24,7 +25,7 @@ public class SharedServiceValidator {
     private StackViewService stackViewService;
 
     public ValidationResult checkSharedServiceStackRequirements(StackV4Request request, Workspace workspace) {
-        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
         if (request.getSharedService() != null) {
             checkCloudPlatform(request, workspace.getId(), resultBuilder);
             checkSharedServiceRequirements(request, workspace, resultBuilder);
@@ -32,7 +33,7 @@ public class SharedServiceValidator {
         return resultBuilder.build();
     }
 
-    private void checkCloudPlatform(StackV4Request request, Long workspaceId, ValidationResult.ValidationResultBuilder resultBuilder) {
+    private void checkCloudPlatform(StackV4Request request, Long workspaceId, ValidationResultBuilder resultBuilder) {
         StackView datalakeStack = stackViewService.findByName(request.getSharedService().getDatalakeName(), workspaceId);
         if (datalakeStack == null) {
             resultBuilder.error("Datalake stack with the requested name (in sharedService/sharedClusterName field) was not found.");
@@ -46,7 +47,7 @@ public class SharedServiceValidator {
         }
     }
 
-    private void checkSharedServiceRequirements(StackV4Request request, Workspace workspace, ValidationResult.ValidationResultBuilder resultBuilder) {
+    private void checkSharedServiceRequirements(StackV4Request request, Workspace workspace, ValidationResultBuilder resultBuilder) {
         if (!hasConfiguredLdap(request)) {
             resultBuilder.error("Shared service stack should have LDAP configured.");
         }

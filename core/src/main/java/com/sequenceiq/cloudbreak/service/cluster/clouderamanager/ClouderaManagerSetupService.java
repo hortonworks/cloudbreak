@@ -20,7 +20,6 @@ import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -109,12 +108,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForHosts(Stack stack) throws CloudbreakSecuritySetupException {
+    public void waitForHosts(Stack stack) {
         clouderaManagerPollingServiceProvider.hostsPollingService(stack, clouderaManagerClientFactory.getDefaultClient(stack));
     }
 
     @Override
-    public void waitForServices(Stack stack, int requestId) throws CloudbreakException {
+    public void waitForServices(Stack stack, int requestId) {
 
     }
 }

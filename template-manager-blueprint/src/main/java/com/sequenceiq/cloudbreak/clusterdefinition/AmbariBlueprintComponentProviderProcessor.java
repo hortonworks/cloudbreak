@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.clusterdefinition;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class AmbariBlueprintComponentProviderProcessor {
     @Inject
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
-    public String process(TemplatePreparationObject source, String blueprintText) throws IOException {
+    public String process(TemplatePreparationObject source, String blueprintText) {
         AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
         for (ClusterDefinitionComponentConfigProvider provider : clusterDefinitionComponentConfigProviders) {
             if (blueprintProcessor.isComponentsExistsInBlueprint(provider.components()) || provider.specialCondition(source, blueprintText)) {

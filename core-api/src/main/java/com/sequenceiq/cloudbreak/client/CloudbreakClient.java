@@ -343,9 +343,9 @@ public class CloudbreakClient {
 
         private String token;
 
-        private String caasProtocol;
+        private final String caasProtocol;
 
-        private String caasAddress;
+        private final String caasAddress;
 
         private boolean debug;
 

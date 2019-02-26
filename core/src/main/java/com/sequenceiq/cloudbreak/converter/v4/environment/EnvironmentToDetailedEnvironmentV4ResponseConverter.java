@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -105,7 +106,7 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
                 datalakeResourcesResponse.setKerberosName(datalakeResources.getKerberosConfig().getName());
             }
             if (!CollectionUtils.isEmpty(datalakeResources.getRdsConfigs())) {
-                datalakeResourcesResponse.setDatabaseNames(datalakeResources.getRdsConfigs().stream().map(rds -> rds.getName()).collect(Collectors.toSet()));
+                datalakeResourcesResponse.setDatabaseNames(datalakeResources.getRdsConfigs().stream().map(RDSConfig::getName).collect(Collectors.toSet()));
             }
             Map<String, ServiceDescriptorV4Response> serviceDescriptorResponses = new HashMap<>();
             for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {

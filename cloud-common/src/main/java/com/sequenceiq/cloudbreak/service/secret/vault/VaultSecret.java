@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.service.secret.vault;
 
 public class VaultSecret {
 
-    private String enginePath;
+    private final String enginePath;
 
-    private String engineClass;
+    private final String engineClass;
 
-    private String path;
+    private final String path;
 
     public VaultSecret(String enginePath, String engineClass, String path) {
         this.enginePath = enginePath;

@@ -44,7 +44,7 @@ public class AutoscaleClient {
 
     private final String autoscaleAddress;
 
-    private String refreshToken;
+    private final String refreshToken;
 
     private final CaasClient caasClient;
 
@@ -126,9 +126,9 @@ public class AutoscaleClient {
 
         private String refreshToken;
 
-        private String caasProtocol;
+        private final String caasProtocol;
 
-        private String caasAddress;
+        private final String caasAddress;
 
         private boolean debug;
 

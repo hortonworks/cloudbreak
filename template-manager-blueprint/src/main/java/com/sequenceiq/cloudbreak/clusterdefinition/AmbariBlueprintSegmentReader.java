@@ -43,8 +43,6 @@ public class AmbariBlueprintSegmentReader implements ResourceLoaderAware {
     @Value("${cb.clusterdefinition.ambari.security.kerberos_descriptor.path:blueprints/security/kerberos_descriptor}")
     private String kerberosDescriptorTemplatePath;
 
-    private ResourceLoader resourceLoader;
-
     public Map<ServiceName, TemplateFiles> collectAllServiceFile() {
         return readAllFilesFromParameterDir(blueprintTemplatePath);
     }
@@ -65,7 +63,7 @@ public class AmbariBlueprintSegmentReader implements ResourceLoaderAware {
         Map<ServiceName, TemplateFiles> collectedFiles = new HashMap<>();
         try {
             List<Resource> files = getFiles(dir);
-            for (final Resource serviceEntry : files) {
+            for (Resource serviceEntry : files) {
                 String[] serviceAndPath = serviceEntry.getURL().getPath().split(dir);
                 String simpleServiceName = serviceAndPath[1].split("/")[1];
                 String insideFolder = String.format("%s%s", dir, serviceAndPath[1]);
@@ -102,6 +100,5 @@ public class AmbariBlueprintSegmentReader implements ResourceLoaderAware {
 
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
     }
 }

@@ -117,7 +117,7 @@ public class CloudFailureHandler {
 
     private void doRollbackAndDecreaseNodeCount(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Collection<Long> ids, Group group,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
-        List<ComputeResourceBuilder> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
+        List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         LOGGER.info("InstanceGroup {} node count decreased with one so the new node size is: {}", group.getName(), group.getInstancesSize());
         if (getRemovableInstanceTemplates(group, ids).size() <= 0 && !upscale) {

@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class AwsUpscaleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsUpscaleService.class);
 
-    private static final List<String> UPSCALE_PROCESSES = asList("Launch");
+    private static final List<String> UPSCALE_PROCESSES = singletonList("Launch");
 
     @Inject
     private AwsNetworkService awsNetworkService;
@@ -72,7 +72,7 @@ public class AwsUpscaleService {
         Map<String, Group> groupMap = scaledGroups.stream().collect(
                 Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
         awsAutoScalingService.resumeAutoScaling(amazonASClient, groupMap.keySet(), UPSCALE_PROCESSES);
-        for (Map.Entry<String, Group> groupEntry : groupMap.entrySet()) {
+        for (Entry<String, Group> groupEntry : groupMap.entrySet()) {
             awsAutoScalingService.updateAutoscalingGroup(amazonASClient, groupEntry.getKey(), groupEntry.getValue(), ac.getCloudContext().getId());
         }
         awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient);

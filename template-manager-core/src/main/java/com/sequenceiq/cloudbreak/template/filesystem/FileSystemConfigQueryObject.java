@@ -18,14 +18,14 @@ public class FileSystemConfigQueryObject {
 
     private final boolean datalakeCluster;
 
-    private FileSystemConfigQueryObject(FileSystemConfigQueryObject.Builder builder) {
-        this.storageName = builder.storageName;
-        this.clusterName = builder.clusterName;
-        this.clusterDefinitionText = builder.clusterDefinitionText;
-        this.fileSystemType = builder.fileSystemType;
-        this.accountName = builder.accountName;
-        this.attachedCluster = builder.attachedCluster;
-        this.datalakeCluster = builder.datalakeCluster;
+    private FileSystemConfigQueryObject(Builder builder) {
+        storageName = builder.storageName;
+        clusterName = builder.clusterName;
+        clusterDefinitionText = builder.clusterDefinitionText;
+        fileSystemType = builder.fileSystemType;
+        accountName = builder.accountName;
+        attachedCluster = builder.attachedCluster;
+        datalakeCluster = builder.datalakeCluster;
     }
 
     public String getClusterName() {

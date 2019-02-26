@@ -80,23 +80,23 @@ public class Environment implements WorkspaceAwareResource {
     @Column(nullable = false)
     private Double latitude;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
     private Set<LdapConfig> ldapConfigs = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "proxyid"))
     private Set<ProxyConfig> proxyConfigs = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "rdsid"))
     private Set<RDSConfig> rdsConfigs = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_kubernetes", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kubernetesid"))
     private Set<KubernetesConfig> kubernetesConfigs = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_kdc", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kdcid"))
     private Set<KerberosConfig> kerberosConfigs = new HashSet<>();
 
@@ -177,7 +177,7 @@ public class Environment implements WorkspaceAwareResource {
     }
 
     public Set<Region> getRegionSet() {
-        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() {
+        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
         });
     }
 

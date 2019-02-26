@@ -84,7 +84,7 @@ public class SmartSenseConfigProvider implements ClusterDefinitionComponentConfi
     private String addSmartSenseServerToBp(AmbariBlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
             Collection<String> hostGroupNames) {
         if (!blueprintProcessor.isComponentExistsInBlueprint(HST_SERVER_COMPONENT)) {
-            String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
+            String aHostGroupName = hostGroupNames.stream().min(String::compareTo).get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
                 if (hostGroup.isInstanceGroupConfigured() && InstanceGroupType.GATEWAY.equals(hostGroup.getInstanceGroupType())
@@ -106,7 +106,7 @@ public class SmartSenseConfigProvider implements ClusterDefinitionComponentConfi
 
             }
             LOGGER.debug("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
-            final String finalAHostGroupName = aHostGroupName;
+            String finalAHostGroupName = aHostGroupName;
             blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, finalAHostGroupName::equals);
         }
         return blueprintProcessor.asText();

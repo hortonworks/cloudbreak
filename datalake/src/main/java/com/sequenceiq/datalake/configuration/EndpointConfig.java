@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.configuration;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -50,7 +49,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     @PostConstruct
-    private void registerSwagger() throws IOException {
+    private void registerSwagger() {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Datalake API");
         swaggerConfig.setDescription("");

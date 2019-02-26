@@ -94,7 +94,7 @@ public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource
     @ManyToOne
     private Workspace workspace;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_kdc", joinColumns = @JoinColumn(name = "kdcid"), inverseJoinColumns = @JoinColumn(name = "envid"))
     private Set<EnvironmentView> environments = new HashSet<>();
 

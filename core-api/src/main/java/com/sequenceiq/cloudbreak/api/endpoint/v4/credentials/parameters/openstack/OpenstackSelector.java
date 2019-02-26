@@ -5,7 +5,7 @@ public enum OpenstackSelector {
     DOMAIN("cb-keystone-v3-domain-scope"),
     PROJECT("cb-keystone-v3-project-scope");
 
-    private String value;
+    private final String value;
 
     OpenstackSelector(String value) {
         this.value = value;

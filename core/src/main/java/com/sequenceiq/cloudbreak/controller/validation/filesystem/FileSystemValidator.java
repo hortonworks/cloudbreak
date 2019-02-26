@@ -45,7 +45,7 @@ public class FileSystemValidator {
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
-            FileSystemValidationResult result = request.await();
+            FileSystemValidationResult<? extends FileSystemValidationRequest> result = request.await();
             LOGGER.debug("File system validation result: {}", result);
             Exception exception = result.getErrorDetails();
             if (exception != null) {
@@ -68,7 +68,7 @@ public class FileSystemValidator {
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
-            FileSystemValidationResult result = request.await();
+            FileSystemValidationResult<? extends FileSystemValidationRequest> result = request.await();
             LOGGER.debug("File system validation result: {}", result);
             Exception exception = result.getErrorDetails();
             if (exception != null) {

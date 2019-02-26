@@ -137,7 +137,7 @@ public class HeartbeatService {
 
             String nodeId = cloudbreakNodeConfig.getId();
             Set<String> allMyFlows = flowLogRepository.findAllByCloudbreakNodeId(nodeId).stream()
-                    .map(FlowLog::getFlowId).distinct().collect(Collectors.toSet());
+                    .map(FlowLog::getFlowId).collect(Collectors.toSet());
             Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
             for (String flow : newFlows) {
                 try {
@@ -247,7 +247,7 @@ public class HeartbeatService {
      * This is required as we don't want to distribute flows that will be terminated anyways.
      */
     private List<FlowLog> getInvalidFlows(Collection<FlowLog> flowLogs) {
-        Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
+        Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).collect(Collectors.toSet());
         if (!stackIds.isEmpty()) {
             Set<Long> deletingStackIds = stackService.getStatuses(stackIds).stream()
                     .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());

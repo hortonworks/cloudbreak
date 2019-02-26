@@ -51,13 +51,13 @@ public class StorageLocation implements ProvisionEntity {
             return false;
         }
         StorageLocation that = (StorageLocation) o;
-        return Objects.equals(getConfigFile(), that.getConfigFile())
-                && Objects.equals(getProperty(), that.getProperty())
-                && Objects.equals(getValue(), that.getValue());
+        return Objects.equals(configFile, that.configFile)
+                && Objects.equals(property, that.property)
+                && Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getConfigFile(), getProperty(), getValue());
+        return Objects.hash(configFile, property, value);
     }
 }

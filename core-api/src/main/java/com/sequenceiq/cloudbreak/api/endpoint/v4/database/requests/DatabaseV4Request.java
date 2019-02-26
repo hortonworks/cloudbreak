@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.ValidRds;
 
 import io.swagger.annotations.ApiModel;
@@ -16,14 +16,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class DatabaseV4Request extends DatabaseV4Base {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.Database.USERNAME, required = true)
+    @ApiModelProperty(value = Database.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.Database.PASSWORD, required = true)
+    @ApiModelProperty(value = Database.PASSWORD, required = true)
     private String connectionPassword;
 
-    @ApiModelProperty(ModelDescriptions.Database.ORACLE)
+    @ApiModelProperty(Database.ORACLE)
     private OracleParameters oracle;
 
     public String getConnectionUserName() {

@@ -121,32 +121,29 @@ public class GcpPlatformResources implements PlatformResources {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
-        if (compute != null) {
-            NetworkList networkList = compute.networks().list(projectId).execute();
-            List<Subnetwork> subnetworkList = compute.subnetworks().list(projectId, region.value()).execute().getItems();
-            for (Network network : networkList.getItems()) {
-                Map<String, Object> properties = new HashMap<>();
-                properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
-                properties.put("description", Strings.nullToEmpty(network.getDescription()));
-                properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
-                properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
+        NetworkList networkList = compute.networks().list(projectId).execute();
+        List<Subnetwork> subnetworkList = compute.subnetworks().list(projectId, region.value()).execute().getItems();
+        for (Network network : networkList.getItems()) {
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
+            properties.put("description", Strings.nullToEmpty(network.getDescription()));
+            properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
+            properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
 
-                Map<String, String> subnets = new HashMap<>();
-                if (subnetworkList != null && network.getSubnetworks() != null) {
-                    for (Subnetwork subnetwork : subnetworkList) {
-                        if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
-                            subnets.put(subnetwork.getName(), subnetwork.getName());
-                        }
+            Map<String, String> subnets = new HashMap<>();
+            if (subnetworkList != null && network.getSubnetworks() != null) {
+                for (Subnetwork subnetwork : subnetworkList) {
+                    if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
+                        subnets.put(subnetwork.getName(), subnetwork.getName());
                     }
                 }
-
-                CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId().toString(), subnets, properties);
-                cloudNetworks.add(cloudNetwork);
             }
 
-            result.put(region.value(), cloudNetworks);
-
+            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId().toString(), subnets, properties);
+            cloudNetworks.add(cloudNetwork);
         }
+        result.put(region.value(), cloudNetworks);
+
         return new CloudNetworks(result);
     }
 
@@ -161,14 +158,12 @@ public class GcpPlatformResources implements PlatformResources {
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
-        if (compute != null) {
-            FirewallList firewallList = compute.firewalls().list(projectId).execute();
-            for (Firewall firewall : firewallList.getItems()) {
-                Map<String, Object> properties = new HashMap<>();
-                properties.put("network", getNetworkName(firewall));
-                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
-                result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
-            }
+        FirewallList firewallList = compute.firewalls().list(projectId).execute();
+        for (Firewall firewall : firewallList.getItems()) {
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("network", getNetworkName(firewall));
+            CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
+            result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
         }
 
         return new CloudSecurityGroups(result);

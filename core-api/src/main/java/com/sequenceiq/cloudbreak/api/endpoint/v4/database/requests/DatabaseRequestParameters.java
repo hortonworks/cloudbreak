@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class DatabaseRequestParameters implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.Database.VERSION, required = true)
+    @ApiModelProperty(value = Database.VERSION, required = true)
     private String version;
 
     public String getVersion() {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 
 @Component
@@ -30,7 +31,7 @@ public class StackUnderOperationAspects {
     @AfterReturning(pointcut = "com.sequenceiq.cloudbreak.aspect.StackUnderOperationAspects.interceptStackMethod()", returning = "result")
     public void setByStack(Object result) {
         if (result instanceof Stack && ((Stack) result).getType() != StackType.TEMPLATE) {
-            stackUnderOperationService.set(((Stack) result).getId());
+            stackUnderOperationService.set(((WorkspaceAwareResource) result).getId());
         }
     }
 

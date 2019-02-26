@@ -470,9 +470,9 @@ public class ClusterService {
                 throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
             }
             StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(cluster.getId());
-            String stackRepoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+            String stackRepoId = repoDetails.getStack().get(REPO_ID_TAG);
             String osType = ambariRepositoryVersionService.getOsTypeForStackRepoDetails(repoDetails);
-            if ("".equals(osType)) {
+            if (osType != null && osType.isEmpty()) {
                 LOGGER.debug(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
                 return null;
             }
@@ -910,14 +910,14 @@ public class ClusterService {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
             }
             ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(clusterDefinitionName, stack.getWorkspace());
-            if (!withEmbeddedAmbariDB(cluster)) {
+            if (cluster == null || !withEmbeddedAmbariDB(cluster)) {
                 throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
             }
             if (validateClusterDefinition) {
                 ambariBlueprintValidator.validateBlueprintForStack(cluster, clusterDefinition, hostGroups, stackWithLists.getInstanceGroups());
             }
-            Boolean containerOrchestrator;
+            boolean containerOrchestrator;
             try {
                 containerOrchestrator = orchestratorTypeResolver.resolveType(stackWithLists.getOrchestrator()).containerOrchestrator();
             } catch (CloudbreakException ignored) {

@@ -5,7 +5,7 @@ public enum AwsSelectorType {
     ROLE_BASED("role-based"),
     KEY_BASED("key-based");
 
-    private String name;
+    private final String name;
 
     AwsSelectorType(String name) {
         this.name = name;

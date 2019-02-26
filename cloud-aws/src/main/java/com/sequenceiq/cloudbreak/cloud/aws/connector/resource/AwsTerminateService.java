@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @Service
 public class AwsTerminateService {
@@ -106,11 +107,11 @@ public class AwsTerminateService {
                         if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
                             throw e;
                         }
-                        throw new Retry.ActionWentFailException("Stack not exists");
+                        throw new ActionWentFailException("Stack not exists");
                     }
                     return Boolean.TRUE;
                 });
-            } catch (Retry.ActionWentFailException ignored) {
+            } catch (ActionWentFailException ignored) {
                 LOGGER.debug("Stack not found with name: {}", cFStackName);
                 awsElasticIpService.releaseReservedIp(amazonEC2Client, resources);
                 cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);

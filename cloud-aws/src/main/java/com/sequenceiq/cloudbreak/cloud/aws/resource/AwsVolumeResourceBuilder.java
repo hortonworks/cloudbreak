@@ -86,7 +86,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Inject
     private AwsClient awsClient;
 
-    private Function<VolumeSetAttributes.Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
+    private final Function<VolumeSetAttributes.Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
         EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
                 .withVolumeId(volume.getId())
                 .withDeleteOnTermination(Boolean.TRUE);

@@ -144,11 +144,9 @@ public class StackImageUpdateService {
     private StatedImage getNewImage(String newImageId, String imageCatalogName, String imageCatalogUrl, Image currentImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage newImage;
-        if (StringUtils.isNotBlank(imageCatalogName) && StringUtils.isNotBlank(imageCatalogUrl)) {
-            newImage = imageCatalogService.getImage(imageCatalogUrl, imageCatalogName, newImageId);
-        } else {
-            newImage = imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), newImageId);
-        }
+        newImage = StringUtils.isNotBlank(imageCatalogName) && StringUtils.isNotBlank(imageCatalogUrl)
+                ? imageCatalogService.getImage(imageCatalogUrl, imageCatalogName, newImageId)
+                : imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), newImageId);
         return newImage;
     }
 

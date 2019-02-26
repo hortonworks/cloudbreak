@@ -7,26 +7,29 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.KerberosConfigModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class DatalakePrerequisiteV4Response {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.RESPONSE)
+    @ApiModelProperty(LdapConfigModelDescription.RESPONSE)
     private LdapV4Response ldap;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.RESPONSE)
+    @ApiModelProperty(RDSConfigModelDescription.RESPONSE)
     private Set<DatabaseV4Response> databases = new HashSet<>();
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.KerberosConfigModelDescription.RESPONSE)
+    @ApiModelProperty(KerberosConfigModelDescription.RESPONSE)
     private KerberosV4Response kerberos;
 
     public LdapV4Response getLdap() {

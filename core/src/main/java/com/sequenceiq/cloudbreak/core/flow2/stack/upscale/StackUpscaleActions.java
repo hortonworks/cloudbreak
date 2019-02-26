@@ -127,7 +127,7 @@ public class StackUpscaleActions {
     public Action<?, ?> addInstances() {
         return new AbstractStackUpscaleAction<>(UpscaleStackValidationResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -272,7 +272,7 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, MountDisksOnNewHostsResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.mountDisksOnNewHosts(context.getStack());
-                metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -289,7 +289,7 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.handleStackUpscaleFailure(context.getStackView().getId(), payload);
-                metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -108,7 +108,7 @@ public class AwsMetadataCollector implements MetadataCollector {
                 cloudInstance, unknownMap, collectedCloudVmMetaDataStatuses);
         String groupName = cloudInstance.getTemplate().getGroupName();
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
-        if (unknownInstancesForGroup.size() > 0) {
+        if (!unknownInstancesForGroup.isEmpty()) {
             Optional<Instance> found = unknownInstancesForGroup.stream().findFirst();
             Instance foundInstance = found.get();
             CloudInstance newCloudInstance = new CloudInstance(foundInstance.getInstanceId(), cloudInstance.getTemplate(),
@@ -126,7 +126,7 @@ public class AwsMetadataCollector implements MetadataCollector {
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
         LOGGER.debug("Add known intance, cloudInstance: {}, instancesOnAWSForGroup: {}, collectedCloudVmMetaDataStatuses: {}",
                 cloudInstance, instancesOnAWSForGroup, collectedCloudVmMetaDataStatuses);
-        List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+        List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Entry::getValue).collect(Collectors.toList());
         instanceList.stream()
                 .filter(instance ->
                         cloudInstance.getInstanceId().equals(instance.getInstanceId()))

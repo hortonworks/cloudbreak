@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.Flex
 import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.FlexSubOpDescription;
 
 import io.swagger.annotations.Api;
@@ -32,28 +31,28 @@ public interface FlexSubscriptionV4Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "listFlexSubscriptionsByWorkspace")
     FlexSubscriptionV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "getFlexSubscriptionInWorkspace")
     FlexSubscriptionV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "createFlexSubscriptionInWorkspace")
     FlexSubscriptionV4Response create(@PathParam("workspaceId") Long workspaceId, @Valid FlexSubscriptionV4Request request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FlexSubOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.FLEX_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = FlexSubOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deleteFlexSubscriptionInWorkspace")
     FlexSubscriptionV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

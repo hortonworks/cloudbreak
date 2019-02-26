@@ -7,7 +7,7 @@ import java.util.List;
  * is automatically done by Cloudbreak, if the class which implements this interface is on the classpath. Cloud providers implementations are
  * stored in a map in Cloudbreak and the {@link CloudPlatformAware} is used as key to identify the different implementations.
  */
-public interface CloudConnector extends CloudPlatformAware {
+public interface CloudConnector<R> extends CloudPlatformAware {
 
     /**
      * Access to the {@link Authenticator} object.
@@ -42,7 +42,7 @@ public interface CloudConnector extends CloudPlatformAware {
      *
      * @return the {@link ResourceConnector} object
      */
-    ResourceConnector<Object> resources();
+    ResourceConnector<R> resources();
 
     /**
      * Access to the {@link MetadataCollector} object.

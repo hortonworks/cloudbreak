@@ -11,9 +11,6 @@ public class PlatformAccessConfigsV4Response implements JsonEntity {
 
     private Set<AccessConfigV4Response> accessConfigs = new HashSet<>();
 
-    public PlatformAccessConfigsV4Response() {
-    }
-
     public Set<AccessConfigV4Response> getAccessConfigs() {
         return accessConfigs;
     }

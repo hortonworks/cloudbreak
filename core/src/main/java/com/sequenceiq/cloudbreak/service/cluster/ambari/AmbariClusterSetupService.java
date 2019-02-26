@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationTy
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.START_OPERATION_STATE;
 import static java.util.Collections.singletonMap;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +28,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -160,11 +159,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
                     pollingResult.getRight() == null ? constructClusterFailedMessage(cluster.getId(), ambariClient) : pollingResult.getRight().getMessage();
             clusterConnectorPollingResultChecker.checkPollingResult(pollingResult.getLeft(), message);
             Pair<PollingResult, Exception> pollingResultExceptionPair = ambariOperationService
-                    .waitForOperations(stack, ambariClient, new HashMap<>() {
-                        {
-                            put("CLUSTER_INSTALL", 1);
-                        }
-                    }, INSTALL_AMBARI_PROGRESS_STATE);
+                    .waitForOperations(stack, ambariClient, Map.of("CLUSTER_INSTALL", 1), INSTALL_AMBARI_PROGRESS_STATE);
 
             clusterConnectorPollingResultChecker
                     .checkPollingResult(pollingResultExceptionPair.getLeft(), constructClusterFailedMessage(cluster.getId(), ambariClient));

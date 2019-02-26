@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SiteConfiguration {
-    private String name;
+    private final String name;
 
-    private Map<String, String> properties;
+    private final Map<String, String> properties;
 
     public SiteConfiguration(String name, Map<String, String> properties) {
         this.name = name;

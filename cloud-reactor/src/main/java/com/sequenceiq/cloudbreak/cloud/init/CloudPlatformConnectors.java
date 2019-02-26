@@ -36,16 +36,16 @@ public class CloudPlatformConnectors {
     private final Map<Platform, Variant> defaultVariants = new HashMap<>();
 
     @Inject
-    private List<CloudConnector> cloudConnectors;
+    private List<CloudConnector<?>> cloudConnectors;
 
-    private final Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
+    private final Map<CloudPlatformVariant, CloudConnector<?>> map = new HashMap<>();
 
     private Multimap<Platform, Variant> platformToVariants;
 
     @PostConstruct
     public void cloudPlatformConnectors() {
         platformToVariants = HashMultimap.create();
-        for (CloudConnector connector : cloudConnectors) {
+        for (CloudConnector<?> connector : cloudConnectors) {
             map.put(new CloudPlatformVariant(connector.platform(), connector.variant()), connector);
             platformToVariants.put(connector.platform(), connector.variant());
         }
@@ -89,18 +89,18 @@ public class CloudPlatformConnectors {
         return defaultVariants.get(platform);
     }
 
-    public CloudConnector getDefault(Platform platform) {
+    public CloudConnector<?> getDefault(Platform platform) {
         Variant variant = getDefaultVariant(platform);
         return map.get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector get(Platform platform, Variant variant) {
+    public CloudConnector<?> get(Platform platform, Variant variant) {
         return get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector get(CloudPlatformVariant variant) {
-        CloudConnector cc = map.get(variant);
-        return cc == null ? getDefault(variant.getPlatform()) : cc;
+    public CloudConnector<?> get(CloudPlatformVariant variant) {
+        CloudConnector<?> cloudConnector = map.get(variant);
+        return cloudConnector == null ? getDefault(variant.getPlatform()) : cloudConnector;
     }
 
     public PlatformVariants getPlatformVariants() {

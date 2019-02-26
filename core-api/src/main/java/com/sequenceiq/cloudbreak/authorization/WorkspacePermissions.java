@@ -57,17 +57,11 @@ public enum WorkspacePermissions {
 
     private final String name;
 
-    private final WorkspaceResource resource;
-
-    private final Action action;
-
     private final String description;
 
     WorkspacePermissions(WorkspaceResource resource, Action action, String description) {
-        this.resource = resource;
-        this.action = action;
-        this.description = description;
         name = getName(resource, action);
+        this.description = description;
     }
 
     public static String getName(WorkspaceResource resource, Action action) {

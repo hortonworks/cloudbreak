@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.auth.CumulusYarnAuthenticato
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.auth.CumulusYarnCredentialConnector;
 
 @Service
-public class CumulusYarnConnector implements CloudConnector {
+public class CumulusYarnConnector implements CloudConnector<Object> {
     @Inject
     private CumulusYarnAuthenticator authenticator;
 
@@ -70,7 +70,7 @@ public class CumulusYarnConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<Object> resources() {
         return resourceConnector;
     }
 

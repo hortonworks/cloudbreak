@@ -23,12 +23,12 @@ public class Subnet {
             return false;
         }
         Subnet subnet = (Subnet) o;
-        return Objects.equals(getCidr(), subnet.getCidr());
+        return Objects.equals(cidr, subnet.cidr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCidr());
+        return Objects.hash(cidr);
     }
 
 }

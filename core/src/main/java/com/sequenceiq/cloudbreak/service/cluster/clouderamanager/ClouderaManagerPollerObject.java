@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class ClouderaManagerPollerObject extends StackContext {
 
-    private ApiClient apiClient;
+    private final ApiClient apiClient;
 
     public ClouderaManagerPollerObject(Stack stack, ApiClient apiClient) {
         super(stack);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository.cluster;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
@@ -10,7 +11,7 @@ import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepositor
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ClusterTemplateView.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 @WorkspaceResourceType(resource = WorkspaceResource.CLUSTER_TEMPLATE)
 public interface ClusterTemplateViewRepository extends WorkspaceResourceRepository<ClusterTemplateView, Long> {

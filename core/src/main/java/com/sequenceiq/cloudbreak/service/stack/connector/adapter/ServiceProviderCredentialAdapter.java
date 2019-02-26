@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -163,7 +164,7 @@ public class ServiceProviderCredentialAdapter {
         Json attributes = new Json(credential.getAttributes());
         Map<String, Object> newAttributes = attributes.getMap();
         boolean newAttributesAdded = false;
-        for (Map.Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {
+        for (Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {
             if (!skippedKeys.contains(cloudParam.getKey()) && cloudParam.getValue() != null) {
                 if (overrideParameters || newAttributes.get(cloudParam.getKey()) == null) {
                     newAttributes.put(cloudParam.getKey(), cloudParam.getValue());

@@ -40,10 +40,10 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         super(selector, stackId, accepted);
         this.hostGroup = hostGroup;
         this.adjustment = adjustment;
-        this.hostNames = Collections.emptySet();
-        this.singlePrimaryGateway = false;
-        this.kerberosSecured = false;
-        this.singleNodeCluster = false;
+        hostNames = Collections.emptySet();
+        singlePrimaryGateway = false;
+        kerberosSecured = false;
+        singleNodeCluster = false;
     }
 
     @Override

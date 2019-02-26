@@ -161,7 +161,7 @@ public class AzureSetup implements Setup {
     }
 
     @Override
-    public void validateParameters(AuthenticatedContext ac, Map<String, String> parameters) throws Exception {
+    public void validateParameters(AuthenticatedContext ac, Map<String, String> parameters) {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = parameters.get(AzureResourceConnector.RESOURCE_GROUP_NAME);
         if (StringUtils.isEmpty(resourceGroupName)) {

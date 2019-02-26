@@ -168,7 +168,7 @@ public class ClusterContainerRunner {
         Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
-        Map<String, List<ContainerInfo>> containers = new HashMap<>();
+
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
 
         try {
@@ -183,14 +183,12 @@ public class ClusterContainerRunner {
             List<String> hostBlackList = getOtherHostgroupsAgentHostsFromContainer(existingContainers, hostGroupName);
             ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, ambariAgentApp,
                     cloudPlatform, hostGroup, adjustment, hostBlackList, cluster.getId().toString());
+            Map<String, List<ContainerInfo>> containers = new HashMap<>();
             containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
                     ambariAgentConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
 
             return saveContainers(containers, cluster);
         } catch (CloudbreakOrchestratorException ex) {
-            if (!containers.isEmpty()) {
-                saveContainers(containers, cluster);
-            }
             checkCancellation(ex);
             throw ex;
         }

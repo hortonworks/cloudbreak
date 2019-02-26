@@ -38,7 +38,7 @@ public class ClusterCreationEnvironmentValidator {
     private KerberosService kerberosService;
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack) {
-        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
         EnvironmentView stackEnv = stack.getEnvironment();
         if (stackEnv != null && !CollectionUtils.isEmpty(stackEnv.getRegionSet())
                 && stackEnv.getRegionSet().stream().noneMatch(region -> region.getName().equals(stack.getRegion()))) {
@@ -53,7 +53,7 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     public ValidationResult validate(RegisterDatalakeV4Request registerDatalakeRequest, Environment environment) {
-        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Long workspaceId = environment.getWorkspace().getId();
         String environmentName = environment.getName();
         if (!CollectionUtils.isEmpty(environment.getDatalakeResources())) {

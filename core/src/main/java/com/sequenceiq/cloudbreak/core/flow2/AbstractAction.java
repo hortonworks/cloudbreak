@@ -40,7 +40,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final int MS_PER_SEC = 1000;
 
     @Inject
-    protected CloudbreakMetricService metricService;
+    private CloudbreakMetricService metricService;
 
     @Inject
     private EventBus eventBus;
@@ -107,6 +107,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             throw new UnsupportedOperationException("Failure event already configured. Actions reusable not allowed!");
         }
         this.failureEvent = failureEvent;
+    }
+
+    public CloudbreakMetricService getMetricService() {
+        return metricService;
     }
 
     protected Flow getFlow(String flowId) {

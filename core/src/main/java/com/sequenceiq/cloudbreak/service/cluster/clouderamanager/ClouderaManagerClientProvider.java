@@ -24,7 +24,7 @@ public class ClouderaManagerClientProvider {
     public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password) {
         ApiClient cmClient = Configuration.getDefaultApiClient();
         if (port != null) {
-            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ":" + port + API_V_30);
+            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_V_30);
         } else {
             cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_V_30);
         }

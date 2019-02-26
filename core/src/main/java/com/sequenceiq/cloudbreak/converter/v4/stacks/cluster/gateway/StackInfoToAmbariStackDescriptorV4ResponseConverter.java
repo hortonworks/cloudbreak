@@ -30,9 +30,7 @@ public class StackInfoToAmbariStackDescriptorV4ResponseConverter extends Abstrac
         stackDescriptorV4.setRepository(defaultStackRepoDetailsToStackRepoDetailsV4Response(source.getRepo()));
         if (source.getRepo().getMpacks() != null) {
             Map<String, List<ManagementPackV4Entry>> map = new HashMap<>();
-            source.getRepo().getMpacks().forEach((key, value) -> {
-                map.put(key, converterUtil.convertAll(value, ManagementPackV4Entry.class));
-            });
+            source.getRepo().getMpacks().forEach((key, value) -> map.put(key, converterUtil.convertAll(value, ManagementPackV4Entry.class)));
             stackDescriptorV4.setMpacks(map);
         }
         return stackDescriptorV4;

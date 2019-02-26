@@ -92,7 +92,7 @@ public class CredentialPrerequisiteService {
         String attributes = credential.getAttributes();
         Map<String, Object> newAttributes = convertJsonStringToMap(attributes);
         boolean attributesChanged = false;
-        if (StringUtils.isNoneEmpty((String) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
+        if (StringUtils.isNoneEmpty((CharSequence) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);
             if (userPreferencesOptional.isPresent() && StringUtils.isNoneEmpty(userPreferencesOptional.get().getExternalId())) {
                 String externalId = userPreferencesOptional.get().getExternalId();
@@ -119,7 +119,7 @@ public class CredentialPrerequisiteService {
 
     public AmbariClient createCumulusAmbariClient(Map<String, Object> attributes) {
         if (isCumulusCredential(attributes)) {
-            String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
+            String datalakeAmbariUrl = (String) attributes.get(CUMULUS_AMBARI_URL);
             try {
                 URL ambariUrl = new URL(datalakeAmbariUrl);
                 AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariUrl, (String) attributes.get(CUMULUS_AMBARI_USER),
@@ -138,7 +138,7 @@ public class CredentialPrerequisiteService {
     }
 
     public boolean isCumulusCredential(Map<String, Object> attributes) {
-        return StringUtils.isNoneEmpty((String) attributes.get(CUMULUS_AMBARI_URL));
+        return StringUtils.isNoneEmpty((CharSequence) attributes.get(CUMULUS_AMBARI_URL));
     }
 
     public boolean isCumulusCredential(String attributes) {

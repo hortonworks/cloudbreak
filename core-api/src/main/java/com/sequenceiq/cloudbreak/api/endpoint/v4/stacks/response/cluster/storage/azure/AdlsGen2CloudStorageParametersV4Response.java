@@ -54,13 +54,13 @@ public class AdlsGen2CloudStorageParametersV4Response implements CloudStoragePar
             return false;
         }
         AdlsGen2CloudStorageParametersV4Response that = (AdlsGen2CloudStorageParametersV4Response) o;
-        return Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName());
+        return Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName());
+        return Objects.hash(accountKey, accountName);
     }
 
 }

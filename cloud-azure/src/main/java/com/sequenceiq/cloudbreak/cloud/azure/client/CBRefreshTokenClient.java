@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import okhttp3.JavaNetAuthenticator;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
+import retrofit2.Retrofit.Builder;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -26,7 +26,7 @@ public class CBRefreshTokenClient {
     public CBRefreshTokenClient(String baseUrl) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(new LoggingInterceptor(LogLevel.BODY_AND_HEADERS));
         builder.proxyAuthenticator(new JavaNetAuthenticator());
-        service = new Retrofit.Builder()
+        service = new Builder()
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(new JacksonAdapter().converterFactory())
                 .baseUrl(baseUrl)

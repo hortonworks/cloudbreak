@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public class ClouderaManagerCommandPollerObject extends ClouderaManagerPollerObject {
 
-    private BigDecimal id;
+    private final BigDecimal id;
 
     public ClouderaManagerCommandPollerObject(Stack stack, ApiClient apiClient, BigDecimal id) {
         super(stack, apiClient);

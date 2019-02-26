@@ -56,7 +56,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         AzureClient client = getAzureClient(auth);
 
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);
-        volumeSetAttributes.getVolumes().stream()
+        volumeSetAttributes.getVolumes()
                 .forEach(volume -> {
                             Disk disk = client.getDiskById(volume.getId());
                             VirtualMachine vm = client.getVirtualMachine(resourceGroupName, instance.getName());

@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.template.processor.configuration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class SiteConfigurations implements Iterable<SiteConfiguration> {
-    private Map<String, SiteConfiguration> config = new HashMap<>();
+    private final Map<String, SiteConfiguration> config = new HashMap<>();
 
     private SiteConfigurations() {
 
@@ -17,7 +18,7 @@ public class SiteConfigurations implements Iterable<SiteConfiguration> {
 
     public static SiteConfigurations fromMap(Map<String, Map<String, String>> configuration) {
         SiteConfigurations result = new SiteConfigurations();
-        for (Map.Entry<String, Map<String, String>> conf : configuration.entrySet()) {
+        for (Entry<String, Map<String, String>> conf : configuration.entrySet()) {
             result.addSiteConfiguration(new SiteConfiguration(conf.getKey(), conf.getValue()));
         }
         return result;

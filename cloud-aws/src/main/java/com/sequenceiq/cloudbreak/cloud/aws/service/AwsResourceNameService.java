@@ -30,12 +30,10 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
     public String resourceName(ResourceType resourceType, Object... parts) {
         String resourceName;
 
-        switch (resourceType) {
-            case AWS_VOLUMESET:
-                resourceName = attachedDiskResourceName(parts);
-                break;
-            default:
-                throw new IllegalStateException("Unsupported resource type: " + resourceType);
+        if (resourceType == ResourceType.AWS_VOLUMESET) {
+            resourceName = attachedDiskResourceName(parts);
+        } else {
+            throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
         return resourceName;
     }

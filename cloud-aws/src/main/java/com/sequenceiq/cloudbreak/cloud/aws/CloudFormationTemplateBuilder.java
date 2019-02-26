@@ -133,7 +133,7 @@ public class CloudFormationTemplateBuilder {
 
         private String defaultSubnet;
 
-        private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
+        private final Map<String, String> encryptedAMIByGroupName = new HashMap<>();
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;

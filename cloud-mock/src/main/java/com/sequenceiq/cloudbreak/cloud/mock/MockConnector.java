@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class MockConnector implements CloudConnector {
+public class MockConnector implements CloudConnector<Object> {
 
     @Inject
     private MockAuthenticator mockAuthenticator;
@@ -72,7 +72,7 @@ public class MockConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<Object> resources() {
         return mockResourceConnector;
     }
 

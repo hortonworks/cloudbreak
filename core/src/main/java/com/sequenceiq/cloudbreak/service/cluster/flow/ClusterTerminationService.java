@@ -64,7 +64,7 @@ public class ClusterTerminationService {
     private HostGroupRepository hostGroupRepository;
 
     @Resource
-    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    private Map<FileSystemType, FileSystemConfigurator<BaseFileSystemConfigurationsView>> fileSystemConfigurators;
 
     @Inject
     private ConstraintRepository constraintRepository;
@@ -182,7 +182,7 @@ public class ClusterTerminationService {
 
     private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
         try {
-            FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
+            FileSystemConfigurator<BaseFileSystemConfigurationsView> fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
             BaseFileSystemConfigurationsView fsConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem);
             fsConfiguration.setStorageContainer("cloudbreak" + stackId);
             fsConfigurator.deleteResources(fsConfiguration);

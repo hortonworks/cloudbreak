@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.clusterdefinition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,9 +36,7 @@ public class GeneralClusterConfigsProvider {
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
             List<InstanceMetaData> gatewayInstanceMetadata = stack.getGatewayInstanceMetadata();
-            gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty()
-                    && stack.getCluster().getGateway() != null
-                    && stack.getCluster().getGateway().isGatewayEnabled();
+            gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty() && stack.getCluster().hasGateway();
             instanceMetadataPresented = true;
         }
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -92,7 +91,7 @@ public class GeneralClusterConfigsProvider {
         int kafkaBrokerNumber = 0;
         AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
         Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
-        for (Map.Entry<String, Set<String>> hostGroup : componentsByHostGroup.entrySet()) {
+        for (Entry<String, Set<String>> hostGroup : componentsByHostGroup.entrySet()) {
             for (String service : hostGroup.getValue()) {
                 if (KAFKA_BROKER.equals(service)) {
                     kafkaBrokerNumber++;

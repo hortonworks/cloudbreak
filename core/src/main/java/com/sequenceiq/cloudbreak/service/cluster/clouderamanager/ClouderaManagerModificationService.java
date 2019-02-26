@@ -51,7 +51,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private CloudbreakEventService eventService;
 
     @Override
-    public void upscaleCluster(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata) throws CloudbreakException {
+    public void upscaleCluster(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata) {
 
     }
 
@@ -139,37 +139,37 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void stopComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+    public void stopComponents(Stack stack, Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void ensureComponentsAreStopped(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+    public void ensureComponentsAreStopped(Stack stack, Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void initComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+    public void initComponents(Stack stack, Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void installComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+    public void installComponents(Stack stack, Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void regenerateKerberosKeytabs(Stack stack, String hostname) throws CloudbreakException {
+    public void regenerateKerberosKeytabs(Stack stack, String hostname) {
 
     }
 
     @Override
-    public void startComponents(Stack stack, Map<String, String> components, String hostname) throws CloudbreakException {
+    public void startComponents(Stack stack, Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void restartAll(Stack stack) throws CloudbreakException {
+    public void restartAll(Stack stack) {
 
     }
 }

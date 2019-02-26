@@ -86,10 +86,8 @@ public class SubscriptionChecker {
             List<AzureSubscription> subscriptionList = azureSubscriptionListResult.getValue();
             if (azureSubscriptionListResult.getNextLink() != null) {
                 subscriptionList.addAll(getNextSetOfSubscriptions(azureSubscriptionListResult.getNextLink(), accessToken));
-                return subscriptionList;
-            } else {
-                return subscriptionList;
             }
+            return subscriptionList;
         } else {
             String errorResponse = response.readEntity(String.class);
             try {

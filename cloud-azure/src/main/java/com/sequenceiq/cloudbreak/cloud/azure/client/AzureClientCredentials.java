@@ -38,7 +38,7 @@ public class AzureClientCredentials {
         this.cbRefreshTokenClientProvider = cbRefreshTokenClientProvider;
         this.credentialView = credentialView;
         this.logLevel = logLevel;
-        this.azureClientCredentials = getAzureCredentials();
+        azureClientCredentials = getAzureCredentials();
     }
 
     public Azure getAzure() {
