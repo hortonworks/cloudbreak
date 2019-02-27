@@ -19,15 +19,15 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
-import com.sequenceiq.cloudbreak.converter.v4.clusterdefinition.ClusterDefinitionV4RequestToClusterDefinitionConverter;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.converter.v4.clusterdefinition.ClusterDefinitionV4RequestToClusterDefinitionConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Service
-public class DefaultAmbariBlueprintCache {
+public class DefaulClusterDefinitionCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmbariBlueprintCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaulClusterDefinitionCache.class);
 
     private final Map<String, ClusterDefinition> defaultBlueprints = new HashMap<>();
 
@@ -36,6 +36,9 @@ public class DefaultAmbariBlueprintCache {
 
     @Value("#{'${cb.clusterdefinition.ambari.internal:}'.split(';')}")
     private List<String> internalBlueprints;
+
+    @Value("#{'${cb.clusterdefinition.cm.defaults:}'.split(';')}")
+    private List<String> releasedCMClusterDefinitions;
 
     @Inject
     private AmbariBlueprintUtils ambariBlueprintUtils;
@@ -76,7 +79,8 @@ public class DefaultAmbariBlueprintCache {
     }
 
     private List<String> blueprints() {
-        return Stream.concat(releasedBlueprints.stream().filter(StringUtils::isNoneBlank),
-                internalBlueprints.stream().filter(StringUtils::isNoneBlank)).collect(Collectors.toList());
+        return Stream.concat(
+                Stream.concat(releasedBlueprints.stream(), internalBlueprints.stream()), releasedCMClusterDefinitions.stream()
+        ).filter(StringUtils::isNoneBlank).collect(Collectors.toList());
     }
 }

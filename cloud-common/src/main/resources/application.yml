@@ -120,6 +120,9 @@ cb:
     defaultLifeTime: -1
 
   clusterdefinition:
+    cm:
+      defaults: >
+                CDH 6.1 - Data Lake: Hive Metastore=cdh6-shared-services;
     ambari:
       defaults: >
                 EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;
@@ -237,14 +240,14 @@ cb:
         repo:
           stack:
             repoid: CDH
-            redhat7: https://archive.cloudera.com/cdh6/{latest_supported}/parcels/
+            redhat7: https://archive.cloudera.com/cdh6/6.1.0/parcels/
       "[6.1.1]":
         version: 6.1.1-1.cdh6.1.1.p0.875250
         minCM: 6.1
         repo:
           stack:
             repoid: CDH
-            redhat7: https://archive.cloudera.com/cdh6/{latest_supported}/parcels/
+            redhat7: https://archive.cloudera.com/cdh6/6.1.1/parcels/
 
   ambari:
     entries:
