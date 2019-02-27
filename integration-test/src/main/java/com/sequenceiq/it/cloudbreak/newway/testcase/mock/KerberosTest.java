@@ -24,11 +24,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerber
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -62,16 +64,23 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = "dataProviderForTest")
-    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String clusterDefinitionName, KerberosTestData testData) {
+    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String clusterDefinitionName, KerberosTestData testData,
+            @Description TestCaseDescription testCaseDescription) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestAction.postV4())
-                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .given(ClusterDefinitionTestDto.class)
+                .withName(clusterDefinitionName)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestClient.postV4())
+                .given(KerberosTestDto.class)
+                .withRequest(request)
+                .withName(request.getName())
                 .when(KerberosTestAction::post)
-                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
+                .given("master", InstanceGroupEntity.class)
+                .withHostGroup(MASTER)
+                .withNodeCount(1)
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
@@ -85,13 +94,21 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a cluster setup without kerberosname",
+            when = "calling cluster creation",
+            then = "the cluster should not been kerberized")
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestAction.postV4())
-                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
+                .given(ClusterDefinitionTestDto.class)
+                .withName(clusterDefinitionName)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestClient.postV4())
+                .given("master", InstanceGroupEntity.class)
+                .withHostGroup(MASTER)
+                .withNodeCount(1)
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
@@ -104,17 +121,27 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a cluster setup with '' kerberosname",
+            when = "calling cluster creation",
+            then = "getting BadRequestException because kerberosname should not be empty")
     public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestAction.postV4())
-                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
+                .given(ClusterDefinitionTestDto.class)
+                .withName(clusterDefinitionName)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestClient.postV4())
+                .given(KerberosTestDto.class)
+                .withRequest(request)
+                .withName(request.getName())
                 .when(KerberosTestAction::post)
-                .given("master", InstanceGroupEntity.class).withHostGroup(MASTER).withNodeCount(1)
+                .given("master", InstanceGroupEntity.class)
+                .withHostGroup(MASTER)
+                .withNodeCount(1)
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .withCluster(new ClusterEntity(testContext)
@@ -127,63 +154,122 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an invalid kerberos descriptor JSON",
+            when = "calling kerberos creation",
+            then = "getting BadRequestException because descriptor should be a valid JSON")
     public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String badRequest = getNameGenerator().getRandomNameForResource();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         String descriptor = "{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
                 + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}";
         request.getAmbariDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestAction.postV4())
-                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
-                .when(KerberosTestAction::post, key("badRequest"))
-                .expect(BadRequestException.class, key("badRequest"))
+                .given(ClusterDefinitionTestDto.class)
+                .withName(clusterDefinitionName)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestClient.postV4())
+                .given(KerberosTestDto.class)
+                .withRequest(request)
+                .withName(request.getName())
+                .when(KerberosTestAction::post, key(badRequest))
+                .expect(BadRequestException.class, key(badRequest))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid kerberos descriptor JSON which does not contain all the required fields",
+            when = "calling kerberos creation",
+            then = "getting BadRequestException because descriptor need all the required fields")
     public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String badRequest = getNameGenerator().getRandomNameForResource();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setDescriptor(
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestAction.postV4())
-                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
-                .when(KerberosTestAction::post, key("badRequest"))
-                .expect(BadRequestException.class, key("badRequest"))
+                .given(ClusterDefinitionTestDto.class)
+                .withName(clusterDefinitionName)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestClient.postV4())
+                .given(KerberosTestDto.class)
+                .withRequest(request)
+                .withName(request.getName())
+                .when(KerberosTestAction::post, key(badRequest))
+                .expect(BadRequestException.class, key(badRequest))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a kerberos configuration where the krb5conf is not a valid JSON",
+            when = "calling kerberos creation",
+            then = "getting BadRequestException because krb5conf should be a valid JSON")
     public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String badRequest = getNameGenerator().getRandomNameForResource();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestAction.postV4())
-                .given(KerberosTestDto.class).withRequest(request).withName(request.getName())
-                .when(KerberosTestAction::post, key("badRequest"))
-                .expect(BadRequestException.class, key("badRequest"))
+                .given(ClusterDefinitionTestDto.class)
+                .withName(clusterDefinitionName)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(ClusterDefinitionTestClient.postV4())
+                .given(KerberosTestDto.class)
+                .withRequest(request)
+                .withName(request.getName())
+                .when(KerberosTestAction::post, key(badRequest))
+                .expect(BadRequestException.class, key(badRequest))
                 .validate();
     }
 
     @DataProvider(name = "dataProviderForTest")
     public Object[][] provide() {
         return new Object[][]{
-                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.FREEIPA},
-                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.ACTIVE_DIRECTORY},
-                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.MIT},
-                {getBean(MockedTestContext.class), getNameGenerator().getRandomNameForResource(), KerberosTestData.AMBARI_DESCRIPTOR}
+                {
+                        getBean(MockedTestContext.class),
+                        getNameGenerator().getRandomNameForResource(),
+                        KerberosTestData.FREEIPA,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a valid stack request and a FreeIPA based kerberos configuration")
+                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .then("the cluster should be available")
+                },
+                {
+                        getBean(MockedTestContext.class),
+                        getNameGenerator().getRandomNameForResource(),
+                        KerberosTestData.ACTIVE_DIRECTORY,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a valid stack request and a Active Directory based kerberos configuration")
+                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .then("the cluster should be available")
+                },
+                {
+                        getBean(MockedTestContext.class),
+                        getNameGenerator().getRandomNameForResource(),
+                        KerberosTestData.MIT,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a valid stack request and a MIT based kerberos configuration")
+                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .then("the cluster should be available")
+                },
+                {
+                        getBean(MockedTestContext.class),
+                        getNameGenerator().getRandomNameForResource(),
+                        KerberosTestData.AMBARI_DESCRIPTOR,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a valid stack request and a Ambari Descriptor based kerberos configuration")
+                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .then("the cluster should be available")
+                }
         };
     }
 

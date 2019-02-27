@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import java.io.IOException;
 
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -11,6 +10,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
@@ -26,21 +26,25 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
         super.beforeMethod(data);
     }
 
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        testContext.cleanupTestContextEntity();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster does not exist the we should return with the future cluster definition")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "cm cluster",
+            when = "cluster does not exist",
+            then = "we should return with the future cluster definition")
     public void testGetClusterDefinitionWhenClusterIsNotAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
+        String cmcluster = getNameGenerator().getRandomNameForResource();
+        String cm = getNameGenerator().getRandomNameForResource();
+
         testContext
-                .given("cm", AmbariEntity.class).withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
-                .given("cmcluster", ClusterEntity.class).withAmbari("cm")
-                .given(StackTestDto.class).withCluster("cmcluster")
+                .given(cm, AmbariEntity.class)
+                .withClusterDefinitionName(clusterDefinitionName)
+                .withValidateClusterDefinition(Boolean.FALSE)
+                .given(cmcluster, ClusterEntity.class)
+                .withAmbari(cm)
+                .given(StackTestDto.class)
+                .withCluster(cmcluster)
                 .withName(clusterName)
                 .when(Stack.generatedClusterDefinition())
                 .then(ShowClusterDefinitionUtil::checkFutureClusterDefinition)
@@ -48,15 +52,24 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster exist the we should return with the generated cluster definition")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a cm cluster",
+            when = "cluster exist",
+            then = "we should return with the generated cluster definition")
     public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
+        String cmcluster = getNameGenerator().getRandomNameForResource();
+        String cm = getNameGenerator().getRandomNameForResource();
         testContext
-                .given("cm", AmbariEntity.class).withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
-                .given("cmcluster", ClusterEntity.class).withAmbari("cm")
-                .given(StackTestDto.class).withCluster("cmcluster")
+                .given(cm, AmbariEntity.class)
+                .withClusterDefinitionName(clusterDefinitionName)
+                .withValidateClusterDefinition(Boolean.FALSE)
+                .given(cmcluster, ClusterEntity.class)
+                .withAmbari(cm)
+                .given(StackTestDto.class)
+                .withCluster(cmcluster)
                 .withName(clusterName)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)

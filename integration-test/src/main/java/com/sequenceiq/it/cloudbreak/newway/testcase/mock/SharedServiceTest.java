@@ -29,19 +29,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionTestAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -84,6 +85,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "the cluster will be available")
     public void testCreateDatalakeCluster(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
@@ -100,7 +102,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(ldapConfigTestClient.post())
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .given(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
@@ -119,6 +121,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "cluster creation is failed by invalid hostgroups")
     public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInClusterDefinition(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
@@ -136,15 +139,17 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true))
                 .withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .init(StackTestDto.class)
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, key(BAD_REQUEST_KEY).withExpectedMessage("The host groups in the validation \\[master\\] "
+                        + "must match the hostgroups in the request \\[compute,worker,master\\]."))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "hive rds, ranger rds are attached", then = "cluster creation is failed by missing ldap")
     public void testCreateDatalakeClusterWithoutLdap(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
@@ -157,17 +162,19 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(DatabaseEntity.post())
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, rangerRdsName, null, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, key(BAD_REQUEST_KEY).withExpectedMessage("1. For a Datalake cluster \\(since you have selected a datalake "
+                        + "ready cluster definition\\) you should provide an LDAP configuration or its name/id to the Cluster request"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "hive rds and ldap are attached", then = "cluster creation is failed by missing ranger rds")
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsHive(TestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
@@ -178,7 +185,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(DatabaseEntity.post())
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
@@ -186,11 +193,13 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, hiveRdsName, null, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, key(BAD_REQUEST_KEY).withExpectedMessage("1. For a Datalake cluster \\(since you have selected a datalake "
+                        + "ready cluster definition\\) you should provide at least one Ranger rds/database configuration to the Cluster request"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "ranger rds and ldap are attached", then = "cluster creation is failed by missing hive rds")
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsRanger(TestContext testContext) {
         String rangerRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
@@ -201,7 +210,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(DatabaseEntity.post())
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
@@ -209,11 +218,13 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, rangerRdsName, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, key(BAD_REQUEST_KEY).withExpectedMessage("1. For a Datalake cluster \\(since you have selected a datalake "
+                        + "ready cluster definition\\) you should provide at least one Hive rds/database configuration to the Cluster request"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "ldap are attached", then = "cluster creation is failed by missing hive and ranger rds")
     public void testCreateDatalakeClusterWithoutRds(TestContext testContext) {
         String ldapName = creator.getRandomNameForResource();
         String clusterDefinitionName = creator.getRandomNameForResource();
@@ -221,7 +232,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         testContext
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
@@ -229,24 +240,34 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, null, ldapName, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, key(BAD_REQUEST_KEY).withExpectedMessage("1. For a Datalake cluster \\(since you have selected a datalake "
+                        + "ready cluster definition\\) you should provide at least one Hive rds/database configuration to the Cluster request\n"
+                        + " 2. For a Datalake cluster \\(since you have selected a datalake ready cluster definition\\) you should provide at least "
+                        + "one Ranger rds/database configuration to the Cluster request"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "a datalake cluster", when = "without ldap, ranger and hive rds",
+            then = "cluster creation is failed by missing hive and ranger rds and ldap")
     public void testCreateDatalakeClusterWithoutRdsAndLdap(TestContext testContext) {
         String clusterDefinitionName = creator.getRandomNameForResource();
         CloudStorageV4Request cloudStorage = cloudStorage();
         testContext
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
-                .when(ClusterDefinitionTestAction.postV4())
+                .when(ClusterDefinitionTestClient.postV4())
                 .given(MASTER.name(), InstanceGroupEntity.class).valid().withHostGroup(MASTER).withNodeCount(1)
                 .init(StackTestDto.class)
                 .withInstanceGroups(MASTER.name())
                 .withCluster(datalakeReadyCluster(testContext, null, null, null, clusterDefinitionName, cloudStorage))
                 .when(Stack.postV4(), key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
+                .expect(BadRequestException.class, key(BAD_REQUEST_KEY).withExpectedMessage("1. For a Datalake cluster \\(since you have selected a datalake "
+                        + "ready cluster definition\\) you should provide at least one Hive rds/database configuration to the Cluster request\n"
+                        + " 2. For a Datalake cluster \\(since you have selected a datalake ready cluster definition\\) you should provide at least one "
+                        + "Ranger rds/database configuration to the Cluster request\n"
+                        + " 3. For a Datalake cluster \\(since you have selected a datalake ready cluster definition\\) you should provide an LDAP "
+                        + "configuration or its name/id to the Cluster request"))
                 .validate();
     }
 

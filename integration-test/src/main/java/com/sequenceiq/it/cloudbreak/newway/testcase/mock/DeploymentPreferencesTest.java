@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.action.deploymentpref.DeploymentPreferencesTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.newway.assertion.deploymentpref.DeploymentPreferencesAssertion;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.deploymentpref.DeploymentPreferencesTestDto;
@@ -19,6 +20,10 @@ public class DeploymentPreferencesTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+        given = "there is a running cloudbreak with MOCK deployment prefernces",
+        when = "calling the get deployment preferences endpoint",
+        then = "the deployment preferences should be returned")
     public void testGetDeploymentPreferences(MockedTestContext testContext) {
         testContext
                 .given(DeploymentPreferencesTestDto.class)

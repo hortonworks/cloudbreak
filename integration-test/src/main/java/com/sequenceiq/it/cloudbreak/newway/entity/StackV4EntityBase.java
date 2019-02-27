@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -33,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
 public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends AbstractCloudbreakEntity<StackV4Request, StackV4Response, T> {
 
@@ -49,6 +49,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     public StackV4EntityBase<T> valid() {
         String name = getNameCreator().getRandomNameForResource();
         return withName(name)
+                .withImageSettings(getCloudProvider().imageSettings(getTestContext().given(ImageSettingsEntity.class)))
                 .withPlacement(getTestContext().given(PlacementSettingsEntity.class))
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
                 .withNetwork(getTestContext().given(NetworkV2Entity.class))
@@ -101,10 +102,19 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     public StackV4EntityBase<T> withEnvironment(Class<EnvironmentEntity> environmentKey) {
-        return withEnvironment(environmentKey.getSimpleName());
+        return withEnvironmentKey(environmentKey.getSimpleName());
     }
 
-    public StackV4EntityBase<T> withEnvironment(String environmentKey) {
+    public StackV4EntityBase<T> withCatalog(Class<ImageCatalogTestDto> catalogKey) {
+        ImageCatalogTestDto catalog = getTestContext().get(catalogKey);
+        if (catalog == null) {
+            throw new IllegalArgumentException("Catalog is null with given key: " + catalogKey);
+        }
+        getRequest().getImage().setCatalog(catalog.getName());
+        return this;
+    }
+
+    public StackV4EntityBase<T> withEnvironmentKey(String environmentKey) {
         EnvironmentEntity env = getTestContext().get(environmentKey);
         if (env == null) {
             throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
@@ -159,11 +169,10 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withImageCatalog(String imageCatalog) {
-        if (getRequest().getImage() == null) {
-            getRequest().setImage(new ImageSettingsV4Request());
-        }
-        getRequest().getImage().setCatalog(imageCatalog);
+    public StackV4EntityBase<T> withImageSettings(ImageSettingsEntity imageSettings) {
+        getRequest().setImage(imageSettings.getRequest());
+        ImageCatalogTestDto imageCatalogTestDto = getTestContext().get(ImageCatalogTestDto.class);
+        getRequest().getImage().setCatalog(imageCatalogTestDto.getName());
         return this;
     }
 

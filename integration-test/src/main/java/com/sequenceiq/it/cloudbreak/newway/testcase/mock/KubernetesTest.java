@@ -13,7 +13,9 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.action.kubernetes.KubernetesTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.kubernetes.KubernetesTestAssertion;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -42,6 +44,10 @@ public class KubernetesTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid kubernetes config request",
+            when = "calling create kubernetes config",
+            then = "the kubernetes list contains the newly created entity")
     public void testKubernetesCreationWithCorrectRequest(MockedTestContext testContext) {
         String kubernetesName = getNameGenerator().getRandomNameForResource();
         testContext
@@ -54,6 +60,10 @@ public class KubernetesTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a created kubernetes config",
+            when = "calling delete that specific kubernetes config",
+            then = "the kubernetes list does not contain the entity")
     public void testCreateDeleteCreate(TestContext testContext) {
         String kubernetesName = getNameGenerator().getRandomNameForResource();
         testContext
@@ -74,6 +84,10 @@ public class KubernetesTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a created kubernetes config",
+            when = "calling create that kubernetes config again",
+            then = "getting BadRequestException because two kubernetes config with same name should not exist")
     public void testCreateTwice(TestContext testContext) {
         String kubernetesName = getNameGenerator().getRandomNameForResource();
         testContext
@@ -88,31 +102,65 @@ public class KubernetesTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
-    public void testCreatKubernetesWithInvalidAttribute(TestContext testContext,
-                                                        String kubernetesName,
-                                                        String content,
-                                                        String expectedErrorMessage) {
+    public void testCreatKubernetesWithInvalidAttribute(
+            TestContext testContext,
+            String kubernetesName,
+            String content,
+            String expectedErrorMessage,
+            @Description TestCaseDescription testCaseDescription) {
+        String badRequestKey = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
                 .withContent(content)
-                .when(KubernetesTestAction::create, key(BAD_REQUEST_KEY))
-                .expect(BadRequestException.class, expectedMessage(expectedErrorMessage).withKey(BAD_REQUEST_KEY))
+                .when(KubernetesTestAction::create, key(badRequestKey))
+                .expect(BadRequestException.class, expectedMessage(expectedErrorMessage).withKey(badRequestKey))
                 .validate();
     }
 
     @DataProvider(name = INVALID_ATTRIBUTE_PROVIDER)
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
-                {getBean(TestContext.class), longStringGeneratorUtil.stringGenerator(101), KUBERNETES_CONTENT,
-                        "\"post.arg1.name\":\"The length of the config's name has to be in range of 5 to 100\""},
-                {getBean(TestContext.class), "abc", KUBERNETES_CONTENT,
-                        "\"post.arg1.name\":\"The length of the config's name has to be in range of 5 to 100\""},
-                {getBean(TestContext.class), "a-@#$%|:&*;", KUBERNETES_CONTENT,
-                        "\"post.arg1.name\":\"The config's name can only contain lowercase alphanumeric characters "
-                        + "and hyphens and has start with an alphanumeric character\""},
-                {getBean(TestContext.class), getNameGenerator().getRandomNameForResource(), null,
-                        "\"post.arg1.content\":\"must not be null\""}
+                {
+                        getBean(TestContext.class),
+                        longStringGeneratorUtil.stringGenerator(101),
+                        KUBERNETES_CONTENT,
+                        "The length of the config's name has to be in range of 5 to 100",
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a kubernetes config with too long name")
+                                .when("calling create kubernetes configuration")
+                                .then("getting BadRequestException")
+                },
+                {
+                        getBean(TestContext.class),
+                        "abc",
+                        KUBERNETES_CONTENT,
+                        "The length of the config's name has to be in range of 5 to 100",
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a kubernetes config with too short name")
+                                .when("calling create kubernetes configuration")
+                                .then("getting BadRequestException")
+                },
+                {
+                        getBean(TestContext.class),
+                        "a-@#$%|:&*;",
+                        KUBERNETES_CONTENT,
+                        "The config's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character",
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a kubernetes config with specific character in the name")
+                                .when("calling create kubernetes configuration")
+                                .then("getting BadRequestException")
+                },
+                {
+                        getBean(TestContext.class),
+                        getNameGenerator().getRandomNameForResource(),
+                        null,
+                        "must not be null",
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("a valid stack request and a Active Directory based kerberos configuration")
+                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .then("the cluster should be available")
+                }
         };
     }
 }

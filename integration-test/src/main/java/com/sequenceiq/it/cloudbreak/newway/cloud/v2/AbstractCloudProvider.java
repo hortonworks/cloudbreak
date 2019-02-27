@@ -5,8 +5,9 @@ import java.util.Collections;
 import javax.inject.Inject;
 
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 
@@ -24,6 +25,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return imageCatalog.withName("cloudbreak-default").withUrl(null);
+    }
+
+    @Override
+    public ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings) {
+        imageSettings.withImageCatalog("default");
+        return imageSettings;
     }
 
     @Override
