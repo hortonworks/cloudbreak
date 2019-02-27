@@ -52,7 +52,7 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private static final IFileParser<XmlSuite> DEFAULT_FILE_PARSER = XML_PARSER;
 
-    @Value("${integrationtest.testsuite.threadPoolSize}")
+    @Value("${integrationtest.testsuite.threadPoolSize:8}")
     private int suiteThreadPoolSize;
 
     @Value("${integrationtest.command:}")
@@ -67,6 +67,12 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
 
+    @Value("${integrationtest.threadCount:8}")
+    private int threadCount;
+
+    @Value("${integrationtest.parallel:METHODS}")
+    private String parallel;
+
     @Inject
     private TestNG testng;
 
@@ -77,6 +83,7 @@ public class IntegrationTestApp implements CommandLineRunner {
     private ITProps itProps;
 
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
         springApp.setWebApplicationType(WebApplicationType.NONE);
         try {
@@ -90,6 +97,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             threadSet.stream().forEach(t -> LOG.info("Runnning threads: {}", t.getName()));
             System.exit(1);
         }
+        LOG.info("run successfully: {}", System.currentTimeMillis() - start);
         System.exit(0);
     }
 
@@ -129,6 +137,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             case "suiteurls":
                 List<String> suitePathes = itProps.getSuiteFiles();
                 testng.setXmlSuites(loadSuites(suitePathes));
+
                 break;
             default:
                 LOG.info("Unknown command: {}", itCommand);
@@ -199,7 +208,11 @@ public class IntegrationTestApp implements CommandLineRunner {
     private XmlSuite loadSuite(String suitePath, InputStreamSource resource) throws IOException {
         IFileParser<XmlSuite> parser = getParser(suitePath);
         try (InputStream inputStream = resource.getInputStream()) {
-            return parser.parse(suitePath, inputStream, true);
+            XmlSuite xmlSuite = parser.parse(suitePath, inputStream, true);
+            xmlSuite.setParallel(XmlSuite.ParallelMode.valueOf(parallel.toUpperCase()));
+            xmlSuite.setThreadCount(threadCount);
+            LOG.info("Test are running in: {} type of parallel mode", parallel.toUpperCase());
+            return xmlSuite;
         }
     }
 

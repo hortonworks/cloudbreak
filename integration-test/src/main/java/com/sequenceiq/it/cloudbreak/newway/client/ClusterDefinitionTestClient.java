@@ -1,13 +1,18 @@
-package com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition;
+package com.sequenceiq.it.cloudbreak.newway.client;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionDeleteAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetListAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionRequestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 
-public class ClusterDefinitionTestAction {
+public class ClusterDefinitionTestClient {
 
-    private ClusterDefinitionTestAction() {
+    private ClusterDefinitionTestClient() {
     }
 
     public static ClusterDefinitionTestDto getByName(TestContext testContext, ClusterDefinitionTestDto entity, CloudbreakClient cloudbreakClient) {

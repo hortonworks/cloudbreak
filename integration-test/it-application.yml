@@ -7,10 +7,10 @@ mock:
 
 integrationtest:
     testsuite:
-      threadPoolSize: 1
+      threadPoolSize: 5
       pollingInterval: 1000
     defaultClusterDefinitionName: hdp-small-default
     outputdir: /it
     command: suites
     cleanup:
-      cleanupBeforeStart: true
+      cleanupBeforeStart: false

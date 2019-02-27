@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -41,6 +42,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid ldap request",
+            when = "calling create ldap",
+            then = "the ldap should be created")
     public void testCreateValidLdap(TestContext testContext) {
         String name = getNameGenerator().getRandomNameForResource();
         testContext
@@ -57,6 +62,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid active directory request",
+            when = "calling create ldap",
+            then = "the ldap should be created")
     public void testCreateValidAd(TestContext testContext) {
         String name = getNameGenerator().getRandomNameForResource();
         testContext
@@ -74,6 +83,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an invalid ldap request with empty name",
+            when = "calling create ldap",
+            then = "getting BadRequestException because ldap needs a valid name")
     public void testCreateLdapWithMissingName(TestContext testContext) {
         String key = getNameGenerator().getRandomNameForResource();
         testContext
@@ -88,6 +101,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an invalid ldap request with specific characters in the name",
+            when = "calling create ldap",
+            then = "getting BadRequestException because ldap needs a valid name")
     public void testCreateLdapWithInvalidName(TestContext testContext) {
         testContext
                 .given(LdapConfigTestDto.class)
@@ -101,6 +118,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an invalid ldap request with too long name",
+            when = "calling create ldap",
+            then = "getting BadRequestException because ldap needs a valid name")
     public void testCreateLdapWithLongName(TestContext testContext) {
         String longName = longStringGenerator.stringGenerator(101);
         testContext
@@ -115,6 +136,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an invalid ldap request with too long description",
+            when = "calling create ldap",
+            then = "getting BadRequestException because ldap needs a valid description")
     public void testCreateLdapWithLongDesc(TestContext testContext) {
         String name = getNameGenerator().getRandomNameForResource();
         String longDesc = longStringGenerator.stringGenerator(1001);
@@ -131,6 +156,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid ldap request",
+            when = "calling create ldap and delete and create again with the same name",
+            then = "ldap should be created")
     public void testCreateDeleteCreateAgain(TestContext testContext) {
         String name = getNameGenerator().getRandomNameForResource();
         testContext
@@ -149,6 +178,10 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid ldap request",
+            when = "calling create ldap and create again with the same name",
+            then = "getting BadRequestException because only one ldap can exist with same name in a workspace at the same time")
     public void testCreateLdapWithSameName(TestContext testContext) {
         String name = getNameGenerator().getRandomNameForResource();
         testContext

@@ -7,6 +7,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -28,24 +29,26 @@ public class ShowClusterDefinitionTest extends AbstractIntegrationTest {
         initializeDefaultClusterDefinitions(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster does not exist the we should return with the future cluster definition")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "stack", when = "cluster does not exist ", then = "we should return with the future cluster definition")
     public void testGetClusterDefinitionWhenClusterIsNotAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(StackTestDto.class).valid()
+                .given(StackTestDto.class)
+                .valid()
                 .withName(clusterName)
                 .when(Stack.generatedClusterDefinition())
                 .then(ShowClusterDefinitionUtil::checkFutureClusterDefinition)
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster exist the we should return with the generated cluster definition")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "stack", when = "cluster exist ", then = "we should return with the generated cluster definition")
     public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(StackTestDto.class).valid()
+                .given(StackTestDto.class)
+                .valid()
                 .withName(clusterName)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)

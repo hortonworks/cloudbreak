@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.stackmatrix.StackMatrixTestAction;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stackmatrix.StackMatrixTestDto;
@@ -21,6 +22,10 @@ public class StackMatrixTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "stack matrix",
+            when = "list all supported stack combinations",
+            then = "validate hdp and hdf ambari descriptor")
     public void testGetStackMatrix(MockedTestContext testContext) {
         testContext
                 .given(StackMatrixTestDto.class)

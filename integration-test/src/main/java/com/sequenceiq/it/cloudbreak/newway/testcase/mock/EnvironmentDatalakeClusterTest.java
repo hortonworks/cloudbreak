@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
@@ -59,6 +60,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create datalake cluster and then delete",
+            when = "create cluster and if available then delete",
+            then = "the cluster should work")
     public void testCreateDalalakeDelete(TestContext testContext) {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
@@ -97,7 +102,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create datalake cluster and then delete resources",
+            when = "create cluster and then delete resources",
+            then = "the resource deletion does not work because the resources attached to the cluster")
     public void testCreateDalalakeDeleteFails(TestContext testContext) {
+        String forbiddenKey = getNameGenerator().getRandomNameForResource();
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -117,14 +127,18 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .when(Stack.postV4())
-                .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(FORBIDDEN_KEY))
-                .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(CredentialTestDto.class, Credential::delete, key(FORBIDDEN_KEY))
-                .deleteGiven(EnvironmentEntity.class, Environment::delete, key(FORBIDDEN_KEY))
+                .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(forbiddenKey))
+                .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(forbiddenKey))
+                .deleteGiven(CredentialTestDto.class, Credential::delete, key(forbiddenKey))
+                .deleteGiven(EnvironmentEntity.class, Environment::delete, key(forbiddenKey))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create two datalake cluster in one environment",
+            when = "create cluster called twice",
+            then = "the cluster creation should work in both case")
     public void testSameEnvironmentWithDifferentDatalakes(TestContext testContext) {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
@@ -139,7 +153,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create datalake cluster in one environment and change credential in environment",
+            when = "call create cluster and change credential",
+            then = "the credential change will not work")
     public void testDatalakeChangeCredentialFails(TestContext testContext) {
+        String forbiddenKey = getNameGenerator().getRandomNameForResource();
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -155,13 +174,18 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)
                 .withCredential("newCred")
-                .when(Environment::changeCredential,  key(FORBIDDEN_KEY))
-                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
+                .when(Environment::changeCredential,  key(forbiddenKey))
+                .expect(BadRequestException.class, key(forbiddenKey))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create datalake cluster in one environment and detach resources",
+            when = "call create cluster and detach resources",
+            then = "will not work because the datalake still up and running")
     public void testDatalakeDetachFails(TestContext testContext) {
+        String forbiddenKey = getNameGenerator().getRandomNameForResource();
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -174,12 +198,16 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentEntity.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::putDetachResources, key(FORBIDDEN_KEY))
-                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
+                .when(Environment::putDetachResources, key(forbiddenKey))
+                .expect(BadRequestException.class, key(forbiddenKey))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create datalake cluster and workload",
+            when = "call create cluster with datalake and wiht workload config",
+            then = "will work fine")
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
         String dlName = getNameGenerator().getRandomNameForResource();
         String hivedb = getNameGenerator().getRandomNameForResource();
@@ -201,6 +229,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "Create datalake cluster with invalid configurations",
+            when = "call create cluster",
+            then = "will drop ForbiddenException")
     public void testCreateDalalakeWithoutResourcesFails(TestContext testContext) {
         testContext.given(EnvironmentEntity.class)
                 .withRegions(VALID_REGION)

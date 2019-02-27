@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -10,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
 public interface CloudProvider {
 
@@ -20,6 +21,8 @@ public interface CloudProvider {
     String location();
 
     ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog);
+
+    ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings);
 
     InstanceTemplateV4Entity template(InstanceTemplateV4Entity template);
 

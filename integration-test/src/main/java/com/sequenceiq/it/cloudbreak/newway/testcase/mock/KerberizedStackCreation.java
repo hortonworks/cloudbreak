@@ -8,6 +8,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
@@ -33,13 +34,22 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an ActiveDirectory based kerberos config without realm and domain",
+            when = "calling a stack creation with that kerberos config",
+            then = "custom should be used and salt action should be called")
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithoutDomainAndWithRealm(TestContext testContext) {
         testContext
-                .given(ActiveDirectoryKerberosDescriptorTestDto.class).withDomain(null).withRealm("realm.addomain.com")
-                .given(KerberosTestDto.class).withActiveDirectoryDescriptor()
+                .given(ActiveDirectoryKerberosDescriptorTestDto.class)
+                .withDomain(null)
+                .withRealm("realm.addomain.com")
+                .given(KerberosTestDto.class)
+                .withActiveDirectoryDescriptor()
                 .when(KerberosTestAction::post)
-                .given(ClusterEntity.class).withKerberos()
-                .given(StackTestDto.class).withCluster()
+                .given(ClusterEntity.class)
+                .withKerberos()
+                .given(StackTestDto.class)
+                .withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("realm.addomain.com"))
@@ -48,13 +58,22 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "an ActiveDirectory based kerberos config without realm and with domain",
+            when = "calling a stack creation with that kerberos config",
+            then = "propagated domain should be used and salt action should be called")
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithDomainAndWithRealm(TestContext testContext) {
         testContext
-                .given(ActiveDirectoryKerberosDescriptorTestDto.class).withDomain("custom.addomain.com").withRealm("realm.addomain.com")
-                .given(KerberosTestDto.class).withActiveDirectoryDescriptor()
+                .given(ActiveDirectoryKerberosDescriptorTestDto.class)
+                .withDomain("custom.addomain.com")
+                .withRealm("realm.addomain.com")
+                .given(KerberosTestDto.class)
+                .withActiveDirectoryDescriptor()
                 .when(KerberosTestAction::post)
-                .given(ClusterEntity.class).withKerberos()
-                .given(StackTestDto.class).withCluster()
+                .given(ClusterEntity.class)
+                .withKerberos()
+                .given(StackTestDto.class)
+                .withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("custom.addomain.com"))
@@ -63,13 +82,22 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a FreeIPA based kerberos config with realm and without domain",
+            when = "calling a stack creation with that kerberos config",
+            then = "propagated realm should be used and salt action should be called")
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithoutDomainAndWithRealm(TestContext testContext) {
         testContext
-                .given(FreeIPAKerberosDescriptorTestDto.class).withDomain(null).withRealm("realm.freeiparealm.com")
-                .given(KerberosTestDto.class).withFreeIPADescriptor()
+                .given(FreeIPAKerberosDescriptorTestDto.class)
+                .withDomain(null)
+                .withRealm("realm.freeiparealm.com")
+                .given(KerberosTestDto.class)
+                .withFreeIPADescriptor()
                 .when(KerberosTestAction::post)
-                .given(ClusterEntity.class).withKerberos()
-                .given(StackTestDto.class).withCluster()
+                .given(ClusterEntity.class)
+                .withKerberos()
+                .given(StackTestDto.class)
+                .withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("realm.freeiparealm.com"))
@@ -78,13 +106,22 @@ public class KerberizedStackCreation extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a FreeIPA based kerberos config with realm and domain",
+            when = "calling a stack creation with that kerberos config",
+            then = "propagated domain should be used and salt action should be called")
     public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithDomainAndWithRealm(TestContext testContext) {
         testContext
-                .given(FreeIPAKerberosDescriptorTestDto.class).withDomain("custom.freeipadomain.com").withRealm("realm.freeiparealm.com")
-                .given(KerberosTestDto.class).withFreeIPADescriptor()
+                .given(FreeIPAKerberosDescriptorTestDto.class)
+                .withDomain("custom.freeipadomain.com")
+                .withRealm("realm.freeiparealm.com")
+                .given(KerberosTestDto.class)
+                .withFreeIPADescriptor()
                 .when(KerberosTestAction::post)
-                .given(ClusterEntity.class).withKerberos()
-                .given(StackTestDto.class).withCluster()
+                .given(ClusterEntity.class)
+                .withKerberos()
+                .given(StackTestDto.class)
+                .withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(validateCustomDomain("custom.freeipadomain.com"))
