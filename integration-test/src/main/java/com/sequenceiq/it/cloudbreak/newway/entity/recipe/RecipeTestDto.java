@@ -21,19 +21,9 @@ import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class RecipeEntity extends AbstractCloudbreakEntity<RecipeV4Request, RecipeV4Response, RecipeEntity> implements Purgable<RecipeViewV4Response> {
-    public static final String RECIPE = "RECIPE";
+public class RecipeTestDto extends AbstractCloudbreakEntity<RecipeV4Request, RecipeV4Response, RecipeTestDto> implements Purgable<RecipeViewV4Response> {
 
-    public RecipeEntity(String newId) {
-        super(newId);
-        setRequest(new RecipeV4Request());
-    }
-
-    public RecipeEntity() {
-        this(RECIPE);
-    }
-
-    public RecipeEntity(TestContext testContext) {
+    public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
     }
 
@@ -47,29 +37,34 @@ public class RecipeEntity extends AbstractCloudbreakEntity<RecipeV4Request, Reci
         }
     }
 
-    public RecipeEntity valid() {
+    @Override
+    public String getName() {
+        return getRequest().getName();
+    }
+
+    public RecipeTestDto valid() {
         return withName(getNameCreator().getRandomNameForResource())
                 .withRecipeType(RecipeV4Type.PRE_AMBARI_START)
                 .withContent(new String(Base64.getEncoder().encode("#!/bin/bash%necho ALMAA".getBytes())));
     }
 
-    public RecipeEntity withName(String name) {
+    public RecipeTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
     }
 
-    public RecipeEntity withDescription(String description) {
+    public RecipeTestDto withDescription(String description) {
         getRequest().setDescription(description);
         return this;
     }
 
-    public RecipeEntity withContent(String content) {
+    public RecipeTestDto withContent(String content) {
         getRequest().setContent(content);
         return this;
     }
 
-    public RecipeEntity withRecipeType(RecipeV4Type recipeType) {
+    public RecipeTestDto withRecipeType(RecipeV4Type recipeType) {
         getRequest().setType(recipeType);
         return this;
     }

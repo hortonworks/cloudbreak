@@ -38,8 +38,8 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
@@ -80,9 +80,9 @@ public class AuditTest extends AbstractIntegrationTest {
     public void testCreateAuditForRecipeAndThenValidate(TestContext testContext) {
         String recipeName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(RecipeEntity.class)
+                .given(RecipeTestDto.class)
                 .withName(recipeName)
-                .when(Recipe.postV4(), key(recipeName))
+                .when(RecipeTestClient::postV4, key(recipeName))
                 .select(recipe -> recipe.getResponse().getId(), key(recipeName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(recipeName)
@@ -275,9 +275,9 @@ public class AuditTest extends AbstractIntegrationTest {
     public void testCreateAuditForRecipesAndThenValidate(TestContext testContext) {
         String recipeName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(RecipeEntity.class)
+                .given(RecipeTestDto.class)
                 .withName(recipeName)
-                .when(Recipe.postV4(), key(recipeName))
+                .when(RecipeTestClient::postV4, key(recipeName))
                 .select(r -> r.getResponse().getId(), key(recipeName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(recipeName)
