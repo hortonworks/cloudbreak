@@ -154,6 +154,10 @@
         {
           "name": "hive_metastore_database_name",
           "variable": "hive-hive_metastore_database_name"
+        },
+        {
+          "name": "hive_metastore_database_user",
+          "variable": "hive-hive_metastore_database_user"
         }
       ],
       "roleConfigGroups": [
@@ -271,6 +275,10 @@
       {
         "name": "hive-hive_metastore_database_password",
         "value": "password"
+      },
+      {
+        "name": "hive-hive_metastore_database_user",
+        "value": "user"
       }
     ]
   }
