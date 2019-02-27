@@ -40,8 +40,8 @@ import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.Recipe;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeEntity;
+import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
@@ -141,8 +141,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext
                 .given(LdapConfigTestDto.class).withName("mock-test-ldap")
                 .when(ldapConfigTestClient.createIfNotExists())
-                .given(RecipeEntity.class).withName("mock-test-recipe")
-                .when(Recipe.postV4())
+                .given(RecipeTestDto.class).withName("mock-test-recipe")
+                .when(RecipeTestClient::postV4)
                 .given(DatabaseEntity.class).withName("mock-test-rds")
                 .when(new DatabaseCreateIfNotExistsAction())
                 .given("mpack", MPackTestDto.class).withName("mock-test-mpack")
