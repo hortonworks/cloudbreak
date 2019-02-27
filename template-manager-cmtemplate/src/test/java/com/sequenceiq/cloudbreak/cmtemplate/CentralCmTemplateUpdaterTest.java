@@ -113,6 +113,7 @@ public class CentralCmTemplateUpdaterTest {
         config.setConnectionURL("jdbc:postgresql://cluster.test.com:5432/hive");
         config.setDatabaseEngine(DatabaseVendor.POSTGRES);
         config.setType(DatabaseType.HIVE.name());
+        config.setConnectionUserName("user");
         config.setConnectionPassword("password");
         return Set.of(config);
     }

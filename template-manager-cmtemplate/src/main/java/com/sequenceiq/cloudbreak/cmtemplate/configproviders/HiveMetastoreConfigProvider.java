@@ -26,6 +26,7 @@ public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigPro
         result.add(new ApiClusterTemplateConfig().name("hive_metastore_database_host").variable("hive-hive_metastore_database_host"));
         result.add(new ApiClusterTemplateConfig().name("hive_metastore_database_type").variable("hive-hive_metastore_database_type"));
         result.add(new ApiClusterTemplateConfig().name("hive_metastore_database_name").variable("hive-hive_metastore_database_name"));
+        result.add(new ApiClusterTemplateConfig().name("hive_metastore_database_user").variable("hive-hive_metastore_database_user"));
         return result;
     }
 
@@ -38,6 +39,7 @@ public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigPro
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_name").value(hiveView.getDatabaseName()));
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_type").value(hiveView.getSubprotocol()));
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_password").value(hiveView.getConnectionPassword()));
+        result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_user").value(hiveView.getConnectionUserName()));
         return result;
     }
 
