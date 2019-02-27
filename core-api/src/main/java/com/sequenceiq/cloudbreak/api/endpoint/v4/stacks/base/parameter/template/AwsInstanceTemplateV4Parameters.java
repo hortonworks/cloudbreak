@@ -47,7 +47,7 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         putIfValueNotNull(map, "spotPrice", spotPrice);
         if (encryption != null) {
             putIfValueNotNull(map, "type", encryption.getType());
-            putIfValueNotNull(map, "encrypted", true);
+            putIfValueNotNull(map, "encrypted", encryption.getType() != EncryptionType.NONE);
         }
         return map;
     }
