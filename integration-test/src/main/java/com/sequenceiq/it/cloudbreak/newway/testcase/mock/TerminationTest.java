@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertStatusReasonMessage;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
@@ -34,6 +35,10 @@ public class TerminationTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "stack with 3 worker nodes",
+            when = "terminate an instance by instance id",
+            then = "remove that instance from stack")
     public void testInstanceTermination(TestContext testContext) {
         testContext
                 // create stack
@@ -51,6 +56,10 @@ public class TerminationTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "stack with 2 worker nodes",
+            when = "terminate an instance by instance id",
+            then = "cannot remove that instance from stack because there is not enough nodes to dowsncale")
     public void testInstanceTerminationReplicationError(TestContext testContext) {
         testContext
                 // create stack
@@ -67,6 +76,10 @@ public class TerminationTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "stack with 1 worker nodes",
+            when = "terminate an instance by instance id with force",
+            then = "remove that instance from stack")
     public void testInstanceTerminationForced(TestContext testContext) {
         testContext
                 // create stack

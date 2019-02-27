@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.util;
 
 import java.io.IOException;
 
-import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -13,9 +13,9 @@ public class ResponseUtil {
     }
 
     public static String getErrorMessage(Exception ex) {
-        if (ex instanceof BadRequestException) {
+        if (ex instanceof ClientErrorException) {
             try {
-                String responseJson = ((BadRequestException) ex).getResponse().readEntity(String.class);
+                String responseJson = ((ClientErrorException) ex).getResponse().readEntity(String.class);
                 if (JsonUtil.isValid(responseJson)) {
                     JsonNode jsonNode = JsonUtil.readTree(responseJson);
                     if (jsonNode.has("message")) {

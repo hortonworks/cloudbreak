@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -24,6 +25,9 @@ public class PurgeGarbageService {
 
     @Inject
     private List<Purgable> purgables;
+
+    @Value("${integrationtest.cleanup.cleanupBeforeStart:false}")
+    private boolean cleanupBeforeStart;
 
     public <T> void purge() {
         MDC.put("testlabel", "purge");
@@ -52,7 +56,11 @@ public class PurgeGarbageService {
                     .filter(purgable::deletable)
                     .collect(Collectors.toList());
             LOGGER.info("Purge all {}, count: {}", purgable.getClass().getSimpleName(), all.size());
-            all.forEach(e -> purgable.delete(testContext, e, cloudbreakClient));
+            if (cleanupBeforeStart) {
+                all.forEach(e -> purgable.delete(testContext, e, cloudbreakClient));
+            } else {
+                all.forEach(e -> LOGGER.info("Created resource remained in the Database: {}", e));
+            }
         });
     }
 }

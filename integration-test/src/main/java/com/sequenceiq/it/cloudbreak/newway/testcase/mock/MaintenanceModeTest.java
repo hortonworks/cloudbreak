@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -33,6 +34,10 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a valid cluster request",
+            when = "calling create cluster and then modelling a maintenance mode on it",
+            then = "cluster should be available after the whole process")
     public void testMaintenanceMode(TestContext testContext) {
         testContext
                 .given(StackTestDto.class)

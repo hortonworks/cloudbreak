@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
 public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<ImageCatalogTestDto> {
 

@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotEx
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
@@ -69,9 +70,14 @@ public class RepairTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a MOCK cluster without kerberos",
+            when = "repair the master node on the cluster",
+            then = "after the process the master has to be available")
     public void testRepairMasterNodeNoKerberos(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         String ambariRdsName = getNameGenerator().getRandomNameForResource();
+        String hostnameKey = getNameGenerator().getRandomNameForResource();
         createEnvWithResources(testContext, ambariRdsName);
         addAmbariMocks(testContext, clusterName);
         testContext
@@ -80,7 +86,11 @@ public class RepairTest extends AbstractIntegrationTest {
                 .withCluster(getCluster(testContext, null, ambariRdsName))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .select(s -> s.getInstanceMetaData(HostGroupType.MASTER.getName()).stream().findFirst().get().getDiscoveryFQDN(), key("hostname"));
+                .select(s -> s.getInstanceMetaData(HostGroupType.MASTER.getName())
+                        .stream()
+                        .findFirst()
+                        .get()
+                        .getDiscoveryFQDN(), key(hostnameKey));
 
         testContext
                 .given(StackTestDto.class)
@@ -89,18 +99,22 @@ public class RepairTest extends AbstractIntegrationTest {
 
         testContext.given(StackTestDto.class)
                 .then((tc, stackEntity, cc) -> {
-                    String hostname = tc.getSelected("hostname");
+                    String hostname = tc.getSelected(hostnameKey);
                     AmbariPathResolver ambariPathResolver = new AmbariPathResolver(clusterName, hostname);
-                    assertGetClusterComponentCalls(stackEntity, AMBARI_CLUSTER_COMPONENTS, components, ambariPathResolver);
                     assertSetComponentStateCalls(stackEntity, AMBARI_HOST_COMPONENTS, components, "INSTALLED", 2, ambariPathResolver);
                     assertSetComponentStateCalls(stackEntity, AMBARI_HOST_COMPONENTS, components, "INIT", 1, ambariPathResolver);
                     assertSetComponentStateCalls(stackEntity, AMBARI_HOST_COMPONENTS, components, "STARTED", 1, ambariPathResolver);
-                    stackEntity.then(MockVerification.verify(HttpMethod.GET, ambariPathResolver.resolve(AMBARI_HOST_COMPONENTS)).exactTimes(2));
-                    stackEntity.then(MockVerification.verify(HttpMethod.PUT, ambariPathResolver.resolve(AMBARI_HOST_COMPONENTS)).exactTimes(4));
-                    stackEntity.then(MockVerification.verify(HttpMethod.POST, ambariPathResolver.resolve(AMBARI_KERBEROS_CREDENTIAL)).exactTimes(0));
-                    stackEntity.then(MockVerification.verify(HttpMethod.PUT, ambariPathResolver.resolve(AMBARI_REGENERATE_KEYTABS)).bodyContains("KERBEROS")
+                    stackEntity.then(MockVerification.verify(HttpMethod.GET,
+                            ambariPathResolver.resolve(AMBARI_HOST_COMPONENTS)).exactTimes(2));
+                    stackEntity.then(MockVerification.verify(HttpMethod.PUT,
+                            ambariPathResolver.resolve(AMBARI_HOST_COMPONENTS)).exactTimes(4));
+                    stackEntity.then(MockVerification.verify(HttpMethod.POST,
+                            ambariPathResolver.resolve(AMBARI_KERBEROS_CREDENTIAL)).exactTimes(0));
+                    stackEntity.then(MockVerification.verify(HttpMethod.PUT,
+                            ambariPathResolver.resolve(AMBARI_REGENERATE_KEYTABS)).bodyContains("KERBEROS")
                             .exactTimes(0));
-                    stackEntity.then(MockVerification.verify(HttpMethod.POST, ambariPathResolver.resolve(AMBARI_CLUSTER_REQUESTS)).bodyContains("RESTART")
+                    stackEntity.then(MockVerification.verify(HttpMethod.POST,
+                            ambariPathResolver.resolve(AMBARI_CLUSTER_REQUESTS)).bodyContains("RESTART")
                             .exactTimes(0));
                     return stackEntity;
                 })
@@ -108,6 +122,10 @@ public class RepairTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a MOCK cluster with kerberos",
+            when = "repair the master node on the cluster",
+            then = "after the process the master has to be available")
     public void testRepairMasterNodeWithKerberos(MockedTestContext testContext) {
         String ambariRdsName = getNameGenerator().getRandomNameForResource();
         createEnvWithResources(testContext, ambariRdsName);
@@ -134,7 +152,6 @@ public class RepairTest extends AbstractIntegrationTest {
                 .then((tc, e, cc) -> {
                     String hostname = tc.getSelected("hostname");
                     AmbariPathResolver ambariPathResolver = new AmbariPathResolver(clusterName, hostname);
-                    assertGetClusterComponentCalls(e, AMBARI_CLUSTER_COMPONENTS, components, ambariPathResolver);
                     assertSetComponentStateCalls(e, AMBARI_HOST_COMPONENTS, components, "INSTALLED", 2, ambariPathResolver);
                     assertSetComponentStateCalls(e, AMBARI_HOST_COMPONENTS, components, "INIT", 1, ambariPathResolver);
                     assertSetComponentStateCalls(e, AMBARI_HOST_COMPONENTS, components, "STARTED", 1, ambariPathResolver);
@@ -156,7 +173,7 @@ public class RepairTest extends AbstractIntegrationTest {
         MockVerification mockVerification = MockVerification.verify(HttpMethod.PUT, ambariPathResolver.resolve(path))
                 .bodyContains(expectedState);
         components.forEach(mockVerification::bodyContains);
-        mockVerification.exactTimes(times);
+        mockVerification.atLeast(times);
         stackEntity.then(mockVerification);
     }
 

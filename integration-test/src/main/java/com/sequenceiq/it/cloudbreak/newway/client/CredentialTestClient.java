@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.action.credential;
+package com.sequenceiq.it.cloudbreak.newway.client;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
@@ -16,11 +16,11 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
-public class CredentialTestAction {
+public class CredentialTestClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialTestAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialTestClient.class);
 
-    private CredentialTestAction() {
+    private CredentialTestClient() {
 
     }
 

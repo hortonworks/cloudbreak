@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -26,8 +27,8 @@ public class ShowStackCliRequestTest extends AbstractIntegrationTest {
         initializeDefaultClusterDefinitions(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK,
-            description = "When cluster exist the we should return with the cli json")
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "stack", when = "cluster exist", then = "we should return with the cli json")
     public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         testContext

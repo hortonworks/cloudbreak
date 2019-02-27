@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.entity;
+package com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog;
 
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
 
 @Prototype
 public class ImageCatalogTestDto extends AbstractCloudbreakEntity<ImageCatalogV4Request, ImageCatalogV4Response, ImageCatalogTestDto>
@@ -50,9 +50,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakEntity<ImageCatalogV4
     }
 
     public ImageCatalogTestDto valid() {
-        MockedTestContext mockedTestContext = (MockedTestContext) getTestContext();
-        return getCloudProvider().imageCatalog(withName(getNameCreator().getRandomNameForResource())
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl()));
+        return getCloudProvider().imageCatalog(withName(getNameCreator().getRandomNameForResource()));
     }
 
     public ImagesV4Response getResponseByProvider() {

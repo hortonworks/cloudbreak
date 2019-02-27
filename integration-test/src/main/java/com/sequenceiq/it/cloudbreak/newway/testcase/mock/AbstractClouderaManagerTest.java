@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -19,11 +19,11 @@ public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(getNameGenerator().getRandomNameForResource())
                 .withClusterDefinition(ResourceUtil.readResourceAsString(applicationContext, "classpath:/clusterdefinition/clouderamanager.bp"))
-                .when(ClusterDefinitionTestAction.postV4());
+                .when(ClusterDefinitionTestClient.postV4());
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
+    public void tearDown(Object[] data) {
         MockedTestContext testContext = (MockedTestContext) data[0];
         testContext.cleanupTestContextEntity();
     }

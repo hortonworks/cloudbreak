@@ -43,7 +43,7 @@ public class MockVerification implements AssertionV2<StackTestDto> {
     public MockVerification(HttpMethod httpMethod, String path, Integer exactTimes) {
         this.path = path;
         this.httpMethod = httpMethod;
-        this.exactTimes = 1;
+        this.exactTimes = exactTimes;
     }
 
     public static MockVerification verify(HttpMethod httpMethod, String path) {
@@ -94,7 +94,7 @@ public class MockVerification implements AssertionV2<StackTestDto> {
     private void checkExactTimes(int times) {
         if (exactTimes != null) {
             if (exactTimes != times) {
-                throw new RuntimeException(path + "with body" + generateBodyTimesLog(bodyContainsList) + " "
+                throw new RuntimeException(path + " with body" + generateBodyTimesLog(bodyContainsList) + " "
                         + "request should have been invoked exactly " + exactTimes + " times, but it was invoked " + times + " times");
             }
         }

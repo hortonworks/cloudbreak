@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED;
 import static com.sequenceiq.it.cloudbreak.newway.Mock.gson;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
@@ -13,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -41,16 +43,24 @@ public class AmbariPasswordUpdateTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    public void testModifyAmbariPasswordThenValidate(MockedTestContext testContext) {
+    @Description(
+        given = "a stack with and Ambari cluster",
+        when = "password of the cluster is modified",
+        then = "the cluster should still be available")
+    public void createAmbariClusterAndModifyThePasswordOnItThenNoExceptionOccursTheStackIsAvailable(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
+        String generatedKey = getNameGenerator().getRandomNameForResource();
+
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);
         testContext
-                .given(StackTestDto.class).valid().withName(clusterName)
-                .when(Stack.postV4())
-                .await(STACK_AVAILABLE)
-                .when(StackTestAction::modifyAmbariPassword)
-                .await(STACK_AVAILABLE)
+                .given(generatedKey, StackTestDto.class)
+                .valid()
+                .withName(clusterName)
+                .when(Stack.postV4(), key(generatedKey))
+                .await(STACK_AVAILABLE, key(generatedKey))
+                .when(StackTestAction::modifyAmbariPassword, key(generatedKey))
+                .await(STACK_AVAILABLE, key(generatedKey))
                 .validate();
     }
 

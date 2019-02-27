@@ -20,7 +20,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.Clu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -49,6 +50,10 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a valid cluster definition create request is sent",
+            then = "the cluster definition should be in the response")
     public void testCreateClusterDefinition(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         List<String> keys = Arrays.asList("key_1", "key_2", "key_3");
@@ -58,7 +63,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
                 .withDescription(clusterDefinitionName)
                 .withTag(keys, values)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestAction.postV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(clusterDefinitionName, entity.getName());
                     assertEquals(clusterDefinitionName, entity.getDescription());
@@ -70,43 +75,59 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a cluster definition create request with invalid name is sent",
+            then = "a BadRequestException should be returned")
     public void testCreateClusterDefinitionWithInvalidCharacterName(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getInvalidRandomNameForResource();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestAction.postV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
                 .expect(BadRequestException.class, expectedMessage("must match ").withKey(clusterDefinitionName))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a cluster definition create request is sent with an invalid JSON",
+            then = "a BadRequestException should be returned with 'Failed to parse JSON' message")
     public void testCreateClusterDefinitionWithInvalidJson(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition("apple-tree")
-                .when(ClusterDefinitionTestAction.postV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
                 .expect(BadRequestException.class, expectedMessage("Failed to parse JSON").withKey(clusterDefinitionName))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "the list cluster definition",
+            then = "returns with cluster definition list")
     public void testListClusterDefinition(TestContext testContext) {
         testContext.given(ClusterDefinitionTestDto.class)
-                .when(ClusterDefinitionTestAction.listV4())
+                .when(ClusterDefinitionTestClient.listV4())
                 .then(ClusterDefinitionTest::checkDefaultClusterDefinitionsIsListed)
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "the get cluster definition endpoint is called",
+            then = "the cluster definition should be returned")
     public void testGetSpecificClusterDefinition(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestAction.postV4(), key(clusterDefinitionName))
-                .when(ClusterDefinitionTestAction.getV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.getV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(clusterDefinitionName, entity.getName());
                     return entity;
@@ -115,18 +136,22 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a specified cluster definition",
+            when = "delete cluster definition is called for the specified cluster definition",
+            then = "the cluster definition list response does not contain it")
     public void testDeleteSpecificClusterDefinition(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestAction.postV4(), key(clusterDefinitionName))
-                .when(ClusterDefinitionTestAction.deleteV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.deleteV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(clusterDefinitionName, entity.getName());
                     return entity;
                 })
-                .when(ClusterDefinitionTestAction.listV4())
+                .when(ClusterDefinitionTestClient.listV4())
                 .then(ClusterDefinitionTest::checkClusterDefinitionDoesNotExistInTheList)
                 .validate();
     }
@@ -141,13 +166,17 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a cluster definition",
+            when = "the cluster definition request endpoint is called",
+            then = "the valid request for thet cluster definition is returned")
     public void testRequestSpecificClusterDefinitionRequest(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestAction.postV4(), key(clusterDefinitionName))
-                .when(ClusterDefinitionTestAction.requestV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
+                .when(ClusterDefinitionTestClient.requestV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(entity.getRequest().getClusterDefinition(), VALID_CD);
                     assertEquals(clusterDefinitionName, entity.getName());

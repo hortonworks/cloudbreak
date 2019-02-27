@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
 public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogDeleteAction.class);

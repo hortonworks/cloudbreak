@@ -4,6 +4,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.action.tagspecifications.TagSpecificationsTestAction;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.tagspecifications.TagSpecificationsTestDto;
@@ -17,6 +18,10 @@ public class TagSpecificationsTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a tag specification",
+            when = "list all tag specifications",
+            then = "retrive successfully")
     public void testGetTagSpecifications(MockedTestContext testContext) {
         testContext
                 .given(TagSpecificationsTestDto.class)

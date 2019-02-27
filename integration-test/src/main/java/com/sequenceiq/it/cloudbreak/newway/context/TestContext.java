@@ -45,6 +45,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestContext.class);
 
+    private static final String DESCRIPTION = "DESCRIPTION";
+
     private ApplicationContext applicationContext;
 
     private final Map<String, CloudbreakEntity> resources = new LinkedHashMap<>();
@@ -61,6 +63,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private final Map<String, Capture> captures = new HashMap<>();
 
+    private Map<String, Object> contextParameters = new HashMap<>();
+
     @Inject
     private WaitUtilForMultipleStatuses waitUtil;
 
@@ -76,6 +80,8 @@ public abstract class TestContext implements ApplicationContextAware {
     private DefaultModel model;
 
     private boolean validated;
+
+    private boolean initialized;
 
     public Map<String, CloudbreakEntity> getResources() {
         return resources;
@@ -200,6 +206,19 @@ public abstract class TestContext implements ApplicationContextAware {
         return this;
     }
 
+    public TestContext withDescription(TestCaseDescription testCaseDesription) {
+        this.contextParameters.put(DESCRIPTION, testCaseDesription);
+        return this;
+    }
+
+    public Optional<TestCaseDescription> getDescription() {
+        TestCaseDescription description = (TestCaseDescription) this.contextParameters.get(DESCRIPTION);
+        if (description == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(description);
+    }
+
     protected String getDefaultUser() {
         return testParameter.get(CloudbreakTest.REFRESH_TOKEN);
     }
@@ -208,6 +227,7 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         Log.log(LOGGER, "init " + clss.getSimpleName());
         CloudbreakEntity bean = applicationContext.getBean(clss, this);
+        initialized = true;
         return (O) bean.valid();
     }
 
@@ -216,6 +236,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakEntity> O given(String key, Class<O> clss) {
+        Optional<TestCaseDescription> description = getDescription();
+        if (description.isPresent()) {
+            Log.log(LOGGER, "Test case description: " + description.get().getValue());
+        }
         checkShutdown();
         O cloudbreakEntity = (O) resources.get(key);
         if (cloudbreakEntity == null) {
@@ -435,14 +459,15 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
         if (!exceptionsDuringTest.isEmpty()) {
-            StringBuilder br = new StringBuilder("All Exceptions during test are logged before this message").append(System.lineSeparator());
+            StringBuilder builder = new StringBuilder("All Exceptions that occurred during the test are logged before this message")
+                    .append(System.lineSeparator());
             exceptionsDuringTest.forEach((msg, ex) -> {
                 LOGGER.error(msg, ex);
-                br.append(msg).append(": ").append(getErrorMessage(ex)).append(System.lineSeparator());
+                builder.append(msg).append(": ").append(getErrorMessage(ex)).append(System.lineSeparator());
             });
             exceptionsDuringTest.clear();
             if (!silently) {
-                throw new TestFailException(br.toString());
+                throw new TestFailException(builder.toString());
             }
         }
     }
@@ -489,9 +514,9 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public void cleanupTestContextEntity() {
-        if (!validated) {
+        if (!validated && initialized) {
             throw new IllegalStateException(
-                    "Should be validate the context! Maybe do you forget to call .validate() end of the test? See other tests for example");
+                    "Test context should be validated! Maybe do you forgot to call .validate() end of the test? See other tests as an example.");
         }
         checkShutdown();
         handleExecptionsDuringTest(true);

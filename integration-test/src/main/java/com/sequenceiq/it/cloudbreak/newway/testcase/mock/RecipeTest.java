@@ -1,13 +1,16 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
-import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -18,12 +21,19 @@ public class RecipeTest extends AbstractIntegrationTest {
     @Inject
     private LongStringGeneratorUtil longStringGenerator;
 
+    @Inject
+    private RandomNameCreator randomNameCreator;
+
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         createDefaultUser((TestContext) data[0]);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a valid recipe request",
+            when = "create recipe",
+            then = "recipe created")
     public void testCreateValidRecipe(TestContext testContext) {
         testContext.given(RecipeTestDto.class)
                 .when(RecipeTestClient::postV4)
@@ -31,6 +41,10 @@ public class RecipeTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a valid recipe request",
+            when = "create recipe and then delete and create again",
+            then = "recipe created")
     public void testCreateDeleteValidCreateAgain(TestContext testContext) {
         testContext.given(RecipeTestDto.class)
                 .when(RecipeTestClient::postV4)
@@ -40,51 +54,79 @@ public class RecipeTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "an invalid recipe request with specific characters in name",
+            when = "create recipe",
+            then = "getting a BadRequestException")
     public void testCreateSpecialNameRecipe(TestContext testContext) {
+        String spacialName = randomNameCreator.getRandomNameForResource();
         testContext.given(RecipeTestDto.class)
                 .withName(getNameGenerator().getInvalidRandomNameForResource())
-                .when(RecipeTestClient::postV4, RunningParameter.key("special-name"))
-                .expect(BadRequestException.class, RunningParameter.key("special-name")
+                .when(RecipeTestClient::postV4, key(spacialName))
+                .expect(BadRequestException.class, key(spacialName)
                         .withExpectedMessage("The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start "
                                 + "with an alphanumeric character"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a valid recipe request",
+            when = "create recipe twice",
+            then = "getting a BadRequestException")
     public void testCreateAgainRecipe(TestContext testContext) {
+        String againName = randomNameCreator.getRandomNameForResource();
         testContext.given(RecipeTestDto.class)
                 .when(RecipeTestClient::postV4)
-                .when(RecipeTestClient::postV4, RunningParameter.key("again-name"))
-                .expect(BadRequestException.class, RunningParameter.key("again-name").withExpectedMessage("recipe already exists with name '"))
+                .when(RecipeTestClient::postV4, key(againName))
+                .expect(BadRequestException.class, key(againName)
+                        .withExpectedMessage("recipe already exists with name '"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "an invalid recipe request with too short name",
+            when = "create recipe",
+            then = "getting a BadRequestException")
     public void testCreateInvalidRecipeShortName(TestContext testContext) {
+        String shortName = randomNameCreator.getRandomNameForResource();
         testContext.given(RecipeTestDto.class)
                 .withName(longStringGenerator.stringGenerator(3))
-                .when(RecipeTestClient::postV4, RunningParameter.key("short-name"))
-                .expect(BadRequestException.class, RunningParameter.key("short-name")
+                .when(RecipeTestClient::postV4, key(shortName))
+                .expect(BadRequestException.class, key(shortName)
                         .withExpectedMessage("The length of the recipe's name has to be in range of 5 to 100"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "an invalid recipe request with too long name",
+            when = "create recipe",
+            then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongName(TestContext testContext) {
+        String longName = randomNameCreator.getRandomNameForResource();
         testContext.given(RecipeTestDto.class)
                 .withName(longStringGenerator.stringGenerator(101))
-                .when(RecipeTestClient::postV4, RunningParameter.key("long-name"))
-                .expect(BadRequestException.class, RunningParameter.key("long-name")
+                .when(RecipeTestClient::postV4, key(longName))
+                .expect(BadRequestException.class, key(longName)
                         .withExpectedMessage("The length of the recipe's name has to be in range of 5 to 100"))
                 .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
-    public void testCreateInvalidRecipeLongDescr(TestContext testContext) {
+
+    @Description(
+            given = "an invalid recipe request with too long description",
+            when = "create recipe",
+            then = "getting a BadRequestException")
+    public void testCreateInvalidRecipeLongDescription(TestContext testContext) {
+        String longDesc = randomNameCreator.getRandomNameForResource();
         testContext.given(RecipeTestDto.class)
                 .withDescription(longStringGenerator.stringGenerator(1001))
-                .when(RecipeTestClient::postV4, RunningParameter.key("long-desc"))
-                .expect(BadRequestException.class, RunningParameter.key("long-desc").withExpectedMessage("size must be between 0 and 1000"))
+                .when(RecipeTestClient::postV4, key(longDesc))
+                .expect(BadRequestException.class, key(longDesc)
+                        .withExpectedMessage("size must be between 0 and 1000"))
                 .validate();
     }
 }
