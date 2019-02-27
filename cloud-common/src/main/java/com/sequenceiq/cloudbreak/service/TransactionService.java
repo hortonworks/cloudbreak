@@ -33,7 +33,7 @@ public class TransactionService {
     private boolean logTransactionStacktrace;
 
     public <T> T required(Supplier<T> callback) throws TransactionExecutionException {
-        long start = clock.getCurrentTime();
+        long start = clock.getCurrentTimeMillis();
         try {
             return transactionExecutorService.required(callback);
         } catch (RuntimeException e) {
@@ -44,7 +44,7 @@ public class TransactionService {
     }
 
     public <T> T requiresNew(Supplier<T> callback) throws TransactionExecutionException {
-        long start = clock.getCurrentTime();
+        long start = clock.getCurrentTimeMillis();
         try {
             return transactionExecutorService.requiresNew(callback);
         } catch (RuntimeException e) {
@@ -55,7 +55,7 @@ public class TransactionService {
     }
 
     public <T> T mandatory(Supplier<T> callback) throws TransactionExecutionException {
-        long start = clock.getCurrentTime();
+        long start = clock.getCurrentTimeMillis();
         try {
             return transactionExecutorService.mandatory(callback);
         } catch (RuntimeException e) {
@@ -66,7 +66,7 @@ public class TransactionService {
     }
 
     public <T> T supports(Supplier<T> callback) throws TransactionExecutionException {
-        long start = clock.getCurrentTime();
+        long start = clock.getCurrentTimeMillis();
         try {
             return transactionExecutorService.supports(callback);
         } catch (RuntimeException e) {
@@ -77,7 +77,7 @@ public class TransactionService {
     }
 
     public <T> T notSupported(Supplier<T> callback) throws TransactionExecutionException {
-        long start = clock.getCurrentTime();
+        long start = clock.getCurrentTimeMillis();
         try {
             return transactionExecutorService.notSupported(callback);
         } catch (RuntimeException e) {
@@ -88,7 +88,7 @@ public class TransactionService {
     }
 
     public <T> T never(Supplier<T> callback) throws TransactionExecutionException {
-        long start = clock.getCurrentTime();
+        long start = clock.getCurrentTimeMillis();
         try {
             return transactionExecutorService.never(callback);
         } catch (RuntimeException e) {
@@ -99,7 +99,7 @@ public class TransactionService {
     }
 
     private void processTransactionDuration(long start) {
-        long duration = clock.getCurrentTime() - start;
+        long duration = clock.getCurrentTimeMillis() - start;
         if (TX_DURATION_ERROR < duration) {
             if (logTransactionStacktrace) {
                 LOGGER.error("Transaction duration was critical, took {}ms at: {}", duration, generateStackTrace());

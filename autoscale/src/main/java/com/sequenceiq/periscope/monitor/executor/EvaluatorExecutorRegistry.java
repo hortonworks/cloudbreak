@@ -28,7 +28,7 @@ public class EvaluatorExecutorRegistry {
     private final Map<Element, Element> submittedEvaluators = new ConcurrentHashMap<>();
 
     boolean putIfAbsent(EvaluatorExecutor evaluator, long resourceId) {
-        long now = clock.getCurrentTime();
+        long now = clock.getCurrentTimeMillis();
         Element elementToSubmit = new Element(evaluator, resourceId, now);
         Element elementAlreadyPresent = submittedEvaluators.putIfAbsent(elementToSubmit, elementToSubmit);
 

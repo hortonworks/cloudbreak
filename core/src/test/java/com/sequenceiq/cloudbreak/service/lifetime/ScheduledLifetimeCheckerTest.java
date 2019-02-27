@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,6 +36,9 @@ public class ScheduledLifetimeCheckerTest {
 
     @Mock
     private ReactorFlowManager flowManager;
+
+    @Mock
+    private Clock clock;
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndNotExceeded() {
@@ -65,7 +69,7 @@ public class ScheduledLifetimeCheckerTest {
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsLetter() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "ttl"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "ttl"));
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -79,7 +83,7 @@ public class ScheduledLifetimeCheckerTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setCluster(null);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "1"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
         stack.setStackStatus(stackStatus);
@@ -98,7 +102,7 @@ public class ScheduledLifetimeCheckerTest {
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(1L);
         stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "1"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
         stack.setStackStatus(stackStatus);
@@ -117,7 +121,7 @@ public class ScheduledLifetimeCheckerTest {
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(null);
         stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "1"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
         stack.setStackStatus(stackStatus);
@@ -134,7 +138,7 @@ public class ScheduledLifetimeCheckerTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setCluster(null);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "1"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
@@ -153,7 +157,7 @@ public class ScheduledLifetimeCheckerTest {
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(null);
         stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "1"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.STOPPED);
         stack.setStackStatus(stackStatus);
@@ -176,14 +180,17 @@ public class ScheduledLifetimeCheckerTest {
         workspace.setName("workspace");
         stack.setWorkspace(workspace);
         Cluster cluster = new Cluster();
-        cluster.setCreationFinished(System.currentTimeMillis() - 10000L);
+        long startTimeMillis = 0;
+        int ttlMillis = 1;
+        cluster.setCreationFinished(startTimeMillis);
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, String.valueOf(ttlMillis)));
         stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
+        when(clock.getCurrentTimeMillis()).thenReturn(startTimeMillis + ttlMillis + 1);
 
         underTest.validate();
 
@@ -203,7 +210,7 @@ public class ScheduledLifetimeCheckerTest {
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(System.currentTimeMillis() - 1L);
         stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL, "10000"));
+        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "10000"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);

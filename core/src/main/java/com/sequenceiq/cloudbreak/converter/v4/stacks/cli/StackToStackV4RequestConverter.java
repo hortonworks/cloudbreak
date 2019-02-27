@@ -168,7 +168,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
 
     private Long getStackTimeToLive(Stack stack) {
         Map<String, String> params = stack.getParameters();
-        Optional<String> optional = Optional.ofNullable(params.get(PlatformParametersConsts.TTL));
+        Optional<String> optional = Optional.ofNullable(params.get(PlatformParametersConsts.TTL_MILLIS));
         if (optional.isPresent()) {
             return optional.map(Long::parseLong).get();
         }

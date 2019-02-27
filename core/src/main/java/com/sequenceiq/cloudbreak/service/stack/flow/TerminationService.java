@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
@@ -53,6 +53,9 @@ public class TerminationService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private Clock clock;
 
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -103,8 +106,7 @@ public class TerminationService {
     private void terminateMetaDataInstances(Stack stack) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
         for (InstanceMetaData metaData : stack.getNotDeletedInstanceMetaDataSet()) {
-            long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            metaData.setTerminationDate(timeInMillis);
+            metaData.setTerminationDate(clock.getCurrentTimeMillis());
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
             instanceMetaDatas.add(metaData);
         }

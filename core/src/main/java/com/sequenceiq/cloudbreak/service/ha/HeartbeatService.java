@@ -102,7 +102,7 @@ public class HeartbeatService {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
                         CloudbreakNode self = cloudbreakNodeRepository.findById(nodeId).orElse(new CloudbreakNode(nodeId));
-                        self.setLastUpdated(clock.getCurrentTime());
+                        self.setLastUpdated(clock.getCurrentTimeMillis());
                         cloudbreakNodeRepository.save(self);
                         return Boolean.TRUE;
                     } catch (RuntimeException e) {
@@ -155,7 +155,7 @@ public class HeartbeatService {
 
     public List<CloudbreakNode> distributeFlows() throws TransactionExecutionException {
         List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
-        long currentTimeMillis = clock.getCurrentTime();
+        long currentTimeMillis = clock.getCurrentTimeMillis();
         List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
                 .filter(node -> currentTimeMillis - node.getLastUpdated() > heartbeatThresholdRate).collect(Collectors.toList());
         List<CloudbreakNode> activeNodes = cloudbreakNodes.stream().filter(c -> !failedNodes.contains(c)).collect(Collectors.toList());

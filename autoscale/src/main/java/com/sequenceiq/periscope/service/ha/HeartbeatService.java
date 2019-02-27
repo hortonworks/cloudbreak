@@ -59,7 +59,7 @@ public class HeartbeatService {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
                         PeriscopeNode self = periscopeNodeRepository.findById(nodeId).orElse(new PeriscopeNode(nodeId));
-                        self.setLastUpdated(clock.getCurrentTime());
+                        self.setLastUpdated(clock.getCurrentTimeMillis());
                         if (unLeaderIt) {
                             self.setLeader(false);
                         }

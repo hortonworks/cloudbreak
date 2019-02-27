@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -44,6 +45,9 @@ public class UserProfile implements TenantAwareResource {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Credential> defaultCredentials;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private ShowTerminatedClustersPreferences showTerminatedClustersPreferences;
 
     public Long getId() {
         return id;
@@ -95,6 +99,14 @@ public class UserProfile implements TenantAwareResource {
 
     public void setDefaultCredentials(Set<Credential> defaultCredentials) {
         this.defaultCredentials = defaultCredentials;
+    }
+
+    public ShowTerminatedClustersPreferences getShowTerminatedClustersPreferences() {
+        return showTerminatedClustersPreferences;
+    }
+
+    public void setShowTerminatedClustersPreferences(ShowTerminatedClustersPreferences showTerminatedClustersPreferences) {
+        this.showTerminatedClustersPreferences = showTerminatedClustersPreferences;
     }
 
     @Override

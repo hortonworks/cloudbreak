@@ -87,7 +87,7 @@ public class SecretAspects {
                             tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
                             String path = String.format("%s/%s/%s/%s-%s", tenant,
                                     entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
-                                    UUID.randomUUID().toString(), Long.toHexString(clock.getCurrentTime()));
+                                    UUID.randomUUID().toString(), Long.toHexString(clock.getCurrentTimeMillis()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, new SecretProxy(secretService, secret));
