@@ -5,6 +5,7 @@ import (
 
 	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/dp-cli-common/utils"
 )
 
 type getStackAvailableClient struct {
@@ -82,4 +83,20 @@ func TestWaitForOperationToFinishImplFailedCluster(t *testing.T) {
 	waitForOperationToFinishImpl(int64(2), "name", AVAILABLE, SKIP, client)
 
 	t.Error("Exit not happened")
+}
+
+type getStackNotFoundClient struct {
+}
+
+func (c getStackNotFoundClient) GetStackInWorkspaceV4(params *v4stack.GetStackInWorkspaceV4Params) (*v4stack.GetStackInWorkspaceV4OK, error) {
+	return nil, &utils.RESTError{
+		Code:     403,
+		Response: nil,
+	}
+}
+
+func TestWaitForDeleteCompletedOperationToFinishImpl(t *testing.T) {
+	t.Parallel()
+
+	waitForOperationToFinishImpl(int64(2), "name", DELETE_COMPLETED, DELETE_COMPLETED, getStackNotFoundClient{})
 }

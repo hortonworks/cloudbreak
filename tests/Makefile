@@ -1,6 +1,6 @@
 GIT_FIRST_PARENT ?= $(shell git describe --tags --first-parent | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]-*([a-z]+\.)*[0-9]+).*/\1/p')
 GIT_LATEST_TAG ?= $(shell git describe --tags | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+\-[a-z]+\.[0-9]*")
-GIT_ACTIVE_BRANCH ?= $(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD | sed -e 's|origin/||g')
+GIT_ACTIVE_BRANCH ?= $(shell git rev-parse HEAD)
 DOCKER_IP ?= $(shell echo $(DOCKER_HOST) | awk -F/ '{print $$3}' | sed 's/:.*//')
 CLUSTER_DEFINITION_URL ?= https://raw.githubusercontent.com/hortonworks/cb-cli/$(GIT_ACTIVE_BRANCH)/tests/clusterdefinitions/test.bp
 

@@ -1,14 +1,14 @@
 package stack
 
 import (
+	"net/http"
 	"strings"
 	"time"
-
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
 
@@ -41,12 +41,29 @@ type getStackClient interface {
 func waitForOperationToFinishImpl(workspaceID int64, name string, desiredStackStatus, desiredClusterStatus status, client getStackClient) {
 	for {
 		resp, err := client.GetStackInWorkspaceV4(v4stack.NewGetStackInWorkspaceV4Params().WithWorkspaceID(workspaceID).WithName(name))
+		var stackStatus string
+		var clusterStatus string
 		if err != nil {
-			utils.LogErrorAndExit(err)
+			if err, ok := err.(*utils.RESTError); ok {
+				if desiredStackStatus == DELETE_COMPLETED {
+					if err.Code != http.StatusForbidden {
+						utils.LogErrorAndExit(err)
+					} else {
+						stackStatus = DELETE_COMPLETED.String()
+						clusterStatus = DELETE_COMPLETED.String()
+					}
+				} else {
+					utils.LogErrorAndExit(err)
+				}
+			} else {
+				utils.LogErrorAndExit(err)
+			}
 		}
 
-		stackStatus := resp.Payload.Status
-		clusterStatus := resp.Payload.Cluster.Status
+		if stackStatus == "" {
+			stackStatus = resp.Payload.Status
+			clusterStatus = resp.Payload.Cluster.Status
+		}
 		log.Infof("[waitForClusterToFinishImpl] stack status: %s, cluster status: %s", stackStatus, clusterStatus)
 
 		if (desiredStackStatus == SKIP || stackStatus == desiredStackStatus.String()) && (desiredClusterStatus == SKIP || clusterStatus == desiredClusterStatus.String()) {
