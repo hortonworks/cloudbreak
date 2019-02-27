@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
@@ -54,6 +54,9 @@ public class ClusterBootstrapperErrorHandler {
 
     @Inject
     private ServiceProviderConnectorAdapter connector;
+
+    @Inject
+    private Clock clock;
 
     private enum Msg {
 
@@ -100,8 +103,7 @@ public class ClusterBootstrapperErrorHandler {
                 eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
                 deleteInstanceResourceFromDatabase(stack, instanceMetaData);
-                long timeInMillis = Calendar.getInstance().getTimeInMillis();
-                instanceMetaData.setTerminationDate(timeInMillis);
+                instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instanceMetaData);
                 LOGGER.debug("InstanceMetadata [name: {}, id: {}] status set to {}.", instanceMetaData.getId(), instanceMetaData.getInstanceId(),

@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_R
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_WRITE;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.WORKSPACE_MANAGE;
 
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -57,6 +57,9 @@ public class WorkspaceService {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private Clock clock;
 
     public Workspace create(User user, Workspace workspace) {
         try {
@@ -316,7 +319,7 @@ public class WorkspaceService {
 
     private void setupDeletionDateAndFlag(Workspace workspaceForDelete) {
         workspaceForDelete.setStatus(DELETED);
-        workspaceForDelete.setDeletionTimestamp(Calendar.getInstance().getTimeInMillis());
+        workspaceForDelete.setDeletionTimestamp(clock.getCurrentTimeMillis());
     }
 
     public Workspace getForCurrentUser() {

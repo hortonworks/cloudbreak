@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 
 @Service
 public class StackApiViewService {
@@ -38,6 +40,9 @@ public class StackApiViewService {
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
+
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {
             if (stackApiView.getStatus() == Status.AVAILABLE) {
@@ -53,25 +58,44 @@ public class StackApiViewService {
 
     public Set<StackViewV4Response> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, boolean dataLakeOnly) {
         try {
-            Set<StackViewV4Response> stackViewResponses;
-            if (StringUtils.isEmpty(environmentName)) {
-                stackViewResponses = transactionService.required(() -> convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
-            } else {
-                EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
-                stackViewResponses = transactionService.required(() ->
-                        convertStackViews(stackApiViewRepository.findAllByWorkspaceIdAndEnvironments(workspaceId, env)));
-            }
-            if (dataLakeOnly) {
-                stackViewResponses = stackViewResponses
-                        .stream()
-                        .filter(stackViewResponse ->
-                                Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getClusterDefinition().getTags().get("shared_services_ready")))
-                        .collect(Collectors.toSet());
-            }
+            Set<StackViewV4Response> stackViewResponses = StringUtils.isEmpty(environmentName)
+                    ? getAllByWorkspace(workspaceId)
+                    : getAllByWorkspaceAndEnvironment(workspaceId, environmentName);
+            stackViewResponses = filterDatalakes(dataLakeOnly, stackViewResponses);
             return stackViewResponses;
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    private Set<StackViewV4Response> filterDatalakes(boolean dataLakeOnly, Set<StackViewV4Response> stackViewResponses) {
+        if (dataLakeOnly) {
+            stackViewResponses = stackViewResponses
+                    .stream()
+                    .filter(stackViewResponse ->
+                            Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getClusterDefinition().getTags().get("shared_services_ready")))
+                    .collect(Collectors.toSet());
+        }
+        return new HashSet<>(stackViewResponses);
+    }
+
+    private Set<StackViewV4Response> getAllByWorkspaceAndEnvironment(Long workspaceId, String environmentName) throws TransactionExecutionException {
+        EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
+        ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
+        return transactionService.required(() -> convertStackViews(stackApiViewRepository.findAllByWorkspaceIdAndEnvironments(
+                workspaceId,
+                env,
+                showTerminatedClustersAfterConfig.isActive(),
+                showTerminatedClustersAfterConfig.showAfterMillisecs()
+        )));
+    }
+
+    private Set<StackViewV4Response> getAllByWorkspace(Long workspaceId) throws TransactionExecutionException {
+        ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
+        return transactionService.required(() -> convertStackViews(stackApiViewRepository.findAllByWorkspaceId(
+                workspaceId,
+                showTerminatedClustersAfterConfig.isActive(),
+                showTerminatedClustersAfterConfig.showAfterMillisecs())));
     }
 
     private Set<StackViewV4Response> convertStackViews(Set<StackApiView> stacks) {

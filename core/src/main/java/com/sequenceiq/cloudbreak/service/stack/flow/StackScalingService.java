@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -48,6 +48,9 @@ public class StackScalingService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private Clock clock;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -101,8 +104,7 @@ public class StackScalingService {
             int nodesRemoved = 0;
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
                 if (instanceIds.contains(instanceMetaData.getInstanceId())) {
-                    long timeInMillis = Calendar.getInstance().getTimeInMillis();
-                    instanceMetaData.setTerminationDate(timeInMillis);
+                    instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
                     instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                     instanceMetaDataRepository.save(instanceMetaData);
                     nodesRemoved++;

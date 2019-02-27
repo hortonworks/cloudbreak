@@ -119,6 +119,12 @@ public class UserProfileServiceTest {
         assertEquals(2, userProfile.getDefaultCredentials().size());
     }
 
+    public void testGetShowTerminatedClustersPreferences() {
+        User user = new User();
+        when(userService.getOrCreate(any())).thenReturn(user);
+
+    }
+
     private UserProfileV4Request createUserProfileRequest(String credentialName, Long credentialId) {
         UserProfileV4Request request = new UserProfileV4Request();
         request.setCredentialId(credentialId);

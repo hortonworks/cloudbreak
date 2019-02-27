@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDefinitionDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
@@ -47,6 +48,9 @@ public class StructuredFlowEventFactory {
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
+    @Inject
+    private Clock clock;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -56,8 +60,9 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), cloudbreakNodeConfig.getId(), cbVersion,
-                stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(), stack.getTenant().getName());
+        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, "stacks", stackId, stack.getName(),
+                cloudbreakNodeConfig.getId(), cbVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
+                stack.getTenant().getName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         ClusterDefinitionDetails clusterDefinitionDetails = null;
@@ -109,8 +114,8 @@ public class StructuredFlowEventFactory {
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 
-        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, cloudbreakNodeConfig.getInstanceUUID(),
-                cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
+        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, "stacks", stackId, stackName,
+                cloudbreakNodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
@@ -122,6 +127,7 @@ public class StructuredFlowEventFactory {
         notificationDetails.setNotificationType(notificationType);
 
         OperationDetails operationDetails = new OperationDetails(
+                clock.getCurrentTimeMillis(),
                 NOTIFICATION,
                 "ldaps",
                 ldapDetails.getId(),
@@ -149,6 +155,7 @@ public class StructuredFlowEventFactory {
         notificationDetails.setNotificationType(notificationType);
 
         OperationDetails operationDetails = new OperationDetails(
+                clock.getCurrentTimeMillis(),
                 NOTIFICATION,
                 "rds",
                 rdsDetails.getId(),

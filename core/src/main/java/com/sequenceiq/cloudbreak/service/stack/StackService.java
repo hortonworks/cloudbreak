@@ -94,6 +94,7 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -109,6 +110,9 @@ public class StackService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
+
+    @Inject
+    private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     @Inject
     private NetworkConfigurationValidator networkConfigurationValidator;
@@ -214,7 +218,7 @@ public class StackService {
     }
 
     public Stack findStackByNameAndWorkspaceId(String name, Long workspaceId) {
-        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
+        return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
     public StackV4Response getJsonById(Long id, Collection<String> entry) {
@@ -320,7 +324,13 @@ public class StackService {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
-                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspace.getId());
+                ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
+                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(
+                        name,
+                        workspace.getId(),
+                        showTerminatedClustersAfterConfig.isActive(),
+                        showTerminatedClustersAfterConfig.showAfterMillisecs()
+                );
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
@@ -336,7 +346,7 @@ public class StackService {
     public StackV4Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
+                Stack stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
@@ -353,7 +363,7 @@ public class StackService {
     }
 
     public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
-        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
+        return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
     public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
@@ -624,6 +634,10 @@ public class StackService {
         } else {
             LOGGER.debug("Stack is already deleted.");
         }
+    }
+
+    private Stack findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
+        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {

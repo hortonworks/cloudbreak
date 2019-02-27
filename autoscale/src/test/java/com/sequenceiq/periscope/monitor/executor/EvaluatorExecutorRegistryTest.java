@@ -53,7 +53,7 @@ public class EvaluatorExecutorRegistryTest {
     @Test
     public void testPutIfAbsentReturnsFalseWhenAddingSameValues() {
         underTest.putIfAbsent(getEvaluatorExecutor(EXECUTOR_ONE), CLUSTER_ONE);
-        when(clock.getCurrentTime()).thenReturn(600000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(600000L);
 
         assertFalse(underTest.putIfAbsent(getEvaluatorExecutor(EXECUTOR_ONE), CLUSTER_ONE));
     }
@@ -89,9 +89,9 @@ public class EvaluatorExecutorRegistryTest {
 
     @Test
     public void testPutIfAbsentWhenElementHasBeenTooLongInRegister() {
-        when(clock.getCurrentTime()).thenReturn(0L);
+        when(clock.getCurrentTimeMillis()).thenReturn(0L);
         underTest.putIfAbsent(getEvaluatorExecutor(EXECUTOR_ONE), CLUSTER_ONE);
-        when(clock.getCurrentTime()).thenReturn(600001L);
+        when(clock.getCurrentTimeMillis()).thenReturn(600001L);
 
         assertTrue(underTest.putIfAbsent(getEvaluatorExecutor(EXECUTOR_ONE), CLUSTER_ONE));
     }

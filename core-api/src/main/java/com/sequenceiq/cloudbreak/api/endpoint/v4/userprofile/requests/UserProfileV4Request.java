@@ -19,6 +19,8 @@ public class UserProfileV4Request implements JsonEntity {
 
     private String imageCatalogName;
 
+    private ShowTerminatedClustersPreferencesV4Request showTerminatedClustersPreferencesV4Request;
+
     public String getCredentialName() {
         return credentialName;
     }
@@ -41,5 +43,13 @@ public class UserProfileV4Request implements JsonEntity {
 
     public void setImageCatalogName(String imageCatalogName) {
         this.imageCatalogName = imageCatalogName;
+    }
+
+    public ShowTerminatedClustersPreferencesV4Request getShowTerminatedClustersPreferencesV4Request() {
+        return showTerminatedClustersPreferencesV4Request;
+    }
+
+    public void setShowTerminatedClustersPreferencesV4Request(ShowTerminatedClustersPreferencesV4Request showTerminatedClustersPreferencesV4Request) {
+        this.showTerminatedClustersPreferencesV4Request = showTerminatedClustersPreferencesV4Request;
     }
 }

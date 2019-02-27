@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -94,6 +94,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    private Clock clock;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -123,7 +126,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
-        stack.setCreated(Calendar.getInstance().getTimeInMillis());
+        stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
         if (source.getNetwork() != null) {
@@ -159,7 +162,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private void setTimeToLive(StackV4Request source, Stack stack) {
         if (source.getTimeToLive() != null) {
-            stack.getParameters().put(PlatformParametersConsts.TTL, source.getTimeToLive().toString());
+            stack.getParameters().put(PlatformParametersConsts.TTL_MILLIS, source.getTimeToLive().toString());
         }
     }
 

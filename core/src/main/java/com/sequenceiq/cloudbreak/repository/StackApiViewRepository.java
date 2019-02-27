@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import static com.sequenceiq.cloudbreak.repository.snippets.ShowTerminatedClustersSnippets.SHOW_TERMINATED_CLUSTERS_IF_REQUESTED;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,16 +40,25 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.environment LEFT JOIN FETCH c.kerberosConfig "
-            + "WHERE s.workspace.id= :id AND s.terminated = null "
+            + "WHERE s.workspace.id= :id AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
+    Set<StackApiView> findAllByWorkspaceId(
+            @Param("id") Long id,
+            @Param("showTerminated") Boolean showTerminated,
+            @Param("terminatedAfter") Long terminatedAfter
+    );
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s FROM StackApiView s LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.clusterDefinition "
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.environment LEFT JOIN FETCH c.kerberosConfig "
-            + "WHERE s.workspace.id= :id AND :environment in e AND s.terminated = null "
+            + "WHERE s.workspace.id= :id AND :environment in e AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Set<StackApiView> findAllByWorkspaceIdAndEnvironments(@Param("id") Long id, @Param("environment") EnvironmentView environment);
+    Set<StackApiView> findAllByWorkspaceIdAndEnvironments(
+            @Param("id") Long id,
+            @Param("environment") EnvironmentView environment,
+            @Param("showTerminated") Boolean showTerminated,
+            @Param("terminatedAfter") Long terminatedAfter
+    );
 }

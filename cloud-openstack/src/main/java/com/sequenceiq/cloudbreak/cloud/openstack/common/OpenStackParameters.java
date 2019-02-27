@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL_MILLIS;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -99,7 +99,7 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.of("^[0-9]*$")));
+        additionalStackParameterValidations.add(new StackParamValidation(TTL_MILLIS, false, String.class, Optional.of("^[0-9]*$")));
         return additionalStackParameterValidations;
     }
 

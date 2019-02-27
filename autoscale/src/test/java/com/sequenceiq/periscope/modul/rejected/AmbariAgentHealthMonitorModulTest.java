@@ -93,11 +93,9 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
     @Mock
     private CloudbreakIdentityClient cloudbreakClient;
 
-    private TestContextManager testContextManager;
-
     @Before
     public void setUp() throws Exception {
-        testContextManager = new TestContextManager(getClass());
+        TestContextManager testContextManager = new TestContextManager(getClass());
         testContextManager.prepareTestInstance(this);
 
         JobDataMap map = new JobDataMap(Collections.singletonMap(MonitorContext.APPLICATION_CONTEXT.name(), applicationContext));

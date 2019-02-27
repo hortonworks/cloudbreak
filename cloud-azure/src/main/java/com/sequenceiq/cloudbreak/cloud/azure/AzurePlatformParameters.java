@@ -125,7 +125,7 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL, false, String.class, Optional.of("^[0-9]*$")));
+        additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL_MILLIS, false, String.class, Optional.of("^[0-9]*$")));
         additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.empty()));
         additionalStackParameterValidations.add(new StackParamValidation("encryptStorage", false, Boolean.class, Optional.empty()));
         additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class,

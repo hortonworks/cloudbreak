@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -105,6 +106,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
+
+    @Mock
+    private Clock clock;
 
     private Credential credential;
 

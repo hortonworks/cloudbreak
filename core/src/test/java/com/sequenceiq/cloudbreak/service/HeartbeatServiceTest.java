@@ -132,7 +132,7 @@ public class HeartbeatServiceTest {
             node.setLastUpdated(50_000L);
         }
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(200_000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
@@ -184,7 +184,7 @@ public class HeartbeatServiceTest {
             node.setLastUpdated(50_000L);
         }
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(200_000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
@@ -236,7 +236,7 @@ public class HeartbeatServiceTest {
             node.setLastUpdated(50_000L);
         }
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(200_000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
@@ -302,7 +302,7 @@ public class HeartbeatServiceTest {
             node.setLastUpdated(50_000L);
         }
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(200_000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
@@ -360,7 +360,7 @@ public class HeartbeatServiceTest {
         clusterNodes.get(2).setLastUpdated(200_000L); // active node
 
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(200_000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
@@ -402,7 +402,7 @@ public class HeartbeatServiceTest {
         clusterNodes.get(2).setLastUpdated(200_000L); // active node
 
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(200_000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
@@ -534,7 +534,7 @@ public class HeartbeatServiceTest {
 
         List<CloudbreakNode> clusterNodes = getClusterNodes();
         when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
-        when(clock.getCurrentTime()).thenReturn(BASE_DATE_TIME.plusMinutes(clusterNodes.size()).toEpochSecond(ZoneOffset.UTC));
+        when(clock.getCurrentTimeMillis()).thenReturn(BASE_DATE_TIME.plusMinutes(clusterNodes.size()).toEpochSecond(ZoneOffset.UTC));
 
         Set<FlowLog> failedFLowLogs1 = new HashSet<>(getFlowLogs(2, 5000));
         Set<FlowLog> failedFlowLogs2 = new HashSet<>(getFlowLogs(2, 5000));

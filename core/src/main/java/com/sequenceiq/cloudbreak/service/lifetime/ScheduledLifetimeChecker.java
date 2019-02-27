@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
 import java.time.Duration;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -26,6 +26,9 @@ public class ScheduledLifetimeChecker {
 
     @Inject
     private ReactorFlowManager flowManager;
+
+    @Inject
+    private Clock clock;
 
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
@@ -46,7 +49,7 @@ public class ScheduledLifetimeChecker {
         if (stack.getParameters() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(params.get(PlatformParametersConsts.TTL))
+        return Optional.ofNullable(params.get(PlatformParametersConsts.TTL_MILLIS))
                 .filter(this::isLong)
                 .map(s -> Duration.ofMillis(Long.parseLong(s)));
     }
@@ -56,7 +59,7 @@ public class ScheduledLifetimeChecker {
             Long.parseLong(s);
             return true;
         } catch (NumberFormatException e) {
-            LOGGER.debug("Cannot parse TTL to long: {}", s);
+            LOGGER.debug("Cannot parse TTL_MILLIS to long: {}", s);
         }
         return false;
     }
@@ -70,8 +73,7 @@ public class ScheduledLifetimeChecker {
     }
 
     private boolean isExceeded(Long created, Long clusterTimeToLive) {
-        long now = Calendar.getInstance().getTimeInMillis();
-        long clusterRunningTime = now - created;
+        long clusterRunningTime = clock.getCurrentTimeMillis() - created;
         if (clusterRunningTime > clusterTimeToLive) {
             LOGGER.info("The maximum running time exceeded by the cluster! clusterRunningTime: {}, clusterTimeToLive: {}",
                     clusterRunningTime, clusterTimeToLive);

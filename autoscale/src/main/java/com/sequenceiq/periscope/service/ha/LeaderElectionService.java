@@ -102,7 +102,7 @@ public class LeaderElectionService {
     @Scheduled(initialDelay = 35000L, fixedDelay = 30000L)
     public void leaderElection() {
         if (periscopeNodeConfig.isNodeIdSpecified()) {
-            long leaders = periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(clock.getCurrentTime() - heartbeatThresholdRate);
+            long leaders = periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(clock.getCurrentTimeMillis() - heartbeatThresholdRate);
             if (leaders == 0L) {
                 metricService.submit(MetricType.LEADER, 0);
                 LOGGER.info("There is no active leader available");
@@ -127,7 +127,7 @@ public class LeaderElectionService {
                     public void run() {
                         try {
                             stackCollectorService.collectStackDetails();
-                            long limit = clock.getCurrentTime() - heartbeatThresholdRate;
+                            long limit = clock.getCurrentTimeMillis() - heartbeatThresholdRate;
                             List<PeriscopeNode> activeNodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(limit);
                             reallocateOrphanClusters(activeNodes);
                             if (!activeNodes.isEmpty()) {
@@ -169,7 +169,7 @@ public class LeaderElectionService {
     }
 
     private boolean isExecutionOfMissedTimeBasedAlertsNeeded(Cluster cluster) {
-        long now = clock.getCurrentTime();
+        long now = clock.getCurrentTimeMillis();
         return cluster.getPeriscopeNodeId() != null
                 && cluster.isAutoscalingEnabled()
                 && cluster.getLastEvaluated() != 0L
@@ -180,7 +180,7 @@ public class LeaderElectionService {
     private void executeMissedTimeBasedAlerts(Cluster cluster) {
         Map<TimeAlert, ZonedDateTime> alerts = new LinkedHashMap<>();
         ZonedDateTime now = dateTimeService.getDefaultZonedDateTime();
-        long millisDiff = clock.getCurrentTime() - cluster.getLastEvaluated();
+        long millisDiff = clock.getCurrentTimeMillis() - cluster.getLastEvaluated();
         long coolDown = TimeUtil.convertMinToMillisec(cluster.getCoolDown());
         long rewindMillis = Math.min(millisDiff, coolDown);
         LOGGER.debug("Start rewind for cluster {} at {} - millisDiff: {}, coolDown: {}, rewindMillis: {}",

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 public class PlatformParametersConsts {
 
-    public static final String TTL = "timetolive";
+    public static final String TTL_MILLIS = "timetolive";
 
     public static final String CUSTOM_INSTANCETYPE = "customInstanceType";
 

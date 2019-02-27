@@ -88,7 +88,7 @@ public class LeaderElectionServiceTest {
         when(periscopeNodeConfig.isNodeIdSpecified()).thenReturn(true);
         when(periscopeNodeConfig.getId()).thenReturn("nodeid");
         when(timerFactory.get()).thenReturn(timer);
-        when(clock.getCurrentTime()).thenReturn(5000L);
+        when(clock.getCurrentTimeMillis()).thenReturn(5000L);
         when(applicationContext.getBean(eq("CronTimeEvaluator"), eq(CronTimeEvaluator.class))).thenReturn(cronTimeEvaluator);
         ReflectionTestUtils.setField(underTest, "heartbeatThresholdRate", 70000);
     }
