@@ -28,16 +28,16 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
@@ -183,23 +183,25 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         }
     }
 
-    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(stackRequest.getCluster().getAmbari().getClusterDefinitionName(),
-                workspaceId);
+    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long wsId) {
+        ClusterV4Request clusterRequest = stackRequest.getCluster();
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterRequest.getAmbari().getClusterDefinitionName(), wsId);
         boolean sharedServiceReadyBlueprint = clusterDefinitionService.isDatalakeAmbariBlueprint(clusterDefinition);
         if (sharedServiceReadyBlueprint) {
-            Set<String> databaseTypes = getGivenRdsTypes(stackRequest.getCluster(), workspaceId);
+            Set<String> databaseTypes = getGivenRdsTypes(clusterRequest, wsId);
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready cluster definition) you should provide at least "
                     + "one %s rds/database configuration to the Cluster request";
             if (!databaseTypes.contains(DatabaseType.HIVE.name())) {
                 validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
             }
-            if (!databaseTypes.contains(DatabaseType.RANGER.name())) {
-                validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
-            }
-            if (isLdapNotProvided(stackRequest.getCluster())) {
-                validationBuilder.error("For a Datalake cluster (since you have selected a datalake ready cluster definition) you should provide an "
-                        + "LDAP configuration or its name/id to the Cluster request");
+            if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+                if (!databaseTypes.contains(DatabaseType.RANGER.name())) {
+                    validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
+                }
+                if (isLdapNotProvided(clusterRequest)) {
+                    validationBuilder.error("For a Datalake cluster (since you have selected a datalake ready cluster definition) you should provide an "
+                            + "LDAP configuration or its name/id to the Cluster request");
+                }
             }
         }
     }

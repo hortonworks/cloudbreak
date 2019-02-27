@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.clusterdefinition.ClusterDefinitionLoaderService;
-import com.sequenceiq.cloudbreak.init.clusterdefinition.DefaultAmbariBlueprintCache;
+import com.sequenceiq.cloudbreak.init.clusterdefinition.DefaulClusterDefinitionCache;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterDefinitionLoaderServiceTest {
@@ -49,10 +49,10 @@ public class ClusterDefinitionLoaderServiceTest {
     private ClusterDefinitionLoaderService underTest;
 
     @Mock
-    private DefaultAmbariBlueprintCache blueprintCache;
+    private DefaulClusterDefinitionCache blueprintCache;
 
     @Mock
-    private DefaultAmbariBlueprintCache defaultAmbariBlueprintCache;
+    private DefaulClusterDefinitionCache defaulClusterDefinitionCache;
 
     @Mock
     private Workspace workspace;
@@ -61,7 +61,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testBlueprintLoaderWhenTheUserWhenUserHaveAllTheDefaultBlueprintThenItShouldReturnWithFalse() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(3);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
@@ -72,7 +72,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testBlueprintLoaderWhenTheUserIsANewOneInTheNewWorkspaceThenItShouldReturnWithTrue() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(0);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(2);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
@@ -83,7 +83,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testBlueprintLoaderWhenTheUserIsANewOneInTheExistingWorkspaceThenItShouldReturnWithTrue() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(1);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(2);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
@@ -94,7 +94,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testBlueprintLoaderWhenTheUserHasAllDefaultBlueprintButOneOfItWasChangeThenItShouldReturnWithTrue() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(3);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3, 1);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions);
 
@@ -105,7 +105,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testLoadBlueprintsForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(3);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3, 1);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<ClusterDefinition> resultSet = underTest.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
 
@@ -116,7 +116,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testLoadBlueprintsForTheSpecifiedUserIsNewOneAndNoDefaultBlueprintAddedThenAllDefaultShouldBeAdd() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(0);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<ClusterDefinition> resultSet = underTest.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
 
@@ -127,7 +127,7 @@ public class ClusterDefinitionLoaderServiceTest {
     public void testLoadBlueprintsForTheSpecifiedUserWhenEveryDefaultExistThenRepositoryShouldNotUpdateAnything() {
         Set<ClusterDefinition> clusterDefinitions = generateDatabaseData(3);
         Map<String, ClusterDefinition> defaultBlueprints = generateCacheData(3);
-        when(defaultAmbariBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(defaulClusterDefinitionCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<ClusterDefinition> resultSet = underTest.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace, this::mockSave);
 

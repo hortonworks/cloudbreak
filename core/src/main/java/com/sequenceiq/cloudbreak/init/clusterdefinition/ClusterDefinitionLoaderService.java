@@ -26,10 +26,10 @@ public class ClusterDefinitionLoaderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDefinitionLoaderService.class);
 
     @Inject
-    private DefaultAmbariBlueprintCache defaultAmbariBlueprintCache;
+    private DefaulClusterDefinitionCache defaulClusterDefinitionCache;
 
     public boolean addingDefaultClusterDefinitionsAreNecessaryForTheUser(Collection<ClusterDefinition> clusterDefinitions) {
-        Map<String, ClusterDefinition> defaultBlueprints = defaultAmbariBlueprintCache.defaultBlueprints();
+        Map<String, ClusterDefinition> defaultBlueprints = defaulClusterDefinitionCache.defaultBlueprints();
         for (ClusterDefinition clusterDefinitionFromDatabase : clusterDefinitions) {
             ClusterDefinition defaultClusterDefinition = defaultBlueprints.get(clusterDefinitionFromDatabase.getName());
             if (mustUpdateTheExistingClusterDefinition(clusterDefinitionFromDatabase, defaultClusterDefinition)) {
@@ -93,7 +93,7 @@ public class ClusterDefinitionLoaderService {
     private Set<ClusterDefinition> updateDefaultClusterDefinitions(Iterable<ClusterDefinition> clusterDefinitions, Workspace workspace) {
         Set<ClusterDefinition> resultList = new HashSet<>();
         LOGGER.debug("Updating default cluster definitions which are contains text modifications.");
-        Map<String, ClusterDefinition> defaultBlueprints = defaultAmbariBlueprintCache.defaultBlueprints();
+        Map<String, ClusterDefinition> defaultBlueprints = defaulClusterDefinitionCache.defaultBlueprints();
         for (ClusterDefinition clusterDefinitionFromDatabase : clusterDefinitions) {
             ClusterDefinition defaultClusterDefinition = defaultBlueprints.get(clusterDefinitionFromDatabase.getName());
             if (defaultClusterDefinitionExistInTheCache(defaultClusterDefinition)
@@ -129,7 +129,7 @@ public class ClusterDefinitionLoaderService {
     private Map<String, ClusterDefinition> collectDeviationOfExistingAndDefaultClusterDefinitions(Iterable<ClusterDefinition> clusterDefinitions) {
         LOGGER.debug("Collecting cluster definitions which are missing from the defaults.");
         Map<String, ClusterDefinition> diff = new HashMap<>();
-        for (Entry<String, ClusterDefinition> stringClusterDefinitionEntry : defaultAmbariBlueprintCache.defaultBlueprints().entrySet()) {
+        for (Entry<String, ClusterDefinition> stringClusterDefinitionEntry : defaulClusterDefinitionCache.defaultBlueprints().entrySet()) {
             boolean contains = false;
             for (ClusterDefinition clusterDefinition : clusterDefinitions) {
                 if (isRegisteregClusterDefinitionAndDefaultIsTheSame(stringClusterDefinitionEntry, clusterDefinition)) {

@@ -41,15 +41,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -156,6 +156,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_HIVE_RDS_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
+        when(clusterDefinitionService.isAmbariBlueprint(any(ClusterDefinition.class))).thenReturn(true);
 
         ValidationResult validationResult = underTest.validate(request);
 
@@ -170,8 +171,47 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsHiveRdsWithClouderaManager() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
+        when(clusterDefinitionService.isAmbariBlueprint(any(ClusterDefinition.class))).thenReturn(false);
+        StackV4Request request = stackRequest();
+        request.getCluster().setDatabases(Set.of(TEST_HIVE_RDS_NAME));
+        when(rdsConfigService.getByNameForWorkspaceId(TEST_HIVE_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(HIVE));
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertEquals(0L, validationResult.getErrors().size());
+        assertFalse(validationResult.getErrors().stream().anyMatch(s -> s.equals(String.format(RDS_ERROR_MESSAGE_FORMAT, "Hive"))));
+        assertFalse(validationResult.getErrors().stream().anyMatch(s -> s.equals(String.format(RDS_ERROR_MESSAGE_FORMAT, "Ranger"))));
+        assertFalse(validationResult.getErrors().stream().anyMatch(s -> s.equals(LACK_OF_LDAP_MESSAGE)));
+
+        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
+        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(rdsConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+    }
+
+    @Test
+    public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsNoRdsWithClouderaManager() {
+        when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
+        when(clusterDefinitionService.isAmbariBlueprint(any(ClusterDefinition.class))).thenReturn(false);
+        StackV4Request request = stackRequest();
+
+        ValidationResult validationResult = underTest.validate(request);
+
+        assertEquals(1L, validationResult.getErrors().size());
+        assertTrue(validationResult.getErrors().stream().anyMatch(s -> s.equals(String.format(RDS_ERROR_MESSAGE_FORMAT, "Hive"))));
+        assertFalse(validationResult.getErrors().stream().anyMatch(s -> s.equals(String.format(RDS_ERROR_MESSAGE_FORMAT, "Ranger"))));
+        assertFalse(validationResult.getErrors().stream().anyMatch(s -> s.equals(LACK_OF_LDAP_MESSAGE)));
+
+        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceId(TEST_BP_NAME, WORKSPACE_ID);
+        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(rdsConfigService, times(0)).getByNameForWorkspaceId(anyString(), anyLong());
+    }
+
+    @Test
     public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsOnlyRangerRdsWithNameThenErrorComes() {
         when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
+        when(clusterDefinitionService.isAmbariBlueprint(any(ClusterDefinition.class))).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
@@ -191,6 +231,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenClusterDefinitionIsSharedServiceReadyAndThereAreRangerAndHiveRdsWithNameButLdapDoesntThenErrorComes() {
         when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
+        when(clusterDefinitionService.isAmbariBlueprint(any(ClusterDefinition.class))).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Set.of(TEST_RANGER_RDS_NAME, TEST_HIVE_RDS_NAME));
         when(rdsConfigService.getByNameForWorkspaceId(TEST_RANGER_RDS_NAME, WORKSPACE_ID)).thenReturn(rdsConfig(RANGER));
@@ -252,6 +293,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWhenClusterDefinitionIsSharedServiceReadyAndThereIsNoLdapAndRdsConfigGivenThenErrorComes() {
         when(clusterDefinitionService.isDatalakeAmbariBlueprint(any())).thenReturn(true);
+        when(clusterDefinitionService.isAmbariBlueprint(any(ClusterDefinition.class))).thenReturn(true);
         StackV4Request request = stackRequest();
         request.getCluster().setDatabases(Collections.emptySet());
         request.getCluster().setLdapName(null);
