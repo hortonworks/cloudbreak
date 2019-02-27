@@ -4,7 +4,6 @@ import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.util.TimeService;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -93,6 +93,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    private TimeService timeService;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -122,7 +125,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
-        stack.setCreated(Calendar.getInstance().getTimeInMillis());
+        stack.setCreated(timeService.getTimeInMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
         if (source.getNetwork() != null) {

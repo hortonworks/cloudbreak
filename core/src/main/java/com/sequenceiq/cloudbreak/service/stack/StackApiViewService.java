@@ -38,6 +38,9 @@ public class StackApiViewService {
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private ShowTerminatedConfigService showTerminatedConfigService;
+
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {
             if (stackApiView.getStatus() == Status.AVAILABLE) {
@@ -56,25 +59,42 @@ public class StackApiViewService {
 
     public Set<StackViewV4Response> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, boolean dataLakeOnly) {
         try {
-            Set<StackViewV4Response> stackViewResponses;
-            if (StringUtils.isEmpty(environmentName)) {
-                stackViewResponses = transactionService.required(() -> convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
-            } else {
-                EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
-                stackViewResponses = transactionService.required(() ->
-                        convertStackViews(stackApiViewRepository.findAllByWorkspaceIdAndEnvironments(workspaceId, env)));
-            }
-            if (dataLakeOnly) {
-                stackViewResponses = stackViewResponses
-                        .stream()
-                        .filter(stackViewResponse ->
-                                Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getClusterDefinition().getTags().get("shared_services_ready")))
-                        .collect(Collectors.toSet());
-            }
+            Set<StackViewV4Response> stackViewResponses = StringUtils.isEmpty(environmentName) ?
+                    getAllByWorkspace(workspaceId) :
+                    getAllByWorkspaceAndEnvironment(workspaceId, environmentName);
+            stackViewResponses = filterDatalakes(dataLakeOnly, stackViewResponses);
             return stackViewResponses;
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    Set<StackViewV4Response> filterDatalakes(boolean dataLakeOnly, Set<StackViewV4Response> stackViewResponses) {
+        if (dataLakeOnly) {
+            stackViewResponses = stackViewResponses
+                    .stream()
+                    .filter(stackViewResponse ->
+                            Boolean.TRUE.equals(stackViewResponse.getCluster().getAmbari().getClusterDefinition().getTags().get("shared_services_ready")))
+                    .collect(Collectors.toSet());
+        }
+        return stackViewResponses;
+    }
+
+    private Set<StackViewV4Response> getAllByWorkspaceAndEnvironment(Long workspaceId, String environmentName) throws TransactionExecutionException {
+        EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
+        return transactionService.required(() -> convertStackViews(stackApiViewRepository.findAllByWorkspaceIdAndEnvironments(
+                workspaceId,
+                env,
+                showTerminatedConfigService.isActive(),
+                showTerminatedConfigService.showAfter()
+        )));
+    }
+
+    private Set<StackViewV4Response> getAllByWorkspace(Long workspaceId) throws TransactionExecutionException {
+        return transactionService.required(() -> convertStackViews(stackApiViewRepository.findAllByWorkspaceId(
+                workspaceId,
+                showTerminatedConfigService.isActive(),
+                showTerminatedConfigService.showAfter())));
     }
 
     private Set<StackViewV4Response> convertStackViews(Set<StackApiView> stacks) {

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
 import java.time.Duration;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,6 +17,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.TimeService;
 
 @Service
 public class ScheduledLifetimeChecker {
@@ -28,6 +28,9 @@ public class ScheduledLifetimeChecker {
 
     @Inject
     private ReactorFlowManager flowManager;
+
+    @Inject
+    private TimeService timeService;
 
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
@@ -58,8 +61,7 @@ public class ScheduledLifetimeChecker {
     }
 
     private void validateClusterTimeToLive(Long created, Long clusterTimeToLive) throws AccountPreferencesValidationException {
-        long now = Calendar.getInstance().getTimeInMillis();
-        long clusterRunningTime = now - created;
+        long clusterRunningTime = timeService.getTimeInMillis() - created;
         if (clusterRunningTime > clusterTimeToLive) {
             LOGGER.info("The maximum running time exceeded by the cluster! clusterRunningTime: {}, clusterTimeToLive: {}",
                     clusterRunningTime, clusterTimeToLive);

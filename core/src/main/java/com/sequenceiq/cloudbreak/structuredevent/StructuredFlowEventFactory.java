@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import com.sequenceiq.cloudbreak.util.TimeService;
 
 @Component
 @Transactional
@@ -47,6 +48,9 @@ public class StructuredFlowEventFactory {
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
+    @Inject
+    private TimeService timeService;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -56,7 +60,7 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), cloudbreakNodeConfig.getId(), cbVersion,
+        OperationDetails operationDetails = new OperationDetails(timeService.getTimeInMillis(), FLOW, "stacks", stackId, stack.getName(), cloudbreakNodeConfig.getId(), cbVersion,
                 stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(), stack.getTenant().getName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
@@ -109,7 +113,7 @@ public class StructuredFlowEventFactory {
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 
-        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, cloudbreakNodeConfig.getInstanceUUID(),
+        OperationDetails operationDetails = new OperationDetails(timeService.getTimeInMillis(), NOTIFICATION, "stacks", stackId, stackName, cloudbreakNodeConfig.getInstanceUUID(),
                 cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
@@ -122,6 +126,7 @@ public class StructuredFlowEventFactory {
         notificationDetails.setNotificationType(notificationType);
 
         OperationDetails operationDetails = new OperationDetails(
+                timeService.getTimeInMillis(),
                 NOTIFICATION,
                 "ldaps",
                 ldapDetails.getId(),
@@ -149,6 +154,7 @@ public class StructuredFlowEventFactory {
         notificationDetails.setNotificationType(notificationType);
 
         OperationDetails operationDetails = new OperationDetails(
+                timeService.getTimeInMillis(),
                 NOTIFICATION,
                 "rds",
                 rdsDetails.getId(),

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.util.Calendar;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.util.TimeService;
 
 @Service
 public class MetadataSetupService {
@@ -36,6 +36,9 @@ public class MetadataSetupService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    @Inject
+    private TimeService timeService;
+
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         try {
             int newInstances = 0;
@@ -45,7 +48,6 @@ public class MetadataSetupService {
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
                 CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
                 CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
-                long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 Long privateId = cloudInstance.getTemplate().getPrivateId();
                 String instanceId = cloudInstance.getInstanceId();
                 InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
@@ -63,7 +65,7 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setInstanceGroup(instanceGroup);
                 instanceMetaDataEntry.setInstanceId(instanceId);
                 instanceMetaDataEntry.setPrivateId(privateId);
-                instanceMetaDataEntry.setStartDate(timeInMillis);
+                instanceMetaDataEntry.setStartDate(timeService.getTimeInMillis());
                 instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
                 instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
