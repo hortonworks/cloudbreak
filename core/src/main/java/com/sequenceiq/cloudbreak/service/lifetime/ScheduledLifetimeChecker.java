@@ -12,11 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -31,22 +29,36 @@ public class ScheduledLifetimeChecker {
 
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
-        for (Stack stack : stackService.getAllAlive()) {
-            getStackTimeToLive(stack).ifPresent(ttl -> {
-                try {
-                    if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
-                        validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
+        stackService.getAllAlive().forEach(stack ->
+                getStackTimeToLive(stack).ifPresent(ttl -> {
+                    if (isInDeletableStatus(stack) && isExceeded(stack.getCluster().getCreationFinished(), ttl.toMillis())) {
+                        terminateStack(stack);
                     }
-                } catch (AccountPreferencesValidationException ignored) {
-                    terminateStack(stack);
-                }
-            });
-        }
+                }));
+    }
+
+    private boolean isInDeletableStatus(Stack stack) {
+        return !stack.isDeleteInProgress() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null;
     }
 
     private Optional<Duration> getStackTimeToLive(Stack stack) {
         Map<String, String> params = stack.getParameters();
-        return Optional.ofNullable(params.get(PlatformParametersConsts.TTL)).map(s -> Duration.ofMillis(Long.parseLong(s)));
+        if (stack.getParameters() == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(params.get(PlatformParametersConsts.TTL))
+                .filter(this::isLong)
+                .map(s -> Duration.ofMillis(Long.parseLong(s)));
+    }
+
+    private boolean isLong(String s) {
+        try {
+            Long.parseLong(s);
+            return true;
+        } catch (NumberFormatException e) {
+            LOGGER.debug("Cannot parse TTL to long: {}", s);
+        }
+        return false;
     }
 
     private void terminateStack(Stack stack) {
@@ -57,13 +69,14 @@ public class ScheduledLifetimeChecker {
         }
     }
 
-    private void validateClusterTimeToLive(Long created, Long clusterTimeToLive) throws AccountPreferencesValidationException {
+    private boolean isExceeded(Long created, Long clusterTimeToLive) {
         long now = Calendar.getInstance().getTimeInMillis();
         long clusterRunningTime = now - created;
         if (clusterRunningTime > clusterTimeToLive) {
             LOGGER.info("The maximum running time exceeded by the cluster! clusterRunningTime: {}, clusterTimeToLive: {}",
                     clusterRunningTime, clusterTimeToLive);
-            throw new AccountPreferencesValidationException("The maximum running time exceeded by the cluster!");
+            return true;
         }
+        return false;
     }
 }
