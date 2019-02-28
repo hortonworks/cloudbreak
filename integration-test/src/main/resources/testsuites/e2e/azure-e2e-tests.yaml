@@ -1,0 +1,7 @@
+name: "azure-e2e-tests"
+tests:
+  - name: "azure e2e tests"
+    classes:
+      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.StackCreationTest
+    packages:
+      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.azure.*

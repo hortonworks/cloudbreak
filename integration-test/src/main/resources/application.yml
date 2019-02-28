@@ -18,6 +18,9 @@ integrationtest:
     aws:
       availabilityZone:
       region:
+      vpcId:
+      subnetId:
+      publicKeyId:
       credential:
         type:
         roleArn:
