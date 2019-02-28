@@ -27,7 +27,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST)
+    @Test(dataProvider = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST, enabled = false)
     public void testGetSubscription(MockedTestContext testContext, String endpointUrl) {
         testContext
                 .given(SubscriptionTestDto.class)
@@ -38,7 +38,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DATA_PROVIDER_FOR_INVALID_SUBSCRIPTION_TEST)
+    @Test(dataProvider = DATA_PROVIDER_FOR_INVALID_SUBSCRIPTION_TEST, enabled = false)
     public void testGetSubscriptionWithInvalidData(MockedTestContext testContext, String endpointUrl) {
         testContext
                 .given(SubscriptionTestDto.class)
@@ -51,7 +51,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
     @DataProvider(name = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST)
     public Object[][] provideValidAttributes() {
         var testContext = getBean(MockedTestContext.class);
-        return new Object[][] {
+        return new Object[][]{
                 {testContext, "https://localhost//"},
                 {testContext, "https://1.1.1.1//"},
                 {testContext, "https://1.1.1.1:11111//"}
@@ -61,7 +61,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
     @DataProvider(name = DATA_PROVIDER_FOR_INVALID_SUBSCRIPTION_TEST)
     public Object[][] provideInvalidAttributes() {
         var testContext = getBean(MockedTestContext.class);
-        return new Object[][] {
+        return new Object[][]{
                 {testContext, "localhost"},
                 {testContext, "https://1.1.1.1"},
                 {testContext, "https://1.1.1.1://"}
