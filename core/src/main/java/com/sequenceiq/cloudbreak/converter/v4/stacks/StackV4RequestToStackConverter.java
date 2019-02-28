@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -134,13 +135,13 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.setCustomHostname(source.getCustomDomain().getHostname());
             stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
             stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
-        } else if (!StringUtils.isEmpty(source.getCluster().getKerberosName())) {
+        } else if (!isEmpty(source.getCluster().getKerberosName())) {
             KerberosConfig kerberosConfig = stack.getCluster().getKerberosConfig();
             if (kerberosConfig == null) {
                 throw new BadRequestException("Cluster should be converted before custom domain is updated by kerberos config");
             }
             if (kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY) {
-                if (StringUtils.isEmpty(kerberosConfig.getRealm())) {
+                if (isEmpty(kerberosConfig.getRealm())) {
                     throw new BadRequestException("Realm cannot be null in case of ACTIVE_DIRECTORY");
                 }
                 stack.setCustomDomain(kerberosConfig.getRealm().toLowerCase());
@@ -230,7 +231,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getCloudPlatform() != null) {
             return source.getCloudPlatform().name();
         }
-        return StringUtils.isEmpty(source.getEnvironment().getName())
+        return isEmpty(source.getEnvironment().getName())
                 ? credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace).cloudPlatform()
                 : environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace).getCloudPlatform();
     }
@@ -258,8 +259,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private Long getDatalakeResourceId(StackV4Request source, Workspace workspace) {
-        if (source.getSharedService() != null && org.apache.commons.lang3.StringUtils.isNotBlank(source.getSharedService().getDatalakeName())) {
-            return datalakeResourcesService.getByNameForWorkspace(source.getSharedService().getDatalakeName(), workspace).getId();
+        try {
+            if (source.getSharedService() != null && isNotBlank(source.getSharedService().getDatalakeName())) {
+                return datalakeResourcesService.getByNameForWorkspace(source.getSharedService().getDatalakeName(), workspace).getId();
+            }
+        } catch (NotFoundException nfe) {
+            LOGGER.debug("No datalake resource found for data lake: {}", source.getSharedService().getDatalakeName());
         }
         return null;
     }
@@ -274,11 +279,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private void updateEnvironment(StackV4Request source, Stack stack, Workspace workspace) {
-        if (!StringUtils.isEmpty(source.getEnvironment().getCredentialName())) {
+        if (!isEmpty(source.getEnvironment().getCredentialName())) {
             Credential credential = credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace);
             stack.setCredential(credential);
         }
-        if (!StringUtils.isEmpty(source.getEnvironment().getName())) {
+        if (!isEmpty(source.getEnvironment().getName())) {
             EnvironmentView environment = environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace);
             stack.setEnvironment(environment);
         }
