@@ -4,8 +4,6 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/566493a63aaaf0c61bd4/maintainability)](https://codeclimate.com/github/hortonworks/cloudbreak/maintainability)
 [![Build Automated](https://img.shields.io/docker/automated/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
 [![Build Pulls](https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
-[![Build Status](https://img.shields.io/docker/build/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
-[![Swagger Cloudbreak API](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/hortonworks/cloudbreak/master/mock/cloudbreak/api/swagger.json.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/mock/cloudbreak/api/swagger.json)
 [![Licence](https://img.shields.io/github/license/hortonworks/cloudbreak.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/LICENSE)
 
 * Website: https://hortonworks.com/open-source/cloudbreak/
