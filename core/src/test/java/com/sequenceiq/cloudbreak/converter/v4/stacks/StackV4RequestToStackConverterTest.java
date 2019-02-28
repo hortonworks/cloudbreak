@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -123,7 +122,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     }
 
     @Test
-    public void testConvert() throws CloudbreakException {
+    public void testConvert() {
         initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         StackV4Request request = getRequest("stack.json");
@@ -161,7 +160,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     }
 
     @Test
-    public void testConvertWithLoginUserName() throws CloudbreakException {
+    public void testConvertWithLoginUserName() {
         initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());

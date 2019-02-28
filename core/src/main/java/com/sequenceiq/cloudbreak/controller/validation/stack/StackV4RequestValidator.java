@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -9,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -106,9 +107,11 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void validateSharedService(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
-        checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, validationBuilder, workspaceId);
+        ClusterV4Request clusterReq = stackRequest.getCluster();
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterReq.getAmbari().getClusterDefinitionName(), workspaceId);
+        checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, clusterDefinition, validationBuilder, workspaceId);
         SharedServiceV4Request sharedService = stackRequest.getSharedService();
-        if (sharedService != null && StringUtils.isNotBlank(sharedService.getDatalakeName())) {
+        if (isDatalakeNameSpecified(sharedService) && clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
             DatalakeResources datalakeResources = datalakeResourcesService.getByNameForWorkspaceId(sharedService.getDatalakeName(), workspaceId);
             Optional<Stack> stack = datalakeResources.getDatalakeStackId() == null ? Optional.empty()
                     : stackService.findById(datalakeResources.getDatalakeStackId());
@@ -120,6 +123,10 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                 validationBuilder.error("Unable to attach to datalake because it doesn't exists.");
             }
         }
+    }
+
+    private boolean isDatalakeNameSpecified(SharedServiceV4Request sharedService) {
+        return sharedService != null && isNotBlank(sharedService.getDatalakeName());
     }
 
     private void validateAvailableDatalakeStack(ValidationResultBuilder validationBuilder, Optional<Stack> stack) {
@@ -183,11 +190,11 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         }
     }
 
-    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long wsId) {
-        ClusterV4Request clusterRequest = stackRequest.getCluster();
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterRequest.getAmbari().getClusterDefinitionName(), wsId);
+    private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, ClusterDefinition clusterDefinition,
+            ValidationResultBuilder validationBuilder, Long wsId) {
         boolean sharedServiceReadyBlueprint = clusterDefinitionService.isDatalakeAmbariBlueprint(clusterDefinition);
         if (sharedServiceReadyBlueprint) {
+            ClusterV4Request clusterRequest = stackRequest.getCluster();
             Set<String> databaseTypes = getGivenRdsTypes(clusterRequest, wsId);
             String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready cluster definition) you should provide at least "
                     + "one %s rds/database configuration to the Cluster request";
@@ -218,7 +225,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     private void validateKerberos(String kerberosName, ValidationResultBuilder validationBuilder, Long workspaceId) {
         if (kerberosName != null && kerberosName.isEmpty()) {
             validationBuilder.error("kerberosName should not be empty. Should be either filled or null!");
-        } else if (StringUtils.isNotEmpty(kerberosName)) {
+        } else if (isNotEmpty(kerberosName)) {
             kerberosService.getByNameForWorkspaceId(kerberosName, workspaceId);
         }
     }

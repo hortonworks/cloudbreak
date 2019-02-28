@@ -7,7 +7,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -20,11 +22,14 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,6 +53,9 @@ public class SharedServiceValidatorTest {
     @Mock
     private StackViewService stackViewService;
 
+    @Mock
+    private ClusterDefinitionService clusterDefinitionService;
+
     @InjectMocks
     private SharedServiceValidator underTest;
 
@@ -57,6 +65,8 @@ public class SharedServiceValidatorTest {
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
+        when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
+        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -69,6 +79,8 @@ public class SharedServiceValidatorTest {
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(null);
+        when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
+        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -83,6 +95,8 @@ public class SharedServiceValidatorTest {
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(null);
+        when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
+        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -98,6 +112,8 @@ public class SharedServiceValidatorTest {
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
+        when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
+        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -116,6 +132,9 @@ public class SharedServiceValidatorTest {
         ClusterV4Request clusterRequest = new ClusterV4Request();
         clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
         clusterRequest.setLdapName(ldapName);
+        AmbariV4Request ambariRequest = new AmbariV4Request();
+        ambariRequest.setClusterDefinitionName("test-blueprint");
+        clusterRequest.setAmbari(ambariRequest);
         StackV4Request stackRequest = new StackV4Request();
         stackRequest.setSharedService(new SharedServiceV4Request());
         stackRequest.getSharedService().setDatalakeName(DATALAKE_NAME);

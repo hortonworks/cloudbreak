@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -108,53 +107,46 @@ public class StackDecorator {
         prepareDomainIfDefined(subject, request, user, workspace);
         LOGGER.debug("Domain was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-        String credentialName = request.getEnvironment().getCredentialName();
-        if (Objects.isNull(credentialName)) {
-            EnvironmentView environment = environmentViewService.getByNameForWorkspace(request.getEnvironment().getName(), workspace);
-                credentialName = environment.getCredential().getName();
+        subject.setCloudPlatform(subject.getCredential().cloudPlatform());
+        if (subject.getInstanceGroups() == null) {
+            throw new BadRequestException("Instance groups must be specified!");
         }
-        if (credentialName != null) {
-            subject.setCloudPlatform(subject.getCredential().cloudPlatform());
-            if (subject.getInstanceGroups() == null) {
-                throw new BadRequestException("Instance groups must be specified!");
-            }
-            start = System.currentTimeMillis();
-            PlatformParameters pps = cloudParameterCache.getPlatformParameters().get(Platform.platform(subject.cloudPlatform()));
-            Boolean mandatoryNetwork = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY);
-            if (BooleanUtils.isTrue(mandatoryNetwork) && subject.getNetwork() == null) {
-                throw new BadRequestException("Network must be specified!");
-            }
-            LOGGER.debug("Network was prepared and validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            prepareOrchestratorIfNotExist(subject, subject.getCredential());
-            LOGGER.debug("Orchestrator was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            if (subject.getFailurePolicy() != null) {
-                validatFailurePolicy(subject, subject.getFailurePolicy());
-            }
-            LOGGER.debug("Failure policy was validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            prepareInstanceGroups(subject, request, subject.getCredential(), user);
-            LOGGER.debug("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            prepareFlexSubscription(subject, request.getFlexId());
-            LOGGER.debug("Flex subscriptions were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            validateInstanceGroups(subject);
-            LOGGER.debug("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
-            ValidationResult validationResult = sharedServiceValidator.checkSharedServiceStackRequirements(request, workspace);
-            if (validationResult.hasError()) {
-                throw new BadRequestException(validationResult.getFormattedErrors());
-            }
-            LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        start = System.currentTimeMillis();
+        PlatformParameters pps = cloudParameterCache.getPlatformParameters().get(Platform.platform(subject.cloudPlatform()));
+        Boolean mandatoryNetwork = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY);
+        if (BooleanUtils.isTrue(mandatoryNetwork) && subject.getNetwork() == null) {
+            throw new BadRequestException("Network must be specified!");
         }
+        LOGGER.debug("Network was prepared and validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        prepareOrchestratorIfNotExist(subject, subject.getCredential());
+        LOGGER.debug("Orchestrator was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        if (subject.getFailurePolicy() != null) {
+            validatFailurePolicy(subject, subject.getFailurePolicy());
+        }
+        LOGGER.debug("Failure policy was validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        prepareInstanceGroups(subject, request, subject.getCredential(), user);
+        LOGGER.debug("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        prepareFlexSubscription(subject, request.getFlexId());
+        LOGGER.debug("Flex subscriptions were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        validateInstanceGroups(subject);
+        LOGGER.debug("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        ValidationResult validationResult = sharedServiceValidator.checkSharedServiceStackRequirements(request, workspace);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         return subject;
     }
 
