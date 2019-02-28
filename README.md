@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/hortonworks/dp-cli.svg?style=shield)](https://circleci.com/gh/hortonworks/cb-cli) [![Go Report Card](https://goreportcard.com/badge/github.com/hortonworks/cb-cli)](https://goreportcard.com/report/github.com/hortonworks/cb-cli)
+[![CircleCI](https://circleci.com/gh/hortonworks/cb-cli.svg?style=shield)](https://circleci.com/gh/hortonworks/cb-cli) [![Go Report Card](https://goreportcard.com/badge/github.com/hortonworks/cb-cli)](https://goreportcard.com/report/github.com/hortonworks/cb-cli)
 
 # DataPlane - Command Line Interface
 
