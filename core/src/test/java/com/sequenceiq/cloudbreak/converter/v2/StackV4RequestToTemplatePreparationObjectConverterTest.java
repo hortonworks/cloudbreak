@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -166,6 +167,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cluster.getAmbari()).thenReturn(ambari);
         when(ambari.getClusterDefinitionName()).thenReturn(TEST_CLUSTER_DEFINITION_NAME);
         when(clusterDefinitionService.getByNameForWorkspace(TEST_CLUSTER_DEFINITION_NAME, workspace)).thenReturn(clusterDefinition);
+        when(clusterDefinitionService.getClusterDefinitionVariant(any())).thenReturn("AMBARI");
         when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_CLUSTER_DEFINITION_TEXT);
         when(stackInfoService.clusterDefinitionStackInfo(TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(clusterDefinitionStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
@@ -363,7 +365,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenObtainingGeneralClusterConfigsFromGeneralClusterConfigsProviderThenItsReturnValueShouldBeStored() {
         GeneralClusterConfigs expected = new GeneralClusterConfigs();
-        when(generalClusterConfigsProvider.generalClusterConfigs(eq(source), eq(user), anyString())).thenReturn(expected);
+        when(generalClusterConfigsProvider.generalClusterConfigs(eq(source), anyString(), anyString())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -383,6 +385,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void testConvertWhenLdapConfigNameIsNotNullThenPublicConfigFromLdapConfigServiceShouldBeStored() {
         LdapConfig expected = new LdapConfig();
         expected.setProtocol("");
+        expected.setBindDn("");
+        expected.setBindPassword("");
         String ldapConfigName = "configName";
         when(cluster.getLdapName()).thenReturn(ldapConfigName);
         when(ldapConfigService.getByNameForWorkspace(eq(ldapConfigName), eq(workspace))).thenReturn(expected);

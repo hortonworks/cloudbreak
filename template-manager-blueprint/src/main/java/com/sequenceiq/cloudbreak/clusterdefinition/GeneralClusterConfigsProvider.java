@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 
@@ -55,11 +54,11 @@ public class GeneralClusterConfigsProvider {
         String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
         generalClusterConfigs.setKafkaReplicationFactor(
                 getKafkaReplicationFactor(clusterDefinitionText) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
-
+        generalClusterConfigs.setVariant(cluster.getVariant());
         return generalClusterConfigs;
     }
 
-    public GeneralClusterConfigs generalClusterConfigs(StackV4Request stack, User user, String email) {
+    public GeneralClusterConfigs generalClusterConfigs(StackV4Request stack, String email, String clusterVariant) {
         boolean gatewayInstanceMetadataPresented = false;
         int nodeCount = 0;
         for (InstanceGroupV4Request instanceGroup : stack.getInstanceGroups()) {
@@ -84,7 +83,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setNodeCount(nodeCount);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(PENDING_DEFAULT_VALUE));
         generalClusterConfigs.setKafkaReplicationFactor(1);
-
+        generalClusterConfigs.setVariant(clusterVariant);
         return generalClusterConfigs;
     }
 
