@@ -20,10 +20,16 @@ public class ImageCatalogServiceMock extends AbstractMock {
     }
 
     public void mockImageCatalogResponse(String cbServerAddress) {
-        getSparkService().get(IMAGE_CATALOG, (request, response) -> {
-            String version = getCloudbreakUnderTestVersion(cbServerAddress);
-            return responseFromJsonFile("imagecatalog/catalog.json").replace("CB_VERSION", version);
+        getSparkService().get(IMAGE_CATALOG, (request, response) -> generateImageCatalog(cbServerAddress));
+        getSparkService().head(IMAGE_CATALOG, (request, response) -> {
+            response.header("Content-Length", String.valueOf(generateImageCatalog(cbServerAddress).length()));
+            return "";
         });
+    }
+
+    private String generateImageCatalog(String cbServerAddress) throws URISyntaxException {
+        String version = getCloudbreakUnderTestVersion(cbServerAddress);
+        return responseFromJsonFile("imagecatalog/catalog.json").replace("CB_VERSION", version);
     }
 
     private String getCloudbreakUnderTestVersion(String cbServerAddress) throws URISyntaxException {
