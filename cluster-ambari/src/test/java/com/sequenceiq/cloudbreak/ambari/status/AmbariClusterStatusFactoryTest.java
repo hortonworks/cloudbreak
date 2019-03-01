@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.ambari.status;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,26 +11,25 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.ambari.AmbariAdapter;
+import com.sequenceiq.cloudbreak.ambari.AmbariClientFactory;
 import com.sequenceiq.cloudbreak.ambari.AmbariClusterStatusFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class AmbariClusterStatusFactoryTest {
     private static final String TEST_BLUEPRINT = "blueprint";
 
@@ -49,18 +51,22 @@ public class AmbariClusterStatusFactoryTest {
     @Mock
     private AmbariClient ambariClient;
 
+    @Mock
+    private AmbariClientFactory ambariClientFactory;
+
     @Spy
     private AmbariAdapter ambariAdapter;
 
-    private HttpClientConfig clientConfig;
+    private HttpClientConfig clientConfig = new HttpClientConfig("1.1.1.1");
 
     private Stack stack = new Stack();
 
+    private Cluster cluster = new Cluster();
+
     @Before
     public void setUp() {
-        underTest = new AmbariClusterStatusFactory();
-        MockitoAnnotations.initMocks(this);
-        clientConfig = new HttpClientConfig("1.1.1.1");
+        stack.setCluster(cluster);
+        when(ambariClientFactory.getAmbariClient(any(), any(), any())).thenReturn(ambariClient);
     }
 
     @Test
