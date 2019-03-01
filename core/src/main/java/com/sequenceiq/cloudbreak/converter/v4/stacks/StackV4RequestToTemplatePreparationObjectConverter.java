@@ -143,7 +143,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
             ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView(clusterDefinition.getClusterDefinitionText(),
                     clusterDefinitionStackInfo.getVersion(), clusterDefinitionStackInfo.getType());
-            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, user, cloudbreakUser.getEmail());
+            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
+                    clusterDefinitionService.getClusterDefinitionVariant(clusterDefinition));
             String bindDn = null;
             String bindPassword = null;
             if (ldapConfig != null) {

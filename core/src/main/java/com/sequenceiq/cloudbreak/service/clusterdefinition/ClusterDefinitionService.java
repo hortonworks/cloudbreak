@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
@@ -204,6 +205,10 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
 
     public boolean isAmbariBlueprint(ClusterDefinition clusterDefinition) {
         return ambariBlueprintUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText());
+    }
+
+    public String getClusterDefinitionVariant(ClusterDefinition clusterDefinition) {
+        return isAmbariBlueprint(clusterDefinition) ? ClusterApi.AMBARI : ClusterApi.CLOUDERA_MANAGER;
     }
 
     @Override

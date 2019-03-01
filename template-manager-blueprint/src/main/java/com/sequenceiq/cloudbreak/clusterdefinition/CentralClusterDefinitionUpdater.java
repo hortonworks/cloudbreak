@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
 
 @Component
-public class CentralClusterDefinitionUpdater {
+public class CentralClusterDefinitionUpdater implements ClusterDefinitionUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CentralClusterDefinitionUpdater.class);
 
@@ -37,6 +39,11 @@ public class CentralClusterDefinitionUpdater {
             throw new ClusterDefinitionProcessingException(message, e);
         }
         return clusterDefinitionText;
+    }
+
+    @Override
+    public String getVariant() {
+        return ClusterApi.AMBARI;
     }
 
     private String updateBlueprintConfiguration(TemplatePreparationObject source, String blueprint)

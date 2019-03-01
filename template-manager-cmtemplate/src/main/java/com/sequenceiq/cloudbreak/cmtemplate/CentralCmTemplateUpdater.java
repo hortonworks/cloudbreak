@@ -12,12 +12,15 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class CentralCmTemplateUpdater {
+public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CentralCmTemplateUpdater.class);
 
@@ -53,4 +56,14 @@ public class CentralCmTemplateUpdater {
         return processor;
     }
 
+    @Override
+    public String getClusterDefinitionText(TemplatePreparationObject source) {
+        ApiClusterTemplate template = getCmTemplate(source, Map.of());
+        return JsonUtil.writeValueAsStringSilent(template);
+    }
+
+    @Override
+    public String getVariant() {
+        return ClusterApi.CLOUDERA_MANAGER;
+    }
 }

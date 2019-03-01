@@ -18,7 +18,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -99,11 +98,7 @@ public class ClusterDecorator {
     }
 
     private void prepareClusterManagerVariant(Cluster cluster) {
-        if (clusterDefinitionService.isAmbariBlueprint(cluster.getClusterDefinition())) {
-            cluster.setVariant(ClusterApi.AMBARI);
-        } else {
-            cluster.setVariant(ClusterApi.CLOUDERA_MANAGER);
-        }
+        cluster.setVariant(clusterDefinitionService.getClusterDefinitionVariant(cluster.getClusterDefinition()));
     }
 
     // because KNOX does not support them

@@ -19,6 +19,7 @@ dependencies {
     compile project(':orchestrator-api')
     compile project(':core-model')
     compile project(':cloud-api')
+    compile project(':cluster-api')
     compile project(':template-manager-core')
 
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion

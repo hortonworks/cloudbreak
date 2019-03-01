@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
@@ -49,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
@@ -67,9 +67,6 @@ public class StackCommonService {
 
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
-
-    @Inject
-    private CentralClusterDefinitionUpdater centralClusterDefinitionUpdater;
 
     @Inject
     private OperationRetryService operationRetryService;
@@ -109,6 +106,9 @@ public class StackCommonService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private ClusterDefinitionUpdaterConnectors clusterDefinitionUpdaterConnectors;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
         return stackCreatorService.createStack(cloudbreakUser, user, workspace, stackRequest);
@@ -231,7 +231,8 @@ public class StackCommonService {
 
     public GeneratedClusterDefinitionV4Response postStackForClusterDefinition(StackV4Request stackRequest) {
         TemplatePreparationObject templatePreparationObject = converterUtil.convert(stackRequest, TemplatePreparationObject.class);
-        String clusterDefinitionText = centralClusterDefinitionUpdater.getClusterDefinitionText(templatePreparationObject);
+
+        String clusterDefinitionText = clusterDefinitionUpdaterConnectors.getClusterDefinitionText(templatePreparationObject);
         GeneratedClusterDefinitionV4Response response = new GeneratedClusterDefinitionV4Response();
         response.setClusterDefinitionText(clusterDefinitionText);
         return response;
