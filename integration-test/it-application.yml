@@ -1,9 +1,9 @@
 mock:
   server:
-    address: test.service.consul
+    address: test
   image:
     catalog:
-      url: https://test.service.consul:9443/imagecatalog
+      url: https://test:9443/imagecatalog
 
 integrationtest:
     testsuite:

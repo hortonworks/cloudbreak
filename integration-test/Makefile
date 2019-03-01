@@ -1,12 +1,5 @@
 include integcb/Environment
 
-ifdef DOCKER_MACHINE
-TMP := $(shell docker-machine env $(DOCKER_MACHINE) | awk '{ gsub ("\"", ""); print}' > docker_env.tmp)
-$(shell echo export TEST_ENV=docker-machine >> docker_env.tmp)
-include docker_env.tmp
-else
-$(shell echo export TEST_ENV=boot2docker > docker_env.tmp)
-endif
 ifeq ($(REPO_URL),"")
 REPO_URL = https://cloudbreak-maven.s3.amazonaws.com/releases
 endif
