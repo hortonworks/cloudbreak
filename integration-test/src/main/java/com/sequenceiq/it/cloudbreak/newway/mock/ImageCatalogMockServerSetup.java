@@ -45,6 +45,10 @@ public class ImageCatalogMockServerSetup implements AutoCloseable {
     public void startImageCatalog() {
         String jsonCatalogResponse = responseFromJsonFile("imagecatalog/catalog.json");
         sparkServer.getSparkService().get(IMAGE_CATALOG, (request, response) -> patchCbVersion(jsonCatalogResponse, testParameter));
+        sparkServer.getSparkService().head(IMAGE_CATALOG, (request, response) -> {
+            response.header("Content-Length", String.valueOf(patchCbVersion(jsonCatalogResponse, testParameter).length()));
+            return "";
+        });
         LOGGER.info("ImageCatalog has started at: {}", sparkServer.getEndpoint() + IMAGE_CATALOG);
     }
 
@@ -55,6 +59,10 @@ public class ImageCatalogMockServerSetup implements AutoCloseable {
     public String getPreWarmedImageCatalogUrl() {
         String jsonCatalogResponse = responseFromJsonFile("imagecatalog/catalog-with-prewarmed.json");
         sparkServer.getSparkService().get(IMAGE_CATALOG_PREWARMED, (request, response) -> patchCbVersion(jsonCatalogResponse, testParameter));
+        sparkServer.getSparkService().head(IMAGE_CATALOG_PREWARMED, (request, response) -> {
+            response.header("Content-Length", String.valueOf(patchCbVersion(jsonCatalogResponse, testParameter).length()));
+            return "";
+        });
         return String.join("", sparkServer.getEndpoint(), IMAGE_CATALOG_PREWARMED);
     }
 

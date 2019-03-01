@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.ClusterDefinitionV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterDefinitionModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidHttpContentSize;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class ClusterDefinitionV4Request extends ClusterDefinitionV4Base {
 
+    @ValidHttpContentSize
     @ApiModelProperty(ClusterDefinitionModelDescription.URL)
     private String url;
 

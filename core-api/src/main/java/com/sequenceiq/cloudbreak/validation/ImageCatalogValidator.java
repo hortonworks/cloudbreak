@@ -4,12 +4,10 @@ import java.util.Map;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +16,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 
 public class ImageCatalogValidator implements ConstraintValidator<ValidImageCatalog, String> {
-
-    public static final String INVALID_URL_MSG = "The value should be a valid URL and start with 'http(s)'!";
 
     public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
 
@@ -34,9 +30,11 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogValidator.class);
 
-    private static final Client CLIENT = RestClientUtil.get();
-
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static final HttpContentSizeValidator HTTP_CONTENT_SIZE_VALIDATOR = new HttpContentSizeValidator();
+
+    private static final HttpHelper HTTP_HELPER = HttpHelper.getInstance();
 
     @Override
     public void initialize(ValidImageCatalog constraintAnnotation) {
@@ -44,23 +42,16 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null || !value.startsWith("http")) {
-            context.buildConstraintViolationWithTemplate(INVALID_URL_MSG).addConstraintViolation();
-            return false;
-        }
         try {
-            WebTarget target = CLIENT.target(value);
-            Response response = target.request().get();
-            StatusType responseStatusInfo = response.getStatusInfo();
-            if (responseStatusInfo.getFamily().equals(Family.SUCCESSFUL)) {
-                String responseContent = response.readEntity(String.class);
-                if (imageCatalogParsable(context, responseContent)) {
-                    return true;
-                }
-            } else {
-                String msg = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, value, responseStatusInfo.getReasonPhrase());
-                context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+            if (value == null || !HTTP_CONTENT_SIZE_VALIDATOR.isValid(value, context)) {
+                return false;
             }
+            Pair<StatusType, String> content = HTTP_HELPER.getContent(value);
+            if (content.getKey().getFamily().equals(Family.SUCCESSFUL)) {
+                return imageCatalogParsable(context, content.getValue());
+            }
+            String msg = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, value, content.getKey().getReasonPhrase());
+            context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
         } catch (Throwable throwable) {
             context.buildConstraintViolationWithTemplate(FAILED_TO_GET_WITH_EXCEPTION).addConstraintViolation();
             LOGGER.debug("Failed to validate the specified image catalog URL: " + value, throwable);
