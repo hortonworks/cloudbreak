@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -48,23 +47,6 @@ public class AmbariClientFactoryTest {
     }
 
     @Test
-    @Ignore
-    public void testGetDefaultAmbariClientWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() {
-        Stack stack = TestUtil.stack();
-        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
-        AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("failed");
-
-        AmbariClient defaultAmbariClient = underTest.getDefaultAmbariClient(stack, httpClientConfig);
-
-        Assert.assertEquals(ambariClient, defaultAmbariClient);
-
-        verify(ambariClientProvider, times(0)).getDefaultAmbariClient(httpClientConfig, stack.getGatewayPort());
-    }
-
-    @Test
     public void testGetAmbariClientWhenEverythingWorksFine() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
@@ -79,24 +61,6 @@ public class AmbariClientFactoryTest {
         Assert.assertEquals(ambariClient, defaultAmbariClient);
 
         verify(ambariClientProvider, times(1)).getAmbariClient(httpClientConfig, stack.getGatewayPort(), cluster);
-    }
-
-    @Test
-    @Ignore
-    public void testGetAmbariClientWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() {
-        Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster();
-        stack.setCluster(cluster);
-        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
-        AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("failed");
-
-        AmbariClient defaultAmbariClient = underTest.getAmbariClient(stack, cluster, httpClientConfig);
-
-        Assert.assertEquals(ambariClient, defaultAmbariClient);
-
-        verify(ambariClientProvider, times(0)).getAmbariClient(httpClientConfig, stack.getGatewayPort(), cluster);
     }
 
     @Test
@@ -116,27 +80,6 @@ public class AmbariClientFactoryTest {
         Assert.assertEquals(ambariClient, defaultAmbariClient);
 
         verify(ambariClientProvider, times(1)).getAmbariClient(httpClientConfig, stack.getGatewayPort(), userName, password);
-    }
-
-    @Test
-    @Ignore
-    public void testGetAmbariClientWithUsernameAndPasswordWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() {
-        Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster();
-        String userName = "userName";
-        String password = "password";
-        stack.setCluster(cluster);
-        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
-        AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("failed");
-
-        AmbariClient defaultAmbariClient = underTest.getAmbariClient(stack, userName, password, httpClientConfig);
-
-        Assert.assertEquals(ambariClient, defaultAmbariClient);
-
-        verify(ambariClientProvider, times(0)).getAmbariClient(httpClientConfig, stack.getGatewayPort(), userName, password);
     }
 
 }

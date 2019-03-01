@@ -2,17 +2,13 @@ package com.sequenceiq.cloudbreak.ambari;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -24,32 +20,25 @@ import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class AmbariSSOServiceTest {
 
     @InjectMocks
     private AmbariSSOService ambariSSOService;
 
-    @Mock
-    private AmbariClientFactory ambariClientFactory;
-
     @Captor
     private ArgumentCaptor<Map<String, Object>> captor;
 
+    @Mock
     private AmbariClient ambariClient;
 
     @Before
     public void initTest() {
-        ambariClient = mock(AmbariClient.class);
-        when(ambariClientFactory.getAmbariClient(any(Stack.class), any(), any(HttpClientConfig.class))).thenReturn(ambariClient);
         Field knoxPort = ReflectionUtils.findField(AmbariSSOService.class, "knoxPort", String.class);
+        knoxPort.setAccessible(true);
         ReflectionUtils.setField(knoxPort, ambariSSOService, "8443");
     }
 
@@ -64,10 +53,7 @@ public class AmbariSSOServiceTest {
         cluster.setName("cluster0");
         cluster.setGateway(gateway);
 
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        when(gatewayConfig.getPublicAddress()).thenReturn("hostname");
-
-        ambariSSOService.setupSSO(ambariClient, cluster, "1.1.1.1");
+        ambariSSOService.setupSSO(ambariClient, cluster, "hostname");
         verify(ambariClient, times(1)).configureSSO(captor.capture());
         Map<String, Object> parameters = captor.getValue();
         assertThat(parameters, hasEntry("ambari.sso.provider.url", "https://hostname:8443/ssoprovider"));

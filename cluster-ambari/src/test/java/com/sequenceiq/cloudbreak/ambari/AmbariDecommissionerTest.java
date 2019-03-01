@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,7 +21,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,7 +30,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.ambari.filter.HostFilterService;
@@ -38,7 +39,6 @@ import com.sequenceiq.cloudbreak.ambari.flow.AmbariClientPollerObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.cluster.service.NotRecommendedNodeRemovalException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -196,6 +196,7 @@ public class AmbariDecommissionerTest {
         Assert.assertTrue(selectedNodes.keySet().contains(hostname1));
     }
 
+    @Test
     public void testVerifyNodesAreRemovableWithReplicationFactor() {
         String ipAddress = "192.18.256.1";
         int gatewayPort = 1234;
@@ -212,6 +213,7 @@ public class AmbariDecommissionerTest {
         Stack stack = new Stack();
         stack.setCluster(cluster);
         stack.setGatewayPort(gatewayPort);
+        stack.setPlatformVariant("GCP");
         stack.setId(100L);
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
@@ -227,9 +229,6 @@ public class AmbariDecommissionerTest {
 
         AmbariClient ambariClient = mock(AmbariClient.class);
 
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
-
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
@@ -240,15 +239,24 @@ public class AmbariDecommissionerTest {
                         .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
                         .collect(Collectors.toList());
 
+        Set<String> removableHostnames = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .collect(Collectors.toList())).when(hostFilterService).filterHostsForDecommission(any(), any(), any(), any(), any());
+        Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
+        slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .forEach(hostMetadata -> {
+                    hostGroupWithInstances.put(slaveHostGroup.getId(), hostMetadata);
+                });
 
-        underTest.verifyNodesAreRemovable(stack, Multimaps.forMap(Collections.emptyMap()), Collections.emptySet(), 50, ambariClient,
+        underTest.verifyNodesAreRemovable(stack, hostGroupWithInstances, Sets.newHashSet(masterHostGroup, slaveHostGroup), 50, ambariClient,
                 removableNodes);
 
-        verify(ambariDecommissionTimeCalculator).calculateDecommissioningTime(any(), any(), any(), anyLong(), any());
+        verify(ambariDecommissionTimeCalculator).calculateDecommissioningTime(any(), any(), any(), anyLong(), anyInt());
     }
 
     @Test
-    @Ignore
     public void testVerifyNodesAreRemovableFilterOutNodes() {
 
         String ipAddress = "192.18.256.1";
@@ -281,9 +289,6 @@ public class AmbariDecommissionerTest {
 
         AmbariClient ambariClient = mock(AmbariClient.class);
 
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
-
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
@@ -293,15 +298,26 @@ public class AmbariDecommissionerTest {
                         .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
                         .collect(Collectors.toList());
 
+        Set<String> removableHostnames = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> !"10-0-1-0.example.com".equals(hostMetadata.getHostName()))
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .collect(Collectors.toList())).when(hostFilterService).filterHostsForDecommission(any(), any(), any(), any(), any());
+
+        Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
+        slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .forEach(hostMetadata -> {
+            hostGroupWithInstances.put(slaveHostGroup.getId(), hostMetadata);
+        });
         thrown.expect(NotRecommendedNodeRemovalException.class);
         thrown.expectMessage("Following nodes shouldn't be removed from the cluster: [10-0-1-0.example.com]");
 
-        underTest.verifyNodesAreRemovable(stack, Multimaps.forMap(Collections.emptyMap()), Collections.emptySet(), 50, ambariClient,
+        underTest.verifyNodesAreRemovable(stack, hostGroupWithInstances, Sets.newHashSet(masterHostGroup, slaveHostGroup), 50, ambariClient,
                 removableNodes);
     }
 
     @Test
-    @Ignore
     public void testVerifyNodesAreRemovableWithReplicationFactoryVerificationFailBecauseReplication() {
 
         String ipAddress = "192.18.256.1";
@@ -336,9 +352,6 @@ public class AmbariDecommissionerTest {
 
         AmbariClient ambariClient = mock(AmbariClient.class);
 
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
-
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
@@ -348,15 +361,26 @@ public class AmbariDecommissionerTest {
                         .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
                         .collect(Collectors.toList());
 
+        Set<String> removableHostnames = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .collect(Collectors.toList())).when(hostFilterService).filterHostsForDecommission(any(), any(), any(), any(), any());
+
+        Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
+        slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .forEach(hostMetadata -> {
+                    hostGroupWithInstances.put(slaveHostGroup.getId(), hostMetadata);
+                });
+
         thrown.expect(NotEnoughNodeException.class);
         thrown.expectMessage("There is not enough node to downscale. Check the replication factor and the ApplicationMaster occupation.");
 
-        underTest.verifyNodesAreRemovable(stack, Multimaps.forMap(Collections.emptyMap()), Collections.emptySet(), 50, ambariClient,
+        underTest.verifyNodesAreRemovable(stack, hostGroupWithInstances, Sets.newHashSet(masterHostGroup, slaveHostGroup), 50, ambariClient,
                 removableNodes);
     }
 
     @Test
-    @Ignore
     public void testVerifyNodesAreRemovableWithoutReplicationFactory() {
 
         String ipAddress = "192.18.256.1";
@@ -391,9 +415,6 @@ public class AmbariDecommissionerTest {
 
         AmbariClient ambariClient = mock(AmbariClient.class);
 
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
-
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
@@ -404,10 +425,21 @@ public class AmbariDecommissionerTest {
                         .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
                         .collect(Collectors.toList());
 
-        underTest.verifyNodesAreRemovable(stack, Multimaps.forMap(Collections.emptyMap()), Collections.emptySet(), 50, ambariClient,
+        Set<String> removableHostnames = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .collect(Collectors.toList())).when(hostFilterService).filterHostsForDecommission(any(), any(), any(), any(), any());
+        Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
+        slaveHostGroup.getHostMetadata().stream()
+                .filter(hostMetadata -> removableHostnames.contains(hostMetadata.getHostName()))
+                .forEach(hostMetadata -> {
+                    hostGroupWithInstances.put(slaveHostGroup.getId(), hostMetadata);
+                });
+
+        underTest.verifyNodesAreRemovable(stack, hostGroupWithInstances, Sets.newHashSet(masterHostGroup, slaveHostGroup), 50, ambariClient,
                 removableNodes);
 
-        verify(ambariDecommissionTimeCalculator).calculateDecommissioningTime(any(), any(), any(), anyLong(), any());
+        verify(ambariDecommissionTimeCalculator).calculateDecommissioningTime(any(), any(), any(), anyLong(), anyInt());
     }
 
     private HostGroup getHostGroupForInstanceGroup(InstanceGroup instanceGroup, Long id) {

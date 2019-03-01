@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -44,11 +43,7 @@ import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import groovyx.net.http.HttpResponseException;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class AmbariClusterModificationServiceTest {
-
-    @Mock
-    private AmbariClientFactory clientFactory;
 
     @Mock
     private ClusterConnectorPollingResultChecker clusterConnectorPollingResultChecker;
@@ -71,22 +66,24 @@ public class AmbariClusterModificationServiceTest {
     @Mock
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
-    @InjectMocks
-    private AmbariClusterModificationService ambariClusterModificationService;
+    @Mock
+    private AmbariClient ambariClient;
+
+    private Stack stack = TestUtil.stack();
 
     private HttpClientConfig clientConfig = new HttpClientConfig("1.1.1.1");
 
+    @InjectMocks
+    private AmbariClusterModificationService ambariClusterModificationService = new AmbariClusterModificationService(stack, clientConfig);
+
     @Test
     public void testRackUpdate() throws CloudbreakException, HttpResponseException {
-        Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
         when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
-        when(clientFactory.getAmbariClient(any(Stack.class), any(), clientConfig)).thenReturn(ambariClient);
 
         ImmutablePair<PollingResult, Exception> pair = new ImmutablePair<>(PollingResult.SUCCESS, null);
         when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(UPSCALE_AMBARI_PROGRESS_STATE))).thenReturn(pair);
@@ -123,15 +120,12 @@ public class AmbariClusterModificationServiceTest {
 
     @Test
     public void testRackUpdateIfNewAmbari() throws CloudbreakException, HttpResponseException {
-        Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
         when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
-        when(clientFactory.getAmbariClient(any(Stack.class), any(), clientConfig)).thenReturn(ambariClient);
 
         ImmutablePair<PollingResult, Exception> pair = new ImmutablePair<>(PollingResult.SUCCESS, null);
         when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(UPSCALE_AMBARI_PROGRESS_STATE))).thenReturn(pair);
@@ -168,15 +162,12 @@ public class AmbariClusterModificationServiceTest {
 
     @Test
     public void testRackUpdateIfRackIsNull() throws CloudbreakException, HttpResponseException {
-        Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
         when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
-        when(clientFactory.getAmbariClient(any(Stack.class), any(), clientConfig)).thenReturn(ambariClient);
 
         ImmutablePair<PollingResult, Exception> pair = new ImmutablePair<>(PollingResult.SUCCESS, null);
         when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(UPSCALE_AMBARI_PROGRESS_STATE))).thenReturn(pair);

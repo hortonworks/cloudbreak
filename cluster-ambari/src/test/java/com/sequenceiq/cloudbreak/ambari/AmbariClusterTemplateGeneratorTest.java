@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.ambari;
 import java.util.HashMap;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -54,13 +53,13 @@ public class AmbariClusterTemplateGeneratorTest {
     }
 
     @Test
-    @Ignore
     public void testDefaultPasswordIsUserProvidedSecure() throws CloudbreakException {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setPassword("KerberosPassword");
+        kerberosConfig.setPrincipal("principal");
         cluster.setKerberosConfig(kerberosConfig);
 
         // WHEN
