@@ -33,10 +33,11 @@ public class SharedServiceValidator {
     public ValidationResult checkSharedServiceStackRequirements(StackV4Request request, Workspace workspace) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         if (request.getSharedService() != null) {
-            Long wsId = workspace.getId();
-            checkCloudPlatform(request, wsId, resultBuilder);
+            Long workspaceId = workspace.getId();
+            checkCloudPlatform(request, workspaceId, resultBuilder);
             ClusterV4Request clusterReq = request.getCluster();
-            ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterReq.getAmbari().getClusterDefinitionName(), wsId);
+            ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(
+                    clusterReq.getAmbari().getClusterDefinitionName(), workspaceId);
             if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
                 checkSharedServiceRequirements(request, workspace, resultBuilder);
             }

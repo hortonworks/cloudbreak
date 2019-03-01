@@ -81,6 +81,16 @@ public class Cluster extends Entity {
         return this;
     }
 
+    public Cluster withUsername(String username) {
+        request.setUserName(username);
+        return this;
+    }
+
+    public Cluster withPassword(String password) {
+        request.setPassword(password);
+        return this;
+    }
+
     public Cluster withCloudStorage(CloudStorageV4Request cloudStorage) {
         request.setCloudStorage(cloudStorage);
         return this;

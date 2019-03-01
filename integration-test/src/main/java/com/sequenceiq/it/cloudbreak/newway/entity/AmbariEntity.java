@@ -22,24 +22,12 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
     public AmbariEntity valid() {
         String clusterDefinitionName = getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
                 getCloudProvider().getDefaultClusterDefinitionName());
-        return withUserName("admin")
-                .withPassword("Admin123")
-                .withClusterDefinitionName(clusterDefinitionName)
+        return withClusterDefinitionName(clusterDefinitionName)
                 .withValidateRepositories(true);
     }
 
     public AmbariEntity withClusterDefinitionName(String clusterDefinitionName) {
         getRequest().setClusterDefinitionName(clusterDefinitionName);
-        return this;
-    }
-
-    public AmbariEntity withUserName(String userName) {
-        getRequest().setUserName(userName);
-        return this;
-    }
-
-    public AmbariEntity withPassword(String password) {
-        getRequest().setPassword(password);
         return this;
     }
 

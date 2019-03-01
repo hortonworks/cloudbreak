@@ -100,9 +100,9 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         stackV2Request.setCluster(clusterV2Request);
         AmbariV4Request ambariV2Request = new AmbariV4Request();
         clusterV2Request.setAmbari(ambariV2Request);
+        clusterV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
+        clusterV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         ambariV2Request.setClusterDefinitionName(clusterDefinitionName);
-        ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
-        ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         if (enableGateway) {
             addGatewayRequest(stackV2Request);
         }

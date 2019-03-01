@@ -39,7 +39,9 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         given(cloudProvider.aValidCredential()
                 .withName(credentialName), "a credential is created.");
         given(Cluster.request()
-                .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
+                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")

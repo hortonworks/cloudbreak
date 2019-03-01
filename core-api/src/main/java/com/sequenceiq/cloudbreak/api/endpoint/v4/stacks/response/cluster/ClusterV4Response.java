@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -87,6 +89,12 @@ public class ClusterV4Response implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
+
+    @ApiModelProperty(StackModelDescription.DP_AMBARI_USERNAME)
+    private SecretV4Response dpUser;
+
+    @ApiModelProperty(StackModelDescription.DP_AMBARI_PASSWORD)
+    private SecretV4Response dpPassword;
 
     public Long getId() {
         return id;
@@ -206,6 +214,22 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setUptime(Long uptime) {
         this.uptime = uptime;
+    }
+
+    public SecretV4Response getDpUser() {
+        return dpUser;
+    }
+
+    public void setDpUser(SecretV4Response dpUser) {
+        this.dpUser = dpUser;
+    }
+
+    public SecretV4Response getDpPassword() {
+        return dpPassword;
+    }
+
+    public void setDpPassword(SecretV4Response dpPassword) {
+        this.dpPassword = dpPassword;
     }
 
     public WorkspaceResourceV4Response getWorkspace() {

@@ -25,8 +25,6 @@ public class ClusterToAmbariV4RequestRequestConverter extends AbstractConversion
         ambariRequest.setClusterDefinitionName(source.getClusterDefinition().getName());
         prepareRepoDetails(source, ambariRequest);
         ambariRequest.setConfigStrategy(null);
-        ambariRequest.setPassword("");
-        ambariRequest.setUserName("");
         ambariRequest.setValidateClusterDefinition(null);
         return ambariRequest;
     }

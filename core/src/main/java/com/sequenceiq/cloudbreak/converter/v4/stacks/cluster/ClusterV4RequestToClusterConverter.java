@@ -89,8 +89,8 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         Cluster cluster = new Cluster();
         cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
-        cluster.setUserName(source.getAmbari().getUserName());
-        cluster.setPassword(source.getAmbari().getPassword());
+        cluster.setUserName(source.getUserName());
+        cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
         convertGateway(source, cluster);
 

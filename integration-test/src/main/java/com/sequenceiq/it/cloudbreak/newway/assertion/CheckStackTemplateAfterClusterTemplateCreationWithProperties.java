@@ -128,11 +128,11 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("stack repo vdf-url is mismatch!");
         }
 
-        if (!StringUtils.isEmpty(stackTemplate.getCluster().getAmbari().getPassword())) {
+        if (!StringUtils.isEmpty(stackTemplate.getCluster().getPassword())) {
             throw new IllegalArgumentException("Password should be empty!");
         }
 
-        if (!StringUtils.isEmpty(stackTemplate.getCluster().getAmbari().getUserName())) {
+        if (!StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
             throw new IllegalArgumentException("Username should be empty!");
         }
 

@@ -31,6 +31,8 @@ public class EncryptedClusterTests extends ClusterTests {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
                         .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -36,20 +35,6 @@ public class AmbariV4Response implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.AMBARI_URL)
     private String serverUrl;
-
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
-    private SecretV4Response userName;
-
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
-    private SecretV4Response password;
-
-    @ApiModelProperty(StackModelDescription.DP_AMBARI_USERNAME)
-    private SecretV4Response dpUser;
-
-    @ApiModelProperty(StackModelDescription.DP_AMBARI_PASSWORD)
-    private SecretV4Response dpPassword;
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
@@ -92,38 +77,6 @@ public class AmbariV4Response implements JsonEntity {
 
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
-    }
-
-    public SecretV4Response getUserName() {
-        return userName;
-    }
-
-    public void setUserName(SecretV4Response userName) {
-        this.userName = userName;
-    }
-
-    public SecretV4Response getPassword() {
-        return password;
-    }
-
-    public void setPassword(SecretV4Response password) {
-        this.password = password;
-    }
-
-    public SecretV4Response getDpUser() {
-        return dpUser;
-    }
-
-    public void setDpUser(SecretV4Response dpUser) {
-        this.dpUser = dpUser;
-    }
-
-    public SecretV4Response getDpPassword() {
-        return dpPassword;
-    }
-
-    public void setDpPassword(SecretV4Response dpPassword) {
-        this.dpPassword = dpPassword;
     }
 
     public StackRepositoryV4Response getStackRepository() {

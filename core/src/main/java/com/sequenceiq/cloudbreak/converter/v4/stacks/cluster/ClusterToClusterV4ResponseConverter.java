@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
@@ -86,6 +88,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs().stream().filter(
                 rds -> ResourceStatus.USER_MANAGED.equals(rds.getStatus())).collect(Collectors.toList()), DatabaseV4Response.class));
         clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
+        convertDpSecrets(source, clusterResponse);
         return clusterResponse;
     }
 
@@ -160,6 +163,13 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     private void decorateResponseWithProxyConfig(Cluster source, ClusterV4Response clusterResponse) {
         if (source.getProxyConfig() != null) {
             clusterResponse.setProxy(getConversionService().convert(source.getProxyConfig(), ProxyV4Response.class));
+        }
+    }
+
+    private void convertDpSecrets(Cluster source, ClusterV4Response response) {
+        if (isNotEmpty(source.getDpAmbariUserSecret()) && isNotEmpty(source.getDpAmbariPasswordSecret())) {
+            response.setDpUser(getConversionService().convert(source.getDpAmbariUserSecret(), SecretV4Response.class));
+            response.setDpPassword(getConversionService().convert(source.getDpAmbariPasswordSecret(), SecretV4Response.class));
         }
     }
 }

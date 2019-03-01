@@ -115,4 +115,8 @@ public abstract class CloudProvider {
     public abstract List<InstanceGroupV4Request> instanceGroups(Set<String> recipes, HostGroupType... groupTypes);
 
     public abstract RecoveryMode getRecoveryModeParam(String hostgroupName);
+
+    public abstract String getUsername();
+
+    public abstract String getPassword();
 }

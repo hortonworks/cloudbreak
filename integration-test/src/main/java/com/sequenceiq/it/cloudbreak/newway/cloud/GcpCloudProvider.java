@@ -231,6 +231,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidDatalakeCluster() {
         return Cluster.request()
+                .withUsername(getUsername())
+                .withPassword(getPassword())
                 .withAmbariRequest(ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
                 .withRdsConfigNames(Set.of(
@@ -242,6 +244,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidAttachedCluster() {
         return Cluster.request()
+                .withUsername(getUsername())
+                .withPassword(getPassword())
                 .withAmbariRequest(ambariRequestWithClusterDefinitionName(getClusterDefinitionName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(

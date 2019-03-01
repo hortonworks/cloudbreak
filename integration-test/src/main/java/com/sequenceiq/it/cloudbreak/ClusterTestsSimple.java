@@ -55,6 +55,8 @@ public class ClusterTestsSimple extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
                 .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME)),
                 "a cluster request");
         given(cloudProvider.aValidStackRequest(), "a stack request");

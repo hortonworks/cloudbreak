@@ -43,6 +43,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
                         .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
@@ -66,6 +68,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(cloudProvider.aValidCredential());
         given(AwsKerberos.kerberosOnAws(getTestParameter()));
         given(Cluster.request()
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
                         .withKerberos(AwsKerberos.KERBEROS_CLOUDY)
                         .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, clusterDefinitionName, getTestParameter())),
                 "a cluster request");
@@ -93,6 +97,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
                         .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
@@ -115,6 +121,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
+                        .withUsername(cloudProvider.getUsername())
+                        .withPassword(cloudProvider.getPassword())
                         .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
                 "a cluster request");
         given(ImageSettingsEntity.request()
