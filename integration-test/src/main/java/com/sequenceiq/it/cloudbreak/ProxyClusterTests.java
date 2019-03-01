@@ -71,6 +71,8 @@ public class ProxyClusterTests extends CloudbreakTest {
     public void testCreateClusterWithProxy(String securityGroupId) throws Exception {
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
+                .withUsername(cloudProvider.getUsername())
+                .withPassword(cloudProvider.getPassword())
                 .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(CLUSTER_DEFINITION_HDP26_NAME))
                 .withProxyConfigName(VALID_PROXY_CONFIG), "a cluster request with proxy");
         given(cloudProvider.aValidStackRequest()

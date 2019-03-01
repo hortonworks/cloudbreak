@@ -70,7 +70,7 @@ public class GeneralClusterConfigsProvider {
 
         generalClusterConfigs.setAmbariIp(PENDING_DEFAULT_VALUE);
         generalClusterConfigs.setInstanceGroupsPresented(false);
-        generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
+        generalClusterConfigs.setPassword(stack.getCluster().getPassword());
         if (stack.getCluster().getGateway() != null) {
             gatewayInstanceMetadataPresented = true;
         }
@@ -79,7 +79,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setExecutorType(stack.getCluster().getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(PENDING_DEFAULT_VALUE);
-        generalClusterConfigs.setUserName(stack.getCluster().getAmbari().getUserName());
+        generalClusterConfigs.setUserName(stack.getCluster().getUserName());
         generalClusterConfigs.setNodeCount(nodeCount);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(PENDING_DEFAULT_VALUE));
         generalClusterConfigs.setKafkaReplicationFactor(1);

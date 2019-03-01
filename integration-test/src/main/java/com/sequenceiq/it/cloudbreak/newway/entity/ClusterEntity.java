@@ -30,11 +30,23 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
     }
 
     public ClusterEntity valid() {
-        return withAmbari(getTestContext().init(AmbariEntity.class));
+        return withUserName("admin")
+                .withPassword("Admin123")
+                .withAmbari(getTestContext().init(AmbariEntity.class));
     }
 
     public ClusterEntity withName(String name) {
         getRequest().setName(name);
+        return this;
+    }
+
+    public ClusterEntity withUserName(String userName) {
+        getRequest().setUserName(userName);
+        return this;
+    }
+
+    public ClusterEntity withPassword(String password) {
+        getRequest().setPassword(password);
         return this;
     }
 

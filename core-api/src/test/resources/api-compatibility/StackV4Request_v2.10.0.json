@@ -82,6 +82,8 @@
   },
   "flexId": 0,
   "cluster": {
+    "userName": "string",
+    "password": "string",
     "emailNeeded": false,
     "emailTo": "string",
     "ldapConfigName": "string",
@@ -118,8 +120,6 @@
     "ambari": {
       "clusterDefinitionId": 0,
       "clusterDefinitionName": "string",
-      "userName": "string",
-      "password": "string",
       "kerberosConfigName": "testFreeIpaKdc",
       "validateClusterDefinition": false,
       "ambariStackDetails": {

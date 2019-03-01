@@ -269,6 +269,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidDatalakeCluster() {
         return Cluster.request()
+                .withUsername(getUsername())
+                .withPassword(getPassword())
                 .withAmbariRequest(ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName()))
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
                 .withRdsConfigNames(of(getTestParameter().get(Ranger.CONFIG_NAME),

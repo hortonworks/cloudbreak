@@ -202,13 +202,21 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public AmbariV4Request ambariRequestWithClusterDefinitionName(String clusterDefinitionName) {
         var req = new AmbariV4Request();
-        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
-        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setClusterDefinitionName(clusterDefinitionName);
         req.setValidateClusterDefinition(false);
         req.setValidateRepositories(Boolean.TRUE);
         req.setStackRepository(new StackRepositoryV4Request());
         return req;
+    }
+
+    @Override
+    public String getUsername() {
+        return testParameter.get(DEFAULT_AMBARI_USER);
+    }
+
+    @Override
+    public String getPassword() {
+        return testParameter.get(DEFAULT_AMBARI_PASSWORD);
     }
 
     public LdapV4Request getLdap() {

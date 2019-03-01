@@ -82,7 +82,10 @@ public class NetworkClusterTests extends CloudbreakTest {
     public void testCreateNewCluster() throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
+        given(Cluster.request()
+                .withUsername(cloudProvider.getUsername())
+                .withPassword(cloudProvider.getPassword())
+                .withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithClusterDefinitionName(cloudProvider.getClusterDefinitionName())), cloudProvider.getPlatform() + " cluster request ");
 //        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
 //                " stack request ");
@@ -97,7 +100,10 @@ public class NetworkClusterTests extends CloudbreakTest {
     public void testCreateNewAzureCluster() throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
-        given(Cluster.request().withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
+        given(Cluster.request()
+                .withUsername(cloudProvider.getUsername())
+                .withPassword(cloudProvider.getPassword())
+                .withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
                         .ambariRequestWithClusterDefinitionName(cloudProvider.getClusterDefinitionName())), cloudProvider.getPlatform() + " cluster request ");
 //        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
 //                " stack request ");

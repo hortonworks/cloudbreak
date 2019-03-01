@@ -104,8 +104,8 @@ public class StackTestAction {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         logJSON(LOGGER, " Stack put ambari password request:\n", entity.getRequest());
         UserNamePasswordV4Request userNamePasswordV4Request = new UserNamePasswordV4Request();
-        userNamePasswordV4Request.setOldPassword(entity.getRequest().getCluster().getAmbari().getPassword());
-        userNamePasswordV4Request.setUserName(entity.getRequest().getCluster().getAmbari().getUserName());
+        userNamePasswordV4Request.setOldPassword(entity.getRequest().getCluster().getPassword());
+        userNamePasswordV4Request.setUserName(entity.getRequest().getCluster().getUserName());
         userNamePasswordV4Request.setPassword("testnewambaripassword");
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
                 entity.getName(), userNamePasswordV4Request);

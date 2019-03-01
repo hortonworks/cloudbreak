@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 
-public class Ambari extends Entity  {
+public class Ambari extends Entity {
 
     private static final String AMBARI_REQUEST = "AMBARI_REQUEST";
 
@@ -45,16 +45,6 @@ public class Ambari extends Entity  {
 
     public Ambari withConfigStrategy(ConfigStrategy configStrategy) {
         request.setConfigStrategy(configStrategy);
-        return this;
-    }
-
-    public Ambari withPassword(String password) {
-        request.setPassword(password);
-        return this;
-    }
-
-    public Ambari withUsername(String username) {
-        request.setUserName(username);
         return this;
     }
 

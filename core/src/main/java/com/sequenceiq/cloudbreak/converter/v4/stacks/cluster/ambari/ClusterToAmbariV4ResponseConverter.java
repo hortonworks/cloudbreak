@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.anonymize;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -44,7 +43,6 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
         AmbariV4Response response = new AmbariV4Response();
         response.setClusterDefinition(getConversionService().convert(source.getClusterDefinition(), ClusterDefinitionV4Response.class));
         response.setConfigStrategy(source.getConfigStrategy());
-        convertDpSecrets(source, response);
         response.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(source));
         response.setRepository(getComponent(source, ComponentType.AMBARI_REPO_DETAILS, AmbariRepo.class, AmbariRepositoryV4Response.class));
         response.setSecurityMasterKey(getConversionService().convert(source.getAmbariSecurityMasterKey(), SecretV4Response.class));
@@ -52,15 +50,7 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
         response.setServerIp(ambariIp);
         response.setServerUrl(serviceEndpointCollector.getAmbariServerUrl(source, ambariIp));
         response.setStackRepository(getComponent(source, ComponentType.HDP_REPO_DETAILS, StackRepoDetails.class, StackRepositoryV4Response.class));
-        response.setUserName(getConversionService().convert(source.getUserName(), SecretV4Response.class));
         return response;
-    }
-
-    private void convertDpSecrets(Cluster source, AmbariV4Response response) {
-        if (isNotEmpty(source.getDpAmbariUserSecret()) && isNotEmpty(source.getDpAmbariPasswordSecret())) {
-            response.setDpUser(getConversionService().convert(source.getDpAmbariUserSecret(), SecretV4Response.class));
-            response.setDpPassword(getConversionService().convert(source.getDpAmbariPasswordSecret(), SecretV4Response.class));
-        }
     }
 
     private <T> T getComponent(Cluster source, ComponentType hdpRepoDetails, Class<?> srcClss, Class<T> responseClss) {
