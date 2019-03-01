@@ -91,6 +91,14 @@ public class CentralCmTemplateUpdaterTest {
         Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-fixparam.bp")).getTemplate(), generated);
     }
 
+    @Test
+    public void getCmTemplateWithoutHosts() {
+        when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager-without-hosts.bp"));
+        String generated = generator.getClusterDefinitionText(templatePreparationObject);
+        Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-without-hosts.bp")).getTemplate(),
+                new CmTemplateProcessor(generated).getTemplate());
+    }
+
     private String getClusterDefinitionText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }

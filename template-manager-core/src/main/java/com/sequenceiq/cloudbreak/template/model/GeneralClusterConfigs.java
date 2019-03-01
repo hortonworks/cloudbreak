@@ -35,6 +35,11 @@ public class GeneralClusterConfigs {
 
     private int kafkaReplicationFactor;
 
+    private String variant;
+
+    public GeneralClusterConfigs() {
+    }
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -145,5 +150,13 @@ public class GeneralClusterConfigs {
 
     public void setKafkaReplicationFactor(int kafkaReplicationFactor) {
         this.kafkaReplicationFactor = kafkaReplicationFactor;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
     }
 }

@@ -91,7 +91,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
 
             ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings);
-            LOGGER.debug("Generated Cloudera cluster template: {}", apiClusterTemplate);
+            cluster.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(apiClusterTemplate));
+            LOGGER.debug("Generated Cloudera cluster template: {}", cluster.getExtendedClusterDefinitionText());
 
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
             ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(true, apiClusterTemplate);
@@ -114,6 +115,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.info("Invalid Cloudera template json", e);
             throw new CloudbreakServiceException(e);
         }
+    }
+
+    private String getExtendedClusterDefinitionText(ApiClusterTemplate apiClusterTemplate) {
+        return JsonUtil.writeValueAsStringSilent(apiClusterTemplate);
     }
 
     @Override
