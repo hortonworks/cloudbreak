@@ -113,10 +113,10 @@ func assembleStackRequest(c *cli.Context) *model.StackV4Request {
 	if len(ambariUser) != 0 || len(ambariPassword) != 0 {
 		if req.Cluster != nil && req.Cluster.Ambari != nil {
 			if len(ambariUser) != 0 {
-				req.Cluster.Ambari.UserName = &ambariUser
+				req.Cluster.UserName = &ambariUser
 			}
 			if len(ambariPassword) != 0 {
-				req.Cluster.Ambari.Password = &ambariPassword
+				req.Cluster.Password = &ambariPassword
 			}
 		} else {
 			commonutils.LogErrorMessageAndExit("Missing clusterRequest.ambariRequest node in JSON")

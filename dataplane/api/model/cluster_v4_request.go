@@ -25,6 +25,12 @@ type ClusterV4Request struct {
 	// external cloud storage configuration
 	CloudStorage *CloudStorageV4Request `json:"cloudStorage,omitempty"`
 
+	// cluster definition name for the cluster
+	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
+
+	// cloudera manager specific requests
+	Cm *ClouderaManagerV4Request `json:"cm,omitempty"`
+
 	// custom containers
 	CustomContainer *CustomContainerV4Request `json:"customContainer,omitempty"`
 
@@ -48,8 +54,24 @@ type ClusterV4Request struct {
 	// LDAP config name for the cluster
 	LdapName string `json:"ldapName,omitempty"`
 
+	// ambari password
+	// Required: true
+	// Max Length: 100
+	// Min Length: 5
+	Password *string `json:"password"`
+
 	// proxy configuration name for the cluster
 	ProxyName string `json:"proxyName,omitempty"`
+
+	// ambari username
+	// Required: true
+	// Max Length: 15
+	// Min Length: 5
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
+	UserName *string `json:"userName"`
+
+	// cluster definition validation
+	ValidateClusterDefinition *bool `json:"validateClusterDefinition,omitempty"`
 }
 
 // Validate validates this cluster v4 request
@@ -61,6 +83,10 @@ func (m *ClusterV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateCloudStorage(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCm(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -77,6 +103,14 @@ func (m *ClusterV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGateway(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePassword(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUserName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -114,6 +148,24 @@ func (m *ClusterV4Request) validateCloudStorage(formats strfmt.Registry) error {
 		if err := m.CloudStorage.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cloudStorage")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Request) validateCm(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Cm) { // not required
+		return nil
+	}
+
+	if m.Cm != nil {
+		if err := m.Cm.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cm")
 			}
 			return err
 		}
@@ -209,6 +261,44 @@ func (m *ClusterV4Request) validateGateway(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Request) validatePassword(formats strfmt.Registry) error {
+
+	if err := validate.Required("password", "body", m.Password); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("password", "body", string(*m.Password), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("password", "body", string(*m.Password), 100); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Request) validateUserName(formats strfmt.Registry) error {
+
+	if err := validate.Required("userName", "body", m.UserName); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("userName", "body", string(*m.UserName), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("userName", "body", string(*m.UserName), 15); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("userName", "body", string(*m.UserName), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+		return err
 	}
 
 	return nil

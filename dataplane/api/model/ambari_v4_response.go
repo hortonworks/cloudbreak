@@ -19,25 +19,9 @@ import (
 // swagger:model AmbariV4Response
 type AmbariV4Response struct {
 
-	// cluster definition for the cluster
-	ClusterDefinition *ClusterDefinitionV4Response `json:"clusterDefinition,omitempty"`
-
 	// config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'
 	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
 	ConfigStrategy string `json:"configStrategy,omitempty"`
-
-	// ambari password for Dataplane
-	DpPassword *SecretV4Response `json:"dpPassword,omitempty"`
-
-	// ambari username for Dataplane
-	DpUser *SecretV4Response `json:"dpUser,omitempty"`
-
-	// cluster definition, set this or the url field
-	ExtendedClusterDefinitionText string `json:"extendedClusterDefinitionText,omitempty"`
-
-	// ambari password
-	// Required: true
-	Password *SecretV4Response `json:"password"`
 
 	// details of the Ambari package repository
 	Repository *AmbariRepositoryV4Response `json:"repository,omitempty"`
@@ -45,41 +29,15 @@ type AmbariV4Response struct {
 	// a master key for encrypting the passwords in Ambari
 	SecurityMasterKey *SecretV4Response `json:"securityMasterKey,omitempty"`
 
-	// public ambari ip of the stack
-	ServerIP string `json:"serverIp,omitempty"`
-
-	// public ambari url
-	ServerURL string `json:"serverUrl,omitempty"`
-
 	// details of the Ambari stack
 	StackRepository *StackRepositoryV4Response `json:"stackRepository,omitempty"`
-
-	// ambari username
-	// Required: true
-	UserName *SecretV4Response `json:"userName"`
 }
 
 // Validate validates this ambari v4 response
 func (m *AmbariV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateClusterDefinition(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateConfigStrategy(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDpPassword(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDpUser(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validatePassword(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -95,31 +53,9 @@ func (m *AmbariV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateUserName(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *AmbariV4Response) validateClusterDefinition(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ClusterDefinition) { // not required
-		return nil
-	}
-
-	if m.ClusterDefinition != nil {
-		if err := m.ClusterDefinition.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("clusterDefinition")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -172,60 +108,6 @@ func (m *AmbariV4Response) validateConfigStrategy(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *AmbariV4Response) validateDpPassword(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DpPassword) { // not required
-		return nil
-	}
-
-	if m.DpPassword != nil {
-		if err := m.DpPassword.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("dpPassword")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *AmbariV4Response) validateDpUser(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DpUser) { // not required
-		return nil
-	}
-
-	if m.DpUser != nil {
-		if err := m.DpUser.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("dpUser")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *AmbariV4Response) validatePassword(formats strfmt.Registry) error {
-
-	if err := validate.Required("password", "body", m.Password); err != nil {
-		return err
-	}
-
-	if m.Password != nil {
-		if err := m.Password.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("password")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *AmbariV4Response) validateRepository(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Repository) { // not required
@@ -272,24 +154,6 @@ func (m *AmbariV4Response) validateStackRepository(formats strfmt.Registry) erro
 		if err := m.StackRepository.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stackRepository")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *AmbariV4Response) validateUserName(formats strfmt.Registry) error {
-
-	if err := validate.Required("userName", "body", m.UserName); err != nil {
-		return err
-	}
-
-	if m.UserName != nil {
-		if err := m.UserName.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("userName")
 			}
 			return err
 		}

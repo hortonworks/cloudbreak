@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// StackDetailsV4Response stack details v4 response
-// swagger:model StackDetailsV4Response
-type StackDetailsV4Response struct {
+// AmbariStackDetailsV4Response ambari stack details v4 response
+// swagger:model AmbariStackDetailsV4Response
+type AmbariStackDetailsV4Response struct {
 
 	// mpacks
 	Mpacks map[string][]ManagementPackV4Entry `json:"mpacks,omitempty"`
@@ -29,8 +29,8 @@ type StackDetailsV4Response struct {
 	Version string `json:"version,omitempty"`
 }
 
-// Validate validates this stack details v4 response
-func (m *StackDetailsV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this ambari stack details v4 response
+func (m *AmbariStackDetailsV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMpacks(formats); err != nil {
@@ -47,7 +47,7 @@ func (m *StackDetailsV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StackDetailsV4Response) validateMpacks(formats strfmt.Registry) error {
+func (m *AmbariStackDetailsV4Response) validateMpacks(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Mpacks) { // not required
 		return nil
@@ -75,7 +75,7 @@ func (m *StackDetailsV4Response) validateMpacks(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StackDetailsV4Response) validateRepository(formats strfmt.Registry) error {
+func (m *AmbariStackDetailsV4Response) validateRepository(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Repository) { // not required
 		return nil
@@ -94,7 +94,7 @@ func (m *StackDetailsV4Response) validateRepository(formats strfmt.Registry) err
 }
 
 // MarshalBinary interface implementation
-func (m *StackDetailsV4Response) MarshalBinary() ([]byte, error) {
+func (m *AmbariStackDetailsV4Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -102,8 +102,8 @@ func (m *StackDetailsV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *StackDetailsV4Response) UnmarshalBinary(b []byte) error {
-	var res StackDetailsV4Response
+func (m *AmbariStackDetailsV4Response) UnmarshalBinary(b []byte) error {
+	var res AmbariStackDetailsV4Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

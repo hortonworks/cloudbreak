@@ -15,10 +15,10 @@ import (
 // swagger:model RepoConfigValidationV4Request
 type RepoConfigValidationV4Request struct {
 
-	// url of the Ambari repository
+	// url of the cluster manager repository
 	AmbariBaseURL string `json:"ambariBaseUrl,omitempty"`
 
-	// gpg key of the Ambari repository
+	// gpg key of the cluster manager repository
 	AmbariGpgKeyURL string `json:"ambariGpgKeyUrl,omitempty"`
 
 	// url the MPACK that needs to be installed before HDF installation

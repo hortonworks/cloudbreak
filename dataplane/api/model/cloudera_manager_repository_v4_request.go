@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// RepositoryV4Response repository v4 response
-// swagger:model RepositoryV4Response
-type RepositoryV4Response struct {
+// ClouderaManagerRepositoryV4Request cloudera manager repository v4 request
+// swagger:model ClouderaManagerRepositoryV4Request
+type ClouderaManagerRepositoryV4Request struct {
 
 	// url of the cluster manager repository
 	BaseURL string `json:"baseUrl,omitempty"`
@@ -28,8 +28,8 @@ type RepositoryV4Response struct {
 	Version *string `json:"version"`
 }
 
-// Validate validates this repository v4 response
-func (m *RepositoryV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this cloudera manager repository v4 request
+func (m *ClouderaManagerRepositoryV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateVersion(formats); err != nil {
@@ -42,7 +42,7 @@ func (m *RepositoryV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RepositoryV4Response) validateVersion(formats strfmt.Registry) error {
+func (m *ClouderaManagerRepositoryV4Request) validateVersion(formats strfmt.Registry) error {
 
 	if err := validate.Required("version", "body", m.Version); err != nil {
 		return err
@@ -52,7 +52,7 @@ func (m *RepositoryV4Response) validateVersion(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *RepositoryV4Response) MarshalBinary() ([]byte, error) {
+func (m *ClouderaManagerRepositoryV4Request) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -60,8 +60,8 @@ func (m *RepositoryV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *RepositoryV4Response) UnmarshalBinary(b []byte) error {
-	var res RepositoryV4Response
+func (m *ClouderaManagerRepositoryV4Request) UnmarshalBinary(b []byte) error {
+	var res ClouderaManagerRepositoryV4Request
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

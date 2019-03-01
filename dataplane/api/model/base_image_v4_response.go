@@ -18,8 +18,14 @@ import (
 // swagger:model BaseImageV4Response
 type BaseImageV4Response struct {
 
-	// ambari repo gpg key
-	AmbariRepoGpgKey string `json:"ambariRepoGpgKey,omitempty"`
+	// ambari repo
+	AmbariRepo *AmbariRepositoryV4Response `json:"ambariRepo,omitempty"`
+
+	// cdh stacks
+	CdhStacks []*ClouderaManagerStackDetailsV4Response `json:"cdhStacks"`
+
+	// cloudera manager repo
+	ClouderaManagerRepo *ClouderaManagerRepositoryV4Response `json:"clouderaManagerRepo,omitempty"`
 
 	// date
 	Date string `json:"date,omitempty"`
@@ -31,10 +37,10 @@ type BaseImageV4Response struct {
 	Description string `json:"description,omitempty"`
 
 	// hdf stacks
-	HdfStacks []*StackDetailsV4Response `json:"hdfStacks"`
+	HdfStacks []*AmbariStackDetailsV4Response `json:"hdfStacks"`
 
 	// hdp stacks
-	HdpStacks []*StackDetailsV4Response `json:"hdpStacks"`
+	HdpStacks []*AmbariStackDetailsV4Response `json:"hdpStacks"`
 
 	// images
 	Images map[string]map[string]string `json:"images,omitempty"`
@@ -52,7 +58,7 @@ type BaseImageV4Response struct {
 	Repository map[string]string `json:"repository,omitempty"`
 
 	// stack details
-	StackDetails *StackDetailsV4Response `json:"stackDetails,omitempty"`
+	StackDetails *AmbariStackDetailsV4Response `json:"stackDetails,omitempty"`
 
 	// uuid
 	UUID string `json:"uuid,omitempty"`
@@ -64,6 +70,18 @@ type BaseImageV4Response struct {
 // Validate validates this base image v4 response
 func (m *BaseImageV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAmbariRepo(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCdhStacks(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateClouderaManagerRepo(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateHdfStacks(formats); err != nil {
 		res = append(res, err)
@@ -80,6 +98,67 @@ func (m *BaseImageV4Response) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *BaseImageV4Response) validateAmbariRepo(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AmbariRepo) { // not required
+		return nil
+	}
+
+	if m.AmbariRepo != nil {
+		if err := m.AmbariRepo.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ambariRepo")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *BaseImageV4Response) validateCdhStacks(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CdhStacks) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.CdhStacks); i++ {
+		if swag.IsZero(m.CdhStacks[i]) { // not required
+			continue
+		}
+
+		if m.CdhStacks[i] != nil {
+			if err := m.CdhStacks[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("cdhStacks" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *BaseImageV4Response) validateClouderaManagerRepo(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClouderaManagerRepo) { // not required
+		return nil
+	}
+
+	if m.ClouderaManagerRepo != nil {
+		if err := m.ClouderaManagerRepo.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("clouderaManagerRepo")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

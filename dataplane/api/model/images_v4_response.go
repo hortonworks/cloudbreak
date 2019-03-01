@@ -22,6 +22,9 @@ type ImagesV4Response struct {
 	// base images
 	BaseImages []*BaseImageV4Response `json:"baseImages"`
 
+	// cdh images
+	CdhImages []*ImageV4Response `json:"cdhImages"`
+
 	// hdf images
 	HdfImages []*ImageV4Response `json:"hdfImages"`
 
@@ -38,6 +41,10 @@ func (m *ImagesV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBaseImages(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCdhImages(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -74,6 +81,31 @@ func (m *ImagesV4Response) validateBaseImages(formats strfmt.Registry) error {
 			if err := m.BaseImages[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("baseImages" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ImagesV4Response) validateCdhImages(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CdhImages) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.CdhImages); i++ {
+		if swag.IsZero(m.CdhImages[i]) { // not required
+			continue
+		}
+
+		if m.CdhImages[i] != nil {
+			if err := m.CdhImages[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("cdhImages" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

@@ -19,18 +19,9 @@ import (
 // swagger:model AmbariV4Request
 type AmbariV4Request struct {
 
-	// cluster definition name for the cluster
-	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
-
 	// config recommendation strategy, default value is 'ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES'
 	// Enum: [NEVER_APPLY ONLY_STACK_DEFAULTS_APPLY ALWAYS_APPLY ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES]
 	ConfigStrategy string `json:"configStrategy,omitempty"`
-
-	// ambari password
-	// Required: true
-	// Max Length: 100
-	// Min Length: 5
-	Password *string `json:"password"`
 
 	// details of the Ambari package repository
 	Repository *AmbariRepositoryV4Request `json:"repository,omitempty"`
@@ -42,16 +33,6 @@ type AmbariV4Request struct {
 
 	// details of the Ambari stack
 	StackRepository *StackRepositoryV4Request `json:"stackRepository,omitempty"`
-
-	// ambari username
-	// Required: true
-	// Max Length: 15
-	// Min Length: 5
-	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
-	UserName *string `json:"userName"`
-
-	// cluster definition validation
-	ValidateClusterDefinition *bool `json:"validateClusterDefinition,omitempty"`
 
 	// ambari and stack repository validation
 	ValidateRepositories *bool `json:"validateRepositories,omitempty"`
@@ -65,10 +46,6 @@ func (m *AmbariV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validatePassword(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateRepository(formats); err != nil {
 		res = append(res, err)
 	}
@@ -78,10 +55,6 @@ func (m *AmbariV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateStackRepository(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateUserName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -140,23 +113,6 @@ func (m *AmbariV4Request) validateConfigStrategy(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *AmbariV4Request) validatePassword(formats strfmt.Registry) error {
-
-	if err := validate.Required("password", "body", m.Password); err != nil {
-		return err
-	}
-
-	if err := validate.MinLength("password", "body", string(*m.Password), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("password", "body", string(*m.Password), 100); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *AmbariV4Request) validateRepository(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Repository) { // not required
@@ -205,27 +161,6 @@ func (m *AmbariV4Request) validateStackRepository(formats strfmt.Registry) error
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *AmbariV4Request) validateUserName(formats strfmt.Registry) error {
-
-	if err := validate.Required("userName", "body", m.UserName); err != nil {
-		return err
-	}
-
-	if err := validate.MinLength("userName", "body", string(*m.UserName), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("userName", "body", string(*m.UserName), 15); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("userName", "body", string(*m.UserName), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
-		return err
 	}
 
 	return nil

@@ -129,12 +129,10 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 	template := model.StackV4Request{
 		Cluster: &model.ClusterV4Request{
-			Ambari: &model.AmbariV4Request{
-				ClusterDefinitionName:     "____",
-				UserName:                  &(&types.S{S: "____"}).S,
-				Password:                  &(&types.S{S: ""}).S,
-				ValidateClusterDefinition: &(&types.B{B: false}).B,
-			},
+			UserName:                  &(&types.S{S: "____"}).S,
+			Password:                  &(&types.S{S: ""}).S,
+			ClusterDefinitionName:     "____",
+			ValidateClusterDefinition: &(&types.B{B: false}).B,
 		},
 		Name: &(&types.S{S: ""}).S,
 		Environment: &model.EnvironmentSettingsV4Request{
@@ -160,7 +158,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 			commonUtils.LogErrorAndExit(err)
 		}
 		nodes = getNodesByClusterDefinition(bp)
-		template.Cluster.Ambari.ClusterDefinitionName = bpName
+		template.Cluster.ClusterDefinitionName = bpName
 	} else if bpFile := stringFinder(fl.FlClusterDefinitionFileOptional.Name); len(bpFile) != 0 {
 		bp := commonUtils.ReadFile(bpFile)
 		nodes = getNodesByClusterDefinition(bp)
@@ -175,7 +173,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
 	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
-	isSharedServiceReady, _ := datalake.Cluster.Ambari.ClusterDefinition.Tags["shared_services_ready"].(bool)
+	isSharedServiceReady, _ := datalake.Cluster.ClusterDefinition.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		commonUtils.LogErrorMessageAndExit("The source cluster must be a datalake")
 	} else if datalake.Status != "AVAILABLE" || datalake.Cluster.Status != "AVAILABLE" {
@@ -310,7 +308,7 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV4Request, boolFin
 		}
 	}
 	if withClusterDefinitionValidation := boolFinder(fl.FlWithClusterDefinitionValidation.Name); withClusterDefinitionValidation {
-		template.Cluster.Ambari.ValidateClusterDefinition = &(&types.B{B: true}).B
+		template.Cluster.ValidateClusterDefinition = &(&types.B{B: true}).B
 	}
 	extendTemplateWithStorageType(template, storageType)
 }

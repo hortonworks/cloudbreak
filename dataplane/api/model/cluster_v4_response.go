@@ -29,6 +29,12 @@ type ClusterV4Response struct {
 	// filesystem for a specific stack
 	CloudStorage *CloudStorageV4Response `json:"cloudStorage,omitempty"`
 
+	// cluster definition for the cluster
+	ClusterDefinition *ClusterDefinitionV4Response `json:"clusterDefinition,omitempty"`
+
+	// cm
+	Cm *ClouderaManagerV4Response `json:"cm,omitempty"`
+
 	// Epoch time of cluster creation finish
 	CreationFinished int64 `json:"creationFinished,omitempty"`
 
@@ -44,8 +50,17 @@ type ClusterV4Response struct {
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
+	// ambari password for Dataplane
+	DpPassword *SecretV4Response `json:"dpPassword,omitempty"`
+
+	// ambari username for Dataplane
+	DpUser *SecretV4Response `json:"dpUser,omitempty"`
+
 	// cluster exposed services for topologies
 	ExposedServices map[string][]ClusterExposedServiceV4Response `json:"exposedServices,omitempty"`
+
+	// cluster definition, set this or the url field
+	ExtendedClusterDefinitionText string `json:"extendedClusterDefinitionText,omitempty"`
 
 	// gateway
 	Gateway *GatewayV4Response `json:"gateway,omitempty"`
@@ -70,6 +85,12 @@ type ClusterV4Response struct {
 
 	// proxy configuration name for the cluster
 	Proxy *ProxyV4Response `json:"proxy,omitempty"`
+
+	// public ambari ip of the stack
+	ServerIP string `json:"serverIp,omitempty"`
+
+	// public ambari url
+	ServerURL string `json:"serverUrl,omitempty"`
 
 	// status of the cluster
 	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
@@ -97,11 +118,27 @@ func (m *ClusterV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateClusterDefinition(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCm(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateCustomContainers(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateDatabases(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDpPassword(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDpUser(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -175,6 +212,42 @@ func (m *ClusterV4Response) validateCloudStorage(formats strfmt.Registry) error 
 	return nil
 }
 
+func (m *ClusterV4Response) validateClusterDefinition(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterDefinition) { // not required
+		return nil
+	}
+
+	if m.ClusterDefinition != nil {
+		if err := m.ClusterDefinition.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("clusterDefinition")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Response) validateCm(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Cm) { // not required
+		return nil
+	}
+
+	if m.Cm != nil {
+		if err := m.Cm.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cm")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *ClusterV4Response) validateCustomContainers(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.CustomContainers) { // not required
@@ -213,6 +286,42 @@ func (m *ClusterV4Response) validateDatabases(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Response) validateDpPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DpPassword) { // not required
+		return nil
+	}
+
+	if m.DpPassword != nil {
+		if err := m.DpPassword.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("dpPassword")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Response) validateDpUser(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DpUser) { // not required
+		return nil
+	}
+
+	if m.DpUser != nil {
+		if err := m.DpUser.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("dpUser")
+			}
+			return err
+		}
 	}
 
 	return nil

@@ -17,13 +17,13 @@ import (
 // swagger:model AmbariRepositoryV4Request
 type AmbariRepositoryV4Request struct {
 
-	// url of the Ambari repository
+	// url of the cluster manager repository
 	BaseURL string `json:"baseUrl,omitempty"`
 
-	// gpg key of the Ambari repository
+	// gpg key of the cluster manager repository
 	GpgKeyURL string `json:"gpgKeyUrl,omitempty"`
 
-	// version of the Ambari
+	// version of the cluster manager
 	// Required: true
 	Version *string `json:"version"`
 }

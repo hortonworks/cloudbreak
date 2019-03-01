@@ -20,8 +20,8 @@ import (
 // swagger:model ClusterViewV4Response
 type ClusterViewV4Response struct {
 
-	// ambari
-	Ambari *AmbariViewV4Response `json:"ambari,omitempty"`
+	// cluster definition for the cluster
+	ClusterDefinition *ClusterDefinitionV4ViewResponse `json:"clusterDefinition,omitempty"`
 
 	// description of the resource
 	// Max Length: 1000
@@ -48,6 +48,9 @@ type ClusterViewV4Response struct {
 	// tells wether the cluster is secured or not
 	Secure *bool `json:"secure,omitempty"`
 
+	// public ambari ip of the stack
+	ServerIP string `json:"serverIp,omitempty"`
+
 	// shared service for a specific stack
 	SharedServiceResponse *SharedServiceV4Response `json:"sharedServiceResponse,omitempty"`
 
@@ -60,7 +63,7 @@ type ClusterViewV4Response struct {
 func (m *ClusterViewV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAmbari(formats); err != nil {
+	if err := m.validateClusterDefinition(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -90,16 +93,16 @@ func (m *ClusterViewV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterViewV4Response) validateAmbari(formats strfmt.Registry) error {
+func (m *ClusterViewV4Response) validateClusterDefinition(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Ambari) { // not required
+	if swag.IsZero(m.ClusterDefinition) { // not required
 		return nil
 	}
 
-	if m.Ambari != nil {
-		if err := m.Ambari.Validate(formats); err != nil {
+	if m.ClusterDefinition != nil {
+		if err := m.ClusterDefinition.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("ambari")
+				return ve.ValidateName("clusterDefinition")
 			}
 			return err
 		}
