@@ -79,8 +79,8 @@ public class MockSparkServer {
     private static final String CB_SERVER_ADDRESS;
 
     static {
-        MOCK_SERVER_ADDRESS = Optional.ofNullable(System.getenv("MOCK_SERVER_ADDRESS")).orElse("mockhosts.service.consul");
-        CB_SERVER_ADDRESS = Optional.ofNullable(System.getenv("CB_SERVER_ADDRESS")).orElse("cb.service.consul");
+        MOCK_SERVER_ADDRESS = Optional.ofNullable(System.getenv("MOCK_SERVER_ADDRESS")).orElse("test");
+        CB_SERVER_ADDRESS = Optional.ofNullable(System.getenv("CB_SERVER_ADDRESS")).orElse("cloudbreak");
     }
 
     private MockSparkServer() {

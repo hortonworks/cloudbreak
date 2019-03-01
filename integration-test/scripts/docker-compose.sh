@@ -12,13 +12,16 @@ cd ..
 echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
 $INTEGCB_LOCATION/.deps/bin/docker-compose down
 
+echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
+docker network create cbreak_default || true
+
 echo -e "\n\033[1;96m--- Start caas mock\033[0m\n"
-$INTEGCB_LOCATION/.deps/bin/docker-compose up -d mock-caas
+$INTEGCB_LOCATION/.deps/bin/docker-compose up -d caas-mock
 
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
-./cbd start-wait consul registrator identity commondb vault cloudbreak
+./cbd start-wait identity commondb vault cloudbreak
 cd ..
 
 echo -e "\n\033[1;96m--- Get token for testing from caas mock\033[0m\n"
