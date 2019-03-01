@@ -446,7 +446,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         initializeDefaultClusterDefinitions(testContext);
 
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
-        String stackName = imgCatalogName + "-stack";
+        String stackName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -484,7 +484,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         initializeDefaultClusterDefinitions(testContext);
 
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
-        String stackName = imgCatalogName + "-stack";
+        String stackName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
