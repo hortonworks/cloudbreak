@@ -122,7 +122,8 @@ cb:
   clusterdefinition:
     cm:
       defaults: >
-                CDH 6.1 - Data Lake: Hive Metastore=cdh6-shared-services;
+                CDH 6.1 - Data Science: Apache Spark, Apach Hive, Impala=cdh6-data-science;
+                CDH 6.1 - Data Lake: Hive Metastore=cdh6-shared-services
     ambari:
       defaults: >
                 EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;
