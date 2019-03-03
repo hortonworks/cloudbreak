@@ -40,6 +40,7 @@ public class KeystoneV3Parameters implements Mappable {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = new LinkedHashMap<>();
+        map.put("keystoneVersion", KeystoneVersionTypes.V3.getType());
         if (project != null) {
             map.putAll(project.asMap());
         } else if (domain != null) {
