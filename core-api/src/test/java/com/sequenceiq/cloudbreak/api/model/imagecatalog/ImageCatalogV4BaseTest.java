@@ -1,6 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model.imagecatalog;
 
+import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.FAILED_TO_GET_BY_FAMILY_TYPE;
+import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.FAILED_TO_GET_WITH_EXCEPTION;
+import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.INVALID_JSON_IN_RESPONSE;
+import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.INVALID_JSON_STRUCTURE_IN_RESPONSE;
+import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.INVALID_URL_MSG;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +23,7 @@ import javax.validation.Configuration;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
@@ -87,7 +94,11 @@ public class ImageCatalogV4BaseTest {
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("ftp://protocol.com");
-        validateAndAssertInvalidCatalog(i);
+
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+
+        assertEquals(2L, violations.size());
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_URL_MSG)));
     }
 
     @Test
@@ -95,21 +106,33 @@ public class ImageCatalogV4BaseTest {
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("without.protocol.com");
-        validateAndAssertInvalidCatalog(i);
+
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+
+        assertEquals(2L, violations.size());
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_URL_MSG)));
     }
 
     @Test
     public void testContentNotAvailable() {
+        String url = "http://protocol.com";
+        String reasonPhrase = "Invalid reason phrase";
         when(statusType.getFamily()).thenReturn(Family.OTHER);
+        when(statusType.getReasonPhrase()).thenReturn(reasonPhrase);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
-        i.setUrl("http://protocol.com");
-        validateAndAssertInvalidCatalog(i);
+        i.setUrl(url);
+
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+
+        assertEquals(2L, violations.size());
+        String failedToGetMessage = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, url, reasonPhrase);
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(failedToGetMessage)));
     }
 
     @Test
-    public void testContentNotValid() {
+    public void testContentStructureNotValid() {
         when(builder.get()).thenReturn(this.new DummyResponse() {
             @Override
             public <T> T readEntity(Class<T> entityType) {
@@ -120,7 +143,44 @@ public class ImageCatalogV4BaseTest {
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
-        validateAndAssertInvalidCatalog(i);
+
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+
+        assertEquals(2L, violations.size());
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_JSON_STRUCTURE_IN_RESPONSE)));
+    }
+
+    @Test
+    public void testContentNotAValidJSON() {
+        when(builder.get()).thenReturn(this.new DummyResponse() {
+            @Override
+            public <T> T readEntity(Class<T> entityType) {
+                return (T) "{[]}";
+            }
+        });
+
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
+        i.setName("testname");
+        i.setUrl("http://protocol.com");
+
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+
+        assertEquals(2L, violations.size());
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_JSON_IN_RESPONSE)));
+    }
+
+    @Test
+    public void testWhenWebTargetFailesWithException() {
+        when(builder.get()).thenThrow(ProcessingException.class);
+
+        ImageCatalogV4Base i = new ImageCatalogV4Base();
+        i.setName("testname");
+        i.setUrl("http://protocol.com");
+
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+
+        assertEquals(2L, violations.size());
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(FAILED_TO_GET_WITH_EXCEPTION)));
     }
 
     @Test
@@ -137,13 +197,6 @@ public class ImageCatalogV4BaseTest {
         i.setName("testname");
         i.setUrl("http://protocol.com");
         validateAndAssertValidCatalog(i);
-    }
-
-    private void validateAndAssertInvalidCatalog(ImageCatalogV4Base i) {
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
-        assertEquals(1L, violations.size());
-        ConstraintViolation<ImageCatalogV4Base> v = violations.toArray(new ConstraintViolation[1])[0];
-        assertEquals(INVALID_MESSAGE, v.getMessage());
     }
 
     private void validateAndAssertValidCatalog(ImageCatalogV4Base i) {
