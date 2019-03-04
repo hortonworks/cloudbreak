@@ -17,6 +17,8 @@ public interface CloudProvider {
 
     String region();
 
+    String location();
+
     ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog);
 
     InstanceTemplateV4Entity template(InstanceTemplateV4Entity template);
@@ -24,6 +26,8 @@ public interface CloudProvider {
     VolumeV4Entity attachedVolume(VolumeV4Entity volume);
 
     NetworkV2Entity network(NetworkV2Entity network);
+
+    StackV4EntityBase stack(StackV4EntityBase stack);
 
     String getSubnetCIDR();
 

@@ -49,7 +49,17 @@ integrationtest:
         volumeCount:
         volumeType:
 
-
+    # yarn details
+    yarn:
+      availabilityZone:
+        region:
+      credential:
+        endpoint:
+        ambariUser:
+      instance:
+        cpus:
+        memory:
+      queue:
 
 # ---------- old test parameters: ---------- #
 

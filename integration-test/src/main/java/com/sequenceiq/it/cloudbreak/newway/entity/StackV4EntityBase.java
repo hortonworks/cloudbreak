@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -50,7 +53,8 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
                 .withNetwork(getTestContext().given(NetworkV2Entity.class))
                 .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationEntity.class)))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
-                .withCluster(getTestContext().given(ClusterEntity.class).withName(name));
+                .withCluster(getTestContext().given(ClusterEntity.class).withName(name))
+                .withYarnQueue(getTestParameter().get("integrationtest.yarn.queue"));
     }
 
     public StackV4EntityBase<T> withEveryProperties() {
@@ -234,6 +238,30 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> withAzure(AzureStackV4Parameters azure) {
         getRequest().setAzure(azure);
+        return this;
+    }
+
+    public StackV4EntityBase<T> withAws(AwsStackV4Parameters aws) {
+        getRequest().setAws(aws);
+        return this;
+    }
+
+    public StackV4EntityBase<T> withMock(MockStackV4Parameters mock) {
+        getRequest().setMock(mock);
+        return this;
+    }
+
+    public StackV4EntityBase<T> withYarn(YarnStackV4Parameters yarn) {
+        getRequest().setYarn(yarn);
+        return this;
+    }
+
+    public StackV4EntityBase<T> withYarnQueue(String yarnQueue) {
+        if (yarnQueue != null) {
+            YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
+            yarnStackV4Parameters.setYarnQueue(yarnQueue);
+            getRequest().setYarn(yarnStackV4Parameters);
+        }
         return this;
     }
 

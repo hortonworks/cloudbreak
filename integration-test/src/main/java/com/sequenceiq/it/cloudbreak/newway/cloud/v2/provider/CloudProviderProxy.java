@@ -45,16 +45,6 @@ public class CloudProviderProxy implements CloudProvider {
         delegate = cloudProviderMap.get(cloudPlatform);
     }
 
-//    @Override
-//    public InstanceTemplateV4Entity template(TestContext testContext) {
-//        return delegate.template(testContext);
-//    }
-
-//    @Override
-//    public NetworkV2Entity network(TestContext testContext) {
-//        return delegate.network(testContext);
-//    }
-
     @Override
     public String availabilityZone() {
         return delegate.availabilityZone();
@@ -66,6 +56,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String location() {
+        return delegate.location();
+    }
+
+    @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return delegate.imageCatalog(imageCatalog);
     }
@@ -73,6 +68,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public InstanceTemplateV4Entity template(InstanceTemplateV4Entity template) {
         return delegate.template(template);
+    }
+
+    @Override
+    public StackV4EntityBase stack(StackV4EntityBase stack) {
+        return delegate.stack(stack);
     }
 
     @Override

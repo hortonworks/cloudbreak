@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
@@ -59,6 +60,11 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
         return this;
     }
 
+    public InstanceTemplateV4Entity withYarnParameters(YarnInstanceTemplateV4Parameters yarnParameters) {
+        getRequest().setYarn(yarnParameters);
+        return this;
+    }
+
     public InstanceTemplateV4Entity withRootVolume(RootVolumeV4Entity rootVolume) {
         getRequest().setRootVolume(rootVolume.getRequest());
         return this;
@@ -99,6 +105,11 @@ public class InstanceTemplateV4Entity extends AbstractCloudbreakEntity<InstanceT
 
     public InstanceTemplateV4Entity withOpenstack(OpenStackInstanceTemplateV4Parameters openstack) {
         getRequest().setOpenstack(openstack);
+        return this;
+    }
+
+    public InstanceTemplateV4Entity withYarn(YarnInstanceTemplateV4Parameters yarn) {
+        getRequest().setYarn(yarn);
         return this;
     }
 

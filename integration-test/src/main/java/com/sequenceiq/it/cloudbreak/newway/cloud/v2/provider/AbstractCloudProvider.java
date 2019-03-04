@@ -30,7 +30,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public EnvironmentEntity environment(EnvironmentEntity environment) {
         return environment.withRegions(Collections.singleton(region()))
-                .withLocation(region());
+                .withLocation(location());
     }
 
     @Override
