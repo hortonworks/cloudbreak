@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariRepositoryDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterManagerRepositoryDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,13 +17,13 @@ import io.swagger.annotations.ApiModelProperty;
 public class RepositoryV4Response implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = AmbariRepositoryDescription.VERSION, required = true)
+    @ApiModelProperty(value = ClusterManagerRepositoryDescription.VERSION, required = true)
     private String version;
 
-    @ApiModelProperty(AmbariRepositoryDescription.AMBARI_BASE_URL)
+    @ApiModelProperty(ClusterManagerRepositoryDescription.BASE_URL)
     private String baseUrl;
 
-    @ApiModelProperty(AmbariRepositoryDescription.AMBARI_REPO_GPG_KEY)
+    @ApiModelProperty(ClusterManagerRepositoryDescription.REPO_GPG_KEY)
     private String gpgKeyUrl;
 
     public String getVersion() {
