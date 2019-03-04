@@ -15,8 +15,8 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
 
 public class CredentialV4BaseValidator implements ConstraintValidator<ValidCredentialV4Base, CredentialV4Base> {
 
@@ -34,7 +34,7 @@ public class CredentialV4BaseValidator implements ConstraintValidator<ValidCrede
     private static boolean isOnlyOneParameterFieldFilled(CredentialV4Base base) {
         Stream<Field> fields = Stream.concat(stream(base.getClass().getDeclaredFields()), stream(base.getClass().getSuperclass().getDeclaredFields()));
         int notEmptyParamTypeQuantity = 0;
-        for (Field field : fields.filter(field -> getInterfacesOfField(field).contains(CredentialV4Parameters.class)).collect(Collectors.toList())) {
+        for (Field field : fields.filter(field -> getInterfacesOfField(field).contains(Mappable.class)).collect(Collectors.toList())) {
             try {
                 if (FieldUtils.readField(base, field.getName(), true) != null) {
                     notEmptyParamTypeQuantity++;
@@ -48,7 +48,9 @@ public class CredentialV4BaseValidator implements ConstraintValidator<ValidCrede
     }
 
     private static List<Class<?>> getInterfacesOfField(Field field) {
-        return Arrays.asList(field.getType().getInterfaces());
+        // assuming that the given field's base class is extending the MappableBase class which implements the Mappable interface
+        // if this structure changes, this listing still works, but the verification shall fail at the end
+        return Arrays.asList(field.getType().getSuperclass().getInterfaces());
     }
 
 }

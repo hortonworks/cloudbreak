@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -8,8 +7,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.providers.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class CumulusYarnCredentialV4Parameters implements CredentialV4Parameters {
+public class CumulusYarnCredentialV4Parameters extends MappableBase {
 
     @NotNull
     @ApiModelProperty(required = true)
@@ -30,11 +29,6 @@ public class CumulusYarnCredentialV4Parameters implements CredentialV4Parameters
     @NotNull
     @ApiModelProperty(required = true)
     private String ambariUser;
-
-    @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.CUMULUS_YARN;
-    }
 
     public String getAmbariPassword() {
         return ambariPassword;
@@ -62,11 +56,24 @@ public class CumulusYarnCredentialV4Parameters implements CredentialV4Parameters
 
     @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
+        Map<String, Object> map = super.asMap();
         map.put("cumulusAmbariPassword", ambariPassword);
         map.put("cumulusAmbariUrl", ambariUrl);
         map.put("cumulusAmbariUser", ambariUser);
         return map;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.CUMULUS_YARN;
+    }
+
+    @Override
+    public void parse(Map<String, Object> parameters) {
+        super.parse(parameters);
+        ambariPassword = getParameterOrNull(parameters, "ambariPassword");
+        ambariUrl = getParameterOrNull(parameters, "ambariUrl");
+        ambariUser = getParameterOrNull(parameters, "ambariUser");
     }
 
 }
