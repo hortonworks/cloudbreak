@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
@@ -55,6 +56,10 @@ public class ClusterV4Request implements JsonEntity {
     @Valid
     @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
     private CloudStorageV4Request cloudStorage;
+
+    @Valid
+    @ApiModelProperty(ClusterModelDescription.CM_REQUEST)
+    private ClouderaManagerV4Request cm;
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)

@@ -267,9 +267,12 @@ public class ModelDescriptions {
         public static final String STATUS_REQUEST = "request status";
         public static final String USERNAME_PASSWORD = "user details";
         public static final String AMBARI_REQUEST = "ambari specific requests";
+        public static final String CM_REQUEST = "cloudera manager specific requests";
         public static final String HOSTGROUPS = "collection of hostgroups";
         public static final String AMBARI_STACK_DETAILS = "details of the Ambari stack";
         public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";
+        public static final String CM_REPO_DETAILS = "details of the Cloudera Manager package repository";
+        public static final String CM_PRODUCT_DETAILS = "list of Cloudera Manager product detials";
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
@@ -353,10 +356,16 @@ public class ModelDescriptions {
         public static final String DEFAULT_REGIOS = "default regions";
     }
 
-    public static class AmbariRepositoryDescription {
-        public static final String VERSION = "version of the Ambari";
-        public static final String AMBARI_BASE_URL = "url of the Ambari repository";
-        public static final String AMBARI_REPO_GPG_KEY = "gpg key of the Ambari repository";
+    public static class ClusterManagerRepositoryDescription {
+        public static final String VERSION = "version of the cluster manager";
+        public static final String BASE_URL = "url of the cluster manager repository";
+        public static final String REPO_GPG_KEY = "gpg key of the cluster manager repository";
+    }
+
+    public static class ClouderaManagerProductDescription {
+        public static final String NAME = "name of the Cloudera manager product";
+        public static final String VERSION = "version of the Cloudera manager product";
+        public static final String PARCEL = "parcel url of the Cloudera manager product";
     }
 
     public static class AmbariDatabaseDetailsDescription {
