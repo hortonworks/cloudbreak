@@ -94,6 +94,7 @@ public class SparkServer {
 
     public void initSparkService(int min, int max) {
         port = generatePort(min, max);
+        long start = System.currentTimeMillis();
         if (sparkService == null) {
             LOGGER.info("Try to ignite with endpoint: {}", getEndpoint());
             sparkService = Service.ignite();
@@ -117,7 +118,8 @@ public class SparkServer {
         callStack.clear();
         requestResponseMap.clear();
         initialized = true;
-
+        sparkService.awaitInitialization();
+        LOGGER.info("Spark has been initalized in {}ms", System.currentTimeMillis() - start);
         LOGGER.info("SparkServer has been started on {}", getEndpoint());
     }
 
