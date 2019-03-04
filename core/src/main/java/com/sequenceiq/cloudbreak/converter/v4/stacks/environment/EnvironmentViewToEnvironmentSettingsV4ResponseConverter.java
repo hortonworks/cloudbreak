@@ -14,7 +14,9 @@ public class EnvironmentViewToEnvironmentSettingsV4ResponseConverter
     @Override
     public EnvironmentSettingsV4Response convert(EnvironmentView source) {
         EnvironmentSettingsV4Response response = new EnvironmentSettingsV4Response();
-        response.setCredential(getConversionService().convert(source.getCredential(), CredentialV4Response.class));
+        var credential = getConversionService().convert(source.getCredential(), CredentialV4Response.class);
+        response.setCloudPlatform(credential.getCloudPlatform());
+        response.setCredential(credential);
         response.setName(source.getName());
         return response;
     }
