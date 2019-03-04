@@ -26,12 +26,10 @@ mkdir cbd-local
 cd cbd-local
 ```
 
-The next step is to download the cloudbreak-deployer onto your machine:
+The next step is to download the latest cloudbreak-deployer onto your machine:
 ```
-curl -s https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/install-dev | sh [-s branch] && cbd --version
+curl -s https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/install-dev | sh && cbd --version
 ```
-Use the -s branch option for sh here in case you'd like to checkout another branch than master.
-
 Add the following to the file named `Profile` under the cbd-local directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file could be found (`cbd-local` in our example). The CB_SCHEMA_SCRIPTS_LOCATION environment variable configures the location of SQL scripts that are in the 'core/src/main/resources/schema' directory in the cloned Cloudbreak git repository.  
 Please note that the full path needs to be configured and env variables like $USER cannot be used. You also have to set a password for your local Cloudbreak in UAA_DEFAULT_USER_PW:
 
