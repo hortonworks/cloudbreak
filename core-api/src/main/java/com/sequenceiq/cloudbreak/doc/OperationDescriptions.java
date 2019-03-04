@@ -119,6 +119,9 @@ public class OperationDescriptions {
     public static class UserProfileOpDescription {
         public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
         public static final String GET_USER_PROFILE = "user related profile";
+        public static final String GET_TERMINATED_CLUSTERS_PREFERENCES = "get user preference to show or hide terminated clusters";
+        public static final String PUT_TERMINATED_CLUSTERS_PREFERENCES = "set user preference to show or hide terminated clusters";
+        public static final String DELETE_TERMINATED_INSTANCES_PREFERENCES = "delete user preference to show or hide terminated clusters";
     }
 
     public static class AccountPreferencesDescription {

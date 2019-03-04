@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.ShowTerminatedClustersPreferences;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -146,6 +147,22 @@ public class UserProfileService {
         UserProfile newUserProfile = userProfileRepository.save(userProfile);
         secretService.delete(oldVaultSecret);
         return newUserProfile;
+    }
+
+    public void setShowClustersPreferences(ShowTerminatedClustersPreferences showTerminatedClustersPreferences) {
+        UserProfile userProfile = getOrCreateForLoggedInUser();
+        userProfile.setShowTerminatedClustersPreferences(showTerminatedClustersPreferences);
+        userProfileRepository.save(userProfile);
+    }
+
+    public void deleteShowClustersPreferences() {
+        UserProfile userProfile = getOrCreateForLoggedInUser();
+        userProfile.setShowTerminatedClustersPreferences(null);
+        userProfileRepository.save(userProfile);
+    }
+
+    public ShowTerminatedClustersPreferences getShowClustersPreferences() {
+        return getOrCreateForLoggedInUser().getShowTerminatedClustersPreferences();
     }
 
     private void storeDefaultCredential(UserProfile userProfile, Credential credential, Workspace workspace) {

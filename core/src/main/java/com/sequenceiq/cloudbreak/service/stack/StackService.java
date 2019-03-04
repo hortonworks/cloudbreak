@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -112,7 +113,7 @@ public class StackService {
     private static final String SSH_USER_CB = "cloudbreak";
 
     @Inject
-    private ShowTerminatedConfigService showTerminatedConfigService;
+    private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     @Inject
     private NetworkConfigurationValidator networkConfigurationValidator;
@@ -324,11 +325,12 @@ public class StackService {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
+                ShowTerminatedConfig showTerminatedConfig = showTerminatedClusterConfigService.get();
                 Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(
                         name,
                         workspace.getId(),
-                        showTerminatedConfigService.isActive(),
-                        showTerminatedConfigService.showAfter()
+                        showTerminatedConfig.isActive(),
+                        showTerminatedConfig.showAfterMillisecs()
                 );
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));

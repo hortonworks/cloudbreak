@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedConfig;
 
 @Service
 public class StackApiViewService {
@@ -39,7 +40,7 @@ public class StackApiViewService {
     private ConverterUtil converterUtil;
 
     @Inject
-    private ShowTerminatedConfigService showTerminatedConfigService;
+    private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {
@@ -82,19 +83,21 @@ public class StackApiViewService {
 
     private Set<StackViewV4Response> getAllByWorkspaceAndEnvironment(Long workspaceId, String environmentName) throws TransactionExecutionException {
         EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
+        ShowTerminatedConfig showTerminatedConfig = showTerminatedClusterConfigService.get();
         return transactionService.required(() -> convertStackViews(stackApiViewRepository.findAllByWorkspaceIdAndEnvironments(
                 workspaceId,
                 env,
-                showTerminatedConfigService.isActive(),
-                showTerminatedConfigService.showAfter()
+                showTerminatedConfig.isActive(),
+                showTerminatedConfig.showAfterMillisecs()
         )));
     }
 
     private Set<StackViewV4Response> getAllByWorkspace(Long workspaceId) throws TransactionExecutionException {
+        ShowTerminatedConfig showTerminatedConfig = showTerminatedClusterConfigService.get();
         return transactionService.required(() -> convertStackViews(stackApiViewRepository.findAllByWorkspaceId(
                 workspaceId,
-                showTerminatedConfigService.isActive(),
-                showTerminatedConfigService.showAfter())));
+                showTerminatedConfig.isActive(),
+                showTerminatedConfig.showAfterMillisecs())));
     }
 
     private Set<StackViewV4Response> convertStackViews(Set<StackApiView> stacks) {

@@ -48,8 +48,9 @@ public class Notes {
     public static final String MAINTENANCE_NOTES = "Setting maintenance mode for the cluster in order to be able to update Ambari and/or the Hadoop stack.";
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users";
-    public static final String USER_PROFILE_NOTES = "Users can be invited under an account by the administrator, and all resources "
-            + "(e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users";
+    public static final String USER_PROFILE_NOTES = "Users can be invited under an account by the administrator, and all resources ";
+    public static final String SHOW_INSTANCES_PREFERENCES = "User preference whether to show or hide terminated instances and how old "
+            + "deleted instances should be shown.";
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
     public static final String DATABASE_NOTES = "A Database Configuration describe a connection to an external Relational Database Service "
             + "that can be used as the Hive Metastore.";

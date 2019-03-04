@@ -12,7 +12,7 @@ public class TimeService {
         return Instant.now().toEpochMilli();
     }
 
-    public Long nowMinus(TemporalAmount amount) {
-        return Instant.now().minus(amount).toEpochMilli();
+    public Instant nowMinus(TemporalAmount amount) {
+        return Instant.now().minus(amount);
     }
 }
