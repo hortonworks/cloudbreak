@@ -4,17 +4,17 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
 
 @Component
 public class CredentialPropertyPropagator {
 
-    public Optional<CredentialV4Parameters> propagateCredentialProperty(CredentialV4Base request) {
+    public Optional<Mappable> propagateCredentialProperty(CredentialV4Base request) {
         return propagate(request);
     }
 
-    private Optional<CredentialV4Parameters> propagate(CredentialV4Base cred) {
+    private Optional<Mappable> propagate(CredentialV4Base cred) {
         if (cred.getAws() != null) {
             return Optional.of(cred.getAws());
         } else if (cred.getAzure() != null) {

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.openstack;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.providers.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
+public class OpenstackCredentialV4Parameters extends MappableBase {
 
     @ApiModelProperty(required = true)
     private String endpoint;
@@ -82,13 +82,8 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
     }
 
     @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.OPENSTACK;
-    }
-
-    @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> mapOfFields = new LinkedHashMap<>();
+        Map<String, Object> mapOfFields = super.asMap();
         mapOfFields.put("endpoint", endpoint);
         mapOfFields.put("facing", facing);
         mapOfFields.put("password", password);
@@ -99,6 +94,26 @@ public class OpenstackCredentialV4Parameters implements CredentialV4Parameters {
             mapOfFields.putAll(keystoneV3.asMap());
         }
         return mapOfFields;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.OPENSTACK;
+    }
+
+    @Override
+    public void parse(Map<String, Object> parameters) {
+        super.parse(parameters);
+        endpoint = getParameterOrNull(parameters, "endpoint");
+        facing = getParameterOrNull(parameters, "facing");
+        password = getParameterOrNull(parameters, "password");
+        userName = getParameterOrNull(parameters, "userName");
+        keystoneV2 = new KeystoneV2Parameters();
+        keystoneV2.parse(parameters);
+        keystoneV3 = new KeystoneV3Parameters();
+        keystoneV3.parse(parameters);
     }
 
 }

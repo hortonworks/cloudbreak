@@ -8,9 +8,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.providers.CloudPlatform;
 
 @Component
 public class CredentialPropertyCollector {
@@ -19,7 +19,7 @@ public class CredentialPropertyCollector {
     private CredentialPropertyPropagator credentialPropertyPropagator;
 
     public Map<String, Object> propertyMap(CredentialV4Base cred) {
-        CredentialV4Parameters params = credentialPropertyPropagator.propagateCredentialProperty(cred)
+        Mappable params = credentialPropertyPropagator.propagateCredentialProperty(cred)
                 .orElseThrow(() -> new InvalidParameterException("Unable to propagate credential property"));
         Optional<Map<String, Object>> propertiesAsMap = Optional.empty();
         if (params.getCloudPlatform().equals(CloudPlatform.AWS)) {

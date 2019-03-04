@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.CredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.providers.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AzureCredentialV4Parameters implements CredentialV4Parameters {
+public class AzureCredentialV4Parameters extends MappableBase {
 
     @NotNull
     @ApiModelProperty(required = true, example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
@@ -69,13 +69,8 @@ public class AzureCredentialV4Parameters implements CredentialV4Parameters {
     }
 
     @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.AZURE;
-    }
-
-    @Override
     public Map<String, Object> asMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
+        Map<String, Object> map = super.asMap();
         map.put("subscriptionId", subscriptionId);
         map.put("tenantId", tenantId);
         if (appBased != null) {
@@ -85,6 +80,24 @@ public class AzureCredentialV4Parameters implements CredentialV4Parameters {
             map.putAll(roleBased.asMap());
         }
         return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
+    }
+
+    @Override
+    public void parse(Map<String, Object> parameters) {
+        super.parse(parameters);
+        subscriptionId = getParameterOrNull(parameters, "subscriptionId");
+        tenantId = getParameterOrNull(parameters, "tenantId");
+        appBased = new AppBased();
+        appBased.parse(parameters);
+        roleBased = new RoleBased();
+        roleBased.parse(parameters);
     }
 
 }
