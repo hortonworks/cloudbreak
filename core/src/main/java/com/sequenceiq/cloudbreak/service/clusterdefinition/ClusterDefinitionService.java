@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParam
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterDefinitionView;
@@ -148,6 +149,40 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
             LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
         return clusterDefinitions;
+    }
+
+    public ClusterDefinition getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
+        Set<ClusterDefinition> clusterDefinitions = clusterDefinitionRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+        Optional<ClusterDefinition> clusterDefinition = filterClusterDefinitionsByName(name, clusterDefinitions);
+        if (clusterDefinition.isPresent()) {
+            return clusterDefinition.get();
+        } else {
+            if (clusterDefinitionLoaderService.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions)) {
+                LOGGER.debug("Modifying cluster definitions based on the defaults for the '{}' workspace.", workspace.getId());
+                clusterDefinitions = clusterDefinitionLoaderService.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, workspace,
+                        this::saveDefaultsWithReadRight);
+                LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+                clusterDefinition = filterClusterDefinitionsByName(name, clusterDefinitions);
+                if (clusterDefinition.isPresent()) {
+                    return clusterDefinition.get();
+                }
+            }
+        }
+        throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
+    }
+
+    private Optional<ClusterDefinition> filterClusterDefinitionsByName(String name, Collection<ClusterDefinition> clusterDefinitions) {
+        return clusterDefinitions.stream().filter(clusterDefinition -> name.equals(clusterDefinition.getName())).findFirst();
+    }
+
+    public void updateDefaultClusterDefinitions(Long workspaceId) {
+        Set<ClusterDefinition> clusterDefinitions = clusterDefinitionRepository.findAllByWorkspaceIdAndStatus(workspaceId, ResourceStatus.DEFAULT);
+        if (clusterDefinitionLoaderService.addingDefaultClusterDefinitionsAreNecessaryForTheUser(clusterDefinitions)) {
+            LOGGER.debug("Modifying cluster definitions based on the defaults for the '{}' workspace.", workspaceId);
+            clusterDefinitionLoaderService.loadClusterDEfinitionsForTheWorkspace(clusterDefinitions, getWorkspaceService().getByIdForCurrentUser(workspaceId),
+                    this::saveDefaultsWithReadRight);
+            LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspaceId);
+        }
     }
 
     public boolean isDatalakeAmbariBlueprint(ClusterDefinition clusterDefinition) {

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -38,6 +39,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private ClusterTemplateViewService clusterTemplateViewService;
 
     @Inject
+    private ClusterDefinitionService clusterDefinitionService;
+
+    @Inject
     private TransactionService transactionService;
 
     @Override
@@ -49,6 +53,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
         try {
+            clusterDefinitionService.updateDefaultClusterDefinitions(workspaceId);
             clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
                     converterUtil.convertAllAsSet(clusterTemplateViewService.findAllByWorkspaceId(workspaceId), ClusterTemplateViewV4Response.class));

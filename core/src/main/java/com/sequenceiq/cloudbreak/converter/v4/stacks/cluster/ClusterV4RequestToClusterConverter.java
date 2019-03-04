@@ -175,7 +175,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private ClusterDefinition getClusterDefinition(AmbariV4Request ambariV4Request, Workspace workspace) {
         ClusterDefinition clusterDefinition = null;
         if (!StringUtils.isEmpty(ambariV4Request.getClusterDefinitionName())) {
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(ambariV4Request.getClusterDefinitionName(), workspace);
+            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(ambariV4Request.getClusterDefinitionName(), workspace);
             if (clusterDefinition == null) {
                 throw new NotFoundException("Cluster definition does not exists by name: " + ambariV4Request.getClusterDefinitionName());
             }
