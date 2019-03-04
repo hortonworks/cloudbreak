@@ -43,6 +43,14 @@ export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 export VAULT_AUTO_UNSEAL=true
 ```
 
+In order to run Cloudbreak, Periscope and Datalake from IDEA, put this into your Profile:
+
+```
+export CB_LOCAL_DEV=true
+```
+
+Cloudbreak, Periscope and Datalake containers will be stopped and Uluwatu will connect to java processes running on your host.
+
 Then run these commands:
 ```
 cbd start
@@ -72,14 +80,6 @@ cbd logs periscope
 If everything went well then Cloudbreak will be available on http://localhost. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
-
-In order to run Cloudbreak, Periscope and Datalake from IDEA, put this into your Profile and restart cbd:
-
-```
-export CB_LOCAL_DEV=true
-```
-
-Cloudbreak, Periscope and Datalake containers will be stopped and Uluwatu will connect to java processes running on your host.
 
 ## IDEA
 
