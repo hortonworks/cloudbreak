@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfi
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UserProfileOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,7 +23,7 @@ public interface UserProfileV4Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserProfileOpDescription.GET_USER_PROFILE, produces = ContentType.JSON,
+    @ApiOperation(value = UserProfileOpDescription.GET_USER_PROFILE, produces = ContentType.JSON,
             notes = Notes.USER_PROFILE_NOTES, nickname = "getUserProfileInWorkspace")
     UserProfileV4Response get();
 

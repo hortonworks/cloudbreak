@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Component
 public class ContainerOrchestratorResolver {

@@ -31,7 +31,7 @@ public class EnvironmentAttachValidator {
             Set<String> requestedNames = new HashSet<>(request.getLdaps());
             requestedNames.removeAll(attachableNames);
             resultBuilder.error(String.format("LdapConfigs [%s] cannot be found in the workspace, therefore cannot be attached.",
-                    requestedNames.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedNames)));
         }
     }
 
@@ -41,7 +41,7 @@ public class EnvironmentAttachValidator {
             Set<String> requestedNames = new HashSet<>(request.getProxies());
             requestedNames.removeAll(attachableNames);
             resultBuilder.error(String.format("ProxyConfigs [%s] cannot be found in the workspace, therefore cannot be attached.",
-                    requestedNames.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedNames)));
         }
     }
 
@@ -51,7 +51,7 @@ public class EnvironmentAttachValidator {
             Set<String> requestedNames = new HashSet<>(request.getDatabases());
             requestedNames.removeAll(attachableNames);
             resultBuilder.error(String.format("RdsConfigs [%s] cannot be found in the workspace, therefore cannot be attached.",
-                    requestedNames.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedNames)));
         }
     }
 }

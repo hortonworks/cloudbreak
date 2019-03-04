@@ -3,26 +3,27 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.DatalakeResourcesDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class DatalakeResourcesV4Response {
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_URL)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_URL)
     private String ambariUrl;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.LDAP_CONFIG_NAME)
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
     private String ldapName;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.RDSCONFIG_NAMES)
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databaseNames;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.KERBEROSCONFIG_NAME)
+    @ApiModelProperty(ClusterModelDescription.KERBEROSCONFIG_NAME)
     private String kerberosName;
 
-    @ApiModelProperty(ModelDescriptions.DatalakeResourcesDescription.SERVICE_DESCRIPTORS)
+    @ApiModelProperty(DatalakeResourcesDescription.SERVICE_DESCRIPTORS)
     private Map<String, ServiceDescriptorV4Response> serviceDescriptorMap;
 
     public String getAmbariUrl() {

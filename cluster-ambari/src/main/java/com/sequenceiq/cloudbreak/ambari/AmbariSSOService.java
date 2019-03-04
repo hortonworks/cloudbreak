@@ -28,7 +28,7 @@ public class AmbariSSOService {
             LOGGER.debug("Setup gateway on Ambari API for cluster: {}", cluster.getId());
             GatewayView gatewayView = new GatewayView(gateway, gateway.getSignKey());
             Map<String, Object> ssoConfigs = new HashMap<>();
-            ssoConfigs.put("ambari.sso.provider.url", "https://" + primaryGatewayPublicAddress + ":" + knoxPort + gatewayView.getSsoProvider());
+            ssoConfigs.put("ambari.sso.provider.url", "https://" + primaryGatewayPublicAddress + ':' + knoxPort + gatewayView.getSsoProvider());
             ssoConfigs.put("ambari.sso.provider.certificate", gatewayView.getSignCert());
             ssoConfigs.put("ambari.sso.authentication.enabled", true);
             ssoConfigs.put("ambari.sso.manage_services", true);

@@ -18,7 +18,7 @@ public class IfFalseHelper extends IfHelper {
     public static final String NAME = "if-false";
 
     @Override
-    public Object apply(Boolean context, final Options options)
+    public Object apply(Boolean context, Options options)
             throws IOException {
         return decision(context(context), options);
     }

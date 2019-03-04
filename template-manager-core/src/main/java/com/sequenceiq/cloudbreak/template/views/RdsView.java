@@ -5,11 +5,11 @@ import java.util.regex.Pattern;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.views.dialect.DefaultRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.OracleRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.RdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.ServiceIdOracleRdsViewDialect;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 public class RdsView {
 

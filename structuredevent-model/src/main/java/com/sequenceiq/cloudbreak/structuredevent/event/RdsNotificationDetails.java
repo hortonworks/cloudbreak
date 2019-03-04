@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RdsNotificationDetails implements Serializable {

@@ -8,8 +8,8 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseRequestParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 
 public enum DatabaseVendor {
     POSTGRES("postgres", "PostgreSQL", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
@@ -110,11 +110,7 @@ public enum DatabaseVendor {
     }
 
     private static Optional<String> databaseVersion(Optional<DatabaseRequestParameters> rdsConfigRequestParameters) {
-        if (rdsConfigRequestParameters.isPresent()) {
-            return Optional.of(rdsConfigRequestParameters.get().getVersion());
-        } else {
-            return Optional.empty();
-        }
+        return rdsConfigRequestParameters.isPresent() ? Optional.of(rdsConfigRequestParameters.get().getVersion()) : Optional.empty();
     }
 
     public static Collection<DatabaseVendor> availableVendors() {

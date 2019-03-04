@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CloudStorageV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.location.StorageLocationV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -31,10 +32,10 @@ public class CloudStorageV4Response extends CloudStorageV4Base {
     private Set<StorageLocationV4Response> locations = new HashSet<>();
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.NAME, required = true)
+    @ApiModelProperty(value = FileSystem.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.TYPE, required = true)
+    @ApiModelProperty(value = FileSystem.TYPE, required = true)
     private String type;
 
     public Long getId() {

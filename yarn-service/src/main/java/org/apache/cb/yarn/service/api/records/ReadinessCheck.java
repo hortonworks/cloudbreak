@@ -40,7 +40,7 @@ public class ReadinessCheck {
 
         PORT("PORT");
 
-        private String value;
+        private final String value;
 
         TypeEnum(String value) {
             this.value = value;

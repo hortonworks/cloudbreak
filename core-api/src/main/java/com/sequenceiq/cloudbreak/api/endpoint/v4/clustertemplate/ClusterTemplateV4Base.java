@@ -7,6 +7,7 @@ import javax.validation.constraints.Size;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,14 +26,14 @@ public abstract class ClusterTemplateV4Base implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterTemplateModelDescription.TEMPLATE, required = true)
+    @ApiModelProperty(value = ClusterTemplateModelDescription.TEMPLATE, required = true)
     @NotNull
     private StackV4Request stackTemplate;
 
     @ApiModelProperty(required = true, allowableValues = "SPARK,HIVE,DATASCIENCE,EDW,ETL,OTHER")
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.CLOUD_PLATFORM)
+    @ApiModelProperty(ClusterTemplateModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
     public String getName() {

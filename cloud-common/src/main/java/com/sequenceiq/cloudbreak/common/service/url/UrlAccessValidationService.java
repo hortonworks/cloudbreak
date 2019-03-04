@@ -34,9 +34,10 @@ public class UrlAccessValidationService {
         boolean result = false;
         try {
             WebTarget target = client.target(url);
-            Response response = target.request().head();
-            if (HttpStatus.OK.value() == response.getStatus()) {
-                result = true;
+            try (Response response = target.request().head()) {
+                if (HttpStatus.OK.value() == response.getStatus()) {
+                    result = true;
+                }
             }
         } catch (ProcessingException ex) {
             LOGGER.info("The following URL is not reachable by Cloudbreak: '{}', reason: {}", url, ex.getMessage());

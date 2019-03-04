@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -34,7 +33,7 @@ public class RdsConfigValidator {
         }
         if (!multipleTypes.isEmpty()) {
             throw new BadRequestException("Mutliple Rds are defined for the following types: "
-                    + multipleTypes.stream().collect(Collectors.joining(",")));
+                    + String.join(",", multipleTypes));
         }
     }
 

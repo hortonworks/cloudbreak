@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.openstack4j.api.OSClient;

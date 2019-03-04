@@ -12,7 +12,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
 public class AmbariClusterTemplateGenerator {
@@ -28,7 +27,7 @@ public class AmbariClusterTemplateGenerator {
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     String generateClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings,
-            ClusterService ambariClient) throws CloudbreakException {
+            ClusterService ambariClient) {
         String blueprintName = cluster.getClusterDefinition().getStackName();
         String configStrategy = cluster.getConfigStrategy().name();
         String clusterTemplate;

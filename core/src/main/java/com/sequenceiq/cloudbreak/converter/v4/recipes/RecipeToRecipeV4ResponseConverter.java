@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v4.recipes;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component

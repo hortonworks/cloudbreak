@@ -21,7 +21,7 @@ public class ExposedServiceListValidator implements Validator<List<String>> {
 
         return ValidationResult.builder()
                 .ifError(() -> !invalidKnoxServices.isEmpty(), "The following services are not supported Knox services: "
-                        + invalidKnoxServices.stream().collect(Collectors.joining(", ")))
+                        + String.join(", ", invalidKnoxServices))
                 .build();
     }
 }

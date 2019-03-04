@@ -246,11 +246,7 @@ public class CloudbreakIdentityClient {
                 .filter(e -> e.endpointType.equals(clazz))
                 .map(e -> e.endPointProxy)
                 .findFirst();
-        if (first.isPresent()) {
-            return (T) first.get();
-        } else {
-            return null;
-        }
+        return first.isPresent() ? (T) first.get() : null;
     }
 
     protected void refreshEndpointWrapperHolder(String token) {

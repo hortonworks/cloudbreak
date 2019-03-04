@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service

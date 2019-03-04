@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class ClouderaHostGroupAssociationBuilder {
     public Map<String, List<Map<String, String>>> buildHostGroupAssociations(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup) {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.debug("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
-        for (Map.Entry<HostGroup, List<InstanceMetaData>> hostGroupListEntry : instanceMetaDataByHostGroup.entrySet()) {
+        for (Entry<HostGroup, List<InstanceMetaData>> hostGroupListEntry : instanceMetaDataByHostGroup.entrySet()) {
             List<Map<String, String>> hostInfoForHostGroup = buildHostGroupAssociation(hostGroupListEntry.getValue());
             hostGroupMappings.put(hostGroupListEntry.getKey().getName(), hostInfoForHostGroup);
         }

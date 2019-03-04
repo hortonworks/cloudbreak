@@ -20,8 +20,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType) {
         super(selector, stackId, instanceGroup, adjustment, Collections.emptySet());
         this.scalingType = scalingType;
-        this.singleMasterGateway = false;
-        this.kerberosSecured = false;
+        singleMasterGateway = false;
+        kerberosSecured = false;
         singleNodeCluster = false;
     }
 
@@ -29,7 +29,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
             Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<Boolean> accepted, boolean singleNodeCluster) {
         super(selector, stackId, instanceGroup, adjustment, hostNames, accepted);
         this.scalingType = scalingType;
-        this.singleMasterGateway = singlePrimaryGateway;
+        singleMasterGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;
         this.singleNodeCluster = singleNodeCluster;
     }

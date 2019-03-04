@@ -25,10 +25,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -17,7 +17,7 @@ public class CaasUserList {
 
     public CaasUserList(List<CaasUser> users) {
         this.users = users;
-        this.count = users.size();
+        count = users.size();
     }
 
     public int getCount() {

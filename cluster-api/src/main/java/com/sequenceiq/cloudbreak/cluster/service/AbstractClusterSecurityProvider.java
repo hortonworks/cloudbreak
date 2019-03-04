@@ -20,7 +20,7 @@ public abstract class AbstractClusterSecurityProvider {
     }
 
     public String getClusterUserProvidedPassword(Cluster cluster) {
-        return cluster.getPassword() == null ? null : cluster.getPassword();
+        return cluster.getPassword();
     }
 
     public abstract String getCertPath();

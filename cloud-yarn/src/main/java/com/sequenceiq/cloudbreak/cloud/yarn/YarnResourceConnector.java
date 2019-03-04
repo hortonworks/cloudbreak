@@ -165,31 +165,29 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
         YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
-            switch (resource.getType()) {
-                case YARN_APPLICATION:
-                    LOGGER.debug("Checking Yarn application status of: {}", resource.getName());
-                    try {
-                        ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
-                        applicationDetailRequest.setName(resource.getName());
-                        ResponseContext responseContext = yarnClient.getApplicationDetail(applicationDetailRequest);
-                        if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_SUCCESS) {
-                            ApplicationDetailResponse applicationDetailResponse = (ApplicationDetailResponse) responseContext.getResponseObject();
-                            result.add(new CloudResourceStatus(resource, YarnApplicationStatus.mapResourceStatus(applicationDetailResponse.getState())));
-                        } else if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_NOT_FOUND) {
-                            result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED, "Yarn application has been killed."));
-                        } else if (responseContext.getResponseError() != null) {
-                            throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
-                                    responseContext.getStatusCode(), responseContext.getResponseError().getDiagnostics()));
-                        } else {
-                            throw new CloudConnectorException(String.format("Yarn Application status check failed: Invalid HttpStatusCode: %d",
-                                    responseContext.getStatusCode()));
-                        }
-                    } catch (MalformedURLException | RuntimeException e) {
-                        throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
+            if (resource.getType() == YARN_APPLICATION) {
+                LOGGER.debug("Checking Yarn application status of: {}", resource.getName());
+                try {
+                    ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
+                    applicationDetailRequest.setName(resource.getName());
+                    ResponseContext responseContext = yarnClient.getApplicationDetail(applicationDetailRequest);
+                    if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_SUCCESS) {
+                        ApplicationDetailResponse applicationDetailResponse = (ApplicationDetailResponse) responseContext.getResponseObject();
+                        result.add(new CloudResourceStatus(resource, YarnApplicationStatus.mapResourceStatus(applicationDetailResponse.getState())));
+                    } else if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_NOT_FOUND) {
+                        result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED, "Yarn application has been killed."));
+                    } else if (responseContext.getResponseError() != null) {
+                        throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
+                                responseContext.getStatusCode(), responseContext.getResponseError().getDiagnostics()));
+                    } else {
+                        throw new CloudConnectorException(String.format("Yarn Application status check failed: Invalid HttpStatusCode: %d",
+                                responseContext.getStatusCode()));
                     }
-                    break;
-                default:
-                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+                } catch (MalformedURLException | RuntimeException e) {
+                    throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
+                }
+            } else {
+                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
         return result;
@@ -198,23 +196,21 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
         for (CloudResource resource : cloudResources) {
-            switch (resource.getType()) {
-                case YARN_APPLICATION:
-                    YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
-                    String yarnApplicationName = resource.getName();
-                    String stackName = authenticatedContext.getCloudContext().getName();
-                    LOGGER.debug("Terminate stack: {}", stackName);
-                    try {
-                        DeleteApplicationRequest deleteApplicationRequest = new DeleteApplicationRequest();
-                        deleteApplicationRequest.setName(yarnApplicationName);
-                        yarnClient.deleteApplication(deleteApplicationRequest);
-                        LOGGER.debug("Yarn Applicatin has been deleted");
-                    } catch (MalformedURLException | YarnClientException e) {
-                        throw new CloudConnectorException("Stack cannot be deleted", e);
-                    }
-                    break;
-                default:
-                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+            if (resource.getType() == YARN_APPLICATION) {
+                YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
+                String yarnApplicationName = resource.getName();
+                String stackName = authenticatedContext.getCloudContext().getName();
+                LOGGER.debug("Terminate stack: {}", stackName);
+                try {
+                    DeleteApplicationRequest deleteApplicationRequest = new DeleteApplicationRequest();
+                    deleteApplicationRequest.setName(yarnApplicationName);
+                    yarnClient.deleteApplication(deleteApplicationRequest);
+                    LOGGER.debug("Yarn Applicatin has been deleted");
+                } catch (MalformedURLException | YarnClientException e) {
+                    throw new CloudConnectorException("Stack cannot be deleted", e);
+                }
+            } else {
+                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
         return check(authenticatedContext, cloudResources);

@@ -96,7 +96,7 @@ public class ServiceDescriptor implements ProvisionEntity, WorkspaceAwareResourc
     }
 
     public void setClusterDefinitionParam(Json clusterDefinitionParam) {
-        this.clusterDefinitionParams = clusterDefinitionParam;
+        clusterDefinitionParams = clusterDefinitionParam;
     }
 
     public Json getClusterDefinitionSecretParams() {

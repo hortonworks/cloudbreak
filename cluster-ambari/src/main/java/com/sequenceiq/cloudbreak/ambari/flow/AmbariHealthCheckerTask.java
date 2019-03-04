@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Component
 public class AmbariHealthCheckerTask extends ClusterBasedStatusCheckerTask<AmbariClientPollerObject> {

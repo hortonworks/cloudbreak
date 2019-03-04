@@ -141,8 +141,7 @@ public class AmbariDecommissioner {
         return hostsToRemove;
     }
 
-    public Set<HostMetadata> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, AmbariClient ambariClient)
-            throws CloudbreakException {
+    public Set<HostMetadata> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, AmbariClient ambariClient) {
         Map<String, HostMetadata> unhealthyHosts = new HashMap<>();
         Map<String, HostMetadata> healthyHosts = new HashMap<>();
         for (Entry<String, HostMetadata> hostToRemove : hostsToRemove.entrySet()) {
@@ -230,7 +229,7 @@ public class AmbariDecommissioner {
     }
 
     private Collection<HostMetadata> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove,
-            Map<String, Map<String, String>> runningComponents, AmbariClient ambariClient) throws CloudbreakException {
+            Map<String, Map<String, String>> runningComponents, AmbariClient ambariClient) {
         Collection<HostMetadata> result = new HashSet<>();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, runningComponents);
         if (isSuccess(pollingResult)) {

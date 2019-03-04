@@ -58,7 +58,7 @@ public class StackRepoDetailsToStackRepositoryV4ResponseConverter
         stackRepositoryV4Response.setVersion(source.getMajorHdpVersion());
         if (!source.getMpacks().isEmpty()) {
             stackRepositoryV4Response.setMpacks(converterUtil.convertAll(source.getMpacks(), ManagementPackDetailsV4Response.class));
-            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(mp -> mp.isStackDefault()).findFirst();
+            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(ManagementPackComponent::isStackDefault).findFirst();
             stackDefaultMpack.ifPresent(mp -> stackRepositoryV4Response.setMpackUrl(mp.getMpackUrl()));
         }
         return stackRepositoryV4Response;

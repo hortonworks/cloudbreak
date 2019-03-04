@@ -19,10 +19,4 @@ public class UserIds {
     public void setUserIds(Set<String> userIds) {
         this.userIds = userIds;
     }
-
-    public static final UserIds userIds(Set<String> userIdSet) {
-        UserIds userIds = new UserIds();
-        userIds.setUserIds(userIdSet);
-        return userIds;
-    }
 }

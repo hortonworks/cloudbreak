@@ -6,9 +6,6 @@ public class CloudS3View extends CloudFileSystemView {
 
     private String instanceProfile;
 
-    public CloudS3View() {
-    }
-
     public String getInstanceProfile() {
         return instanceProfile;
     }
@@ -26,12 +23,12 @@ public class CloudS3View extends CloudFileSystemView {
             return false;
         }
         CloudS3View that = (CloudS3View) o;
-        return Objects.equals(getInstanceProfile(), that.getInstanceProfile());
+        return Objects.equals(instanceProfile, that.instanceProfile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInstanceProfile());
+        return Objects.hash(instanceProfile);
     }
 
 }

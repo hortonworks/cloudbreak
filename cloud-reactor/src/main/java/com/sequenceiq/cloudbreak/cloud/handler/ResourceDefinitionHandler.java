@@ -30,7 +30,7 @@ public class ResourceDefinitionHandler implements CloudPlatformEventHandler<Reso
         LOGGER.debug("Received event: {}", getRegionsRequestEvent);
         ResourceDefinitionRequest request = getRegionsRequestEvent.getData();
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(request.getPlatform());
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getPlatform());
             String resource = request.getResource();
             String definition = connector.parameters().resourceDefinition(request.getResource());
             if (definition == null) {

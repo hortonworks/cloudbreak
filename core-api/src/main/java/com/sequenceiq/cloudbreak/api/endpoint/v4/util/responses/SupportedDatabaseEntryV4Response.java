@@ -12,16 +12,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class SupportedDatabaseEntryV4Response implements JsonEntity {
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.DATABASENAME)
+    @ApiModelProperty(SupportedDatabaseModelDescription.DATABASENAME)
     private String databaseName;
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.DISPLAYNAME)
+    @ApiModelProperty(SupportedDatabaseModelDescription.DISPLAYNAME)
     private String displayName;
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.JDBCPREFIX)
+    @ApiModelProperty(SupportedDatabaseModelDescription.JDBCPREFIX)
     private String jdbcPrefix;
 
-    @ApiModelProperty(value = SupportedDatabaseModelDescription.VERSIONS)
+    @ApiModelProperty(SupportedDatabaseModelDescription.VERSIONS)
     private  Set<String> versions;
 
     public SupportedDatabaseEntryV4Response() {

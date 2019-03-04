@@ -19,10 +19,10 @@ import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 
 @Service
 @Scope("prototype")
@@ -108,7 +108,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         try {
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
             Optional<ApiUser2> oldAdminUser = oldUserList.getItems().stream()
-                    .filter(apiUser2 -> apiUser2.getName().equals("admin"))
+                    .filter(apiUser2 -> "admin".equals(apiUser2.getName()))
                     .findFirst();
             if (oldAdminUser.isPresent()) {
                 Cluster cluster = stack.getCluster();

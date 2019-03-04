@@ -7,7 +7,7 @@ public enum StackType {
     // Currently only HDP_REPO_DETAILS is handled
     HDF(ComponentType.HDP_REPO_DETAILS);
 
-    private ComponentType componentType;
+    private final ComponentType componentType;
 
     StackType(ComponentType componentType) {
         this.componentType = componentType;

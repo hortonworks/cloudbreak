@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class ScalingHardLimitsService {
     private static final int DEFAULT_UPSCALING_MAXIMUM_NODE_COUNT = 100;
 
-    @Value("${cb.upscale.max.nodecount:" + DEFAULT_UPSCALING_MAXIMUM_NODE_COUNT + "}")
+    @Value("${cb.upscale.max.nodecount:" + DEFAULT_UPSCALING_MAXIMUM_NODE_COUNT + '}')
     private int maxUpscaleStepInNodeCount;
 
     public int getMaxUpscaleStepInNodeCount() {

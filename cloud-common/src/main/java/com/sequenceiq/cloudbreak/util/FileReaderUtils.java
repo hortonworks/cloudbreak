@@ -6,10 +6,12 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,7 +41,7 @@ public final class FileReaderUtils {
 
     public static String readFileFromClasspath(String fileName) throws IOException {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ClassPathResource(fileName).getInputStream(), "UTF-8"))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ClassPathResource(fileName).getInputStream(), StandardCharsets.UTF_8))) {
             for (int c = br.read(); c != -1; c = br.read()) {
                 sb.append((char) c);
             }
@@ -94,7 +96,7 @@ public final class FileReaderUtils {
 
     public static List<String> getFileNamesRecursivelyFromClasspathByDirPath(String dirPath, FilenameFilter filter) throws IOException {
         File dir = getDirFromClasspath(dirPath);
-        return Arrays.stream(dir.listFiles())
+        return Arrays.stream(Objects.requireNonNull(dir.listFiles()))
                 .flatMap(f -> {
                     if (f.isDirectory() && f.listFiles() != null) {
                         try {

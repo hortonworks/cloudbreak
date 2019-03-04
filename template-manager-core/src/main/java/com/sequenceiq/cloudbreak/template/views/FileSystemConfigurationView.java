@@ -20,14 +20,14 @@ public class FileSystemConfigurationView {
         this.fileSystemConfiguration = fileSystemConfiguration;
         Set<StorageLocationView> storageLocationViews = new HashSet<>();
         if (storageLocations == null || storageLocations.getLocations() == null) {
-            this.locations = new HashSet<>();
+            locations = new HashSet<>();
         } else {
             for (StorageLocation storageLocation : storageLocations.getLocations()) {
                 storageLocationViews.add(new StorageLocationView(storageLocation));
             }
-            this.locations = storageLocationViews;
+            locations = storageLocationViews;
         }
-        this.defaultFs = false;
+        defaultFs = false;
     }
 
     public BaseFileSystemConfigurationsView getFileSystemConfiguration() {

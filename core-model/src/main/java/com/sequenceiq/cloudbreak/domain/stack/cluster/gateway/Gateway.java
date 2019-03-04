@@ -78,27 +78,23 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     private String tokenCert;
 
-    // It is not used anyomore, other than to support Cloudbreak upgrade-ability (e.g. frm 2.4 to 2.7)
-    // It is set to false by hibernate when loading old gateways created with previous CB versions
-    private boolean enableGateway = true;
-
     @ManyToOne
     private Workspace workspace;
 
     public Gateway copy() {
         Gateway gateway = new Gateway();
-        gateway.setTopologies(topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet()));
-        gateway.setTokenCert(tokenCert);
-        gateway.setSignCert(signCert);
+        gateway.topologies = topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet());
+        gateway.tokenCert = tokenCert;
+        gateway.signCert = signCert;
         gateway.signKey = signKey;
-        gateway.setPath(path);
-        gateway.setGatewayType(gatewayType);
-        gateway.setSsoType(ssoType);
-        gateway.setCluster(cluster);
-        gateway.setId(id);
-        gateway.setSignPub(signPub);
-        gateway.setSsoProvider(ssoProvider);
-        gateway.setWorkspace(workspace);
+        gateway.path = path;
+        gateway.gatewayType = gatewayType;
+        gateway.ssoType = ssoType;
+        gateway.cluster = cluster;
+        gateway.id = id;
+        gateway.signPub = signPub;
+        gateway.ssoProvider = ssoProvider;
+        gateway.workspace = workspace;
         return gateway;
     }
 
@@ -113,7 +109,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public String getName() {
-        return getResource().getShortName() + "-" + id;
+        return getResource().getShortName() + '-' + id;
     }
 
     @Override
@@ -225,10 +221,5 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setTopologies(Set<GatewayTopology> topologies) {
         this.topologies = topologies;
-    }
-
-    // to support Cloudbreak upgrade-ability (e.g. frm 2.4 to 2.7)
-    public boolean isGatewayEnabled() {
-        return enableGateway;
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import groovyx.net.http.HttpResponseException;
@@ -29,8 +28,7 @@ public class AmbariClusterTemplateSubmitter {
     @Inject
     private AmbariClusterTemplateGenerator ambariClusterTemplateGenerator;
 
-    public void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, ClusterService ambariClient)
-            throws CloudbreakException {
+    public void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, ClusterService ambariClient) {
         String clusterName = cluster.getName();
 
         if (ambariClient.getClusterName() == null) {

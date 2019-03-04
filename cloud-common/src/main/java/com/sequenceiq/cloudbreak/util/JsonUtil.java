@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,7 +31,7 @@ public class JsonUtil {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static {
-        MAPPER.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+        MAPPER.enable(Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
     }
 
@@ -46,7 +46,7 @@ public class JsonUtil {
         return MAPPER.readValue(content, valueType);
     }
 
-    public static <T> T readValue(String content, TypeReference valueTypeRef) throws IOException {
+    public static <T> T readValue(String content, TypeReference<?> valueTypeRef) throws IOException {
         return MAPPER.readValue(content, valueTypeRef);
     }
 

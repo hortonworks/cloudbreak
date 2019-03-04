@@ -11,9 +11,6 @@ public class PlatformEncryptionKeysV4Response implements JsonEntity {
 
     private Set<EncryptionKeyConfigV4Response> encryptionKeyConfigs = new HashSet<>();
 
-    public PlatformEncryptionKeysV4Response() {
-    }
-
     public Set<EncryptionKeyConfigV4Response> getEncryptionKeyConfigs() {
         return encryptionKeyConfigs;
     }

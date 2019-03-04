@@ -58,7 +58,7 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
     }
 
     protected void sanitizeSensitiveRestData(StructuredEvent event) {
-        if (event.getType().equals("StructuredRestCallEvent")) {
+        if ("StructuredRestCallEvent".equals(event.getType())) {
             StructuredRestCallEvent restEvent = (StructuredRestCallEvent) event;
             RestRequestDetails restRequestDetails = restEvent.getRestCall().getRestRequest();
             restRequestDetails.setBody(REPLACEMENT);

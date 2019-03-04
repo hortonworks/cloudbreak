@@ -99,6 +99,6 @@ public class UserProfile implements TenantAwareResource {
 
     @Override
     public Tenant getTenant() {
-        return getUser().getTenant();
+        return user.getTenant();
     }
 }

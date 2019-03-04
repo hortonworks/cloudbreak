@@ -23,7 +23,7 @@ public abstract class DatabaseV4Base implements JsonEntity {
     @Size(max = 100, min = 5, message = "The length of the RDS config's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The database's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @ApiModelProperty(value = ModelDescriptions.Database.NAME, required = true)
+    @ApiModelProperty(value = Database.NAME, required = true)
     private String name;
 
     @Size(max = 1000)
@@ -35,10 +35,10 @@ public abstract class DatabaseV4Base implements JsonEntity {
     private String connectionURL;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.Database.RDSTYPE, required = true)
+    @ApiModelProperty(value = Database.RDSTYPE, required = true)
     private String type;
 
-    @ApiModelProperty(ModelDescriptions.Database.CONNECTOR_JAR_URL)
+    @ApiModelProperty(Database.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
 
     @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)

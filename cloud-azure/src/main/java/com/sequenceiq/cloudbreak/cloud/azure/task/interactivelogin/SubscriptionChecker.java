@@ -39,22 +39,22 @@ public class SubscriptionChecker {
         request.accept(MediaType.APPLICATION_JSON);
 
         request.header("Authorization", "Bearer " + accessToken);
-        Response response = request.get();
-
-        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
-            AzureSubscription subscription = response.readEntity(AzureSubscription.class);
-            if (!subscription.getState().equals(SubscriptionState.ENABLED)) {
-                throw new InteractiveLoginException("Subscription is in incorrect state:" + "" + subscription.getState());
-            }
-            LOGGER.debug("Subscription definitions successfully retrieved:" + subscription.getDisplayName());
-        } else {
-            String errorResponse = response.readEntity(String.class);
-            try {
-                String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                LOGGER.info("Subscription retrieve error:" + errorMessage);
-                throw new InteractiveLoginException("Error with the subscription id: " + subscriptionId + " message: " + errorMessage);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
+        try (Response response = request.get()) {
+            if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
+                AzureSubscription subscription = response.readEntity(AzureSubscription.class);
+                if (!subscription.getState().equals(SubscriptionState.ENABLED)) {
+                    throw new InteractiveLoginException("Subscription is in incorrect state:" + "" + subscription.getState());
+                }
+                LOGGER.debug("Subscription definitions successfully retrieved:" + subscription.getDisplayName());
+            } else {
+                String errorResponse = response.readEntity(String.class);
+                try {
+                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                    LOGGER.info("Subscription retrieve error:" + errorMessage);
+                    throw new InteractiveLoginException("Error with the subscription id: " + subscriptionId + " message: " + errorMessage);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
     }
@@ -86,10 +86,8 @@ public class SubscriptionChecker {
             List<AzureSubscription> subscriptionList = azureSubscriptionListResult.getValue();
             if (azureSubscriptionListResult.getNextLink() != null) {
                 subscriptionList.addAll(getNextSetOfSubscriptions(azureSubscriptionListResult.getNextLink(), accessToken));
-                return subscriptionList;
-            } else {
-                return subscriptionList;
             }
+            return subscriptionList;
         } else {
             String errorResponse = response.readEntity(String.class);
             try {

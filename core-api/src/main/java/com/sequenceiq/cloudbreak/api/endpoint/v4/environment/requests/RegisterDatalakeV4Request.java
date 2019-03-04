@@ -4,22 +4,22 @@ import java.util.Set;
 
 import javax.validation.constraints.NotEmpty;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class RegisterDatalakeV4Request {
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.LDAP_CONFIG_NAME)
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
     @NotEmpty
     private String ldapName;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.RDSCONFIG_NAMES)
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     @NotEmpty
     private Set<String> databaseNames;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.KERBEROSCONFIG_NAME)
+    @ApiModelProperty(ClusterModelDescription.KERBEROSCONFIG_NAME)
     private String kerberosName;
 
     @NotEmpty

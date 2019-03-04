@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -27,12 +26,8 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
     private static final Map<Class<? extends AbstractOpenStackComputeResourceBuilder>, Integer> ORDER;
 
     static {
-        Map<Class<? extends AbstractOpenStackComputeResourceBuilder>, Integer> map = Maps.newHashMap();
-        map.put(OpenStackPortBuilder.class, 0);
-        map.put(OpenStackAttachedDiskResourceBuilder.class, 0);
-        map.put(OpenStackInstanceBuilder.class, 1);
-        map.put(OpenStackFloatingIPBuilder.class, 2);
-        ORDER = Collections.unmodifiableMap(map);
+        ORDER = Map.of(OpenStackPortBuilder.class, 0, OpenStackAttachedDiskResourceBuilder.class, 0, OpenStackInstanceBuilder.class, 1,
+                OpenStackFloatingIPBuilder.class, 2);
     }
 
     @Inject

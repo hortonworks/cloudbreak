@@ -24,7 +24,7 @@ public class ResourcesStatePollerResults {
         return new LaunchStackResult(request, result.getResults());
     }
 
-    public static UpscaleStackResult transformToUpscaleStackResult(ResourcesStatePollerResult result, UpscaleStackRequest request) {
+    public static UpscaleStackResult transformToUpscaleStackResult(ResourcesStatePollerResult result, UpscaleStackRequest<?> request) {
         return new UpscaleStackResult(request, result.getStatus(), result.getResults());
     }
 }

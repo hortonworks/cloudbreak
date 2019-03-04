@@ -10,9 +10,6 @@ public class CloudAdlsGen2View extends CloudFileSystemView {
 
     private String resourceGroupName;
 
-    public CloudAdlsGen2View() {
-    }
-
     public String getAccountKey() {
         return accountKey;
     }
@@ -46,14 +43,14 @@ public class CloudAdlsGen2View extends CloudFileSystemView {
             return false;
         }
         CloudAdlsGen2View that = (CloudAdlsGen2View) o;
-        return Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName())
-                && Objects.equals(getResourceGroupName(), that.getResourceGroupName());
+        return Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(resourceGroupName, that.resourceGroupName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName(), getResourceGroupName());
+        return Objects.hash(accountKey, accountName, resourceGroupName);
     }
 
 }

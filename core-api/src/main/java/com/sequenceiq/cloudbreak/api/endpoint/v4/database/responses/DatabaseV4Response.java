@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
@@ -14,7 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class DatabaseV4Response extends DatabaseV4Base {
 
     @ApiModelProperty(ModelDescriptions.ID)
@@ -26,7 +27,7 @@ public class DatabaseV4Response extends DatabaseV4Base {
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
-    @ApiModelProperty(value = ModelDescriptions.Database.DB_ENGINE, required = true)
+    @ApiModelProperty(value = Database.DB_ENGINE, required = true)
     private String databaseEngine;
 
     @ApiModelProperty(value = Database.CONNECTION_DRIVER_NAME, required = true)
@@ -35,10 +36,10 @@ public class DatabaseV4Response extends DatabaseV4Base {
     @ApiModelProperty(value = Database.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
 
-    @ApiModelProperty(value = Database.USERNAME)
+    @ApiModelProperty(Database.USERNAME)
     private SecretV4Response connectionUserName;
 
-    @ApiModelProperty(value = ModelDescriptions.Database.PASSWORD)
+    @ApiModelProperty(Database.PASSWORD)
     private SecretV4Response connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)

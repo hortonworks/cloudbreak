@@ -10,8 +10,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 
 @Component
 public class FlowRegister {

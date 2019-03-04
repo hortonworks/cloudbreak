@@ -92,32 +92,32 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "ldapid"), inverseJoinColumns = @JoinColumn(name = "envid"))
     private Set<EnvironmentView> environments = new HashSet<>();
 
     public LdapConfig copyWithoutWorkspace() {
         LdapConfig copy = new LdapConfig();
-        copy.setId(id);
-        copy.setName(name);
-        copy.setDescription(description);
-        copy.setServerHost(serverHost);
-        copy.setServerPort(serverPort);
-        copy.setProtocol(protocol);
+        copy.id = id;
+        copy.name = name;
+        copy.description = description;
+        copy.serverHost = serverHost;
+        copy.serverPort = serverPort;
+        copy.protocol = protocol;
         copy.bindDn = bindDn;
         copy.bindPassword = bindPassword;
-        copy.setDirectoryType(directoryType);
-        copy.setUserSearchBase(userSearchBase);
-        copy.setUserDnPattern(userDnPattern);
-        copy.setUserNameAttribute(userNameAttribute);
-        copy.setUserObjectClass(userObjectClass);
-        copy.setGroupSearchBase(groupSearchBase);
-        copy.setGroupNameAttribute(groupNameAttribute);
-        copy.setGroupObjectClass(groupObjectClass);
-        copy.setGroupMemberAttribute(groupMemberAttribute);
-        copy.setDomain(domain);
-        copy.setAdminGroup(adminGroup);
-        copy.setCertificate(certificate);
+        copy.directoryType = directoryType;
+        copy.userSearchBase = userSearchBase;
+        copy.userDnPattern = userDnPattern;
+        copy.userNameAttribute = userNameAttribute;
+        copy.userObjectClass = userObjectClass;
+        copy.groupSearchBase = groupSearchBase;
+        copy.groupNameAttribute = groupNameAttribute;
+        copy.groupObjectClass = groupObjectClass;
+        copy.groupMemberAttribute = groupMemberAttribute;
+        copy.domain = domain;
+        copy.adminGroup = adminGroup;
+        copy.certificate = certificate;
         return copy;
     }
 

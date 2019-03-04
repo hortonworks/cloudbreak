@@ -9,7 +9,6 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-
 package org.apache.cb.yarn.service.api;
 
 import java.text.FieldPosition;
@@ -17,7 +16,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
-
 
 public class RFC3339DateFormat extends ISO8601DateFormat {
 

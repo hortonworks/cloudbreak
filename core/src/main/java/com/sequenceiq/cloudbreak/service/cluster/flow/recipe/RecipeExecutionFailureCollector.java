@@ -1,69 +1,44 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
-import java.util.Collection;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Component
 public class RecipeExecutionFailureCollector {
 
+    private static final Pattern PHASE_PATTERN = Pattern.compile(".*/opt/scripts/recipe-runner\\.sh ([a-zA-Z0-9-]+) (([a-zA-Z0-9-]+)).*", Pattern.DOTALL);
+
     public boolean canProcessExecutionFailure(CloudbreakOrchestratorException exception) {
         return !getNodesWithErrors(exception).isEmpty() && exception.getMessage().contains("/opt/scripts/recipe-runner.sh ");
     }
 
-    public Set<RecipeExecutionFailure> collectErrors(CloudbreakOrchestratorException exception, Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap,
-            Set<InstanceGroup> instanceGroups) {
-
+    public List<RecipeFailure> collectErrors(CloudbreakOrchestratorException exception) {
         Multimap<String, String> nodesWithErrors = getNodesWithErrors(exception);
 
         if (nodesWithErrors.isEmpty()) {
             throw new CloudbreakServiceException("Failed to collect recipe execution failures. Cause exception contains no information.", exception);
         }
 
-        return nodesWithErrors.asMap().entrySet().stream().flatMap((Entry<String, Collection<String>> nodeWithErrors) -> {
+        List<RecipeFailure> failures = nodesWithErrors.asMap().entrySet().stream()
+                .flatMap(e -> e.getValue().stream()
+                        .map(v -> new SimpleImmutableEntry<>(e.getKey(), v))
+                        .map(failure -> new RecipeFailure(failure.getKey(), getRecipePhase(failure.getValue()), getFailedRecipeName(failure.getValue()))))
+                .filter(failure -> !failure.getRecipeName().isEmpty() && !failure.getPhase().isEmpty())
+                .collect(Collectors.toList());
 
-            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream()
-                    .collect(Collectors.toMap(error -> error, this::getInstallPhase, (phase1, phase2) -> phase1.or(() -> phase2)));
-
-            return errorsWithPhase.entrySet().stream()
-                    .filter(errorWithPhase -> errorWithPhase.getValue().isPresent())
-                    .map(this::errorWithPhaseToRecipeName)
-                    .collect(Collectors.toMap(
-                            recipeName -> recipeName,
-                            recipeName -> getPossibleFailingHostgroupsByRecipeName(hostgroupToRecipeMap, recipeName),
-                            (hg1, hg2) -> Stream.concat(hg1.stream(), hg2.stream()).collect(Collectors.toSet()))
-                    )
-                    .entrySet().stream()
-                    .flatMap((Entry<String, Set<String>> recipeWithHostgroups) -> recipeWithHostgroups.getValue().stream()
-                            .map((String hostGroup) -> {
-                                Optional<Recipe> recipe = getRecipeOfHostgroupByRecipeName(hostgroupToRecipeMap, recipeWithHostgroups.getKey(), hostGroup);
-                                Optional<InstanceMetaData> instanceMetaData = getInstanceMetaDataByHost(instanceGroups, nodeWithErrors.getKey(), hostGroup);
-                                if (recipe.isPresent() && instanceMetaData.isPresent()) {
-                                    return new RecipeExecutionFailure(recipe.get(), instanceMetaData.get());
-                                }
-                                return null;
-                            })
-                            .filter(Objects::nonNull)
-                    );
-        }).collect(Collectors.toSet());
+        return failures;
     }
 
     private Multimap<String, String> getNodesWithErrors(CloudbreakOrchestratorException exception) {
@@ -78,66 +53,50 @@ public class RecipeExecutionFailureCollector {
         return errors;
     }
 
-    private Optional<String> getInstallPhase(String message) {
-        String phaseString = StringUtils.substringAfter(message, "/opt/scripts/recipe-runner.sh ");
-        if (phaseString.startsWith("pre-termination")) {
-            return Optional.of("pre-termination");
-        } else if (phaseString.startsWith("post-cluster-install")) {
-            return Optional.of("post-cluster-install");
-        } else if (phaseString.startsWith("post-ambari-start")) {
-            return Optional.of("post-ambari-start");
-        } else if (phaseString.startsWith("pre-ambari-start")) {
-            return Optional.of("pre-ambari-start");
-        } else if (phaseString.startsWith("post")) {
-            return Optional.of("post");
-        } else if (phaseString.startsWith("pre")) {
-            return Optional.of("pre");
+    protected String getFailedRecipeName(String message) {
+        Matcher matcher = PHASE_PATTERN.matcher(message);
+        if (matcher.matches()) {
+            return matcher.group(2);
         }
-        return Optional.empty();
+        return "";
     }
 
-    private String errorWithPhaseToRecipeName(Entry<String, Optional<String>> errorWithPhase) {
-        return StringUtils.substringBetween(errorWithPhase.getKey(), ' ' + errorWithPhase.getValue().get() + ' ', "\" run");
+    protected String getRecipePhase(String message) {
+        Matcher matcher = PHASE_PATTERN.matcher(message);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        return "";
     }
 
-    private Set<String> getPossibleFailingHostgroupsByRecipeName(Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap, String recipeName) {
-        return hostgroupToRecipeMap.entrySet().stream()
-                .filter(entry -> entry.getValue().stream().anyMatch(recipe -> recipe.getName().equals(recipeName)))
-                .map(Entry::getKey)
-                .map(HostGroup::getName)
-                .collect(Collectors.toSet());
+    public Optional<InstanceMetaData> getInstanceMetadataByHost(Set<InstanceMetaData> instanceMetaData, String host) {
+        return instanceMetaData.stream().filter(metadata -> metadata.getDiscoveryFQDN().equals(host)).findFirst();
     }
 
-    private Optional<Recipe> getRecipeOfHostgroupByRecipeName(Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap, String recipeName, String hostGroupName) {
-        return hostgroupToRecipeMap.keySet().stream()
-                .filter(hg -> hg.getName().equals(hostGroupName)).findFirst()
-                .flatMap(hostGroup -> hostGroup.getRecipes().stream().filter(r -> r.getName().equals(recipeName)).findFirst());
-    }
+    public static class RecipeFailure {
 
-    private Optional<InstanceMetaData> getInstanceMetaDataByHost(Set<InstanceGroup> instanceGroups, String host, String hostGroupName) {
-        return instanceGroups.stream()
-                .filter(ig -> ig.getGroupName().equals(hostGroupName)).findFirst()
-                .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream()
-                        .filter(imd -> imd.getDiscoveryFQDN().equals(host)).findFirst());
-    }
+        private final String host;
 
-    public static class RecipeExecutionFailure {
+        private final String phase;
 
-        private final Recipe recipe;
+        private final String recipeName;
 
-        private final InstanceMetaData instanceMetaData;
-
-        public RecipeExecutionFailure(Recipe recipe, InstanceMetaData instanceMetaData) {
-            this.recipe = recipe;
-            this.instanceMetaData = instanceMetaData;
+        public RecipeFailure(String host, String phase, String recipeName) {
+            this.host = host;
+            this.phase = phase;
+            this.recipeName = recipeName;
         }
 
-        public Recipe getRecipe() {
-            return recipe;
+        public String getHost() {
+            return host;
         }
 
-        public InstanceMetaData getInstanceMetaData() {
-            return instanceMetaData;
+        public String getPhase() {
+            return phase;
+        }
+
+        public String getRecipeName() {
+            return recipeName;
         }
     }
 }

@@ -192,7 +192,7 @@ public final class PublicKeyReaderUtil {
             int byte2 = data[pos++];
             int byte3 = data[pos++];
             int byte4 = data[pos++];
-            return (byte1 << INT1) + (byte2 << INT2) + (byte3 << INT3) + (byte4 << 0);
+            return (byte1 << INT1) + (byte2 << INT2) + (byte3 << INT3) + byte4;
         }
 
         private byte[] readByteArray() throws PublicKeyParseException {

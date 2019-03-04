@@ -7,8 +7,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
@@ -30,9 +30,7 @@ public class StackInfoToAmbariStackDescriptorV4ResponseConverter extends Abstrac
         stackDescriptorV4.setRepository(defaultStackRepoDetailsToStackRepoDetailsV4Response(source.getRepo()));
         if (source.getRepo().getMpacks() != null) {
             Map<String, List<ManagementPackV4Entry>> map = new HashMap<>();
-            source.getRepo().getMpacks().forEach((key, value) -> {
-                map.put(key, converterUtil.convertAll(value, ManagementPackV4Entry.class));
-            });
+            source.getRepo().getMpacks().forEach((key, value) -> map.put(key, converterUtil.convertAll(value, ManagementPackV4Entry.class)));
             stackDescriptorV4.setMpacks(map);
         }
         return stackDescriptorV4;

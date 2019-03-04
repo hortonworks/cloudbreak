@@ -98,16 +98,16 @@ public class SaltConnector implements Closeable {
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple pillar save for CB <= 1.14
             distributeResponse.close();
-            Response singleResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
+            try (Response singleResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
                     .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
-                    .post(Entity.json(pillar));
-            GenericResponses genericResponses = new GenericResponses();
-            GenericResponse genericResponse = new GenericResponse();
-            genericResponse.setAddress(targets.iterator().next());
-            genericResponse.setStatusCode(singleResponse.getStatus());
-            genericResponses.setResponses(Collections.singletonList(genericResponse));
-            singleResponse.close();
-            return genericResponses;
+                    .post(Entity.json(pillar))) {
+                GenericResponses genericResponses = new GenericResponses();
+                GenericResponse genericResponse = new GenericResponse();
+                genericResponse.setAddress(targets.iterator().next());
+                genericResponse.setStatusCode(singleResponse.getStatus());
+                genericResponses.setResponses(Collections.singletonList(genericResponse));
+                return genericResponses;
+            }
         }
         return JaxRSUtil.response(distributeResponse, GenericResponses.class);
     }
@@ -163,7 +163,7 @@ public class SaltConnector implements Closeable {
                 .param("fun", fun)
                 .param("client", "wheel");
         if (match != null && !match.isEmpty()) {
-            form.param("match", match.stream().collect(Collectors.joining(",")));
+            form.param("match", String.join(",", match));
         }
         Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
@@ -193,11 +193,18 @@ public class SaltConnector implements Closeable {
     private Response upload(String endpoint, Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
             StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
-            MultiPart multiPart = new FormDataMultiPart().field("path", path).field("targets", String.join(",", targets)).bodyPart(streamDataBodyPart);
-            MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
-            contentType = Boundary.addBoundary(contentType);
-            String signature = PkiUtil.generateSignature(signatureKey, content);
-            return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature).post(Entity.entity(multiPart, contentType));
+            try (FormDataMultiPart multiPart = new FormDataMultiPart()) {
+                try (FormDataMultiPart pathField = multiPart.field("path", path)) {
+                    try (FormDataMultiPart targetsField = pathField.field("targets", String.join(",", targets))) {
+                        try (MultiPart bodyPart = targetsField.bodyPart(streamDataBodyPart)) {
+                            MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
+                            contentType = Boundary.addBoundary(contentType);
+                            String signature = PkiUtil.generateSignature(signatureKey, content);
+                            return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature).post(Entity.entity(bodyPart, contentType));
+                        }
+                    }
+                }
+            }
         }
     }
 

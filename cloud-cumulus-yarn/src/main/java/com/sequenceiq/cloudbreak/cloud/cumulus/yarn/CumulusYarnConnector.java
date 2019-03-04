@@ -18,13 +18,13 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.auth.CumulusYarnAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.auth.CumulusYarnCredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class CumulusYarnConnector implements CloudConnector {
+public class CumulusYarnConnector implements CloudConnector<Object> {
     @Inject
     private CumulusYarnAuthenticator authenticator;
 
@@ -70,7 +70,7 @@ public class CumulusYarnConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<Object> resources() {
         return resourceConnector;
     }
 

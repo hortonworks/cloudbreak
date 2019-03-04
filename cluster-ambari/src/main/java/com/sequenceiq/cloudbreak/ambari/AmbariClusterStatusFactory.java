@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -55,7 +56,7 @@ public class AmbariClusterStatusFactory {
             if (!ambariOperations.isEmpty()) {
                 clusterStatus = ClusterStatus.PENDING;
             } else {
-                AmbariAdapter.ClusterStatusResult statusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
+                ClusterStatusResult statusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
 
                 clusterStatus = statusResult.getClusterStatus();
                 clusterStatus.setStatusReasonArg(statusResult.getComponentsInStatus());

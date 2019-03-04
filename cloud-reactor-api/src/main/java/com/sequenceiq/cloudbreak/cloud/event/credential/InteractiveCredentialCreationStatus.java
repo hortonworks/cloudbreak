@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 /**
  * Created by perdos on 11/17/16.
  */
-public class InteractiveCredentialCreationStatus extends CloudPlatformRequest {
+public class InteractiveCredentialCreationStatus extends CloudPlatformRequest<InteractiveCredentialCreationRequest> {
 
     private final ExtendedCloudCredential extendedCloudCredential;
 

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
@@ -27,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackPlatformResourc
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackTagValidator;
 
-public class OpenStackNativeConnector implements CloudConnector {
+public class OpenStackNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
@@ -75,7 +76,7 @@ public class OpenStackNativeConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<List<CloudResource>> resources() {
         return resourceConnector;
     }
 

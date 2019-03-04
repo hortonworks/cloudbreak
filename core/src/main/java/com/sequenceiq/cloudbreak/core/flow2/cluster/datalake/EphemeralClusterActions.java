@@ -27,7 +27,7 @@ public class EphemeralClusterActions {
 
     @Bean(name = "EPHEMERAL_CLUSTER_UPDATE_STATE")
     public Action<?, ?> updateNameserverAction() {
-        return new AbstractClusterAction<EphemeralClusterUpdateTriggerEvent>(EphemeralClusterUpdateTriggerEvent.class) {
+        return new AbstractClusterAction<>(EphemeralClusterUpdateTriggerEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateTriggerEvent payload, Map<Object, Object> variables) {
                 ephemeralClusterService.updateClusterStarted(context.getStackId());
@@ -39,7 +39,7 @@ public class EphemeralClusterActions {
 
     @Bean(name = "EPHEMERAL_CLUSTER_UPDATE_FINISHED_STATE")
     public Action<?, ?> ephemeralUpdateFinishedAction() {
-        return new AbstractClusterAction<EphemeralClusterUpdateSuccess>(EphemeralClusterUpdateSuccess.class) {
+        return new AbstractClusterAction<>(EphemeralClusterUpdateSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateSuccess payload, Map<Object, Object> variables) {
                 ephemeralClusterService.updateClusterFinished(context.getStackId());

@@ -8,6 +8,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
+import javax.ws.rs.core.Response.StatusType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
         try {
             WebTarget target = CLIENT.target(value);
             Response response = target.request().get();
-            Response.StatusType responseStatusInfo = response.getStatusInfo();
+            StatusType responseStatusInfo = response.getStatusInfo();
             if (responseStatusInfo.getFamily().equals(Family.SUCCESSFUL)) {
                 String responseContent = response.readEntity(String.class);
                 if (imageCatalogParsable(context, responseContent)) {

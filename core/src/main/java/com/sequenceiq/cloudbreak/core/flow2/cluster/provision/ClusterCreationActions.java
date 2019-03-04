@@ -172,7 +172,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.clusterInstallationFinished(context.getStack());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -189,7 +189,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

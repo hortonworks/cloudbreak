@@ -44,7 +44,7 @@ public class EnvironmentCreationValidator {
             Set<String> requestedKerberosConfigs = new HashSet<>(request.getKerberoses());
             requestedKerberosConfigs.removeAll(foundKerberosConfigs);
             resultBuilder.error(String.format("The following Kerberos config(s) could not be found in the workspace: [%s]",
-                    requestedKerberosConfigs.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedKerberosConfigs)));
         }
     }
 
@@ -54,7 +54,7 @@ public class EnvironmentCreationValidator {
             Set<String> requestedLdaps = new HashSet<>(request.getLdaps());
             requestedLdaps.removeAll(foundLdaps);
             resultBuilder.error(String.format("The following LDAP config(s) could not be found in the workspace: [%s]",
-                    requestedLdaps.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedLdaps)));
         }
     }
 
@@ -64,7 +64,7 @@ public class EnvironmentCreationValidator {
             Set<String> requestedProxyConfigs = new HashSet<>(request.getProxies());
             requestedProxyConfigs.removeAll(foundProxyConfigs);
             resultBuilder.error(String.format("The following Proxy config(s) could not be found in the workspace: [%s]",
-                    requestedProxyConfigs.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedProxyConfigs)));
         }
     }
 
@@ -74,7 +74,7 @@ public class EnvironmentCreationValidator {
             Set<String> requestedRdsConfigs = new HashSet<>(request.getDatabases());
             requestedRdsConfigs.removeAll(foundRdsConfigs);
             resultBuilder.error(String.format("The following RDS config(s) could not be found in the workspace: [%s]",
-                    requestedRdsConfigs.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedRdsConfigs)));
         }
     }
 
@@ -84,7 +84,7 @@ public class EnvironmentCreationValidator {
             Set<String> requestedKubernetesConfigs = new HashSet<>(request.getKubernetes());
             requestedKubernetesConfigs.removeAll(foundKubernetesConfigs);
             resultBuilder.error(String.format("The following Kubernetes config(s) could not be found in the workspace: [%s]",
-                    requestedKubernetesConfigs.stream().collect(Collectors.joining(", "))));
+                    String.join(", ", requestedKubernetesConfigs)));
         }
     }
 }

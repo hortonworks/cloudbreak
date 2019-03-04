@@ -40,10 +40,10 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
     @Override
     public void accept(Event<UpdateImageRequest> event) {
         LOGGER.debug("Received event: {}", event);
-        UpdateImageRequest request = event.getData();
+        UpdateImageRequest<UpdateImageResult> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector<?> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack stack = request.getCloudStack();
 

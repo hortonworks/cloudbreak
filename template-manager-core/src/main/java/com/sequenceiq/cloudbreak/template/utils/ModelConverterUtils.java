@@ -99,8 +99,8 @@ public class ModelConverterUtils {
         for (String entry : newMap.keySet()) {
             String key = entry;
             if (newMap.get(key) instanceof Map && original.get(key) instanceof Map) {
-                Map originalChild = (Map) original.get(entry);
-                Map newChild = (Map) newMap.get(key);
+                Map<String, Object> originalChild = (Map<String, Object>) original.get(entry);
+                Map<String, Object> newChild = (Map<String, Object>) newMap.get(key);
                 original.put(key, deepMerge(originalChild, newChild));
             } else {
                 original.put(key, newMap.get(key));

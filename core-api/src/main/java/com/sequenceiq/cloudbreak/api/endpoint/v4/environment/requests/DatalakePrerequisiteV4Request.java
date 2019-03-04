@@ -7,26 +7,29 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.KerberosConfigModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class DatalakePrerequisiteV4Request {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.REQUEST, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.REQUEST, required = true)
     private LdapV4Request ldap;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.REQUEST, required = true)
+    @ApiModelProperty(value = RDSConfigModelDescription.REQUEST, required = true)
     private Set<DatabaseV4Request> databases = new HashSet<>();
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.KerberosConfigModelDescription.REQUEST, required = true)
+    @ApiModelProperty(value = KerberosConfigModelDescription.REQUEST, required = true)
     private KerberosV4Request kerberos;
 
     public LdapV4Request getLdap() {

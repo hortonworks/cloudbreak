@@ -132,7 +132,7 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
     }
 
     public void setDatalakeAmbariFqdn(String datalakeAnbariFqdn) {
-        this.datalakeAmbariFqdn = datalakeAnbariFqdn;
+        datalakeAmbariFqdn = datalakeAnbariFqdn;
     }
 
     public Json getDatalakeComponents() {

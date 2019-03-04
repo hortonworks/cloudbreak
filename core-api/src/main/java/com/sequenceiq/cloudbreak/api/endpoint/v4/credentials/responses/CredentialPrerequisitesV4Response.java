@@ -15,16 +15,16 @@ public class CredentialPrerequisitesV4Response implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(value = CredentialModelDescription.ACCOUNT_IDENTIFIER)
+    @ApiModelProperty(CredentialModelDescription.ACCOUNT_IDENTIFIER)
     private String accountId;
 
-    @ApiModelProperty(value = CredentialModelDescription.AWS_CREDENTIAL_PREREQUISITES)
+    @ApiModelProperty(CredentialModelDescription.AWS_CREDENTIAL_PREREQUISITES)
     private AwsCredentialPrerequisites aws;
 
-    @ApiModelProperty(value = CredentialModelDescription.AZURE_CREDENTIAL_PREREQUISITES)
+    @ApiModelProperty(CredentialModelDescription.AZURE_CREDENTIAL_PREREQUISITES)
     private AzureCredentialPrerequisites azure;
 
-    @ApiModelProperty(value = CredentialModelDescription.GCP_CREDENTIAL_PREREQUISITES)
+    @ApiModelProperty(CredentialModelDescription.GCP_CREDENTIAL_PREREQUISITES)
     private GcpCredentialPrerequisites gcp;
 
     public CredentialPrerequisitesV4Response(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {

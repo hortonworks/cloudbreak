@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -43,7 +43,7 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     public Map<String, Set<String>> getComponentsByHostGroup() {
         Map<String, Set<String>> result = new HashMap<>();
         for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : cmTemplate.getHostTemplates()) {
-            Set<String> componentNames = apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames().stream().collect(Collectors.toSet());
+            Set<String> componentNames = new HashSet<>(apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames());
             result.put(apiClusterTemplateHostTemplate.getRefName(), componentNames);
         }
         return result;
@@ -65,7 +65,7 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     }
 
     public void addServiceConfigs(String serviceType, String roleType, List<ApiClusterTemplateConfig> configs) {
-        getServiceByType(serviceType).stream().forEach(service -> configs.stream().forEach(config -> service.addServiceConfigsItem(config)));
+        getServiceByType(serviceType).ifPresent(service -> configs.forEach(service::addServiceConfigsItem));
     }
 
     public boolean isRoleTypePresentInService(String serviceType, String roleType) {

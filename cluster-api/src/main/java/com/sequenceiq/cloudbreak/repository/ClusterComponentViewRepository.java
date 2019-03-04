@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.repository.query.Param;
 
@@ -11,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ClusterComponentView.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 public interface ClusterComponentViewRepository extends DisabledBaseRepository<ClusterComponentView, Long> {
     ClusterComponentView findOneByClusterIdAndComponentTypeAndName(@Param("clusterId") Long clusterId, @Param("componentType") ComponentType componentType,

@@ -71,7 +71,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> metas) throws CloudbreakException {
+    public void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> metas) {
 
     }
 
@@ -171,37 +171,37 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void stopComponents(Map<String, String> components, String hostname) throws CloudbreakException {
+    public void stopComponents(Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
+    public void ensureComponentsAreStopped(Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void initComponents(Map<String, String> components, String hostname) throws CloudbreakException {
+    public void initComponents(Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void installComponents(Map<String, String> components, String hostname) throws CloudbreakException {
+    public void installComponents(Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void regenerateKerberosKeytabs(String hostname) throws CloudbreakException {
+    public void regenerateKerberosKeytabs(String hostname) {
 
     }
 
     @Override
-    public void startComponents(Map<String, String> components, String hostname) throws CloudbreakException {
+    public void startComponents(Map<String, String> components, String hostname) {
 
     }
 
     @Override
-    public void restartAll() throws CloudbreakException {
+    public void restartAll() {
 
     }
 }

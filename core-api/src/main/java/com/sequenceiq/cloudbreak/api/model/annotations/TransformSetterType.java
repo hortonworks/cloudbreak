@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD })
+@Target(ElementType.FIELD)
 public @interface TransformSetterType {
 }

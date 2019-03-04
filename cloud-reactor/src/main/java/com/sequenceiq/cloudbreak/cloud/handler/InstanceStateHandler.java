@@ -35,7 +35,7 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
     @Override
     public void accept(Event<GetInstancesStateRequest> event) {
         LOGGER.debug("Received event: {}", event);
-        GetInstancesStateRequest request = event.getData();
+        GetInstancesStateRequest<GetInstancesStateResult> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         GetInstancesStateResult result;
         try {

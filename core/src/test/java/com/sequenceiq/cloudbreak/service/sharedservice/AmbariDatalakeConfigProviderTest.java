@@ -16,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
+import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;

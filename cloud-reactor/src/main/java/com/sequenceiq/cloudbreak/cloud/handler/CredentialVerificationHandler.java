@@ -35,7 +35,7 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
         LOGGER.debug("Received event: {}", createCredentialRequestEvent);
         CredentialVerificationRequest request = createCredentialRequestEvent.getData();
         try {
-            CloudConnector connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
+            CloudConnector<Object> connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
             AuthenticatedContext ac;
             CloudCredentialStatus cloudCredentialStatus;
             try {

@@ -103,7 +103,7 @@ public class CloudResourceAdvisor {
                     hostGroupContainsMasterComp, availableVmTypes, cloudPlatform, diskTypes);
             vmTypesByHostGroup.putAll(workerVmTypes);
         } else {
-            componentsByHostGroup.keySet().stream().forEach(hg -> vmTypesByHostGroup.put(hg, null));
+            componentsByHostGroup.keySet().forEach(hg -> vmTypesByHostGroup.put(hg, null));
         }
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
@@ -118,12 +118,10 @@ public class CloudResourceAdvisor {
     }
 
     private boolean isThereMasterComponents(ClusterManagerType clusterManagerType, String hostGroupName, Collection<String> components) {
-        if (clusterManagerType == ClusterManagerType.AMBARI) {
-            return components.stream()
-                    .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster());
-        } else {
-            return hostGroupName.toLowerCase().contains("master");
-        }
+        return clusterManagerType == ClusterManagerType.AMBARI
+                ? components.stream()
+                    .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster())
+                : hostGroupName.toLowerCase().contains("master");
     }
 
     private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {

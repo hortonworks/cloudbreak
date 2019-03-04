@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.retry.RetryUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 
 import groovyx.net.http.HttpResponseException;
@@ -318,11 +319,11 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 Map<String, String> masterSlaveWithState = collectMasterSlaveComponents(components).stream()
                         .collect(Collectors.toMap(Function.identity(), componentStatus::get));
                 if (masterSlaveWithState.values().stream().anyMatch("UNKNOWN"::equals)) {
-                    throw new Retry.ActionWentFailException("Ambari has not recovered");
+                    throw new ActionWentFailException("Ambari has not recovered");
                 }
                 return componentStatus;
             });
-        } catch (Retry.ActionWentFailException e) {
+        } catch (ActionWentFailException e) {
             throw new CloudbreakException("Status of one or more components in ambari remained in UNKNOWN status.");
         }
     }
@@ -430,7 +431,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     public String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId) {
         try {
             String osType = ambariRepositoryVersionService.getOsTypeForStackRepoDetails(repoDetails);
-            if ("".equals(osType)) {
+            if (osType != null && osType.isEmpty()) {
                 LOGGER.debug(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
                 return null;
             }
@@ -474,13 +475,13 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         private AmbariMessages operationFailedMessage;
 
         private OperationParameters(AmbariOperationType ambariOperationType, AmbariMessages operationFailedMessage) {
-            this.waitForOperation = true;
+            waitForOperation = true;
             this.ambariOperationType = ambariOperationType;
             this.operationFailedMessage = operationFailedMessage;
         }
 
         private OperationParameters() {
-            this.waitForOperation = false;
+            waitForOperation = false;
         }
 
         private boolean isWaitForOperation() {

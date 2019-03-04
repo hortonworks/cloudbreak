@@ -42,13 +42,10 @@ public class AmbariBlueprintPortConfigCollector {
     private Optional<Integer> getConfiguredPortForService(PortConfig portConfig, Map<String, Map<String, String>> configurations) {
         if (configurations.containsKey(portConfig.getConfigName())) {
             Map<String, String> configuration = configurations.get(portConfig.getConfigName());
-            if (portConfig.isPortKeySet()) {
-                return Optional.ofNullable(configuration.get(portConfig.getPortKey()))
-                        .map(portValue -> getPortFromPortString(portConfig.getService(), portValue));
-            } else {
-                return Optional.ofNullable(configuration.get(portConfig.getHostKey()))
-                        .map(hostValue -> getPortFromHost(portConfig.getService(), hostValue));
-            }
+            return portConfig.isPortKeySet()
+                    ? Optional.ofNullable(configuration.get(portConfig.getPortKey()))
+                    .map(portValue -> getPortFromPortString(portConfig.getService(), portValue))
+                    : Optional.ofNullable(configuration.get(portConfig.getHostKey())).map(hostValue -> getPortFromHost(portConfig.getService(), hostValue));
         }
         return Optional.empty();
     }

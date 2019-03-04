@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.validation;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -42,8 +41,8 @@ public class ManagementPackResourceValidator implements ConstraintValidator<Vali
     private boolean isValidPurgeList(ManagementPackV4Request value, ConstraintValidatorContext context) {
         boolean result = true;
         if (value.getPurgeList().stream().anyMatch(p -> !validPurgeListElements.contains(p))) {
-            ValidatorUtil.addConstraintViolation(context, String.format("purgelist contains only elements from %s", validPurgeListElements.stream().collect(
-                    Collectors.joining(","))), "purgeList");
+            ValidatorUtil.addConstraintViolation(context, String.format("purgelist contains only elements from %s", String.join(",", validPurgeListElements)),
+                    "purgeList");
             result = false;
         }
         return result;

@@ -105,9 +105,9 @@ public class AmbariAdapter {
 
     public static class ClusterStatusResult {
 
-        private ClusterStatus clusterStatus;
+        private final ClusterStatus clusterStatus;
 
-        private String componentsInStatus;
+        private final String componentsInStatus;
 
         ClusterStatusResult(ClusterStatus clusterStatus, String componentsInStatus) {
             this.clusterStatus = clusterStatus;

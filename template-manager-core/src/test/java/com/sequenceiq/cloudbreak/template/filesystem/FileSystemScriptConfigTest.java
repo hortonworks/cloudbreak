@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 
 public class FileSystemScriptConfigTest {
 

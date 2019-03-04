@@ -15,16 +15,12 @@ public class CmTemplateComponentConfigProcessor {
     private List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviderList;
 
     public CmTemplateProcessor process(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        for (CmTemplateComponentConfigProvider provider : getCmTemplateComponentConfigProviderList()) {
+        for (CmTemplateComponentConfigProvider provider : cmTemplateComponentConfigProviderList) {
             if (provider.specialCondition(cmTemplateProcessor, source)) {
                 cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getRoleType(), provider.getServiceConfigs(source));
                 cmTemplateProcessor.addVariables(provider.getVariables(source));
             }
         }
         return cmTemplateProcessor;
-    }
-
-    public List<CmTemplateComponentConfigProvider> getCmTemplateComponentConfigProviderList() {
-        return cmTemplateComponentConfigProviderList;
     }
 }

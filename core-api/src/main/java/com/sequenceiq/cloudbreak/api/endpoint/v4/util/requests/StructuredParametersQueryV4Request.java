@@ -4,30 +4,32 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UtilDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class StructuredParametersQueryV4Request {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.STACK_NAME, required = true)
+    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String clusterName;
 
-    @ApiModelProperty(value = ModelDescriptions.UtilDescription.ACCOUNT_NAME)
+    @ApiModelProperty(UtilDescription.ACCOUNT_NAME)
     private String accountName;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.UtilDescription.STORAGE_NAME, required = true)
+    @ApiModelProperty(value = UtilDescription.STORAGE_NAME, required = true)
     private String storageName;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.UtilDescription.FILESYTEM_TYPE, required = true)
+    @ApiModelProperty(value = UtilDescription.FILESYTEM_TYPE, required = true)
     private String fileSystemType;
 
-    @ApiModelProperty(value = ModelDescriptions.UtilDescription.ATTACHED_CLUSTER, required = true)
+    @ApiModelProperty(value = UtilDescription.ATTACHED_CLUSTER, required = true)
     private boolean attachedCluster;
 
     public String getAccountName() {

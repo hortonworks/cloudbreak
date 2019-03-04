@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -87,7 +88,7 @@ public class PrometheusEvaluator extends EvaluatorExecutor {
             for (PrometheusAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
                 LOGGER.debug("Checking Prometheus based alert: '{}'", alertName);
-                String query = URLEncoder.encode(String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getName(), alert.getPeriod()), "UTF-8");
+                String query = URLEncoder.encode(String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getName(), alert.getPeriod()), StandardCharsets.UTF_8);
                 Response response = target
                         .path("/api/v1/query")
                         .queryParam("query", query)
