@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.MockParameters;
@@ -73,7 +74,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
                 .withCloudPlatform(MOCK_CAPITAL);
     }
 
-    //    @Override
+    @Override
+    public StackV4EntityBase stack(StackV4EntityBase stack) {
+        return stack.withMock(mockStackParameters());
+    }
+
     public String availabilityZone() {
         String availabilityZone = "eu-west-1a";
         String availabilityZoneParam = getTestParameter().get("mockAvailabilityZone");
@@ -85,6 +90,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public String region() {
         String regionParam = getTestParameter().get("mockRegion");
         return regionParam == null ? EUROPE : regionParam;
+    }
+
+    public String location() {
+        String locationParam = getTestParameter().get("mockLocation");
+        return locationParam == null ? LONDON : locationParam;
     }
 
     public String getVpcId() {
@@ -178,5 +188,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getDefaultClusterDefinitionName() {
         return MockParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
+    }
+
+    private MockStackV4Parameters mockStackParameters() {
+        MockStackV4Parameters mockStackV4Parameters = new MockStackV4Parameters();
+        mockStackV4Parameters.getCloudPlatform();
+        return mockStackV4Parameters;
     }
 }

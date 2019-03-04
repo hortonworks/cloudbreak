@@ -9,10 +9,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsC
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
@@ -24,6 +26,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public InstanceTemplateV4Entity template(InstanceTemplateV4Entity template) {
         return template.withInstanceType(getTestParameter().getWithDefault(AwsParameters.Instance.TYPE, "m5.2xlarge"));
+    }
+
+    @Override
+    public StackV4EntityBase stack(StackV4EntityBase stack) {
+        return stack.withAws(awsStackParameters());
     }
 
     @Override
@@ -80,6 +87,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String region() {
         return getTestParameter().getWithDefault(AwsParameters.REGION, "eu-west-1");
+    }
+
+    @Override
+    public String location() {
+        return getTestParameter().getWithDefault(AwsParameters.LOCATION, "eu-west-1");
     }
 
     @Override
@@ -143,5 +155,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         keyBasedCredentialParameters.setAccessKey(getTestParameter().get(AwsParameters.Credential.ACCESS_KEY_ID));
         parameters.setKeyBased(keyBasedCredentialParameters);
         return parameters;
+    }
+
+    private AwsStackV4Parameters awsStackParameters() {
+        AwsStackV4Parameters awsStackV4Parameters = new AwsStackV4Parameters();
+        awsStackV4Parameters.getCloudPlatform();
+        return awsStackV4Parameters;
     }
 }

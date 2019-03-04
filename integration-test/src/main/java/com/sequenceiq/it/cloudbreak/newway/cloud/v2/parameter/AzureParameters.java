@@ -8,6 +8,8 @@ public class AzureParameters {
 
     public static final String REGION = PREFIX + "region";
 
+    public static final String LOCATION = PREFIX + "location";
+
     public static final String AVAILABILITY_ZONE = PREFIX + "availabilityZone";
 
     private AzureParameters() {

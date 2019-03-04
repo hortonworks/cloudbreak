@@ -8,12 +8,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AzureParameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
@@ -35,8 +37,18 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public StackV4EntityBase stack(StackV4EntityBase stack) {
+        return stack.withAzure(azureStackParameters());
+    }
+
+    @Override
     public String region() {
         return getTestParameter().getWithDefault(AzureParameters.REGION, "West Europe");
+    }
+
+    @Override
+    public String location() {
+        return getTestParameter().getWithDefault(AzureParameters.LOCATION, "West Europe");
     }
 
     @Override
@@ -84,5 +96,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getDefaultClusterDefinitionName() {
         return AzureParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
+    }
+
+    private AzureStackV4Parameters azureStackParameters() {
+        AzureStackV4Parameters azureStackV4Parameters = new AzureStackV4Parameters();
+        azureStackV4Parameters.getCloudPlatform();
+        return azureStackV4Parameters;
     }
 }

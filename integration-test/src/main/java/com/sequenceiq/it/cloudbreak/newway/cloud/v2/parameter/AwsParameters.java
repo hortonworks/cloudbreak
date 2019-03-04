@@ -12,6 +12,8 @@ public class AwsParameters {
 
     public static final String REGION = PREFIX + "region";
 
+    public static final String LOCATION = PREFIX + "location";
+
     public static final String VPC_ID = PREFIX + "vpcId";
 
     public static final String SUBNET_ID = PREFIX + "subnetId";
