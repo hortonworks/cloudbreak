@@ -206,7 +206,7 @@ public class ClusterV4RequestToClusterConverterTest {
         ambariV4Request.setClusterDefinitionName(blueprintName);
         source.setAmbari(ambariV4Request);
 
-        when(clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(null);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("Cluster definition does not exists by name: bp-name");
@@ -227,13 +227,13 @@ public class ClusterV4RequestToClusterConverterTest {
         ambariV4Request.setClusterDefinitionName(blueprintName);
         source.setAmbari(ambariV4Request);
 
-        when(clusterDefinitionService.getByNameForWorkspace(blueprintName, workspace)).thenReturn(clusterDefinition);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace)).thenReturn(clusterDefinition);
 
         Cluster actual = underTest.convert(source);
 
         assertThat(actual.getClusterDefinition(), is(clusterDefinition));
 
-        verify(clusterDefinitionService, times(1)).getByNameForWorkspace(blueprintName, workspace);
+        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
     }
 
     @Test
