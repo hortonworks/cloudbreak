@@ -25,9 +25,69 @@ type Client struct {
 }
 
 /*
+DeleteTerminatedClustersPreferences deletes user preference to show or hide terminated clusters
+
+User preference whether to show or hide terminated instances and how old deleted instances should be shown.
+*/
+func (a *Client) DeleteTerminatedClustersPreferences(params *DeleteTerminatedClustersPreferencesParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteTerminatedClustersPreferencesParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteTerminatedClustersPreferences",
+		Method:             "DELETE",
+		PathPattern:        "/v4/user_profiles/terminated_clusters_preferences",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteTerminatedClustersPreferencesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+GetTerminatedClustersPreferences gets user preference to show or hide terminated clusters
+
+User preference whether to show or hide terminated instances and how old deleted instances should be shown.
+*/
+func (a *Client) GetTerminatedClustersPreferences(params *GetTerminatedClustersPreferencesParams) (*GetTerminatedClustersPreferencesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetTerminatedClustersPreferencesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getTerminatedClustersPreferences",
+		Method:             "GET",
+		PathPattern:        "/v4/user_profiles/terminated_clusters_preferences",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetTerminatedClustersPreferencesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetTerminatedClustersPreferencesOK), nil
+
+}
+
+/*
 GetUserProfileInWorkspace users related profile
 
-Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users
+Users can be invited under an account by the administrator, and all resources
 */
 func (a *Client) GetUserProfileInWorkspace(params *GetUserProfileInWorkspaceParams) (*GetUserProfileInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -51,6 +111,36 @@ func (a *Client) GetUserProfileInWorkspace(params *GetUserProfileInWorkspacePara
 		return nil, err
 	}
 	return result.(*GetUserProfileInWorkspaceOK), nil
+
+}
+
+/*
+PutTerminatedClustersPreferences sets user preference to show or hide terminated clusters
+
+User preference whether to show or hide terminated instances and how old deleted instances should be shown.
+*/
+func (a *Client) PutTerminatedClustersPreferences(params *PutTerminatedClustersPreferencesParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutTerminatedClustersPreferencesParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putTerminatedClustersPreferences",
+		Method:             "PUT",
+		PathPattern:        "/v4/user_profiles/terminated_clusters_preferences",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutTerminatedClustersPreferencesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 
 }
 

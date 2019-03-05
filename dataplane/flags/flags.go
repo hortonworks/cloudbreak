@@ -1153,6 +1153,27 @@ var (
 			Usage: "kerberos admin",
 		},
 	}
+	FlTimeoutMinutes = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "minutes",
+			Usage: "timeout (minutes)",
+		},
+	}
+	FlTimeoutHours = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "hours",
+			Usage: "timeout (hours)",
+		},
+	}
+	FlTimeoutDays = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "days",
+			Usage: "timeout (hours)",
+		},
+	}
 	FlShowUsage = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
@@ -1190,6 +1211,11 @@ type BoolFlag struct {
 
 type IntFlag struct {
 	cli.IntFlag
+	RequiredFlag
+}
+
+type Int64Flag struct {
+	cli.Int64Flag
 	RequiredFlag
 }
 

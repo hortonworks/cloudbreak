@@ -2,9 +2,10 @@ package imagecatalog
 
 import (
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"strconv"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	log "github.com/Sirupsen/logrus"
 	v4img "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_imagecatalogs"

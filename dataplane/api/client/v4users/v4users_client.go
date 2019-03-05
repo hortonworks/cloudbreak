@@ -27,7 +27,7 @@ type Client struct {
 /*
 EvictCurrentUserDetails removes current user from cache
 
-Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users
+Users can be invited under an account by the administrator, and all resources
 */
 func (a *Client) EvictCurrentUserDetails(params *EvictCurrentUserDetailsParams) (*EvictCurrentUserDetailsOK, error) {
 	// TODO: Validate the params before sending
