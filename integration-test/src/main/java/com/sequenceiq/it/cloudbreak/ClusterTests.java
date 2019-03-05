@@ -45,7 +45,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withUsername(cloudProvider.getUsername())
                         .withPassword(cloudProvider.getPassword())
-                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
+                        .withClusterDefinitionName(clusterDefinitionName)
+                        .withAmbariRequest(cloudProvider.ambariRequest()),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -71,7 +72,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
                         .withUsername(cloudProvider.getUsername())
                         .withPassword(cloudProvider.getPassword())
                         .withKerberos(AwsKerberos.KERBEROS_CLOUDY)
-                        .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, clusterDefinitionName, getTestParameter())),
+                        .withClusterDefinitionName(clusterDefinitionName)
+                        .withAmbariRequest(AwsKerberos.getAmbariV2Request(cloudProvider, getTestParameter())),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -99,7 +101,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withUsername(cloudProvider.getUsername())
                         .withPassword(cloudProvider.getPassword())
-                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
+                        .withClusterDefinitionName(clusterDefinitionName)
+                        .withAmbariRequest(cloudProvider.ambariRequest()),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")
@@ -123,7 +126,8 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
         given(Cluster.request()
                         .withUsername(cloudProvider.getUsername())
                         .withPassword(cloudProvider.getPassword())
-                        .withAmbariRequest(cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
+                        .withClusterDefinitionName(clusterDefinitionName)
+                        .withAmbariRequest(cloudProvider.ambariRequest()),
                 "a cluster request");
         given(ImageSettingsEntity.request()
                 .withImageCatalog("")

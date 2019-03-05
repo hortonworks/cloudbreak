@@ -43,8 +43,8 @@ public class AwsKerberos {
         return network;
     }
 
-    public static AmbariV4Request getAmbariV2Request(CloudProvider cloudProvider, String clusterDefinitionName, TestParameter testParameter) {
-        AmbariV4Request ambariRequest = cloudProvider.ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+    public static AmbariV4Request getAmbariV2Request(CloudProvider cloudProvider, TestParameter testParameter) {
+        AmbariV4Request ambariRequest = cloudProvider.ambariRequest();
         return ambariRequest;
     }
 

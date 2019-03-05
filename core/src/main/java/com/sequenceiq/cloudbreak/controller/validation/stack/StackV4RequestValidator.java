@@ -108,7 +108,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
 
     private void validateSharedService(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
         ClusterV4Request clusterReq = stackRequest.getCluster();
-        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterReq.getAmbari().getClusterDefinitionName(), workspaceId);
+        ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterReq.getClusterDefinitionName(), workspaceId);
         checkResourceRequirementsIfBlueprintIsDatalakeReady(stackRequest, clusterDefinition, validationBuilder, workspaceId);
         SharedServiceV4Request sharedService = stackRequest.getSharedService();
         if (isDatalakeNameSpecified(sharedService) && clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {

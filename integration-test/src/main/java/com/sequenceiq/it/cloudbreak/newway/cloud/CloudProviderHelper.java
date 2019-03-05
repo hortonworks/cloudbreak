@@ -194,16 +194,14 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     @Override
-    public AmbariV4Request ambariRequestWithClusterDefinitionNameAndCustomAmbari(String clusterDefinitionName, String customAmbariVersion,
+    public AmbariV4Request ambariRequestWithCustomAmbari(String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
-        return ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+        return ambariRequest();
     }
 
     @Override
-    public AmbariV4Request ambariRequestWithClusterDefinitionName(String clusterDefinitionName) {
+    public AmbariV4Request ambariRequest() {
         var req = new AmbariV4Request();
-        req.setClusterDefinitionName(clusterDefinitionName);
-        req.setValidateClusterDefinition(false);
         req.setValidateRepositories(Boolean.TRUE);
         req.setStackRepository(new StackRepositoryV4Request());
         return req;

@@ -82,7 +82,7 @@ public class MockCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks() {
         return null;
     }
 

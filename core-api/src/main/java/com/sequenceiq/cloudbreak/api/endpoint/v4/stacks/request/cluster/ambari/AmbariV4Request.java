@@ -20,12 +20,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AmbariV4Request implements JsonEntity {
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_NAME)
-    private String clusterDefinitionName;
-
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_CLUSTER_DEFINITION)
-    private Boolean validateClusterDefinition = Boolean.TRUE;
-
     @ApiModelProperty(ClusterModelDescription.VALIDATE_REPOSITORIES)
     private Boolean validateRepositories = Boolean.FALSE;
 
@@ -44,22 +38,6 @@ public class AmbariV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     private String securityMasterKey;
-
-    public String getClusterDefinitionName() {
-        return clusterDefinitionName;
-    }
-
-    public void setClusterDefinitionName(String clusterDefinitionName) {
-        this.clusterDefinitionName = clusterDefinitionName;
-    }
-
-    public Boolean getValidateClusterDefinition() {
-        return validateClusterDefinition;
-    }
-
-    public void setValidateClusterDefinition(Boolean validateClusterDefinition) {
-        this.validateClusterDefinition = validateClusterDefinition;
-    }
 
     public Boolean getValidateRepositories() {
         return validateRepositories;

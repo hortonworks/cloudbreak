@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.anonymize;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -15,8 +16,10 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -61,6 +64,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     @Inject
     private ConverterUtil converterUtil;
 
+    @Value("${cb.disable.show.blueprint:false}")
+    private boolean disableShowBlueprint;
+
     @Override
     public ClusterV4Response convert(Cluster source) {
         ClusterV4Response clusterResponse = new ClusterV4Response();
@@ -88,6 +94,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs().stream().filter(
                 rds -> ResourceStatus.USER_MANAGED.equals(rds.getStatus())).collect(Collectors.toList()), DatabaseV4Response.class));
         clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
+        clusterResponse.setClusterDefinition(getConversionService().convert(source.getClusterDefinition(), ClusterDefinitionV4Response.class));
+        clusterResponse.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(source));
         convertDpSecrets(source, clusterResponse);
         return clusterResponse;
     }
@@ -112,6 +120,14 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
                 clusterResponse.setCustomQueue("default");
             }
         }
+    }
+
+    private String getExtendedClusterDefinitionText(Cluster source) {
+        if (StringUtils.isNoneEmpty(source.getExtendedClusterDefinitionText()) && !disableShowBlueprint) {
+            String fromVault = source.getExtendedClusterDefinitionText();
+            return anonymize(fromVault);
+        }
+        return null;
     }
 
     private CloudStorageV4Response getCloudStorage(Cluster source) {

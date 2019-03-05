@@ -230,8 +230,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
-        var ambari = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks() {
+        var ambari = ambariRequest();
         var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);

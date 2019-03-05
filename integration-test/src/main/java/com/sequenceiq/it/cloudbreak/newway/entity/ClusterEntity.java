@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
@@ -30,8 +31,11 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
     }
 
     public ClusterEntity valid() {
+        String clusterDefinitionName = getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
+                getCloudProvider().getDefaultClusterDefinitionName());
         return withUserName("admin")
                 .withPassword("Admin123")
+                .withClusterDefinitionName(clusterDefinitionName)
                 .withAmbari(getTestContext().init(AmbariEntity.class));
     }
 
@@ -119,6 +123,16 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
 
     public ClusterEntity withDatabase(String databaseName) {
         getRequest().getDatabases().add(databaseName);
+        return this;
+    }
+
+    public ClusterEntity withClusterDefinitionName(String clusterDefinitionName) {
+        getRequest().setClusterDefinitionName(clusterDefinitionName);
+        return this;
+    }
+
+    public ClusterEntity withValidateClusterDefinition(Boolean validateClusterDefinition) {
+        getRequest().setValidateClusterDefinition(validateClusterDefinition);
         return this;
     }
 }

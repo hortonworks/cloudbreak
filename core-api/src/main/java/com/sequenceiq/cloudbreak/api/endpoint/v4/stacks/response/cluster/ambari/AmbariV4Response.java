@@ -5,19 +5,13 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.stackrepository.StackRepositoryV4Response;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterDefinitionModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
-import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,9 +20,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AmbariV4Response implements JsonEntity {
-
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION)
-    private ClusterDefinitionV4Response clusterDefinition;
 
     @ApiModelProperty(StackModelDescription.AMBARI_IP)
     private String serverIp;
@@ -49,19 +40,6 @@ public class AmbariV4Response implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
     private SecretV4Response securityMasterKey;
-
-    @ApiModelProperty(ClusterDefinitionModelDescription.CLUSTER_DEFINITION)
-    @JsonSerialize(using = Base64Serializer.class)
-    @JsonDeserialize(using = Base64Deserializer.class)
-    private String extendedClusterDefinitionText;
-
-    public ClusterDefinitionV4Response getClusterDefinition() {
-        return clusterDefinition;
-    }
-
-    public void setClusterDefinition(ClusterDefinitionV4Response clusterDefinition) {
-        this.clusterDefinition = clusterDefinition;
-    }
 
     public String getServerIp() {
         return serverIp;
@@ -109,13 +87,5 @@ public class AmbariV4Response implements JsonEntity {
 
     public void setSecurityMasterKey(SecretV4Response securityMasterKey) {
         this.securityMasterKey = securityMasterKey;
-    }
-
-    public String getExtendedClusterDefinitionText() {
-        return extendedClusterDefinitionText;
-    }
-
-    public void setExtendedClusterDefinitionText(String extendedClusterDefinitionText) {
-        this.extendedClusterDefinitionText = extendedClusterDefinitionText;
     }
 }

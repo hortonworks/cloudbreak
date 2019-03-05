@@ -93,7 +93,7 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
         String clusterDefinitionName = entity.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
                 CommonCloudParameters.DEFAULT_CLUSTER_DEFINITION_NAME);
 
-        if (!clusterDefinitionName.equals(stackTemplate.getCluster().getAmbari().getClusterDefinitionName())) {
+        if (!clusterDefinitionName.equals(stackTemplate.getCluster().getClusterDefinitionName())) {
             throw new IllegalArgumentException("Cluster Definition name is mismatch!");
         }
 

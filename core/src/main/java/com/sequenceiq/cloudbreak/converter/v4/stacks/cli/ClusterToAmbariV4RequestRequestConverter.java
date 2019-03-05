@@ -22,10 +22,8 @@ public class ClusterToAmbariV4RequestRequestConverter extends AbstractConversion
     @Override
     public AmbariV4Request convert(Cluster source) {
         AmbariV4Request ambariRequest = new AmbariV4Request();
-        ambariRequest.setClusterDefinitionName(source.getClusterDefinition().getName());
         prepareRepoDetails(source, ambariRequest);
         ambariRequest.setConfigStrategy(null);
-        ambariRequest.setValidateClusterDefinition(null);
         return ambariRequest;
     }
 

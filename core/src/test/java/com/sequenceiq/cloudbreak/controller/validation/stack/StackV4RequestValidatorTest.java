@@ -479,13 +479,12 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
         ClusterV4Request clusterRequest = new ClusterV4Request();
         AmbariV4Request ambariV4Request = getAmbariV4Request();
         clusterRequest.setAmbari(ambariV4Request);
+        clusterRequest.setClusterDefinitionName(TEST_BP_NAME);
         return clusterRequest;
     }
 
     private AmbariV4Request getAmbariV4Request() {
-        AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setClusterDefinitionName(TEST_BP_NAME);
-        return ambariV4Request;
+        return new AmbariV4Request();
     }
 
     private StackV4Request getStackV4Request(List<InstanceGroupV4Request> instanceGroupRequests, ClusterV4Request clusterRequest) {

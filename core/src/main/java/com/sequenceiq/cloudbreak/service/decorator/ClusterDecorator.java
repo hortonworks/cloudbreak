@@ -79,7 +79,7 @@ public class ClusterDecorator {
     }
 
     private void validateClusterDefinitionIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
-        if (clusterDefinitionService.isAmbariBlueprint(subject.getClusterDefinition()) && request.getAmbari().getValidateClusterDefinition()) {
+        if (clusterDefinitionService.isAmbariBlueprint(subject.getClusterDefinition()) && request.getValidateClusterDefinition()) {
             ambariBlueprintValidator.validateBlueprintForStack(subject, subject.getClusterDefinition(), subject.getHostGroups(), stack.getInstanceGroups());
         }
     }
@@ -88,13 +88,13 @@ public class ClusterDecorator {
             Optional<ClusterDefinition> clusterDefinition, User user) {
         if (clusterDefinition.isPresent()) {
             subject.setClusterDefinition(clusterDefinition.get());
-        } else if (!Strings.isNullOrEmpty(request.getAmbari().getClusterDefinitionName())) {
-            subject.setClusterDefinition(clusterDefinitionService.getByNameForWorkspace(request.getAmbari().getClusterDefinitionName(), workspace));
+        } else if (!Strings.isNullOrEmpty(request.getClusterDefinitionName())) {
+            subject.setClusterDefinition(clusterDefinitionService.getByNameForWorkspace(request.getClusterDefinitionName(), workspace));
         } else {
             throw new BadRequestException("Cluster definition is not configured for the cluster!");
         }
         removeHaComponentsFromGatewayTopologies(subject);
-        subject.setTopologyValidation(request.getAmbari().getValidateClusterDefinition());
+        subject.setTopologyValidation(request.getValidateClusterDefinition());
     }
 
     private void prepareClusterManagerVariant(Cluster cluster) {

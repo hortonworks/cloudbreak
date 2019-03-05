@@ -85,8 +85,9 @@ public class NetworkClusterTests extends CloudbreakTest {
         given(Cluster.request()
                 .withUsername(cloudProvider.getUsername())
                 .withPassword(cloudProvider.getPassword())
+                .withClusterDefinitionName(cloudProvider.getClusterDefinitionName())
                 .withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
-                        .ambariRequestWithClusterDefinitionName(cloudProvider.getClusterDefinitionName())), cloudProvider.getPlatform() + " cluster request ");
+                        .ambariRequest()), cloudProvider.getPlatform() + " cluster request ");
 //        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
 //                " stack request ");
         when(Stack.postV3(), "post the stack request");
@@ -103,8 +104,9 @@ public class NetworkClusterTests extends CloudbreakTest {
         given(Cluster.request()
                 .withUsername(cloudProvider.getUsername())
                 .withPassword(cloudProvider.getPassword())
+                .withClusterDefinitionName(cloudProvider.getClusterDefinitionName())
                 .withName(cloudProvider.getClusterName()).withAmbariRequest(cloudProvider
-                        .ambariRequestWithClusterDefinitionName(cloudProvider.getClusterDefinitionName())), cloudProvider.getPlatform() + " cluster request ");
+                        .ambariRequest()), cloudProvider.getPlatform() + " cluster request ");
 //        given(cloudProvider.aValidStackRequest().withEnvironmentSettings(cloudProvider.getEnvironmentSettings()).withNetwork(cloudProvider.existingSubnet()),
 //                " stack request ");
         when(Stack.postV3(), "post the stack request");

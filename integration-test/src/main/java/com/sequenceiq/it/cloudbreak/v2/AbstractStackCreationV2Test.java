@@ -95,14 +95,14 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         Assert.assertNotNull(clusterDefinitionName, "cluster definition name is mandatory.");
 
         StackV4Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV4Request.class);
-        ClusterV4Request clusterV2Request = new ClusterV4Request();
-        clusterV2Request.setName(stackV2Request.getName());
-        stackV2Request.setCluster(clusterV2Request);
-        AmbariV4Request ambariV2Request = new AmbariV4Request();
-        clusterV2Request.setAmbari(ambariV2Request);
-        clusterV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
-        clusterV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
-        ambariV2Request.setClusterDefinitionName(clusterDefinitionName);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        clusterRequest.setName(stackV2Request.getName());
+        stackV2Request.setCluster(clusterRequest);
+        AmbariV4Request ambariRequest = new AmbariV4Request();
+        clusterRequest.setAmbari(ambariRequest);
+        clusterRequest.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
+        clusterRequest.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
+        clusterRequest.setClusterDefinitionName(clusterDefinitionName);
         if (enableGateway) {
             addGatewayRequest(stackV2Request);
         }

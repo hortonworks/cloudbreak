@@ -252,8 +252,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
-        var ambari = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks() {
+        var ambari = ambariRequest();
         var stackRepoDetails = new StackRepositoryV4Request();
         stackRepoDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
@@ -271,7 +271,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
         return Cluster.request()
                 .withUsername(getUsername())
                 .withPassword(getPassword())
-                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName()))
+                .withAmbariRequest(ambariRequest())
+                .withClusterDefinitionName(getDatalakeClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
                 .withRdsConfigNames(of(getTestParameter().get(Ranger.CONFIG_NAME),
                         getTestParameter().get(Hive.CONFIG_NAME)))
@@ -281,7 +282,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public Cluster aValidAttachedCluster() {
         return Cluster.request()
-                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getClusterDefinitionName()))
+                .withAmbariRequest(ambariRequest())
+                .withClusterDefinitionName(getClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
                         getTestParameter().get(Ranger.CONFIG_NAME),
@@ -297,9 +299,9 @@ public class AwsCloudProvider extends CloudProviderHelper {
         return request.getStack();
     }
 
-    public AmbariV4Request ambariRequestWithClusterDefinitionNameAndCustomAmbari(String clusterDefinitionName, String customAmbariVersion,
+    public AmbariV4Request ambariRequestWithCustomAmbari(String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey) {
-        var req = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+        var req = ambariRequest();
         if (StringUtils.isNoneEmpty(customAmbariVersion)) {
             Preconditions.checkNotNull(customAmbariRepoUrl);
             Preconditions.checkNotNull(customAmbariRepoGpgKey);

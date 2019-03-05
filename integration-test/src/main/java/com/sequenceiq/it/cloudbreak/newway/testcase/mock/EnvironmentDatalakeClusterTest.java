@@ -262,7 +262,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(rdsConfigs)
-                .withAmbari(testContext.given(AmbariEntity.class).withClusterDefinitionName(cdName));
+                .withClusterDefinitionName(cdName)
+                .withAmbari(testContext.given(AmbariEntity.class));
         if (rdsConfigs != null) {
             cluster.withRdsConfigNames(rdsConfigs);
         }

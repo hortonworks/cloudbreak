@@ -198,15 +198,16 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Test
     public void testConvertWheClusterDefinitionDoesNotExists() {
-        String blueprintName = "bp-name";
+        String clusterDefinitionName = "bp-name";
 
         ClusterV4Request source = new ClusterV4Request();
+        source.setAmbari(new AmbariV4Request());
+        source.setClusterDefinitionName(clusterDefinitionName);
 
         AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setClusterDefinitionName(blueprintName);
         source.setAmbari(ambariV4Request);
 
-        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace)).thenReturn(null);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(clusterDefinitionName, workspace)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("Cluster definition does not exists by name: bp-name");
@@ -216,24 +217,25 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Test
     public void testConvertWheBlueprintExists() {
-        String blueprintName = "bp-name";
+        String clusterDefinitionName = "bp-name";
 
         ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setName(blueprintName);
+        clusterDefinition.setName(clusterDefinitionName);
 
         ClusterV4Request source = new ClusterV4Request();
+        source.setClusterDefinitionName(clusterDefinitionName);
+        source.setAmbari(new AmbariV4Request());
 
         AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setClusterDefinitionName(blueprintName);
         source.setAmbari(ambariV4Request);
 
-        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace)).thenReturn(clusterDefinition);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(clusterDefinitionName, workspace)).thenReturn(clusterDefinition);
 
         Cluster actual = underTest.convert(source);
 
         assertThat(actual.getClusterDefinition(), is(clusterDefinition));
 
-        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
+        verify(clusterDefinitionService, times(1)).getByNameForWorkspaceAndLoadDefaultsIfNecessary(clusterDefinitionName, workspace);
     }
 
     @Test

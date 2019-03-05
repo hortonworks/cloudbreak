@@ -20,35 +20,37 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
 
     @Override
     public ClusterV4Request convert(Cluster source) {
-        ClusterV4Request clusterV2Request = new ClusterV4Request();
-        clusterV2Request.setAmbari(getConversionService().convert(source, AmbariV4Request.class));
-        clusterV2Request.setExecutorType(source.getExecutorType());
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        clusterRequest.setAmbari(getConversionService().convert(source, AmbariV4Request.class));
+        clusterRequest.setClusterDefinitionName(source.getClusterDefinition().getName());
+        clusterRequest.setValidateClusterDefinition(null);
+        clusterRequest.setExecutorType(source.getExecutorType());
         if (source.getFileSystem() != null) {
-            clusterV2Request.setCloudStorage(getConversionService().convert(source.getFileSystem(), CloudStorageV4Request.class));
+            clusterRequest.setCloudStorage(getConversionService().convert(source.getFileSystem(), CloudStorageV4Request.class));
         }
-        clusterV2Request.setLdapName(source.getLdapConfig() == null ? null : source.getLdapConfig().getName());
-        clusterV2Request.setName(source.getName());
+        clusterRequest.setLdapName(source.getLdapConfig() == null ? null : source.getLdapConfig().getName());
+        clusterRequest.setName(source.getName());
         if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
             Set<String> databaseNames = source.getRdsConfigs().stream()
                     .filter(rdsConfig -> rdsConfig.getStatus() == ResourceStatus.USER_MANAGED)
                     .map(RDSConfig::getName)
                     .collect(Collectors.toSet());
-            clusterV2Request.setDatabases(Collections.unmodifiableSet(databaseNames));
+            clusterRequest.setDatabases(Collections.unmodifiableSet(databaseNames));
         }
 
         if (source.getKerberosConfig() != null) {
-            clusterV2Request.setKerberosName(source.getKerberosConfig().getName());
+            clusterRequest.setKerberosName(source.getKerberosConfig().getName());
         }
 
         if (source.getProxyConfig() != null) {
-            clusterV2Request.setProxyName(source.getProxyConfig().getName());
+            clusterRequest.setProxyName(source.getProxyConfig().getName());
         }
 
         if (source.getGateway() != null) {
-            clusterV2Request.setGateway(getConversionService().convert(source.getGateway(), GatewayV4Request.class));
+            clusterRequest.setGateway(getConversionService().convert(source.getGateway(), GatewayV4Request.class));
         }
 
-        return clusterV2Request;
+        return clusterRequest;
     }
 
 }
