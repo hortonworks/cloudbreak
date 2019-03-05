@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -68,9 +67,6 @@ class OrchestratorRecipeExecutor {
 
     @Inject
     private StackUtil stackUtil;
-
-    @Inject
-    private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
