@@ -32,6 +32,9 @@ public class WaitUtilForMultipleStatuses {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses);
+            if (waitResult == WaitResult.FAILED || waitResult == WaitResult.TIMEOUT) {
+                break;
+            }
         }
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());

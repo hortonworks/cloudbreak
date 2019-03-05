@@ -50,11 +50,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     public String getVpcId() {
-        return getTestParameter().getWithDefault(AwsParameters.VPC_ID, "vpc-578e5f31");
+        return getTestParameter().getWithDefault(AwsParameters.VPC_ID, "vpc-5e68eb3a");
     }
 
     public String getSubnetId() {
-        return getTestParameter().getWithDefault(AwsParameters.SUBNET_ID, "subnet-f6e01490");
+        return getTestParameter().getWithDefault(AwsParameters.SUBNET_ID, "subnet-87b729f1");
     }
 
     @Override
@@ -89,7 +89,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity) {
-        String publicKeyId = getTestParameter().getWithDefault(AwsParameters.PUBLIC_KEY_ID, "akanto-ssh");
+        String publicKeyId = getTestParameter().getWithDefault(AwsParameters.PUBLIC_KEY_ID, "api-e2e-test");
         stackAuthenticationEntity.withPublicKeyId(publicKeyId);
         return stackAuthenticationEntity;
     }
