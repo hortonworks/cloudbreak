@@ -22,7 +22,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var stackHeader = []string{"Name", "Description", "CloudPlatform", "Environment", "StackStatus", "ClusterStatus"}
+var stackHeader = []string{"Name", "CloudPlatform", "Environment", "StackStatus", "ClusterStatus"}
 
 type stackOut struct {
 	common.CloudResourceOut
@@ -36,7 +36,7 @@ type stackOutDescribe struct {
 }
 
 func (s *stackOut) DataAsStringArray() []string {
-	arr := s.CloudResourceOut.DataAsStringArray()
+	arr := []string{s.Name, s.CloudPlatform}
 	arr = append(arr, s.Environment)
 	arr = append(arr, s.StackStatus)
 	arr = append(arr, s.ClusterStatus)
@@ -129,7 +129,6 @@ func convertViewResponseToStack(s *model.StackViewV4Response) *stackOut {
 	return &stackOut{
 		CloudResourceOut: common.CloudResourceOut{
 			Name:          *s.Name,
-			Description:   utils.SafeClusterViewDescriptionConvert(s),
 			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
 		},
 		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),

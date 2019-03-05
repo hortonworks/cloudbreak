@@ -38,13 +38,6 @@ func SafeEnvironmentNameConvert(env *model.EnvironmentSettingsV4Response) string
 	return ""
 }
 
-func SafeClusterViewDescriptionConvert(s *model.StackViewV4Response) string {
-	if s.Cluster != nil {
-		return commonutils.SafeStringConvert(s.Cluster.Description)
-	}
-	return ""
-}
-
 func SafeClusterDescriptionConvert(s *model.StackV4Response) string {
 	if s.Cluster != nil {
 		return s.Cluster.Description
