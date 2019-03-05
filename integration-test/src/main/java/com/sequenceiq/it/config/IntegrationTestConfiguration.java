@@ -2,10 +2,12 @@ package com.sequenceiq.it.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.kohsuke.randname.RandomNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,8 @@ import org.testng.TestNG;
 
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.spark.SparkServer;
+import com.sequenceiq.it.cloudbreak.newway.spark.SparkServerPool;
 
 @Configuration
 @ComponentScan("com.sequenceiq.it")
@@ -28,6 +32,9 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 public class IntegrationTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestConfiguration.class);
+
+    @Value("${integrationtest.spark.sparkPoolSize:80}")
+    private int sparkPoolSize;
 
     @Bean
     public static PropertyResourceConfigurer propertySourcesPlaceholderConfigurer() {
@@ -49,6 +56,13 @@ public class IntegrationTestConfiguration {
         int seed = (int) System.currentTimeMillis();
         LOGGER.info("Created random name generator with Seed: {}", seed);
         return new RandomNameGenerator(seed);
+    }
+
+    @Bean
+    public SparkServerPool sparkServerPool() {
+        SparkServerPool sparkServerPool = new SparkServerPool();
+        IntStream.range(0, sparkPoolSize).forEach(i -> sparkServerPool.put(new SparkServer()));
+        return sparkServerPool;
     }
 
     @Bean

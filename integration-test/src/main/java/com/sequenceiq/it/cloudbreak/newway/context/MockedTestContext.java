@@ -8,13 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.config.SparkServer;
 import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.newway.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.cloudbreak.newway.spark.SparkServer;
+import com.sequenceiq.it.cloudbreak.newway.spark.SparkServerFactory;
 import com.sequenceiq.it.spark.DynamicRouteStack;
 
 @Prototype
-public class MockedTestContext extends TestContext {
+public class MockedTestContext extends TestContext implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockedTestContext.class);
 
@@ -22,16 +23,18 @@ public class MockedTestContext extends TestContext {
     private String mockServerAddress;
 
     @Inject
-    private SparkServer sparkServer;
+    private SparkServerFactory sparkServerFactory;
 
     @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
+
+    private SparkServer sparkServer;
 
     private DefaultModel model;
 
     @PostConstruct
     private void init() {
-        sparkServer.initSparkService(9750, 9900);
+        sparkServer = sparkServerFactory.construct();
         imageCatalogMockServerSetup.configureImgCatalogMock();
         model = new DefaultModel();
         model.startModel(sparkServer.getSparkService(), mockServerAddress);
@@ -49,14 +52,14 @@ public class MockedTestContext extends TestContext {
         return imageCatalogMockServerSetup;
     }
 
-    public void shutdown() {
-        sparkServer.shutdown();
-        imageCatalogMockServerSetup.shutdown();
-        setShutdown(true);
-    }
-
     public DynamicRouteStack dynamicRouteStack() {
         return model.getAmbariMock().getDynamicRouteStack();
     }
 
+    @Override
+    public void close() {
+        sparkServerFactory.release(sparkServer);
+        imageCatalogMockServerSetup.close();
+        setShutdown(true);
+    }
 }

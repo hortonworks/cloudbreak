@@ -10,6 +10,7 @@ import java.io.InputStream;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -19,22 +20,25 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.mock.json.CBVersion;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.config.SparkServer;
+import com.sequenceiq.it.cloudbreak.newway.spark.SparkServer;
+import com.sequenceiq.it.cloudbreak.newway.spark.SparkServerFactory;
 import com.sequenceiq.it.spark.ITResponse;
 
 @Prototype
-public class ImageCatalogMockServerSetup {
+public class ImageCatalogMockServerSetup implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogMockServerSetup.class);
 
     @Inject
-    private SparkServer sparkServer;
+    private SparkServerFactory sparkServerFactory;
 
     @Inject
     private TestParameter testParameter;
 
+    private SparkServer sparkServer;
+
     public void configureImgCatalogMock() {
-        sparkServer.initSparkService(9400, 9749);
+        sparkServer = sparkServerFactory.construct();
         startImageCatalog();
     }
 
@@ -69,8 +73,8 @@ public class ImageCatalogMockServerSetup {
     private String getCloudbreakUnderTestVersion(String cbServerAddress) {
         Client client = RestClientUtil.get();
         WebTarget target = client.target(cbServerAddress + "/info");
-        try {
-            CBVersion cbVersion = target.request().get().readEntity(CBVersion.class);
+        try (Response response = target.request().get()) {
+            CBVersion cbVersion = response.readEntity(CBVersion.class);
             LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), cbVersion.getApp().getVersion());
             return cbVersion.getApp().getVersion();
         } catch (Exception e) {
@@ -79,8 +83,9 @@ public class ImageCatalogMockServerSetup {
         }
     }
 
-    public void shutdown() {
-        sparkServer.shutdown();
+    @Override
+    public void close() {
+        sparkServerFactory.release(sparkServer);
         LOGGER.info("ImageCatalog has stopped");
     }
 }
