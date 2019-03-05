@@ -91,19 +91,19 @@ public class FileSystemParameterV4Response implements JsonEntity {
             return false;
         }
         FileSystemParameterV4Response that = (FileSystemParameterV4Response) o;
-        return Objects.equals(getPropertyName(), that.getPropertyName())
-                && Objects.equals(getDescription(), that.getDescription())
-                && Objects.equals(getDefaultPath(), that.getDefaultPath())
-                && Objects.equals(getRelatedServices(), that.getRelatedServices())
-                && Objects.equals(getPropertyFile(), that.getPropertyFile())
-                && Objects.equals(getProtocol(), that.getProtocol())
-                && Objects.equals(getPropertyDisplayName(), that.getPropertyDisplayName());
+        return Objects.equals(propertyName, that.propertyName)
+                && Objects.equals(description, that.description)
+                && Objects.equals(defaultPath, that.defaultPath)
+                && Objects.equals(relatedServices, that.relatedServices)
+                && Objects.equals(propertyFile, that.propertyFile)
+                && Objects.equals(protocol, that.protocol)
+                && Objects.equals(propertyDisplayName, that.propertyDisplayName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPropertyName(), getDescription(), getDefaultPath(), getRelatedServices(), getPropertyFile(), getProtocol(),
-                getPropertyDisplayName());
+        return Objects.hash(propertyName, description, defaultPath, relatedServices, propertyFile, protocol,
+                propertyDisplayName);
     }
 
 }

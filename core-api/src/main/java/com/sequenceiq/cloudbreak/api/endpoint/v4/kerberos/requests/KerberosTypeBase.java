@@ -36,7 +36,7 @@ public abstract class KerberosTypeBase implements JsonEntity {
     @ApiModelProperty(value = KERBEROS_TCP_ALLOW, required = true)
     private Boolean tcpAllowed = false;
 
-    @ApiModelProperty(value = KERBEROS_KDC_VERIFY_KDC_TRUST)
+    @ApiModelProperty(KERBEROS_KDC_VERIFY_KDC_TRUST)
     private Boolean verifyKdcTrust = true;
 
     @ApiModelProperty(KERBEROS_DOMAIN)

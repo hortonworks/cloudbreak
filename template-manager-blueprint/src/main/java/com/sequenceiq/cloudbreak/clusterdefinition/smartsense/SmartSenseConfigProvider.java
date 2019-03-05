@@ -20,9 +20,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.clusterdefinition.SmartsenseConfigurationLocator;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.ClusterDefinitionConfigurationEntry;
@@ -84,7 +84,7 @@ public class SmartSenseConfigProvider implements ClusterDefinitionComponentConfi
     private String addSmartSenseServerToBp(AmbariBlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
             Collection<String> hostGroupNames) {
         if (!blueprintProcessor.isComponentExistsInBlueprint(HST_SERVER_COMPONENT)) {
-            String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
+            String aHostGroupName = hostGroupNames.stream().min(String::compareTo).get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
                 if (hostGroup.isInstanceGroupConfigured() && InstanceGroupType.GATEWAY.equals(hostGroup.getInstanceGroupType())
@@ -106,7 +106,7 @@ public class SmartSenseConfigProvider implements ClusterDefinitionComponentConfi
 
             }
             LOGGER.debug("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
-            final String finalAHostGroupName = aHostGroupName;
+            String finalAHostGroupName = aHostGroupName;
             blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, finalAHostGroupName::equals);
         }
         return blueprintProcessor.asText();

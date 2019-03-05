@@ -79,15 +79,10 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
         attachGlobalResources = attachGlobalResources == null ? Boolean.TRUE : attachGlobalResources;
         Set<T> resources;
         if (StringUtils.isEmpty(environmentName)) {
-            if (attachGlobalResources) {
-                resources = findAllByWorkspaceId(workspaceId);
-            } else {
-                resources = repository().findAllByWorkspaceIdAndEnvironmentsIsNotNull(workspaceId);
-            }
+            resources = attachGlobalResources ? findAllByWorkspaceId(workspaceId) : repository().findAllByWorkspaceIdAndEnvironmentsIsNotNull(workspaceId);
         } else {
-            resources = new HashSet<>();
             EnvironmentView env = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
-            resources.addAll(repository().findAllByWorkspaceIdAndEnvironments(workspaceId, env));
+            resources = new HashSet<>(repository().findAllByWorkspaceIdAndEnvironments(workspaceId, env));
             if (attachGlobalResources) {
                 resources.addAll(repository().findAllByWorkspaceIdAndEnvironmentsIsNull(workspaceId));
             }
@@ -129,7 +124,7 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
             requestedEnvironments.removeAll(existingEnvNames);
             throw new BadRequestException(
                     String.format("The following environments does not exist in the workspace: [%s], therefore the resource cannot be %s.",
-                            requestedEnvironments.stream().collect(Collectors.joining(", ")), messageEnding
+                            String.join(", ", requestedEnvironments), messageEnding
                     )
             );
         }

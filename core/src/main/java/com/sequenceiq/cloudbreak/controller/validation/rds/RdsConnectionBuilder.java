@@ -20,6 +20,8 @@ public class RdsConnectionBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConnectionBuilder.class);
 
+    private static final String CREATE_SQL = "CREATE DATABASE ?";
+
     public Map<String, String> buildRdsConnection(String connectionURL, String connectionUserName, String connectionPassword, String clusterName,
             Iterable<String> targets) {
         Map<String, String> map = new HashMap<>();
@@ -39,10 +41,9 @@ public class RdsConnectionBuilder {
     }
 
     private void createDb(Connection conn, String clusterName, String service) {
-        String createSQL = "CREATE DATABASE ?";
-        try (PreparedStatement preparedStatement = conn.prepareStatement(createSQL)) {
+        try (PreparedStatement preparedStatement = conn.prepareStatement(CREATE_SQL)) {
             preparedStatement.setString(1, clusterName + service);
-            preparedStatement.executeUpdate(createSQL);
+            preparedStatement.executeUpdate(CREATE_SQL);
         } catch (PSQLException ex) {
             if ("42P04".equals(ex.getSQLState())) {
                 LOGGER.info("The expected database already exist");

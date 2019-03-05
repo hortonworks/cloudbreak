@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
@@ -66,7 +67,7 @@ public class KerberosClusterDefinitionService implements ClusterDefinitionCompon
         String ldapUrl = kerberosDetailService.resolveLdapUrlForKerberos(kerberosConfig);
         String containerDn = kerberosDetailService.resolveContainerDnForKerberos(kerberosConfig);
 
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
+        Builder<String, String> builder = ImmutableMap.<String, String>builder()
                 .put("realm", realm)
                 .put("kdc_type", kdcType)
                 .put("kdc_hosts", kdcHosts)
@@ -105,7 +106,7 @@ public class KerberosClusterDefinitionService implements ClusterDefinitionCompon
                 krb5Conf.put("manage_krb5_conf", "false");
             }
             if (!useUdp || kpropPort != null) {
-                krb5Conf.put("content", krb5Config.toString());
+                krb5Conf.put("content", krb5Config);
             }
             configs.addSiteConfiguration("kerberos-env", kerberosEnv);
             configs.addSiteConfiguration("krb5-conf", krb5Conf);

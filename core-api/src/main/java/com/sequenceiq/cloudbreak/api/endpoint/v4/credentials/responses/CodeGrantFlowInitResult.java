@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class CodeGrantFlowInitResult implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.CODE_GRANT_FLOW_LOGIN_URL, required = true)
+    @ApiModelProperty(value = CredentialModelDescription.CODE_GRANT_FLOW_LOGIN_URL, required = true)
     private String loginURL;
 
     public CodeGrantFlowInitResult(String loginURL) {

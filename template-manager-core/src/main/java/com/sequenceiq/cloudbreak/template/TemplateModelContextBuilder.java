@@ -164,8 +164,7 @@ public class TemplateModelContextBuilder {
     }
 
     private Map<String, Object> createAdjustedFileSystemConfig() {
-        Map<String, Object> result = new HashMap<>();
-        result.putAll(fileSystemConfig);
+        Map<String, Object> result = new HashMap<>(fileSystemConfig);
         result.put("cloudStorageEnabled", !fileSystemConfig.isEmpty());
         return result;
     }

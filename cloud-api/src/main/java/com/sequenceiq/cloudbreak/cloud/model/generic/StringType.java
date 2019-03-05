@@ -27,7 +27,7 @@ public abstract class StringType {
             return true;
         }
         StringType that = (StringType) o;
-        return value != null ? value.equals(that.value) : that.value == null;
+        return Objects.equals(value, that.value);
 
     }
 

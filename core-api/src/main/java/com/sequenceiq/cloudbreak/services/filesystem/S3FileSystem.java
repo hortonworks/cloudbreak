@@ -31,12 +31,12 @@ public class S3FileSystem extends BaseFileSystem {
             return false;
         }
         S3FileSystem that = (S3FileSystem) o;
-        return Objects.equals(getInstanceProfile(), that.getInstanceProfile());
+        return Objects.equals(instanceProfile, that.instanceProfile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInstanceProfile());
+        return Objects.hash(instanceProfile);
     }
 
 }

@@ -88,8 +88,8 @@ public class AzureCredentialAppCreationCommand {
 
     String getRedirectURL(String workspaceId, String deploymentAddress) {
         String cbAzAppAuthUri = String.format(CB_AZ_APP_REDIRECT_URI_PATTERN, workspaceId);
-        String replyUrl = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress.concat(DELIMITER);
-        return replyUrl.concat(cbAzAppAuthUri);
+        String replyUrl = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress + DELIMITER;
+        return replyUrl + cbAzAppAuthUri;
     }
 
     private Map<String, Object> buildModel(String deploymentAddress, String appIdentifierURI, String replyURL) {
@@ -104,13 +104,13 @@ public class AzureCredentialAppCreationCommand {
     }
 
     private String getAppIdentifierURI(String deploymentAddress) {
-        String result = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress.concat(DELIMITER);
-        return result.concat(UUID.randomUUID().toString());
+        String result = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress + DELIMITER;
+        return result + UUID.randomUUID().toString();
     }
 
     private String getReplyURL(String deploymentAddress) {
-        String replyUrl = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress.concat(DELIMITER);
-        return replyUrl.concat(CB_AZ_APP_REPLY_URI);
+        String replyUrl = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress + DELIMITER;
+        return replyUrl + CB_AZ_APP_REPLY_URI;
     }
 
     private String getExpirationDate() {

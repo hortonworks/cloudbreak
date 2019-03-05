@@ -38,13 +38,13 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorRes
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 
 @Component
 @ConfigurationProperties(prefix = "cb.instance")
@@ -203,7 +203,7 @@ public class InstanceMetadataUpdater {
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
                             .filter(e -> StringUtils.isNotBlank(e.getValue()))
-                            .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Map.Entry::getValue));
+                            .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Entry::getValue));
             packageVersionsByNameByHost.put(entry.getKey(), versionByName);
         }
         return packageVersionsByNameByHost;
@@ -225,7 +225,7 @@ public class InstanceMetadataUpdater {
             Multimap<String, String> pkgVersionsMMap = HashMultimap.create();
             for (InstanceMetaData im : instanceMetadataList) {
                 Image image = im.getImage().get(Image.class);
-                for (Map.Entry<String, String> packageEntry : image.getPackageVersions().entrySet()) {
+                for (Entry<String, String> packageEntry : image.getPackageVersions().entrySet()) {
                     pkgVersionsMMap.put(packageEntry.getKey(), packageEntry.getValue());
                 }
             }

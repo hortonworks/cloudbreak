@@ -5,16 +5,17 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentRespons
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = EnvironmentResponseModelDescription.CREDENTIAL, parent = CredentialV4Base.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class CredentialV4Response extends CredentialV4Base {
 
     @ApiModelProperty(ID)

@@ -90,15 +90,15 @@ public class ClusterDefinitionView {
             return false;
         }
         ClusterDefinitionView that = (ClusterDefinitionView) o;
-        return Objects.equals(getClusterDefinitionText(), that.getClusterDefinitionText())
-                && Objects.equals(getVersion(), that.getVersion())
-                && Objects.equals(getType(), that.getType())
-                && Objects.equals(getComponents(), that.getComponents());
+        return Objects.equals(clusterDefinitionText, that.clusterDefinitionText)
+                && Objects.equals(version, that.version)
+                && Objects.equals(type, that.type)
+                && Objects.equals(components, that.components);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getClusterDefinitionText(), getVersion(), getType(), getComponents());
+        return Objects.hash(clusterDefinitionText, version, type, components);
     }
 
 }

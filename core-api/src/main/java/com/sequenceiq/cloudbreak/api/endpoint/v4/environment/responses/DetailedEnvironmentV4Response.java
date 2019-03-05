@@ -77,7 +77,7 @@ public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
     }
 
     public void setDatalakeResources(Set<DatalakeResourcesV4Response> datalakeResources) {
-        this.datalakeResourcesResponses = datalakeResources;
+        datalakeResourcesResponses = datalakeResources;
     }
 
     public Set<StackViewV4Response> getWorkloadClusters() {

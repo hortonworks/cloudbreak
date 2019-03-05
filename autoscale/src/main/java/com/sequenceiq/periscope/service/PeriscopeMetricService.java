@@ -18,7 +18,7 @@ public class PeriscopeMetricService extends AbstractMetricService {
     protected void init() {
         Arrays.stream(MetricType.values())
                 .filter(m -> !gaugeMetric(m))
-                .forEach(m -> initMicrometerMetricCounter(m));
+                .forEach(this::initMicrometerMetricCounter);
 
         Arrays.stream(MetricType.values())
                 .filter(this::gaugeMetric)

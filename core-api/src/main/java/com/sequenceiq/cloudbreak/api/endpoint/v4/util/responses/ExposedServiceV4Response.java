@@ -55,10 +55,10 @@ public class ExposedServiceV4Response {
         List<ExposedServiceV4Response> exposedServiceV4ResponseList = new ArrayList<>();
         for (ExposedService service : exposedServices) {
             ExposedServiceV4Response exposedServiceV4Response = new ExposedServiceV4Response();
-            exposedServiceV4Response.setDisplayName(service.getPortName());
-            exposedServiceV4Response.setServiceName(service.getServiceName());
-            exposedServiceV4Response.setKnoxService(service.getKnoxService());
-            exposedServiceV4Response.setKnoxUrl(service.getKnoxUrl());
+            exposedServiceV4Response.displayName = service.getPortName();
+            exposedServiceV4Response.serviceName = service.getServiceName();
+            exposedServiceV4Response.knoxService = service.getKnoxService();
+            exposedServiceV4Response.knoxUrl = service.getKnoxUrl();
             exposedServiceV4ResponseList.add(exposedServiceV4Response);
         }
         return exposedServiceV4ResponseList;

@@ -119,7 +119,7 @@ public class CredentialPrerequisiteService {
 
     public DatalakeConfigApi createCumulusDatalakeConnector(Map<String, Object> attributes) {
         if (isCumulusCredential(attributes)) {
-            String datalakeAmbariUrl = (String) attributes.get(CredentialPrerequisiteService.CUMULUS_AMBARI_URL);
+            String datalakeAmbariUrl = (String) attributes.get(CUMULUS_AMBARI_URL);
             try {
                 URL datalakeUrl = new URL(datalakeAmbariUrl);
                 DatalakeConfigApi connector = datalakeConfigApiConnector.getConnector(datalakeUrl, (String) attributes.get(CUMULUS_AMBARI_USER),

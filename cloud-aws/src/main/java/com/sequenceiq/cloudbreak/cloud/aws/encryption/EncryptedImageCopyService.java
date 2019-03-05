@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -73,10 +75,10 @@ public class EncryptedImageCopyService {
 
         Map<String, String> imageIdByGroupName = configByGroupName.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getImageId()));
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getImageId()));
         if (!imageIdByGroupName.isEmpty()) {
             Collection<String> imageIds = new HashSet<>(imageIdByGroupName.values());
-            LOGGER.debug("Start polling the availability of the created AMIs: '{}'", imageIds.stream().collect(Collectors.joining(",")));
+            LOGGER.debug("Start polling the availability of the created AMIs: '{}'", String.join(",", imageIds));
             checkBooleanPollTask(awsPollTaskFactory.newAMICopyStatusCheckerTask(ac, imageIds, client));
         }
         return imageIdByGroupName;
@@ -121,7 +123,7 @@ public class EncryptedImageCopyService {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         CopyImageResult copyImageResult = client.copyImage(createCopyImageRequest(selectedAMIName, regionName, awsInstanceView));
         String imageId = copyImageResult.getImageId();
-        CloudResource cloudResource = new CloudResource.Builder()
+        CloudResource cloudResource = new Builder()
                 .type(ResourceType.AWS_ENCRYPTED_AMI)
                 .name(imageId)
                 .group(awsInstanceView.getGroupName())
@@ -167,7 +169,7 @@ public class EncryptedImageCopyService {
                         .findFirst()
                         .ifPresent(image -> deleteImage(client, encryptedImage, image, regionName));
             } catch (Exception e) {
-                String errorMessage = String.format("Failed to delete image(AMI) [id:'%s'], in region: '%s', detailed message: %s",
+                String errorMessage = format("Failed to delete image(AMI) [id:'%s'], in region: '%s', detailed message: %s",
                         encryptedImage.getName(), regionName, e.getMessage());
                 LOGGER.warn(errorMessage, e);
                 if (!e.getMessage().contains(AMI_NOT_FOUND_MSG_CODE) && !e.getMessage().contains(SNAPSHOT_NOT_FOUND_MSG_CODE)) {
@@ -202,7 +204,7 @@ public class EncryptedImageCopyService {
             DeleteSnapshotRequest deleteSnapshotRequest = new DeleteSnapshotRequest().withSnapshotId(snapshotId);
             client.deleteSnapshot(deleteSnapshotRequest);
         } catch (Exception e) {
-            String errorMessage = String.format("Failed to delete snapshot [id:'%s'] of AMI [id:'%s'], in region: '%s', detailed message: %s",
+            String errorMessage = format("Failed to delete snapshot [id:'%s'] of AMI [id:'%s'], in region: '%s', detailed message: %s",
                     snapshotId, imageName, regionName, e.getMessage());
             LOGGER.warn(errorMessage, e);
             throw new CloudConnectorException(errorMessage, e);

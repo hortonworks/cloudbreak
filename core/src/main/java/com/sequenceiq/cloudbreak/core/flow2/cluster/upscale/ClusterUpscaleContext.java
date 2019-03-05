@@ -17,7 +17,7 @@ public class ClusterUpscaleContext extends ClusterViewContext {
         this.hostGroupName = hostGroupName;
         this.adjustment = adjustment;
         this.singlePrimaryGateway = singlePrimaryGateway;
-        this.primaryGatewayHostName = hostName;
+        primaryGatewayHostName = hostName;
     }
 
     public String getHostGroupName() {

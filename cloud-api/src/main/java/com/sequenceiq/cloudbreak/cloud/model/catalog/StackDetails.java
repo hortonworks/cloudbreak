@@ -20,7 +20,7 @@ public class StackDetails {
     public StackDetails(
             @JsonProperty(value = "version", required = true) String version,
             @JsonProperty(value = "repo", required = true) StackRepoDetails repo,
-            @JsonProperty(value = "mpacks") List<Mpack> mpackList) {
+            @JsonProperty("mpacks") List<Mpack> mpackList) {
         this.version = version;
         this.repo = repo;
         this.mpackList = mpackList == null ? Collections.emptyList() : mpackList;

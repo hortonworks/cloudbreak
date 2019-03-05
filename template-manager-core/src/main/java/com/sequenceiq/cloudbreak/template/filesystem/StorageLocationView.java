@@ -11,9 +11,9 @@ public class StorageLocationView {
     private final String value;
 
     public StorageLocationView(StorageLocation storageLocation) {
-        this.configFile = storageLocation.getConfigFile();
-        this.property = storageLocation.getProperty();
-        this.value = storageLocation.getValue();
+        configFile = storageLocation.getConfigFile();
+        property = storageLocation.getProperty();
+        value = storageLocation.getValue();
     }
 
     public String getConfigFile() {

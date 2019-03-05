@@ -33,7 +33,6 @@ public class AppMasterFilter implements HostFilter {
     private Client restClient;
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts, Set<InstanceMetaData> instanceMetaDatasInStack)
             throws HostFilterException {
         List<HostMetadata> result = new ArrayList<>(hosts);

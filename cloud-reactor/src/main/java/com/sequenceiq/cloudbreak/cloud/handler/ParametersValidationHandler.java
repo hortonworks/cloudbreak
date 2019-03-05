@@ -32,7 +32,7 @@ public class ParametersValidationHandler implements CloudPlatformEventHandler<Pa
         LOGGER.debug("Received event: {}", requestEvent);
         ParametersValidationRequest request = requestEvent.getData();
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             connector.setup().validateParameters(auth, request.getParameters());
             request.getResult().onNext(new ParametersValidationResult(request));

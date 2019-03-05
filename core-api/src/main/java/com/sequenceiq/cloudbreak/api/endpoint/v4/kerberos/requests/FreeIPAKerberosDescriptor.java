@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_ADMIN_URL;
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_URL;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_REALM;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_URL;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

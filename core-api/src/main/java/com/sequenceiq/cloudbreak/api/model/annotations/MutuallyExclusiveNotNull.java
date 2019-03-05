@@ -11,9 +11,11 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-@Target({ ElementType.TYPE })
+import com.sequenceiq.cloudbreak.api.model.annotations.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
+
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator.class)
+@Constraint(validatedBy = MutuallyExclusiveNotNullValidator.class)
 public @interface MutuallyExclusiveNotNull {
 
     String[] fieldNames();

@@ -13,6 +13,6 @@ public class DisableKerberosResultToStackEventConverter implements PayloadConver
 
     @Override
     public StackEvent convert(Object payload) {
-        return new StackEvent(((ClusterPlatformResult) payload).getRequest().getStackId());
+        return new StackEvent(((ClusterPlatformResult<?>) payload).getRequest().getStackId());
     }
 }

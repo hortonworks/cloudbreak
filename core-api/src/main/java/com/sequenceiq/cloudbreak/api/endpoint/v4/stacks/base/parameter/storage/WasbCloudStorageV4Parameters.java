@@ -64,13 +64,13 @@ public class WasbCloudStorageV4Parameters implements CloudStorageV4Parameters {
         }
         WasbCloudStorageV4Parameters that = (WasbCloudStorageV4Parameters) o;
         return Objects.equals(isSecure(), that.isSecure())
-                && Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName());
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName(), isSecure());
+        return Objects.hash(accountKey, accountName, isSecure());
     }
 
 }

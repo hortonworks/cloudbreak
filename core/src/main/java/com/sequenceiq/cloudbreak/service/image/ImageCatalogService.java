@@ -462,7 +462,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
         return applicableVersion
                 .map(ver -> cloudbreakVersions.stream().filter(cbVer -> cbVer.getVersions().contains(ver)).collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                .orElse(emptySet());
     }
 
     private Integer accumulateImageCount(Collection<CloudbreakVersion> cloudbreakVersions) {

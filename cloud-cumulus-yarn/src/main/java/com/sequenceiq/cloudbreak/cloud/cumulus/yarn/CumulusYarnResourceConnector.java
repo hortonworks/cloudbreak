@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedExcep
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -61,7 +62,7 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
             throw new CloudConnectorException(String.format("Yarn Service creation error: HTTP Return: %d", response.getStatusCode()));
         }
 
-        CloudResource yarnService = new CloudResource.Builder().type(CUMULUS_YARN_SERVICE).name(service.getName()).build();
+        CloudResource yarnService = new Builder().type(CUMULUS_YARN_SERVICE).name(service.getName()).build();
         persistenceNotifier.notifyAllocation(yarnService, authenticatedContext.getCloudContext());
         return check(authenticatedContext, Collections.singletonList(yarnService));
     }
@@ -71,30 +72,28 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
         DefaultApi api = client.createApi(authenticatedContext);
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
-            switch (resource.getType()) {
-                case CUMULUS_YARN_SERVICE:
-                    LOGGER.debug("Checking Yarn application status of: {}", resource.getName());
-                    try {
-                        ApiResponse<Service> response = api.appV1ServicesServiceNameGetWithHttpInfo(resource.getName());
-                        if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
-                            Service service = response.getData();
-                            result.add(new CloudResourceStatus(resource,
-                                    CumulusYarnApplicationStatus.mapResourceStatus(service.getState())));
-                        } else if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NOT_FOUND) {
-                            result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED, "Yarn application has been killed."));
-                        } else if (response.getData() != null) {
-                            throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
-                                    response.getStatusCode(), response.getData()));
-                        } else {
-                            throw new CloudConnectorException(String.format("Yarn Application status check failed: Invalid HttpStatusCode: %d",
-                                    response.getStatusCode()));
-                        }
-                    } catch (ApiException | RuntimeException e) {
-                        throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
+            if (resource.getType() == CUMULUS_YARN_SERVICE) {
+                LOGGER.debug("Checking Yarn application status of: {}", resource.getName());
+                try {
+                    ApiResponse<Service> response = api.appV1ServicesServiceNameGetWithHttpInfo(resource.getName());
+                    if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
+                        Service service = response.getData();
+                        result.add(new CloudResourceStatus(resource,
+                                CumulusYarnApplicationStatus.mapResourceStatus(service.getState())));
+                    } else if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NOT_FOUND) {
+                        result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED, "Yarn application has been killed."));
+                    } else if (response.getData() != null) {
+                        throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
+                                response.getStatusCode(), response.getData()));
+                    } else {
+                        throw new CloudConnectorException(String.format("Yarn Application status check failed: Invalid HttpStatusCode: %d",
+                                response.getStatusCode()));
                     }
-                    break;
-                default:
-                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+                } catch (ApiException | RuntimeException e) {
+                    throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
+                }
+            } else {
+                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
         return result;
@@ -104,89 +103,85 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
         List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         for (CloudResource resource : cloudResources) {
-            switch (resource.getType()) {
-                case CUMULUS_YARN_SERVICE:
-                    DefaultApi api = client.createApi(authenticatedContext);
-                    String yarnApplicationName = resource.getName();
-                    String stackName = authenticatedContext.getCloudContext().getName();
-                    LOGGER.debug("Terminate stack: {}", stackName);
-                    try {
-                        ApiResponse<Void> response = api.appV1ServicesServiceNameDeleteWithHttpInfo(yarnApplicationName);
-                        LOGGER.debug("Yarn Service has been deleted");
-                        if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
-                                || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
-                                || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
-                            String msg = String.format("Successfully deleted application %s", yarnApplicationName);
-                            LOGGER.debug(msg);
-                        } else if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NOT_FOUND) {
-                            String msg = String.format("Application %s not found, already deleted?", yarnApplicationName);
-                            LOGGER.debug(msg);
+            if (resource.getType() == CUMULUS_YARN_SERVICE) {
+                DefaultApi api = client.createApi(authenticatedContext);
+                String yarnApplicationName = resource.getName();
+                String stackName = authenticatedContext.getCloudContext().getName();
+                LOGGER.debug("Terminate stack: {}", stackName);
+                try {
+                    ApiResponse<Void> response = api.appV1ServicesServiceNameDeleteWithHttpInfo(yarnApplicationName);
+                    LOGGER.debug("Yarn Service has been deleted");
+                    if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
+                            || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
+                            || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
+                        String msg = String.format("Successfully deleted application %s", yarnApplicationName);
+                        LOGGER.debug(msg);
+                    } else if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NOT_FOUND) {
+                        String msg = String.format("Application %s not found, already deleted?", yarnApplicationName);
+                        LOGGER.debug(msg);
+                    } else {
+                        if (response.getData() != null) {
+                            throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
+                                    response.getStatusCode(), response.getData()));
                         } else {
-                            if (response.getData() != null) {
-                                throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
-                                        response.getStatusCode(), response.getData()));
-                            } else {
-                                throw new CloudConnectorException(String.format("Yarn Application status check failed: Invalid HttpStatusCode: %d",
-                                        response.getStatusCode()));
-                            }
+                            throw new CloudConnectorException(String.format("Yarn Application status check failed: Invalid HttpStatusCode: %d",
+                                    response.getStatusCode()));
                         }
-                        cloudResourceStatuses.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
-                    } catch (ApiException e) {
-                        throw new CloudConnectorException("Stack cannot be deleted", e);
                     }
-                    break;
-                default:
-                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+                    cloudResourceStatuses.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
+                } catch (ApiException e) {
+                    throw new CloudConnectorException("Stack cannot be deleted", e);
+                }
+            } else {
+                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
         return cloudResourceStatuses;
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return null;
     }
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         for (CloudResource resource : resources) {
-            switch (resource.getType()) {
-                case CUMULUS_YARN_SERVICE:
-                    DefaultApi api = client.createApi(authenticatedContext);
-                    String yarnApplicationName = resource.getName();
-                    String stackName = authenticatedContext.getCloudContext().getName();
-                    LOGGER.debug("Upscale stack: {}", stackName);
-                    try {
-                        List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
-                        Artifact artifact = serviceCreator.createArtifact(stack);
-                        for (Group scaledGroup : scaledGroups) {
-                            Component component = serviceCreator.mapGroupToYarnComponent(scaledGroup, stack, artifact);
-                            LOGGER.debug("Upscale group [{}] with component name [{}] to size [{}]", scaledGroup.getName(), component.getName(),
-                                    component.getNumberOfContainers());
-                            ApiResponse<Void> response =
-                                    api.appV1ServicesServiceNameComponentsComponentNamePutWithHttpInfo(yarnApplicationName, component.getName(), component);
-                            LOGGER.debug("Cumulus Yarn group [{}] upscale triggered", scaledGroup.getName());
-                            if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
-                                    || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
-                                    || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
-                                String msg = String.format("Successfully upscaled group %s", scaledGroup.getName());
-                                LOGGER.debug(msg);
+            if (resource.getType() == CUMULUS_YARN_SERVICE) {
+                DefaultApi api = client.createApi(authenticatedContext);
+                String yarnApplicationName = resource.getName();
+                String stackName = authenticatedContext.getCloudContext().getName();
+                LOGGER.debug("Upscale stack: {}", stackName);
+                try {
+                    List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
+                    Artifact artifact = serviceCreator.createArtifact(stack);
+                    for (Group scaledGroup : scaledGroups) {
+                        Component component = serviceCreator.mapGroupToYarnComponent(scaledGroup, stack, artifact);
+                        LOGGER.debug("Upscale group [{}] with component name [{}] to size [{}]", scaledGroup.getName(), component.getName(),
+                                component.getNumberOfContainers());
+                        ApiResponse<Void> response =
+                                api.appV1ServicesServiceNameComponentsComponentNamePutWithHttpInfo(yarnApplicationName, component.getName(), component);
+                        LOGGER.debug("Cumulus Yarn group [{}] upscale triggered", scaledGroup.getName());
+                        if (response.getStatusCode() == CumulusYarnResourceConstants.HTTP_ACCEPTED
+                                || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_NO_CONTENT
+                                || response.getStatusCode() == CumulusYarnResourceConstants.HTTP_SUCCESS) {
+                            String msg = String.format("Successfully upscaled group %s", scaledGroup.getName());
+                            LOGGER.debug(msg);
+                        } else {
+                            if (response.getData() != null) {
+                                throw new CloudConnectorException(String.format("Yarn Application upscale failed: HttpStatusCode: %d, Error: %s",
+                                        response.getStatusCode(), response.getData()));
                             } else {
-                                if (response.getData() != null) {
-                                    throw new CloudConnectorException(String.format("Yarn Application upscale failed: HttpStatusCode: %d, Error: %s",
-                                            response.getStatusCode(), response.getData()));
-                                } else {
-                                    throw new CloudConnectorException(String.format("Yarn Application upscale failed: Invalid HttpStatusCode: %d",
-                                            response.getStatusCode()));
-                                }
+                                throw new CloudConnectorException(String.format("Yarn Application upscale failed: Invalid HttpStatusCode: %d",
+                                        response.getStatusCode()));
                             }
                         }
-                    } catch (ApiException e) {
-                        throw new CloudConnectorException("Stack cannot be upscaled", e);
                     }
-                    break;
-                default:
-                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+                } catch (ApiException e) {
+                    throw new CloudConnectorException("Stack cannot be upscaled", e);
+                }
+            } else {
+                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
         return check(authenticatedContext, resources);

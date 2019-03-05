@@ -10,10 +10,8 @@ import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 @Component
 public class ClusterDefinitionTextProcessorFactory {
     public ClusterDefinitionTextProcessor createClusterDefinitionTextProcessor(String clusterDefinitionText) {
-        if (ClusterDefinitionTextProcessorUtil.getClusterManagerType(clusterDefinitionText) == ClusterManagerType.CLOUDERA_MANAGER) {
-            return new CmTemplateProcessor(clusterDefinitionText);
-        } else {
-            return new AmbariBlueprintTextProcessor(clusterDefinitionText);
-        }
+        return ClusterDefinitionTextProcessorUtil.getClusterManagerType(clusterDefinitionText) == ClusterManagerType.CLOUDERA_MANAGER
+                ? new CmTemplateProcessor(clusterDefinitionText)
+                : new AmbariBlueprintTextProcessor(clusterDefinitionText);
     }
 }

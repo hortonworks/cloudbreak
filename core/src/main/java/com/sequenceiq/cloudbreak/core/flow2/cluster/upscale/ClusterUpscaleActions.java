@@ -67,7 +67,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
     public Action<?, ?> uploadUpscaleRecipesAction() {
-        return new AbstractClusterUpscaleAction<ClusterScaleTriggerEvent>(ClusterScaleTriggerEvent.class) {
+        return new AbstractClusterUpscaleAction<>(ClusterScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
@@ -101,7 +101,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "CHECK_HOST_METADATA_STATE")
     public Action<?, ?> checkHostMetadataAction() {
-        return new AbstractClusterUpscaleAction<UploadUpscaleRecipesResult>(UploadUpscaleRecipesResult.class) {
+        return new AbstractClusterUpscaleAction<>(UploadUpscaleRecipesResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -117,7 +117,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPSCALING_CLUSTER_MANAGER_STATE")
     public Action<?, ?> upscalingClusterManagerAction() {
-        return new AbstractClusterUpscaleAction<UpscaleCheckHostMetadataResult>(UpscaleCheckHostMetadataResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscaleCheckHostMetadataResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleCheckHostMetadataResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -134,7 +134,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "UPSCALING_AMBARI_FINISHED_STATE")
     public Action<?, ?> upscalingAmbariFinishedAction() {
-        return new AbstractClusterUpscaleAction<UpscaleClusterManagerResult>(UpscaleClusterManagerResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscaleClusterManagerResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterManagerResult payload, Map<Object, Object> variables) {
                 if (context.isSinglePrimaryGateway()) {
@@ -151,7 +151,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_GATHER_INSTALLED_COMPONENTS_STATE")
     public Action<?, ?> ambariGatherInstalledComponentsAction() {
-        return new AbstractClusterUpscaleAction<AmbariRepairSingleMasterStartResult>(AmbariRepairSingleMasterStartResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariRepairSingleMasterStartResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariRepairSingleMasterStartResult payload, Map<Object, Object> variables) {
@@ -168,7 +168,7 @@ public class ClusterUpscaleActions {
     @Bean(name = "AMBARI_STOP_COMPONENTS_STATE")
 
     public Action<?, ?> ambariStopComponentsAction() {
-        return new AbstractClusterUpscaleAction<AmbariGatherInstalledComponentsResult>(AmbariGatherInstalledComponentsResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariGatherInstalledComponentsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariGatherInstalledComponentsResult payload, Map<Object, Object> variables) {
@@ -183,7 +183,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_STOP_SERVER_AGENT_STATE")
     public Action<?, ?> ambariStopServerAndAgentAction() {
-        return new AbstractClusterUpscaleAction<AmbariStopComponentsResult>(AmbariStopComponentsResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariStopComponentsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariStopComponentsResult payload, Map<Object, Object> variables) {
@@ -201,7 +201,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_START_SERVER_AGENT_STATE")
     public Action<?, ?> ambariStartServerAndAgentAction() {
-        return new AbstractClusterUpscaleAction<AmbariStopServerAndAgentResult>(AmbariStopServerAndAgentResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariStopServerAndAgentResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariStopServerAndAgentResult payload, Map<Object, Object> variables) {
@@ -218,7 +218,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_REGENERATE_KERBEROS_KEYTABS_STATE")
     public Action<?, ?> ambariRegenerateKerberosKeytabsAction() {
-        return new AbstractClusterUpscaleAction<AmbariStartServerAndAgentResult>(AmbariStartServerAndAgentResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariStartServerAndAgentResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariStartServerAndAgentResult payload, Map<Object, Object> variables) {
@@ -237,7 +237,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_ENSURE_COMPONENTS_ARE_STOPPED_STATE")
     public Action<?, ?> ambariEnsureComponentsAreStoppedAction() {
-        return new AbstractClusterUpscaleAction<AmbariRegenerateKerberosKeytabsResult>(AmbariRegenerateKerberosKeytabsResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariRegenerateKerberosKeytabsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariRegenerateKerberosKeytabsResult payload, Map<Object, Object> variables) {
@@ -253,7 +253,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_INIT_COMPONENTS_STATE")
     public Action<?, ?> ambariInitComponentsAction() {
-        return new AbstractClusterUpscaleAction<AmbariEnsureComponentsAreStoppedResult>(AmbariEnsureComponentsAreStoppedResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariEnsureComponentsAreStoppedResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariEnsureComponentsAreStoppedResult payload, Map<Object, Object> variables) {
@@ -267,7 +267,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_INSTALL_COMPONENTS_STATE")
     public Action<?, ?> ambariInstallComponentsAction() {
-        return new AbstractClusterUpscaleAction<AmbariInitComponentsResult>(AmbariInitComponentsResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariInitComponentsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariInitComponentsResult payload, Map<Object, Object> variables) {
@@ -282,7 +282,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_START_COMPONENTS_STATE")
     public Action<?, ?> ambariStartComponentsAction() {
-        return new AbstractClusterUpscaleAction<AmbariInstallComponentsResult>(AmbariInstallComponentsResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariInstallComponentsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariInstallComponentsResult payload, Map<Object, Object> variables) {
@@ -301,7 +301,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_RESTART_ALL_STATE")
     public Action<?, ?> ambariRestartAllAction() {
-        return new AbstractClusterUpscaleAction<AmbariStartComponentsResult>(AmbariStartComponentsResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariStartComponentsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariStartComponentsResult payload, Map<Object, Object> variables) {
@@ -319,7 +319,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "AMBARI_REPAIR_SINGLE_MASTER_FINISHED_STATE")
     public Action<?, ?> ambariRepairSingleMasterFinishedAction() {
-        return new AbstractClusterUpscaleAction<AmbariRestartAllResult>(AmbariRestartAllResult.class) {
+        return new AbstractClusterUpscaleAction<>(AmbariRestartAllResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariRestartAllResult payload, Map<Object, Object> variables) {
@@ -337,7 +337,7 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "EXECUTING_POSTRECIPES_STATE")
     public Action<?, ?> executePostRecipesAction() {
-        return new AbstractClusterUpscaleAction<UpscaleClusterResult>(UpscaleClusterResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscaleClusterResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterResult payload, Map<Object, Object> variables) {
@@ -353,12 +353,12 @@ public class ClusterUpscaleActions {
 
     @Bean(name = "FINALIZE_UPSCALE_STATE")
     public Action<?, ?> upscaleFinishedAction() {
-        return new AbstractClusterUpscaleAction<UpscalePostRecipesResult>(UpscalePostRecipesResult.class) {
+        return new AbstractClusterUpscaleAction<>(UpscalePostRecipesResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context.getFlowId(), FINALIZED_EVENT.event(), payload);
             }
 
@@ -376,7 +376,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
             }
         };

@@ -37,9 +37,6 @@ public class GeneralClusterConfigs {
 
     private String variant;
 
-    public GeneralClusterConfigs() {
-    }
-
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }

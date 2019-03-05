@@ -22,7 +22,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Re
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SubscriptionOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
@@ -56,35 +59,35 @@ public interface UtilV4Endpoint {
     @POST
     @Path("validate_repository")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION, produces = ContentType.JSON,
+    @ApiOperation(value = RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION, produces = ContentType.JSON,
             notes = Notes.REPOSITORY_CONFIGS_VALIDATION_NOTES, nickname = "repositoryConfigsValidationV4")
     RepoConfigValidationV4Response repositoryConfigValidationRequest(@Valid RepoConfigValidationV4Request repoConfigValidationV4Request);
 
     @GET
     @Path("default_security_rules")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
+    @ApiOperation(value = SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
             notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
     SecurityRulesV4Response getDefaultSecurityRules(@QueryParam("knoxEnabled") @DefaultValue("false") Boolean knoxEnabled);
 
     @POST
     @Path("subscribe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES,
             nickname = "subscribeSubscription")
     SubscriptionV4Response subscribe(@Valid SubscriptionV4Request subscriptionV4Request);
 
     @GET
     @Path("deployment")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.GET, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+    @ApiOperation(value = AccountPreferencesDescription.GET, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "getDeploymentInfo")
     DeploymentPreferencesV4Response deployment();
 
     @POST
     @Path("notification_test")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.NOTIFICATION_TEST, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+    @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "postNotificationTest")
     void postNotificationTest();
 

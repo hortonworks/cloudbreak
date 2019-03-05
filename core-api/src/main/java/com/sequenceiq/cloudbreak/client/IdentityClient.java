@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -52,26 +53,23 @@ public class IdentityClient {
     public AccessToken getToken(String user, String password) {
         MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
         formData.add("credentials", String.format("{\"username\":\"%s\",\"password\":\"%s\"}", user, password.replace("\\", "\\\\").replace("\"", "\\\"")));
-        try {
-            Response resp = authorizeWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(Entity.form(formData));
+        try (Response resp = authorizeWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(Entity.form(formData))) {
             String token;
             int exp;
-            switch (fromStatusCode(resp.getStatus())) {
-                case FOUND:
-                    String location = resp.getHeaderString("Location");
-                    Matcher m = LOCATION_PATTERN.matcher(location);
-                    if (m.matches()) {
-                        token = m.group(1);
-                        exp = Integer.parseInt(m.group(2));
+            if (fromStatusCode(resp.getStatus()) == Status.FOUND) {
+                String location = resp.getHeaderString("Location");
+                Matcher m = LOCATION_PATTERN.matcher(location);
+                if (m.matches()) {
+                    token = m.group(1);
+                    exp = Integer.parseInt(m.group(2));
 
-                    } else {
-                        throw new TokenUnavailableException(String.format("Failed to parse access token from the identity server,  check its configuration! "
-                                + "Raw Location response: %s", location));
-                    }
-                    break;
-                default:
-                    throw new TokenUnavailableException(String.format("Couldn't get an access token from the identity server, check its configuration!"
-                            + " Perhaps %s is not autoapproved? Response headers: %s", clientId, resp.getHeaders()));
+                } else {
+                    throw new TokenUnavailableException(String.format("Failed to parse access token from the identity server,  check its configuration! "
+                            + "Raw Location response: %s", location));
+                }
+            } else {
+                throw new TokenUnavailableException(String.format("Couldn't get an access token from the identity server, check its configuration!"
+                        + " Perhaps %s is not autoapproved? Response headers: %s", clientId, resp.getHeaders()));
             }
             return new AccessToken(token, "bearer", exp);
         } catch (ProcessingException e) {

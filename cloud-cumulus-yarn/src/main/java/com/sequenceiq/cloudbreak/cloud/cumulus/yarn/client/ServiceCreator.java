@@ -10,7 +10,9 @@ import javax.inject.Inject;
 
 import org.apache.cb.yarn.service.api.records.Artifact;
 import org.apache.cb.yarn.service.api.records.Component;
+import org.apache.cb.yarn.service.api.records.Component.RestartPolicyEnum;
 import org.apache.cb.yarn.service.api.records.ConfigFile;
+import org.apache.cb.yarn.service.api.records.ConfigFile.TypeEnum;
 import org.apache.cb.yarn.service.api.records.ModelConfiguration;
 import org.apache.cb.yarn.service.api.records.Resource;
 import org.apache.cb.yarn.service.api.records.Service;
@@ -89,7 +91,7 @@ public class ServiceCreator {
 
     private void addCloudbreakSpecificConfiguration(Group group, CloudStack stack, String userData, ModelConfiguration configuration) {
         ConfigFile cloudbreakConfig = new ConfigFile();
-        cloudbreakConfig.setType(ConfigFile.TypeEnum.TEMPLATE);
+        cloudbreakConfig.setType(TypeEnum.TEMPLATE);
         cloudbreakConfig.setDestFile("/etc/cloudbreak-config.props");
         cloudbreakConfig.putPropertiesItem("content",
                 "userData=" + '\'' + Base64.getEncoder().encodeToString(userData.getBytes()) + '\'' + '\n'
@@ -107,9 +109,9 @@ public class ServiceCreator {
                     .orElse(DEFAULT_CPU_COUNT);
             Integer memoryInMb = Optional.ofNullable(template.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class))
                     .orElse(DEFAULT_MEM_SIZE_IN_MB);
-            Integer memoryInKb = memoryInMb * MB_TO_KB;
+            int memoryInKb = memoryInMb * MB_TO_KB;
             ConfigFile resourcesOverrides = new ConfigFile();
-            resourcesOverrides.setType(ConfigFile.TypeEnum.TEMPLATE);
+            resourcesOverrides.setType(TypeEnum.TEMPLATE);
             resourcesOverrides.setDestFile("/etc/resource_overrides/yarn.json");
             resourcesOverrides.putPropertiesItem("content",
                     "{\n"
@@ -118,7 +120,7 @@ public class ServiceCreator {
                             + "    \"memorysize\": \"" + memoryInKb + "\",\n"
                             + "    \"memoryfree\": \"" + memoryInKb + "\",\n"
                             + "    \"memorytotal\": \"" + memoryInKb + "\"\n"
-                            + "}");
+                            + '}');
             configuration.addFilesItem(resourcesOverrides);
         }
     }
@@ -133,7 +135,7 @@ public class ServiceCreator {
         component.setArtifact(artifact);
         component.setDependencies(new ArrayList<>());
         component.setRunPrivilegedContainer(true);
-        component.setRestartPolicy(Component.RestartPolicyEnum.ALWAYS);
+        component.setRestartPolicy(RestartPolicyEnum.ALWAYS);
         return userData;
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository.cluster;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = DatalakeResources.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @WorkspaceResourceType(resource = WorkspaceResource.DATALAKE_RESOURCES)
 public interface DatalakeResourcesRepository extends WorkspaceResourceRepository<DatalakeResources, Long> {
     @CheckPermissionsByReturnValue

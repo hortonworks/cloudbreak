@@ -30,7 +30,7 @@ public class ClusterDownscaleActions {
 
     @Bean(name = "COLLECT_CANDIDATES_STATE")
     public Action<?, ?> collectCandidatesAction() {
-        return new AbstractClusterAction<ClusterDownscaleTriggerEvent>(ClusterDownscaleTriggerEvent.class) {
+        return new AbstractClusterAction<>(ClusterDownscaleTriggerEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupName(), payload.getAdjustment(),
@@ -44,9 +44,9 @@ public class ClusterDownscaleActions {
 
     @Bean(name = "DECOMMISSION_STATE")
     public Action<?, ?> decommissionAction() {
-        return new AbstractClusterAction<CollectDownscaleCandidatesResult>(CollectDownscaleCandidatesResult.class) {
+        return new AbstractClusterAction<>(CollectDownscaleCandidatesResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) {
                 DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(),
                         payload.getRequest().getDetails());
                 sendEvent(context.getFlowId(), request.selector(), request);
@@ -56,7 +56,7 @@ public class ClusterDownscaleActions {
 
     @Bean(name = "UPDATE_INSTANCE_METADATA_STATE")
     public Action<?, ?> updateInstanceMetadataAction() {
-        return new AbstractClusterAction<DecommissionResult>(DecommissionResult.class) {
+        return new AbstractClusterAction<>(DecommissionResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
                 clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getRequest().getHostGroupName());

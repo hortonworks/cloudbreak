@@ -16,8 +16,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
 
 @RunWith(Parameterized.class)
 public class DatabaseVendorTest {

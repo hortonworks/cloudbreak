@@ -16,12 +16,12 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Stack
 
     @Override
     protected void doExecute(StackTerminationContext context, StackPreTerminationSuccess payload, Map<Object, Object> variables) {
-        TerminateStackRequest terminateRequest = createRequest(context);
+        TerminateStackRequest<?> terminateRequest = createRequest(context);
         sendEvent(context.getFlowId(), terminateRequest.selector(), terminateRequest);
     }
 
     @Override
-    protected TerminateStackRequest createRequest(StackTerminationContext context) {
+    protected TerminateStackRequest<?> createRequest(StackTerminationContext context) {
         return new TerminateStackRequest<>(context.getCloudContext(), context.getCloudStack(), context.getCloudCredential(), context.getCloudResources());
     }
 }

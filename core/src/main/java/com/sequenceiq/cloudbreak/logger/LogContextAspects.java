@@ -47,8 +47,8 @@ public class LogContextAspects {
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptCloudPlatformEventHandlersAcceptMethod()")
     public void buildLogContextForCloudPlatformEventHandler(JoinPoint joinPoint) {
-        Event<CloudPlatformRequest> event = (Event<CloudPlatformRequest>) joinPoint.getArgs()[0];
-        CloudPlatformRequest cloudPlatformRequest = event.getData();
+        Event<CloudPlatformRequest<?>> event = (Event<CloudPlatformRequest<?>>) joinPoint.getArgs()[0];
+        CloudPlatformRequest<?> cloudPlatformRequest = event.getData();
         CloudContext cloudContext = cloudPlatformRequest.getCloudContext();
         buildMdcContext(cloudContext, event);
         LOGGER.debug("A CloudPlatformEventHandler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());

@@ -2,20 +2,20 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.DatalakeResourcesDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class ServiceDescriptorV4Response {
-    @ApiModelProperty(ModelDescriptions.DatalakeResourcesDescription.SERVICE_NAME)
+    @ApiModelProperty(DatalakeResourcesDescription.SERVICE_NAME)
     private String serviceName;
 
-    @ApiModelProperty(ModelDescriptions.DatalakeResourcesDescription.BLUEPRINT_PARAMS)
+    @ApiModelProperty(DatalakeResourcesDescription.BLUEPRINT_PARAMS)
     private Map<String, String> blueprintParams;
 
-    @ApiModelProperty(ModelDescriptions.DatalakeResourcesDescription.COMPONENT_HOSTS)
+    @ApiModelProperty(DatalakeResourcesDescription.COMPONENT_HOSTS)
     private Map<String, String> componentHosts;
 
     public String getServiceName() {

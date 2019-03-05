@@ -58,8 +58,8 @@ public enum ExposedService {
         Collection<ExposedService> supportedKnoxServices = filterSupportedKnoxServices();
         return supportedKnoxServices.stream()
                 .filter(exposedService ->
-                        components.contains(exposedService.getServiceName())
-                                || "AMBARI_SERVER".equals(exposedService.getServiceName()))
+                        components.contains(exposedService.serviceName)
+                                || "AMBARI_SERVER".equals(exposedService.serviceName))
                 .collect(Collectors.toList());
     }
 

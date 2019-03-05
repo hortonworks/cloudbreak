@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.ambari.AmbariHostsUnavailableException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 
 @Component
 public class AmbariHostsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsCheckerContext> {

@@ -38,7 +38,7 @@ public class PlacementType {
 
         AFFINITY_WITH_CARDINALITY("AFFINITY_WITH_CARDINALITY");
 
-        private String value;
+        private final String value;
 
         TypeEnum(String value) {
             this.value = value;

@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
 import com.sequenceiq.cloudbreak.repository.workspace.UserPreferencesRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 
 @Service
 public class UserPreferencesService {
@@ -63,9 +65,9 @@ public class UserPreferencesService {
         LOGGER.debug("Update user preferences for user '{}'", user.getUserId());
         try {
             return transactionService.required(() -> userPreferencesRepository.save(userPreferences));
-        } catch (TransactionService.TransactionExecutionException e) {
+        } catch (TransactionExecutionException e) {
             LOGGER.warn("UserPreferences could not be updated. ", e);
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 }

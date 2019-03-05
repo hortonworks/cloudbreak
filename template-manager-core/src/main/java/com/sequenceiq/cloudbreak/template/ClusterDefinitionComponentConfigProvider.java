@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.template;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +26,7 @@ public interface ClusterDefinitionComponentConfigProvider {
     }
 
     default Map<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> getHostgroupConfigurationEntries(TemplatePreparationObject source,
-            String clusterDefinitionProcessor) throws IOException {
+            String clusterDefinitionProcessor) {
         return Maps.newHashMap();
     }
 

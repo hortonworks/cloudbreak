@@ -75,19 +75,19 @@ public interface RdsConfigRepository extends EnvironmentResourceRepository<RDSCo
     RDSConfig findByClusterIdAndType(@Param("clusterId") Long clusterId, @Param("type") String type);
 
     @Override
-    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 0)
+    @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters LEFT JOIN FETCH r.environments e WHERE "
             + "r.workspace.id = :workspaceId AND :environment in e AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByWorkspaceIdAndEnvironments(@Param("workspaceId") Long workspaceId, @Param("environment") EnvironmentView environment);
 
     @Override
-    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 0)
+    @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters LEFT JOIN FETCH r.environments e WHERE "
             + "r.workspace.id = :workspaceId AND e IS NULL AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByWorkspaceIdAndEnvironmentsIsNull(@Param("workspaceId") Long workspaceId);
 
     @Override
-    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 0)
+    @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters LEFT JOIN FETCH r.environments e WHERE "
             + "r.workspace.id = :workspaceId AND e IS NOT NULL AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByWorkspaceIdAndEnvironmentsIsNotNull(@Param("workspaceId") Long workspaceId);

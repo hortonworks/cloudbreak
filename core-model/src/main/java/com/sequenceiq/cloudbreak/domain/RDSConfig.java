@@ -87,7 +87,7 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "rdsid"), inverseJoinColumns = @JoinColumn(name = "envid"))
     private Set<EnvironmentView> environments = new HashSet<>();
 

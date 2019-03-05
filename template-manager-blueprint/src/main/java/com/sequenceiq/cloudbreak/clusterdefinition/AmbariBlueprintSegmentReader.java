@@ -65,7 +65,7 @@ public class AmbariBlueprintSegmentReader implements ResourceLoaderAware {
         Map<ServiceName, TemplateFiles> collectedFiles = new HashMap<>();
         try {
             List<Resource> files = getFiles(dir);
-            for (final Resource serviceEntry : files) {
+            for (Resource serviceEntry : files) {
                 String[] serviceAndPath = serviceEntry.getURL().getPath().split(dir);
                 String simpleServiceName = serviceAndPath[1].split("/")[1];
                 String insideFolder = String.format("%s%s", dir, serviceAndPath[1]);

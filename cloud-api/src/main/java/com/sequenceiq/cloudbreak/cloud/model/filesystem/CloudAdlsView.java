@@ -24,9 +24,6 @@ public class CloudAdlsView extends CloudFileSystemView {
 
     private String adlsTrackingClusterTypeKey;
 
-    public CloudAdlsView() {
-    }
-
     public String getAccountName() {
         return accountName;
     }

@@ -29,7 +29,7 @@ public class StringTypesCompare implements Comparator<StringType>, Serializable 
                 }
             } else if (ca > cb) {
                 if (bias == 0) {
-                    bias = +1;
+                    bias = 1;
                 }
             } else if (ca == 0 && cb == 0) {
                 return bias;
@@ -80,7 +80,7 @@ public class StringTypesCompare implements Comparator<StringType>, Serializable 
                 }
             }
             if (ca == 0 && cb == 0) {
-                return nza - nzb;
+                return Integer.compare(nza, nzb);
             }
             if (ca < cb) {
                 return -1;

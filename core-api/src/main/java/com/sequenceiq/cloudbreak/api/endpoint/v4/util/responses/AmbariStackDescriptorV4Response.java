@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 
 public class AmbariStackDescriptorV4Response {
 

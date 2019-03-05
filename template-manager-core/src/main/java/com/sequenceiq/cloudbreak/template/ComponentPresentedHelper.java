@@ -8,6 +8,7 @@ import org.apache.commons.lang3.Validate;
 
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.Options.Buffer;
 
 public class ComponentPresentedHelper implements Helper<Set<String>> {
 
@@ -22,7 +23,7 @@ public class ComponentPresentedHelper implements Helper<Set<String>> {
     public static final String NAME = "cp";
 
     @Override
-    public Object apply(Set<String> context, final Options options)
+    public Object apply(Set<String> context, Options options)
             throws IOException {
         String first = options.param(0, null);
 
@@ -31,7 +32,7 @@ public class ComponentPresentedHelper implements Helper<Set<String>> {
             context = new HashSet<>();
         }
 
-        Options.Buffer buffer = options.buffer();
+        Buffer buffer = options.buffer();
         if (!context.contains(first)) {
             buffer.append(options.inverse());
         } else {

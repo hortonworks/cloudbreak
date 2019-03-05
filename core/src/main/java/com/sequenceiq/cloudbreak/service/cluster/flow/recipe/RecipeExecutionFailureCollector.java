@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,7 +33,7 @@ public class RecipeExecutionFailureCollector {
 
         List<RecipeFailure> failures = nodesWithErrors.asMap().entrySet().stream()
                 .flatMap(e -> e.getValue().stream()
-                        .map(v -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), v))
+                        .map(v -> new SimpleImmutableEntry<>(e.getKey(), v))
                         .map(failure -> new RecipeFailure(failure.getKey(), getRecipePhase(failure.getValue()), getFailedRecipeName(failure.getValue()))))
                 .filter(failure -> !failure.getRecipeName().isEmpty() && !failure.getPhase().isEmpty())
                 .collect(Collectors.toList());
@@ -75,11 +75,11 @@ public class RecipeExecutionFailureCollector {
 
     public static class RecipeFailure {
 
-        private String host;
+        private final String host;
 
-        private String phase;
+        private final String phase;
 
-        private String recipeName;
+        private final String recipeName;
 
         public RecipeFailure(String host, String phase, String recipeName) {
             this.host = host;

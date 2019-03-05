@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Configuration
 public class ClusterTerminationActions {
@@ -32,7 +31,7 @@ public class ClusterTerminationActions {
 
     @Bean(name = "PREPARE_CLUSTER_STATE")
     public Action<?, ?> prepareCluster() {
-        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterTerminationFlowService.terminateCluster(context);
@@ -48,7 +47,7 @@ public class ClusterTerminationActions {
 
     @Bean(name = "DISABLE_KERBEROS_STATE")
     public Action<?, ?> disableKerboros() {
-        return new AbstractClusterAction<PrepareClusterTerminationResult>(PrepareClusterTerminationResult.class) {
+        return new AbstractClusterAction<>(PrepareClusterTerminationResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, PrepareClusterTerminationResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -63,7 +62,7 @@ public class ClusterTerminationActions {
 
     @Bean(name = "CLUSTER_TERMINATING_STATE")
     public Action<?, ?> terminatingCluster() {
-        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterTerminationFlowService.terminateCluster(context);
@@ -84,10 +83,9 @@ public class ClusterTerminationActions {
 
     @Bean(name = "CLUSTER_TERMINATION_FINISH_STATE")
     public Action<?, ?> clusterTerminationFinished() {
-        return new AbstractClusterAction<ClusterTerminationResult>(ClusterTerminationResult.class) {
+        return new AbstractClusterAction<>(ClusterTerminationResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables)
-                    throws TransactionExecutionException {
+            protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables) {
                 if (payload.isOperationAllowed()) {
                     clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
                 } else {

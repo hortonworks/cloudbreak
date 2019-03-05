@@ -7,12 +7,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.clusterdefinition.ConfigService;
+import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Service

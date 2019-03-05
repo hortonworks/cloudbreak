@@ -31,12 +31,12 @@ public class GcsFileSystem extends BaseFileSystem {
             return false;
         }
         GcsFileSystem that = (GcsFileSystem) o;
-        return Objects.equals(getServiceAccountEmail(), that.getServiceAccountEmail());
+        return Objects.equals(serviceAccountEmail, that.serviceAccountEmail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getServiceAccountEmail());
+        return Objects.hash(serviceAccountEmail);
     }
 
 }

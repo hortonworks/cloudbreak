@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 public class StructuredEventDeserializer extends StdDeserializer<StructuredEvent> {
 
@@ -38,19 +38,18 @@ public class StructuredEventDeserializer extends StdDeserializer<StructuredEvent
     }
 
     @Override
-    public StructuredEvent deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException, JsonProcessingException {
+    public StructuredEvent deserialize(JsonParser jp, DeserializationContext ctxt) {
         try {
             JsonNode node = jp.getCodec().readTree(jp);
-            String type = (String) node.get(StructuredEvent.TYPE_FIELD).asText();
+            String type = node.get(StructuredEvent.TYPE_FIELD).asText();
             Class<? extends StructuredEvent> eventClass = classes.get(type);
             return treeToValue(node, eventClass);
-        } catch (IOException e) {
+        } catch (JsonSyntaxException | IOException e) {
             return null;
         }
     }
 
-    private <T> T treeToValue(TreeNode n, Class<T> valueType) throws IOException {
+    private <T> T treeToValue(TreeNode n, Class<T> valueType) {
         // We don't want to use the deserializer jackson again (StackOverflow exception)
         return new Gson().fromJson(n.toString(), valueType);
     }

@@ -14,20 +14,20 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.ambari.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.ambari.AmbariOperationType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 
 @Component
 public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {
 
-    public static final Comparable<BigDecimal> COMPLETED = new BigDecimal(100.0);
+    public static final Comparable<BigDecimal> COMPLETED = new BigDecimal("100.0");
 
-    public static final BigDecimal FAILED = new BigDecimal(-1.0);
+    public static final BigDecimal FAILED = BigDecimal.valueOf(-1.0);
 
     public static final BigDecimal PENDING = BigDecimal.ZERO;
 

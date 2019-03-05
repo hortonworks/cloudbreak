@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
@@ -20,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
-@Transactional(Transactional.TxType.NEVER)
+@Transactional(TxType.NEVER)
 @WorkspaceEntityType(KerberosConfig.class)
 public class KerberosConfigV4Controller extends NotificationController implements KerberosConfigV4Endpoint {
 

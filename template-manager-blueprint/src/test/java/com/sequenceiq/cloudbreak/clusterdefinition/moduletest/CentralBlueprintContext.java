@@ -17,7 +17,6 @@ import org.springframework.vault.core.VaultTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;

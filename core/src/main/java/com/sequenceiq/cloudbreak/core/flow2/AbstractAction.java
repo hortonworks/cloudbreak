@@ -20,10 +20,10 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 
 import reactor.bus.EventBus;
 
@@ -40,7 +40,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final int MS_PER_SEC = 1000;
 
     @Inject
-    protected CloudbreakMetricService metricService;
+    private CloudbreakMetricService metricService;
 
     @Inject
     private EventBus eventBus;
@@ -107,6 +107,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             throw new UnsupportedOperationException("Failure event already configured. Actions reusable not allowed!");
         }
         this.failureEvent = failureEvent;
+    }
+
+    public CloudbreakMetricService getMetricService() {
+        return metricService;
     }
 
     protected Flow getFlow(String flowId) {

@@ -2,38 +2,39 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateViewModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     private ResourceStatus status;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.DATALAKE_REQUIRED)
+    @ApiModelProperty(ClusterTemplateViewModelDescription.DATALAKE_REQUIRED)
     private DatalakeRequired datalakeRequired;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.TYPE)
+    @ApiModelProperty(ClusterTemplateViewModelDescription.TYPE)
     private ClusterTemplateV4Type type;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.CLOUD_PLATFORM)
+    @ApiModelProperty(ClusterTemplateViewModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.NODE_COUNT)
+    @ApiModelProperty(ClusterTemplateViewModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_TYPE)
+    @ApiModelProperty(ClusterTemplateViewModelDescription.STACK_TYPE)
     private String stackType;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_VERSION)
+    @ApiModelProperty(ClusterTemplateViewModelDescription.STACK_VERSION)
     private String stackVersion;
 
     @ApiModelProperty

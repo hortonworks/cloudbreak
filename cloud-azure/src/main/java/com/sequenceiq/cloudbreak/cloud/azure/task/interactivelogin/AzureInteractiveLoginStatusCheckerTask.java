@@ -154,17 +154,18 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         WebTarget webTarget = ClientBuilder.newClient().target(LOGIN_MICROSOFTONLINE);
         Builder request = webTarget.path(tenantId + "/oauth2/token").queryParam("api-version", "1.0").request();
         request.accept(MediaType.APPLICATION_JSON);
-        Response response = request.post(Entity.entity(resourceTokenForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-            throw new InteractiveLoginException("Obtain access token for " + resource + " failed "
-                    + "with tenant ID: " + tenantId + ", status code " + response.getStatus()
-                    + ", error message: " + response.readEntity(String.class));
-        }
-        String responseString = response.readEntity(String.class);
-        try {
-            return new ObjectMapper().readTree(responseString).get("access_token").asText();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+        try (Response response = request.post(Entity.entity(resourceTokenForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE))) {
+            if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                throw new InteractiveLoginException("Obtain access token for " + resource + " failed "
+                        + "with tenant ID: " + tenantId + ", status code " + response.getStatus()
+                        + ", error message: " + response.readEntity(String.class));
+            }
+            String responseString = response.readEntity(String.class);
+            try {
+                return new ObjectMapper().readTree(responseString).get("access_token").asText();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 

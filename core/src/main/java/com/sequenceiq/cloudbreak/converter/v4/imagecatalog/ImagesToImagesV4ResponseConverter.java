@@ -4,18 +4,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackDetailsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -105,7 +106,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
             json.setRepository(repoJson);
             json.setVersion(info.getVersion());
             Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
-            for (Map.Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
+            for (Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
                 mpacks.put(mp.getKey(), mp.getValue().stream().map(mpack -> {
                     ManagementPackV4Entry mpackEntry = new ManagementPackV4Entry();
                     mpackEntry.setMpackUrl(mpack.getMpackUrl());

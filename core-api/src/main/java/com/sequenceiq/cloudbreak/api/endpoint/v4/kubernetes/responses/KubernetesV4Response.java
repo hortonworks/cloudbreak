@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.KubernetesConfig;

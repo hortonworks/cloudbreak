@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import java.util.Collections;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnCredentialConnector;
 
 @Service
-public class YarnConnector implements CloudConnector {
+public class YarnConnector implements CloudConnector<Object> {
     @Inject
     private YarnAuthenticator authenticator;
 
@@ -69,7 +70,7 @@ public class YarnConnector implements CloudConnector {
     }
 
     @Override
-    public ResourceConnector resources() {
+    public ResourceConnector<Object> resources() {
         return resourceConnector;
     }
 

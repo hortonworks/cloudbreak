@@ -12,9 +12,6 @@ public class CloudWasbView extends CloudFileSystemView {
 
     private String resourceGroupName;
 
-    public CloudWasbView() {
-    }
-
     public String getAccountKey() {
         return accountKey;
     }
@@ -56,15 +53,15 @@ public class CloudWasbView extends CloudFileSystemView {
             return false;
         }
         CloudWasbView that = (CloudWasbView) o;
-        return isSecure() == that.isSecure()
-                && Objects.equals(getAccountKey(), that.getAccountKey())
-                && Objects.equals(getAccountName(), that.getAccountName())
-                && Objects.equals(getResourceGroupName(), that.getResourceGroupName());
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(resourceGroupName, that.resourceGroupName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAccountKey(), getAccountName(), isSecure(), getResourceGroupName());
+        return Objects.hash(accountKey, accountName, secure, resourceGroupName);
     }
 
 }

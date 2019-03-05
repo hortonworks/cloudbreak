@@ -63,10 +63,8 @@ public class TenantChecker {
             List<AzureTenant> tenantList = azureTenantListResult.getValue();
             if (azureTenantListResult.getNextLink() != null) {
                 tenantList.addAll(getNextSetOfTenants(azureTenantListResult.getNextLink(), accessToken));
-                return tenantList;
-            } else {
-                return tenantList;
             }
+            return tenantList;
         } else {
             String errorResponse = response.readEntity(String.class);
             try {

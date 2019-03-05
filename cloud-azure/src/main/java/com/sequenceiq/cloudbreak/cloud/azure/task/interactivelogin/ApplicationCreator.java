@@ -47,29 +47,28 @@ public class ApplicationCreator {
         request.accept(MediaType.APPLICATION_JSON);
         request.header("Authorization", "Bearer " + accessToken);
         AzureApplicationCreationView appCreationView = appCreationCommand.generateJSON(deploymentAddress);
-        Response response = request.post(Entity.entity(appCreationView.getAppCreationRequestPayload(), MediaType.APPLICATION_JSON));
-
-        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
-            String application = response.readEntity(String.class);
-            try {
-                JsonNode applicationJson = new ObjectMapper().readTree(application);
-                String appId = applicationJson.get("appId").asText();
-                String objectId = applicationJson.get("objectId").asText();
-                LOGGER.info("Application created with appId: " + appId);
-                return new AzureApplication(appId, objectId, appCreationView);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        } else {
-            String errorResponse = response.readEntity(String.class);
-            try {
-                String errorMessage = new ObjectMapper().readTree(errorResponse).get("odata.error").get("message").get("value").asText();
-                throw new InteractiveLoginException("AD Application creation error: " + errorMessage);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
+        try (Response response = request.post(Entity.entity(appCreationView.getAppCreationRequestPayload(), MediaType.APPLICATION_JSON))) {
+            if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
+                String application = response.readEntity(String.class);
+                try {
+                    JsonNode applicationJson = new ObjectMapper().readTree(application);
+                    String appId = applicationJson.get("appId").asText();
+                    String objectId = applicationJson.get("objectId").asText();
+                    LOGGER.info("Application created with appId: " + appId);
+                    return new AzureApplication(appId, objectId, appCreationView);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            } else {
+                String errorResponse = response.readEntity(String.class);
+                try {
+                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("odata.error").get("message").get("value").asText();
+                    throw new InteractiveLoginException("AD Application creation error: " + errorMessage);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
-
     }
 
     @Retryable(value = RetryException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
@@ -80,9 +79,10 @@ public class ApplicationCreator {
         Builder request = resource.path("/applications/" + objectId).queryParam("api-version", GRAPH_API_VERSION).request();
         request.accept(MediaType.APPLICATION_JSON);
         request.header("Authorization", "Bearer " + accessToken);
-        Response response = request.get();
-        if (response.getStatus() != HttpStatus.SC_OK) {
-            throw new RetryException("App with objectId (" + objectId + ") hasn't been created yet");
+        try (Response response = request.get()) {
+            if (response.getStatus() != HttpStatus.SC_OK) {
+                throw new RetryException("App with objectId (" + objectId + ") hasn't been created yet");
+            }
         }
     }
 }

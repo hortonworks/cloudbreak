@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.common.type.metric.Metric;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 
@@ -31,7 +32,7 @@ public abstract class AbstractMetricService implements MetricService {
         gaugeCache.put(metricName, value);
 
         Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
-        Metrics.gauge(metricName, tags, gaugeCache, cache -> cache.getOrDefault(metricName, 0d));
+        Metrics.gauge(metricName, tags, gaugeCache, cache -> cache.getOrDefault(metricName, 0.0d));
     }
 
     @Override
@@ -40,7 +41,9 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     protected void initMicrometerMetricCounter(String metric) {
-        Metrics.counter(metric).increment(0);
+        try (Counter counter = Metrics.counter(metric)) {
+            counter.increment(0);
+        }
     }
 
     @Override
@@ -49,7 +52,9 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     protected void incrementMetricCounter(String metric) {
-        Metrics.counter(metric).increment();
+        try (Counter counter = Metrics.counter(metric)) {
+            counter.increment();
+        }
     }
 
     protected boolean gaugeMetric(Metric metric) {

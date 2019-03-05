@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RelatedServices {
 
-    private Set<String> services;
+    private final Set<String> services;
 
     @JsonCreator
     public RelatedServices(@JsonProperty(value = "services", required = true) Set<String> services) {

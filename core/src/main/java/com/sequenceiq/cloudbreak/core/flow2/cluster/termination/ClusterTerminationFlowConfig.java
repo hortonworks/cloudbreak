@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
-
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.DISABLE_KERBEROS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.DISABLE_KERBEROS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.FAILURE_EVENT;
@@ -8,10 +7,10 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTe
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PREPARE_CLUSTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PREPARE_CLUSTER_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PROPER_TERMINATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.TERMINATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.TERMINATION_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PROPER_TERMINATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.CLUSTER_TERMINATING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.CLUSTER_TERMINATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.CLUSTER_TERMINATION_FINISH_STATE;

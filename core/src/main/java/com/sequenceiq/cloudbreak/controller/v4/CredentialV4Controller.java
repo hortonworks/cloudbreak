@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Controller;
 
@@ -78,13 +79,13 @@ public class CredentialV4Controller extends NotificationController implements Cr
     @Override
     public Response initCodeGrantFlow(Long workspaceId, CredentialV4Request credentialRequest) {
         String loginURL = credentialService.initCodeGrantFlow(workspaceId, converterUtil.convert(credentialRequest, Credential.class));
-        return Response.status(Response.Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
+        return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 
     @Override
     public Response initCodeGrantFlowOnExisting(Long workspaceId, String name) {
         String loginURL = credentialService.initCodeGrantFlow(workspaceId, name);
-        return Response.status(Response.Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
+        return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 
     @Override

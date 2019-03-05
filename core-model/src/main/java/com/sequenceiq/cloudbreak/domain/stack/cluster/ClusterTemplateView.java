@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequire
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Entity
@@ -79,7 +80,7 @@ public class ClusterTemplateView extends CompactView {
     public Integer getFullNodeCount() {
         return stackTemplate.getInstanceGroups()
                 .stream()
-                .mapToInt(instanceGroup -> instanceGroup.getNodeCount())
+                .mapToInt(InstanceGroupView::getNodeCount)
                 .sum();
 
     }

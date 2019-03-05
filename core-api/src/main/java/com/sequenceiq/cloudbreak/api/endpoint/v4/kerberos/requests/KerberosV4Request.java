@@ -12,6 +12,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.validation.ValidKerberosRequest;
@@ -21,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 @ValidKerberosRequest
 public class KerberosV4Request implements JsonEntity {
 
@@ -66,7 +67,7 @@ public class KerberosV4Request implements JsonEntity {
     }
 
     public void setActiveDirectory(ActiveDirectoryKerberosDescriptor activeDirectoryKerberosDescriptor) {
-        this.activeDirectory = activeDirectoryKerberosDescriptor;
+        activeDirectory = activeDirectoryKerberosDescriptor;
     }
 
     public FreeIPAKerberosDescriptor getFreeIpa() {
@@ -74,7 +75,7 @@ public class KerberosV4Request implements JsonEntity {
     }
 
     public void setFreeIpa(FreeIPAKerberosDescriptor freeIpaKerberosDescriptor) {
-        this.freeIpa = freeIpaKerberosDescriptor;
+        freeIpa = freeIpaKerberosDescriptor;
     }
 
     public MITKerberosDescriptor getMit() {
@@ -82,7 +83,7 @@ public class KerberosV4Request implements JsonEntity {
     }
 
     public void setMit(MITKerberosDescriptor mitKerberosDescriptor) {
-        this.mit = mitKerberosDescriptor;
+        mit = mitKerberosDescriptor;
     }
 
     public AmbariKerberosDescriptor getAmbariDescriptor() {
