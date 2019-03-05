@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.ClusterDefinitionV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.RecommendationV4Response;
@@ -62,6 +63,13 @@ public class ClusterDefinitionV4Controller extends NotificationController implem
         ClusterDefinition deleted = clusterDefinitionService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.CLUSTER_DEFINITION_DELETED);
         return converterUtil.convert(deleted, ClusterDefinitionV4Response.class);
+    }
+
+    @Override
+    public ClusterDefinitionV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<ClusterDefinition> deleted = clusterDefinitionService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.CLUSTER_DEFINITION_DELETED);
+        return new ClusterDefinitionV4Responses(converterUtil.convertAllAsSet(deleted, ClusterDefinitionV4Response.class));
     }
 
     @Override
