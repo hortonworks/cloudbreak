@@ -5,7 +5,6 @@ import javax.ws.rs.core.Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
@@ -20,20 +19,7 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV4Request, Resp
     }
 
     public AmbariEntity valid() {
-        String clusterDefinitionName = getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
-                getCloudProvider().getDefaultClusterDefinitionName());
-        return withClusterDefinitionName(clusterDefinitionName)
-                .withValidateRepositories(true);
-    }
-
-    public AmbariEntity withClusterDefinitionName(String clusterDefinitionName) {
-        getRequest().setClusterDefinitionName(clusterDefinitionName);
-        return this;
-    }
-
-    public AmbariEntity withValidateClusterDefinition(Boolean validateClusterDefinition) {
-        getRequest().setValidateClusterDefinition(validateClusterDefinition);
-        return this;
+        return withValidateRepositories(true);
     }
 
     public AmbariEntity withValidateRepositories(Boolean validateRepositories) {

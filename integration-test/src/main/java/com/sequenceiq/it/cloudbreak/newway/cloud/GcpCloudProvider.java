@@ -214,8 +214,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
-        var ambari = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks() {
+        var ambari = ambariRequest();
         var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
@@ -233,7 +233,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
         return Cluster.request()
                 .withUsername(getUsername())
                 .withPassword(getPassword())
-                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName()))
+                .withAmbariRequest(ambariRequest())
+                .withClusterDefinitionName(getDatalakeClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
                 .withRdsConfigNames(Set.of(
                         getTestParameter().get(Ranger.CONFIG_NAME),
@@ -246,7 +247,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
         return Cluster.request()
                 .withUsername(getUsername())
                 .withPassword(getPassword())
-                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getClusterDefinitionName()))
+                .withAmbariRequest(ambariRequest())
+                .withClusterDefinitionName(getClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
                         getTestParameter().get(Ranger.CONFIG_NAME),

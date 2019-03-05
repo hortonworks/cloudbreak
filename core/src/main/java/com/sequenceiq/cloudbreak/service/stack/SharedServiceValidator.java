@@ -37,7 +37,7 @@ public class SharedServiceValidator {
             checkCloudPlatform(request, workspaceId, resultBuilder);
             ClusterV4Request clusterReq = request.getCluster();
             ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(
-                    clusterReq.getAmbari().getClusterDefinitionName(), workspaceId);
+                    clusterReq.getClusterDefinitionName(), workspaceId);
             if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
                 checkSharedServiceRequirements(request, workspace, resultBuilder);
             }

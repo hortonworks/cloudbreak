@@ -32,9 +32,9 @@ public abstract class CloudProvider {
 
     public abstract StackTestDto aValidAttachedStackRequest(String datalakeName);
 
-    public abstract AmbariV4Request ambariRequestWithClusterDefinitionName(String clusterDefinitionName);
+    public abstract AmbariV4Request ambariRequest();
 
-    public abstract AmbariV4Request ambariRequestWithClusterDefinitionNameAndCustomAmbari(String clusterDefinitionName, String customAmbariVersion,
+    public abstract AmbariV4Request ambariRequestWithCustomAmbari(String customAmbariVersion,
             String customAmbariRepoUrl, String customAmbariRepoGpgKey);
 
     public abstract String getClusterName();
@@ -96,7 +96,7 @@ public abstract class CloudProvider {
 
     public abstract Stack aValidAttachedClusterStackCreated(HostGroupType... groupTypes);
 
-    public abstract AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName);
+    public abstract AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks();
 
     public abstract ResourceHelper<?> getResourceHelper();
 

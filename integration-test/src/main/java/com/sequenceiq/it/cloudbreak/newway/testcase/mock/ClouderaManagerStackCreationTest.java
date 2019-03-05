@@ -14,8 +14,8 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
     public void testCreateNewRegularCluster(TestContext testContext) {
         String name = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
         testContext
-                .given("cm", AmbariEntity.class).withClusterDefinitionName(name).withValidateClusterDefinition(Boolean.FALSE)
-                .given("cmcluster", ClusterEntity.class).withAmbari("cm")
+                .given("cm", AmbariEntity.class)
+                .given("cmcluster", ClusterEntity.class).withClusterDefinitionName(name).withValidateClusterDefinition(Boolean.FALSE).withAmbari("cm")
                 .given(StackTestDto.class).withCluster("cmcluster")
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)

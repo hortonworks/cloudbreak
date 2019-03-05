@@ -126,7 +126,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(subject.getCluster()).thenReturn(clusterRequest);
         when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
         String credentialName = "someCred";
-        when(ambariRequest.getClusterDefinitionName()).thenReturn("dummy");
+        when(clusterRequest.getClusterDefinitionName()).thenReturn("dummy");
         when(credential.cloudPlatform()).thenReturn("AWS");
         when(credentialService.getByNameForWorkspaceId(any(), any())).thenReturn(credential);
         when(platformParameterService.getPlatformResourceRequest(anyLong(), anyString(), eq(null), eq(null), eq(null)))

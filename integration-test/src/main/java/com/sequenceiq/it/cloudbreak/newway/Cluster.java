@@ -96,6 +96,16 @@ public class Cluster extends Entity {
         return this;
     }
 
+    public Cluster withClusterDefinitionName(String clusterDefinitionName) {
+        request.setClusterDefinitionName(clusterDefinitionName);
+        return this;
+    }
+
+    public Cluster withValidateClusterDefinition(Boolean validateClusterDefinition) {
+        request.setValidateClusterDefinition(validateClusterDefinition);
+        return this;
+    }
+
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster(String key) {
         return testContext -> testContext.getContextParam(key, Cluster.class);
     }

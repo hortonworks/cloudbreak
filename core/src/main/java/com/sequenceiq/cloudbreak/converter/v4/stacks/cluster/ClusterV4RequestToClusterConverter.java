@@ -98,12 +98,11 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             KerberosConfig kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getKerberosName(), workspace.getId());
             cluster.setKerberosConfig(kerberosConfig);
         }
-        cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
         cluster.setCloudbreakAmbariUser(ambariUserName);
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setDpAmbariUser(dpUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
-        cluster.setClusterDefinition(getClusterDefinition(source.getAmbari(), workspace));
+        cluster.setClusterDefinition(getClusterDefinition(source.getClusterDefinitionName(), workspace));
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystem.class));
         }
@@ -114,12 +113,19 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         } catch (JsonProcessingException ignored) {
             cluster.setCustomContainerDefinition(null);
         }
-        cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
         updateDatabases(source, cluster, workspace);
-        extractAmbariAndHdpRepoConfig(cluster, source.getAmbari());
+        convertAmbariSpecificPart(source, cluster);
         cluster.setProxyConfig(getProxyConfig(source.getProxyName(), workspace));
         cluster.setLdapConfig(getLdap(source.getLdapName(), workspace));
         return cluster;
+    }
+
+    private void convertAmbariSpecificPart(ClusterV4Request source, Cluster cluster) {
+        if (source.getAmbari() != null) {
+            cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
+            cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
+            extractAmbariAndHdpRepoConfig(cluster, source.getAmbari());
+        }
     }
 
     private void convertGateway(ClusterV4Request source, Cluster cluster) {
@@ -172,12 +178,12 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         }
     }
 
-    private ClusterDefinition getClusterDefinition(AmbariV4Request ambariV4Request, Workspace workspace) {
+    private ClusterDefinition getClusterDefinition(String clusterDefinitionName, Workspace workspace) {
         ClusterDefinition clusterDefinition = null;
-        if (!StringUtils.isEmpty(ambariV4Request.getClusterDefinitionName())) {
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(ambariV4Request.getClusterDefinitionName(), workspace);
+        if (!StringUtils.isEmpty(clusterDefinitionName)) {
+            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(clusterDefinitionName, workspace);
             if (clusterDefinition == null) {
-                throw new NotFoundException("Cluster definition does not exists by name: " + ambariV4Request.getClusterDefinitionName());
+                throw new NotFoundException("Cluster definition does not exists by name: " + clusterDefinitionName);
             }
         }
         return clusterDefinition;

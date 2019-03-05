@@ -1,8 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import java.io.IOException;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -51,4 +57,33 @@ public class ShowClusterDefinitionTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    private static StackTestDto checkFutureClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedClusterDefinitionText = stackTestDto.getGeneratedClusterDefinition().getClusterDefinitionText();
+        validateGeneratedClusterDefinition(extendedClusterDefinitionText);
+        return stackTestDto;
+    }
+
+    private static StackTestDto checkGeneratedClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getExtendedClusterDefinitionText();
+        validateGeneratedClusterDefinition(extendedClusterDefinitionText);
+        return stackTestDto;
+    }
+
+    private static void validateGeneratedClusterDefinition(String extendedClusterDefinitionText) {
+        if (Strings.isNullOrEmpty(extendedClusterDefinitionText)) {
+            throw new TestFailException("Generated Cluster Definition does not exist");
+        } else if (!isJSONValid(extendedClusterDefinitionText)) {
+            throw new TestFailException("Generated Cluster Definition is not a valid json");
+        }
+    }
+
+    public static boolean isJSONValid(String jsonInString) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.readTree(jsonInString);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }

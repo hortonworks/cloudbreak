@@ -159,7 +159,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(environment.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);
         when(cluster.getAmbari()).thenReturn(ambari);
-        when(ambari.getClusterDefinitionName()).thenReturn(TEST_CLUSTER_DEFINITION_NAME);
+        when(cluster.getClusterDefinitionName()).thenReturn(TEST_CLUSTER_DEFINITION_NAME);
         when(clusterDefinitionService.getByNameForWorkspace(TEST_CLUSTER_DEFINITION_NAME, workspace)).thenReturn(clusterDefinition);
         when(clusterDefinitionService.getClusterDefinitionVariant(any())).thenReturn("AMBARI");
         when(clusterDefinition.getClusterDefinitionText()).thenReturn(TEST_CLUSTER_DEFINITION_TEXT);

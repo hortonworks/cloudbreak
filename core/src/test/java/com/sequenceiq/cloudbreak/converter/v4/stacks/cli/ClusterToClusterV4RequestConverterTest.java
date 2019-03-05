@@ -27,6 +27,7 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -47,6 +48,7 @@ public class ClusterToClusterV4RequestConverterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(cluster.getClusterDefinition()).thenReturn(new ClusterDefinition());
     }
 
     @Test

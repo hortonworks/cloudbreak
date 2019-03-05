@@ -420,8 +420,8 @@ public class ClusterCreationSetupService {
         if (clusterDefinition != null) {
             String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
             root = JsonUtil.readTree(clusterDefinitionText);
-        } else if (request.getAmbari().getClusterDefinitionName() != null) {
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(request.getAmbari().getClusterDefinitionName(), workspace);
+        } else if (request.getClusterDefinitionName() != null) {
+            clusterDefinition = clusterDefinitionService.getByNameForWorkspace(request.getClusterDefinitionName(), workspace);
             String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
             root = JsonUtil.readTree(clusterDefinitionText);
         }

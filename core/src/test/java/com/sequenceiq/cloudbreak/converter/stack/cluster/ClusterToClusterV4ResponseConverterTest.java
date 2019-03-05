@@ -23,6 +23,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
@@ -75,6 +76,8 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     public void testConvert() {
         // GIVEN
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
+        getSource().setClusterDefinition(new ClusterDefinition());
+        getSource().setExtendedClusterDefinitionText("asdf");
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
         Cluster source = getSource();
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
@@ -83,10 +86,12 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
         when(conversionService.convert(source.getProxyConfig(), ProxyV4Response.class)).thenReturn(new ProxyV4Response());
         when(conversionService.convert("secret/path", SecretV4Response.class)).thenReturn(new SecretV4Response("kv", "pass"));
+        when(conversionService.convert(getSource().getClusterDefinition(), ClusterDefinitionV4Response.class)).thenReturn(new ClusterDefinitionV4Response());
         // WHEN
         ClusterV4Response result = underTest.convert(source);
         // THEN
         assertEquals(1L, (long) result.getId());
+        assertEquals(getSource().getExtendedClusterDefinitionText(), result.getExtendedClusterDefinitionText());
         assertAllFieldsNotNull(result, Lists.newArrayList("ldap", "customContainers", "ambari", "creationFinished", "kerberos", "cloudStorage", "gateway"));
     }
 

@@ -233,8 +233,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String clusterDefinitionName) {
-        var ambari = ambariRequestWithClusterDefinitionName(clusterDefinitionName);
+    public AmbariV4Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks() {
+        var ambari = ambariRequest();
         var stackDetails = new StackRepositoryV4Request();
         stackDetails.setMpacks(Collections.emptyList());
         ambari.setConfigStrategy(null);
@@ -252,7 +252,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
         return Cluster.request()
                 .withUsername(getUsername())
                 .withPassword(getPassword())
-                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName()))
+                .withAmbariRequest(ambariRequest())
+                .withClusterDefinitionName(getDatalakeClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
                 .withRdsConfigNames(Set.of(
                         getTestParameter().get(Ranger.CONFIG_NAME),
@@ -265,7 +266,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
         return Cluster.request()
                 .withUsername(getUsername())
                 .withPassword(getPassword())
-                .withAmbariRequest(ambariRequestWithClusterDefinitionName(getClusterDefinitionName()))
+                .withAmbariRequest(ambariRequest())
+                .withClusterDefinitionName(getClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
                 .withRdsConfigNames(new HashSet<>(Arrays.asList(
                         getTestParameter().get(Ranger.CONFIG_NAME),
@@ -274,7 +276,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Cluster aValidClusterWithFs() {
-        AmbariV4Request ambariV2Request = ambariRequestWithClusterDefinitionName(getDatalakeClusterDefinitionName());
+        AmbariV4Request ambariV2Request = ambariRequest();
         StackRepositoryV4Request stackRepo = ambariV2Request.getStackRepository();
         stackRepo.setVersion("3.0");
         stackRepo.setOs("centos7");
@@ -286,6 +288,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
                 .withUsername(getUsername())
                 .withPassword(getPassword())
                 .withAmbariRequest(ambariV2Request)
+                .withClusterDefinitionName(getDatalakeClusterDefinitionName())
                 .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake());
     }
 

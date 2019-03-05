@@ -24,10 +24,10 @@ public class ManagementPackValidator {
     private ManagementPackService mpackService;
 
     public void validateMpacks(AmbariV4Request ambari, Workspace workspace) {
-        StackRepositoryV4Request stackDetails = ambari.getStackRepository();
-        if (stackDetails == null) {
+        if (ambari == null || ambari.getStackRepository() == null) {
             return;
         }
+        StackRepositoryV4Request stackDetails = ambari.getStackRepository();
         String mpackUrl = stackDetails.getMpackUrl();
         List<ManagementPackDetailsV4Request> mpackList = stackDetails.getMpacks() != null ? stackDetails.getMpacks() : Collections.emptyList();
         Map<String, ManagementPackDetailsV4Request> mpackDetailsMap = mpackList.stream()
@@ -44,6 +44,10 @@ public class ManagementPackValidator {
         if (mpackMap.get(mpackUrl) != null) {
             throw new BadRequestException("Mpack list contains entries with the stackDefault mpackUrl");
         }
+        validatePurgedMpacks(mpackUrl, mpackList, mpackMap);
+    }
+
+    private void validatePurgedMpacks(String mpackUrl, List<ManagementPackDetailsV4Request> mpackList, Map<String, ManagementPack> mpackMap) {
         List<ManagementPack> purgedMpacks = mpackMap.values().stream()
                 .filter(ManagementPack::isPurge)
                 .collect(Collectors.toList());

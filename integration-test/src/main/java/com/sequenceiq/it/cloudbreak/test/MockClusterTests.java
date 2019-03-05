@@ -24,7 +24,8 @@ public class MockClusterTests extends CloudbreakMockClusterTest {
         given(Cluster.request()
                         .withUsername(getMockProvider().getUsername())
                         .withPassword(getMockProvider().getPassword())
-                        .withAmbariRequest(getMockProvider().ambariRequestWithClusterDefinitionName(clusterDefinitionName)),
+                        .withClusterDefinitionName(clusterDefinitionName)
+                        .withAmbariRequest(getMockProvider().ambariRequest()),
                 "a cluster request");
         given(getMockProvider().aValidStackRequest()
                 .withName(clusterName), "a stack request");

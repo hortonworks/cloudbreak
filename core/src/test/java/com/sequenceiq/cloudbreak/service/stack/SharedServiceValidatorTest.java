@@ -133,7 +133,7 @@ public class SharedServiceValidatorTest {
         clusterRequest.setDatabases(Sets.newHashSet(RANGER_DB_NAME, HIVE_DB_NAME));
         clusterRequest.setLdapName(ldapName);
         AmbariV4Request ambariRequest = new AmbariV4Request();
-        ambariRequest.setClusterDefinitionName("test-blueprint");
+        clusterRequest.setClusterDefinitionName("test-blueprint");
         clusterRequest.setAmbari(ambariRequest);
         StackV4Request stackRequest = new StackV4Request();
         stackRequest.setSharedService(new SharedServiceV4Request());

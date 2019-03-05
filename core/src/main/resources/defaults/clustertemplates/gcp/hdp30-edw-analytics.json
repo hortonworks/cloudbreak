@@ -7,9 +7,9 @@
   "stackTemplate": {
     "type": "TEMPLATE",
     "cluster": {
+      "clusterDefinitionName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
+      "validateClusterDefinition": false,
       "ambari": {
-        "clusterDefinitionName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-        "validateClusterDefinition": false,
         "stackRepository": {
           "stack": "HDP",
           "version": "3.0",

@@ -79,6 +79,12 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
 
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_NAME)
+    private String clusterDefinitionName;
+
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_CLUSTER_DEFINITION)
+    private Boolean validateClusterDefinition = Boolean.TRUE;
+
     public String getUserName() {
         return userName;
     }
@@ -181,5 +187,29 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setCustomContainer(CustomContainerV4Request customContainer) {
         this.customContainer = customContainer;
+    }
+
+    public String getClusterDefinitionName() {
+        return clusterDefinitionName;
+    }
+
+    public void setClusterDefinitionName(String clusterDefinitionName) {
+        this.clusterDefinitionName = clusterDefinitionName;
+    }
+
+    public Boolean getValidateClusterDefinition() {
+        return validateClusterDefinition;
+    }
+
+    public void setValidateClusterDefinition(Boolean validateClusterDefinition) {
+        this.validateClusterDefinition = validateClusterDefinition;
+    }
+
+    public ClouderaManagerV4Request getCm() {
+        return cm;
+    }
+
+    public void setCm(ClouderaManagerV4Request cm) {
+        this.cm = cm;
     }
 }

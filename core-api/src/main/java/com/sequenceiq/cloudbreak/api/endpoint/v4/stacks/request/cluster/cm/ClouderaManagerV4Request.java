@@ -6,25 +6,26 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ClouderaManagerV4Request implements JsonEntity {
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CM_REPO_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.CM_REPO_DETAILS)
     private ClouderaManagerRepositoryV4Request repository;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CM_PRODUCT_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.CM_PRODUCT_DETAILS)
     private List<ClouderaManagerProductV4Request> products;
 
     public ClouderaManagerRepositoryV4Request getRepository() {

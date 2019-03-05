@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Component
 public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
@@ -22,10 +24,16 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
         clusterTemplateViewV4Response.setStatus(source.getStatus());
         clusterTemplateViewV4Response.setType(source.getType());
         clusterTemplateViewV4Response.setNodeCount(source.getFullNodeCount());
-        clusterTemplateViewV4Response.setStackType(source.getStackTemplate().getCluster().getClusterDefinition().getStackType());
-        clusterTemplateViewV4Response.setStackVersion(source.getStackTemplate().getCluster().getClusterDefinition().getStackVersion());
-        if (source.getStackTemplate().getEnvironment() != null) {
-            clusterTemplateViewV4Response.setEnvironmentName(source.getStackTemplate().getEnvironment().getName());
+        if (source.getStackTemplate() != null) {
+            StackApiView stackTemplate = source.getStackTemplate();
+            if (stackTemplate.getCluster() != null) {
+                ClusterApiView cluster = stackTemplate.getCluster();
+                clusterTemplateViewV4Response.setStackType(cluster.getClusterDefinition() != null ? cluster.getClusterDefinition().getStackType() : "");
+                clusterTemplateViewV4Response.setStackVersion(cluster.getClusterDefinition() != null ? cluster.getClusterDefinition().getStackVersion() : "");
+            }
+            if (stackTemplate.getEnvironment() != null) {
+                clusterTemplateViewV4Response.setEnvironmentName(stackTemplate.getEnvironment().getName());
+            }
         }
         return clusterTemplateViewV4Response;
     }

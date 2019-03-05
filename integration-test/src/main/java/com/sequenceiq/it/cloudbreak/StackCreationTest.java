@@ -64,8 +64,8 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setName(clusterName);
         clusterRequest.setUserName(ambariUser);
         clusterRequest.setPassword(ambariPassword);
+        clusterRequest.setClusterDefinitionName(itContext.getContextParam(CloudbreakITContextConstants.CLUSTER_DEFINITION_NAME));
         AmbariV4Request ambariV4Request = new AmbariV4Request();
-        ambariV4Request.setClusterDefinitionName(itContext.getContextParam(CloudbreakITContextConstants.CLUSTER_DEFINITION_NAME));
         clusterRequest.setAmbari(ambariV4Request);
 
         if (withFs) {

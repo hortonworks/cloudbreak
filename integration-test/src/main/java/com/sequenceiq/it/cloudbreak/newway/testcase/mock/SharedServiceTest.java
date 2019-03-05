@@ -275,7 +275,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName, rangerRdsName))
-                .withAmbari(testContext.given(AmbariEntity.class).withClusterDefinitionName(clusterDefinitionName));
+                .withClusterDefinitionName(clusterDefinitionName)
+                .withAmbari(testContext.given(AmbariEntity.class));
         if (ldapName != null) {
             cluster.withLdapConfigName(ldapName);
         }
@@ -296,7 +297,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private static StackTestDto checkClusterDefinitionTaggedWithSharedService(TestContext testContext, StackTestDto stack, CloudbreakClient cloudbreakClient) {
-        Map<String, Object> clusterDefinitionTags = stack.getResponse().getCluster().getAmbari().getClusterDefinition().getTags();
+        Map<String, Object> clusterDefinitionTags = stack.getResponse().getCluster().getClusterDefinition().getTags();
         if (!clusterDefinitionTags.containsKey(SHARED_SERVICE_TAG) || clusterDefinitionTags.get(SHARED_SERVICE_TAG) == null
                 || !(clusterDefinitionTags.get(SHARED_SERVICE_TAG) instanceof Boolean)
                 || !((Boolean) clusterDefinitionTags.get(SHARED_SERVICE_TAG))) {

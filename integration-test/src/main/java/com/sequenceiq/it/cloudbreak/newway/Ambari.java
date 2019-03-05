@@ -28,11 +28,6 @@ public class Ambari extends Entity {
         this.request = request;
     }
 
-    public Ambari withClusterDefinitionName(String name) {
-        request.setClusterDefinitionName(name);
-        return this;
-    }
-
     public Ambari withAmbariRepoDetailsJson(AmbariRepositoryV4Request ambariRepoDetailsJson) {
         request.setRepository(ambariRepoDetailsJson);
         return this;
@@ -45,11 +40,6 @@ public class Ambari extends Entity {
 
     public Ambari withConfigStrategy(ConfigStrategy configStrategy) {
         request.setConfigStrategy(configStrategy);
-        return this;
-    }
-
-    public Ambari withValidateClusterDefinition(boolean validate) {
-        request.setValidateClusterDefinition(validate);
         return this;
     }
 

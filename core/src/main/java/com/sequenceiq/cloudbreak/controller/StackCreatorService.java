@@ -236,7 +236,7 @@ public class StackCreatorService {
 
     private void decorateWithDatalakeResourceIdFromEnvironment(Stack stack) {
         if (stack.getEnvironment() != null && !CollectionUtils.isEmpty(stack.getEnvironment().getDatalakeResources())
-                &&  stack.getEnvironment().getDatalakeResources().size() == 1 && stack.getDatalakeResourceId() == null) {
+                && stack.getEnvironment().getDatalakeResources().size() == 1 && stack.getDatalakeResourceId() == null) {
             stack.setDatalakeResourceId(stack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
         }
     }
@@ -267,8 +267,10 @@ public class StackCreatorService {
     }
 
     private boolean shouldUseBaseImage(ClusterV4Request clusterRequest, ClusterDefinition clusterDefinition) {
-        return clusterRequest.getAmbari().getRepository() != null
-                || (clusterRequest.getAmbari().getStackRepository() != null && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
+        return (clusterRequest.getAmbari() != null && clusterRequest.getAmbari().getRepository() != null)
+                || (clusterRequest.getAmbari() != null
+                && clusterRequest.getAmbari().getStackRepository() != null
+                && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
                 || clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition);
     }
 

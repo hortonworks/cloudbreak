@@ -200,7 +200,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private ClusterDefinition getClusterDefinition(StackV4Request source, Workspace workspace) {
-        return clusterDefinitionService.getByNameForWorkspace(source.getCluster().getAmbari().getClusterDefinitionName(), workspace);
+        return clusterDefinitionService.getByNameForWorkspace(source.getCluster().getClusterDefinitionName(), workspace);
     }
 
     private Set<HostgroupView> getHostgroupViews(StackV4Request source) {
