@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -105,8 +106,21 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
+    public Set<T> delete(Set<T> resources) {
+        return resources.stream()
+                .map(r -> delete(r))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public T deleteByNameFromWorkspace(String name, Long workspaceId) {
         T toBeDeleted = getByNameForWorkspaceId(name, workspaceId);
+        return delete(toBeDeleted);
+    }
+
+    @Override
+    public Set<T> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
+        Set<T> toBeDeleted = names.stream().map(n -> getByNameForWorkspaceId(n, workspaceId)).collect(Collectors.toSet());
         return delete(toBeDeleted);
     }
 

@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition;
 import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
 import static com.sequenceiq.cloudbreak.doc.Notes.CLUSTER_DEFINITION_NOTES;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
@@ -60,6 +63,13 @@ public interface ClusterDefinitionV4Endpoint {
     @ApiOperation(value = ClusterDefinitionOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
             nickname = "deleteClusterDefinitionInWorkspace")
     ClusterDefinitionV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ClusterDefinitionOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = JSON,
+            notes = CLUSTER_DEFINITION_NOTES, nickname = "deleteClusterDefinitionsInWorkspace")
+    ClusterDefinitionV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @GET
     @Path("{name}/request")

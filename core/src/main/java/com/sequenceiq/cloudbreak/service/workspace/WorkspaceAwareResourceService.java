@@ -25,7 +25,11 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     T delete(T resource);
 
+    Set<T> delete(Set<T> resources);
+
     T deleteByNameFromWorkspace(String name, Long workspaceId);
+
+    Set<T> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId);
 
     WorkspaceResource resource();
 

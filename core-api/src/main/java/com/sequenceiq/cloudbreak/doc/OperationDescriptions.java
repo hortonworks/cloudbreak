@@ -7,6 +7,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get cluster definition by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create cluster definition in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete cluster definition by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple cluster definitions by name in workspace";
     }
 
     public static class CredentialOpDescription {
