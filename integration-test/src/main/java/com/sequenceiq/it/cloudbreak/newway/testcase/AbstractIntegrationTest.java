@@ -2,8 +2,10 @@ package com.sequenceiq.it.cloudbreak.newway.testcase;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
 
@@ -28,8 +30,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetListAction;
+import com.sequenceiq.it.cloudbreak.newway.action.credential.CredentialTestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigCreateIfNotExistsAction;
@@ -40,8 +42,8 @@ import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
 import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
@@ -70,6 +72,8 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @Inject
     private RandomNameCreator nameGenerator;
 
+    private final List<AutoCloseable> closableBeans = new CopyOnWriteArrayList<>();
+
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
         MDC.put("testlabel", "init of " + getClass().getSimpleName());
@@ -96,7 +100,13 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @AfterClass(alwaysRun = true)
     public void cleanSharedObjects() {
-
+        closableBeans.forEach(b -> {
+            try {
+                b.close();
+            } catch (Exception e) {
+                LOGGER.error("Unable to close bean: " + b.getClass().getCanonicalName(), e);
+            }
+        });
     }
 
     @AfterSuite
@@ -194,7 +204,11 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected <T> T getBean(Class<T> requiredType) {
         if (applicationContext != null) {
             try {
-                return applicationContext.getBean(requiredType);
+                T bean = applicationContext.getBean(requiredType);
+                if (bean instanceof AutoCloseable) {
+                    closableBeans.add((AutoCloseable) bean);
+                }
+                return bean;
             } catch (BeansException be) {
                 throw new IllegalStateException("No bean found!", be);
             }
