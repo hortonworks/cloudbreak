@@ -58,7 +58,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenURLIsValidAndExists(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -72,7 +72,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenNameIsTooShort(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource().substring(0, 4);
 
@@ -86,7 +86,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenNameIsTooLong(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(longStringGeneratorUtil.stringGenerator(100));
 
@@ -100,7 +100,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenNameContainsSpecialCharacters(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(IMAGECATALOG_NAME_WITH_SPECIAL_CHARS);
 
@@ -113,7 +113,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenTheCatalogURLIsInvalid(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         String invalidURL = "https:/google.com/imagecatalog";
@@ -128,7 +128,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenTheCatalogURLPointsNotToAnImageCatalogJson(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
 
@@ -142,7 +142,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenTheCatalogURLPointsToAnInvalidImageCatalogJson(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
 
@@ -156,7 +156,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogCreationWhenCatalogWithTheSameNameDeletedRightBeforeCreation(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -180,7 +180,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogDeletion(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -197,7 +197,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testImageCatalogDeletionWithDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
@@ -209,7 +209,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
@@ -217,7 +217,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogWhenCatalogContainsTheRequestedProvider(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -238,7 +238,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogWhenCatalogDoesNotContainTheRequestedProvider(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -259,7 +259,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogWhenTheSpecifiedCatalogDoesNotExistWithName(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -273,7 +273,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogWhenDefaultCatalogContainsTheRequestedProvider(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -294,7 +294,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogWhenDefaultCatalogDoesNotContainTheRequestedProvider(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -315,7 +315,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateADefaultImageCatalog(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -337,7 +337,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testAPreviouslyCreatedDefaultImageCatalogSetAsNotDefault(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -362,7 +362,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogsRequestFromExistingImageCatalog(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -391,7 +391,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testUpdateImageCatalog(TestContext testContext) {
         String imgCatalogName = getNameGenerator().getRandomNameForResource();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -426,7 +426,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetListOfImageCatalogs(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class).withName(CB_DEFAULT_IMG_CATALOG_NAME)
@@ -440,7 +440,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testGetImageCatalogByNameAndStackWhenPreWarmedImageHasBeenUsed(TestContext testContext) {
         createDefaultCredential(testContext);
         initializeDefaultClusterDefinitions(testContext);
