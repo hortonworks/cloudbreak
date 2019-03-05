@@ -16,6 +16,8 @@ public class RandomNameCreator {
 
     public static final String PREFIX = "autotest-";
 
+    private static final int MAX_LENGTH = 40;
+
     @Inject
     private RandomNameGenerator generator;
 
@@ -23,10 +25,14 @@ public class RandomNameCreator {
     private CloudPlatform cloudPlatform;
 
     public String getRandomNameForResource() {
-        return PREFIX + cloudPlatform.name().toLowerCase() + '-' + generator.next().replaceAll("_", "-");
+        return trim(PREFIX + cloudPlatform.name().toLowerCase() + '-' + generator.next().replaceAll("_", "-"));
     }
 
     public String getInvalidRandomNameForResource() {
-        return PREFIX + cloudPlatform.name().toLowerCase() + "-?!;" + generator.next().replaceAll("_", "-");
+        return trim(PREFIX + cloudPlatform.name().toLowerCase() + "-?!;" + generator.next().replaceAll("_", "-"));
+    }
+
+    private String trim(String name) {
+        return (name.length() > MAX_LENGTH) ? name.substring(0, MAX_LENGTH) : name;
     }
 }

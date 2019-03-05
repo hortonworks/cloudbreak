@@ -4,12 +4,9 @@ public class CommonCloudParameters {
 
     public static final String DEFAULT_CLUSTER_DEFINITION_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
-    public static final String DEFAULT_SSH_PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDXF9paZtj6ibDgRGtw2jTls1fysxETxG/rbCN9vYlpDw6ROK90rjXn"
-            + "C0qi43kXbs5Z/NyFDDcYW4U1nUmJCIhQqNJv00ukTbS4McfeNYrZF78KNLtbUP57SfKzjcH1Txz9Zr3ILEADqMyNRzgSB2gw5XnfbbLUFQYcF3hT11gjEw99Qi9eCQ6nCM37iy9t"
-            + "CIfMyB5CI24LECv+8UMFdYw+X9JQXgkAlcPi1zmVNckD6dDGGC2nY9mK7jw0dqZ2W/Q2HvGVgP7iSxnKIFIylifPMz0jmtzpjPi4czgr34d4PFlQsv8LgwWEQMyTJGQmtF3GGa1o/"
-            + "qT07gePY2tl1sAzOLszfglmkBZS+POYi65fxYGepF5C0Rmc3427dLp+HPl8QSAuq0j92/3LGLOKTjn1qC2MjBNhbkhFhDKnv0VQslmN/nkgDKUSHfQqfMwo4HXFIIydUWxT+5PxFC"
-            + "aS4axzGQ2HYylxqonnU3P0DJkh/omegI36HyxxlMNlpf/zn3/zrwSFvKNCFvbQezJg8jdqq7VEHx4DH6WhYQ02TLsjmcA0EFp1HxTCbJojD/Ixev/Wc5duHotOBiS0CXdJwyzKSQt"
-            + "tQS9NGn+/LvUyiD/Z/Rz2r3B0LpQsQu4tI/8F5Jq+QiRgS9cQRnuLZuvAwbSNYI+g+zPdhaZq8fvumWarcQ== apalfi@hortonworks.com\n";
+    public static final String DEFAULT_SSH_PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBt"
+            + "iTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofp"
+            + "jT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh";
 
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting credential default description.";
 
