@@ -433,9 +433,10 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
             ObjectNode prop = (ObjectNode) jsonNode;
             for (String key : conf.getProperties().keySet()) {
                 JsonNode found = prop.get(key);
-                if (found != null) {
-                    foundNum += 1;
+                if (found == null) {
+                    continue;
                 }
+                foundNum++;
                 if (NAME_NODE.equals(key) && !conf.getProperties().get(key).equals(found.asText())) {
                     foundNum = 0;
                 }
