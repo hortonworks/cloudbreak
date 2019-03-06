@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.stackrepository.StackRepositoryV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,12 +19,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AmbariV4Response implements JsonEntity {
-
-    @ApiModelProperty(StackModelDescription.AMBARI_IP)
-    private String serverIp;
-
-    @ApiModelProperty(StackModelDescription.AMBARI_URL)
-    private String serverUrl;
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
@@ -40,22 +33,6 @@ public class AmbariV4Response implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
     private SecretV4Response securityMasterKey;
-
-    public String getServerIp() {
-        return serverIp;
-    }
-
-    public void setServerIp(String serverIp) {
-        this.serverIp = serverIp;
-    }
-
-    public String getServerUrl() {
-        return serverUrl;
-    }
-
-    public void setServerUrl(String serverUrl) {
-        this.serverUrl = serverUrl;
-    }
 
     public StackRepositoryV4Response getStackRepository() {
         return stackRepository;

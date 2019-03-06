@@ -97,6 +97,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setClusterDefinition(getConversionService().convert(source.getClusterDefinition(), ClusterDefinitionV4Response.class));
         clusterResponse.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(source));
         convertDpSecrets(source, clusterResponse);
+        String ambariIp = stackUtil.extractAmbariIp(source.getStack());
+        clusterResponse.setServerIp(ambariIp);
+        clusterResponse.setServerUrl(serviceEndpointCollector.getAmbariServerUrl(source, ambariIp));
         return clusterResponse;
     }
 

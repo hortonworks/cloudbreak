@@ -168,8 +168,8 @@ public class ModelDescriptions {
         public static final String STACK_STATUS = "status of the stack";
         public static final String STATUS_REASON = "status message of the stack";
         public static final String STATUS_REQUEST = "status of the scale request";
-        public static final String AMBARI_IP = "public ambari ip of the stack";
-        public static final String AMBARI_URL = "public ambari url";
+        public static final String SERVER_IP = "public ambari ip of the stack";
+        public static final String SERVER_URL = "public ambari url";
         public static final String DP_AMBARI_USERNAME = "ambari username for Dataplane";
         public static final String DP_AMBARI_PASSWORD = "ambari password for Dataplane";
         public static final String NETWORK_ID = "network resource id for the stack";

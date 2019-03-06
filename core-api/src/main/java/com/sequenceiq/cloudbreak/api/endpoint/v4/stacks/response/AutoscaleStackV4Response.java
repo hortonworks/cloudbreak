@@ -38,7 +38,7 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
 
-    @ApiModelProperty(StackModelDescription.AMBARI_IP)
+    @ApiModelProperty(StackModelDescription.SERVER_IP)
     private String ambariServerIp;
 
     @ApiModelProperty(StackModelDescription.USERNAME)
