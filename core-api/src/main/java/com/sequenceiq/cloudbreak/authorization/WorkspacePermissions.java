@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Actio
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ALL;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.CLUSTER_DEFINITION;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.CREDENTIAL;
-import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.FLEXSUBSCRIPTION;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.IMAGECATALOG;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.LDAP;
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.MPACK;
@@ -50,10 +49,7 @@ public enum WorkspacePermissions {
     PROXYCONFIG_WRITE(PROXY, WRITE, "Read proxy configs in an workspace."),
 
     MANAGEMENTPACK_READ(MPACK, READ, "Write management pack configs in an workspace."),
-    MANAGEMENTPACK_WRITE(MPACK, WRITE, "Write management pack configs in an workspace."),
-
-    FLEXSUBSCRIPTION_READ(FLEXSUBSCRIPTION, READ, "Write management pack configs in an workspace."),
-    FLEXSUBSCRIPTION_WRITE(FLEXSUBSCRIPTION, WRITE, "Write management pack configs in an workspace.");
+    MANAGEMENTPACK_WRITE(MPACK, WRITE, "Write management pack configs in an workspace.");
 
     private final String name;
 

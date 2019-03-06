@@ -26,7 +26,6 @@ import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBluep
 import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.blueprintObjectWhenSharedServiceConfigured;
 import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.blueprintObjectWhenWebhcatConfigured;
 import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.blueprintObjectWhereExecutioTypeHasConfiguredAsContainer;
-import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.blueprintObjectWhereSmartSenseHasConfigured;
 import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured;
 import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured;
 import static com.sequenceiq.cloudbreak.clusterdefinition.moduletest.AmbariBlueprintModulTestModelProvider.getFileName;
@@ -56,9 +55,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestContextManager;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.clusterdefinition.smartsense.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.clusterdefinition.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -128,10 +125,6 @@ public class AmbariBlueprintModulTest extends CentralBlueprintContext implements
                 blueprintObjectForHbaseConfigurationForTwoHosts()});
         params.add(new Object[]{"execution-type-container", "execution-type-container",
                 blueprintObjectWhereExecutioTypeHasConfiguredAsContainer()});
-        params.add(new Object[]{"smartsense", "smartsense",
-                blueprintObjectWhereSmartSenseHasConfigured()});
-        params.add(new Object[]{"smartsense-when-no-hst-server", "smartsense-when-no-hst-server",
-                blueprintObjectWhereSmartSenseHasConfigured()});
         params.add(new Object[]{"oozie", "oozie",
                 blueprintObjectWhenRdsConfiguredWithRdsOozie()});
         params.add(new Object[]{"webhcat", "webhcat-2-6",
@@ -167,8 +160,6 @@ public class AmbariBlueprintModulTest extends CentralBlueprintContext implements
     public void setUp() throws Exception {
         TestContextManager testContextManager = new TestContextManager(getClass());
         testContextManager.prepareTestInstance(this);
-        SmartSenseConfigProvider smartSenseConfigProvider = applicationContext.getBean(SmartSenseConfigProvider.class);
-        ReflectionTestUtils.setField(smartSenseConfigProvider, "cbVersion", "custom.cb.version");
     }
 
     @Test

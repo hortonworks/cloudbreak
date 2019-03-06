@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.clusterdefinition.testrepeater.TestFile;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -350,15 +349,6 @@ class AmbariBlueprintModulTestModelProvider {
                 .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withGeneralClusterConfigs(configs)
-                .build();
-    }
-
-    static TemplatePreparationObject blueprintObjectWhereSmartSenseHasConfigured() {
-        SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
-        smartSenseSubscription.setSubscriptionId("A-99900000-C-00000000");
-        return getPreparedBuilder("master", "slave_1")
-                .withClusterDefinitionView(generalBlueprintView("", "2.6", "HDP"))
-                .withSmartSenseSubscription(smartSenseSubscription)
                 .build();
     }
 

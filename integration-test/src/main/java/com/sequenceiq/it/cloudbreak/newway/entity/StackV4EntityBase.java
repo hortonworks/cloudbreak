@@ -152,11 +152,6 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withFlexId(Long flexId) {
-        getRequest().setFlexId(flexId);
-        return this;
-    }
-
     public StackV4EntityBase<T> withImageSettings(String key) {
         ImageSettingsEntity imageSettingsEntity = getTestContext().get(key);
         getRequest().setImage(imageSettingsEntity.getRequest());

@@ -513,9 +513,6 @@ cb:
             amazonlinux2:
               - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
                 stackDefault: true
-  smartsense.configure: false
-  smartsense.enabled: true
-  smartsense.id.pattern: A-9990%s-C-%s
 
   structuredevent:
     rest:

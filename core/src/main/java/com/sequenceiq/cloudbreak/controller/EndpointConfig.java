@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EnvironmentV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.FlexSubscriptionV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KubernetesV4Controller;
@@ -35,7 +34,6 @@ import com.sequenceiq.cloudbreak.controller.v4.ManagementPackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.PlatformParameterV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ProxyV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.SmartSenseSubscriptionV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserV4Controller;
@@ -61,7 +59,6 @@ public class EndpointConfig extends ResourceConfig {
             CredentialV4Controller.class,
             DatabaseV4Controller.class,
             EnvironmentV4Controller.class,
-            FlexSubscriptionV4Controller.class,
             ImageCatalogV4Controller.class,
             KerberosConfigV4Controller.class,
             LdapV4Controller.class,
@@ -70,7 +67,6 @@ public class EndpointConfig extends ResourceConfig {
             PlatformParameterV4Controller.class,
             ProxyV4Controller.class,
             RecipesV4Controller.class,
-            SmartSenseSubscriptionV4Controller.class,
             UserProfileV4Controller.class,
             UserV4Controller.class,
             FileSystemV4Controller.class,

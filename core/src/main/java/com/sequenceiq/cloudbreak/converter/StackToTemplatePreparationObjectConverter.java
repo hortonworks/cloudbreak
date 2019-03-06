@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.clusterdefinition.sharedservice.SharedServiceCo
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -50,9 +48,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
-
-    @Inject
-    private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
     @Inject
     private HdfConfigProvider hdfConfigProvider;
@@ -81,7 +76,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
-            Optional<SmartSenseSubscription> aDefault = smartSenseSubscriptionService.getDefault();
             Cluster cluster = clusterService.getById(source.getCluster().getId());
             FileSystem fileSystem = cluster.getFileSystem();
             LdapConfig ldapConfig = cluster.getLdapConfig();
@@ -107,7 +101,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 gatewaySignKey = gateway.getSignKey();
             }
             return Builder.builder()
-                    .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey)
@@ -117,7 +110,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))
-                    .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
                     .withLdapConfig(ldapConfig, bindDn, bindPassword)
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.getKerberosConfig())

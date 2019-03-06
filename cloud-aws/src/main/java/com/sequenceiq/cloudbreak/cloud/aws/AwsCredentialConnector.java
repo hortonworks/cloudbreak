@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
@@ -39,9 +38,6 @@ public class AwsCredentialConnector implements CredentialConnector {
     private AwsClient awsClient;
 
     @Inject
-    private AwsSmartSenseIdGenerator smartSenseIdGenerator;
-
-    @Inject
     private AwsPlatformParameters awsPlatformParameters;
 
     @Override
@@ -52,10 +48,6 @@ public class AwsCredentialConnector implements CredentialConnector {
         String roleArn = awsCredential.getRoleArn();
         String accessKey = awsCredential.getAccessKey();
         String secretKey = awsCredential.getSecretKey();
-        String smartSenseId = smartSenseIdGenerator.getSmartSenseId(awsCredential);
-        if (isNoneEmpty(smartSenseId)) {
-            credential.putParameter(SMART_SENSE_ID, smartSenseId);
-        }
         if (isNoneEmpty(roleArn) && isNoneEmpty(accessKey) && isNoneEmpty(secretKey)) {
             String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
             return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);

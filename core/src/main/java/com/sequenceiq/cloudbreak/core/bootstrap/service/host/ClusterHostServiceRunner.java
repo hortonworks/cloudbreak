@@ -66,7 +66,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
@@ -108,9 +107,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private ComponentLocatorService componentLocator;
-
-    @Inject
-    private SmartSenseCredentialConfigService smartSenseCredentialConfigService;
 
     @Inject
     private KerberosDetailService kerberosDetailService;
@@ -263,11 +259,6 @@ public class ClusterHostServiceRunner {
         credentials.put("password", connector.getCloudbreakClusterPassword(cluster));
         credentials.put("securityMasterKey", connector.getMasterKey(cluster));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
-
-        if (smartSenseCredentialConfigService.areCredentialsSpecified()) {
-            Map<String, Object> smartSenseCredentials = smartSenseCredentialConfigService.getCredentials();
-            servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
-        }
 
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 

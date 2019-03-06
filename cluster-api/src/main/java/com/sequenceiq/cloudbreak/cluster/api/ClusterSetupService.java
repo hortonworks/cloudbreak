@@ -20,8 +20,6 @@ public interface ClusterSetupService {
     Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
             Set<HostMetadata> hostsInCluster);
 
-    void configureSmartSense();
-
     void waitForHosts(Set<HostMetadata> hostsInCluster);
 
     void waitForServices(int requestId) throws CloudbreakException;

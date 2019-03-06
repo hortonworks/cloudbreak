@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
@@ -194,12 +193,9 @@ class RecipeModulTestModelProvider {
     }
 
     static Builder getPreparedBuilder(String... hostNames) {
-        SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
-        smartSenseSubscription.setSubscriptionId("A-99900000-C-00000000");
         return Builder.builder()
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withClusterDefinitionView(generalClusterDefinitionView("", "2.6", "HDP"))
-                .withSmartSenseSubscription(smartSenseSubscription)
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
                 .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames));

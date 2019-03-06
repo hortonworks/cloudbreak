@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -681,13 +680,6 @@ public class TestUtil {
         resource.setResourceName("testResource");
         resource.setResourceType(ResourceType.GCP_INSTANCE);
         return resource;
-    }
-
-    public static SmartSenseSubscription smartSenseSubscription() {
-        SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
-        smartSenseSubscription.setSubscriptionId("1234-1234-1234-1244");
-        smartSenseSubscription.setId(1L);
-        return smartSenseSubscription;
     }
 
     public static RDSConfig rdsConfig(DatabaseType databaseType, DatabaseVendor databaseVendor) {

@@ -44,18 +44,15 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePre
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -84,9 +81,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
-
-    @Mock
-    private FlexSubscriptionService flexSubscriptionService;
 
     @Mock
     private LdapConfigService ldapConfigService;
@@ -174,53 +168,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
-    }
-
-    @Test
-    public void testConvertWhenFlexSubscriptionExistsThenItShouldbeStored() {
-        Long flexId = 2L;
-        FlexSubscription expected = new FlexSubscription();
-        when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.get(flexId)).thenReturn(expected);
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertTrue(result.getFlexSubscription().isPresent());
-        assertEquals(expected, result.getFlexSubscription().get());
-    }
-
-    @Test
-    public void testConvertWhenFlexSubscriptionDoesNotExistThenEmptyOptionalShouldBeStored() {
-        when(source.getFlexId()).thenReturn(null);
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertFalse(result.getFlexSubscription().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenFlexSubscriptionExistsThenItsSubscriptionIdShouldBeStoredAsSmartsenseSubscriptionId() {
-        Long flexId = 2L;
-        FlexSubscription flexSubscription = new FlexSubscription();
-        SmartSenseSubscription expected = new SmartSenseSubscription();
-        flexSubscription.setSmartSenseSubscription(expected);
-        expected.setSubscriptionId(String.valueOf(flexId));
-        when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.get(flexId)).thenReturn(flexSubscription);
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertTrue(result.getSmartSenseSubscription().isPresent());
-        assertEquals(String.valueOf(flexId), result.getSmartSenseSubscription().get().getSubscriptionId());
-    }
-
-    @Test
-    public void testConvertWhenFlexSubscriptionDoesNotExistThenEmptyOptionalShouldBeStoredAsSmartsenseSubscriptionId() {
-        when(source.getFlexId()).thenReturn(null);
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertFalse(result.getSmartSenseSubscription().isPresent());
     }
 
     @Test

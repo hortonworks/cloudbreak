@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -44,7 +43,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -82,9 +80,6 @@ public class StackDecorator {
 
     @Inject
     private CloudParameterService cloudParameterService;
-
-    @Inject
-    private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
     private CloudParameterCache cloudParameterCache;
@@ -132,10 +127,6 @@ public class StackDecorator {
         start = System.currentTimeMillis();
         prepareInstanceGroups(subject, request, subject.getCredential(), user);
         LOGGER.debug("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-        start = System.currentTimeMillis();
-        prepareFlexSubscription(subject, request.getFlexId());
-        LOGGER.debug("Flex subscriptions were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
         validateInstanceGroups(subject);
@@ -275,13 +266,6 @@ public class StackDecorator {
     private void validateExactCount(Stack stack, FailurePolicy failurePolicy) {
         if (failurePolicy.getThreshold() > stack.getFullNodeCount()) {
             throw new BadRequestException("Threshold can not be higher than the node count of the stack.");
-        }
-    }
-
-    private void prepareFlexSubscription(Stack subject, Long flexId) {
-        if (flexId != null) {
-            FlexSubscription flexSubscription = flexSubscriptionService.get(flexId);
-            subject.setFlexSubscription(flexSubscription);
         }
     }
 

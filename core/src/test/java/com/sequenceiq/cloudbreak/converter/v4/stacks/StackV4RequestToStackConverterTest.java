@@ -137,7 +137,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         assertAllFieldsNotNull(
                 stack,
                 Arrays.asList("description", "cluster", "credential", "gatewayPort", "network", "securityConfig",
-                        "version", "created", "platformVariant", "cloudPlatform", "flexSubscription",
+                        "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environment", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
         assertEquals("eu-west-1", stack.getRegion());
@@ -172,7 +172,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         assertAllFieldsNotNull(
                 stack,
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
-                        "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
+                        "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "datalakeId",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "rootVolumeSize"));
         assertEquals("eu-west-1", stack.getRegion());
     }

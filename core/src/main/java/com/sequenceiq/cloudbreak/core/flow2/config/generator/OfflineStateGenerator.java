@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -351,11 +350,6 @@ public class OfflineStateGenerator {
 
         @Override
         public Set<Stack> findAliveOnesWithAmbari() {
-            return null;
-        }
-
-        @Override
-        public Long countByFlexSubscription(FlexSubscription flexSubscription) {
             return null;
         }
 

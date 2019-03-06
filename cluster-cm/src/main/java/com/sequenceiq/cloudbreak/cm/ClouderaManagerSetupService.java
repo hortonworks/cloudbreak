@@ -122,11 +122,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void configureSmartSense() {
-
-    }
-
-    @Override
     public void waitForHosts(Set<HostMetadata> hostsInCluster) {
         clouderaManagerPollingServiceProvider.hostsPollingService(stack, clouderaManagerClientFactory.getDefaultClient(stack, clientConfig));
     }
