@@ -19,8 +19,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
@@ -52,8 +50,6 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     @OneToMany(mappedBy = "gateway", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<GatewayTopology> topologies = new HashSet<>();
-
-    private String topologyName = "";
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -207,15 +203,6 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public Set<GatewayTopology> getTopologies() {
-        if (StringUtils.isNotEmpty(topologyName) && topologies.stream().noneMatch(t -> t.getTopologyName().equals(topologyName))) {
-            GatewayTopology gatewayTopology = new GatewayTopology();
-            gatewayTopology.setTopologyName(topologyName);
-            if (exposedServices != null && StringUtils.isNoneEmpty(exposedServices.getValue())) {
-                gatewayTopology.setExposedServices(exposedServices);
-            }
-            topologies.add(gatewayTopology);
-
-        }
         return topologies;
     }
 
