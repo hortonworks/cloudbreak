@@ -4,19 +4,26 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
+@RunWith(MockitoJUnitRunner.class)
 public class StructuredNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
 
     private static final long ORG_ID = 1L;
@@ -25,17 +32,17 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     private static final String USER_NAME = "Alma Ur";
 
+    @InjectMocks
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
 
-    @Before
-    public void setUp() {
-        underTest = new StructuredNotificationEventToCloudbreakEventJsonConverter();
-    }
+    @Mock
+    private StackApiViewService stackApiViewService;
 
     @Test
     public void testConvert() {
         // GIVEN
         // WHEN
+        when(stackApiViewService.retrieveById(1L)).thenReturn(new StackViewResponse());
         CloudbreakEventsJson result = underTest.convert(getSource());
         // THEN
         assertEquals("message", result.getEventMessage());

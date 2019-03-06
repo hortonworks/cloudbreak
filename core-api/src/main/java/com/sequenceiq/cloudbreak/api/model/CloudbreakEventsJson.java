@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -72,6 +73,16 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_ID)
     private Long workspaceId;
+
+    private StackViewResponse stackView;
+
+    public StackViewResponse getStackView() {
+        return stackView;
+    }
+
+    public void setStackView(StackViewResponse stackView) {
+        this.stackView = stackView;
+    }
 
     public Integer getNodeCount() {
         return nodeCount;

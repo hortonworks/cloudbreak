@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class CompactViewResponse {
+public class CompactViewResponse implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 

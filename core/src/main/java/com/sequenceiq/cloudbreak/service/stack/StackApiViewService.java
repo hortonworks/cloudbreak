@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -33,6 +34,17 @@ public class StackApiViewService {
         try {
             return transactionService.required(() ->
                     convertStackViews(stackApiViewRepository.findByWorkspaceId(workspaceId)));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public StackViewResponse retrieveById(Long stackId) {
+        try {
+            return transactionService.required(() -> {
+                Optional<StackApiView> byId = stackApiViewRepository.findById(stackId);
+                return conversionService.convert(byId.orElse(null), StackViewResponse.class);
+            });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

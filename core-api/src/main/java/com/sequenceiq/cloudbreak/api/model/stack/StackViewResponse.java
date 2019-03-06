@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.model.stack;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.STACK_ID;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialViewResponse;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -10,7 +11,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class StackViewResponse {
+public class StackViewResponse implements JsonEntity {
     @ApiModelProperty(STACK_ID)
     private Long id;
 

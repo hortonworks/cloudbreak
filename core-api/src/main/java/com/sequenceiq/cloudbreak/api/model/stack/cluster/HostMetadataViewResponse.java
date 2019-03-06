@@ -4,9 +4,11 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelD
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ID;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NAME;
 
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+
 import io.swagger.annotations.ApiModelProperty;
 
-public class HostMetadataViewResponse {
+public class HostMetadataViewResponse implements JsonEntity {
 
     @ApiModelProperty(value = NAME, required = true)
     private String name;
