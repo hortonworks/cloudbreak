@@ -27,6 +27,8 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -199,17 +201,29 @@ public class ClusterCreationSetupService {
         Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
 
-        if (clusterDefinition != null && clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
-            AmbariRepositoryV4Request repoDetailsJson = request.getAmbari().getRepository();
-            ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);
-            components.add(ambariRepoConfig);
-            ClusterComponent hdpRepoConfig = determineHDPRepoConfig(clusterDefinition, stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
-                    stackImageComponent);
-            components.add(hdpRepoConfig);
-            checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get());
-            checkVDFFile(ambariRepoConfig, hdpRepoConfig, cluster);
-        }
+        if (clusterDefinition != null) {
+            if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+                AmbariRepositoryV4Request repoDetailsJson = request.getAmbari().getRepository();
+                ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);
+                components.add(ambariRepoConfig);
+                ClusterComponent hdpRepoConfig = determineHDPRepoConfig(clusterDefinition,
+                        stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
+                        stackImageComponent);
+                components.add(hdpRepoConfig);
+                checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get());
+                checkVDFFile(ambariRepoConfig, hdpRepoConfig, cluster);
+            } else {
+                ClouderaManagerRepositoryV4Request repoDetailsJson = request.getCm().getRepository();
+                ClusterComponent cmRepoConfig = determineCmRepoConfig(repoDetailsJson, stackImageComponent, cluster);
+                components.add(cmRepoConfig);
 
+                List<ClouderaManagerProductV4Request> products = request.getCm().getProducts();
+                ClusterComponent cdhProductRepoConfig = determineCdhRepoConfig(clusterDefinition,
+                        stack.getId(), products, cluster, stack.getWorkspace(),
+                        stackImageComponent);
+                components.add(cdhProductRepoConfig);
+            }
+        }
         LOGGER.debug("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -345,6 +359,16 @@ public class ClusterCreationSetupService {
         if (ambariStackDetails != null) {
             repo.setEnableGplRepo(ambariStackDetails.isEnableGplRepo());
         }
+    }
+
+    private ClusterComponent determineCmRepoConfig(ClouderaManagerRepositoryV4Request repoDetailsJson,
+            Optional<Component> stackImageComponent, Cluster cluster) {
+        return null;
+    }
+
+    private ClusterComponent determineCdhRepoConfig(ClusterDefinition clusterDefinition, Long id,
+            List<ClouderaManagerProductV4Request> request, Cluster cluster, Workspace workspace, Optional<Component> stackImageComponent) {
+        return null;
     }
 
     private StackRepoDetails createStackRepoDetails(AmbariDefaultStackRepoDetails stackRepoDetails, String osType) {

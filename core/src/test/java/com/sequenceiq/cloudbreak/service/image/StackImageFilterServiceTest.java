@@ -58,6 +58,8 @@ public class StackImageFilterServiceTest {
 
     private static final String IMAGE_HDF_ID = "hdf-3";
 
+    private static final String IMAGE_CDH_ID = "cdh-4";
+
     private static final long STACK_ID = 1L;
 
     private static final long ORG_ID = 100L;
@@ -203,6 +205,7 @@ public class StackImageFilterServiceTest {
                 Collections.singletonList(getImage("a", IMAGE_BASE_ID)),
                 Collections.singletonList(getImage("b", IMAGE_HDP_ID)),
                 Collections.singletonList(getImage("c", IMAGE_HDF_ID)),
+                Collections.singletonList(getImage("d", IMAGE_CDH_ID)),
                 new HashSet<>()
         );
         return StatedImages.statedImages(images, CUSTOM_IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);

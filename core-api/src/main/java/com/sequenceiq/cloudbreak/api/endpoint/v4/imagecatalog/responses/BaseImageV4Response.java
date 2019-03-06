@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerRepositoryV4Response;
 
 import io.swagger.annotations.ApiModel;
 
@@ -10,33 +12,53 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseImageV4Response extends ImageV4Response {
 
-    private List<StackDetailsV4Response> hdpStacks;
+    private List<AmbariStackDetailsV4Response> hdpStacks;
 
-    private List<StackDetailsV4Response> hdfStacks;
+    private List<AmbariStackDetailsV4Response> hdfStacks;
 
-    private String ambariRepoGpgKey;
+    private List<ClouderaManagerStackDetailsV4Response> cdhStacks;
 
-    public String getAmbariRepoGpgKey() {
-        return ambariRepoGpgKey;
-    }
+    private AmbariRepositoryV4Response ambariRepo;
 
-    public void setAmbariRepoGpgKey(String ambariRepoGpgKey) {
-        this.ambariRepoGpgKey = ambariRepoGpgKey;
-    }
+    private ClouderaManagerRepositoryV4Response clouderaManagerRepo;
 
-    public List<StackDetailsV4Response> getHdpStacks() {
+    public List<AmbariStackDetailsV4Response> getHdpStacks() {
         return hdpStacks;
     }
 
-    public void setHdpStacks(List<StackDetailsV4Response> hdpStacks) {
+    public void setHdpStacks(List<AmbariStackDetailsV4Response> hdpStacks) {
         this.hdpStacks = hdpStacks;
     }
 
-    public List<StackDetailsV4Response> getHdfStacks() {
+    public List<AmbariStackDetailsV4Response> getHdfStacks() {
         return hdfStacks;
     }
 
-    public void setHdfStacks(List<StackDetailsV4Response> hdfStacks) {
+    public void setHdfStacks(List<AmbariStackDetailsV4Response> hdfStacks) {
         this.hdfStacks = hdfStacks;
+    }
+
+    public List<ClouderaManagerStackDetailsV4Response> getCdhStacks() {
+        return cdhStacks;
+    }
+
+    public void setCdhStacks(List<ClouderaManagerStackDetailsV4Response> cdhStacks) {
+        this.cdhStacks = cdhStacks;
+    }
+
+    public AmbariRepositoryV4Response getAmbariRepo() {
+        return ambariRepo;
+    }
+
+    public void setAmbariRepo(AmbariRepositoryV4Response ambariRepo) {
+        this.ambariRepo = ambariRepo;
+    }
+
+    public ClouderaManagerRepositoryV4Response getClouderaManagerRepo() {
+        return clouderaManagerRepo;
+    }
+
+    public void setClouderaManagerRepo(ClouderaManagerRepositoryV4Response clouderaManagerRepo) {
+        this.clouderaManagerRepo = clouderaManagerRepo;
     }
 }

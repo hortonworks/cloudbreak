@@ -18,6 +18,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
@@ -99,5 +100,24 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
         hostGroupMappings.forEach((hostGroup, hostAttributes) -> hostAttributes.forEach(
                 attr -> cmTemplate.getInstantiator().addHostsItem(new ApiClusterTemplateHostInfo().hostName(attr.get("fqdn")).hostTemplateRefName(hostGroup))
         ));
+    }
+
+    public void addProduct(String product, String version) {
+        ApiProductVersion productVersion = new ApiProductVersion();
+        productVersion.setProduct(product);
+        productVersion.setVersion(version);
+        cmTemplate.addProductsItem(productVersion);
+    }
+
+    public void addRepositoryItem(String repositoriesItem) {
+        cmTemplate.addRepositoriesItem(repositoriesItem);
+    }
+
+    public void setCmVersion(String cmVersion) {
+        cmTemplate.setCmVersion(cmVersion);
+    }
+
+    public void setCdhVersion(String cdhVersion) {
+        cmTemplate.setCdhVersion(cdhVersion);
     }
 }

@@ -484,7 +484,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesFromDefaultWithStackName() throws CloudbreakImageCatalogException {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
-                Lists.newArrayList(), Sets.newHashSet()));
+                Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
         underTest.getImagesFromDefault(ORG_ID, "stack", null, Collections.emptySet());
 
@@ -524,7 +524,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWithStackName() throws CloudbreakImageCatalogException {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
-                Lists.newArrayList(), Sets.newHashSet()));
+                Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", null);
 

@@ -21,6 +21,8 @@ public class ImagesV4Response implements JsonEntity {
 
     private List<ImageV4Response> hdfImages;
 
+    private List<ImageV4Response> cdhImages;
+
     private Set<String> supportedVersions;
 
     public List<BaseImageV4Response> getBaseImages() {
@@ -45,6 +47,14 @@ public class ImagesV4Response implements JsonEntity {
 
     public void setHdfImages(List<ImageV4Response> hdfImages) {
         this.hdfImages = hdfImages;
+    }
+
+    public List<ImageV4Response> getCdhImages() {
+        return cdhImages;
+    }
+
+    public void setCdhImages(List<ImageV4Response> cdhImages) {
+        this.cdhImages = cdhImages;
     }
 
     public void setSupportedVersions(Set<String> supportedVersions) {

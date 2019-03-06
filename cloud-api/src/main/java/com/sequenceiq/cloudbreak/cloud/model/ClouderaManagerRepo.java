@@ -51,6 +51,26 @@ public class ClouderaManagerRepo {
         this.gpgKeyUrl = gpgKeyUrl;
     }
 
+    public ClouderaManagerRepo withPredefined(Boolean predefined) {
+        setPredefined(predefined);
+        return this;
+    }
+
+    public ClouderaManagerRepo withVersion(String version) {
+        setVersion(version);
+        return this;
+    }
+
+    public ClouderaManagerRepo withBaseUrl(String baseUrl) {
+        setBaseUrl(baseUrl);
+        return this;
+    }
+
+    public ClouderaManagerRepo withGpgKeyUrl(String gpgKeyUrl) {
+        setGpgKeyUrl(gpgKeyUrl);
+        return this;
+    }
+
     public Map<String, Object> asMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("predefined", predefined);

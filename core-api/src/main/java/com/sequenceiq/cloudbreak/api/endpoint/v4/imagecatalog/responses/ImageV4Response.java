@@ -44,7 +44,7 @@ public class ImageV4Response implements JsonEntity {
 
     @JsonProperty("stackDetails")
     @JsonInclude(NON_EMPTY)
-    private StackDetailsV4Response stackDetails;
+    private AmbariStackDetailsV4Response stackDetails;
 
     @JsonProperty("defaultImage")
     private boolean defaultImage;
@@ -92,11 +92,11 @@ public class ImageV4Response implements JsonEntity {
         this.version = version;
     }
 
-    public StackDetailsV4Response getStackDetails() {
+    public AmbariStackDetailsV4Response getStackDetails() {
         return stackDetails;
     }
 
-    public void setStackDetails(StackDetailsV4Response stackDetails) {
+    public void setStackDetails(AmbariStackDetailsV4Response stackDetails) {
         this.stackDetails = stackDetails;
     }
 

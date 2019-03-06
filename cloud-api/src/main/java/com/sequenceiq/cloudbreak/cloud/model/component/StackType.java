@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 public enum StackType {
     HDP(ComponentType.HDP_REPO_DETAILS),
     // Currently only HDP_REPO_DETAILS is handled
-    HDF(ComponentType.HDP_REPO_DETAILS);
+    HDF(ComponentType.HDP_REPO_DETAILS),
+
+    CDH(ComponentType.CDH_PRODUCT_DETAILS);
 
     private final ComponentType componentType;
 

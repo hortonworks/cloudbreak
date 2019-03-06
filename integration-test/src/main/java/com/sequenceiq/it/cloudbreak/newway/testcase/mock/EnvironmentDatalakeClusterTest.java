@@ -69,12 +69,17 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::post)
-
+                .given(ClusterEntity.class).valid()
+                .withRdsConfigNames(rdsList)
+                .withClusterDefinitionName(BP_NAME_DL)
+                .withAmbari(testContext.given(AmbariEntity.class))
+                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
                 .given("placement", PlacementSettingsEntity.class)
+
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
+
                 .when(Stack.postV4())
                 .when(Stack.deleteV4(), withoutLogError())
                 .await(AbstractIntegrationTest.STACK_DELETED)
@@ -83,6 +88,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
+
                 .when(Environment::putDetachResources)
                 .when(Environment::get)
                 .then(EnvironmentClusterTest::checkEnvHasNoRds)
@@ -101,12 +107,15 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(Environment::post)
-
+                .given(ClusterEntity.class).valid()
+                .withRdsConfigNames(rdsList)
+                .withClusterDefinitionName(BP_NAME_DL)
+                .withAmbari(testContext.given(AmbariEntity.class))
+                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
                 .given("placement", PlacementSettingsEntity.class)
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, rdsList,  testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_DL))
                 .when(Stack.postV4())
                 .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(FORBIDDEN_KEY))
@@ -186,8 +195,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(dlName)
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, getRdsAsList(testContext),
-                        testContext.get(LdapConfigTestDto.class).getName(), null, BP_NAME_WL))
                 .when(Stack.postV4())
                 .validate();
                 createDatalake(testContext, rdsList, BP_NAME_DL);
@@ -199,12 +206,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
                 .when(Environment::post)
-
+                .given(ClusterEntity.class).valid()
+                .withClusterDefinitionName(BP_NAME_DL)
+                .withAmbari(testContext.given(AmbariEntity.class))
                 .given("placement", PlacementSettingsEntity.class)
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, null,  null, null, BP_NAME_DL))
                 .when(Stack.postV4(), key(FORBIDDEN_KEY))
                 .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -218,12 +226,16 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private void createDatalake(TestContext testContext, Set<String> rdsList, String bpName) {
         testContext.given("placement", PlacementSettingsEntity.class)
+                .given(ClusterEntity.class).valid()
+                .withRdsConfigNames(rdsList)
+                .withClusterDefinitionName(BP_NAME_DL)
+                .withAmbari(testContext.given(AmbariEntity.class))
+                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
                 .given(StackTestDto.class)
                 .withName(getNameGenerator().getRandomNameForResource())
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentEntity.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .withCluster(setResources(testContext, rdsList, testContext.get(LdapConfigTestDto.class).getName(), null, bpName))
                 .when(Stack.postV4())
                 .validate();
     }
@@ -255,25 +267,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private Set<String> getRdsAsList(TestContext testContext) {
         return new HashSet<>(Collections.singletonList(testContext.get(DatabaseEntity.class).getName()));
-    }
-
-    private ClusterEntity setResources(TestContext testContext, Set<String> rdsConfigs, String ldapName, String proxyName, String cdName) {
-
-        ClusterEntity cluster = new ClusterEntity(testContext)
-                .valid()
-                .withRdsConfigNames(rdsConfigs)
-                .withClusterDefinitionName(cdName)
-                .withAmbari(testContext.given(AmbariEntity.class));
-        if (rdsConfigs != null) {
-            cluster.withRdsConfigNames(rdsConfigs);
-        }
-        if (ldapName != null) {
-            cluster.withLdapConfigName(ldapName);
-        }
-        if (proxyName != null) {
-            cluster.withProxyConfigName(proxyName);
-        }
-        return cluster;
     }
 
     private Collection<InstanceGroupEntity> setInstanceGroup(TestContext testContext) {

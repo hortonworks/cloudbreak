@@ -141,6 +141,14 @@ public class ClusterV4Request implements JsonEntity {
         this.cloudStorage = cloudStorage;
     }
 
+    public ClouderaManagerV4Request getCm() {
+        return cm;
+    }
+
+    public void setCm(ClouderaManagerV4Request cm) {
+        this.cm = cm;
+    }
+
     public AmbariV4Request getAmbari() {
         return ambari;
     }
@@ -205,11 +213,4 @@ public class ClusterV4Request implements JsonEntity {
         this.validateClusterDefinition = validateClusterDefinition;
     }
 
-    public ClouderaManagerV4Request getCm() {
-        return cm;
-    }
-
-    public void setCm(ClouderaManagerV4Request cm) {
-        this.cm = cm;
-    }
 }

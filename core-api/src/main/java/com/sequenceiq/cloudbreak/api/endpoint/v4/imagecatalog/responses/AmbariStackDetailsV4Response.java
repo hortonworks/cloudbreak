@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackDetailsV4Response implements JsonEntity {
+public class AmbariStackDetailsV4Response implements JsonEntity {
     @JsonProperty
     private String version;
 
