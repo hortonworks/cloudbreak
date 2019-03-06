@@ -38,8 +38,9 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
         testContext
-                .given("cm", AmbariEntity.class).withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
+                .given("cm", AmbariEntity.class)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")
+                .withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
                 .given(StackTestDto.class).withCluster("cmcluster")
                 .withName(clusterName)
                 .when(Stack.generatedClusterDefinition())
@@ -54,8 +55,9 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
         testContext
-                .given("cm", AmbariEntity.class).withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
+                .given("cm", AmbariEntity.class)
                 .given("cmcluster", ClusterEntity.class).withAmbari("cm")
+                .withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
                 .given(StackTestDto.class).withCluster("cmcluster")
                 .withName(clusterName)
                 .when(Stack.postV4())
@@ -74,7 +76,7 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
     }
 
     private StackTestDto checkValidClouderaManagerTemplate(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getAmbari().getExtendedClusterDefinitionText();
+        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getExtendedClusterDefinitionText();
         ApiClusterTemplate cmTemplate = parseCmTemplate(extendedClusterDefinitionText);
         checkHostNumberGreaterThanZero(cmTemplate);
         return stackTestDto;

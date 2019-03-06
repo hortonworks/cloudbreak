@@ -33,7 +33,7 @@ public class AmbariBlueprintUtilsTest {
     private JsonHelper jsonHelper;
 
     @InjectMocks
-    private AmbariBlueprintUtils underTest;
+    private ClusterTemplateUtils underTest;
 
     @Test
     public void testReadDefaultBlueprintFromFileWhenFileExistThenShouldReadFile() throws IOException {

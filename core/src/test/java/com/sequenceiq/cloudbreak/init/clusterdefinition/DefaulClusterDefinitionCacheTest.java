@@ -19,7 +19,7 @@ import org.powermock.reflect.Whitebox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
 import com.sequenceiq.cloudbreak.converter.v4.clusterdefinition.ClusterDefinitionV4RequestToClusterDefinitionConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class DefaulClusterDefinitionCacheTest {
 
     @Mock
-    private AmbariBlueprintUtils ambariBlueprintUtils;
+    private ClusterTemplateUtils clusterTemplateUtils;
 
     @Mock
     private ClusterDefinitionV4RequestToClusterDefinitionConverter converter;
@@ -60,15 +60,15 @@ public class DefaulClusterDefinitionCacheTest {
         bp1.setName("bp1");
         String bp1JsonString = "{\"inputs\":[],\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"bp1\"}}}";
         JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);
-        when(ambariBlueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText1);
+        when(clusterTemplateUtils.convertStringToJsonNode(any())).thenReturn(bpText1);
 
         ClusterDefinition bp2 = new ClusterDefinition();
         bp2.setName("bp2");
         String bp2JsonString = "{\"inputs\":[],\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"bp2\"}}}";
         JsonNode bpText2 = JsonUtil.readTree(bp2JsonString);
-        when(ambariBlueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText2);
+        when(clusterTemplateUtils.convertStringToJsonNode(any())).thenReturn(bpText2);
 
-        when(ambariBlueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
+        when(clusterTemplateUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
         Whitebox.setInternalState(underTest, "releasedBlueprints", Collections.singletonList("Description1=bp1"));
         Whitebox.setInternalState(underTest, "internalBlueprints", Collections.singletonList(" "));
         Whitebox.setInternalState(underTest, "releasedCMClusterDefinitions", Collections.singletonList("Description2=bp2"));
