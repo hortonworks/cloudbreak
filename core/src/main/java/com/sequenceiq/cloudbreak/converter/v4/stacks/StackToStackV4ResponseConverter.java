@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -102,7 +101,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         addNodeCount(source, response);
         convertComponentConfig(response, source);
         response.setTags(getTags(response, source.getTags()));
-        addFlexSubscription(response, source);
         response.setTimeToLive(getStackTimeToLive(source));
         addSharedServiceResponse(source, response);
 
@@ -143,17 +141,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
             LOGGER.info("Failed to convert dynamic component.", e);
         }
 
-    }
-
-    private void addFlexSubscription(StackV4Response stackV4Response, Stack source) {
-        if (source.getFlexSubscription() != null) {
-            try {
-                FlexSubscriptionV4Response flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionV4Response.class);
-                stackV4Response.setFlexSubscription(flexSubscription);
-            } catch (Exception ex) {
-                LOGGER.warn("Flex subscription could not be added to stack response.", ex);
-            }
-        }
     }
 
     private List<InstanceGroupV4Response> getInstanceGroups(Stack stack) {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
-import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -10,7 +8,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,6 +38,8 @@ import reactor.bus.EventBus;
 public class ServiceProviderCredentialAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderCredentialAdapter.class);
+
+    private static final String SMART_SENSE_ID = "smartSenseId";
 
     @Inject
     private EventBus eventBus;
@@ -81,7 +80,6 @@ public class ServiceProviderCredentialAdapter {
                         res.getCloudCredentialStatus().getException());
             }
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
-            mergeSmartSenseAttributeIfExists(credential, cloudCredentialResponse);
             mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);
@@ -138,20 +136,6 @@ public class ServiceProviderCredentialAdapter {
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing initialization of authorization code grant based credential creation:", e);
             throw new OperationException(e);
-        }
-    }
-
-    private void mergeSmartSenseAttributeIfExists(Credential credential, CloudCredential cloudCredentialResponse) {
-        String smartSenseId = String.valueOf(cloudCredentialResponse.getParameters().get(SMART_SENSE_ID));
-        if (StringUtils.isNoneEmpty(smartSenseId)) {
-            try {
-                Json attributes = new Json(credential.getAttributes());
-                Map<String, Object> newAttributes = attributes.getMap();
-                newAttributes.put(SMART_SENSE_ID, smartSenseId);
-                credential.setAttributes(new Json(newAttributes).getValue());
-            } catch (IOException e) {
-                LOGGER.info("SmartSense id could not be added to the credential as attribute.", e);
-            }
         }
     }
 

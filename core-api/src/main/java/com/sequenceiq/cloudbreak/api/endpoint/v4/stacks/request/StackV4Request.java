@@ -78,9 +78,6 @@ public class StackV4Request extends StackV4Base {
     @Max(value = 65535, message = "Port should be between 1025 and 65535")
     private Integer gatewayPort;
 
-    @ApiModelProperty(StackModelDescription.FLEX_ID)
-    private Long flexId;
-
     private StackType type;
 
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
@@ -159,14 +156,6 @@ public class StackV4Request extends StackV4Base {
 
     public void setGatewayPort(Integer gatewayPort) {
         this.gatewayPort = gatewayPort;
-    }
-
-    public Long getFlexId() {
-        return flexId;
-    }
-
-    public void setFlexId(Long flexId) {
-        this.flexId = flexId;
     }
 
     public StackType getType() {

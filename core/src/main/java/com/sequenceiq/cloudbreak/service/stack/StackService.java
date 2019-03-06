@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -578,11 +577,6 @@ public class StackService {
 
     public List<Stack> getByStatuses(List<Status> statuses) {
         return stackRepository.findByStatuses(statuses);
-    }
-
-    public long countByFlexSubscription(FlexSubscription subscription) {
-        Long count = stackRepository.countByFlexSubscription(subscription);
-        return count == null ? 0L : count;
     }
 
     public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {

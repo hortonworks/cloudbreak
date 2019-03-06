@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.flexsubscription.responses.FlexSubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -76,9 +75,6 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.CLOUDBREAK_DETAILS)
     private CloudbreakDetailsV4Response cloudbreakDetails;
-
-    @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
-    private FlexSubscriptionV4Response flexSubscription;
 
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationV4Response authentication;
@@ -195,14 +191,6 @@ public class StackV4Response extends StackV4Base {
 
     public void setCloudbreakDetails(CloudbreakDetailsV4Response cloudbreakDetails) {
         this.cloudbreakDetails = cloudbreakDetails;
-    }
-
-    public FlexSubscriptionV4Response getFlexSubscription() {
-        return flexSubscription;
-    }
-
-    public void setFlexSubscription(FlexSubscriptionV4Response flexSubscription) {
-        this.flexSubscription = flexSubscription;
     }
 
     public StackAuthenticationV4Response getAuthentication() {

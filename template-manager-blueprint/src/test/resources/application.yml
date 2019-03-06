@@ -1,4 +1,0 @@
-cb:
-  smartsense.configure: true
-  smartsense.enabled: true
-  smartsense.id.pattern: A-9990%s-C-%s

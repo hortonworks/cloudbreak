@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -116,9 +115,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND s.cluster.status = 'AVAILABLE' "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<Stack> findAliveOnesWithAmbari();
-
-    @DisableCheckPermissions
-    Long countByFlexSubscription(FlexSubscription flexSubscription);
 
     @DisableCheckPermissions
     Long countByCredential(Credential credential);

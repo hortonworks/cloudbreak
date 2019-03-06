@@ -109,9 +109,6 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${rest.debug}")
     private boolean restDebug;
 
-    @Value("${cb.smartsense.configure:false}")
-    private boolean configureSmartSense;
-
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
 
     private ExitCriteria exitCriteria;
@@ -280,11 +277,6 @@ public class SaltOrchestrator implements HostOrchestrator {
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
                 runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "kerberized"), exitModel);
-            }
-            // smartsense
-            if (configureSmartSense) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitModel);
-                runSaltCommand(sc, new GrainAddRunner(allNodeIP, allNodes, "smartsense_agent_update"), exitModel);
             }
             uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
 

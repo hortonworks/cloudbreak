@@ -7,8 +7,6 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class CloudCredential extends DynamicModel {
 
-    public static final String SMART_SENSE_ID = "smartSenseId";
-
     private final Long id;
 
     private final String name;

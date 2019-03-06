@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.cluster;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.clusterdefinition.SmartsenseConfigurationLocator;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -35,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -65,12 +61,6 @@ public class ClusterBuilderService {
 
     @Inject
     private ClusterCreationSuccessHandler clusterCreationSuccessHandler;
-
-    @Inject
-    private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
-
-    @Inject
-    private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -106,7 +96,6 @@ public class ClusterBuilderService {
         clusterService.updateCluster(cluster);
         clusterService.save(connector.buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());
-        configureSmartsense(stack, connector);
         clusterCreationSuccessHandler.handleClusterCreationSuccess(stack);
         if (StackType.DATALAKE == stack.getType()) {
             try {
@@ -131,10 +120,4 @@ public class ClusterBuilderService {
         return instanceMetaDataByHostGroup;
     }
 
-    private void configureSmartsense(Stack stack, ClusterApi connector) {
-        Optional<SmartSenseSubscription> smartSenseSubscription = smartSenseSubscriptionService.getDefault();
-        if (smartsenseConfigurationLocator.smartsenseConfigurable(smartSenseSubscription)) {
-            connector.clusterSetupService().configureSmartSense();
-        }
-    }
 }

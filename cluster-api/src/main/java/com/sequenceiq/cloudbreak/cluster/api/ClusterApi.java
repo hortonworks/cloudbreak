@@ -30,10 +30,6 @@ public interface ClusterApi {
         return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster);
     }
 
-    default void configureSmartSense() {
-        clusterSetupService().configureSmartSense();
-    }
-
     default void waitForHosts(Stack stack, Set<HostMetadata> hostsInCluster) {
         clusterSetupService().waitForHosts(hostsInCluster);
     }

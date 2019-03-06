@@ -97,7 +97,7 @@ public class KubernetesTestDto extends AbstractCloudbreakEntity<KubernetesV4Requ
     @Override
     public void delete(TestContext testContext, KubernetesV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().flexSubscriptionV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
+            client.getCloudbreakClient().kubernetesV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (ProxyMethodInvocationException e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }

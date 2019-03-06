@@ -15,7 +15,6 @@ public enum WorkspaceResource {
     MPACK("MPACK resource", "mpack"),
     KUBERNETES("Kubernetes config", "kube"),
     STRUCTURED_EVENT("Structured event resource", "structuredevent"),
-    FLEXSUBSCRIPTION("Flex subscription", "flexsubscription"),
     NETWORK("Network", "network"),
     TOPOLOGY("Topology", "topology"),
     SECURITY_GROUP("Security group", "securitygroup"),

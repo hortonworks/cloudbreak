@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -56,7 +55,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -89,9 +87,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
-
-    @Mock
-    private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
     @Mock
     private StackInfoService stackInfoService;
@@ -164,28 +159,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.clusterDefinitionStackInfo(TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(clusterDefinitionStackInfo);
-    }
-
-    @Test
-    public void testConvertWhenThereIsNoSmartSenseSubscriptionThenNullShouldBePlaced() {
-        when(smartSenseSubscriptionService.getDefault()).thenReturn(Optional.empty());
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertFalse(result.getSmartSenseSubscription().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenThereIsASmartSenseSubscriptionThenNullShouldBePlaced() {
-        String subscriptionId = "1234567";
-        SmartSenseSubscription subscription = new SmartSenseSubscription();
-        subscription.setSubscriptionId(subscriptionId);
-        when(smartSenseSubscriptionService.getDefault()).thenReturn(Optional.of(subscription));
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertTrue(result.getSmartSenseSubscription().isPresent());
-        assertEquals(subscriptionId, result.getSmartSenseSubscription().get().getSubscriptionId());
     }
 
     @Test

@@ -217,23 +217,6 @@ public class OperationDescriptions {
         public static final String SUBSCRIBE = "retrive subscribe identifier";
     }
 
-    public static class SmartSenseSubOpDescription {
-        public static final String GET = "retrieve default SmartSense subscription";
-        public static final String LIST_BY_WORKSPACE = "list SmartSense subscriptions for the given workspace";
-        public static final String GET_BY_NAME_IN_WORKSPACE = "get SmartSense subscription by name in workspace";
-        public static final String CREATE_IN_WORKSPACE = "create SmartSense subscription in workspace";
-        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete SmartSense subscription by name in workspace";
-    }
-
-    public static class FlexSubOpDescription {
-        public static final String SET_DEFAULT_IN_WORKSPACE = "sets the workspace default flag on the Flex subscription";
-        public static final String SET_USED_FOR_CONTROLLER_IN_WORKSPACE = "sets the workspace 'used for controller' flag on the Flex subscription";
-        public static final String LIST_BY_WORKSPACE = "list Flex subscriptions for the given workspace";
-        public static final String GET_BY_NAME_IN_WORKSPACE = "get Flex subscription by name in workspace";
-        public static final String CREATE_IN_WORKSPACE = "create Flex subscription in workspace";
-        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete Flex subscription by name in workspace";
-    }
-
     public static class ImageCatalogOpDescription {
         public static final String PUT_BY_NAME = "update Image Catalog by id";
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";

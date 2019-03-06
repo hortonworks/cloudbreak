@@ -93,9 +93,6 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private CentralClusterDefinitionUpdater centralClusterDefinitionUpdater;
 
     @Inject
-    private AmbariSmartSenseCapturer ambariSmartSenseCapturer;
-
-    @Inject
     private AmbariAdapter ambariAdapter;
 
     private AmbariClient ambariClient;
@@ -155,11 +152,6 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             LOGGER.warn("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
         }
-    }
-
-    @Override
-    public void configureSmartSense() {
-        ambariSmartSenseCapturer.capture(0, ambariClient);
     }
 
     private String constructClusterFailedMessage(Long clusterId, AmbariClient ambariClient) {

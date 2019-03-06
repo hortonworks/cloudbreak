@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,11 +24,9 @@ import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -43,7 +40,6 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteServic
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -65,9 +61,6 @@ import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
-
-    @Inject
-    private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
     private LdapConfigService ldapConfigService;
@@ -130,8 +123,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = getCredential(source, workspace);
-            Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
-            SmartSenseSubscription smartsenseSubscription = flexSubscription.map(FlexSubscription::getSmartSenseSubscription).orElse(null);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, workspace);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
@@ -156,7 +147,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 gatewaySignKey = gateway.getSignKey();
             }
             Builder builder = Builder.builder()
-                    .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway, gatewaySignKey)
@@ -164,7 +154,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withStackRepoDetailsHdpVersion(clusterDefinitionStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
-                    .withSmartSenseSubscription(smartsenseSubscription)
                     .withLdapConfig(ldapConfig, bindDn, bindPassword)
                     .withKerberosConfig(kerberosConfig);
 
@@ -212,18 +201,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     private ClusterDefinition getClusterDefinition(StackV4Request source, Workspace workspace) {
         return clusterDefinitionService.getByNameForWorkspace(source.getCluster().getAmbari().getClusterDefinitionName(), workspace);
-    }
-
-    private Optional<FlexSubscription> getFlexSubscription(StackV4Request source) {
-        return source.getFlexId() != null
-                ? Optional.ofNullable(flexSubscriptionService.get(source.getFlexId()))
-                : Optional.empty();
-    }
-
-    private Optional<String> getSmartsenseSubscriptionId(Optional<FlexSubscription> flexSubscription) {
-        return flexSubscription.isPresent()
-                ? Optional.ofNullable(flexSubscription.get().getSubscriptionId())
-                : Optional.empty();
     }
 
     private Set<HostgroupView> getHostgroupViews(StackV4Request source) {

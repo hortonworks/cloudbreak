@@ -78,7 +78,6 @@ public class TerminationService {
                 }
                 stack.setCredential(null);
                 stack.setNetwork(null);
-                stack.setFlexSubscription(null);
                 stack.setEnvironment(null);
                 stack.setName(terminatedName);
                 terminateInstanceGroups(stack);
