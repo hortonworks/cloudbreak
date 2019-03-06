@@ -15,11 +15,16 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
@@ -27,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
@@ -54,7 +60,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
     }
 
     @Test
-    public void convert() throws Exception {
+    public void convert() {
         InstanceTemplateV4Request source = new InstanceTemplateV4Request();
         source.setCloudPlatform(CloudPlatform.GCP);
         source.setRootVolume(getRootVolume(100));
@@ -135,6 +141,41 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         assertEquals(1, result.getAttributes().getMap().get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS));
         assertNotNull(result.getSecretAttributes());
         assertEquals(rootVolumeSize, result.getRootVolumeSize().intValue());
+    }
+
+    @Test
+    public void convertWithEncryption() {
+        InstanceTemplateV4Request source = new InstanceTemplateV4Request();
+        source.setCloudPlatform(CloudPlatform.GCP);
+        source.setRootVolume(getRootVolume(100));
+        source.setInstanceType("n1-standard-4");
+        GcpInstanceTemplateV4Parameters parameters = new GcpInstanceTemplateV4Parameters();
+        GcpEncryptionV4Parameters encryption = new GcpEncryptionV4Parameters();
+        encryption.setType(EncryptionType.CUSTOM);
+        encryption.setKeyEncryptionMethod(KeyEncryptionMethod.RAW);
+        encryption.setKey("myKey");
+        parameters.setEncryption(encryption);
+        source.setGcp(parameters);
+
+        ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
+        ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
+
+        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+
+        Template result = underTest.convert(source);
+
+        assertEquals(ResourceStatus.USER_MANAGED, result.getStatus());
+        assertEquals(source.getCloudPlatform().name(), result.cloudPlatform());
+        assertEquals(source.getRootVolume().getSize(), result.getRootVolumeSize());
+        assertEquals(source.getInstanceType(), result.getInstanceType());
+
+        assertNotNull(result.getAttributes());
+        Map<String, Object> map = result.getAttributes().getMap();
+        assertEquals(map.get("keyEncryptionMethod"), "RAW");
+        assertEquals(map.get("type"), "CUSTOM");
+
+        assertNotNull(result.getSecretAttributes());
+        assertEquals(new Json(result.getSecretAttributes()).getMap().get("key"), "myKey");
     }
 
     private RootVolumeV4Request getRootVolume(Integer size) {

@@ -735,4 +735,21 @@ public class StackToCloudStackConverterTest {
         assertEquals("value", instanceTemplate.getParameters().get("someAttr"));
         assertEquals("value", instanceTemplate.getParameters().get("otherAttr"));
     }
+
+    @Test
+    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() throws Exception {
+        Template template = new Template();
+        template.setVolumeCount(0);
+        template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", "type", "CUSTOM")));
+        template.setSecretAttributes(new Json(Map.of("key", "myKey")).getValue());
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
+                template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
+
+        Map<String, Object> parameters = instanceTemplate.getParameters();
+        assertNotNull(parameters);
+        assertEquals("RAW", parameters.get("keyEncryptionMethod"));
+        assertEquals("CUSTOM", parameters.get("type"));
+        assertEquals("myKey", parameters.get("key"));
+    }
 }
