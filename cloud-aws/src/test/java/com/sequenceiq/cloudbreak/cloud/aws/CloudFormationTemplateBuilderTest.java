@@ -6,17 +6,21 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -30,6 +34,7 @@ import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
@@ -140,25 +145,14 @@ public class CloudFormationTemplateBuilderTest {
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
         instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
-        List<SecurityRule> rules = singletonList(new SecurityRule("0.0.0.0/0",
-                new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        Security security = new Security(rules, emptyList());
+        Security security = getDefaultCloudStackSecurity();
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
-        List<Group> groups = new ArrayList<>();
-        groups.add(new Group(name, InstanceGroupType.CORE, singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        groups.add(new Group(name, InstanceGroupType.GATEWAY, singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        Network network = new Network(new Subnet("testSubnet"));
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("persistentStorage", "persistentStorageTest");
-        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("testtagkey", "testtagvalue");
+        List<Group> groups = List.of(createDefaultGroup(InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security),
+                createDefaultGroup(InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security));
 
         defaultTags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
         defaultTags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
@@ -167,8 +161,7 @@ public class CloudFormationTemplateBuilderTest {
         defaultTags.put(CloudbreakResourceType.SECURITY.templateVariable(), CloudbreakResourceType.SECURITY.key());
         defaultTags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
         defaultTags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
     }
 
     @Test
@@ -195,6 +188,69 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("testtagkey")));
         assertThat(templateString, not(containsString("testtagvalue")));
         assertThat(templateString, containsString(Integer.toString(ROOT_VOLUME_SIZE)));
+    }
+
+    @Test
+    public void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperLarge() throws IOException {
+        //GIVEN
+        Integer rootVolumeSize = Integer.MAX_VALUE;
+        Security security = getDefaultCloudStackSecurity();
+        List<Group> groups = List.of(createDefaultGroup(InstanceGroupType.CORE, rootVolumeSize, security),
+                createDefaultGroup(InstanceGroupType.GATEWAY, rootVolumeSize, security));
+        CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, containsString(Integer.toString(rootVolumeSize)));
+        JsonNode firstBlockDeviceMapping = getJsonNode(JsonUtil.readTree(templateString), "BlockDeviceMappings").get(0);
+        String volumeSize = getJsonNode(firstBlockDeviceMapping, "VolumeSize").textValue();
+        assertEquals(Integer.valueOf(volumeSize), rootVolumeSize);
+    }
+
+    @Test
+    public void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperSmall() throws IOException {
+        //GIVEN
+        Integer rootVolumeSize = Integer.MIN_VALUE;
+        Security security = getDefaultCloudStackSecurity();
+        List<Group> groups = List.of(createDefaultGroup(InstanceGroupType.CORE, rootVolumeSize, security),
+                createDefaultGroup(InstanceGroupType.GATEWAY, rootVolumeSize, security));
+        CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, containsString(Integer.toString(rootVolumeSize)));
+        JsonNode firstBlockDeviceMapping = getJsonNode(JsonUtil.readTree(templateString), "BlockDeviceMappings").get(0);
+        String volumeSize = getJsonNode(firstBlockDeviceMapping, "VolumeSize").textValue();
+        assertEquals(Integer.valueOf(volumeSize), rootVolumeSize);
+
     }
 
     @Test
@@ -770,4 +826,40 @@ public class CloudFormationTemplateBuilderTest {
         CloudCredential credential = new CloudCredential(1L, null);
         return new AuthenticatedContext(cloudContext, credential);
     }
+
+    private CloudStack createDefaultCloudStack(Collection<Group> groups, Map<String, String> parameters, Map<String, String> tags) {
+        Network network = new Network(new Subnet("testSubnet"));
+        return new CloudStack(groups, network, image, parameters, tags, null, instanceAuthentication,
+                instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+    }
+
+    private Group createDefaultGroup(InstanceGroupType type, int rootVolumeSize, Security security) {
+        return new Group(name, type, singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), rootVolumeSize);
+    }
+
+    private Map<String, String> getDefaultCloudStackParameters() {
+        return Map.of("persistentStorage", "persistentStorageTest", "attachedStorageOption", "attachedStorageOptionTest");
+    }
+
+    private Map<String, String> getDefaultCloudStackTags() {
+        return Map.of("testtagkey", "testtagvalue");
+    }
+
+    private Security getDefaultCloudStackSecurity() {
+        return new Security(getDefaultSecurityRules(), emptyList());
+    }
+
+    private List<SecurityRule> getDefaultSecurityRules() {
+        return singletonList(new SecurityRule("0.0.0.0/0",
+                new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
+    }
+
+    private JsonNode getJsonNode(JsonNode node, String value) {
+        if (node == null) {
+            throw new RuntimeException("No Json node provided for seeking value!");
+        }
+        return Optional.ofNullable(node.findValue(value)).orElseThrow(() -> new RuntimeException("No value find in json with the name of: \"" + value + "\""));
+    }
+
 }
