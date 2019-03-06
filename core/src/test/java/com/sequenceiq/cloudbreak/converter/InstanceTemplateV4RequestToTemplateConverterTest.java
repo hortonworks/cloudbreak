@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
@@ -144,7 +146,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
     }
 
     @Test
-    public void convertWithEncryption() {
+    public void convertWithGcpEncryption() {
         InstanceTemplateV4Request source = new InstanceTemplateV4Request();
         source.setCloudPlatform(CloudPlatform.GCP);
         source.setRootVolume(getRootVolume(100));
@@ -171,11 +173,44 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
         assertNotNull(result.getAttributes());
         Map<String, Object> map = result.getAttributes().getMap();
-        assertEquals(map.get("keyEncryptionMethod"), "RAW");
-        assertEquals(map.get("type"), "CUSTOM");
+        assertEquals("RAW", map.get("keyEncryptionMethod"));
+        assertEquals("CUSTOM", map.get("type"));
 
         assertNotNull(result.getSecretAttributes());
-        assertEquals(new Json(result.getSecretAttributes()).getMap().get("key"), "myKey");
+        assertEquals("myKey", new Json(result.getSecretAttributes()).getMap().get("key"));
+    }
+
+    @Test
+    public void convertWithAwsEncryption() {
+        InstanceTemplateV4Request source = new InstanceTemplateV4Request();
+        source.setCloudPlatform(CloudPlatform.AWS);
+        source.setRootVolume(getRootVolume(100));
+        source.setInstanceType("m5.2xlarge");
+        AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
+        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
+        encryption.setType(EncryptionType.CUSTOM);
+        encryption.setKey("myKey");
+        parameters.setEncryption(encryption);
+        source.setAws(parameters);
+
+        ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
+        ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
+
+        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+
+        Template result = underTest.convert(source);
+
+        assertEquals(ResourceStatus.USER_MANAGED, result.getStatus());
+        assertEquals(source.getCloudPlatform().name(), result.cloudPlatform());
+        assertEquals(source.getRootVolume().getSize(), result.getRootVolumeSize());
+        assertEquals(source.getInstanceType(), result.getInstanceType());
+
+        assertNotNull(result.getAttributes());
+        Map<String, Object> map = result.getAttributes().getMap();
+        assertEquals("CUSTOM", map.get("type"));
+
+        assertNotNull(result.getSecretAttributes());
+        assertEquals("myKey", new Json(result.getSecretAttributes()).getMap().get("key"));
     }
 
     private RootVolumeV4Request getRootVolume(Integer size) {

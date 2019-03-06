@@ -737,7 +737,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() throws Exception {
+    public void testBuildInstanceTemplateWithEncryptionAttributes() throws Exception {
         Template template = new Template();
         template.setVolumeCount(0);
         template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", "type", "CUSTOM")));
