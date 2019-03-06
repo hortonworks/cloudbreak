@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -37,7 +37,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverter
     private JsonHelper jsonHelper;
 
     @Inject
-    private AmbariBlueprintUtils ambariBlueprintUtils;
+    private ClusterTemplateUtils clusterTemplateUtils;
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -59,17 +59,17 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverter
         }
         try {
             JsonNode clusterDefinitionJson = JsonUtil.readTree(clusterDefinition.getClusterDefinitionText());
-            if (ambariBlueprintUtils.isAmbariBlueprint(clusterDefinitionJson)) {
+            if (clusterTemplateUtils.isAmbariBlueprint(clusterDefinitionJson)) {
                 validateAmbariBlueprint(clusterDefinitionJson);
                 validateAmbariBlueprintStackVersion(clusterDefinitionJson);
-                clusterDefinition.setStackName(ambariBlueprintUtils.getBlueprintName(clusterDefinitionJson));
-                clusterDefinition.setHostGroupCount(ambariBlueprintUtils.countHostGroups(clusterDefinitionJson));
-                clusterDefinition.setStackType(ambariBlueprintUtils.getBlueprintStackName(clusterDefinitionJson));
-                clusterDefinition.setStackVersion(ambariBlueprintUtils.getBlueprintStackVersion(clusterDefinitionJson));
+                clusterDefinition.setStackName(clusterTemplateUtils.getBlueprintName(clusterDefinitionJson));
+                clusterDefinition.setHostGroupCount(clusterTemplateUtils.countHostGroups(clusterDefinitionJson));
+                clusterDefinition.setStackType(clusterTemplateUtils.getBlueprintStackName(clusterDefinitionJson));
+                clusterDefinition.setStackVersion(clusterTemplateUtils.getBlueprintStackVersion(clusterDefinitionJson));
             } else {
-                clusterDefinition.setStackName(ambariBlueprintUtils.getCDHDisplayName(clusterDefinitionJson));
-                clusterDefinition.setHostGroupCount(ambariBlueprintUtils.countHostTemplates(clusterDefinitionJson));
-                clusterDefinition.setStackVersion(ambariBlueprintUtils.getCDHStackVersion(clusterDefinitionJson));
+                clusterDefinition.setStackName(clusterTemplateUtils.getCDHDisplayName(clusterDefinitionJson));
+                clusterDefinition.setHostGroupCount(clusterTemplateUtils.countHostTemplates(clusterDefinitionJson));
+                clusterDefinition.setStackVersion(clusterTemplateUtils.getCDHStackVersion(clusterDefinitionJson));
                 clusterDefinition.setStackType("CDH");
             }
         } catch (IOException e) {
@@ -83,7 +83,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverter
     }
 
     private void validateAmbariBlueprintStackVersion(JsonNode blueprintJson) {
-        String stackVersion = ambariBlueprintUtils.getBlueprintStackVersion(blueprintJson);
+        String stackVersion = clusterTemplateUtils.getBlueprintStackVersion(blueprintJson);
         if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]+")) {
             throw new BadRequestException(String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR format eg.: 2.6",
                     stackVersion));
@@ -117,7 +117,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverter
             JsonNode hostGroupName = hostGroup.path("name");
             if (isTextPropertyMissing(hostGroupName)) {
                 throw new BadRequestException("Validation error: one of the 'host_groups' has no name.");
-            } else if (!ambariBlueprintUtils.isValidHostGroupName(hostGroupName.asText())) {
+            } else if (!clusterTemplateUtils.isValidHostGroupName(hostGroupName.asText())) {
                 throw new BadRequestException(String.format("Validation error: '%s' is not a valid host group name. Host group name "
                         + "must be alphanumeric with underscores ('_').", hostGroupName.asText()));
             }

@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDet
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -59,7 +59,7 @@ public class ClusterCreationSetupServiceTest {
     private ComponentConfigProvider componentConfigProvider;
 
     @Mock
-    private AmbariBlueprintUtils ambariBlueprintUtils;
+    private ClusterTemplateUtils clusterTemplateUtils;
 
     @Mock
     private ClusterDefinitionService clusterDefinitionService;
@@ -113,8 +113,8 @@ public class ClusterCreationSetupServiceTest {
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(component, imageComponent));
         String version = "3.0";
-        when(ambariBlueprintUtils.getBlueprintStackVersion(any())).thenReturn(version);
-        when(ambariBlueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
+        when(clusterTemplateUtils.getBlueprintStackVersion(any())).thenReturn(version);
+        when(clusterTemplateUtils.getBlueprintStackName(any())).thenReturn("HDP");
         DefaultHDPInfo defaultHDPInfo = new DefaultHDPInfo();
         AmbariDefaultStackRepoDetails stackRepoDetails = new AmbariDefaultStackRepoDetails();
         stackRepoDetails.setHdpVersion(version);

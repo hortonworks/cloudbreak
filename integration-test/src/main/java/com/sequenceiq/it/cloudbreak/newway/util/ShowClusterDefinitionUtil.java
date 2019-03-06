@@ -22,7 +22,7 @@ public class ShowClusterDefinitionUtil {
     }
 
     public static StackTestDto checkGeneratedClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getAmbari().getExtendedClusterDefinitionText();
+        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getExtendedClusterDefinitionText();
         validateGeneratedClusterDefinition(extendedClusterDefinitionText);
         return stackTestDto;
     }

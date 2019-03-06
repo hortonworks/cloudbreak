@@ -18,7 +18,11 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class AmbariBlueprintUtils {
+public class ClusterTemplateUtils {
+
+    public static final String BLUEPRINTS_JSON_NODE_TEXT = "Blueprints";
+
+    public static final String CDH_VERSION_JSON_NODE_TEXT = "cdhVersion";
 
     @Inject
     private JsonHelper jsonHelper;
@@ -55,16 +59,24 @@ public class AmbariBlueprintUtils {
         return StringUtils.isNotEmpty(hostGroupName) && validHostGroupNamePattern.matcher(hostGroupName).matches();
     }
 
+    public boolean isClouderaManagerClusterTemplate(String text) {
+        return isClouderaManagerClusterTemplate(convertStringToJsonNode(text));
+    }
+
+    public boolean isClouderaManagerClusterTemplate(JsonNode blueprint) {
+        return blueprint.path(CDH_VERSION_JSON_NODE_TEXT).isValueNode() && blueprint.path(BLUEPRINTS_JSON_NODE_TEXT).isMissingNode();
+    }
+
     public boolean isAmbariBlueprint(String blueprint) {
         return isAmbariBlueprint(convertStringToJsonNode(blueprint));
     }
 
     public boolean isAmbariBlueprint(JsonNode blueprint) {
-        return blueprint.path("cdhVersion").isMissingNode();
+        return blueprint.path(CDH_VERSION_JSON_NODE_TEXT).isMissingNode() && blueprint.path(BLUEPRINTS_JSON_NODE_TEXT).isContainerNode();
     }
 
     public String getBlueprintName(JsonNode root) {
-        return root.get("Blueprints").get("blueprint_name").asText();
+        return root.get(BLUEPRINTS_JSON_NODE_TEXT).get("blueprint_name").asText();
     }
 
     public String getCDHDisplayName(JsonNode root) {
@@ -72,21 +84,21 @@ public class AmbariBlueprintUtils {
     }
 
     public String getBlueprintStackVersion(JsonNode root) {
-        if (root.get("Blueprints") != null) {
-            return root.get("Blueprints").get("stack_version").asText();
+        if (root.get(BLUEPRINTS_JSON_NODE_TEXT) != null) {
+            return root.get(BLUEPRINTS_JSON_NODE_TEXT).get("stack_version").asText();
         }
         return "";
     }
 
     public String getBlueprintStackName(JsonNode root) {
-        if (root.get("Blueprints") != null) {
-            return root.get("Blueprints").get("stack_name").asText();
+        if (root.get(BLUEPRINTS_JSON_NODE_TEXT) != null) {
+            return root.get(BLUEPRINTS_JSON_NODE_TEXT).get("stack_name").asText();
         }
         return "";
     }
 
     public String getCDHStackVersion(JsonNode root) {
-        return root.get("cdhVersion").asText();
+        return root.get(CDH_VERSION_JSON_NODE_TEXT).asText();
     }
 
     public JsonNode convertStringToJsonNode(String json) {

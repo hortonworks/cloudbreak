@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,6 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
-import com.sequenceiq.cloudbreak.service.exception.RepositoryCannotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultClouderaManagerRepoServiceTest {
@@ -60,9 +60,7 @@ public class DefaultClouderaManagerRepoServiceTest {
 
     @Test
     public void testDefaultRepoWhenOsTypeNotExist() {
-        thrown.expect(RepositoryCannotFoundException.class);
-        thrown.expectMessage("Repository informations cannot found by given osType!");
-
-        defaultClouderaManagerRepoService.getDefault("redhat8");
+        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat8");
+        assertNull(repo);
     }
 }

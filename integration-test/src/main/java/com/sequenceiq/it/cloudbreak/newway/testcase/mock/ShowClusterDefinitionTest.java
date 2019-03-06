@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -55,18 +54,6 @@ public class ShowClusterDefinitionTest extends AbstractIntegrationTest {
                 .when(Stack.getV4())
                 .then(ShowClusterDefinitionUtil::checkGeneratedClusterDefinition)
                 .validate();
-    }
-
-    private static StackTestDto checkFutureClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedClusterDefinitionText = stackTestDto.getGeneratedClusterDefinition().getClusterDefinitionText();
-        validateGeneratedClusterDefinition(extendedClusterDefinitionText);
-        return stackTestDto;
-    }
-
-    private static StackTestDto checkGeneratedClusterDefinition(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedClusterDefinitionText = stackTestDto.getResponse().getCluster().getExtendedClusterDefinitionText();
-        validateGeneratedClusterDefinition(extendedClusterDefinitionText);
-        return stackTestDto;
     }
 
     private static void validateGeneratedClusterDefinition(String extendedClusterDefinitionText) {

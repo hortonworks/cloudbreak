@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -67,7 +67,7 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
     private ClusterDefinitionViewRepository clusterDefinitionViewRepository;
 
     @Inject
-    private AmbariBlueprintUtils ambariBlueprintUtils;
+    private ClusterTemplateUtils clusterTemplateUtils;
 
     @Inject
     private ClusterService clusterService;
@@ -200,11 +200,11 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
     }
 
     public boolean isClouderaManagerTemplate(ClusterDefinition clusterDefinition) {
-        return !isAmbariBlueprint(clusterDefinition);
+        return clusterTemplateUtils.isClouderaManagerClusterTemplate(clusterDefinition.getClusterDefinitionText());
     }
 
     public boolean isAmbariBlueprint(ClusterDefinition clusterDefinition) {
-        return ambariBlueprintUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText());
+        return clusterTemplateUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText());
     }
 
     public String getClusterDefinitionVariant(ClusterDefinition clusterDefinition) {
@@ -292,7 +292,7 @@ public class ClusterDefinitionService extends AbstractWorkspaceAwareResourceServ
         String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
         // Not necessarily the best way to figure out whether a DL or not. At the moment, DLs cannot be launched as
         // workloads, so works fine. Would be better to get this information from the invoking context itself.
-        boolean datalake = ambariBlueprintUtils.isSharedServiceReadyBlueprint(clusterDefinition);
+        boolean datalake = clusterTemplateUtils.isSharedServiceReadyBlueprint(clusterDefinition);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withClusterName(clusterName)
                 .withStorageName(storageName)

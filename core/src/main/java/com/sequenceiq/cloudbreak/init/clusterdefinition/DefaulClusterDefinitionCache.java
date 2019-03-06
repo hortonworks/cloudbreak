@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
 import com.sequenceiq.cloudbreak.converter.v4.clusterdefinition.ClusterDefinitionV4RequestToClusterDefinitionConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -41,7 +41,7 @@ public class DefaulClusterDefinitionCache {
     private List<String> releasedCMClusterDefinitions;
 
     @Inject
-    private AmbariBlueprintUtils ambariBlueprintUtils;
+    private ClusterTemplateUtils clusterTemplateUtils;
 
     @Inject
     private ClusterDefinitionV4RequestToClusterDefinitionConverter converter;
@@ -52,15 +52,15 @@ public class DefaulClusterDefinitionCache {
         for (String blueprintText : blueprints) {
             try {
                 String[] split = blueprintText.trim().split("=");
-                if (ambariBlueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
+                if (clusterTemplateUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
                     LOGGER.debug("Load default validation '{}'.", blueprintText);
                     ClusterDefinitionV4Request blueprintJson = new ClusterDefinitionV4Request();
                     blueprintJson.setName(split[0].trim());
-                    JsonNode jsonNode = ambariBlueprintUtils.convertStringToJsonNode(ambariBlueprintUtils.readDefaultBlueprintFromFile(split));
+                    JsonNode jsonNode = clusterTemplateUtils.convertStringToJsonNode(clusterTemplateUtils.readDefaultBlueprintFromFile(split));
                     blueprintJson.setClusterDefinition(jsonNode.get("blueprint").toString());
                     ClusterDefinition bp = converter.convert(blueprintJson);
                     JsonNode tags = jsonNode.get("tags");
-                    Map<String, Object> tagParameters = ambariBlueprintUtils.prepareTags(tags);
+                    Map<String, Object> tagParameters = clusterTemplateUtils.prepareTags(tags);
                     bp.setTags(new Json(tagParameters));
                     JsonNode description = jsonNode.get("description");
                     bp.setDescription(description == null ? split[0] : description.asText(split[0]));

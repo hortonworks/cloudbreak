@@ -21,7 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.requests.ClusterDefinitionV4Request;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.AmbariBlueprintUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
@@ -41,7 +41,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverterTest extends 
     private JsonHelper jsonHelper;
 
     @Spy
-    private final AmbariBlueprintUtils ambariBlueprintUtils = new AmbariBlueprintUtils();
+    private final ClusterTemplateUtils clusterTemplateUtils = new ClusterTemplateUtils();
 
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -49,8 +49,8 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverterTest extends 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(2).when(ambariBlueprintUtils).countHostGroups(any());
-        doReturn("bpname").when(ambariBlueprintUtils).getBlueprintName(any());
+        doReturn(2).when(clusterTemplateUtils).countHostGroups(any());
+        doReturn("bpname").when(clusterTemplateUtils).getBlueprintName(any());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverterTest extends 
     public void testConvertWhenUnableToObtainTheBlueprintNameFromTheProvidedBlueprintTextThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(ambariBlueprintUtils).getBlueprintName(any());
+        }).when(clusterTemplateUtils).getBlueprintName(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid cluster definition: Failed to parse JSON.");
 
@@ -146,7 +146,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverterTest extends 
     public void testConvertWhenUnableToObtainHostGroupCountThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(ambariBlueprintUtils).countHostGroups(any());
+        }).when(clusterTemplateUtils).countHostGroups(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid cluster definition: Failed to parse JSON.");
 
@@ -157,7 +157,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverterTest extends 
     public void testConvertWhenUnableToObtainTheStackTypeFromTheProvidedBlueprintTextThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(ambariBlueprintUtils).getBlueprintStackName(any());
+        }).when(clusterTemplateUtils).getBlueprintStackName(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid cluster definition: Failed to parse JSON.");
 
@@ -168,7 +168,7 @@ public class ClusterDefinitionV4RequestToClusterDefinitionConverterTest extends 
     public void testConvertWhenUnableToObtainTheStackVersionFromTheProvidedBlueprintTextThenExceptionWouldCome() {
         doAnswer(invocation -> {
             throw new IOException("some message");
-        }).when(ambariBlueprintUtils).getBlueprintStackVersion(any());
+        }).when(clusterTemplateUtils).getBlueprintStackVersion(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid cluster definition: Failed to parse JSON.");
 
