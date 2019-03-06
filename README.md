@@ -49,7 +49,7 @@ In order to run Cloudbreak, Periscope and Datalake from IDEA, put this into your
 export CB_LOCAL_DEV=true
 ```
 
-Cloudbreak, Periscope and Datalake containers will be stopped and Uluwatu will connect to java processes running on your host.
+Cloudbreak, Periscope and Datalake containers won't be started and Uluwatu will connect to java processes running on your host.
 
 Then run these commands:
 ```
