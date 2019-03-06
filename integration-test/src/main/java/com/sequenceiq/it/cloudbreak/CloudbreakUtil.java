@@ -142,7 +142,7 @@ public class CloudbreakUtil {
         StackV4Response stackResponse = stackV4Endpoint.get(workspaceId, stackName, new HashSet<>());
         checkStackStatusForClusterAvailability(stackResponse);
 
-        String ambariServerUrl = stackResponse.getCluster().getAmbari().getServerUrl();
+        String ambariServerUrl = stackResponse.getCluster().getServerUrl();
         Assert.assertNotNull(ambariServerUrl, "The Ambari URL is not available!");
         Response response = RestClientUtil.get().target(ambariServerUrl).request().get();
         Assert.assertEquals(HttpStatus.OK.value(), response.getStatus(), "Ambari is not available!");
@@ -152,7 +152,7 @@ public class CloudbreakUtil {
             boolean checkAmbari) {
         checkStackStatusForClusterAvailability(stackResponse);
 
-        String ambariIp = stackResponse.getCluster().getAmbari().getServerIp();
+        String ambariIp = stackResponse.getCluster().getServerIp();
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
 
         if (checkAmbari) {
@@ -178,7 +178,7 @@ public class CloudbreakUtil {
         Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.STOPPED, "The cluster is not stopped!");
         Assert.assertEquals(stackResponse.getStatus(), Status.STOPPED, "The stack is not stopped!");
 
-        String ambariIp = stackResponse.getCluster().getAmbari().getServerIp();
+        String ambariIp = stackResponse.getCluster().getServerIp();
         AmbariClient ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassword);
         Assert.assertFalse(isAmbariRunning(ambariClient), "The Ambari server is running in stopped state!");
     }
@@ -196,7 +196,7 @@ public class CloudbreakUtil {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
             StackV4Response stackResponse = stackV4Endpoint.get(workspaceId, stackName, new HashSet<>());
-            ambariIp = stackResponse.getCluster().getAmbari().getServerIp();
+            ambariIp = stackResponse.getCluster().getServerIp();
             Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
             itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);
         }
@@ -206,7 +206,7 @@ public class CloudbreakUtil {
     public static String getAmbariIp(StackV4Response stackResponse, IntegrationTestContext itContext) {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
-            ambariIp = stackResponse.getCluster().getAmbari().getServerIp();
+            ambariIp = stackResponse.getCluster().getServerIp();
             Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
             itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);
         }

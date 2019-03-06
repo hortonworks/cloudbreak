@@ -11,7 +11,7 @@ public class AmbariViewV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION)
     private ClusterDefinitionV4ViewResponse clusterDefinition;
 
-    @ApiModelProperty(StackModelDescription.AMBARI_IP)
+    @ApiModelProperty(StackModelDescription.SERVER_IP)
     private String serverIp;
 
     public ClusterDefinitionV4ViewResponse getClusterDefinition() {

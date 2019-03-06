@@ -129,7 +129,7 @@ public class CloudbreakV3Util {
         StackV4Response stackResponse = stackV3Endpoint.get(workspaceId, stackName, new HashSet<>());
         checkStackStatusForClusterAvailability(stackResponse);
 
-        String ambariServerUrl = stackResponse.getCluster().getAmbari().getServerIp();
+        String ambariServerUrl = stackResponse.getCluster().getServerIp();
         Assert.assertNotNull(ambariServerUrl, "The Ambari URL is not available!");
         Response response = RestClientUtil.get().target(ambariServerUrl).request().get();
         Assert.assertEquals(HttpStatus.OK.value(), response.getStatus(), "Ambari is not available!");
@@ -139,7 +139,7 @@ public class CloudbreakV3Util {
             boolean checkAmbari) {
         checkStackStatusForClusterAvailability(stackResponse);
 
-        String ambariIp = stackResponse.getCluster().getAmbari().getServerIp();
+        String ambariIp = stackResponse.getCluster().getServerIp();
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
 
         if (checkAmbari) {

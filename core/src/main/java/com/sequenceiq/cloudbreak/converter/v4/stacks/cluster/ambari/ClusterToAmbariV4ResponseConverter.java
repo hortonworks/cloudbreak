@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ambari;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
@@ -18,17 +16,9 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, AmbariV4Response> {
-
-    @Inject
-    private StackUtil stackUtil;
-
-    @Inject
-    private ServiceEndpointCollector serviceEndpointCollector;
 
     @Override
     public AmbariV4Response convert(Cluster source) {
@@ -36,9 +26,6 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
         response.setConfigStrategy(source.getConfigStrategy());
         response.setRepository(getComponent(source, ComponentType.AMBARI_REPO_DETAILS, AmbariRepo.class, AmbariRepositoryV4Response.class));
         response.setSecurityMasterKey(getConversionService().convert(source.getAmbariSecurityMasterKey(), SecretV4Response.class));
-        String ambariIp = stackUtil.extractAmbariIp(source.getStack());
-        response.setServerIp(ambariIp);
-        response.setServerUrl(serviceEndpointCollector.getAmbariServerUrl(source, ambariIp));
         response.setStackRepository(getComponent(source, ComponentType.HDP_REPO_DETAILS, StackRepoDetails.class, StackRepositoryV4Response.class));
         return response;
     }

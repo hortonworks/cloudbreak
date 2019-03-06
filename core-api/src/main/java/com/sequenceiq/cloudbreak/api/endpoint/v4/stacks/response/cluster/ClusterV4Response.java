@@ -110,6 +110,12 @@ public class ClusterV4Response implements JsonEntity {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String extendedClusterDefinitionText;
 
+    @ApiModelProperty(StackModelDescription.SERVER_IP)
+    private String serverIp;
+
+    @ApiModelProperty(StackModelDescription.SERVER_URL)
+    private String serverUrl;
+
     public Long getId() {
         return id;
     }
@@ -308,5 +314,21 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setExtendedClusterDefinitionText(String extendedClusterDefinitionText) {
         this.extendedClusterDefinitionText = extendedClusterDefinitionText;
+    }
+
+    public String getServerIp() {
+        return serverIp;
+    }
+
+    public void setServerIp(String serverIp) {
+        this.serverIp = serverIp;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
     }
 }
