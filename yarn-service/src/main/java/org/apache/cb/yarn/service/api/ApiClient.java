@@ -46,14 +46,14 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-08-08T16:59:40.572+02:00")
 public class ApiClient {
-    protected Map<String, String> defaultHeaderMap = new HashMap<String, String>();
+    protected final Map<String, String> defaultHeaderMap = new HashMap<>();
     protected String basePath = "http://localhost";
     protected boolean debugging = false;
     protected int connectionTimeout = 0;
     private int readTimeout = 0;
 
     protected Client httpClient;
-    protected JSON json;
+    protected final JSON json;
     protected String tempFolderPath = null;
 
     protected Map<String, Authentication> authentications;
@@ -521,9 +521,8 @@ public class ApiClient {
      * @param formParams  Form parameters
      * @param contentType Context type
      * @return Entity
-     * @throws ApiException API exception
      */
-    public Entity<?> serialize(Object obj, Map<String, Object> formParams, String contentType) throws ApiException {
+    public Entity<?> serialize(Object obj, Map<String, Object> formParams, String contentType) {
         Entity<?> entity;
         if (contentType.startsWith("multipart/form-data")) {
             MultiPart multiPart = new MultiPart();

@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
@@ -37,7 +37,7 @@ public class ClusterCredentialChangeActions {
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_STATE")
     public Action<?, ?> changingClusterCredential() {
-        return new AbstractClusterAction<ClusterCredentialChangeTriggerEvent>(ClusterCredentialChangeTriggerEvent.class) {
+        return new AbstractClusterAction<>(ClusterCredentialChangeTriggerEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext ctx, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) {
                 clusterCredentialChangeService.credentialChange(ctx.getStackId());
@@ -59,7 +59,7 @@ public class ClusterCredentialChangeActions {
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_FINISHED_STATE")
     public Action<?, ?> clusterCredentialChangeFinished() {
-        return new AbstractClusterAction<ClusterCredentialChangeResult>(ClusterCredentialChangeResult.class) {
+        return new AbstractClusterAction<>(ClusterCredentialChangeResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) {
                 switch (payload.getRequest().getType()) {

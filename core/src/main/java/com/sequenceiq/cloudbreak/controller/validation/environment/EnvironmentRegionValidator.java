@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.validation.environment;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,7 @@ public class EnvironmentRegionValidator {
                 && !requestedRegions.isEmpty()) {
             if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
                 resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", location.getName(),
-                        requestedRegions.stream().collect(Collectors.joining(", "))));
+                        String.join(", ", requestedRegions)));
             }
         }
         return resultBuilder;
@@ -49,8 +48,8 @@ public class EnvironmentRegionValidator {
             if (!requestedRegions.isEmpty()) {
                 resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
                                 + "Existing regions are: [%s]",
-                        requestedRegions.stream().collect(Collectors.joining(", ")),
-                        existingRegionNames.stream().collect(Collectors.joining(", "))
+                        String.join(", ", requestedRegions),
+                        String.join(", ", existingRegionNames)
                 ));
             }
         }

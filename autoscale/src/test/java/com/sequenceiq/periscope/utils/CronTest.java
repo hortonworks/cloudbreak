@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.utils;
 
-
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -16,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
-import com.sequenceiq.periscope.service.DateTimeService;
 import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.DateTimeService;
 
 @RunWith(Parameterized.class)
 public class CronTest {

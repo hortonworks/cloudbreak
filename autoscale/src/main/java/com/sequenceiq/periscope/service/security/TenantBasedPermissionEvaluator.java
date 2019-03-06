@@ -44,7 +44,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
             return true;
         }
         if (target instanceof Optional) {
-            target = ((Optional) target).orElse(null);
+            target = ((Optional<?>) target).orElse(null);
         }
         if (target == null) {
             return false;

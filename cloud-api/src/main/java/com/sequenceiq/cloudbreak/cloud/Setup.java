@@ -5,8 +5,8 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
@@ -61,9 +61,8 @@ public interface Setup {
      *
      * @param authenticatedContext the context which already contains the authenticated client
      * @param parameters map of parameters
-     * @throws Exception exception is thrown when the parameters does not meet the desired requirements
      */
-    void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception;
+    void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters);
 
     /**
      * Implementation of this method shall contain basic checks if scaling is possible or not.

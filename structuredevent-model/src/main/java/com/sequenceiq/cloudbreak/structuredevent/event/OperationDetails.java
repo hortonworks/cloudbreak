@@ -59,7 +59,7 @@ public class OperationDetails implements Serializable {
         this.userId = userId;
         this.userName = userName;
         this.tenant = tenant;
-        this.uuid = UUID.randomUUID().toString();
+        uuid = UUID.randomUUID().toString();
     }
 
     public StructuredEventType getEventType() {

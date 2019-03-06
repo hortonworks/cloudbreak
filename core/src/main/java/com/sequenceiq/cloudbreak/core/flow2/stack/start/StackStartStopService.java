@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
 @Service
@@ -125,7 +125,7 @@ public class StackStartStopService {
                 results.getResults().stream().filter(r -> r.getStatus() == InstanceStatus.FAILED).collect(Collectors.toList());
         if (!failedInstances.isEmpty()) {
             String statusReason = failedInstances.stream().map(
-                    fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + "(" + fi.getStatusReason() + ")")
+                    fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + '(' + fi.getStatusReason() + ')')
                     .collect(Collectors.joining(","));
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext.getName(), statusReason));
         }

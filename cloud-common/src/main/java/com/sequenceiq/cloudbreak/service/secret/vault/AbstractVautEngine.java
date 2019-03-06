@@ -26,7 +26,7 @@ abstract class AbstractVautEngine<E> implements SecretEngine {
     public String scarifySecret(String secret) {
         VaultSecret vaultSecret = convertToVaultSecret(secret);
         int cut = uniqueId.matcher(vaultSecret.getPath()).matches() ? 1 : 0;
-        return Optional.ofNullable(vaultSecret)
+        return Optional.of(vaultSecret)
                 .map(s -> s.getPath().split("/"))
                 .map(ss -> Stream.of(ss).limit(ss.length - cut))
                 .map(st -> st.collect(Collectors.joining(".")))

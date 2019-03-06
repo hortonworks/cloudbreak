@@ -38,17 +38,17 @@ public class CloudPlatformConnectors {
     @Inject
     private List<CloudConnector> cloudConnectors;
 
-    private final Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
+    private final Map<CloudPlatformVariant, CloudConnector<Object>> map = new HashMap<>();
 
     private Multimap<Platform, Variant> platformToVariants;
 
     @PostConstruct
     public void cloudPlatformConnectors() {
         platformToVariants = HashMultimap.create();
-        for (CloudConnector connector : cloudConnectors) {
+        cloudConnectors.forEach(connector -> {
             map.put(new CloudPlatformVariant(connector.platform(), connector.variant()), connector);
             platformToVariants.put(connector.platform(), connector.variant());
-        }
+        });
         Map<Platform, Variant> environmentDefaults = extractEnvironmentDefaultVariants();
         setupDefaultVariants(platformToVariants, environmentDefaults);
         LOGGER.debug(map.toString());
@@ -89,18 +89,18 @@ public class CloudPlatformConnectors {
         return defaultVariants.get(platform);
     }
 
-    public CloudConnector getDefault(Platform platform) {
+    public CloudConnector<Object> getDefault(Platform platform) {
         Variant variant = getDefaultVariant(platform);
         return map.get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector get(Platform platform, Variant variant) {
+    public CloudConnector<Object> get(Platform platform, Variant variant) {
         return get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector get(CloudPlatformVariant variant) {
-        CloudConnector cc = map.get(variant);
-        return cc == null ? getDefault(variant.getPlatform()) : cc;
+    public CloudConnector<Object> get(CloudPlatformVariant variant) {
+        CloudConnector<Object> cloudConnector = map.get(variant);
+        return cloudConnector == null ? getDefault(variant.getPlatform()) : cloudConnector;
     }
 
     public PlatformVariants getPlatformVariants() {

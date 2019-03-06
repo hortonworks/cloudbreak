@@ -8,8 +8,8 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -37,7 +37,7 @@ public class YarnProvisionSetup implements Setup {
     }
 
     @Override
-    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) throws Exception {
+    public void validateParameters(AuthenticatedContext authenticatedContext, Map<String, String> parameters) {
 
     }
 

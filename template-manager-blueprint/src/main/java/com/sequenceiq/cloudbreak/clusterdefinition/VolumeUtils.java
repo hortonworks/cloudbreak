@@ -11,7 +11,7 @@ public final class VolumeUtils {
     }
 
     public static String buildVolumePathString(int volumeCount, String directory) {
-        StringBuilder localDirs = new StringBuilder("");
+        StringBuilder localDirs = new StringBuilder();
         for (int i = 1; i <= volumeCount; i++) {
             localDirs.append(getVolumeDir(i, directory));
             if (i != volumeCount) {

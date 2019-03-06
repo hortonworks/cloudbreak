@@ -22,7 +22,7 @@ public class ChangeWorkspaceUsersV4Requests {
 
     public static final ChangeWorkspaceUsersV4Requests changeWorkspaceUsersV4Requests(Set<ChangeWorkspaceUsersV4Request> users) {
         ChangeWorkspaceUsersV4Requests changeWorkspaceUsersV4Requests = new ChangeWorkspaceUsersV4Requests();
-        changeWorkspaceUsersV4Requests.setUsers(users);
+        changeWorkspaceUsersV4Requests.users = users;
         return changeWorkspaceUsersV4Requests;
     }
 }

@@ -132,7 +132,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForServices(int requestId) throws CloudbreakException {
+    public void waitForServices(int requestId) {
 
     }
 }

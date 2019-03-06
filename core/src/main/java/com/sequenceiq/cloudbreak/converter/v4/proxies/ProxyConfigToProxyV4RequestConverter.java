@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v4.proxies;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 
 @Component
 public class ProxyConfigToProxyV4RequestConverter

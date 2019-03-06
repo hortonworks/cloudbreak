@@ -130,16 +130,13 @@ public class ServiceEndpointCollector {
         String stackName = ambariBlueprintTextProcessor.getStackName();
         String stackVersion = ambariBlueprintTextProcessor.getStackVersion();
         VersionComparator versionComparator = new VersionComparator();
-        if ("HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0) {
-            return Collections.emptyList();
-        } else {
-            return ExposedService.knoxServicesForComponents(blueprintComponents)
-                    .stream()
+        return "HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0
+                ? Collections.emptyList()
+                : ExposedService.knoxServicesForComponents(blueprintComponents).stream()
                     .filter(exposedService -> !("HDP".equals(stackName)
                             && versionComparator.compare(() -> stackVersion, () -> "2.6") <= 0
                             && excludedServicesForHdp26().contains(exposedService)))
                     .collect(Collectors.toSet());
-        }
     }
 
     private List<ExposedService> excludedServicesForHdp26() {

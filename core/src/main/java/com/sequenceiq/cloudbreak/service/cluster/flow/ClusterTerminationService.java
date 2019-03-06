@@ -21,10 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -49,6 +45,10 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 
 @Component
 public class ClusterTerminationService {
@@ -64,7 +64,7 @@ public class ClusterTerminationService {
     private HostGroupRepository hostGroupRepository;
 
     @Resource
-    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    private Map<FileSystemType, FileSystemConfigurator<BaseFileSystemConfigurationsView>> fileSystemConfigurators;
 
     @Inject
     private ConstraintRepository constraintRepository;
@@ -182,7 +182,7 @@ public class ClusterTerminationService {
 
     private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
         try {
-            FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
+            FileSystemConfigurator<BaseFileSystemConfigurationsView> fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
             BaseFileSystemConfigurationsView fsConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem);
             fsConfiguration.setStorageContainer("cloudbreak" + stackId);
             fsConfigurator.deleteResources(fsConfiguration);

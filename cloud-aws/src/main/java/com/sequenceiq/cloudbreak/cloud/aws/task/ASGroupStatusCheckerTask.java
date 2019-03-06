@@ -109,7 +109,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
         }
 
         List<InstanceStatus> instanceStatusList = describeInstanceStatusResultList.stream()
-                .flatMap(describeInstanceStatusResult -> describeInstanceStatusResult.getInstanceStatuses().stream())
+                .flatMap(statusResult -> statusResult.getInstanceStatuses().stream())
                 .collect(Collectors.toList());
 
         if (instanceStatusList.size() < requiredInstances) {

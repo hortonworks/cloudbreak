@@ -92,7 +92,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                 }
             }
             try {
-                instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Running");
+                removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Running");
                 if (!instances.isEmpty()) {
                     amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                 }
@@ -131,7 +131,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                 }
             }
             try {
-                instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
+                removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
                 if (!instances.isEmpty()) {
                     amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
                 }
@@ -227,7 +227,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         return cloudVmInstanceStatuses;
     }
 
-    private Collection<String> removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2 amazonEC2Client, String state) {
+    private void removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2 amazonEC2Client, String state) {
         DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(
                 new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeInstances.getReservations()) {
@@ -237,7 +237,6 @@ public class AwsInstanceConnector implements InstanceConnector {
                 }
             }
         }
-        return instances;
     }
 
     private Collection<String> getGroups(Iterable<CloudInstance> vms) {

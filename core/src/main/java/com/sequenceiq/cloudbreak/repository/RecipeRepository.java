@@ -14,10 +14,10 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 
 @DisableHasPermission
 @EntityType(entityClass = Recipe.class)

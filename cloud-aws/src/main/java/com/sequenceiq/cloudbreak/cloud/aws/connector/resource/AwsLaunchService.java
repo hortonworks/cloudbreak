@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -117,13 +119,13 @@ public class AwsLaunchService {
         } catch (AmazonServiceException ignored) {
             boolean existingVPC = awsNetworkView.isExistingVPC();
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
-            CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+            CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
             String cidr = stack.getNetwork().getSubnet().getCidr();
             String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? awsNetworkService.findNonOverLappingCIDR(ac, stack) : cidr;
             AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-            CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
+            ModelContext modelContext = new ModelContext()
                     .withAuthenticatedContext(ac)
                     .withStack(stack)
                     .withExistingVpc(existingVPC)
@@ -274,24 +276,24 @@ public class AwsLaunchService {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVPC();
-            CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
+            CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
             resources.add(vpc);
         } else {
             String vpcId = getCreatedVpc(cFStackName, client);
-            CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
+            CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
             resources.add(vpc);
         }
 
         if (awsNetworkView.isExistingSubnet()) {
             String subnetId = awsNetworkView.getExistingSubnet();
-            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
             resources.add(subnet);
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
-            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
             resources.add(subnet);
         }

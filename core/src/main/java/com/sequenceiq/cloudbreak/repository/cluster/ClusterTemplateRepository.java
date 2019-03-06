@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Actio
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +20,7 @@ import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepositor
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ClusterTemplate.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 @WorkspaceResourceType(resource = WorkspaceResource.CLUSTER_TEMPLATE)
 public interface ClusterTemplateRepository extends WorkspaceResourceRepository<ClusterTemplate, Long> {

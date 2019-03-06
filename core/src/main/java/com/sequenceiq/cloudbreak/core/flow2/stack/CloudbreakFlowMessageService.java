@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 
 @Service
 public class CloudbreakFlowMessageService implements FlowMessageService {

@@ -8,6 +8,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -64,8 +65,9 @@ public class CaasClient {
     }
 
     public String getAccessToken(TokenRequest refreshToken) {
-        return getCaasWebTarget().path("/oidc/token")
-                .request().post(entity(refreshToken, MediaType.APPLICATION_JSON_TYPE)).readEntity(TokenResponse.class).getAccessToken();
+        try (Response response = getCaasWebTarget().path("/oidc/token").request().post(entity(refreshToken, MediaType.APPLICATION_JSON_TYPE))) {
+            return response.readEntity(TokenResponse.class).getAccessToken();
+        }
     }
 
     private WebTarget getCaasWebTarget() {

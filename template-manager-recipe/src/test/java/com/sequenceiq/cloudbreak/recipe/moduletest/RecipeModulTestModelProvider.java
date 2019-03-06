@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.storageLocation;
-import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterDefinitionView;
 import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterConfigs;
+import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterDefinitionView;
 
 import java.io.File;
 import java.io.IOException;

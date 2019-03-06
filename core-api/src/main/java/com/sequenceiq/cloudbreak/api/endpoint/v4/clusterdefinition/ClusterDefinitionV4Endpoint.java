@@ -19,10 +19,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.Clu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterDefinitionOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ConnectorOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,49 +36,49 @@ public interface ClusterDefinitionV4Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterDefinitionOpDescription.LIST_BY_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
+    @ApiOperation(value = ClusterDefinitionOpDescription.LIST_BY_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
             nickname = "listClusterDefinitionsByWorkspace")
     ClusterDefinitionV4ViewResponses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterDefinitionOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
+    @ApiOperation(value = ClusterDefinitionOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
             nickname = "getClusterDefinitionInWorkspace")
     ClusterDefinitionV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterDefinitionOpDescription.CREATE_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
+    @ApiOperation(value = ClusterDefinitionOpDescription.CREATE_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
             nickname = "createClusterDefinitionInWorkspace")
     ClusterDefinitionV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid ClusterDefinitionV4Request request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterDefinitionOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
+    @ApiOperation(value = ClusterDefinitionOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
             nickname = "deleteClusterDefinitionInWorkspace")
     ClusterDefinitionV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterDefinitionOpDescription.GET_BY_NAME, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
+    @ApiOperation(value = ClusterDefinitionOpDescription.GET_BY_NAME, produces = JSON, notes = CLUSTER_DEFINITION_NOTES,
             nickname = "getClusterDefinitionRequestFromName")
     ClusterDefinitionV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/parameters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.CUSTOM_PARAMETERS, produces = ContentType.JSON,
+    @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = JSON,
             nickname = "getClusterDefinitionCustomParameters")
     ParametersQueryV4Response getParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("recommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspace")
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("clusterDefinitionName") String clusterDefinitionName, @QueryParam("credentialName") String credentialName,

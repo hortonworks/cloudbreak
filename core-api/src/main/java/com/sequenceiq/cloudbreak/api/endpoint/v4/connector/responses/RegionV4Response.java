@@ -9,7 +9,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.CompactRegionV4Response;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +21,7 @@ public class RegionV4Response extends CompactRegionV4Response {
     @ApiModelProperty(ConnectorModelDescription.DEFAULT_REGIOS)
     private String defaultRegion;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGION_LOCATIONS)
+    @ApiModelProperty(ConnectorModelDescription.REGION_LOCATIONS)
     private Set<String> locations;
 
     public RegionV4Response() {

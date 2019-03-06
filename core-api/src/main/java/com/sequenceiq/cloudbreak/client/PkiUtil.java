@@ -171,8 +171,7 @@ public class PkiUtil {
 
     public static String convertOpenSshPublicKey(PublicKey publicKey) {
         ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(byteOs);
-        try {
+        try (DataOutputStream dos = new DataOutputStream(byteOs)) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
             dos.writeInt("ssh-rsa".getBytes().length);
             dos.write("ssh-rsa".getBytes());
@@ -185,7 +184,6 @@ public class PkiUtil {
             throw new PkiException("Failed to convert public key for the cluster!", e);
         } finally {
             try {
-                dos.close();
                 byteOs.close();
             } catch (IOException e) {
                 LOGGER.debug("Failed to close streams while converting public key", e);

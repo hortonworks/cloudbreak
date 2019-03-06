@@ -63,7 +63,7 @@ public class DatabaseMigrationConfig {
             try (ByteArrayOutputStream upOutStream = new ByteArrayOutputStream()) {
                 try (ByteArrayOutputStream pendingOutStream = new ByteArrayOutputStream()) {
                     FileMigrationLoader upMigrationLoader = upMigrationLoader();
-                    upOperation = upOperation.operate(dataSourceConnectionProvider, upMigrationLoader, operationOption, new PrintStream(upOutStream));
+                    upOperation.operate(dataSourceConnectionProvider, upMigrationLoader, operationOption, new PrintStream(upOutStream));
                     FileMigrationLoader pendingMigrationLoader = pendingMigrationLoader();
                     pendingOperation.operate(dataSourceConnectionProvider, pendingMigrationLoader, operationOption, new PrintStream(pendingOutStream));
                     String upMigrationResult = upOutStream.toString().trim();

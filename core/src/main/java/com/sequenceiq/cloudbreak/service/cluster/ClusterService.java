@@ -438,7 +438,7 @@ public class ClusterService {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
         StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(cluster.getId());
-        String stackRepoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+        String stackRepoId = repoDetails.getStack().get(REPO_ID_TAG);
         return clusterApiConnectors.getConnector(stack).clusterModificationService().getStackRepositoryJson(repoDetails, stackRepoId);
     }
 
@@ -865,7 +865,7 @@ public class ClusterService {
             if (validateClusterDefinition) {
                 ambariBlueprintValidator.validateBlueprintForStack(cluster, clusterDefinition, hostGroups, stackWithLists.getInstanceGroups());
             }
-            Boolean containerOrchestrator;
+            boolean containerOrchestrator;
             try {
                 containerOrchestrator = orchestratorTypeResolver.resolveType(stackWithLists.getOrchestrator()).containerOrchestrator();
             } catch (CloudbreakException ignored) {

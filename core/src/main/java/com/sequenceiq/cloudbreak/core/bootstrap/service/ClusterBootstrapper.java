@@ -120,7 +120,6 @@ public class ClusterBootstrapper {
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    @SuppressWarnings("unchecked")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
         String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
@@ -255,7 +254,7 @@ public class ClusterBootstrapper {
         }
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.cloudPlatform());
-        Image image = null;
+        Image image;
         try {
             image = componentConfigProvider.getImage(stack.getId());
             params.setOs(image.getOs());

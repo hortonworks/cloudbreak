@@ -9,6 +9,7 @@ import javax.ws.rs.ProcessingException;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.common.BasicResource;
+import org.openstack4j.model.image.Image.Status;
 import org.openstack4j.model.image.v2.Image;
 import org.openstack4j.model.image.v2.Image.ImageStatus;
 import org.slf4j.Logger;
@@ -81,15 +82,11 @@ public class OpenStackImageVerifier {
         ImageStatus imageStatus;
         LOGGER.debug("OpenStack Image found: {}, entry: {}", name, images);
         BasicResource foundImage = images.get(0);
-        if (v2Resource) {
-            imageStatus = Image.class.cast(foundImage).getStatus();
-        } else {
-            imageStatus = v1StatusToV2Status(org.openstack4j.model.image.Image.class.cast(foundImage).getStatus());
-        }
+        imageStatus = v2Resource ? ((Image) foundImage).getStatus() : v1StatusToV2Status(((org.openstack4j.model.image.Image) foundImage).getStatus());
         return Optional.of(imageStatus);
     }
 
-    private ImageStatus v1StatusToV2Status(org.openstack4j.model.image.Image.Status status) {
+    private ImageStatus v1StatusToV2Status(Status status) {
         return ImageStatus.valueOf(status.name());
     }
 }

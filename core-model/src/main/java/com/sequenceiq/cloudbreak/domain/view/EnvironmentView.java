@@ -61,7 +61,8 @@ public class EnvironmentView extends CompactView {
     }
 
     public Set<Region> getRegionSet() {
-        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<Set<Region>>() { });
+        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
+        });
     }
 
     public String getCloudPlatform() {

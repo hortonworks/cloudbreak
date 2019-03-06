@@ -30,7 +30,7 @@ public class GetStackParamValidationHandler implements CloudPlatformEventHandler
         LOGGER.debug("Received event: {}", getStackParametersRequestEvent);
         GetStackParamValidationRequest request = getStackParametersRequestEvent.getData();
         try {
-            CloudConnector aDefault = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
+            CloudConnector<Object> aDefault = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
             GetStackParamValidationResult getStackParamValidationResult = new GetStackParamValidationResult(request,
                     aDefault.parameters().additionalStackParameters());
             request.getResult().onNext(getStackParamValidationResult);

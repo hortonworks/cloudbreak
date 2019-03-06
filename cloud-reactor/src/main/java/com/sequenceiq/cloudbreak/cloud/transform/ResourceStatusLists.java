@@ -19,15 +19,13 @@ public class ResourceStatusLists {
                 status = currentStatus;
             }
 
-            switch (currentStatus) {
-                case FAILED:
+            if (currentStatus == ResourceStatus.FAILED) {
+                status = currentStatus;
+                statusReason.append(crs.getStatusReason()).append('\n');
+            } else {
+                if (currentStatus.isTransient()) {
                     status = currentStatus;
-                    statusReason.append(crs.getStatusReason()).append('\n');
-                    break;
-                default:
-                    if (currentStatus.isTransient()) {
-                        status = currentStatus;
-                    }
+                }
             }
         }
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class HostgroupConfigurations implements Iterable<HostgroupConfiguration> {
@@ -18,7 +19,7 @@ public class HostgroupConfigurations implements Iterable<HostgroupConfiguration>
 
     public static HostgroupConfigurations fromMap(Map<String, Map<String, Map<String, String>>> configuration) {
         HostgroupConfigurations result = new HostgroupConfigurations();
-        for (Map.Entry<String, Map<String, Map<String, String>>> conf : configuration.entrySet()) {
+        for (Entry<String, Map<String, Map<String, String>>> conf : configuration.entrySet()) {
             result.addHostgroupConfiguration(new HostgroupConfiguration(conf.getKey(), conf.getValue()));
         }
         return result;
@@ -26,7 +27,7 @@ public class HostgroupConfigurations implements Iterable<HostgroupConfiguration>
 
     public static HostgroupConfigurations fromConfigEntryMap(Map<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> configuration) {
         HostgroupConfigurations result = new HostgroupConfigurations();
-        for (Map.Entry<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> conf : configuration.entrySet()) {
+        for (Entry<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> conf : configuration.entrySet()) {
             Map<String, Map<String, String>> config = new HashMap<>();
             for (ClusterDefinitionConfigurationEntry clusterDefinitionConfigurationEntry : conf.getValue()) {
                 if (!config.keySet().contains(clusterDefinitionConfigurationEntry.getConfigFile())) {
@@ -45,7 +46,7 @@ public class HostgroupConfigurations implements Iterable<HostgroupConfiguration>
     }
 
     public HostgroupConfigurations getFilteredConfigs(Set<String> globalConfigs, boolean forced) {
-        HostgroupConfigurations result = HostgroupConfigurations.getEmptyConfiguration();
+        HostgroupConfigurations result = getEmptyConfiguration();
         if (forced) {
             result = this;
         } else {
@@ -57,7 +58,7 @@ public class HostgroupConfigurations implements Iterable<HostgroupConfiguration>
                 for (SiteConfiguration siteConfig : newConfig.getSiteConfigs()) {
                     SiteConfiguration filteredSiteConfig = SiteConfiguration.getEmptyConfiguration(siteConfig.getName());
                     filteredHostgroupConfig.addSiteConfiguration(filteredSiteConfig);
-                    for (Map.Entry<String, String> siteProp : siteConfig.getProperties().entrySet()) {
+                    for (Entry<String, String> siteProp : siteConfig.getProperties().entrySet()) {
                         if (!globalConfigs.contains(siteProp.getKey())) {
                             filteredSiteConfig.getProperties().put(siteProp.getKey(), siteProp.getValue());
                         }

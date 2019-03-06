@@ -10,11 +10,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
+import com.sequenceiq.cloudbreak.message.Msg;
 
 @Component
 public class AmbariDecommissionTimeCalculator {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense;
 
+import static com.sequenceiq.cloudbreak.doc.Notes.SMARTSENSE_SUBSCRIPTION_NOTES;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSense
 import com.sequenceiq.cloudbreak.api.endpoint.v4.smartsense.responses.SmartSenseSubscriptionV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SmartSenseSubOpDescription;
 
 import io.swagger.annotations.Api;
@@ -31,28 +32,28 @@ public interface SmartSenseSubscriptionV4Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "listSmartSenseSubscriptionsByWorkspace")
     SmartSenseSubscriptionV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("onlyDefault") @DefaultValue("false") Boolean onlyDefault);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "getSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "createSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionV4Response create(@PathParam("workspaceId") Long workspaceId, @Valid SmartSenseSubscriptionV4Response request);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SmartSenseSubOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.SMARTSENSE_SUBSCRIPTION_NOTES,
+    @ApiOperation(value = SmartSenseSubOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
             nickname = "deleteSmartSenseSubscriptionInWorkspace")
     SmartSenseSubscriptionV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 

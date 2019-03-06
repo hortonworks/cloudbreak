@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 
 @Component
@@ -32,7 +33,7 @@ public class EnvironmentViewToSimpleEnvironmentV4ResponseConverter extends
         if (source.getDatalakeResources() != null) {
             response.setDatalakeResourcesNames(source.getDatalakeResources()
                 .stream()
-                .map(datalakeResource -> datalakeResource.getName())
+                .map(DatalakeResources::getName)
                 .collect(Collectors.toSet()));
         }
         return response;

@@ -104,7 +104,10 @@ subprojects {
               fileTree(
                       dir: it,
                       exclude: [
-                              '**/converter/mapper/**'
+                              '**/converter/mapper/**',
+                              '**/sequenceiq/it/**',
+                              '**/cloudbreak/api/endpoint/**',
+                              '**/cloudbreak/domain/**'
                       ]
               )
           })

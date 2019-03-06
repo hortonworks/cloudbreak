@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,15 +20,15 @@ import org.springframework.stereotype.Service;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.HandlebarTemplate;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -60,7 +62,7 @@ public class FileSystemConfigQueryService {
 
         AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = ambariBlueprintProcessorFactory.get(request.getClusterDefinitionText());
         Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
-        for (Map.Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
+        for (Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
             for (String service : serviceHostgroupEntry.getValue()) {
                 Set<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                         .stream()
@@ -85,10 +87,9 @@ public class FileSystemConfigQueryService {
                 configQueryEntry.setProtocol(fileSystemType.getProtocol());
                 configQueryEntry.setDefaultPath(generateConfigWithParameters(configQueryEntry.getDefaultPath(), fileSystemType, templateObject));
             } catch (IOException e) {
-                configQueryEntry.setDefaultPath(configQueryEntry.getDefaultPath());
             }
         }
-        filtered = filtered.stream().sorted(Comparator.comparing(ConfigQueryEntry::getPropertyName)).collect(Collectors.toSet());
+        filtered = filtered.stream().sorted(Comparator.comparing(ConfigQueryEntry::getPropertyName)).collect(Collectors.toCollection(LinkedHashSet::new));
         return filtered;
     }
 

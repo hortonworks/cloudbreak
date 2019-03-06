@@ -35,7 +35,7 @@ public class InitCodeGrantFlowHandler implements CloudPlatformEventHandler<InitC
         InitCodeGrantFlowRequest request = initCodeGrantFlowRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
+            CloudConnector<?> connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
             Map<String, String> parameters = connector.credentials().initCodeGrantFlow(cloudContext, request.getCloudCredential());
             InitCodeGrantFlowResponse initCodeGrantFlowResponse = new InitCodeGrantFlowResponse(request, parameters);
             request.getResult().onNext(initCodeGrantFlowResponse);

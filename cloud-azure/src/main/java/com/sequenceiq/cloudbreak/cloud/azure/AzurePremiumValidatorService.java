@@ -16,7 +16,7 @@ public class AzurePremiumValidatorService {
     }
 
     private boolean isPremiumStorageSupportedByInstance(String flavor) {
-        String segment = flavor.toString().split("_")[1];
+        String segment = flavor.split("_")[1];
         String transformedSegment = segment
                 .replaceAll("[0-9]", "")
                 .replaceAll("-", "")

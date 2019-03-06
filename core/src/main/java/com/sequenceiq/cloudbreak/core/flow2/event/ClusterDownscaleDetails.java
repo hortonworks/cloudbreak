@@ -4,7 +4,7 @@ public class ClusterDownscaleDetails {
     private final boolean forced;
 
     public ClusterDownscaleDetails() {
-        this.forced = false;
+        forced = false;
     }
 
     public ClusterDownscaleDetails(boolean forced) {

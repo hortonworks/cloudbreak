@@ -12,10 +12,6 @@ public class ContainerConfigBuilder {
         containerConfig = new ContainerConfig(builder.name, builder.version, builder.queue);
     }
 
-    private ContainerConfig getContainerConfig() {
-        return containerConfig;
-    }
-
     public static class Builder {
 
         private final String name;
@@ -33,7 +29,7 @@ public class ContainerConfigBuilder {
         }
 
         public ContainerConfig build() {
-            return new ContainerConfigBuilder(this).getContainerConfig();
+            return new ContainerConfigBuilder(this).containerConfig;
         }
 
     }

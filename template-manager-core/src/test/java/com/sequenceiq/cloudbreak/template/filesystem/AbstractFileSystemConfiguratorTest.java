@@ -8,16 +8,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 
 public class AbstractFileSystemConfiguratorTest {
 

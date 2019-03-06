@@ -108,7 +108,7 @@ public class MockCaasService {
         try {
             Jwt token = decodeAndVerify(encodedToken, SIGNATURE_VERIFIER);
             IntrospectResponse introspectResponse = jsonUtil.toObject(token.getClaims(), IntrospectResponse.class);
-            LOGGER.info(String.format("IntrospectResponse: %s", jsonUtil.toJsonString(introspectResponse)));
+            LOGGER.info(format("IntrospectResponse: %s", jsonUtil.toJsonString(introspectResponse)));
             return introspectResponse;
         } catch (Exception e) {
             LOGGER.error("Exception in introspect call", e);

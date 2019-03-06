@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
 
-    private static final List<String> UPSCALE_PROCESSES = asList("Launch");
+    private static final List<String> UPSCALE_PROCESSES = singletonList("Launch");
 
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 

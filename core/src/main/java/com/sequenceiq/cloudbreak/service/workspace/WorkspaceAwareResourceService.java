@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service.workspace;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource> {
 

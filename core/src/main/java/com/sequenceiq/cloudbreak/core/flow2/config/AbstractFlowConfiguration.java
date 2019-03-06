@@ -158,8 +158,8 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return state.action() == null ? getAction(state.name()) : getAction(state.action());
     }
 
-    private AbstractAction<S, E, ?, ?> getAction(Class<? extends AbstractAction> clazz) {
-        return applicationContext.getBean(clazz.getSimpleName(), clazz);
+    private AbstractAction<S, E, ?, ?> getAction(Class<? extends AbstractAction<?, ?, ?, ?>> clazz) {
+        return (AbstractAction<S, E, ?, ?>) applicationContext.getBean(clazz.getSimpleName(), clazz);
     }
 
     private AbstractAction<S, E, ?, ?> getAction(String name) {

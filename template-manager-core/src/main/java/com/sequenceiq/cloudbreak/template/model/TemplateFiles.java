@@ -4,7 +4,7 @@ import java.util.List;
 
 public class TemplateFiles {
 
-    private List<String> files;
+    private final List<String> files;
 
     private TemplateFiles(List<String> files) {
         this.files = files;

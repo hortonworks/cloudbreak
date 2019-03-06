@@ -43,13 +43,12 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
@@ -58,6 +57,7 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
+import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -126,7 +126,7 @@ public class AppConfig implements ResourceLoaderAware {
     private List<HostOrchestrator> hostOrchestrators;
 
     @Inject
-    private List<FileSystemConfigurator> fileSystemConfigurators;
+    private List<FileSystemConfigurator<?>> fileSystemConfigurators;
 
     @Inject
     private ConfigurableEnvironment environment;
@@ -166,8 +166,8 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public FilterRegistrationBean turnOnStackUnderOperationService() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
+    public FilterRegistrationBean<GenericFilterBean> turnOnStackUnderOperationService() {
+        FilterRegistrationBean<GenericFilterBean> registration = new FilterRegistrationBean();
         registration.setFilter(new GenericFilterBean() {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -207,9 +207,9 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators() {
-        Map<FileSystemType, FileSystemConfigurator> map = new EnumMap<>(FileSystemType.class);
-        for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
+    public Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators() {
+        Map<FileSystemType, FileSystemConfigurator<?>> map = new EnumMap<>(FileSystemType.class);
+        for (FileSystemConfigurator<?> fileSystemConfigurator : fileSystemConfigurators) {
             map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
         }
         return map;

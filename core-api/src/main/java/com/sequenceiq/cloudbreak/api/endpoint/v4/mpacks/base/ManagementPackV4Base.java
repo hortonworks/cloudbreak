@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.MpackDetailsDescription;
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class ManagementPackV4Base implements JsonEntity {
-    @NotNull()
+    @NotNull
     @Size(max = 100, min = 5, message = "The length of the management pack's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The management pack's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")

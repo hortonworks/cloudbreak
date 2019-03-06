@@ -198,7 +198,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean hasGateway() {
-        return gateway != null && gateway.isGatewayEnabled();
+        return gateway != null;
     }
 
     public Stack getStack() {

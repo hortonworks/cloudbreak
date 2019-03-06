@@ -13,13 +13,13 @@
 
 package org.apache.cb.yarn.service.api.impl;
 
+import java.util.List;
+
 import org.apache.cb.yarn.service.api.ApiException;
 import org.apache.cb.yarn.service.api.records.Component;
 import org.apache.cb.yarn.service.api.records.Service;
-import org.junit.Test;
 import org.junit.Ignore;
-
-import java.util.List;
+import org.junit.Test;
 
 /**
  * API tests for DefaultApi

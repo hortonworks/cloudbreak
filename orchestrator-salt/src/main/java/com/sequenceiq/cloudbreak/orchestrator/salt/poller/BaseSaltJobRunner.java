@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,7 +81,7 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     public Set<String> collectNodes(ApplyResponse applyResponse) {
         Set<String> set = new HashSet<>();
         for (Map<String, JsonNode> stringObjectMap : applyResponse.getResult()) {
-            set.addAll(stringObjectMap.entrySet().stream().map(Entry::getKey).collect(Collectors.toList()));
+            set.addAll(new ArrayList<>(stringObjectMap.keySet()));
         }
         return set;
     }

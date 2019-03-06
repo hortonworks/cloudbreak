@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
-import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.converter.HistoryConverter;
+import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.service.HistoryService;
 
 @Component

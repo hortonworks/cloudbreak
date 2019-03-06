@@ -18,13 +18,14 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstanceStatus>> {
     public static final String NAME = "pollComputeStatusTask";
 
-    private final ComputeResourceBuilder builder;
+    private final ComputeResourceBuilder<ResourceBuilderContext> builder;
 
     private final ResourceBuilderContext context;
 
     private final CloudInstance instance;
 
-    public PollComputeStatusTask(AuthenticatedContext auth, ComputeResourceBuilder builder, ResourceBuilderContext context, CloudInstance instance) {
+    public PollComputeStatusTask(AuthenticatedContext auth, ComputeResourceBuilder<ResourceBuilderContext> builder, ResourceBuilderContext context,
+            CloudInstance instance) {
         super(auth);
         this.builder = builder;
         this.context = context;

@@ -12,20 +12,15 @@ public class DeviceNameGenerator {
 
     private final Iterator<Character> letterIterator;
 
-    private Character currentLetter;
-
     public DeviceNameGenerator(String deviceNameTemplate) {
         this.deviceNameTemplate = deviceNameTemplate;
         letterIterator = DEVICE_NAME_POSTFIX_LETTER.iterator();
     }
 
     public String next() {
-        if (letterIterator.hasNext()) {
-            currentLetter = letterIterator.next();
-        } else {
+        if (!letterIterator.hasNext()) {
             throw new IllegalStateException("Ran out of device names.");
         }
-
-        return String.format(deviceNameTemplate, currentLetter);
+        return String.format(deviceNameTemplate, letterIterator.next());
     }
 }

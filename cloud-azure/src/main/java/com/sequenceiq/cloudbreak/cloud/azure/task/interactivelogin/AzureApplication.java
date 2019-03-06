@@ -13,7 +13,7 @@ public class AzureApplication {
     public AzureApplication(String appId, String objectId, AzureApplicationCreationView appCreationView) {
         this.appId = appId;
         this.objectId = objectId;
-        this.azureApplicationCreationView = appCreationView;
+        azureApplicationCreationView = appCreationView;
     }
 
     public String getAppId() {

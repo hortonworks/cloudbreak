@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -114,7 +115,7 @@ public class ClusterBuilderService {
                     ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
                     return null;
                 });
-            } catch (TransactionService.TransactionExecutionException e) {
+            } catch (TransactionExecutionException e) {
                 LOGGER.info("Couldn't collect Datalake paramaters", e);
             }
         }

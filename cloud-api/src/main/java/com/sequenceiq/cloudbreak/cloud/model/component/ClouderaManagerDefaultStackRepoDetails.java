@@ -31,9 +31,9 @@ public class ClouderaManagerDefaultStackRepoDetails implements Serializable {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ClouderaManagerDefaultStackRepoDetails.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ClouderaManagerDefaultStackRepoDetails.class.getSimpleName() + '[', "]")
                 .add("stack=" + stack)
-                .add("cdhVersion='" + cdhVersion + "'")
+                .add("cdhVersion='" + cdhVersion + '\'')
                 .toString();
     }
 }

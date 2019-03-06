@@ -51,10 +51,10 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
     @Override
     public void accept(Event<StopInstancesRequest> event) {
         LOGGER.debug("Received event: {}", event);
-        StopInstancesRequest request = event.getData();
+        StopInstancesRequest<StopInstancesResult> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             List<CloudInstance> instances = request.getCloudInstances();
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, request.getResources(), instances);

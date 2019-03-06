@@ -12,8 +12,8 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Service
 public class ClouderaManagerHostStatusChecker extends ClusterBasedStatusCheckerTask<ClouderaManagerPollerObject> {
@@ -36,7 +36,7 @@ public class ClouderaManagerHostStatusChecker extends ClusterBasedStatusCheckerT
                     .filter(instanceMetaData -> !hostNamesFromManager.contains(instanceMetaData.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
 
-            if (notKnownInstancesByManager.size() > 0) {
+            if (!notKnownInstancesByManager.isEmpty()) {
                 LOGGER.warn("there are missing nodes from cloudera manager, not known instances: {}", notKnownInstancesByManager);
                 return false;
             } else {

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -21,8 +20,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariInfoV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultAmbariRepoServiceTest {

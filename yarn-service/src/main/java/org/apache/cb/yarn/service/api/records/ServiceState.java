@@ -46,7 +46,7 @@ public class ServiceState {
 
         UPGRADING("UPGRADING");
 
-        private String value;
+        private final String value;
 
         StateEnum(String value) {
             this.value = value;

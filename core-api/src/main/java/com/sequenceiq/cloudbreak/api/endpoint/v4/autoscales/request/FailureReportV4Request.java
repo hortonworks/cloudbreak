@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FailureReport;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class FailureReportV4Request {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.FailureReport.FAILED_NODES, required = true)
+    @ApiModelProperty(value = FailureReport.FAILED_NODES, required = true)
     private List<String> failedNodes;
 
     public List<String> getFailedNodes() {

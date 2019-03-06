@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -18,7 +15,7 @@ public class SecurityRuleToSecurityRuleDetailsConverter extends AbstractConversi
         securityRuleDetails.setCidr(source.getCidr());
         securityRuleDetails.setProtocol(source.getProtocol());
         if (!SecurityRule.ICMP.equalsIgnoreCase(source.getProtocol())) {
-            securityRuleDetails.setPorts(Arrays.stream(source.getPorts()).collect(Collectors.joining(",")));
+            securityRuleDetails.setPorts(String.join(",", source.getPorts()));
         }
         return securityRuleDetails;
     }

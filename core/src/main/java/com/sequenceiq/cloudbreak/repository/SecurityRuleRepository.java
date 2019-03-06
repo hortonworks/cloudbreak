@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.List;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = SecurityRule.class)
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(TxType.REQUIRED)
 @DisableHasPermission
 public interface SecurityRuleRepository extends DisabledBaseRepository<SecurityRule, Long> {
 

@@ -24,9 +24,9 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -50,7 +50,7 @@ public class StackDownscaleActions {
 
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
     public Action<?, ?> stackDownscaleCollectResourcesAction() {
-        return new AbstractStackDownscaleAction<StackDownscaleTriggerEvent>(StackDownscaleTriggerEvent.class) {
+        return new AbstractStackDownscaleAction<>(StackDownscaleTriggerEvent.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 stackDownscaleService.startStackDownscale(context, payload);
@@ -76,10 +76,10 @@ public class StackDownscaleActions {
 
     @Bean(name = "DOWNSCALE_STATE")
     public Action<?, ?> stackDownscaleAction() {
-        return new AbstractStackDownscaleAction<DownscaleStackCollectResourcesResult>(DownscaleStackCollectResourcesResult.class) {
+        return new AbstractStackDownscaleAction<>(DownscaleStackCollectResourcesResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, DownscaleStackCollectResourcesResult payload, Map<Object, Object> variables) {
-                Selectable request =  new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
+                Selectable request = new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         (List<CloudResource>) variables.get(RESOURCES), (List<CloudInstance>) variables.get(INSTANCES), payload.getResourcesToScale());
                 sendEvent(context.getFlowId(), request);
             }
@@ -88,7 +88,7 @@ public class StackDownscaleActions {
 
     @Bean(name = "DOWNSCALE_FINISHED_STATE")
     public Action<?, ?> stackDownscaleFinishedAction() {
-        return new AbstractStackDownscaleAction<DownscaleStackResult>(DownscaleStackResult.class) {
+        return new AbstractStackDownscaleAction<>(DownscaleStackResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables)
                     throws TransactionExecutionException {

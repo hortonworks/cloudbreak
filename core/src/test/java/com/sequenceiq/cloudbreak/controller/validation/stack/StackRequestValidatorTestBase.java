@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
-import java.util.List;
-
 import static java.lang.String.format;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
 
 public class StackRequestValidatorTestBase {
 

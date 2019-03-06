@@ -38,7 +38,7 @@ public class ContainerState {
 
         READY("READY");
 
-        private String value;
+        private final String value;
 
         StateEnum(String value) {
             this.value = value;

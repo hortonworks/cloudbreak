@@ -2,13 +2,14 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.opensta
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(subTypes = {DomainKeystoneV3Parameters.class, ProjectKeystoneV3Parameters.class})
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public abstract class KeystoneV3Base {
 
     @ApiModelProperty(required = true)

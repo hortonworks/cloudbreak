@@ -137,7 +137,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private Boolean checkResult(Boolean success, int retryCount, Exception actualException) throws CloudbreakOrchestratorFailedException {
         if (Boolean.TRUE.equals(success)) {
-            return success;
+            return true;
         }
 
         String cause = null;

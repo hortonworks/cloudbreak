@@ -41,12 +41,12 @@ public class GcsCloudStorageV4Parameters implements CloudStorageV4Parameters {
             return false;
         }
         GcsCloudStorageV4Parameters that = (GcsCloudStorageV4Parameters) o;
-        return Objects.equals(getServiceAccountEmail(), that.getServiceAccountEmail());
+        return Objects.equals(serviceAccountEmail, that.serviceAccountEmail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getServiceAccountEmail());
+        return Objects.hash(serviceAccountEmail);
     }
 
 }

@@ -105,24 +105,24 @@ public class AzureRoleManager {
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("properties", properties);
 
-        Response response = request.put(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON));
-
-        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-            String errorResponse = response.readEntity(String.class);
-            LOGGER.info("Assign role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
-            if (response.getStatusInfo().getStatusCode() == Status.FORBIDDEN.getStatusCode()) {
-                throw new InteractiveLoginException("You don't have enough permissions to assign roles, please contact with your administrator");
-            } else {
-                try {
-                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                    throw new InteractiveLoginException("Failed to assing role: " + errorMessage);
-                } catch (IOException e) {
-                    throw new InteractiveLoginException("Failed to assing role (status " + response.getStatus() + "): " + errorResponse);
+        try (Response response = request.put(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON))) {
+            if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                String errorResponse = response.readEntity(String.class);
+                LOGGER.info("Assign role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
+                if (response.getStatusInfo().getStatusCode() == Status.FORBIDDEN.getStatusCode()) {
+                    throw new InteractiveLoginException("You don't have enough permissions to assign roles, please contact with your administrator");
+                } else {
+                    try {
+                        String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                        throw new InteractiveLoginException("Failed to assing role: " + errorMessage);
+                    } catch (IOException e) {
+                        throw new InteractiveLoginException("Failed to assing role (status " + response.getStatus() + "): " + errorResponse);
+                    }
                 }
+            } else {
+                LOGGER.debug("Role assigned successfully. subscriptionId '{}', roleDefinitionId {}, principalObjectId {}",
+                        subscriptionId, roleDefinitionId, principalObjectId);
             }
-        } else {
-            LOGGER.debug("Role assigned successfully. subscriptionId '{}', roleDefinitionId {}, principalObjectId {}",
-                    subscriptionId, roleDefinitionId, principalObjectId);
         }
     }
 
@@ -153,22 +153,23 @@ public class AzureRoleManager {
         request.accept(MediaType.APPLICATION_JSON);
 
         request.header("Authorization", "Bearer " + accessToken);
-        Response response = request.get();
-        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
-            AzureRoleDefinitionListResponse azureRoleDefinitionListResponse = response.readEntity(AzureRoleDefinitionListResponse.class);
-            LOGGER.debug("Role definitions retrieved:" + azureRoleDefinitionListResponse.getValue());
-            return azureRoleDefinitionListResponse.getValue();
-        } else {
-            String errorResponse = response.readEntity(String.class);
-            LOGGER.info("Get role definition request with filter: {}, failed: {}", filter, errorResponse);
-            if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
-                throw new InteractiveLoginException("You have no permission to access Active Directory roles, please contact with your administrator");
+        try (Response response = request.get()) {
+            if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
+                AzureRoleDefinitionListResponse azureRoleDefinitionListResponse = response.readEntity(AzureRoleDefinitionListResponse.class);
+                LOGGER.debug("Role definitions retrieved:" + azureRoleDefinitionListResponse.getValue());
+                return azureRoleDefinitionListResponse.getValue();
             } else {
-                try {
-                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                    throw new InteractiveLoginException("Get role definition request with filter: " + filter + " failed: " + errorMessage);
-                } catch (IOException e) {
-                    throw new InteractiveLoginException("Get role definition request with filter: " + filter + " failed:" + errorResponse);
+                String errorResponse = response.readEntity(String.class);
+                LOGGER.info("Get role definition request with filter: {}, failed: {}", filter, errorResponse);
+                if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
+                    throw new InteractiveLoginException("You have no permission to access Active Directory roles, please contact with your administrator");
+                } else {
+                    try {
+                        String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                        throw new InteractiveLoginException("Get role definition request with filter: " + filter + " failed: " + errorMessage);
+                    } catch (IOException e) {
+                        throw new InteractiveLoginException("Get role definition request with filter: " + filter + " failed:" + errorResponse);
+                    }
                 }
             }
         }
@@ -193,21 +194,21 @@ public class AzureRoleManager {
             throw new InteractiveLoginException("Create role request error - " + e.getMessage());
         }
 
-        Response response = request.put(Entity.entity(customRole, MediaType.APPLICATION_JSON));
-
-        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-            String errorResponse = response.readEntity(String.class);
-            LOGGER.info("Create role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
-            if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
-                throw new InteractiveLoginException("You don't have enough permissions to create role, please contact with your administrator");
-            } else {
-                try {
-                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
-                    throw new InteractiveLoginException("Create role request error - status code: "
-                            + response.getStatus() + " - error message: " + errorMessage);
-                } catch (IOException e) {
-                    throw new InteractiveLoginException("Create role request error - status code: "
-                            + response.getStatus() + " - error message: " + errorResponse);
+        try (Response response = request.put(Entity.entity(customRole, MediaType.APPLICATION_JSON))) {
+            if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                String errorResponse = response.readEntity(String.class);
+                LOGGER.info("Create role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
+                if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
+                    throw new InteractiveLoginException("You don't have enough permissions to create role, please contact with your administrator");
+                } else {
+                    try {
+                        String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                        throw new InteractiveLoginException("Create role request error - status code: "
+                                + response.getStatus() + " - error message: " + errorMessage);
+                    } catch (IOException e) {
+                        throw new InteractiveLoginException("Create role request error - status code: "
+                                + response.getStatus() + " - error message: " + errorResponse);
+                    }
                 }
             }
         }
@@ -247,21 +248,19 @@ public class AzureRoleManager {
             actions.addAll(permission.getActions());
             notActions.addAll(permission.getNotActions());
         }
-        if (actions.contains("*")) {
-            return !notActions.contains("Microsoft.Compute/*")
-                    && !notActions.contains("Microsoft.Authorization/*/read")
-                    && !notActions.contains("Microsoft.DataLakeStore/accounts/read")
-                    && !notActions.contains("Microsoft.Network/*")
-                    && !notActions.contains("Microsoft.Storage/*")
-                    && !notActions.contains("Microsoft.Resources/*");
-        } else {
-            return actions.contains("Microsoft.Compute/*")
-                    && actions.contains("Microsoft.Authorization/*/read")
-                    && actions.contains("Microsoft.DataLakeStore/accounts/read")
-                    && actions.contains("Microsoft.Network/*")
-                    && actions.contains("Microsoft.Storage/*")
-                    && actions.contains("Microsoft.Resources/*");
-        }
+        return actions.contains("*")
+                ? !notActions.contains("Microsoft.Compute/*")
+                && !notActions.contains("Microsoft.Authorization/*/read")
+                && !notActions.contains("Microsoft.DataLakeStore/accounts/read")
+                && !notActions.contains("Microsoft.Network/*")
+                && !notActions.contains("Microsoft.Storage/*")
+                && !notActions.contains("Microsoft.Resources/*")
+                : actions.contains("Microsoft.Compute/*")
+                && actions.contains("Microsoft.Authorization/*/read")
+                && actions.contains("Microsoft.DataLakeStore/accounts/read")
+                && actions.contains("Microsoft.Network/*")
+                && actions.contains("Microsoft.Storage/*")
+                && actions.contains("Microsoft.Resources/*");
 
     }
     //CHECKSTYLE:ON

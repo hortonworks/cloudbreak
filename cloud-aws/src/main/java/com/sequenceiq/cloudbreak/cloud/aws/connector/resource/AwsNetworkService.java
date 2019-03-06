@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.net.util.SubnetUtils;
+import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -93,13 +94,13 @@ public class AwsNetworkService {
         DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVPC())));
         List<Subnet> awsSubnets = ec2Client.describeSubnets(request).getSubnets();
         List<String> subnetCidrs = awsSubnets.stream().map(Subnet::getCidrBlock).collect(Collectors.toList());
-        LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), subnetCidrs.stream().collect(Collectors.joining(",")));
+        LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), String.join(",", subnetCidrs));
 
         return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
     }
 
     private String calculateSubnet(String stackName, Vpc vpc, Iterable<String> subnetCidrs) {
-        SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+        SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
         String[] cidrParts = vpcInfo.getCidrSignature().split("/");
         int netmask = Integer.parseInt(cidrParts[cidrParts.length - 1]);
         int netmaskBits = CIDR_PREFIX - netmask;
@@ -126,7 +127,7 @@ public class AwsNetworkService {
     }
 
     private String getSubnetCidrInRange(Vpc vpc, Iterable<String> subnetCidrs, int start, int end) {
-        SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+        SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
         String lowProbe = incrementIp(vpcInfo.getLowAddress());
         String highProbe = new SubnetUtils(toSubnetCidr(lowProbe)).getInfo().getHighAddress();
         // start from the target subnet
@@ -138,7 +139,7 @@ public class AwsNetworkService {
         for (int i = start; i < end; i++) {
             boolean overlapping = false;
             for (String subnetCidr : subnetCidrs) {
-                SubnetUtils.SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
+                SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
                 if (isInRange(lowProbe, subnetInfo) || isInRange(highProbe, subnetInfo)) {
                     overlapping = true;
                     break;
@@ -161,7 +162,7 @@ public class AwsNetworkService {
         }
     }
 
-    private boolean isInRange(String address, SubnetUtils.SubnetInfo subnetInfo) {
+    private boolean isInRange(String address, SubnetInfo subnetInfo) {
         int low = InetAddresses.coerceToInteger(InetAddresses.forString(subnetInfo.getLowAddress()));
         int high = InetAddresses.coerceToInteger(InetAddresses.forString(subnetInfo.getHighAddress()));
         int currentAddress = InetAddresses.coerceToInteger(InetAddresses.forString(address));

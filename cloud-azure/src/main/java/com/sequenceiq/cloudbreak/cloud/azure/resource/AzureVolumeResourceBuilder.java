@@ -67,7 +67,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     public List<CloudResource> create(AzureContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Create volume resources");
         List<CloudResource> computeResources = context.getComputeResources(privateId);
-        if (Objects.isNull(computeResources) || computeResources.size() == 0) {
+        if (Objects.isNull(computeResources) || computeResources.isEmpty()) {
             return null;
         }
         Optional<CloudResource> reattachableVolumeSet = computeResources.stream()

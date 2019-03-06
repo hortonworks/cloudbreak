@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -14,11 +13,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackInputs {
 
-    private Map<String, Object> customInputs = new HashMap<>();
+    private Map<String, Object> customInputs;
 
-    private Map<String, Object> fixInputs = new HashMap<>();
+    private Map<String, Object> fixInputs;
 
-    private Map<String, Object> datalakeInputs = new HashMap<>();
+    private Map<String, Object> datalakeInputs;
 
     public StackInputs(
             @JsonProperty("customInputs") Map<String, Object> customInputs,

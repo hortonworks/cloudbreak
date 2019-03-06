@@ -17,17 +17,17 @@ public class HostgroupView {
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType, Integer nodeCount) {
         this.name = name;
         this.volumeCount = volumeCount;
-        this.instanceGroupConfigured = true;
+        instanceGroupConfigured = true;
         this.instanceGroupType = instanceGroupType;
         this.nodeCount = nodeCount;
     }
 
     public HostgroupView(String name) {
         this.name = name;
-        this.volumeCount = null;
-        this.instanceGroupConfigured = false;
-        this.instanceGroupType = InstanceGroupType.CORE;
-        this.nodeCount = 0;
+        volumeCount = null;
+        instanceGroupConfigured = false;
+        instanceGroupType = InstanceGroupType.CORE;
+        nodeCount = 0;
     }
 
     public String getName() {

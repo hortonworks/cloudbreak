@@ -43,7 +43,7 @@ public class CbDelegatedTokenCredentials extends AzureTokenCredentials {
         this.authenticationContextProvider = authenticationContextProvider;
         this.tokens = new ConcurrentHashMap<>(tokens);
         this.redirectUrl = redirectUrl;
-        this.cbRefreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(applicationCredentials.environment().activeDirectoryEndpoint());
+        cbRefreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(applicationCredentials.environment().activeDirectoryEndpoint());
         this.clientSecret = clientSecret;
         this.applicationCredentials = applicationCredentials;
     }
@@ -59,9 +59,9 @@ public class CbDelegatedTokenCredentials extends AzureTokenCredentials {
         super(applicationCredentials.environment(), applicationCredentials.domain());
         this.authenticationContextProvider = authenticationContextProvider;
         this.applicationCredentials = applicationCredentials;
-        this.tokens = new ConcurrentHashMap<>();
+        tokens = new ConcurrentHashMap<>();
         this.redirectUrl = redirectUrl;
-        this.cbRefreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(applicationCredentials.environment().activeDirectoryEndpoint());
+        cbRefreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(applicationCredentials.environment().activeDirectoryEndpoint());
     }
 
     /**
@@ -75,10 +75,10 @@ public class CbDelegatedTokenCredentials extends AzureTokenCredentials {
                     AuthenticationContextProvider authenticationContextProvider, CBRefreshTokenClientProvider cbRefreshTokenClientProvider) {
         super(applicationCredentials.environment(), applicationCredentials.domain());
         this.authenticationContextProvider = authenticationContextProvider;
-        this.tokens = new ConcurrentHashMap<>();
+        tokens = new ConcurrentHashMap<>();
         this.redirectUrl = redirectUrl;
         this.authorizationCode = authorizationCode;
-        this.cbRefreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(applicationCredentials.environment().activeDirectoryEndpoint());
+        cbRefreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(applicationCredentials.environment().activeDirectoryEndpoint());
         this.clientSecret = clientSecret;
         this.applicationCredentials = applicationCredentials;
     }
@@ -122,7 +122,7 @@ public class CbDelegatedTokenCredentials extends AzureTokenCredentials {
      */
     public String generateAuthenticationUrl(String state) {
         return String.format("%s%s/oauth2/authorize?client_id=%s&response_type=code&redirect_uri=%s&response_mode=query&state=%s&resource=%s",
-                environment().activeDirectoryEndpoint(), domain(), clientId(), this.redirectUrl, state, environment().managementEndpoint());
+                environment().activeDirectoryEndpoint(), domain(), clientId(), redirectUrl, state, environment().managementEndpoint());
     }
 
     /**
@@ -195,7 +195,7 @@ public class CbDelegatedTokenCredentials extends AzureTokenCredentials {
     private AuthenticationResult acquireAccessTokenFromRefreshToken(String resource, String refreshToken, boolean multipleResourceRefreshToken) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
-            return cbRefreshTokenClient.refreshToken(domain(), clientId(), this.clientSecret, resource, refreshToken,
+            return cbRefreshTokenClient.refreshToken(domain(), clientId(), clientSecret, resource, refreshToken,
                     multipleResourceRefreshToken);
         } catch (Exception e) {
             throw new AuthenticationException("Could not obtain refresh token.", e);

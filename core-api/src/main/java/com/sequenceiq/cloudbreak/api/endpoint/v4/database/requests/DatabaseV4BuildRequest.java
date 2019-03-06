@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,11 +14,11 @@ import io.swagger.annotations.ApiModelProperty;
 public class DatabaseV4BuildRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.Database.DATABASE_REQUEST, required = true)
+    @ApiModelProperty(value = Database.DATABASE_REQUEST, required = true)
     private DatabaseV4Request rdsConfigRequest;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.Database.DATABASE_REQUEST_CLUSTER_NAME, required = true)
+    @ApiModelProperty(value = Database.DATABASE_REQUEST_CLUSTER_NAME, required = true)
     private String clusterName;
 
     public DatabaseV4Request getRdsConfigRequest() {

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -42,7 +43,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
 @Configuration
 public class StackStartActions {
@@ -59,7 +59,7 @@ public class StackStartActions {
 
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
-        return new AbstractStackStartAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackStartAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.startStackStart(context);
@@ -102,7 +102,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackStartStopContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 stackStartStopService.finishStackStart(context, payload.getResults());
-                metricService.incrementMetricCounter(MetricType.STACK_START_SUCCESSFUL, context.getStack());
+                getMetricService().incrementMetricCounter(MetricType.STACK_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -119,7 +119,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.handleStackStartError(context.getStackView(), payload);
-                metricService.incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView());
                 sendEvent(context);
             }
 

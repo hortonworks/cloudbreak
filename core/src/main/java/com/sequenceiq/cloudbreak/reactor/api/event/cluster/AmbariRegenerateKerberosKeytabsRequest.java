@@ -8,7 +8,7 @@ public class AmbariRegenerateKerberosKeytabsRequest extends AbstractClusterScale
 
     public AmbariRegenerateKerberosKeytabsRequest(Long stackId, String hostGroupName, String hostName) {
         super(stackId, hostGroupName);
-        this.hostname = hostName;
+        hostname = hostName;
     }
 
     public String getHostname() {

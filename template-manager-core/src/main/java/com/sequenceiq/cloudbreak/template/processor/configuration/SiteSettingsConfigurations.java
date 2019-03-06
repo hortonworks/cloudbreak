@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SiteSettingsConfigurations implements Iterable<List<SiteConfiguration>> {
-    private Map<String, List<SiteConfiguration>> config = new HashMap<>();
+    private final Map<String, List<SiteConfiguration>> config = new HashMap<>();
 
     private SiteSettingsConfigurations() {
 

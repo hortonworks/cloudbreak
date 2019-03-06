@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -60,14 +60,14 @@ public class CentralCmTemplateUpdaterTest {
     private RDSConfig rdsConfig;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider());
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getClusterDefinitionView()).thenReturn(clusterDefinitionView);
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(getRdsConfigs());
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
-        when(cmTemplateComponentConfigProcessor.getCmTemplateComponentConfigProviderList()).thenReturn(cmTemplateComponentConfigProviders);
+        ReflectionTestUtils.setField(cmTemplateComponentConfigProcessor, "cmTemplateComponentConfigProviderList", cmTemplateComponentConfigProviders);
     }
 
     @Test
@@ -78,14 +78,14 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
-    public void getCmTemplateNoMetastore() throws IOException {
+    public void getCmTemplateNoMetastore() {
         when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager-nometastore.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings());
         Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-nometastore.bp")).getTemplate(), generated);
     }
 
     @Test
-    public void getCmTemplateNoMetastoreWithTemplateParams() throws IOException {
+    public void getCmTemplateNoMetastoreWithTemplateParams() {
         when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager-fixparam.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings());
         Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-fixparam.bp")).getTemplate(), generated);
