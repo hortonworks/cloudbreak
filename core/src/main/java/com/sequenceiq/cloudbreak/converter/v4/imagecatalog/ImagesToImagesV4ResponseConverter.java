@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,23 +12,31 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ManagementPackV4Entry;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.StackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerRepositoryV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
+import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 
 @Component
 public class ImagesToImagesV4ResponseConverter extends AbstractConversionServiceAwareConverter<Images, ImagesV4Response> {
@@ -39,7 +48,13 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
     private DefaultHDFEntries defaultHDFEntries;
 
     @Inject
+    private DefaultCDHEntries defaultCDHEntries;
+
+    @Inject
     private DefaultAmbariRepoService defaultAmbariRepoService;
+
+    @Inject
+    private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
     @Override
     public ImagesV4Response convert(Images source) {
@@ -47,38 +62,58 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         List<BaseImageV4Response> baseImages = getBaseImageResponses(source);
         res.setBaseImages(baseImages);
 
-        List<ImageV4Response> hdpImages = new ArrayList<>();
-        for (Image hdpImg : source.getHdpImages()) {
-            ImageV4Response hdpImgJson = new ImageV4Response();
-            copyImageFieldsToJson(hdpImg, hdpImgJson);
-            hdpImgJson.setStackDetails(convertStackDetailsToJson(hdpImg.getStackDetails(), hdpImg.getOsType()));
-            hdpImages.add(hdpImgJson);
-        }
-        res.setHdpImages(hdpImages);
+        List<ImageV4Response> hdpImages = setBaseImages(source.getHdpImages());
+        List<ImageV4Response> hdfImages = setBaseImages(source.getHdfImages());
+        List<ImageV4Response> cdhImages = setBaseImages(source.getCdhImages());
 
-        List<ImageV4Response> hdfImages = new ArrayList<>();
-        for (Image hdfImg : source.getHdfImages()) {
-            ImageV4Response hdfImgJson = new ImageV4Response();
-            copyImageFieldsToJson(hdfImg, hdfImgJson);
-            hdfImgJson.setStackDetails(convertStackDetailsToJson(hdfImg.getStackDetails(), hdfImg.getOsType()));
-            hdfImages.add(hdfImgJson);
-        }
+        res.setHdpImages(hdpImages);
         res.setHdfImages(hdfImages);
+        res.setCdhImages(cdhImages);
         res.setSupportedVersions(source.getSuppertedVersions());
         return res;
     }
 
+    private List<ImageV4Response> setBaseImages(List<Image> source) {
+        List<ImageV4Response> images = new ArrayList<>();
+        for (Image img : source) {
+            ImageV4Response imgJson = new ImageV4Response();
+            copyImageFieldsToJson(img, imgJson);
+            imgJson.setStackDetails(convertStackDetailsToJson(img.getStackDetails(), img.getOsType()));
+            images.add(imgJson);
+        }
+        return images;
+    }
+
     private List<BaseImageV4Response> getBaseImageResponses(Images source) {
-        List<StackDetailsV4Response> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
-        List<StackDetailsV4Response> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
+        List<AmbariStackDetailsV4Response> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
+        List<AmbariStackDetailsV4Response> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
+        List<ClouderaManagerStackDetailsV4Response> defaultCdhStacks = getDefaultCdhStackInfo(defaultCDHEntries.getEntries().values());
         List<BaseImageV4Response> baseImages = source.getBaseImages().stream()
-                .filter(image -> defaultAmbariRepoService.getDefault(image.getOsType()) != null)
+                .filter(image ->
+                        defaultAmbariRepoService.getDefault(image.getOsType()) != null
+                                || defaultClouderaManagerRepoService.getDefault(image.getOsType()) != null)
                 .map(image -> {
                     BaseImageV4Response imgJson = new BaseImageV4Response();
                     copyImageFieldsToJson(image, imgJson);
                     imgJson.setHdpStacks(defaultHdpStacks);
                     imgJson.setHdfStacks(defaultHdfStacks);
+                    imgJson.setCdhStacks(defaultCdhStacks);
+                    ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(image.getOsType());
                     AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(image.getOsType());
+                    if (ambariRepo != null) {
+                        AmbariRepositoryV4Response ambariRepoJson = new AmbariRepositoryV4Response();
+                        ambariRepoJson.setBaseUrl(ambariRepo.getBaseUrl());
+                        ambariRepoJson.setVersion(ambariRepo.getVersion());
+                        ambariRepoJson.setGpgKeyUrl(ambariRepo.getGpgKeyUrl());
+                        imgJson.setAmbariRepo(ambariRepoJson);
+                    }
+                    if (clouderaManagerRepo != null) {
+                        ClouderaManagerRepositoryV4Response clouderaManagerRepoJson = new ClouderaManagerRepositoryV4Response();
+                        clouderaManagerRepoJson.setBaseUrl(clouderaManagerRepo.getBaseUrl());
+                        clouderaManagerRepoJson.setVersion(clouderaManagerRepo.getVersion());
+                        clouderaManagerRepoJson.setGpgKeyUrl(clouderaManagerRepo.getGpgKeyUrl());
+                        imgJson.setClouderaManagerRepo(clouderaManagerRepoJson);
+                    }
                     imgJson.setVersion(ambariRepo.getVersion());
                     Map<String, String> repoJson = new HashMap<>();
                     repoJson.put("baseurl", ambariRepo.getBaseUrl());
@@ -90,10 +125,26 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         return baseImages;
     }
 
-    private List<StackDetailsV4Response> getDefaultStackInfos(Iterable<? extends StackInfo> defaultStackInfos) {
-        List<StackDetailsV4Response> result = new ArrayList<>();
+    private List<ClouderaManagerStackDetailsV4Response> getDefaultCdhStackInfo(Collection<DefaultCDHInfo> defaultStackInfo) {
+        List<ClouderaManagerStackDetailsV4Response> result = new ArrayList<>();
+        for (DefaultCDHInfo info : defaultStackInfo) {
+            ClouderaManagerStackDetailsV4Response json = new ClouderaManagerStackDetailsV4Response();
+            ClouderaManagerStackRepoDetailsV4Response repoJson = new ClouderaManagerStackRepoDetailsV4Response();
+            Map<String, String> stackRepo = info.getRepo().getStack();
+            if (stackRepo != null) {
+                repoJson.setStack(stackRepo);
+            }
+            json.setRepository(repoJson);
+            json.setVersion(info.getVersion());
+            result.add(json);
+        }
+        return result;
+    }
+
+    private List<AmbariStackDetailsV4Response> getDefaultStackInfos(Collection<? extends StackInfo> defaultStackInfos) {
+        List<AmbariStackDetailsV4Response> result = new ArrayList<>();
         for (StackInfo info : defaultStackInfos) {
-            StackDetailsV4Response json = new StackDetailsV4Response();
+            AmbariStackDetailsV4Response json = new AmbariStackDetailsV4Response();
             AmbariStackRepoDetailsV4Response repoJson = new AmbariStackRepoDetailsV4Response();
             Map<String, String> stackRepo = info.getRepo().getStack();
             if (stackRepo != null) {
@@ -136,8 +187,8 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
     }
 
-    private StackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType) {
-        StackDetailsV4Response json = new StackDetailsV4Response();
+    private AmbariStackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType) {
+        AmbariStackDetailsV4Response json = new AmbariStackDetailsV4Response();
         json.setVersion(stackDetails.getVersion());
         json.setRepository(convertStackRepoDetailsToJson(stackDetails.getRepo()));
         Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();

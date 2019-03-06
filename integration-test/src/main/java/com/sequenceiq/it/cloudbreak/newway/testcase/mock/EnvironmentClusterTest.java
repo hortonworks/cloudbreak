@@ -72,10 +72,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testDetachFromEnvWithDeletedCluster(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackTestDto.class)
+        testContext
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
+                .withProxyConfigName(testContext.get(ProxyConfigEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .when(StackActionV4::delete, withoutLogError())
@@ -116,10 +121,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     public void testCreateWlClusterDeleteFails(TestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.given(StackTestDto.class)
+        testContext
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
+                .withProxyConfigName(testContext.get(ProxyConfigEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
+                .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
@@ -135,10 +145,14 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testCreateWlClusterDetachFails(TestContext testContext) {
         createEnvWithResources(testContext);
         testContext
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
+                .withProxyConfigName(testContext.get(ProxyConfigEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        testContext.get(LdapConfigTestDto.class).getName(), testContext.get(ProxyConfigEntity.class).getName()))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .given(EnvironmentEntity.class)
@@ -177,18 +191,23 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
 
-                .given(StackTestDto.class).given(EnvironmentSettingsV4Entity.class)
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
+                .given(StackTestDto.class)
+                .given(EnvironmentSettingsV4Entity.class)
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        null, null))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
                 .given(newStack, StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        null, null))
                 .when(Stack.postV4(), key(newStack))
                 .await(STACK_AVAILABLE, key(newStack))
                 .validate();
@@ -205,11 +224,12 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(validRds)
                 .when(Environment::post)
                 .then(EnvironmentTest::checkRdsAttachedToEnv)
-
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        null, null))
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
 
@@ -220,8 +240,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
                 .given(newStack, StackTestDto.class)
                 .withEnvironment(newEnv)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        null, null))
                 .when(Stack.postV4(), key(newStack))
                 .await(STACK_AVAILABLE, key(newStack))
                 .when(StackActionV4::delete, key(newStack))
@@ -238,10 +256,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testClusterWithRdsWithoutEnvironment(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         testContext.given(EnvironmentEntity.class)
+                .given(ClusterEntity.class)
+                .withDatabase(testContext.get(DatabaseEntity.class).getName())
+                .withClusterDefinitionName(CD_NAME)
+                .withAmbari(testContext.given(AmbariEntity.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentEntity.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseEntity.class).getName(),
-                        null, null))
+
                 .when(Stack.postV4(), key(FORBIDDEN_KEY))
                 .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
@@ -314,8 +335,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         ClusterEntity cluster = new ClusterEntity(testContext)
                 .valid()
                 .withRdsConfigNames(rdsSet)
-                .withClusterDefinitionName(CD_NAME)
-                .withAmbari(testContext.given(AmbariEntity.class));
+                .withClusterDefinitionName(CD_NAME);
         if (rdsName != null) {
             cluster.withRdsConfigNames(rdsSet);
         }

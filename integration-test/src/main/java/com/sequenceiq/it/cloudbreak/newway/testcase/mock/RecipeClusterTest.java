@@ -104,7 +104,8 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
         testContext
                 .given(LdapConfigTestDto.class).withName(ldapName)
                 .when(ldapConfigTestClient.post())
-                .given(StackTestDto.class).withCluster(new ClusterEntity(testContext).valid().withLdapConfigName(ldapName))
+                .given(ClusterEntity.class).withLdapConfigName(ldapName)
+                .given(StackTestDto.class)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))

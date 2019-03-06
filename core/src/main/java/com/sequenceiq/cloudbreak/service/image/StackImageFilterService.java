@@ -71,7 +71,7 @@ public class StackImageFilterService {
                 ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdfImages(), currentImageUuid)
                 : Collections.emptyList();
 
-        return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, statedImages.getImages().getSuppertedVersions());
+        return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, null, statedImages.getImages().getSuppertedVersions());
     }
 
     private String getCurrentImageUuid(Stack stack) {

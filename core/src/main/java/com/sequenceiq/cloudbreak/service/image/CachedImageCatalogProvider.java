@@ -98,7 +98,7 @@ public class CachedImageCatalogProvider {
         List<Image> filteredHdpImages = filterImages(catalogImages.getHdpImages(), enabledOsPredicate());
         List<Image> filteredHdfImages = filterImages(catalogImages.getHdfImages(), enabledOsPredicate());
 
-        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, catalogImages.getSuppertedVersions());
+        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, null, catalogImages.getSuppertedVersions());
         return new CloudbreakImageCatalogV2(images, catalog.getVersions());
     }
 

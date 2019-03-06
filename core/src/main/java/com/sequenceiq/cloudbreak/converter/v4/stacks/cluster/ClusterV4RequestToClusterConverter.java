@@ -6,8 +6,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -21,8 +25,11 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -124,7 +131,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         if (source.getAmbari() != null) {
             cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
             cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
-            extractAmbariAndHdpRepoConfig(cluster, source.getAmbari());
+            extractClusterManagerAndHdpRepoConfig(cluster, source);
         }
     }
 
@@ -161,21 +168,56 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         return configs;
     }
 
-    private void extractAmbariAndHdpRepoConfig(Cluster cluster, AmbariV4Request ambariRequest) {
-        try {
-            Set<ClusterComponent> components = new HashSet<>();
-            if (ambariRequest.getRepository() != null) {
-                AmbariRepo ambariRepo = getConversionService().convert(ambariRequest.getRepository(), AmbariRepo.class);
-                components.add(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, new Json(ambariRepo), cluster));
-            }
-            if (ambariRequest.getStackRepository() != null) {
-                StackRepoDetails stackRepoDetails = getConversionService().convert(ambariRequest.getStackRepository(), StackRepoDetails.class);
-                components.add(new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetails), cluster));
-            }
-            cluster.setComponents(components);
-        } catch (IOException e) {
-            throw new BadRequestException("Cannot serialize the stack template", e);
+    private void extractClusterManagerAndHdpRepoConfig(Cluster cluster, ClusterV4Request clusterRequest) {
+        Set<ClusterComponent> components = new HashSet<>();
+
+        AmbariV4Request ambariRequest = clusterRequest.getAmbari();
+        ClouderaManagerV4Request clouderaManagerV4Request = clusterRequest.getCm();
+        if (Objects.nonNull(ambariRequest) && Objects.nonNull(clouderaManagerV4Request)) {
+            throw new BadRequestException("Cannot determine cluster manager. More than one provided");
         }
+
+        Optional.ofNullable(ambariRequest)
+                .map(AmbariV4Request::getRepository)
+                .map(ambariRepoRequest -> getConversionService().convert(ambariRepoRequest, AmbariRepo.class))
+                .map(toJsonWrapException())
+                .map(ambariRepoJson -> new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ambariRepoJson, cluster))
+                .ifPresent(components::add);
+
+        Optional.ofNullable(ambariRequest)
+                .map(AmbariV4Request::getStackRepository)
+                .map(stackRepoRequest -> getConversionService().convert(stackRepoRequest, StackRepoDetails.class))
+                .map(toJsonWrapException())
+                .map(ambariRepoJson -> new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ambariRepoJson, cluster))
+                .ifPresent(components::add);
+
+        Optional.ofNullable(clouderaManagerV4Request)
+                .map(ClouderaManagerV4Request::getRepository)
+                .map(cmRepoRequest -> getConversionService().convert(cmRepoRequest, ClouderaManagerRepo.class))
+                .map(toJsonWrapException())
+                .map(cmRepoJson -> new ClusterComponent(ComponentType.CM_REPO_DETAILS, cmRepoJson, cluster))
+                .ifPresent(components::add);
+
+        Optional.ofNullable(clouderaManagerV4Request)
+                .map(ClouderaManagerV4Request::getProducts)
+                .orElseGet(List::of)
+                .stream()
+                .map(cmProductRequest -> getConversionService().convert(cmProductRequest, ClouderaManagerProduct.class))
+                .map(toJsonWrapException())
+                .map(cmRepoJson -> new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, cmRepoJson, cluster))
+                .forEach(components::add);
+
+        cluster.setComponents(components);
+    }
+
+    private <T> Function<T, Json> toJsonWrapException() {
+        return repositoryObject -> {
+            try {
+                return new Json(repositoryObject);
+            } catch (IOException e) {
+                throw new BadRequestException("Cannot serialize the stack template", e);
+            }
+        };
     }
 
     private ClusterDefinition getClusterDefinition(String clusterDefinitionName, Workspace workspace) {

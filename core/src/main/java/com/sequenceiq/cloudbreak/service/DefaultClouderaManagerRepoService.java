@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
-import com.sequenceiq.cloudbreak.service.exception.RepositoryCannotFoundException;
 
 @Service
 @ConfigurationProperties("cb.clouderamanager")
@@ -35,7 +34,7 @@ public class DefaultClouderaManagerRepoService {
             repository.setGpgKeyUrl(clouderaManagerInfo.getRepo().get(osType).getGpgkey());
             return repository;
         }
-        throw new RepositoryCannotFoundException("Repository informations cannot found by given osType!");
+        return null;
     }
 
     public Map<String, RepositoryInfo> getEntries() {

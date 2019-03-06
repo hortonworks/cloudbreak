@@ -19,6 +19,8 @@ public class Images {
 
     private final List<Image> hdfImages;
 
+    private final List<Image> cdhImages;
+
     private final Set<String> suppertedVersions;
 
     @JsonCreator
@@ -26,10 +28,12 @@ public class Images {
             @JsonProperty("base-images") List<Image> baseImages,
             @JsonProperty("hdp-images") List<Image> hdpImages,
             @JsonProperty("hdf-images") List<Image> hdfImages,
+            @JsonProperty("cdh-images") List<Image> cdhImages,
             @JsonProperty("supported-cb-versions") Set<String> suppertedVersions) {
         this.baseImages = (baseImages == null) ? emptyList() : baseImages;
         this.hdpImages = (hdpImages == null) ? emptyList() : hdpImages;
         this.hdfImages = (hdfImages == null) ? emptyList() : hdfImages;
+        this.cdhImages = (cdhImages == null) ? emptyList() : cdhImages;
         this.suppertedVersions = (suppertedVersions == null) ? emptySet() : suppertedVersions;
     }
 
@@ -43,6 +47,10 @@ public class Images {
 
     public List<Image> getHdfImages() {
         return hdfImages;
+    }
+
+    public List<Image> getCdhImages() {
+        return cdhImages;
     }
 
     public Set<String> getSuppertedVersions() {
