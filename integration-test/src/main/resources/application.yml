@@ -49,6 +49,22 @@ integrationtest:
         volumeCount:
         volumeType:
 
+    # gcp details
+    gcp:
+      availabilityZone:
+      region:
+      vpcId:
+      subnetId:
+      credential:
+        type:
+        json:
+        p12:
+      instance:
+        type:
+        volumeSize:
+        volumeCount:
+        volumeType:
+
     # yarn details
     yarn:
       availabilityZone:

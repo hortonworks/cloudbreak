@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;

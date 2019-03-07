@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
 public class CommonCloudParameters {
 
@@ -10,7 +10,7 @@ public class CommonCloudParameters {
 
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting credential default description.";
 
-    static final String PREFIX = "integrationtest.";
+    public static final String PREFIX = "integrationtest.";
 
     public static final String SUBNET_CIDR = PREFIX + "subnetCidr";
 

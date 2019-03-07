@@ -1,4 +1,6 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.yarn;
+
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 
 public class YarnParameters {
 
@@ -11,6 +13,8 @@ public class YarnParameters {
     public static final String REGION = PREFIX + "region";
 
     public static final String LOCATION = PREFIX + "location";
+
+    public static final String YARN_QUEUE = PREFIX + "queue";
 
     private YarnParameters() {
     }
@@ -35,10 +39,5 @@ public class YarnParameters {
         public static final String ENDPOINT = PREFIX + "endpoint";
 
         public static final String AMBARI_USER = PREFIX + "ambariUser";
-    }
-
-    public static class Queue {
-
-        public static final String YARN_QUEUE = YarnParameters.PREFIX + "queue";
     }
 }

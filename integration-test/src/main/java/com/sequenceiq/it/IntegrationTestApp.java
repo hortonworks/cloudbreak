@@ -169,17 +169,17 @@ public class IntegrationTestApp implements CommandLineRunner {
         return providerTests;
     }
 
-    private List<XmlSuite> loadSuiteResources(Iterable<Resource> suitePathes) throws IOException {
+    private List<XmlSuite> loadSuiteResources(Iterable<Resource> suitePaths) throws IOException {
         List<XmlSuite> suites = new ArrayList<>();
-        for (Resource suite : suitePathes) {
+        for (Resource suite : suitePaths) {
             suites.add(loadSuite(suite.getURL().toString(), suite));
         }
         return suites;
     }
 
-    private List<XmlSuite> loadSuites(Iterable<String> suitePathes) throws IOException {
+    private List<XmlSuite> loadSuites(Iterable<String> suitePaths) throws IOException {
         List<XmlSuite> suites = new ArrayList<>();
-        for (String suitePath : suitePathes) {
+        for (String suitePath : suitePaths) {
             suites.add(loadSuite(suitePath));
         }
         LOG.info("parsed suites: {}", suites.size());
