@@ -332,7 +332,6 @@
   "cloudbreakDetails": {
     "version": "2.8.0-dev.407"
   },
-  "flexSubscription": null,
   "stackAuthentication": {
     "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCeFeKSV69/+Jmf3meAf5SMsTCXqO4v8iAR11HgrauD4Ky1HFRM51e/EiIzBMuI14Y43hWrYMqWcCbAYKme1yAuaaq1VPO6Le1KQQyEMTD5YmgFOrI8tAdBDBPMV8MkTIveWkV8voMkRst0YJ5MWS1sH9+YyRGysl3w4kungWrKw8rAYe0XwNYLWgo362Go7mSEQNvB4oDTcZaF9a/vesPGusTuyZicpf1jmMsH7S5MF8YH/TPbhoDB7KJ+9t278nrUvsyI6MZnpx7Uj5P/5WYfeF0M3v7ltyo2/e8GqbFw3FLixPlGuc+N3UZThcM03Hc2xLmxHbagrgWU8uauwT0z mhalmy@HW13213.local",
     "publicKeyId": null,

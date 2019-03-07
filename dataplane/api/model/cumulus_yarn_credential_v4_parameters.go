@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -28,6 +30,10 @@ type CumulusYarnCredentialV4Parameters struct {
 	// ambari user
 	// Required: true
 	AmbariUser *string `json:"ambariUser"`
+
+	// cloud platform
+	// Enum: [AWS GCP AZURE OPENSTACK CUMULUS_YARN YARN MOCK]
+	CloudPlatform string `json:"cloudPlatform,omitempty"`
 }
 
 // Validate validates this cumulus yarn credential v4 parameters
@@ -43,6 +49,10 @@ func (m *CumulusYarnCredentialV4Parameters) Validate(formats strfmt.Registry) er
 	}
 
 	if err := m.validateAmbariUser(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCloudPlatform(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -73,6 +83,64 @@ func (m *CumulusYarnCredentialV4Parameters) validateAmbariURL(formats strfmt.Reg
 func (m *CumulusYarnCredentialV4Parameters) validateAmbariUser(formats strfmt.Registry) error {
 
 	if err := validate.Required("ambariUser", "body", m.AmbariUser); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var cumulusYarnCredentialV4ParametersTypeCloudPlatformPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["AWS","GCP","AZURE","OPENSTACK","CUMULUS_YARN","YARN","MOCK"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		cumulusYarnCredentialV4ParametersTypeCloudPlatformPropEnum = append(cumulusYarnCredentialV4ParametersTypeCloudPlatformPropEnum, v)
+	}
+}
+
+const (
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformAWS captures enum value "AWS"
+	CumulusYarnCredentialV4ParametersCloudPlatformAWS string = "AWS"
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformGCP captures enum value "GCP"
+	CumulusYarnCredentialV4ParametersCloudPlatformGCP string = "GCP"
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformAZURE captures enum value "AZURE"
+	CumulusYarnCredentialV4ParametersCloudPlatformAZURE string = "AZURE"
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformOPENSTACK captures enum value "OPENSTACK"
+	CumulusYarnCredentialV4ParametersCloudPlatformOPENSTACK string = "OPENSTACK"
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformCUMULUSYARN captures enum value "CUMULUS_YARN"
+	CumulusYarnCredentialV4ParametersCloudPlatformCUMULUSYARN string = "CUMULUS_YARN"
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformYARN captures enum value "YARN"
+	CumulusYarnCredentialV4ParametersCloudPlatformYARN string = "YARN"
+
+	// CumulusYarnCredentialV4ParametersCloudPlatformMOCK captures enum value "MOCK"
+	CumulusYarnCredentialV4ParametersCloudPlatformMOCK string = "MOCK"
+)
+
+// prop value enum
+func (m *CumulusYarnCredentialV4Parameters) validateCloudPlatformEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, cumulusYarnCredentialV4ParametersTypeCloudPlatformPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CumulusYarnCredentialV4Parameters) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudPlatform) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateCloudPlatformEnum("cloudPlatform", "body", m.CloudPlatform); err != nil {
 		return err
 	}
 

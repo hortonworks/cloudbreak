@@ -22,7 +22,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_environments"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_events"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_file_systems"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_flex_subscriptions"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_imagecatalogs"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kerberos"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kubernetes"
@@ -30,7 +29,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_proxies"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_recipes"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_smartsense_subscriptions"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4user_profiles"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4users"
@@ -103,8 +101,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 
 	cli.V4WorkspaceIDFileSystems = v4_workspace_id_file_systems.New(transport, formats)
 
-	cli.V4WorkspaceIDFlexSubscriptions = v4_workspace_id_flex_subscriptions.New(transport, formats)
-
 	cli.V4WorkspaceIDImagecatalogs = v4_workspace_id_imagecatalogs.New(transport, formats)
 
 	cli.V4WorkspaceIDKerberos = v4_workspace_id_kerberos.New(transport, formats)
@@ -118,8 +114,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V4WorkspaceIDProxies = v4_workspace_id_proxies.New(transport, formats)
 
 	cli.V4WorkspaceIDRecipes = v4_workspace_id_recipes.New(transport, formats)
-
-	cli.V4WorkspaceIDSmartsenseSubscriptions = v4_workspace_id_smartsense_subscriptions.New(transport, formats)
 
 	cli.V4WorkspaceIDStacks = v4_workspace_id_stacks.New(transport, formats)
 
@@ -197,8 +191,6 @@ type Cloudbreak struct {
 
 	V4WorkspaceIDFileSystems *v4_workspace_id_file_systems.Client
 
-	V4WorkspaceIDFlexSubscriptions *v4_workspace_id_flex_subscriptions.Client
-
 	V4WorkspaceIDImagecatalogs *v4_workspace_id_imagecatalogs.Client
 
 	V4WorkspaceIDKerberos *v4_workspace_id_kerberos.Client
@@ -212,8 +204,6 @@ type Cloudbreak struct {
 	V4WorkspaceIDProxies *v4_workspace_id_proxies.Client
 
 	V4WorkspaceIDRecipes *v4_workspace_id_recipes.Client
-
-	V4WorkspaceIDSmartsenseSubscriptions *v4_workspace_id_smartsense_subscriptions.Client
 
 	V4WorkspaceIDStacks *v4_workspace_id_stacks.Client
 
@@ -254,8 +244,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 
 	c.V4WorkspaceIDFileSystems.SetTransport(transport)
 
-	c.V4WorkspaceIDFlexSubscriptions.SetTransport(transport)
-
 	c.V4WorkspaceIDImagecatalogs.SetTransport(transport)
 
 	c.V4WorkspaceIDKerberos.SetTransport(transport)
@@ -269,8 +257,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V4WorkspaceIDProxies.SetTransport(transport)
 
 	c.V4WorkspaceIDRecipes.SetTransport(transport)
-
-	c.V4WorkspaceIDSmartsenseSubscriptions.SetTransport(transport)
 
 	c.V4WorkspaceIDStacks.SetTransport(transport)
 

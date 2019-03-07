@@ -413,7 +413,6 @@
   "cloudbreakDetails": {
     "version": "2.4.0-dev.1"
   },
-  "flexSubscription": null,
   "stackAuthentication": {
     "publicKey": null,
     "publicKeyId": "seq-master",

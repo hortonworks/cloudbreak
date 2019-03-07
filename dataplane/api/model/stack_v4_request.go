@@ -40,9 +40,6 @@ type StackV4Request struct {
 	// Required: true
 	Environment *EnvironmentSettingsV4Request `json:"environment"`
 
-	// id of the related flex subscription
-	FlexID int64 `json:"flexId,omitempty"`
-
 	// port of the gateway secured proxy
 	// Maximum: 65535
 	// Minimum: 1025

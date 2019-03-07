@@ -47,9 +47,6 @@ type StackV4Response struct {
 	// environment
 	Environment *EnvironmentSettingsV4Response `json:"environment,omitempty"`
 
-	// the related flex subscription
-	FlexSubscription *FlexSubscriptionV4Response `json:"flexSubscription,omitempty"`
-
 	// port of the gateway secured proxy
 	GatewayPort int32 `json:"gatewayPort,omitempty"`
 
@@ -144,10 +141,6 @@ func (m *StackV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateEnvironment(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateFlexSubscription(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -326,24 +319,6 @@ func (m *StackV4Response) validateEnvironment(formats strfmt.Registry) error {
 		if err := m.Environment.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("environment")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *StackV4Response) validateFlexSubscription(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.FlexSubscription) { // not required
-		return nil
-	}
-
-	if m.FlexSubscription != nil {
-		if err := m.FlexSubscription.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("flexSubscription")
 			}
 			return err
 		}

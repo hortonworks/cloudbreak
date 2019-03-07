@@ -68,8 +68,7 @@
       "status": "UPDATE_IN_PROGRESS",
       "gatewayPort": 9443,
       "nodeCount": 2,
-      "created": 1515151753768,
-      "flexSubscription": null
+      "created": 1515151753768
     },
     {
       "id": 3,
@@ -134,8 +133,7 @@
       "status": "CREATE_IN_PROGRESS",
       "gatewayPort": 9443,
       "nodeCount": 2,
-      "created": 1515152314614,
-      "flexSubscription": null
+      "created": 1515152314614
     },
     {
       "id": 4,
@@ -234,8 +232,7 @@
       "status": "AVAILABLE",
       "gatewayPort": 9443,
       "nodeCount": 5,
-      "created": 1516363385416,
-      "flexSubscription": null
+      "created": 1516363385416
     },
     {
       "id": 1,
@@ -303,8 +300,7 @@
       "status": "REQUESTED",
       "gatewayPort": 9443,
       "nodeCount": 3,
-      "created": 1535371251767,
-      "flexSubscription": null
+      "created": 1535371251767
     }
   ]
 }
