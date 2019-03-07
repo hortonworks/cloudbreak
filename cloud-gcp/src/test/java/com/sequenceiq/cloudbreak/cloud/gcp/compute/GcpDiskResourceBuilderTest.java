@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -96,17 +99,13 @@ class GcpDiskResourceBuilderTest {
 
     private String name;
 
-    private String flavor;
-
     private String instanceId;
-
-    private List<Volume> volumes;
 
     private Security security;
 
-    private Map<String, Object> params;
+    private InstanceAuthentication instanceAuthentication;
 
-    private Operation operation;
+    private InstanceTemplate instanceTemplate;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -124,24 +123,22 @@ class GcpDiskResourceBuilderTest {
 
         privateId = 1L;
         name = "master";
-        flavor = "m1.medium";
+        String flavor = "m1.medium";
         instanceId = "SOME_ID";
 
         auth = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        params = Map.of();
-        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        Map<String, Object> params = Map.of();
+        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
 
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
 
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
+        instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25");
-        CloudInstance cloudInstance =  new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
-        group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50);
+        group = createGroup(50);
 
         buildableResource = List.of(CloudResource.builder()
                 .type(ResourceType.GCP_DISK)
@@ -158,7 +155,7 @@ class GcpDiskResourceBuilderTest {
 
         when(defaultCostTaggingService.prepareDiskTagging()).thenReturn(Map.of());
 
-        operation = new Operation();
+        Operation operation = new Operation();
         operation.setName("operation");
         operation.setHttpErrorStatusCode(null);
 
@@ -190,4 +187,37 @@ class GcpDiskResourceBuilderTest {
         assertNotNull(diskCaptor.getValue());
         assertEquals(encryptionKey, diskCaptor.getValue().getDiskEncryptionKey());
     }
+
+    @Test
+    void testBuildWithVeryLargeRootVolumeSize() throws Exception {
+        int rootVolumeSize = Integer.MAX_VALUE;
+        Group group = createGroup(rootVolumeSize);
+        List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
+
+        assertNotNull(build);
+        verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));
+        verify(insert, times(1)).execute();
+    }
+
+    @Test
+    void testBuildWithVerySmallRootVolumeSize() throws Exception {
+        int rootVolumeSize = Integer.MIN_VALUE;
+        Group group = createGroup(rootVolumeSize);
+
+        List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
+
+        assertNotNull(build);
+        verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));
+        verify(insert, times(1)).execute();
+    }
+
+    private Group createGroup(int rootVolumeSize) {
+        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(createDefaultCloudInstance()), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), rootVolumeSize);
+    }
+
+    private CloudInstance createDefaultCloudInstance() {
+        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
+    }
+
 }
