@@ -141,6 +141,7 @@ mod-tidy:
 
 _mod-tidy:
 	go mod tidy -v
+	go mod vendor
 
 .DEFAULT_GOAL := build
 
